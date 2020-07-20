@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 
-import { usersRoutes } from './users';
+import { authRoutes } from './auth';
 
 import { AppPageNotFound } from './shared/components';
 
@@ -10,7 +10,7 @@ Vue.use(Router);
 const appRoutes = [
   {
     path: '/',
-    redirect: '/users'
+    redirect: '/login'
   },
   {
     path: '*',
@@ -19,7 +19,7 @@ const appRoutes = [
   }
 ];
 
-const routes = [...usersRoutes, ...appRoutes];
+const routes = [...appRoutes, ...authRoutes];
 
 export default new Router({
   mode: 'history',

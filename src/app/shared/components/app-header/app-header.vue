@@ -1,6 +1,6 @@
 <template>
   <div class="app-header">
-    <h2 class="header-title">App Header</h2>
+    <h2 class="header-title">Volateq</h2>
   </div>
 </template>
 

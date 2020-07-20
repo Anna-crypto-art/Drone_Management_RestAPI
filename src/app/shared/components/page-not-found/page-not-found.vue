@@ -7,16 +7,25 @@ export default {
 
 <!-- Template -->
 <template>
-  <h2 class="page-not-found">Page not found</h2>
+  <div class="page-not-found">
+    <h2>Page not found</h2>
+    <img src="@/assets/brdrone.png" alt="page not found" />
+  </div>
 </template>
 
 <!-- Style -->
 <style lang="scss">
-.page-not-found {
+.page-not-found > h2 {
   text-align: center;
   margin-top: 24px;
   font-weight: 500;
   color: #888888;
+}
+.page-not-found > img {
+  width: 500px;
+  margin: auto;
+  display: block;
+  margin-top: 50px;
 }
 </style>
 
