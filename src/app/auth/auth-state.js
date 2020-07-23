@@ -9,21 +9,20 @@ const getDefaultState = () => {
 
 export default {
   strict: true,
+  namespaced: true,
   plugins: [createPersistedState()],
   state: getDefaultState(),
   mutations: {
-    updateToken: (state, token, time) => {
-      if (state.time < time) {
-        state.token = token;
-        state.time = time;
+    updateToken: (state, newState) => {
+      if (state.time < newState.time) {
+        state.token = newState.token;
+        state.time = newState.time;
       }
     }
   },
   actions: {
     updateToken: ({ commit }, { token, time }) => {
-      commit('updateToken', token, time);
-
-      // Axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      commit('updateToken', { token, time });
     }
   }
 }

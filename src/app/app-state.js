@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
-import { default as authState } from './auth/auth-state';
-// import { authState } from './auth';
+import { default as authState } from '@/app/auth/auth-state';
+// import { authState } from '@/app/auth';
 
 Vue.use(Vuex);
 

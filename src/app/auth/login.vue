@@ -18,8 +18,8 @@
 </template>
 
 <script>
-import { AppAuthContainer } from "./shared/compontents";
-import { httpClient } from "../shared/services";
+import { AppAuthContainer } from "@/app/auth/shared/components";
+import { volateqApi } from "@/app/shared/services";
 
 export default {
   name: 'app-login',
@@ -27,13 +27,15 @@ export default {
     AppAuthContainer,
   },
   methods: {
-    onSubmit(e) {
+    async onSubmit(e) {
       e.preventDefault();
 
-      httpClient.post('/auth/login');
-
-      this.msg = 'hello fellow!';
-      this.show = true;
+      try {
+        await volateqApi.login(this.email, this.password);
+      } catch (e) {
+        this.msg = e.message;
+        this.show = true;
+      }
     }
   },
   data() {

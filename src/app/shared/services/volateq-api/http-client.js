@@ -2,18 +2,15 @@ import axios from 'axios';
 
 import store from '@/app/app-state';
 
-import { apiBaseUrl } from '@/environment/environment';
+import { baseUrl } from '@/environment/environment';
 
 /**
  * Axios basic configuration
  * Some general configuration can be added like timeout, headers, params etc. More details can be found on https://github.com/axios/axios
  * */
 const config = {
-  baseURL: apiBaseUrl
+  baseURL: baseUrl + 'api'
 };
-
-console.log('apiBaseUrl:');
-console.log(process.env);
 
 /**
  * Creating the instance of Axios
@@ -32,10 +29,9 @@ const httpClient = axios.create(config);
  */
 const authInterceptor = config => {
   if (store.state.auth.token) {
-    httpClient.defaults.headers.common['Authorization'] = `Bearer ${store.state.auth.token}`;
+    config.headers = { 'Authorization': `Bearer ${store.state.auth.token}`};
   }
   
-  /** add auth token */
   return config;
 };
 
@@ -51,11 +47,25 @@ httpClient.interceptors.request.use(loggerInterceptor);
 /** Adding the response interceptors */
 httpClient.interceptors.response.use(
   response => {
-    return response;
+    const time = response.headers['x-volateq-auth-time'];
+    const token = response.headers['x-volateq-auth-token'];
+
+    store.dispatch('auth/updateToken', { token, time });
+    
+    return response.data;
   },
   error => {
-    /** Do something with response error */
-    return Promise.reject(error);
+    if (error.response && error.response.data && error.response.data.error) {
+      return Promise.reject(error.response.data);
+    }
+
+    console.error('FATAL');
+    console.error(error);
+    
+    return Promise.reject({
+      error: 'FATAL',
+      message: 'Ooops! Something went horribly wrong!'
+    });
   }
 );
 
