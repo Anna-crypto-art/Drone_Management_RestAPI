@@ -6,7 +6,9 @@
  * Default, this is just using the LocalStorage
  */
 export class AppStorage {
-  constructor(storage) {
+  storage: Storage
+
+  constructor(storage?: Storage) {
     this.storage = storage || window.localStorage;
 
     /** Is storage is supported or not */
@@ -15,19 +17,21 @@ export class AppStorage {
     }
   }
 
-  setItem(key, value) {
+  public setItem(key: string, value: any) {
     this.storage.setItem(key, JSON.stringify(value));
   }
 
-  getItem(key) {
-    return JSON.parse(this.storage.getItem(key));
+  public getItem(key: string): any {
+    const item = this.storage.getItem(key);
+    
+    return item ? JSON.parse(item) : null;
   }
 
-  removeItem(key) {
+  public removeItem(key: string) {
     this.storage.removeItem(key);
   }
 
-  clear() {
+  public clear() {
     this.storage.clear();
   }
 
@@ -35,7 +39,7 @@ export class AppStorage {
    * @description Check for storage support
    * @returns {boolean} supported
    * */
-  isSupported() {
+  private isSupported() {
     let supported = true;
 
     if (!this.storage) {

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 import store from '@/app/app-state';
 
@@ -27,26 +27,21 @@ const httpClient = axios.create(config);
  * In future, interceptors can be created into separate files and consumed into multiple http clients
  * @param {*} config
  */
-const authInterceptor = config => {
-  if (store.state.auth.token) {
+const authInterceptor = (config: AxiosRequestConfig) => {
+  if (store.state.auth && store.state.auth.token) {
     config.headers = { 'Authorization': `Bearer ${store.state.auth.token}`};
   }
   
   return config;
 };
 
-const loggerInterceptor = config => {
-  /** Add logging here */
-  return config;
-};
 
 /** Adding the request interceptors */
 httpClient.interceptors.request.use(authInterceptor);
-httpClient.interceptors.request.use(loggerInterceptor);
 
 /** Adding the response interceptors */
 httpClient.interceptors.response.use(
-  response => {
+  (response: AxiosResponse) => {
     const time = response.headers['x-volateq-auth-time'];
     const token = response.headers['x-volateq-auth-token'];
 

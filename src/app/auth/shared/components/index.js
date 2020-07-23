@@ -1,1 +1,0 @@
-export { default as AppAuthContainer } from './auth-container.vue';

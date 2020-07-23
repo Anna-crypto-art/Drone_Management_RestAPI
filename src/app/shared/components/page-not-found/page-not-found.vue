@@ -1,5 +1,5 @@
 <!-- App Page not found component -->
-<script>
+<script lang="ts">
 export default {
   name: "app-page-not-found"
 };

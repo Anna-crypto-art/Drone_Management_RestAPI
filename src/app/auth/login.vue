@@ -17,36 +17,36 @@
   </div>
 </template>
 
-<script>
-import { AppAuthContainer } from "@/app/auth/shared/components";
-import { volateqApi } from "@/app/shared/services";
+<script lang="ts">
+import Vue from 'vue';
+import Component from 'vue-class-component';
 
-export default {
+import AppAuthContainer from './shared/components/auth-container.vue';
+import { volateqApi } from '../shared/services/volateq-api/volateq-api';
+import AppLoginInterface from './login.vue';
+
+@Component({
   name: 'app-login',
   components: {
     AppAuthContainer,
-  },
-  methods: {
-    async onSubmit(e) {
-      e.preventDefault();
+  }
+})
+export default class AppLogin extends Vue implements AppLoginInterface {
+  email = '';
+  password = '';
+  msg = '';
+  show = false;
 
-      try {
-        await volateqApi.login(this.email, this.password);
-      } catch (e) {
-        this.msg = e.message;
-        this.show = true;
-      }
-    }
-  },
-  data() {
-    return {
-      email: '',
-      password: '',
-      msg: '',
-      show: false
+  public async onSubmit(e: Event): Promise<void> {
+    e.preventDefault();
+
+    try {
+      await volateqApi.login(this.email, this.password);
+    } catch (e) {
+      this.msg = e.message;
+      this.show = true;
     }
   }
-
 }
 </script>
 
