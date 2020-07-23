@@ -1,2 +1,3 @@
 export { default as authRoutes } from './auth-routes';
-export { default as AppLogin } from './login.vue'
+export { default as authState } from './auth-state';
+export { default as AppLogin } from './login.vue';

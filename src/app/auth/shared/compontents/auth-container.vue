@@ -22,7 +22,6 @@ export default {
 
 <style lang="scss" scoped>
 .app-auth-box {
-  max-width: 500px;
   width: 100%;
   border: 1px solid lightgray;
   padding: 20px;

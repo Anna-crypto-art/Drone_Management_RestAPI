@@ -1,7 +1,7 @@
-const { APP_BASE_URL, API_BASE_URL, NODE_ENV = '' } = process.env;
+const { VUE_APP_BASE_URL, VUE_APP_API_BASE_URL, NODE_ENV = '' } = process.env;
 
 const environment = NODE_ENV.toLowerCase();
-const appBaseUrl = APP_BASE_URL;
-const apiBaseUrl = API_BASE_URL;
+const baseUrl = VUE_APP_BASE_URL;
+const apiBaseUrl = VUE_APP_API_BASE_URL;
 
-export { environment, apiBaseUrl, appBaseUrl };
+export { environment, baseUrl, apiBaseUrl };

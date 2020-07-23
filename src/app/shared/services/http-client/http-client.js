@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+import store from '@/app/app-state';
+
 import { apiBaseUrl } from '@/environment/environment';
 
 /**
@@ -9,6 +11,9 @@ import { apiBaseUrl } from '@/environment/environment';
 const config = {
   baseURL: apiBaseUrl
 };
+
+console.log('apiBaseUrl:');
+console.log(process.env);
 
 /**
  * Creating the instance of Axios
@@ -26,6 +31,10 @@ const httpClient = axios.create(config);
  * @param {*} config
  */
 const authInterceptor = config => {
+  if (store.state.auth.token) {
+    httpClient.defaults.headers.common['Authorization'] = `Bearer ${store.state.auth.token}`;
+  }
+  
   /** add auth token */
   return config;
 };

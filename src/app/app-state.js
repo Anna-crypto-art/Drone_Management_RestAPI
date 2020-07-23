@@ -1,7 +1,8 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
-import { usersState } from './users';
+import { default as authState } from './auth/auth-state';
+// import { authState } from './auth';
 
 Vue.use(Vuex);
 
@@ -10,6 +11,6 @@ export default new Vuex.Store({
   mutations: {},
   actions: {},
   modules: {
-    usersState
+    auth: authState
   }
 });
