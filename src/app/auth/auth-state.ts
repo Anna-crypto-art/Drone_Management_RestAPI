@@ -1,19 +1,21 @@
-import { Module } from 'vuex'
-
 import { appLocalStorage } from '@/app/shared/services/app-storage/app-storage'
-import { RootState } from '@/app/types';
 import { AuthState } from '@/app/auth/types';
+import { defineModule } from "direct-vuex"
+import { moduleActionContext, moduleGetterContext } from '@/app/app-state'
 
 const key = 'auth_token';
-const getDefaultState = () => {
-  const state = appLocalStorage.getItem(key) || { token: '', time: 0 };
-  
-  return state;
-};
 
-const authStore: Module<AuthState, RootState> = {
+
+const authStore = defineModule({
   namespaced: true,
-  state: getDefaultState(),
+  state: (): AuthState => appLocalStorage.getItem(key) || { token: '', time: 0 },
+  getters: {
+    isAuthenticated(...args): boolean {
+      const { state, getters, rootState, rootGetters } = moduleGetterContext(args, authStore);
+
+      return !!state.token
+    }
+  },
   mutations: {
     updateToken: (state, newState) => {
       if (state.time < newState.time) {
@@ -25,10 +27,12 @@ const authStore: Module<AuthState, RootState> = {
     }
   },
   actions: {
-    updateToken: ({ commit }, { token, time }) => {
-      commit('updateToken', { token, time });
+    updateToken(context, payload: AuthState) {
+      const { dispatch, commit, getters, state } = moduleActionContext(context, authStore);
+
+      commit.updateToken(payload);
     }
   }
-}
+});
 
 export default authStore;

@@ -1,20 +1,32 @@
 import Vue from 'vue';
-import Vuex, { StoreOptions } from 'vuex';
+import Vuex from 'vuex';
+import { createDirectStore } from 'direct-vuex';
 
-import { RootState } from '@/app/types';
-
-import { default as authState } from '@/app/auth/auth-state';
-
+import authState from '@/app/auth/auth-state';
 
 Vue.use(Vuex);
 
-const store: StoreOptions<RootState> = {
+const { 
+  store, 
+  rootActionContext,
+  moduleActionContext,
+  rootGetterContext,
+  moduleGetterContext 
+} = createDirectStore({
   state: {},
   mutations: {},
   actions: {},
   modules: {
     auth: authState
   }
-}
+})
 
-export default new Vuex.Store<RootState>(store);
+// Export the direct-store instead of the classic Vuex store.
+export default store 
+export { rootActionContext, moduleActionContext, rootGetterContext, moduleGetterContext } // The following lines enable types in the injected store '$store'.
+export type AppStore = typeof store
+declare module "vuex" {
+  interface Store<S> {
+    direct: AppStore
+  }
+}

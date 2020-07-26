@@ -22,7 +22,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 
 import AppAuthContainer from './shared/components/auth-container.vue';
-import { volateqApi } from '../shared/services/volateq-api/volateq-api';
+import volateqApi from '../shared/services/volateq-api/volateq-api';
 import AppLoginInterface from './login.vue';
 
 @Component({
