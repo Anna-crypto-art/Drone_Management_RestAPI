@@ -1,6 +1,6 @@
 <template>
   <div class="app-login">
-    <app-auth-container title="Login">
+    <app-auth-container title="">
       <b-form @submit="onSubmit">
         <b-form-group label="E-Mail" label-for="email">
           <b-form-input id="email" v-model="email" type="email" placeholder="E-Mail" required></b-form-input>
@@ -8,7 +8,7 @@
         <b-form-group label="Password" label-for="password">
           <b-form-input id="password" v-model="password" type="password" required></b-form-input>
         </b-form-group>
-        <b-button type="submit">Login</b-button>
+        <b-button class="width-100pc" type="submit">Login</b-button>
       </b-form>
       <b-alert class="invalid-login-alert" v-model="show" variant="danger" dismissible>
         {{msg}}
@@ -37,7 +37,7 @@ export default class AppLogin extends Vue {
   msg = '';
   show = false;
 
-  public async onSubmit(e: Event): Promise<void> {
+  async onSubmit(e: Event): Promise<void> {
     e.preventDefault();
 
     try {

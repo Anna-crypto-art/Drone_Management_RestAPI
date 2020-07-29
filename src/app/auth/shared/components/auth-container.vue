@@ -3,8 +3,9 @@
     <b-container>
       <b-row class="justify-content-md-center">
         <b-col cols="12" md="auto">
-          <h1>{{title}}</h1>
+          <img src="@/assets/logos/logo_2x.jpg" alt="Volateq" class="logo-img">          
           <div class="app-auth-box">
+            <h1 v-if="title" class="app-auth-box-title">{{title}}</h1>
             <slot></slot>
           </div>
         </b-col>
@@ -21,11 +22,23 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '@/scss/_colors.scss';
+
 .app-auth-box {
   width: 100%;
-  border: 1px solid lightgray;
   padding: 20px;
-  background-color: lightgray;
+  background-color: $grey;
+  &-title {
+    margin-bottom: 1em;
+  }
+}
+.logo-img {
+  max-width: 100%;
+}
+@media (min-width(var(--breakpoint-sm))) {
+  .app-auth-box {
+    min-width: 0;
+  }
 }
 
 </style>
