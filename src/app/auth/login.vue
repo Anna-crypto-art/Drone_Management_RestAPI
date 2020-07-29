@@ -21,9 +21,9 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 
+import router from '../app-routes';
 import AppAuthContainer from './shared/components/auth-container.vue';
 import volateqApi from '../shared/services/volateq-api/volateq-api';
-import AppLoginInterface from './login.vue';
 
 @Component({
   name: 'app-login',
@@ -31,7 +31,7 @@ import AppLoginInterface from './login.vue';
     AppAuthContainer,
   }
 })
-export default class AppLogin extends Vue implements AppLoginInterface {
+export default class AppLogin extends Vue {
   email = '';
   password = '';
   msg = '';
@@ -42,6 +42,8 @@ export default class AppLogin extends Vue implements AppLoginInterface {
 
     try {
       await volateqApi.login(this.email, this.password);
+
+      router.push({ name: 'Home' })
     } catch (e) {
       this.msg = e.message;
       this.show = true;

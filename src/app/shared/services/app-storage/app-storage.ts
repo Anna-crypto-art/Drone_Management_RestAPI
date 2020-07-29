@@ -18,11 +18,15 @@ export class AppStorage {
   }
 
   public setItem(key: string, value: any) {
+    console.log('setItem: ' + key + '=' + JSON.stringify(value));
+
     this.storage.setItem(key, JSON.stringify(value));
   }
 
   public getItem(key: string): any {
     const item = this.storage.getItem(key);
+
+    console.log('getItem: ' + key + '=' + item);
     
     return item ? JSON.parse(item) : null;
   }

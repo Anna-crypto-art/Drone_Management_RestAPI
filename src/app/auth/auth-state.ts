@@ -8,7 +8,7 @@ const key = 'auth_token';
 
 const authStore = defineModule({
   namespaced: true,
-  state: (): AuthState => appLocalStorage.getItem(key) || { token: '', time: 0 },
+  state: (): AuthState => appLocalStorage.getItem(key) || { token: '' },
   getters: {
     isAuthenticated(...args): boolean {
       const { state, getters, rootState, rootGetters } = moduleGetterContext(args, authStore);
@@ -17,18 +17,14 @@ const authStore = defineModule({
     }
   },
   mutations: {
-    updateToken: (state, newState) => {
-      if (state.time < newState.time) {
-        state.token = newState.token;
-        state.time = newState.time;
-
-        appLocalStorage.setItem(key, state);
-      }
+    updateToken (state, newState: AuthState) {
+      state.token = newState.token;
+      appLocalStorage.setItem(key, newState);
     }
   },
   actions: {
     updateToken(context, payload: AuthState) {
-      const { dispatch, commit, getters, state } = moduleActionContext(context, authStore);
+      const { dispatch, commit, getters, state } =  moduleActionContext(context, authStore);
 
       commit.updateToken(payload);
     }

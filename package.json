@@ -46,8 +46,7 @@
     "vue-template-compiler": "^2.6.11",
     "node-sass": "4.14.1",
     "sass-loader": "9.0.2",
-    "typescript": "3.4.3",
-    "vuetype": "0.3.2"
+    "typescript": "3.4.3"
   },
   "eslintConfig": {
     "root": true,
@@ -60,7 +59,10 @@
       "@vue/prettier"
     ],
     "parserOptions": {
-      "parser": "babel-eslint"
+      "parser": "babel-eslint",
+      "ecmaFeatures": {
+        "legacyDecorators": true
+      }
     },
     "rules": {}
   },

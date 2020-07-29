@@ -28,7 +28,16 @@ const router = new Router({
 const nonAuthRoutes = ['Login'];
 
 router.beforeEach((to, from, next) => {
-  if (nonAuthRoutes.indexOf(to.name || '') === -1 && !store.state.auth.token) {
+  console.log('to: ' + to.name);
+  console.log('authenticated: ' + store.getters.auth.isAuthenticated);
+
+  if (store.getters.auth.isAuthenticated) {
+    if (to.name === 'Login') {
+      next({ name: 'Home' });
+    } else {
+      next();
+    }
+  } else if (nonAuthRoutes.indexOf(to.name || '') === -1) {
     next({ name: 'Login' });
   } else {
     next();

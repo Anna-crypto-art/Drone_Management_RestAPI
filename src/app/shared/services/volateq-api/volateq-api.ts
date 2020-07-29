@@ -1,51 +1,25 @@
-import Axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
-import { baseUrl } from '@/environment/environment';
 import store from '@/app/app-state';
+import router from '@/app/app-routes';
+import { AuthResult } from './api-schemas/auth-schemas';
+import { HttpClientBase } from './http-client-base';
 
-export class VolateqAPI {
-  private readonly httpClient: AxiosInstance;
-
-  constructor() {
-    this.httpClient = Axios.create({
-      baseURL: baseUrl + 'api'
-    });
-    this.httpClient.interceptors.request.use((config: AxiosRequestConfig): AxiosRequestConfig => {
-      if (store.getters.auth.isAuthenticated) {
-        config.headers = { 'Authorization': `Bearer ${store.state.auth.token}`};
-      }
-      
-      return config;
-    });
-    this.httpClient.interceptors.response.use((response: AxiosResponse) => {
-        const time = response.headers['x-volateq-auth-time'];
-        const token = response.headers['x-volateq-auth-token'];
-    
-        store.dispatch.auth.updateToken({ token, time });
-        
-        return response.data;
-      }, (error: AxiosError) => {
-        if (error.response && error.response.data && error.response.data.error) {
-          return Promise.reject(error.response.data);
-        }
-    
-        console.error('FATAL');
-        console.error(error);
-        
-        return Promise.reject({
-          error: 'FATAL',
-          message: 'Ooops! Something went horribly wrong!'
-        });
-      }
-    );
-  }
+export class VolateqAPI extends HttpClientBase {
 
   public async login(email: string, password: string): Promise<void> {
-    await this.httpClient.post('/auth/login', {}, {
+    const authResult: AuthResult = await this.post('/auth/login', {}, {
       auth: {
         username: email,
         password: password
       }
     });
+
+    await store.dispatch.auth.updateToken({ token: authResult.token });    
+  }
+
+  public async logout(): Promise<void> {
+    await this.post('/auth/logout');
+
+    await store.dispatch.auth.updateToken({ token: '' });
   }
 }
 
