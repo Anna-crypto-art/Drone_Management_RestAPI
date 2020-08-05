@@ -8,5 +8,13 @@ module.exports = {
       }
     },
     headers: { "Access-Control-Allow-Origin": "*" }
+  },
+  pluginOptions: {
+    i18n: {
+      locale: "en",
+      fallbackLocale: "en",
+      localeDir: "locales",
+      enableInSFC: false
+    }
   }
 }

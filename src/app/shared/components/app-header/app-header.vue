@@ -6,10 +6,10 @@
         <b-nav pills>
           <b-nav-item-dropdown toggle-class="app-header-nav-dropdown" right>
             <template slot="button-content"><b-icon icon="gear-fill" font-scale="1.5"></b-icon></template>
-            <b-dropdown-item>Profile</b-dropdown-item>
+            <b-dropdown-item>{{ $t('profile') }}</b-dropdown-item>
             <b-dropdown-divider></b-dropdown-divider>
             <b-dropdown-form>
-              <b-button @click="logout" class="width-100pc">Logout</b-button>
+              <b-button @click="logout" class="width-100pc">{{ $t('logout') }}</b-button>
             </b-dropdown-form>
           </b-nav-item-dropdown>
         </b-nav>
@@ -88,11 +88,6 @@ $header-height: 80px;
       letter-spacing: 1px;
     }
   }
-}
-
-.header-title {
-  margin: 0 16px;
-  font-weight: 500;
 }
 </style>
 

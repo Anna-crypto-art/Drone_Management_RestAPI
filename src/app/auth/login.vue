@@ -2,13 +2,13 @@
   <div class="app-login">
     <app-auth-container title="">
       <b-form @submit="onSubmit">
-        <b-form-group label="E-Mail" label-for="email">
-          <b-form-input id="email" v-model="email" type="email" placeholder="E-Mail" required></b-form-input>
+        <b-form-group :label="$t('email')" label-for="email">
+          <b-form-input id="email" v-model="email" type="email" :placeholder="$t('email')" required></b-form-input>
         </b-form-group>
-        <b-form-group label="Password" label-for="password">
-          <b-form-input id="password" v-model="password" type="password" placeholder="Password" required></b-form-input>
+        <b-form-group :label="$t('password')" label-for="password">
+          <b-form-input id="password" v-model="password" type="password" :placeholder="$t('password')" required></b-form-input>
         </b-form-group>
-        <b-button variant="primary" class="width-100pc" type="submit">Login</b-button>
+        <b-button variant="primary" class="width-100pc" type="submit">{{ $t('login') }}</b-button>
       </b-form>
       <b-alert class="invalid-login-alert" v-model="show" variant="danger" dismissible>
         {{msg}}
