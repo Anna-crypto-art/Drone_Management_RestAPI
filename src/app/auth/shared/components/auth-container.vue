@@ -27,13 +27,18 @@ export default {
 .app-auth-box {
   width: 100%;
   padding: 20px;
-  background-color: $grey;
+  box-shadow: 0px 0px 30px $grey;
+  position: relative;
+  z-index: 1;
+
   &-title {
     margin-bottom: 1em;
   }
 }
 .logo-img {
   max-width: 100%;
+  position: relative;
+  z-index: 0;
 }
 @media (min-width(var(--breakpoint-sm))) {
   .app-auth-box {

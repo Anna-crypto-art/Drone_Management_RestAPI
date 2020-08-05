@@ -1,9 +1,6 @@
-@import '~bootstrap';
-@import '~bootstrap-vue';
+@import './scss/custom.scss';
 
 @import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro);
-
-@import './scss/colors';
 
 * {
   margin: 0;
@@ -11,9 +8,9 @@
   font-family: 'Source Sans Pro';
 }
 
-$theme-colors: (
-  "primary": $blue
-);
+body {
+  color: $dark;
+}
 
 form [type="submit"] {
   margin-top: 10px;
@@ -23,13 +20,3 @@ form [type="submit"] {
   width: 100%;
 }
 
-.btn {
-  &-primary {
-    background-color: $blue;
-  }
-
-  border-radius: 0;
-}
-.form-control {
-  border-radius: 0;
-}

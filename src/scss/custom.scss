@@ -1,0 +1,67 @@
+@import '~bootstrap';
+@import '~bootstrap-vue';
+
+@import './_colors.scss';
+
+$theme-colors: (
+  "primary": $blue
+);
+
+.btn {
+  &-primary {
+    background-color: $blue;
+  }
+
+  border-radius: 0;
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 1px;
+  border-color: $blue;
+
+  &.btn-secondary {
+    background-color: #ffffff;
+    color: $blue;
+    transition: linear 100ms background-color;
+
+    &:hover {
+      background-color: $blue-05pc;
+      border-color: $blue;
+    }
+  }
+}
+
+.form-control {
+  border-radius: 0;
+  border-color: $blue;
+
+  &::placeholder {
+    color: $blue-60pc;
+  }
+  &::-ms-input-placeholder {
+    color: $blue-60pc
+  }
+  &:-ms-input-placeholder {
+    color: $blue-60pc
+  }
+}
+.form-group {
+  label {
+    font-weight: bold;
+  }
+}
+
+.alert {
+  border-radius: 0;
+}
+
+.dropdown-menu {
+  border-radius: 0;
+  border: none;
+  box-shadow: 0px 20px 20px $grey;
+}
+
+.nav-pills .nav-link {
+  border-radius: 0;
+}
+
+
