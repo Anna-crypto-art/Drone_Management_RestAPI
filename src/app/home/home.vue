@@ -1,22 +1,20 @@
 <template>
-  <div class="app-home">
-    <app-header></app-header>
-    <b-container>
-      Home, sweet home!
-    </b-container>
-  </div>
+  <app-content :title="$t('overview')" :subtitle="$t('overview_descr')">
+    <div class="app-home">
+    </div>
+  </app-content>
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import Vue from "vue";
+import Component from "vue-class-component";
 
-import AppHeader from '../shared/components/app-header/app-header.vue';
+import AppContent from "../shared/components/app-content/app-content.vue";
 
 @Component({
-  name: 'app-home',
+  name: "app-home",
   components: {
-    AppHeader
+    AppContent
   }
 })
 export default class AppHome extends Vue {}

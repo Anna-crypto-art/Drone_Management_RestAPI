@@ -1,0 +1,87 @@
+<template>
+  <div>
+    <app-header></app-header>
+    <div class="app-content">
+      <b-container>
+        <div v-if="navback" class="app-content-navback">
+          <router-link :to="{ name: 'Home' }">
+            <b-icon icon="arrow-left-circle-fill"></b-icon> {{ $t("back-to-overview") }}
+          </router-link>
+        </div>
+        <div class="app-content-title">
+          <h1 v-html="title"></h1>
+          <div v-if="subtitle" v-html="subtitle" class="app-content-subtitle"></div>
+        </div>
+        <div class="app-content-content">
+          <slot></slot>
+        </div>
+      </b-container>
+    </div>
+  </div>
+</template>
+
+<script lang="ts">
+import Vue from "vue";
+import AppHeader from "../app-header/app-header.vue";
+
+const AppContentCompoment = Vue.extend({
+  name: "app-content",
+  components: {
+    AppHeader
+  },
+  props: {
+    title: {
+      type: String,
+      required: true,
+    },
+    subtitle: String,
+    navback: Boolean
+  }
+})
+export default class AppContent extends AppContentCompoment {
+}
+</script>
+
+<style lang="scss">
+@import "@/scss/_colors.scss";
+
+.app-content {
+  &-navback {
+    margin-top: 50px;
+    a {
+      color: $blue;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: bold;
+
+      .b-icon {
+        font-size: 20pt;
+        margin-bottom: -3px;
+        margin-right: 5px;
+        transition: transform 150ms;  
+      }
+
+      &:hover {
+        text-decoration: none;
+
+        .b-icon {
+          transform: scale(1.25);
+        }
+      }
+    }
+  }
+
+  &-title {
+    margin: 50px 0;
+
+    h1 {
+      font-size: 4rem;
+      margin-bottom: 10px;
+    }
+  }
+  &-subtitle {
+    color: $dark-80pc;
+    font-size: 1.5rem;
+  }
+}
+</style>

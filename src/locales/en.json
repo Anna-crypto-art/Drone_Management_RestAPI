@@ -3,5 +3,10 @@
   "password": "Password",
   "login": "Login",
   "logout": "Logout",
-  "profile": "Profile"
+  "profile": "Profile",
+  "overview": "Overview",
+  "back-to-overview": "Back to overview",
+  "overview_descr": "Manage all your analysis.",
+  "usermanagement": "Usermanagement",
+  "usermanagement_descr": "Manage all users by inviting, (un)locking and more."
 }

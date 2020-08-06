@@ -6,10 +6,11 @@
         <b-nav pills>
           <b-nav-item-dropdown toggle-class="app-header-nav-dropdown" right>
             <template slot="button-content"><b-icon icon="gear-fill" font-scale="1.5"></b-icon></template>
-            <b-dropdown-item>{{ $t('profile') }}</b-dropdown-item>
+            <b-dropdown-item>{{ $t("profile") }}</b-dropdown-item>
+            <b-dropdown-item><router-link :to="{ name: 'Users' }"> {{ $t("usermanagement") }}</router-link></b-dropdown-item>
             <b-dropdown-divider></b-dropdown-divider>
             <b-dropdown-form>
-              <b-button @click="logout" class="width-100pc">{{ $t('logout') }}</b-button>
+              <b-button @click="logout" class="width-100pc">{{ $t("logout") }}</b-button>
             </b-dropdown-form>
           </b-nav-item-dropdown>
         </b-nav>
@@ -19,21 +20,24 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import Vue from "vue";
+import Component from "vue-class-component";
 
-import router from '../../../app-routes';
-import volateqApi from '../../../shared/services/volateq-api/volateq-api';
+import router from "../../../app-routes";
+import volateqApi from "../../../shared/services/volateq-api/volateq-api";
 
 @Component({
-  name: 'app-header',
+  name: "app-header",
 })
 export default class AppHeader extends Vue {
+  // isSuperAdmin = this.$store.getters.auth.isSuperAdmin;
+  // isCustomerAdmin = this.$store.getters.auth.isCustomerAdmin;
+
   async logout() {
     try {
       await volateqApi.logout();
       
-      router.push({ name: 'Login' })
+      router.push({ name: "Login" })
     } catch (e) {
       console.error(e);
     }
@@ -42,7 +46,7 @@ export default class AppHeader extends Vue {
 </script>
 
 <style lang="scss">
-@import '@/scss/_colors.scss';
+@import "@/scss/_colors.scss";
 
 $header-height: 80px;
 

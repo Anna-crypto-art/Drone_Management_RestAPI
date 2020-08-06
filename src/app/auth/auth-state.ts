@@ -2,6 +2,7 @@ import { appLocalStorage } from '@/app/shared/services/app-storage/app-storage'
 import { AuthState } from '@/app/auth/types';
 import { defineModule } from "direct-vuex"
 import { moduleActionContext, moduleGetterContext } from '@/app/app-state'
+import { ApiRoles } from '../shared/services/volateq-api/api-roles';
 
 const key = 'auth_token';
 
@@ -11,20 +12,32 @@ const authStore = defineModule({
   state: (): AuthState => appLocalStorage.getItem(key) || { token: '' },
   getters: {
     isAuthenticated(...args): boolean {
-      const { state, getters, rootState, rootGetters } = moduleGetterContext(args, authStore);
+      const { state } = moduleGetterContext(args, authStore);
 
       return !!state.token
+    },
+    isSuperAdmin(...args): boolean {
+      const { state } = moduleGetterContext(args, authStore);
+
+      return state.role === ApiRoles.SUPER_ADMIN
+    },
+    isCustomerAdmin(...args): boolean {
+      const { state} = moduleGetterContext(args, authStore);
+
+      return state.role === ApiRoles.CUSTOMER_ADMIN
     }
   },
   mutations: {
     updateToken (state, newState: AuthState) {
       state.token = newState.token;
+      state.role = newState.role;
+
       appLocalStorage.setItem(key, newState);
     }
   },
   actions: {
     updateToken(context, payload: AuthState) {
-      const { dispatch, commit, getters, state } =  moduleActionContext(context, authStore);
+      const { commit } =  moduleActionContext(context, authStore);
 
       commit.updateToken(payload);
     }
