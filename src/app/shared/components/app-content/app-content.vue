@@ -4,7 +4,7 @@
     <div class="app-content">
       <b-container>
         <div v-if="navback" class="app-content-navback">
-          <router-link :to="{ name: 'Home' }">
+          <router-link class="link" :to="{ name: 'Home' }">
             <b-icon icon="arrow-left-circle-fill"></b-icon> {{ $t("back-to-overview") }}
           </router-link>
         </div>
@@ -48,27 +48,6 @@ export default class AppContent extends AppContentCompoment {
 .app-content {
   &-navback {
     margin-top: 50px;
-    a {
-      color: $blue;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-weight: bold;
-
-      .b-icon {
-        font-size: 20pt;
-        margin-bottom: -3px;
-        margin-right: 5px;
-        transition: transform 150ms;  
-      }
-
-      &:hover {
-        text-decoration: none;
-
-        .b-icon {
-          transform: scale(1.25);
-        }
-      }
-    }
   }
 
   &-title {

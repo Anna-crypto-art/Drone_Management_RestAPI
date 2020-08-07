@@ -6,8 +6,8 @@
         <b-nav pills>
           <b-nav-item-dropdown toggle-class="app-header-nav-dropdown" right>
             <template slot="button-content"><b-icon icon="gear-fill" font-scale="1.5"></b-icon></template>
-            <b-dropdown-item>{{ $t("profile") }}</b-dropdown-item>
-            <b-dropdown-item><router-link :to="{ name: 'Users' }"> {{ $t("usermanagement") }}</router-link></b-dropdown-item>
+            <b-dropdown-item><router-link class="link" :to="{ name: 'Home' }">{{ $t("profile") }}</router-link></b-dropdown-item>
+            <b-dropdown-item v-if="isSuperAdmin" ><router-link class="link" :to="{ name: 'Users' }"> {{ $t("users") }}</router-link></b-dropdown-item>
             <b-dropdown-divider></b-dropdown-divider>
             <b-dropdown-form>
               <b-button @click="logout" class="width-100pc">{{ $t("logout") }}</b-button>
@@ -20,19 +20,17 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+// import Vue from "vue";
 import Component from "vue-class-component";
 
+import BaseAuthComponent from "../base-auth-component/base-auth-component";
 import router from "../../../app-routes";
 import volateqApi from "../../../shared/services/volateq-api/volateq-api";
 
 @Component({
   name: "app-header",
 })
-export default class AppHeader extends Vue {
-  // isSuperAdmin = this.$store.getters.auth.isSuperAdmin;
-  // isCustomerAdmin = this.$store.getters.auth.isCustomerAdmin;
-
+export default class AppHeader extends BaseAuthComponent {
   async logout() {
     try {
       await volateqApi.logout();
@@ -84,12 +82,14 @@ $header-height: 80px;
 
   .dropdown-menu {
     line-height: 20px;
+    width: 200px;
+
     .dropdown-item {
-      color: $blue;
-      font-weight: bold;
       text-align: right;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      padding: 0.75rem 1.5rem;
+    }
+    .b-dropdown-form {
+      padding: 0.75rem 1.5rem;
     }
   }
 }

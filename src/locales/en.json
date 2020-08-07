@@ -7,6 +7,6 @@
   "overview": "Overview",
   "back-to-overview": "Back to overview",
   "overview_descr": "Manage all your analysis.",
-  "usermanagement": "Usermanagement",
-  "usermanagement_descr": "Manage all users by inviting, (un)locking and more."
+  "users": "Users",
+  "users_descr": "Manage your users."
 }

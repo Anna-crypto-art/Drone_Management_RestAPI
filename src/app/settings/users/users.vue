@@ -1,5 +1,5 @@
 <template>
-  <app-content :title="$t('usermanagement')" :navback="true" :subtitle="$t('usermanagement_descr')">
+  <app-content :title="$t('users')" :navback="true" :subtitle="$t('users_descr')">
     <div class="app-settings-users">
 
     </div>
