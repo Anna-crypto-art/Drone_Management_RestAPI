@@ -5,7 +5,7 @@
       <b-container>
         <div v-if="navback" class="app-content-navback">
           <router-link class="link" :to="{ name: 'Home' }">
-            <b-icon icon="arrow-left-circle-fill"></b-icon> {{ $t("back-to-overview") }}
+            <b-icon icon="chevron-left"></b-icon> {{ $t("back-to-overview") }}
           </router-link>
         </div>
         <div class="app-content-title">
@@ -23,22 +23,18 @@
 <script lang="ts">
 import Vue from "vue";
 import AppHeader from "../app-header/app-header.vue";
+import { Prop, Component } from "vue-property-decorator";
 
-const AppContentCompoment = Vue.extend({
+@Component({
   name: "app-content",
   components: {
     AppHeader
-  },
-  props: {
-    title: {
-      type: String,
-      required: true,
-    },
-    subtitle: String,
-    navback: Boolean
   }
 })
-export default class AppContent extends AppContentCompoment {
+export default class AppContent extends Vue {
+  @Prop({ required: true }) title: string | undefined;
+  @Prop() subtitle: string | undefined;
+  @Prop({ default: false }) navback: boolean | undefined;
 }
 </script>
 

@@ -8,5 +8,8 @@
   "back-to-overview": "Back to overview",
   "overview_descr": "Manage all your analysis.",
   "users": "Users",
-  "users_descr": "Manage your users."
+  "users_descr": "Manage your users.",
+  "name": "Name",
+  "state": "State",
+  "role": "Role"
 }

@@ -1,24 +1,50 @@
 <template>
-  <app-content :title="$t('users')" :navback="true" :subtitle="$t('users_descr')">
-    <div class="app-settings-users">
-
-    </div>
-  </app-content>
+  <div class="app-settings-users">
+    <app-table :columns="columns" :rows="rows"></app-table>
+  </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import Component from "vue-class-component";
 
-import AppContent from "../../shared/components/app-content/app-content.vue";
+import AppTable from "../../shared/components/app-table/app-table.vue";
+import volateqApi from "../../shared/services/volateq-api/volateq-api";
+import { UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
+import { AppTableRows, AppTableColumns } from "@/app/shared/components/app-table/types";
 
 @Component({
   name: "app-users",
   components: {
-    AppContent
+    AppTable
   }
 })
-export default class AppUsers extends Vue {}
+export default class AppUsers extends Vue {
+  rows: AppTableRows = [];
+  columns: AppTableColumns = [];
+
+  async created() {
+    this.columns = [
+      { name: this.$t("name").toString() },
+      { name: this.$t("state").toString() },
+      { name: this.$t("role").toString() }
+    ];
+
+    const users = await volateqApi.users();
+
+    this.rows = users.map((user: UserSchema) => {
+      return {
+        id: user.id,
+        cells: [
+          { value: user.email },
+          { value: user.state },
+          { value: user.role.name }
+        ]
+      };
+    });
+  }
+
+}
 </script>
 
 <style>

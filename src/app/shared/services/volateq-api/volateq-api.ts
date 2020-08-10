@@ -1,5 +1,6 @@
 import store from "@/app/app-state";
 import { AuthResult } from "./api-schemas/auth-schemas";
+import { UserSchema } from "./api-schemas/user-schemas";
 import { HttpClientBase } from "./http-client-base";
 
 export class VolateqAPI extends HttpClientBase {
@@ -19,6 +20,10 @@ export class VolateqAPI extends HttpClientBase {
     await this.post("/auth/logout");
 
     await store.dispatch.auth.updateToken({ token: "", role: "" });
+  }
+
+  public async users(): Promise<UserSchema[]> {
+    return this.get("/auth/users");
   }
 }
 

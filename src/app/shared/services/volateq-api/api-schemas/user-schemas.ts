@@ -13,6 +13,12 @@ export interface UserProfileSchema {
   login_failed_count: number;
 }
 
+export enum UserStateSchema {
+  REGISTERED = 'REGISTERED',
+  PENDING = 'PENDING',
+  UNKNOWN = 'UNKNOWN',
+}
+
 export interface UserSchema {
   id: number;
   email: string;
@@ -25,4 +31,5 @@ export interface UserSchema {
   invited_at: string;
   registered_at: string;
   role: RoleSchema;
+  state: UserStateSchema;
 }

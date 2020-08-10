@@ -13,7 +13,9 @@ const settingsRoutes: RouteConfig[] = [
         name: "Users",
         component: AppUsers,
         meta: {
-          role: ApiRoles.SUPER_ADMIN
+          role: ApiRoles.SUPER_ADMIN,
+          title: "users",
+          subtitle: "users_descr"
         },
       }
     ]
