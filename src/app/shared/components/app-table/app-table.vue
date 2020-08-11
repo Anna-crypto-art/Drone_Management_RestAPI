@@ -32,13 +32,22 @@ export default class AppTable extends Vue {
 
 .app-table {
   table {
+    width: 100%;
+
     th {
       font-weight: bold;
       padding: 20px 40px;
-      border-bottom: 2px solid $dark-60pc;
+      border-bottom: 2px solid $dark-40pc;
       
       &:first-child {
-        padding-left: 0;
+        padding-left: 5px;
+      }
+    }
+
+    tr {
+      border-bottom: 1px solid $dark-20pc;
+      &:last-child {
+        border: none;
       }
     }
 
@@ -46,7 +55,7 @@ export default class AppTable extends Vue {
       padding: 20px 40px;
 
       &:first-child {
-        padding-left: 0;
+        padding-left: 5px;
       }
     }
   }

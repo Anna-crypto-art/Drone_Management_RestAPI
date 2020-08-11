@@ -55,7 +55,7 @@ export default class AppContent extends Vue {
     }
   }
   &-subtitle {
-    color: $dark-80pc;
+    color: $dark-60pc;
     font-size: 1.5rem;
   }
 }
