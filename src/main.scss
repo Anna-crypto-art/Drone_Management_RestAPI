@@ -39,3 +39,10 @@ form [type="submit"] {
 .grayed {
   color: $dark-60pc;
 }
+
+.hidden {
+  display: none;
+}
+.invisible {
+  opacity: 0;
+}

@@ -17,7 +17,6 @@
 
 <script lang="ts">
 import Vue from "vue";
-import Component from "vue-class-component";
 
 import AppTable from "../../shared/components/app-table/app-table.vue";
 import AppModalForm from "../../shared/components/app-modal/app-modal-form.vue";
@@ -25,6 +24,8 @@ import volateqApi from "../../shared/services/volateq-api/volateq-api";
 import { UserSchema, UserStateSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 import { AppTableRows, AppTableColumns } from "@/app/shared/components/app-table/types";
 import appContentEventBus from "../../shared/components/app-content/app-content-event-bus";
+import { Component, Ref } from "vue-property-decorator";
+import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 
 @Component({
   name: "app-users",
@@ -36,6 +37,8 @@ import appContentEventBus from "../../shared/components/app-content/app-content-
 export default class AppUsers extends Vue {
   rows: AppTableRows = [];
   columns: AppTableColumns = [];
+
+  @Ref() appInviteModal: IAppModalForm | undefined;
 
   async created() {
     this.columns = [
@@ -83,11 +86,10 @@ export default class AppUsers extends Vue {
   async inviteUser() {
     await new Promise(resolve => {
       setTimeout(() => {
+        this.appInviteModal && this.appInviteModal.stopLoading();
         resolve();
       }, 3000);
     });
-    
-    console.log('blub');
   }
 }
 </script>

@@ -1,9 +1,9 @@
 <template>
-  <b-modal class="app-modal" :id="id" :ok-title="okTitle">
+  <b-modal class="app-modal-form" :id="id" :ok-title="okTitle">
     <template v-slot:modal-title>
-      <div class="app-modal-title">
+      <div class="app-modal-form-title">
         <h2>{{ title }}</h2>
-        <div v-if="subtitle" v-html="subtitle" class="app-modal-title-subtitle grayed"></div>
+        <div v-if="subtitle" v-html="subtitle" class="app-modal-form-title-subtitle grayed"></div>
       </div>
     </template>
     <template v-slot:modal-body>
@@ -13,43 +13,43 @@
     </template>
     <template v-slot:modal-footer>
       <b-button variant="secondary" @click="$bvModal.hide(id)">{{ $t('cancel') }}</b-button>
-      <app-loading-button ref="loadingButton" @click="onSubmit">{{ okTitle }}</app-loading-button>
+      <b-button variant="primary" @click="onSubmit" :disabled="loading">
+        <span class="app-modal-form-loading" v-show="loading"><b-spinner small></b-spinner></span> {{ okTitle }}
+      </b-button>
     </template>
   </b-modal>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import { Component, Prop, Ref } from "vue-property-decorator";
-import AppLoadingButton from "../app-loading-button/app-loading-button.vue";
-import { IAppLoadingButton } from "../app-loading-button/types";
+import { Component, Prop } from "vue-property-decorator";
+import { IAppModalForm } from "./types";
 
 @Component({
   name: "app-modal-form",
-  components: {
-    AppLoadingButton
-  }
 })
-export default class AppModalForm extends Vue {
+export default class AppModalForm extends Vue implements IAppModalForm {
   @Prop({ required: true }) id: string | undefined;
   @Prop({ required: true }) title: string | undefined;
   @Prop() subtitle: string | undefined;
   @Prop({ required: true }) okTitle: string | undefined;
 
-  @Ref() loadingButton: IAppLoadingButton | undefined;
+  loading = false;
 
   show() {
     this.$bvModal.show(this.id || "");
   }
 
-  onSubmit(e: Event | undefined) {
-    try {
-      e && e.preventDefault();
+  onSubmit(e: Event) {
+    e && e.preventDefault();
 
-      this.$emit('submit');
-    } finally {
-      this.loadingButton && this.loadingButton.stopLoading();
-    }
+    this.loading = true;
+
+    this.$emit('submit');
+  }
+
+  stopLoading() {
+    this.loading = false;
   }
 }
 </script>
@@ -57,7 +57,7 @@ export default class AppModalForm extends Vue {
 <style lang="scss">
 @import "@/scss/_colors.scss";
 
-.app-modal {
+.app-modal-form {
   &-title {
     h2 {
       font-size: 2em;
@@ -67,6 +67,9 @@ export default class AppModalForm extends Vue {
     &-subtitle {
       font-size: 1em;
     }
+  }
+  &-loading {
+    margin-right: 5px;
   }
 }
 </style>
