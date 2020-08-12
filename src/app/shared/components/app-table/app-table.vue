@@ -22,7 +22,7 @@ import { AppTableColumns, AppTableRows } from "./types";
   name: "app-table",
 })
 export default class AppTable extends Vue {
-  @PropSync('columns', { required: true }) computedColumns: AppTableColumns | undefined;
+  @PropSync('columns', { required: true }) computedColumns!: AppTableColumns;
   @PropSync('rows') computedRows: AppTableRows | undefined;
 }
 </script>

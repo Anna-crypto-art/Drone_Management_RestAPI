@@ -5,3 +5,8 @@ export enum ApiErrors {
   INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
   SOMETHING_WENT_WRONG = 'SOMETHING_WENT_WRONG',
 }
+
+export interface ApiException {
+  error: ApiErrors,
+  message: string
+}

@@ -8,18 +8,19 @@ $theme-colors: (
 );
 
 .btn {
-  &-primary {
-    background-color: $blue;
-  }
-
   border-radius: 0;
   text-transform: uppercase;
   font-weight: bold;
   letter-spacing: 1px;
   border-color: $blue;
+  padding: 0.375rem 1rem;
+
+  &-primary {
+    background-color: $blue;
+  }
 
   &.btn-secondary {
-    background-color: #ffffff;
+    background-color: $white;
     color: $blue;
     transition: linear 100ms background-color;
 
@@ -64,4 +65,16 @@ $theme-colors: (
   border-radius: 0;
 }
 
+.modal-content {
+  border-radius: 0;
 
+  .modal-header {
+    border: none;
+    margin-bottom: 25px;
+  }
+
+  .modal-footer {
+    margin-top: 25px;
+    border: none;
+  }
+}

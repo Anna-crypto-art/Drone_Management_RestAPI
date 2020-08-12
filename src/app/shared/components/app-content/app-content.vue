@@ -10,9 +10,12 @@
         </div>
         <div class="app-content-title">
           <h1 v-html="title"></h1>
-          <div v-if="subtitle" v-html="subtitle" class="app-content-subtitle"></div>
+          <div v-if="subtitle" v-html="subtitle" class="app-content-subtitle grayed"></div>
         </div>
         <div class="app-content-content">
+          <div class="app-content-content-alert">
+            <b-alert v-model="showAlert" :variant="alert.variant" v-html="alert.msg" dismissible></b-alert>
+          </div>
           <slot></slot>
         </div>
       </b-container>
@@ -24,6 +27,7 @@
 import Vue from "vue";
 import AppHeader from "../app-header/app-header.vue";
 import { Prop, Component } from "vue-property-decorator";
+import appContentEventBus, { AppContentAlert } from "./app-content-event-bus";
 
 @Component({
   name: "app-content",
@@ -35,6 +39,16 @@ export default class AppContent extends Vue {
   @Prop({ required: true }) title: string | undefined;
   @Prop() subtitle: string | undefined;
   @Prop({ default: false }) navback: boolean | undefined;
+
+  alert: AppContentAlert = { msg: '', variant: undefined };
+  showAlert = false;
+
+  created() {
+    appContentEventBus.onShowAlert((newAlert: AppContentAlert) => {
+      this.alert = newAlert;
+      this.showAlert = true
+    });
+  }
 }
 </script>
 
@@ -45,7 +59,6 @@ export default class AppContent extends Vue {
   &-navback {
     margin-top: 50px;
   }
-
   &-title {
     margin: 50px 0;
 
@@ -55,8 +68,12 @@ export default class AppContent extends Vue {
     }
   }
   &-subtitle {
-    color: $dark-60pc;
     font-size: 1.5rem;
+  }
+  &-content-alert {
+    .alert {
+      margin-bottom: 50px;
+    }
   }
 }
 </style>

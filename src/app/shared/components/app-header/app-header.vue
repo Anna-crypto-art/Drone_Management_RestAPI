@@ -53,7 +53,7 @@ $header-height: 80px;
   line-height: $header-height;
   align-items: center;
   background-color: $blue;
-  color: #ffffff;
+  color: $white;
 
   &-logo {
     max-height: $header-height;
@@ -68,14 +68,14 @@ $header-height: 80px;
   }
 
   .dropdown.show > .app-header-nav-dropdown {
-    background-color: #fff;
+    background-color: $white;
     .bi-gear-fill {
       color: $blue;
       transform: rotate(225deg);
     }
   }
   .bi-gear-fill {
-    color: #fff;
+    color: $white;
     transform-origin: center;
     transition: 300ms linear all;
   }

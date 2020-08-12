@@ -32,7 +32,7 @@ export class HttpClientBase {
         console.error(error);
         
         return Promise.reject({
-          error: "FATAL",
+          error: ApiErrors.SOMETHING_WENT_WRONG,
           message: "Ooops! Something went horribly wrong!"
         });
       }

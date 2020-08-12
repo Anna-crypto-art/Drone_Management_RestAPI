@@ -17,5 +17,8 @@
   "pending": "Pending",
   "registered-at": "registered at",
   "invited-at": "invited at",
-  "invite": "Invite"
+  "invite": "Invite",
+  "invite-new-user": "Invite new user",
+  "invite-new-user_descr": "The invited user will receive an E-Mail with a confirmation link to register",
+  "cancel": "Cancel"
 }
