@@ -71,10 +71,10 @@ export default class AppUsers extends Vue {
       { name: '' }
     ];
 
-    this.rows = await this.getUsersAsRows();
+    await this.updateUserRows();
   }
 
-  async getUsersAsRows() {
+  async updateUserRows() {
     let users: UserSchema[] = [];
     try {
       users = await volateqApi.getUsers();
@@ -82,7 +82,7 @@ export default class AppUsers extends Vue {
       appContentEventBus.showErrorAlert(this.$t(e.error).toString());
     }
     
-    return users.map((user: UserSchema) => {
+    this.rows = users.map((user: UserSchema) => {
       let userName = ((user.first_name || "") + " " + (user.last_name || "")).trim();
       userName = userName && `${userName}<br><small class="grayed">${user.email}</small>` || user.email;
 
@@ -94,12 +94,17 @@ export default class AppUsers extends Vue {
       }
       const userState = this.$t(user.state.toLowerCase()) + (stateDate && `<br><small class="grayed">${stateDate}</small>` || "");
 
+      let userRole = user.role.name.toString();
+      if (user.role.name === ApiRoles.CUSTOMER_ADMIN && user.customer) {
+        userRole += `<br><small class="grayed">${user.customer.name}</small>`;
+      }
+
       return {
         id: user.id,
         cells: [
           { value: userName },
           { value: userState },
-          { value: user.role.name }, 
+          { value: userRole }, 
           { value: '' }
         ]
       };
@@ -137,7 +142,7 @@ export default class AppUsers extends Vue {
       this.appInviteModal && this.appInviteModal.hide();
       appContentEventBus.showSuccessAlert(confirmUrl);
 
-      this.rows = await this.getUsersAsRows();
+      await this.updateUserRows();
     } catch (e) {
       this.appInviteModal && this.appInviteModal.alertError(e.error);
     } finally {
