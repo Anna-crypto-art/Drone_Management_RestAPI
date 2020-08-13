@@ -9,7 +9,7 @@ export interface AppTableCell {
 }
 export interface AppTableRow {
   cells: AppTableCell[];
-  id: number;
+  id: string;
 }
 export interface AppTableRows {
   [index: number]: AppTableRow;

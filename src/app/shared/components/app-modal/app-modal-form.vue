@@ -6,11 +6,10 @@
         <div v-if="subtitle" v-html="subtitle" class="app-modal-form-title-subtitle grayed"></div>
       </div>
     </template>
-    <template v-slot:modal-body>
-      <form @submit="onSubmit">
-        <slot></slot>
-      </form>
-    </template>
+    <b-alert v-model="showAlert" variant="danger" v-html="alertMsg" class="app-modal-form-alert" dismissible></b-alert>
+    <form @submit="onSubmit">
+      <slot></slot>
+    </form>
     <template v-slot:modal-footer>
       <b-button variant="secondary" @click="$bvModal.hide(id)">{{ $t('cancel') }}</b-button>
       <b-button variant="primary" @click="onSubmit" :disabled="loading">
@@ -35,9 +34,21 @@ export default class AppModalForm extends Vue implements IAppModalForm {
   @Prop({ required: true }) okTitle: string | undefined;
 
   loading = false;
+  
+  showAlert = false;
+  alertMsg = "";
 
   show() {
     this.$bvModal.show(this.id || "");
+  }
+
+  hide() {
+    this.$bvModal.hide(this.id || "");
+  }
+
+  alertError(msg: string) {
+    this.showAlert = true;
+    this.alertMsg = msg;
   }
 
   onSubmit(e: Event) {
@@ -45,12 +56,18 @@ export default class AppModalForm extends Vue implements IAppModalForm {
 
     this.loading = true;
 
-    this.$emit('submit');
+    this.$emit("submit");
   }
 
   stopLoading() {
     this.loading = false;
   }
+
+  hideAlert() {
+    this.showAlert = false;
+    this.alertMsg = "";
+  }
+
 }
 </script>
 
@@ -70,6 +87,9 @@ export default class AppModalForm extends Vue implements IAppModalForm {
   }
   &-loading {
     margin-right: 5px;
+  }
+  &-alert {
+    margin-bottom: 1.5rem;
   }
 }
 </style>

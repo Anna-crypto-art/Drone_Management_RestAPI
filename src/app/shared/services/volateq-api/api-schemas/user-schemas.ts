@@ -1,4 +1,5 @@
 import { RoleSchema } from "./role-schemas";
+import { CustomerSchema } from "./customer-schemas";
 
 export interface NotifiacationSettingsSchema {
   init_debug_phase: boolean;
@@ -20,7 +21,7 @@ export enum UserStateSchema {
 }
 
 export interface UserSchema {
-  id: number;
+  id: string;
   email: string;
   first_name: string;
   last_name: string;
@@ -32,4 +33,5 @@ export interface UserSchema {
   registered_at: string;
   role: RoleSchema;
   state: UserStateSchema;
+  customer?: CustomerSchema;
 }

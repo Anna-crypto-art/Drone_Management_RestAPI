@@ -1,7 +1,7 @@
 <template>
   <div class="app-settings-users">
     <div class="app-settings-users-table-toolbar">
-      <b-button variant="primary" class="btn-invite" @click="$refs.appInviteModal.show()" v-b-modal.invite-modal>{{ $t("invite") }}</b-button>
+      <b-button variant="primary" class="btn-invite" @click="showInviteUserModal()" v-b-modal.invite-modal>{{ $t("invite") }}</b-button>
     </div>
     <app-table :columns="columns" :rows="rows"></app-table>
     <app-modal-form 
@@ -11,6 +11,21 @@
       :subtitle="$t('invite-new-user_descr')" 
       :ok-title="$t('invite')"
       @submit="inviteUser">
+      <b-form-group :label="$t('email')" label-for="email">
+        <b-form-input id="email" v-model="newUser.email" type="email" :placeholder="$t('email')" required></b-form-input>
+      </b-form-group>
+      <b-row>
+        <b-col>
+          <b-form-group :label="$t('role')" label-for="role">
+            <b-form-select id="role" v-model="newUser.role" :options="roles" @change="onRoleSelectionChanged"></b-form-select>
+          </b-form-group>
+        </b-col>
+        <b-col >
+          <b-form-group :label="$t('customer')" label-for="customer">
+            <b-form-select id="customer" v-model="newUser.customer_id" :options="customers" :disabled="newUser.customerSelectionDisabled"></b-form-select>
+          </b-form-group>
+        </b-col>
+      </b-row>
     </app-modal-form>
   </div>
 </template>
@@ -26,6 +41,8 @@ import { AppTableRows, AppTableColumns } from "@/app/shared/components/app-table
 import appContentEventBus from "../../shared/components/app-content/app-content-event-bus";
 import { Component, Ref } from "vue-property-decorator";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
+import { InviteUser } from "./types";
+import { ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
 
 @Component({
   name: "app-users",
@@ -39,6 +56,12 @@ export default class AppUsers extends Vue {
   columns: AppTableColumns = [];
 
   @Ref() appInviteModal: IAppModalForm | undefined;
+  customers: any[] = [];
+  roles = [
+    { value: ApiRoles.SUPER_ADMIN, text: ApiRoles.SUPER_ADMIN }, 
+    { value: ApiRoles.CUSTOMER_ADMIN, text: ApiRoles.CUSTOMER_ADMIN }
+  ];
+  newUser: InviteUser = this.initialInviteUser();
 
   async created() {
     this.columns = [
@@ -54,7 +77,7 @@ export default class AppUsers extends Vue {
   async getUsersAsRows() {
     let users: UserSchema[] = [];
     try {
-      users = await volateqApi.users();
+      users = await volateqApi.getUsers();
     } catch (e) {
       appContentEventBus.showErrorAlert(this.$t(e.error).toString());
     }
@@ -83,13 +106,74 @@ export default class AppUsers extends Vue {
     });
   }
 
+  async showInviteUserModal() {
+    this.newUser = this.initialInviteUser();
+    this.appInviteModal && this.appInviteModal.show();
+
+    try {
+      this.customers = (await volateqApi.getCustomers()).map(customer => ({
+        value: customer.id,
+        text: customer.name
+      }));
+    } catch (e) {
+      this.appInviteModal && this.appInviteModal.alertError(e.error);
+    }
+  }
+
   async inviteUser() {
-    await new Promise(resolve => {
-      setTimeout(() => {
-        this.appInviteModal && this.appInviteModal.stopLoading();
-        resolve();
-      }, 3000);
-    });
+    const errMsg = this.getErrorInviteUserForm();
+    if (errMsg) {
+      this.appInviteModal && this.appInviteModal.alertError(errMsg);
+      this.appInviteModal && this.appInviteModal.stopLoading();
+
+      return;
+    }
+
+    this.appInviteModal && this.appInviteModal.hideAlert();
+
+    try {
+      const confirmUrl = await volateqApi.inviteUser(this.newUser);
+      
+      this.appInviteModal && this.appInviteModal.hide();
+      appContentEventBus.showSuccessAlert(confirmUrl);
+
+      this.rows = await this.getUsersAsRows();
+    } catch (e) {
+      this.appInviteModal && this.appInviteModal.alertError(e.error);
+    } finally {
+      this.appInviteModal && this.appInviteModal.stopLoading();
+    }
+  }
+
+  initialInviteUser(): InviteUser {
+    return {
+      email: "",
+      role: "",
+      customerSelectionDisabled: true,
+    };
+  }
+
+  onRoleSelectionChanged() {
+    if (this.newUser.role !== ApiRoles.CUSTOMER_ADMIN) {
+      this.newUser.customerSelectionDisabled = true;
+      this.newUser.customer_id = undefined;  
+    } else {
+      this.newUser.customerSelectionDisabled = false;  
+    }
+  }
+
+  getErrorInviteUserForm(): string {
+    if (!/^\S+@\S+$/.test(this.newUser.email.trim())) {
+      return 'INVALID_OR_MISSING_EMAIL';
+    }
+    if (Object.keys(ApiRoles).indexOf(this.newUser.role) === -1) {
+      return 'INVALID_OR_MISSING_ROLE';
+    }
+    if (this.newUser.role === ApiRoles.CUSTOMER_ADMIN && !this.newUser.customer_id) {
+      return 'CUSOMTER_REQUIRED_FOR_CUSTOMER_ADMIN';
+    }
+
+    return '';
   }
 }
 </script>
