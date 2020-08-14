@@ -21,5 +21,10 @@
   "invite-new-user": "Invite new user",
   "invite-new-user_descr": "The invited user will receive an E-Mail with a confirmation link to register",
   "cancel": "Cancel",
-  "customer": "Customer"
+  "customer": "Customer",
+  "register": "Register",
+  "company": "Company",
+  "first-name": "First name",
+  "last-name": "Last name",
+  "repeat-password": "Repeat password"
 }

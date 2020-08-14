@@ -4,6 +4,12 @@ export interface InviteUser {
   email: string;
   role: ApiRoles | "";
   customer_id?: string;
+}
 
-  customerSelectionDisabled: boolean;
+export interface RegisterUser {
+  user_id: string;
+  first_name?: string;
+  last_name?: string;
+  password: string;
+  repeat_password: string;
 }

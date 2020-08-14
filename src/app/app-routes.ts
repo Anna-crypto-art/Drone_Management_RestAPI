@@ -28,7 +28,7 @@ const router = new Router({
   ]
 });
 
-const nonAuthRoutes = ["Login"];
+const nonAuthRoutes = ["Login", "Register"];
 
 router.beforeEach((to, from, next) => {
   if (!store.getters.auth.isAuthenticated) {

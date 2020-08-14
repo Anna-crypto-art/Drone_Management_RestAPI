@@ -1,4 +1,4 @@
-import AppUsers from "./users/users.vue";
+import AppSettingsUsers from "./users/users.vue";
 import AppSettings from "./settings.vue";
 import { RouteConfig } from "vue-router";
 import { ApiRoles } from "../shared/services/volateq-api/api-roles";
@@ -11,7 +11,7 @@ const settingsRoutes: RouteConfig[] = [
       { 
         path: 'users', 
         name: "Users",
-        component: AppUsers,
+        component: AppSettingsUsers,
         meta: {
           role: ApiRoles.SUPER_ADMIN,
           title: "users",

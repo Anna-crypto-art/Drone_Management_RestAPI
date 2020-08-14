@@ -22,7 +22,7 @@
         </b-col>
         <b-col >
           <b-form-group :label="$t('customer')" label-for="customer">
-            <b-form-select id="customer" v-model="newUser.customer_id" :options="customers" :disabled="newUser.customerSelectionDisabled"></b-form-select>
+            <b-form-select id="customer" v-model="newUser.customer_id" :options="customers" :disabled="customerSelectionDisabled"></b-form-select>
           </b-form-group>
         </b-col>
       </b-row>
@@ -41,17 +41,17 @@ import { AppTableRows, AppTableColumns } from "@/app/shared/components/app-table
 import appContentEventBus from "../../shared/components/app-content/app-content-event-bus";
 import { Component, Ref } from "vue-property-decorator";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
-import { InviteUser } from "./types";
+import { InviteUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
 
 @Component({
-  name: "app-users",
+  name: "app-settings-users",
   components: {
     AppTable,
     AppModalForm
   }
 })
-export default class AppUsers extends Vue {
+export default class AppSettingsUsers extends Vue {
   rows: AppTableRows = [];
   columns: AppTableColumns = [];
 
@@ -62,6 +62,7 @@ export default class AppUsers extends Vue {
     { value: ApiRoles.CUSTOMER_ADMIN, text: ApiRoles.CUSTOMER_ADMIN }
   ];
   newUser: InviteUser = this.initialInviteUser();
+  customerSelectionDisabled = true;
 
   async created() {
     this.columns = [
@@ -113,6 +114,7 @@ export default class AppUsers extends Vue {
 
   async showInviteUserModal() {
     this.newUser = this.initialInviteUser();
+    this.customerSelectionDisabled = true;
     this.appInviteModal && this.appInviteModal.show();
 
     try {
@@ -154,16 +156,15 @@ export default class AppUsers extends Vue {
     return {
       email: "",
       role: "",
-      customerSelectionDisabled: true,
     };
   }
 
   onRoleSelectionChanged() {
     if (this.newUser.role !== ApiRoles.CUSTOMER_ADMIN) {
-      this.newUser.customerSelectionDisabled = true;
+      this.customerSelectionDisabled = true;
       this.newUser.customer_id = undefined;  
     } else {
-      this.newUser.customerSelectionDisabled = false;  
+      this.customerSelectionDisabled = false;  
     }
   }
 

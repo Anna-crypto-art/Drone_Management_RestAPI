@@ -1,5 +1,5 @@
 <template>
-  <div class="app-login">
+  <div class="app-auth-login">
     <app-auth-container title="">
       <b-form @submit="onSubmit">
         <b-form-group :label="$t('email')" label-for="email">
@@ -21,9 +21,8 @@
 import Vue from "vue";
 import Component from "vue-class-component";
 
-import router from "../app-routes";
-import AppAuthContainer from "./shared/components/auth-container.vue";
-import volateqApi from "../shared/services/volateq-api/volateq-api";
+import AppAuthContainer from "../shared/components/auth-container.vue";
+import volateqApi from "../../shared/services/volateq-api/volateq-api";
 
 @Component({
   name: "app-login",
@@ -31,7 +30,7 @@ import volateqApi from "../shared/services/volateq-api/volateq-api";
     AppAuthContainer,
   }
 })
-export default class AppLogin extends Vue {
+export default class AppAuthLogin extends Vue {
   email = "";
   password = "";
   msg = "";
@@ -43,7 +42,7 @@ export default class AppLogin extends Vue {
     try {
       await volateqApi.login(this.email, this.password);
 
-      router.push({ name: "Home" })
+      this.$router.push({ name: "Home" })
     } catch (e) {
       this.msg = e.message;
       this.show = true;
@@ -52,8 +51,10 @@ export default class AppLogin extends Vue {
 }
 </script>
 
-<style>
-.invalid-login-alert {
-  margin-top: 1rem;
+<style lang="scss">
+.app-auth-login {
+  .invalid-login-alert {
+    margin-top: 1rem;
+  }
 }
 </style>
