@@ -8,7 +8,7 @@
         <b-form-group :label="$t('password')" label-for="password">
           <b-form-input id="password" v-model="password" type="password" :placeholder="$t('password')" required></b-form-input>
         </b-form-group>
-        <b-button variant="primary" class="width-100pc" type="submit">{{ $t("login") }}</b-button>
+        <app-button type="submit" cls="width-100pc">{{ $t("login") }}</app-button>
       </b-form>
       <b-alert class="invalid-login-alert" v-model="show" variant="danger" dismissible>
         {{msg}}
@@ -22,12 +22,15 @@ import Vue from "vue";
 import Component from "vue-class-component";
 
 import AppAuthContainer from "@/app/auth/shared/components/auth-container.vue";
+import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
 
 @Component({
   name: "app-login",
   components: {
     AppAuthContainer,
+    AppButton,
   }
 })
 export default class AppAuthLogin extends Vue {
@@ -46,6 +49,8 @@ export default class AppAuthLogin extends Vue {
     } catch (e) {
       this.msg = e.message;
       this.show = true;
+
+      appButtonEventBus.stopLoading();
     }
   }
 }

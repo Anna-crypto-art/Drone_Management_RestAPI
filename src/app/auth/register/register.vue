@@ -23,7 +23,7 @@
           <b-form-group :label="$t('repeat-password')" label-for="repeat-password">
             <b-form-input id="repeat-password" v-model="user.repeat_password" type="password" :placeholder="$t('repeat-password')" required></b-form-input>
           </b-form-group>
-          <b-button variant="primary" class="width-100pc" type="submit">{{ $t("register") }}</b-button>
+          <app-button type="submit" cls="width-100pc">{{ $t("register") }}</app-button>
         </b-form>
       </div>
       <b-alert class="invalid-register-alert" v-model="alertVisible" variant="danger" dismissible>
@@ -38,21 +38,24 @@ import Vue from "vue";
 import Component from "vue-class-component";
 
 import AppAuthContainer from "@/app/auth/shared/components/auth-container.vue";
+import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
+import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
 
 @Component({
   name: "app-auth-register",
   components: {
     AppAuthContainer,
+    AppButton,
   }
 })
 export default class AppAuthRegister extends Vue {
   hasUser = false;
   email = "";
   company = "";
-  user: RegisterUser | undefined;
+  user!: RegisterUser;
 
   alertMsg = "";
   alertVisible = false;
@@ -83,8 +86,6 @@ export default class AppAuthRegister extends Vue {
   async onSubmit(e: Event): Promise<void> {
     e.preventDefault();
 
-    if (!this.user) return;
-
     if (this.user.password !== this.user.repeat_password) {
       this.showAlert("PASSWORDS_DONT_MATCH");
       return;
@@ -102,6 +103,8 @@ export default class AppAuthRegister extends Vue {
   showAlert(msg: string) {
     this.alertMsg = msg;
     this.alertVisible = true;
+
+    appButtonEventBus.stopLoading();
   }
 }
 </script>

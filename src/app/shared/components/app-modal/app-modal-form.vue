@@ -12,9 +12,7 @@
     </form>
     <template v-slot:modal-footer>
       <b-button variant="secondary" @click="$bvModal.hide(id)">{{ $t('cancel') }}</b-button>
-      <b-button variant="primary" @click="onSubmit" :disabled="loading">
-        <span class="app-modal-form-loading" v-show="loading"><b-spinner small></b-spinner></span> {{ okTitle }}
-      </b-button>
+      <app-button @click="onSubmit">{{ okTitle }}</app-button>
     </template>
   </b-modal>
 </template>
@@ -23,17 +21,19 @@
 import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
+import AppButton from "@/app/shared/components/app-button/app-button.vue";
 
 @Component({
   name: "app-modal-form",
+  components: {
+    AppButton,
+  }
 })
 export default class AppModalForm extends Vue implements IAppModalForm {
-  @Prop({ required: true }) id: string | undefined;
-  @Prop({ required: true }) title: string | undefined;
+  @Prop({ required: true }) id!: string;
+  @Prop({ required: true }) title!: string;
   @Prop() subtitle: string | undefined;
-  @Prop({ required: true }) okTitle: string | undefined;
-
-  loading = false;
+  @Prop({ required: true }) okTitle!: string;
   
   showAlert = false;
   alertMsg = "";
@@ -54,13 +54,7 @@ export default class AppModalForm extends Vue implements IAppModalForm {
   onSubmit(e: Event) {
     e && e.preventDefault();
 
-    this.loading = true;
-
     this.$emit("submit");
-  }
-
-  stopLoading() {
-    this.loading = false;
   }
 
   hideAlert() {
@@ -84,9 +78,6 @@ export default class AppModalForm extends Vue implements IAppModalForm {
     &-subtitle {
       font-size: 1em;
     }
-  }
-  &-loading {
-    margin-right: 5px;
   }
   &-alert {
     margin-bottom: 1.5rem;

@@ -28,7 +28,13 @@ export default class AppTable extends Vue {
 </script>
 
 <style lang="scss">
+@import '~bootstrap/scss/_functions';
+@import '~bootstrap/scss/_variables';
+@import '~bootstrap/scss/mixins/_breakpoints';
 @import "@/scss/_colors.scss";
+
+$table-padding: 20px 40px;
+$left-padding: 5px;
 
 .app-table {
   table {
@@ -36,11 +42,11 @@ export default class AppTable extends Vue {
 
     th {
       font-weight: bold;
-      padding: 20px 40px;
+      padding: $table-padding;
       border-bottom: 2px solid $dark-40pc;
       
       &:first-child {
-        padding-left: 5px;
+        padding-left: $left-padding;
       }
     }
 
@@ -52,12 +58,42 @@ export default class AppTable extends Vue {
     }
 
     td {
-      padding: 20px 40px;
+      padding: $table-padding;
 
       &:first-child {
-        padding-left: 5px;
+        padding-left: $left-padding;
       }
     }
   }
 }
+
+@include media-breakpoint-down(xs) {
+  $table-padding: 5px 10px;
+  $left-padding: 0px;
+
+  .app-table {
+    font-size: 0.75rem;
+    overflow-x: auto;
+    max-width: 100%;
+
+    table {
+      th {
+        padding: $table-padding;
+        
+        &:first-child {
+          padding-left: $left-padding;
+        }
+      }
+
+      td {
+        padding: $table-padding;
+
+        &:first-child {
+          padding-left: $left-padding;
+        }
+      }
+    }
+  }
+}
+
 </style>

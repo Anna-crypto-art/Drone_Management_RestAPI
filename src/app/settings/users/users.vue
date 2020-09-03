@@ -3,6 +3,7 @@
     <div class="app-settings-users-table-toolbar">
       <b-button variant="primary" class="btn-invite" @click="showInviteUserModal()" v-b-modal.invite-modal>{{ $t("invite") }}</b-button>
     </div>
+    <div class="clearfix"></div>
     <app-table :columns="columns" :rows="rows"></app-table>
     <app-modal-form 
       id="inivite-modal" 
@@ -42,6 +43,7 @@ import appContentEventBus from "@/app/shared/components/app-content/app-content-
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import { InviteUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
+import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
 
 @Component({
   name: "app-settings-users",
@@ -67,8 +69,7 @@ export default class AppSettingsUsers extends Vue {
     this.columns = [
       { name: this.$t("name").toString() },
       { name: this.$t("state").toString() },
-      { name: this.$t("role").toString() },
-      { name: "" }
+      { name: this.$t("role").toString() }
     ];
 
     await this.updateUserRows();
@@ -104,8 +105,7 @@ export default class AppSettingsUsers extends Vue {
         cells: [
           { value: userName },
           { value: userState },
-          { value: userRole }, 
-          { value: "" }
+          { value: userRole }
         ]
       };
     });
@@ -114,7 +114,7 @@ export default class AppSettingsUsers extends Vue {
   async showInviteUserModal() {
     this.newUser = this.initialInviteUser();
     this.customerSelectionDisabled = true;
-    this.appInviteModal && this.appInviteModal.show();
+    this.appInviteModal.show();
 
     try {
       this.customers = (await volateqApi.getCustomers()).map(customer => ({
@@ -122,32 +122,32 @@ export default class AppSettingsUsers extends Vue {
         text: customer.name
       }));
     } catch (e) {
-      this.appInviteModal && this.appInviteModal.alertError(e.error);
+      this.appInviteModal.alertError(e.error);
     }
   }
 
   async inviteUser() {
     const errMsg = this.getErrorInviteUserForm();
     if (errMsg) {
-      this.appInviteModal && this.appInviteModal.alertError(errMsg);
-      this.appInviteModal && this.appInviteModal.stopLoading();
+      this.appInviteModal.alertError(errMsg);      
+      appButtonEventBus.stopLoading();
 
       return;
     }
 
-    this.appInviteModal && this.appInviteModal.hideAlert();
+    this.appInviteModal.hideAlert();
 
     try {
       const confirmUrl = await volateqApi.inviteUser(this.newUser);
       
-      this.appInviteModal && this.appInviteModal.hide();
+      this.appInviteModal.hide();
       appContentEventBus.showSuccessAlert(confirmUrl);
 
       await this.updateUserRows();
     } catch (e) {
-      this.appInviteModal && this.appInviteModal.alertError(e.error);
+      this.appInviteModal.alertError(e.error);
     } finally {
-      this.appInviteModal && this.appInviteModal.stopLoading();
+      appButtonEventBus.stopLoading();
     }
   }
 
@@ -186,10 +186,6 @@ export default class AppSettingsUsers extends Vue {
 <style lang="scss">
 .app-settings-users {
   &-table-toolbar {
-    margin-top: -50px;
-    bottom: -50px;
-    position: relative;
-
     .btn-invite {
       float: right;
       margin-right: 5px;
