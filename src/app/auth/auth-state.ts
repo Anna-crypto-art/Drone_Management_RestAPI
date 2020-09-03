@@ -1,15 +1,14 @@
-import { appLocalStorage } from '@/app/shared/services/app-storage/app-storage'
-import { AuthState } from '@/app/auth/types';
 import { defineModule } from "direct-vuex"
-import { moduleActionContext, moduleGetterContext } from '@/app/app-state'
-import { ApiRoles } from '../shared/services/volateq-api/api-roles';
+import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage"
+import { AuthState } from "@/app/auth/types";
+import { moduleActionContext, moduleGetterContext } from "@/app/app-state"
+import { ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
 
-const key = 'auth_token';
-
+const key = "auth_token";
 
 const authStore = defineModule({
   namespaced: true,
-  state: (): AuthState => appLocalStorage.getItem(key) || { token: '' },
+  state: (): AuthState => appLocalStorage.getItem(key) || { token: "" },
   getters: {
     isAuthenticated(...args): boolean {
       const { state } = moduleGetterContext(args, authStore);

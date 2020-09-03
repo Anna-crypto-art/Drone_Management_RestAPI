@@ -1,7 +1,7 @@
 import Axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
 import { baseUrl } from "@/environment/environment";
 import store from "@/app/app-state";
-import { ApiErrors } from "./api-errors";
+import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
 
 export class HttpClientBase {
   private readonly httpClient: AxiosInstance;

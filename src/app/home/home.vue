@@ -9,7 +9,7 @@
 import Vue from "vue";
 import Component from "vue-class-component";
 
-import AppContent from "../shared/components/app-content/app-content.vue";
+import AppContent from "@/app/shared/components/app-content/app-content.vue";
 
 @Component({
   name: "app-home",

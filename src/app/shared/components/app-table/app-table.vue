@@ -16,14 +16,14 @@
 <script lang="ts">
 import Vue from "vue";
 import { Component, PropSync } from "vue-property-decorator";
-import { AppTableColumns, AppTableRows } from "./types";
+import { AppTableColumns, AppTableRows } from "@/app/shared/components/app-table/types";
 
 @Component({
   name: "app-table",
 })
 export default class AppTable extends Vue {
-  @PropSync('columns', { required: true }) computedColumns!: AppTableColumns;
-  @PropSync('rows') computedRows: AppTableRows | undefined;
+  @PropSync("columns", { required: true }) computedColumns!: AppTableColumns;
+  @PropSync("rows") computedRows: AppTableRows | undefined;
 }
 </script>
 

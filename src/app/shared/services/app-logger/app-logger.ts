@@ -1,5 +1,5 @@
 /*eslint no-console: ["off"] */
-import { environment } from '@/environment/environment';
+import { environment } from "@/environment/environment";
 
 /**
  * @description Logger class
@@ -32,7 +32,7 @@ class AppLogger {
     this.log()
 
     /** Checking the environment */
-    if (environment !== 'production') {
+    if (environment !== "production") {
       this.log = console.log.bind(console);
 
       this.debug = console.debug.bind(console);

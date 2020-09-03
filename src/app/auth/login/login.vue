@@ -21,8 +21,8 @@
 import Vue from "vue";
 import Component from "vue-class-component";
 
-import AppAuthContainer from "../shared/components/auth-container.vue";
-import volateqApi from "../../shared/services/volateq-api/volateq-api";
+import AppAuthContainer from "@/app/auth/shared/components/auth-container.vue";
+import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 
 @Component({
   name: "app-login",

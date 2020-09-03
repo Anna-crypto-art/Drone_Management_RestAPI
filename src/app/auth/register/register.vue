@@ -37,8 +37,8 @@
 import Vue from "vue";
 import Component from "vue-class-component";
 
-import AppAuthContainer from "../shared/components/auth-container.vue";
-import volateqApi from "../../shared/services/volateq-api/volateq-api";
+import AppAuthContainer from "@/app/auth/shared/components/auth-container.vue";
+import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
 

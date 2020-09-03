@@ -1,4 +1,4 @@
-import { ApiRoles } from "../shared/services/volateq-api/api-roles";
+import { ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
 
 export interface AuthState {
   token: string;

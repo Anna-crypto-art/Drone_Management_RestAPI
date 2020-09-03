@@ -1,7 +1,7 @@
-import AppSettingsUsers from "./users/users.vue";
-import AppSettings from "./settings.vue";
 import { RouteConfig } from "vue-router";
-import { ApiRoles } from "../shared/services/volateq-api/api-roles";
+import AppSettingsUsers from "@/app/settings/users/users.vue";
+import AppSettings from "@/app/settings/settings.vue";
+import { ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
 
 const settingsRoutes: RouteConfig[] = [
   {
@@ -9,7 +9,7 @@ const settingsRoutes: RouteConfig[] = [
     component: AppSettings,
     children: [
       { 
-        path: 'users', 
+        path: "users", 
         name: "Users",
         component: AppSettingsUsers,
         meta: {

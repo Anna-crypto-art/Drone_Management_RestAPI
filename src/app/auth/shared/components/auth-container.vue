@@ -17,12 +17,12 @@
 <script lang="ts">
 export default {
   name: "app-auth-container",
-  props: ['title']
+  props: ["title"]
 };
 </script>
 
 <style lang="scss" scoped>
-@import '@/scss/_colors.scss';
+@import "@/scss/_colors.scss";
 
 .app-auth-box {
   width: 100%;

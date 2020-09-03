@@ -20,12 +20,10 @@
 </template>
 
 <script lang="ts">
-// import Vue from "vue";
 import Component from "vue-class-component";
 
-import BaseAuthComponent from "../base-auth-component/base-auth-component";
-import router from "../../../app-routes";
-import volateqApi from "../../../shared/services/volateq-api/volateq-api";
+import BaseAuthComponent from "@/app/shared/components/base-auth-component/base-auth-component";
+import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 
 @Component({
   name: "app-header",
@@ -35,7 +33,7 @@ export default class AppHeader extends BaseAuthComponent {
     try {
       await volateqApi.logout();
       
-      router.push({ name: "Login" })
+      this.$router.push({ name: "Login" })
     } catch (e) {
       console.error(e);
     }

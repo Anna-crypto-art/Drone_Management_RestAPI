@@ -1,8 +1,8 @@
 import store from "@/app/app-state";
-import { AuthResult } from "./api-schemas/auth-schemas";
-import { UserSchema } from "./api-schemas/user-schemas";
-import { HttpClientBase } from "./http-client-base";
-import { CustomerSchema } from "./api-schemas/customer-schemas";
+import { AuthResult } from "@/app/shared/services/volateq-api/api-schemas/auth-schemas";
+import { UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
+import { HttpClientBase } from "@/app/shared/services/volateq-api/http-client-base";
+import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
 import { InviteUser, RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { baseUrl } from "@/environment/environment";
 

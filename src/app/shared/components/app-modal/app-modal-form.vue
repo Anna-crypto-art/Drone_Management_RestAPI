@@ -22,7 +22,7 @@
 <script lang="ts">
 import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
-import { IAppModalForm } from "./types";
+import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 
 @Component({
   name: "app-modal-form",

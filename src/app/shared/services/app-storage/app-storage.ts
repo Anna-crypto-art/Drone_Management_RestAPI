@@ -13,21 +13,17 @@ export class AppStorage {
 
     /** Is storage is supported or not */
     if (!this.isSupported()) {
-      throw new Error('Storage is not supported by browser!');
+      throw new Error("Storage is not supported by browser!");
     }
   }
 
   public setItem(key: string, value: any) {
-    console.log('setItem: ' + key + '=' + JSON.stringify(value));
-
     this.storage.setItem(key, JSON.stringify(value));
   }
 
   public getItem(key: string): any {
     const item = this.storage.getItem(key);
 
-    console.log('getItem: ' + key + '=' + item);
-    
     return item ? JSON.parse(item) : null;
   }
 

@@ -1,6 +1,6 @@
+import { RouteConfig } from "vue-router";
 import AppAuthLogin from "@/app/auth/login/login.vue";
 import AppAuthRegister from "@/app/auth/register/register.vue";
-import { RouteConfig } from "vue-router";
 
 const authRoutes: RouteConfig[] = [
   {

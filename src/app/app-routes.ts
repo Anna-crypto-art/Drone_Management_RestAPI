@@ -3,10 +3,10 @@ import Router, { RouteConfig } from "vue-router";
 
 import authRoutes from "@/app/auth/auth-routes";
 import homeRoutes from "@/app/home/home-routes";
-import settingsRoutes from "./settings/settings-routes";
+import settingsRoutes from "@/app/settings/settings-routes";
 import AppPageNotFound from "@/app/shared/components/page-not-found/page-not-found.vue";
 import store from "@/app/app-state";
-import { ApiRoles } from "./shared/services/volateq-api/api-roles";
+import { ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
 
 Vue.use(Router);
 
@@ -46,7 +46,7 @@ router.beforeEach((to, from, next) => {
       (to.meta.role === ApiRoles.SUPER_ADMIN || 
         (to.meta.role === ApiRoles.CUSTOMER_ADMIN && !store.getters.auth.isCustomerAdmin))) 
     {
-      next({ name: "Home" });
+      next({ name: "page-not-found" });
       return;
     }
   }

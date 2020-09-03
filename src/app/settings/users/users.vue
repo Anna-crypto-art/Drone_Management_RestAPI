@@ -32,14 +32,13 @@
 
 <script lang="ts">
 import Vue from "vue";
-
-import AppTable from "../../shared/components/app-table/app-table.vue";
-import AppModalForm from "../../shared/components/app-modal/app-modal-form.vue";
-import volateqApi from "../../shared/services/volateq-api/volateq-api";
+import { Component, Ref } from "vue-property-decorator";
+import AppTable from "@/app/shared/components/app-table/app-table.vue";
+import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
+import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { UserSchema, UserStateSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 import { AppTableRows, AppTableColumns } from "@/app/shared/components/app-table/types";
-import appContentEventBus from "../../shared/components/app-content/app-content-event-bus";
-import { Component, Ref } from "vue-property-decorator";
+import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import { InviteUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
@@ -55,8 +54,8 @@ export default class AppSettingsUsers extends Vue {
   rows: AppTableRows = [];
   columns: AppTableColumns = [];
 
-  @Ref() appInviteModal: IAppModalForm | undefined;
-  customers: any[] = [];
+  @Ref() appInviteModal!: IAppModalForm;
+  customers: any[] = []; 
   roles = [
     { value: ApiRoles.SUPER_ADMIN, text: ApiRoles.SUPER_ADMIN }, 
     { value: ApiRoles.CUSTOMER_ADMIN, text: ApiRoles.CUSTOMER_ADMIN }
@@ -69,7 +68,7 @@ export default class AppSettingsUsers extends Vue {
       { name: this.$t("name").toString() },
       { name: this.$t("state").toString() },
       { name: this.$t("role").toString() },
-      { name: '' }
+      { name: "" }
     ];
 
     await this.updateUserRows();
@@ -106,7 +105,7 @@ export default class AppSettingsUsers extends Vue {
           { value: userName },
           { value: userState },
           { value: userRole }, 
-          { value: '' }
+          { value: "" }
         ]
       };
     });
@@ -170,16 +169,16 @@ export default class AppSettingsUsers extends Vue {
 
   getErrorInviteUserForm(): string {
     if (!/^\S+@\S+$/.test(this.newUser.email.trim())) {
-      return 'INVALID_OR_MISSING_EMAIL';
+      return "INVALID_OR_MISSING_EMAIL";
     }
     if (Object.keys(ApiRoles).indexOf(this.newUser.role) === -1) {
-      return 'INVALID_OR_MISSING_ROLE';
+      return "INVALID_OR_MISSING_ROLE";
     }
     if (this.newUser.role === ApiRoles.CUSTOMER_ADMIN && !this.newUser.customer_id) {
-      return 'CUSOMTER_REQUIRED_FOR_CUSTOMER_ADMIN';
+      return "CUSOMTER_REQUIRED_FOR_CUSTOMER_ADMIN";
     }
 
-    return '';
+    return "";
   }
 }
 </script>

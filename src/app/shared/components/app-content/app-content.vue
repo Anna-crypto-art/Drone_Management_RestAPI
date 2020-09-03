@@ -25,9 +25,9 @@
 
 <script lang="ts">
 import Vue from "vue";
-import AppHeader from "../app-header/app-header.vue";
 import { Prop, Component } from "vue-property-decorator";
-import appContentEventBus, { AppContentAlert } from "./app-content-event-bus";
+import AppHeader from "@/app/shared/components/app-header/app-header.vue";
+import appContentEventBus, { AppContentAlert } from "@/app/shared/components/app-content/app-content-event-bus";
 
 @Component({
   name: "app-content",
