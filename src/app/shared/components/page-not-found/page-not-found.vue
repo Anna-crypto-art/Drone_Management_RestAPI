@@ -1,11 +1,3 @@
-<!-- App Page not found component -->
-<script lang="ts">
-export default {
-  name: "app-page-not-found"
-};
-</script>
-
-<!-- Template -->
 <template>
   <div class="page-not-found">
     <h2>Page not found</h2>
@@ -13,7 +5,12 @@ export default {
   </div>
 </template>
 
-<!-- Style -->
+<script lang="ts">
+export default {
+  name: "app-page-not-found"
+};
+</script>
+
 <style lang="scss">
 .page-not-found > h2 {
   text-align: center;
