@@ -26,5 +26,8 @@
   "company": "Company",
   "first-name": "First name",
   "last-name": "Last name",
-  "repeat-password": "Repeat password"
+  "repeat-password": "Repeat password",
+  "browse...": "Browse...",
+  "create-new-analysis": "Create new analysis",
+  "create-new-analysis_descr": "Your uploaded files will be processed"
 }

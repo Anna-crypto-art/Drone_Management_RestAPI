@@ -46,6 +46,8 @@ export class VolateqAPI extends HttpClientBase {
   public async registerUser(confirmKey: string, user: RegisterUser): Promise<void> {
     await this.post(`/confirm/${confirmKey}`, user);
   }
+
+  // public async getRoutes() { to be continued... }
 }
 
 const volateqApi = new VolateqAPI();

@@ -1,11 +1,5 @@
 <template>
   <div class="resumable">
-    <div class="resumable-dropzone">
-      <slot></slot>
-    </div>
-    <div class="resumable-browse-button">
-      <slot name="browse-button"></slot>
-    </div>
   </div>
 </template>
 
@@ -13,7 +7,6 @@
 import Vue from "vue";
 import ResumableJs from "resumablejs";
 import { Component, Prop } from "vue-property-decorator";
-// import store from "@/app/app-state";
 import { IResumable, IResumableFile } from "@/app/shared/components/resumable/types";
 
 @Component({
@@ -21,14 +14,19 @@ import { IResumable, IResumableFile } from "@/app/shared/components/resumable/ty
 })
 export default class Resumable extends Vue implements IResumable {
   @Prop({ required: true }) target!: string;
+  @Prop({ required: true }) dropzoneId!: string;
+  @Prop() browseButtonId: string | undefined;
   
   private resumable!: ResumableJs;  
+
+  public files!: IResumableFile[];
 
   created() {
     this.resumable = new ResumableJs({
       target: this.target,
-      // headers: { "Authorization": `Bearer ${store.state.auth.token}`}
     });
+
+    this.files = this.resumable.files;
 
     this.resumable.on("fileSuccess", (file) => {
       this.$emit("onFileSuccess", file);
@@ -52,13 +50,18 @@ export default class Resumable extends Vue implements IResumable {
   }
 
   mounted() {
-    const dropzone = this.$el.querySelector(".resumable-dropzone");
-    if (dropzone) {
-      this.resumable.assignDrop(dropzone);
+    const el = document.getElementById(this.dropzoneId);
+    if (!el) {
+      throw new Error(`No HTML-Element found with id='${this.dropzoneId}'`);
     }
-    const browseBtn = this.$el.querySelector(".resumable-browse-button .btn");
-    if (browseBtn) {
-      this.resumable.assignBrowse(browseBtn, false);
+    this.resumable.assignDrop(el);
+    
+    if (this.browseButtonId) {
+      const browseBtnEl = document.getElementById(this.browseButtonId);
+      if (!browseBtnEl) {
+        throw new Error(`No HTML-Element found with id='${this.browseButtonId}'`);
+      }
+      this.resumable.assignBrowse(browseBtnEl, false);
     }
   }
 
@@ -66,12 +69,12 @@ export default class Resumable extends Vue implements IResumable {
     this.resumable.cancel();
   }
 
-  progress() {
-    this.resumable.progress();
+  progress(): number {
+    return this.resumable.progress();
   }
-  
-  getFiles(): IResumableFile[] {
-    return <IResumableFile[]>this.resumable.files;
+
+  upload() {
+    this.resumable.upload();
   }
 
   setBearerToken(token: string) {
@@ -81,6 +84,4 @@ export default class Resumable extends Vue implements IResumable {
 </script>
 
 <style lang="scss">
-@import "@/scss/_colors.scss";
-
 </style>

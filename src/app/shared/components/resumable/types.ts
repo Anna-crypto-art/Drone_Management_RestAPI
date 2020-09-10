@@ -1,7 +1,10 @@
 export interface IResumable {
-  getFiles(): IResumableFile[];
+  files: IResumableFile[];
+  
   cancel(): void;
   setBearerToken(token: string): void;
+  upload(): void;
+  progress(): number;
 }
 
 export interface IResumableFile {

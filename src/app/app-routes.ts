@@ -2,7 +2,7 @@ import Vue from "vue";
 import Router, { RouteConfig } from "vue-router";
 
 import authRoutes from "@/app/auth/auth-routes";
-import homeRoutes from "@/app/home/home-routes";
+import analysisRoutes from "@/app/analysis/analysis-routes";
 import settingsRoutes from "@/app/settings/settings-routes";
 import AppPageNotFound from "@/app/shared/components/page-not-found/page-not-found.vue";
 import store from "@/app/app-state";
@@ -23,7 +23,7 @@ const router = new Router({
   routes: [
     ...appRoutes, 
     ...authRoutes,
-    ...homeRoutes,
+    ...analysisRoutes,
     ...settingsRoutes
   ]
 });

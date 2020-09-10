@@ -1,6 +1,9 @@
 <template>
   <app-content :title="$t('overview')" :subtitle="$t('overview_descr')">
-    <div class="app-home">
+    <div class="app-analysis">
+      <router-link :to="{ name: 'Analysis-New' }">
+        <b-button variant="primary">{{ $t("create-new-analysis") }}</b-button>
+      </router-link>
     </div>
   </app-content>
 </template>
@@ -12,12 +15,12 @@ import Component from "vue-class-component";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
 
 @Component({
-  name: "app-home",
+  name: "app-analysis",
   components: {
     AppContent
   }
 })
-export default class AppHome extends Vue {}
+export default class AppAnalysis extends Vue {}
 </script>
 
 <style>
