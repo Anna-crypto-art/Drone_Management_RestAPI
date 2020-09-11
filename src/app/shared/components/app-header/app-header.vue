@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import Component from "vue-class-component";
+import { Component } from "vue-property-decorator";
 
 import BaseAuthComponent from "@/app/shared/components/base-auth-component/base-auth-component";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";

@@ -29,5 +29,7 @@
   "repeat-password": "Repeat password",
   "browse...": "Browse...",
   "create-new-analysis": "Create new analysis",
-  "create-new-analysis_descr": "Your uploaded files will be processed"
+  "create-new-analysis_descr": "Your uploaded files will be processed",
+  "route": "Route",
+  "upload-your-files": "Upload your files"
 }

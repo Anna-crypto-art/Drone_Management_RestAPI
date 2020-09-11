@@ -3,11 +3,11 @@
     <div class="app-file-upload-file-infos">
       <div class="app-file-upload-file-name">{{ file.fileName }}</div>
       <div class="app-file-upload-file-size"><small class="grayed">{{ getFileSize(file.size) }}</small></div>
-      <div class="app-file-upload-file-remove">
+      <div class="app-file-upload-file-remove" @click="onFileRemove">
         <b-icon icon="x"></b-icon>
       </div>
     </div>
-    <div v-show="uploading" class="app-file-upload-file-infos" style="width: {{ progress }}%"></div>
+    <div v-show="uploading" class="app-file-upload-file-infos" :style="`width: ${progress}%`"></div>
   </div>
 </template>
 
@@ -37,6 +37,12 @@ export default class AppFileUploadFile extends Vue {
 
     return `${Math.round(size)} ${sizes[i]}`;
   }
+
+  onFileRemove(e: Event) {
+    this.file.cancel();
+
+    this.$emit('fileRemoved', this.file);
+  }
 }
 </script>
 
@@ -47,18 +53,24 @@ export default class AppFileUploadFile extends Vue {
   margin-bottom: 10px;
   width: 100%;
   background-color: $white;
+  border: 1px solid $dark-20pc;
   position: relative;
+  height: 60px;
 
   &-infos {
     position: absolute;
     z-index: 1;
     width: 100%;
-    padding: 20px 10px;
+    padding: 10px 20px;
+    height: 40px;
+    line-height: 20px;
   }
   &-remove {
     position: absolute;
-    right: 10px;
-    top: 5px;
+    right: 20px;
+    top: 20px;
+    font-size: 1.25em;
+    cursor: pointer;
 
     &:hover {
       color: $delete;
@@ -71,6 +83,9 @@ export default class AppFileUploadFile extends Vue {
     left: 0;
     height: 100%;
     background-color: $progressbar;
+  }
+  &:last-child {
+    margin-bottom: 0;
   }
 }
 

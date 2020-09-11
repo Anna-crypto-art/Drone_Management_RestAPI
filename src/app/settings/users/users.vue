@@ -59,7 +59,7 @@ export default class AppSettingsUsers extends Vue {
   @Ref() appInviteModal!: IAppModalForm;
   customers: any[] = []; 
   roles = [
-    { value: ApiRoles.SUPER_ADMIN, text: ApiRoles.SUPER_ADMIN }, 
+    { value: ApiRoles.SUPER_ADMIN, text: ApiRoles.SUPER_ADMIN },
     { value: ApiRoles.CUSTOMER_ADMIN, text: ApiRoles.CUSTOMER_ADMIN }
   ];
   newUser: InviteUser = this.initialInviteUser();

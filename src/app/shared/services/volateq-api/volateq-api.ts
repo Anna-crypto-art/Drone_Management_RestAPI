@@ -1,10 +1,11 @@
 import store from "@/app/app-state";
-import { AuthResult } from "@/app/shared/services/volateq-api/api-schemas/auth-schemas";
+import { AuthResult } from "@/app/shared/services/volateq-api/api-schemas/auth-schema";
 import { UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 import { HttpClientBase } from "@/app/shared/services/volateq-api/http-client-base";
 import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
 import { InviteUser, RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { baseUrl } from "@/environment/environment";
+import { RouteSchema } from "./api-schemas/route-schema";
 
 export class VolateqAPI extends HttpClientBase {
 
@@ -47,7 +48,9 @@ export class VolateqAPI extends HttpClientBase {
     await this.post(`/confirm/${confirmKey}`, user);
   }
 
-  // public async getRoutes() { to be continued... }
+  public async getRoutes(params: { customer_id?: string, plant_id?: string } | undefined = undefined): Promise<RouteSchema[]> {
+    return this.get(`/auth/routes`, params);
+  }
 }
 
 const volateqApi = new VolateqAPI();

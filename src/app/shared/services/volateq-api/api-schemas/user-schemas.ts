@@ -1,5 +1,5 @@
-import { RoleSchema } from "./role-schemas";
-import { CustomerSchema } from "./customer-schemas";
+import { RoleSchema } from "@/app/shared/services/volateq-api/api-schemas/role-schema";
+import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
 
 export interface NotifiacationSettingsSchema {
   init_debug_phase: boolean;
@@ -15,9 +15,9 @@ export interface UserProfileSchema {
 }
 
 export enum UserStateSchema {
-  REGISTERED = 'REGISTERED',
-  PENDING = 'PENDING',
-  UNKNOWN = 'UNKNOWN',
+  REGISTERED = "REGISTERED",
+  PENDING = "PENDING",
+  UNKNOWN = "UNKNOWN",
 }
 
 export interface UserSchema {

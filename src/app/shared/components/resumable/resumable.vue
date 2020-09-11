@@ -19,34 +19,33 @@ export default class Resumable extends Vue implements IResumable {
   
   private resumable!: ResumableJs;  
 
-  public files!: IResumableFile[];
-
   created() {
     this.resumable = new ResumableJs({
       target: this.target,
     });
 
-    this.files = this.resumable.files;
-
-    this.resumable.on("fileSuccess", (file) => {
-      this.$emit("onFileSuccess", file);
+    this.resumable.on("fileSuccess", (file: any) => {
+      this.$emit("fileSuccess", file);
     });
-    this.resumable.on("fileProgress", (file) => {
-      this.$emit("onFileProgress", file);
+    this.resumable.on("fileProgress", (file: any) => {
+      this.$emit("fileProgress", file);
     });
-    this.resumable.on("fileRetry", (file) => {
-      this.$emit("onFileRetry", file);
+    this.resumable.on("fileRetry", (file: any) => {
+      this.$emit("fileRetry", file);
     });
-    this.resumable.on("fileError", (file, msg) => {
-      this.$emit("onFileError", file, msg);
+    this.resumable.on("fileError", (file: any, msg: string) => {
+      this.$emit("fileError", file, msg);
     });
-    this.resumable.on("fileAdded", (file) => {
-      this.$emit("onFileAdded", file);
+    this.resumable.on("fileAdded", (file: any) => {
+      this.$emit("fileAdded", file);
     });
     this.resumable.on("progress", () => {
-      this.$emit("onProgress");
+      this.$emit("progress");
     });
-    
+  }
+
+  get files(): IResumableFile[] {
+    return this.resumable.files;
   }
 
   mounted() {
