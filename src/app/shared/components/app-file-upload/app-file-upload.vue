@@ -28,10 +28,9 @@
 import Vue from "vue";
 import { Component, Prop, Ref } from "vue-property-decorator";
 import store from "@/app/app-state";
-import { IResumable, IResumableFile } from "@/app/shared/components/resumable/types";
-import Resumable from "@/app/shared/components/resumable/resumable.vue";
+import Resumable from "@/app/shared/components/app-file-upload/resumable.vue";
 import AppFileUploadFile from "@/app/shared/components/app-file-upload/app-file-upload-file.vue";
-import { IAppFileUpload } from "@/app/shared/components/app-file-upload/types";
+import { IAppFileUpload, IResumable, IResumableFile } from "@/app/shared/components/app-file-upload/types";
 
 @Component({
   name: "app-file-upload",
