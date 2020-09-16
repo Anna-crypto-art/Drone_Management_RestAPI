@@ -14,7 +14,7 @@
 <script lang="ts">
 import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
-import { IResumable, IResumableFile } from "@/app/shared/components/resumable/types";
+import { IResumable, IResumableFile } from "@/app/shared/components/app-file-upload/types";
 
 @Component({
   name: "app-file-upload-file",

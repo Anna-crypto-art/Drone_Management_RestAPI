@@ -1,7 +1,7 @@
 <template>
   <app-content :title="$t('create-new-analysis')" :navback="true" :subtitle="$t('create-new-analysis_descr')">
     <div class="app-new-analysis">
-      <b-form @submit="onSubmit">
+      <b-form @submit="onSubmit" style="margin-bottom: 50px;">
         <b-row>
           <b-col sm="4" v-if="isSuperAdmin">
             <b-form-group label-cols="auto" :label="$t('customer')">
@@ -14,9 +14,17 @@
             </b-form-group>
           </b-col>
         </b-row>
-        <app-file-upload ref="appFileUpload">
-          <h3>{{ $t('upload-your-files') }}</h3>
+        <app-file-upload ref="appFileUpload" :title="$t('upload-your-files')"
+          @fileAdded="checkFileCompleteness"
+          @fileRemoved="checkFileCompleteness">
+          <app-checklist>
+            <app-checklist-item :checked="checkListItems.videoFiles">{{ $t("video-files_descr") }}</app-checklist-item>
+            <app-checklist-item :checked="checkListItems.droneMetaFile">{{ $t("drone-metadata-file_descr") }}</app-checklist-item>
+            <app-checklist-item :checked="checkListItems.plantMetaFile">{{ $t("plant-metadata-file_descr") }}</app-checklist-item>
+          </app-checklist>
         </app-file-upload>
+        <app-button type="submit" cls="pull-right">{{ $t("upload") }}</app-button>
+        <div class="clearfix"></div>
       </b-form>
     </div>
   </app-content>
@@ -33,13 +41,21 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { NewAnalysis } from "@/app/shared/services/volateq-api/api-requests/analysis-requests";
 import { SelectOption } from "@/app/shared/types/select-option";
 import AppFileUpload from "@/app/shared/components/app-file-upload/app-file-upload.vue";
-import { IAppFileUpload } from "@/app/shared/components/app-file-upload/types";
+import { IAppFileUpload, IResumableFile } from "@/app/shared/components/app-file-upload/types";
+import AppChecklist from "@/app/shared/components/app-checklist/app-checklist.vue"
+import AppChecklistItem from "@/app/shared/components/app-checklist/app-checklist-item.vue"
+import { CheckListItems } from "@/app/analysis/new-analysis/types";
+import AppButton from "@/app/shared/components/app-button/app-button.vue";
+import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
 
 @Component({
   name: "app-new-analysis",
   components: {
     AppContent,
-    AppFileUpload
+    AppFileUpload,
+    AppChecklist,
+    AppChecklistItem,
+    AppButton
   }
 })
 export default class AppNewAnalysis extends BaseAuthComponent {
@@ -52,6 +68,11 @@ export default class AppNewAnalysis extends BaseAuthComponent {
   routesOptions: SelectOption[] = [];
 
   newAnalysis: NewAnalysis = { route_id: "" };
+  checkListItems: CheckListItems = {
+    videoFiles: false,
+    droneMetaFile: false,
+    plantMetaFile: false
+  }
 
   async created() {
     try {
@@ -80,8 +101,42 @@ export default class AppNewAnalysis extends BaseAuthComponent {
     this.routesOptions = this.routes.map(route => ({ value: route.id, text: route.abbrev }));
   }
 
-  onSubmit() {
-    // some magic
+  checkFileCompleteness() {
+    this.checkListItems.droneMetaFile = false;
+    this.checkListItems.videoFiles = false;
+    this.checkListItems.plantMetaFile = false;
+
+    let countMp4Files = 0;
+    for (const file of this.appFileUpload.files) {
+      const ext = (file.fileName.split(".").pop() || "").toLowerCase();
+
+      if (ext === "pdf") {
+        this.checkListItems.videoFiles = ++countMp4Files > 1;
+      } else if (ext === "txt") {
+        this.checkListItems.droneMetaFile = true;
+      } else if (ext === "xslx" || ext === "mdb" || ext === "png") {
+        this.checkListItems.plantMetaFile = true;
+      }
+    }
+  }
+
+  onSubmit(e: Event) {
+    e.preventDefault();
+    
+    this.checkFileCompleteness();
+    if (Object.keys(this.checkListItems).find(key => this.checkListItems[key] !== true)) {
+      appContentEventBus.showErrorAlert("MISSING_FILES");
+      appButtonEventBus.stopLoading();
+      return;
+    }
+
+    try {
+      this.appFileUpload.upload();
+    } catch (e) {
+      appContentEventBus.showErrorAlert(this.$t(e.error).toString());
+      appButtonEventBus.stopLoading();
+    }
+    
   }
 }
 </script>

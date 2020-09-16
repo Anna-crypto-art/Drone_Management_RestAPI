@@ -1,13 +1,11 @@
 <template>
-  <div class="resumable">
-  </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import ResumableJs from "resumablejs";
 import { Component, Prop } from "vue-property-decorator";
-import { IResumable, IResumableFile } from "@/app/shared/components/resumable/types";
+import { IResumable, IResumableFile } from "@/app/shared/components/app-file-upload/types";
 
 @Component({
   name: "resumable",

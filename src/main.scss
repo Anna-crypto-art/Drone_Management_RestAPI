@@ -40,6 +40,13 @@ form [type="submit"] {
   color: $dark-60pc;
 }
 
+.pull-right {
+  float: right;
+}
+.pull-left {
+  float: left;
+}
+
 .hidden {
   display: none;
 }

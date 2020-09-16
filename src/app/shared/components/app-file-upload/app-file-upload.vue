@@ -8,6 +8,7 @@
     </resumable>
     <div id="file-upload-dropzone-id" class="app-file-upload-dropzone">
       <div class="app-file-upload-dropzone-content">
+        <h3 v-if="title" class="app-file-upload-dropzone-content-title">{{ title }}</h3>
         <slot></slot>
       </div>
       <div class="app-file-upload-dropzone-browsebutton">
@@ -41,6 +42,7 @@ import { IAppFileUpload, IResumable, IResumableFile } from "@/app/shared/compone
 })
 export default class AppFileUpload extends Vue implements IAppFileUpload {
   @Ref() resumable!: IResumable
+  @Prop() title: string | undefined
 
   keyResumFiles = 0;
   uploading = false;
@@ -89,13 +91,18 @@ export default class AppFileUpload extends Vue implements IAppFileUpload {
 @import "@/scss/_colors.scss";
 
 .app-file-upload {
+  margin-bottom: 30px;
+
   &-dropzone {
     background-color: $dark-10pc;
     // border 1px solid $blue-10pc;
     padding: 20px;
 
     &-content {
-      margin-bottom: 20px;
+      &-title {
+        margin-bottom: 15px;
+      }
+      margin-bottom: 30px;
     }
   }
 }
