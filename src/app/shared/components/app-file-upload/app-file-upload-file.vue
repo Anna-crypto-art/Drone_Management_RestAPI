@@ -142,13 +142,6 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
     top: 20px;
   }
 
-  &-error {
-    position: absolute;
-    left: 250px;
-    top: 20px;
-    max-width: 150px;
-  }
-
   &-progressbar {
     z-index: 0;
     position: absolute;
