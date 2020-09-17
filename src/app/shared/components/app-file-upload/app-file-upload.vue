@@ -4,7 +4,11 @@
       target="/api/auth/resumable"
       dropzoneId="file-upload-dropzone-id"
       browseButtonId="file-upload-browsebutton-id"
-      @fileAdded="onFileAdded">
+      @fileAdded="onFileAdded"
+      @fileSuccess="onFileSuccess"
+      @fileProgress="onFileProgress"
+      @fileRetry="onFileRetry"
+      @fileError="onFileError">
     </resumable>
     <div id="file-upload-dropzone-id" class="app-file-upload-dropzone">
       <div class="app-file-upload-dropzone-content">
@@ -15,7 +19,7 @@
         <b-button variant="primary" id="file-upload-browsebutton-id">{{ $t('browse...') }}</b-button>
       </div>
       <div class="app-file-upload-dropzone-files" style="margin-top: 20px;" v-if="resumable" :key="keyResumFiles" v-show="keyResumFiles > 0">
-        <app-file-upload-file v-for="file in files" :key="file.uniqueIdentifier"
+        <app-file-upload-file v-for="file in files" :key="file.uniqueIdentifier" ref="uploadFiles"
           :uploading="uploading"
           :file="file"
           @fileRemoved="onFileRemoved">
@@ -31,7 +35,7 @@ import { Component, Prop, Ref } from "vue-property-decorator";
 import store from "@/app/app-state";
 import Resumable from "@/app/shared/components/app-file-upload/resumable.vue";
 import AppFileUploadFile from "@/app/shared/components/app-file-upload/app-file-upload-file.vue";
-import { IAppFileUpload, IResumable, IResumableFile } from "@/app/shared/components/app-file-upload/types";
+import { IAppFileUpload, IAppFileUploadFile, IResumable, IResumableFile } from "@/app/shared/components/app-file-upload/types";
 
 @Component({
   name: "app-file-upload",
@@ -41,10 +45,11 @@ import { IAppFileUpload, IResumable, IResumableFile } from "@/app/shared/compone
   }
 })
 export default class AppFileUpload extends Vue implements IAppFileUpload {
-  @Ref() resumable!: IResumable
-  @Prop() title: string | undefined
-
-  keyResumFiles = 0;
+  @Ref() resumable!: IResumable;
+  @Ref() uploadFiles!: IAppFileUploadFile[];
+  @Prop() title: string | undefined;
+  
+  keyResumFiles = 0; // changing the value forces vue to rerender the element with :key="keyResumFiles"
   uploading = false;
 
   mounted() {
@@ -70,6 +75,10 @@ export default class AppFileUpload extends Vue implements IAppFileUpload {
     this.resumable.cancel();
   }
 
+  getFileUploadFile(file: IResumableFile): IAppFileUploadFile {
+    return this.uploadFiles.find(uploadFile => uploadFile.uniqueIdentifier === file.uniqueIdentifier)!;
+  }
+
   onFileAdded(file: IResumableFile) {
     console.log("added: " + file.fileName);
     console.log("files.length: " + this.files.length);
@@ -84,6 +93,20 @@ export default class AppFileUpload extends Vue implements IAppFileUpload {
 
     this.$emit("fileRemoved", file);
   }
+
+  onFileSuccess(file: IResumableFile) {
+    this.getFileUploadFile(file).emitSuccess();
+  }
+  onFileProgress(file: IResumableFile) {
+    this.getFileUploadFile(file).emitProgress();
+  }
+  onFileError(file: IResumableFile, msg: string) {
+    this.getFileUploadFile(file).emitError(msg);
+  }
+  onFileRetry(file: IResumableFile) {
+    this.getFileUploadFile(file).emitRetry();
+  }
+
 }
 </script>
 
@@ -95,7 +118,6 @@ export default class AppFileUpload extends Vue implements IAppFileUpload {
 
   &-dropzone {
     background-color: $dark-10pc;
-    // border 1px solid $blue-10pc;
     padding: 20px;
 
     &-content {

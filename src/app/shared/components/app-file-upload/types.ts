@@ -22,3 +22,12 @@ export interface IAppFileUpload {
   cancel(): void;
   upload(): void;
 }
+
+export interface IAppFileUploadFile {
+  uniqueIdentifier: string;
+
+  emitError(msg: string): void;
+  emitProgress(): void;
+  emitSuccess(): void;
+  emitRetry(): void;
+}

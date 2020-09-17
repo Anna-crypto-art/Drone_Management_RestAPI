@@ -1,30 +1,44 @@
 <template>
-  <div class="app-file-upload-file">
+  <div class="app-file-upload-file" :key="rerender">
     <div class="app-file-upload-file-infos">
       <div class="app-file-upload-file-name">{{ file.fileName }}</div>
       <div class="app-file-upload-file-size"><small class="grayed">{{ getFileSize(file.size) }}</small></div>
-      <div class="app-file-upload-file-remove" @click="onFileRemove">
+      <div v-show="!uploading" class="app-file-upload-file-remove" @click="onFileRemove">
         <b-icon icon="x"></b-icon>
       </div>
+      <div v-show="uploading" class="app-file-upload-file-progress">
+        <span v-show="!success">{{ progress }}%</span>
+        <b-icon v-show="success" icon="check2" class="text-success"></b-icon>
+      </div>
+      <div v-show="error" class="app-file-upload-file-error" v-bind:class="{ 'text-danger': !retry }">
+        {{ retry && $t("retrying...") || error }}
+      </div>
     </div>
-    <div v-show="uploading" class="app-file-upload-file-infos" :style="`width: ${progress}%`"></div>
+    <div v-show="uploading" class="app-file-upload-file-progressbar" :style="`width: ${progress}%`"></div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
-import { IResumable, IResumableFile } from "@/app/shared/components/app-file-upload/types";
+import { IAppFileUploadFile, IResumable, IResumableFile } from "@/app/shared/components/app-file-upload/types";
 
 @Component({
   name: "app-file-upload-file",
 })
-export default class AppFileUploadFile extends Vue {
+export default class AppFileUploadFile extends Vue implements IAppFileUploadFile {
   @Prop({ required: true }) file!: IResumableFile;
   @Prop({ required: true }) uploading!: boolean;
 
-  get progress() {
-    return Math.round(this.file.progress(true) * 100);
+  rerender = 0;
+
+  progress = 0;
+  error = "";
+  retry = false;
+  success = false;
+
+  get uniqueIdentifier(): string {
+    return this.file.uniqueIdentifier;
   }
 
   getFileSize(size: number): string {
@@ -42,6 +56,36 @@ export default class AppFileUploadFile extends Vue {
     this.file.cancel();
 
     this.$emit('fileRemoved', this.file);
+  }
+
+  emitError(msg: string) {
+    this.error = this.$t("ERROR") + ": " + msg;
+    this.retry = false;
+
+    ++this.rerender;
+  }
+
+  emitRetry() {
+    this.retry = true;
+
+    ++this.rerender;
+  }
+
+  emitProgress() {
+    this.progress = Math.round(this.file.progress(true) * 100);
+    this.error = "";
+    this.retry = false;
+
+    ++this.rerender;
+  }
+
+  emitSuccess() {
+    this.error = "";
+    this.retry = false;
+    this.progress = 0;
+    this.success = true;
+
+    ++this.rerender;
   }
 }
 </script>
@@ -65,6 +109,14 @@ export default class AppFileUploadFile extends Vue {
     height: 40px;
     line-height: 20px;
   }
+
+  &-name {
+    width: 200px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
   &-remove {
     position: absolute;
     right: 20px;
@@ -76,6 +128,20 @@ export default class AppFileUploadFile extends Vue {
       color: $delete;
     }
   }
+
+  &-progress {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+  }
+
+  &-error {
+    position: absolute;
+    left: 250px;
+    top: 20px;
+    max-width: 150;
+  }
+
   &-progressbar {
     z-index: 0;
     position: absolute;
