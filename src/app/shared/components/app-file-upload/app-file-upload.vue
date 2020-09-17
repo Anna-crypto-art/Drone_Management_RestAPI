@@ -80,9 +80,6 @@ export default class AppFileUpload extends Vue implements IAppFileUpload {
   }
 
   onFileAdded(file: IResumableFile) {
-    console.log("added: " + file.fileName);
-    console.log("files.length: " + this.files.length);
-
     this.keyResumFiles += 1;
 
     this.$emit("fileAdded", file);

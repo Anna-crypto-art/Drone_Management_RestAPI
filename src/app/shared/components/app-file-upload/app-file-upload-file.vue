@@ -1,7 +1,12 @@
 <template>
   <div class="app-file-upload-file" :key="rerender">
     <div class="app-file-upload-file-infos">
-      <div class="app-file-upload-file-name">{{ file.fileName }}</div>
+      <div class="app-file-upload-file-name">
+        {{ file.fileName }}
+        <span v-show="error" class="app-file-upload-file-name-error" v-bind:class="{ 'text-danger': !retry }">
+          {{ retry && $t("retrying...") || error }}
+        </span>
+      </div>
       <div class="app-file-upload-file-size"><small class="grayed">{{ getFileSize(file.size) }}</small></div>
       <div v-show="!uploading" class="app-file-upload-file-remove" @click="onFileRemove">
         <b-icon icon="x"></b-icon>
@@ -10,9 +15,7 @@
         <span v-show="!success">{{ progress }}%</span>
         <b-icon v-show="success" icon="check2" class="text-success"></b-icon>
       </div>
-      <div v-show="error" class="app-file-upload-file-error" v-bind:class="{ 'text-danger': !retry }">
-        {{ retry && $t("retrying...") || error }}
-      </div>
+      
     </div>
     <div v-show="uploading" class="app-file-upload-file-progressbar" :style="`width: ${progress}%`"></div>
   </div>
@@ -72,7 +75,7 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
   }
 
   emitProgress() {
-    this.progress = Math.round(this.file.progress(true) * 100);
+    this.progress = Math.round(this.file.progress(false) * 100);
     this.error = "";
     this.retry = false;
 
@@ -111,10 +114,14 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
   }
 
   &-name {
-    width: 200px;
+    width: calc(100% - 80px);
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
+
+    &-error {
+      margin-left: 20px;
+    }
   }
 
   &-remove {
@@ -139,7 +146,7 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
     position: absolute;
     left: 250px;
     top: 20px;
-    max-width: 150;
+    max-width: 150px;
   }
 
   &-progressbar {
