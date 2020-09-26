@@ -10,14 +10,14 @@ import { RouteSchema } from "./api-schemas/route-schema";
 export class VolateqAPI extends HttpClientBase {
 
   public async login(email: string, password: string): Promise<void> {
-    // const authResult: AuthResult = await this.post("/auth/login", {}, {
-    //   auth: {
-    //     username: email,
-    //     password: password
-    //   }
-    // });
+    const authResult: AuthResult = await this.post("/auth/login", {}, {
+      auth: {
+        username: email,
+        password: password
+      }
+    });
 
-    const authResult: AuthResult = await this.authRequest("/auth/login", email, password);
+    // const authResult: AuthResult = await this.authRequest("/auth/login", email, password);
 
     await store.dispatch.auth.updateToken({ token: authResult.token, role: authResult.role });    
   }
