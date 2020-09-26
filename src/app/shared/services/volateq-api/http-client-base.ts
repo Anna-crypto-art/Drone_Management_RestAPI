@@ -40,28 +40,27 @@ export class HttpClientBase {
   }
 
   protected async request(method: "GET" | "POST" | "PATCH" | "DELETE", url: string, data?: any, headers?: any): Promise<any> {
-    const xhr = new XMLHttpRequest();
-
-    xhr.setRequestHeader("Content-Type", "application/json;charset=utf-8");
-    xhr.setRequestHeader("Accept", "application/json, text/plain, */*");
-    
-    if (store.getters.auth.isAuthenticated) {
-      xhr.setRequestHeader("Authorization", `Bearer ${store.state.auth.token}`);
-    }
-    
-    if (headers) {
-      for (const headerKey of Object.keys(headers)) {
-        xhr.setRequestHeader(headerKey, headers[headerKey]);
-      }
-    }
-
     return new Promise((resolve, reject) => {
       const fallbackError = {
         error: ApiErrors.SOMETHING_WENT_WRONG,
         message: "Ooops! Something went horribly wrong!"
       };
 
+      const xhr = new XMLHttpRequest();
       xhr.open(method, apiBaseUrl + url);
+
+      xhr.setRequestHeader("Content-Type", "application/json;charset=utf-8");
+      xhr.setRequestHeader("Accept", "application/json, text/plain, */*");
+      
+      if (store.getters.auth.isAuthenticated) {
+        xhr.setRequestHeader("Authorization", `Bearer ${store.state.auth.token}`);
+      }
+      
+      if (headers) {
+        for (const headerKey of Object.keys(headers)) {
+          xhr.setRequestHeader(headerKey, headers[headerKey]);
+        }
+      }
 
       xhr.onreadystatechange = function() {
         if (this.readyState === 4) {
