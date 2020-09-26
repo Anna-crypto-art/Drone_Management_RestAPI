@@ -1,4 +1,5 @@
 <template>
+  <div class="resumable"></div>
 </template>
 
 <script lang="ts">

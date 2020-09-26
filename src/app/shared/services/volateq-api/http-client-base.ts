@@ -1,5 +1,5 @@
 import Axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
-import { baseUrl } from "@/environment/environment";
+import { apiBaseUrl } from "@/environment/environment";
 import store from "@/app/app-state";
 import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
 
@@ -8,7 +8,7 @@ export class HttpClientBase {
 
   constructor() {
     this.httpClient = Axios.create({
-      baseURL: baseUrl + "api"
+      baseURL: apiBaseUrl
     });
     this.httpClient.interceptors.request.use((config: AxiosRequestConfig): AxiosRequestConfig => {
       if (store.getters.auth.isAuthenticated) {
