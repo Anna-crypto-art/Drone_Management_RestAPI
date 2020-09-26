@@ -74,7 +74,7 @@ export class HttpClientBase {
               reject(fallbackError);
             }
           } else if (this.status === 204) {
-            resolve(null);
+            resolve(undefined);
           } else {
             try {
               const errorData: any = JSON.parse(this.responseText);
