@@ -48,7 +48,8 @@ export class HttpClientBase {
 
       const xhr = new XMLHttpRequest();
       xhr.open(method, apiBaseUrl + url);
-
+      xhr.withCredentials = true;
+      
       xhr.setRequestHeader("Content-Type", "application/json;charset=utf-8");
       xhr.setRequestHeader("Accept", "application/json, text/plain, */*");
       
