@@ -60,6 +60,7 @@ import appButtonEventBus from "@/app/shared/components/app-button/app-button-eve
 })
 export default class AppNewAnalysis extends BaseAuthComponent {
   @Ref() appFileUpload!: IAppFileUpload
+  @Ref() newAnalForm!: HTMLFormElement;
   
   customers: CustomerSchema[] | undefined;
   customerOptions: SelectOption[] = [];

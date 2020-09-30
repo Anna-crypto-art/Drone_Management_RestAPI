@@ -19,7 +19,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Component } from "vue-property-decorator";
+import { Component, Ref } from "vue-property-decorator";
 
 import AppAuthContainer from "@/app/auth/shared/components/auth-container.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
@@ -34,6 +34,8 @@ import appButtonEventBus from "@/app/shared/components/app-button/app-button-eve
   }
 })
 export default class AppAuthLogin extends Vue {
+  @Ref() loginForm!: HTMLFormElement;
+  
   email = "";
   password = "";
   msg = "";
