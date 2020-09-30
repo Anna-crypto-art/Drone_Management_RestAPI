@@ -2,7 +2,7 @@
   <div class="app-auth-register">
     <app-auth-container title="">
       <div v-if="hasUser">
-        <b-form @submit="onSubmit">
+        <b-form @submit="onSubmit" ref="registerForm">
           <div v-show="company">
             <b-form-group :label="$t('company')" label-for="company">
               <b-form-input id="company" v-model="company" disabled></b-form-input>
@@ -23,7 +23,7 @@
           <b-form-group :label="$t('repeat-password')" label-for="repeat-password">
             <b-form-input id="repeat-password" v-model="user.repeat_password" type="password" :placeholder="$t('repeat-password')" required></b-form-input>
           </b-form-group>
-          <app-button type="submit" cls="width-100pc">{{ $t("register") }}</app-button>
+          <app-button type="submit" cls="width-100pc" :parentForm="registerForm">{{ $t("register") }}</app-button>
         </b-form>
       </div>
       <b-alert class="invalid-register-alert" v-model="alertVisible" variant="danger" dismissible>

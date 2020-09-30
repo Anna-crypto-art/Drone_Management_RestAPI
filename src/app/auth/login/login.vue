@@ -1,14 +1,14 @@
 <template>
   <div class="app-auth-login">
     <app-auth-container title="">
-      <b-form @submit="onSubmit">
+      <b-form @submit="onSubmit" ref="loginForm">
         <b-form-group :label="$t('email')" label-for="email">
           <b-form-input id="email" v-model="email" type="email" :placeholder="$t('email')" required></b-form-input>
         </b-form-group>
         <b-form-group :label="$t('password')" label-for="password">
           <b-form-input id="password" v-model="password" type="password" :placeholder="$t('password')" required></b-form-input>
         </b-form-group>
-        <app-button type="submit" cls="width-100pc">{{ $t("login") }}</app-button>
+        <app-button type="submit" cls="width-100pc" :parentForm="loginForm">{{ $t("login") }}</app-button>
       </b-form>
       <b-alert class="invalid-login-alert" v-model="show" variant="danger" dismissible>
         {{msg}}

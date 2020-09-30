@@ -17,8 +17,6 @@ export class VolateqAPI extends HttpClientBase {
       }
     });
 
-    // const authResult: AuthResult = await this.authRequest("/auth/login", email, password);
-
     await store.dispatch.auth.updateToken({ token: authResult.token, role: authResult.role });    
   }
 
@@ -39,7 +37,7 @@ export class VolateqAPI extends HttpClientBase {
   public async inviteUser(user: InviteUser): Promise<string> {
     const confirmKey = (await this.post("/auth/user", user)).confirmation_key;
 
-    return `${baseUrl}confirm/${confirmKey}`;
+    return `${baseUrl}/confirm/${confirmKey}`;
   }
 
   public async getInvitedUser(confirmKey: string): Promise<UserSchema> {
