@@ -6,9 +6,12 @@ import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
 export class HttpClientBase {
   private readonly httpClient: AxiosInstance;
 
+  protected readonly baseURL: string | undefined;
+
   constructor() {
+    this.baseURL = apiBaseUrl;
     this.httpClient = Axios.create({
-      baseURL: apiBaseUrl
+      baseURL: this.baseURL
     });
     this.httpClient.interceptors.request.use((config: AxiosRequestConfig): AxiosRequestConfig => {
       if (store.getters.auth.isAuthenticated) {

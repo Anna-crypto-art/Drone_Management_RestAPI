@@ -3,7 +3,7 @@ export interface IResumable {
   
   cancel(): void;
   setBearerToken(token: string): void;
-  upload(): void;
+  upload(target: string): void;
   progress(): number;
 }
 
@@ -20,7 +20,7 @@ export interface IAppFileUpload {
   
   progress(): number;
   cancel(): void;
-  upload(): void;
+  upload(target: string): void;
 }
 
 export interface IAppFileUploadFile {

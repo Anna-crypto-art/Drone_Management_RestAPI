@@ -1,7 +1,6 @@
 <template>
   <div class="app-file-upload">
     <resumable ref="resumable"
-      target="/api/auth/resumable"
       dropzoneId="file-upload-dropzone-id"
       browseButtonId="file-upload-browsebutton-id"
       @fileAdded="onFileAdded"
@@ -60,11 +59,11 @@ export default class AppFileUpload extends Vue implements IAppFileUpload {
     return this.resumable.progress();
   }
 
-  upload() {
+  upload(target: string) {
     this.uploading = true;
     this.keyResumFiles += 100;
 
-    this.resumable.upload();
+    this.resumable.upload(target);
   }
 
   get files(): IResumableFile[] {

@@ -68,7 +68,7 @@ export default class AppNewAnalysis extends BaseAuthComponent {
   routes: RouteSchema[] = [];
   routesOptions: SelectOption[] = [];
 
-  newAnalysis: NewAnalysis = { route_id: "" };
+  newAnalysis: NewAnalysis = { route_id: "", files: [] };
   checkListItems: CheckListItems = {
     videoFiles: false,
     droneMetaFile: false,
@@ -121,7 +121,7 @@ export default class AppNewAnalysis extends BaseAuthComponent {
     }
   }
 
-  onSubmit(e: Event) {
+  async onSubmit(e: Event) {
     e.preventDefault();
     
     this.checkFileCompleteness();
@@ -132,7 +132,9 @@ export default class AppNewAnalysis extends BaseAuthComponent {
     }
 
     try {
-      this.appFileUpload.upload();
+      const analysis = await volateqApi.createAnalyisis(this.newAnalysis);
+
+      this.appFileUpload.upload(analysis.id);
     } catch (e) {
       appContentEventBus.showErrorAlert(this.$t(e.error).toString());
       appButtonEventBus.stopLoading();

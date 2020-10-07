@@ -6,6 +6,7 @@ import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/cu
 import { InviteUser, RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { baseUrl } from "@/environment/environment";
 import { RouteSchema } from "./api-schemas/route-schema";
+import { NewAnalysis } from "./api-requests/analysis-requests";
 
 export class VolateqAPI extends HttpClientBase {
 
@@ -50,6 +51,14 @@ export class VolateqAPI extends HttpClientBase {
 
   public async getRoutes(params: { customer_id?: string, plant_id?: string } | undefined = undefined): Promise<RouteSchema[]> {
     return this.get(`/auth/routes`, params);
+  }
+
+  public async createAnalyisis(newAnalyis: NewAnalysis): Promise<{ id: string }> {
+    return this.post(`/auth/analysis`, newAnalyis);
+  }
+
+  public getAnalyisisFileUploadUrl(analysisId: string): string {
+    return `${this.baseURL}/auth/analysis/${analysisId}/file`;
   }
 }
 

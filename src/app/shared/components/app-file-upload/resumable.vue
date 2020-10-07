@@ -12,16 +12,13 @@ import { IResumable, IResumableFile } from "@/app/shared/components/app-file-upl
   name: "resumable",
 })
 export default class Resumable extends Vue implements IResumable {
-  @Prop({ required: true }) target!: string;
   @Prop({ required: true }) dropzoneId!: string;
   @Prop() browseButtonId: string | undefined;
   
-  private resumable!: ResumableJs;  
+  private resumable!: ResumableJs;
 
   created() {
-    this.resumable = new ResumableJs({
-      target: this.target,
-    });
+    this.resumable = new ResumableJs({});
 
     this.resumable.on("fileSuccess", (file: any) => {
       this.$emit("fileSuccess", file);
@@ -71,7 +68,8 @@ export default class Resumable extends Vue implements IResumable {
     return this.resumable.progress();
   }
 
-  upload() {
+  upload(target: string) {
+    this.resumable.opts.target = target;
     this.resumable.upload();
   }
 
