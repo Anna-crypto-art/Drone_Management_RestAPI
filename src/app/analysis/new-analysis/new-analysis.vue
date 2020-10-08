@@ -1,7 +1,7 @@
 <template>
   <app-content :title="$t('create-new-analysis')" :navback="true" :subtitle="$t('create-new-analysis_descr')">
     <div class="app-new-analysis">
-      <b-form @submit="onSubmit" style="margin-bottom: 50px;" ref="newAnalForm">
+      <b-form @submit.prevent="onSubmit" style="margin-bottom: 50px;">
         <b-row>
           <b-col sm="4" v-if="isSuperAdmin">
             <b-form-group label-cols="auto" :label="$t('customer')">
@@ -23,7 +23,7 @@
             <app-checklist-item :checked="checkListItems.plantMetaFile">{{ $t("plant-metadata-file_descr") }}</app-checklist-item>
           </app-checklist>
         </app-file-upload>
-        <app-button type="submit" cls="pull-right" :parentForm="newAnalForm">{{ $t("upload") }}</app-button>
+        <app-button type="submit" cls="pull-right">{{ $t("upload") }}</app-button>
         <div class="clearfix"></div>
       </b-form>
     </div>
@@ -59,8 +59,7 @@ import appButtonEventBus from "@/app/shared/components/app-button/app-button-eve
   }
 })
 export default class AppNewAnalysis extends BaseAuthComponent {
-  @Ref() appFileUpload!: IAppFileUpload
-  @Ref() newAnalForm!: HTMLFormElement;
+  @Ref() appFileUpload!: IAppFileUpload;
   
   customers: CustomerSchema[] | undefined;
   customerOptions: SelectOption[] = [];
@@ -68,7 +67,7 @@ export default class AppNewAnalysis extends BaseAuthComponent {
   routes: RouteSchema[] = [];
   routesOptions: SelectOption[] = [];
 
-  newAnalysis: NewAnalysis = { route_id: "", files: [] };
+  newAnalysis: NewAnalysis = { route_id: "", files: [], customer_id: "" };
   checkListItems: CheckListItems = {
     videoFiles: false,
     droneMetaFile: false,
@@ -108,11 +107,14 @@ export default class AppNewAnalysis extends BaseAuthComponent {
     this.checkListItems.plantMetaFile = false;
 
     let countMp4Files = 0;
+    this.newAnalysis.files = [];
     for (const file of this.appFileUpload.files) {
+      this.newAnalysis.files.push(file.fileName)
+
       const ext = (file.fileName.split(".").pop() || "").toLowerCase();
 
       if (ext === "mp4") {
-        this.checkListItems.videoFiles = ++countMp4Files > 1;
+        this.checkListItems.videoFiles = true;
       } else if (ext === "srt") {
         this.checkListItems.droneMetaFile = true;
       } else if (ext === "xslx" || ext === "mdb") {
@@ -121,20 +123,21 @@ export default class AppNewAnalysis extends BaseAuthComponent {
     }
   }
 
-  async onSubmit(e: Event) {
-    e.preventDefault();
-    
+  async onSubmit() {
     this.checkFileCompleteness();
-    if (Object.keys(this.checkListItems).find(key => this.checkListItems[key] !== true)) {
+    if (!this.checkListItems.droneMetaFile || !this.checkListItems.videoFiles) {
       appContentEventBus.showErrorAlert("MISSING_FILES");
       appButtonEventBus.stopLoading();
       return;
     }
 
     try {
+      appButtonEventBus.startLoading();
+
       const analysis = await volateqApi.createAnalyisis(this.newAnalysis);
 
-      this.appFileUpload.upload(analysis.id);
+      // this.appFileUpload.upload('/api/auth/resumable')
+      this.appFileUpload.upload(volateqApi.getAnalyisisFileUploadUrl(analysis.id));
     } catch (e) {
       appContentEventBus.showErrorAlert(this.$t(e.error).toString());
       appButtonEventBus.stopLoading();

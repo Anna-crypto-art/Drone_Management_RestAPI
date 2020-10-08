@@ -1,5 +1,5 @@
 <template>
-  <b-button variant="primary" :type="type" :class="cls" :disabled="loading" :form="parentForm" @click="onClick">
+  <b-button variant="primary" :type="type" :class="cls" :disabled="loading" @click="onClick">
     <span class="app-button-loading" v-show="loading"><b-spinner small></b-spinner></span><slot></slot>
   </b-button>
 </template>
@@ -16,7 +16,6 @@ import appButtonEventBus from "@/app/shared/components/app-button/app-button-eve
 export default class AppButton extends Vue implements IAppButton {
   @Prop({ default: "button" }) type!: string;
   @Prop({ default: "" }) cls!: string;
-  @Prop() parentForm: HTMLFormElement | undefined;
 
   loading = false;
 
@@ -24,21 +23,20 @@ export default class AppButton extends Vue implements IAppButton {
     appButtonEventBus.onStopLoading(() => {
       this.stopLoading();
     });
+    appButtonEventBus.onStartLoading(() => {
+      this.startLoading();
+    });
   }
 
   stopLoading() {
     this.loading = false;
   }
+  startLoading() {
+    this.loading = true;
+  }
 
-  onClick(e: Event) {
-    if (this.parentForm) {
-      if (this.parentForm.checkValidity()) {
-        this.loading = true;
-        this.parentForm.submit();
-      }
-    } else {
-      this.$emit("click", e);
-    }
+  onClick(e: Event) {    
+    this.$emit("click", e);
   }
 }
 </script>

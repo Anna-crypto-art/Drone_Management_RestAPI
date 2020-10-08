@@ -52,8 +52,6 @@ export default class AppModalForm extends Vue implements IAppModalForm {
   }
 
   onSubmit(e: Event) {
-    e && e.preventDefault();
-
     this.$emit("submit");
   }
 

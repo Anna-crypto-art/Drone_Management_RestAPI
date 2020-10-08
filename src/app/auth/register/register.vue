@@ -2,7 +2,7 @@
   <div class="app-auth-register">
     <app-auth-container title="">
       <div v-if="hasUser">
-        <b-form @submit="onSubmit" ref="registerForm">
+        <b-form @submit.prevent="onSubmit" ref="registerForm">
           <div v-show="company">
             <b-form-group :label="$t('company')" label-for="company">
               <b-form-input id="company" v-model="company" disabled></b-form-input>
@@ -23,7 +23,7 @@
           <b-form-group :label="$t('repeat-password')" label-for="repeat-password">
             <b-form-input id="repeat-password" v-model="user.repeat_password" type="password" :placeholder="$t('repeat-password')" required></b-form-input>
           </b-form-group>
-          <app-button type="submit" cls="width-100pc" :parentForm="registerForm">{{ $t("register") }}</app-button>
+          <app-button type="submit" cls="width-100pc">{{ $t("register") }}</app-button>
         </b-form>
       </div>
       <b-alert class="invalid-register-alert" v-model="alertVisible" variant="danger" dismissible>
@@ -86,17 +86,17 @@ export default class AppAuthRegister extends Vue {
   }
 
   async onSubmit(e: Event): Promise<void> {
-    e.preventDefault();
-
     if (this.user.password !== this.user.repeat_password) {
       this.showAlert("PASSWORDS_DONT_MATCH");
       return;
     }
 
     try {
+      appButtonEventBus.startLoading();
+
       await volateqApi.registerUser(this.$route.params.confirmKey, this.user);
 
-      this.$router.push({ name: "Login" })
+      this.$router.push({ name: "Login" });
     } catch (e) {
       this.showAlert(e.error);
     }
