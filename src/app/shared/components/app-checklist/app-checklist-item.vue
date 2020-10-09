@@ -1,6 +1,7 @@
 <template>
   <li class="app-checklist-item" v-bind:class="{ grayed: checked }">
-    <b-icon :icon="checked ? 'check2-circle' : 'circle'"></b-icon>
+    <b-icon v-show="checked" icon="check2" class="app-checklist-item-symbol"></b-icon>
+    <span v-show="!checked" class="app-checklist-item-symbol">&middot;</span>
     <slot></slot>
   </li>
 </template>
@@ -19,7 +20,7 @@ export default class AppChecklistItem extends Vue {
 <style lang="scss">
 .app-checklist-item {
   margin-bottom: 5px;
-  .b-icon {
+  &-symbol {
     margin-right: 10px;
   }
 }

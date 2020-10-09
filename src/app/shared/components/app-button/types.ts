@@ -1,3 +1,6 @@
 export interface IAppButton {
-  stopLoading(): void
+  stopLoading(): void;
+  startLoading(): void;
+  
+  disable(): void;
 }

@@ -1,5 +1,5 @@
 <template>
-  <b-button variant="primary" :type="type" :class="cls" :disabled="loading" @click="onClick">
+  <b-button variant="primary" :type="type" :class="cls" :disabled="loading || disable" @click="onClick">
     <span class="app-button-loading" v-show="loading"><b-spinner small></b-spinner></span><slot></slot>
   </b-button>
 </template>
@@ -18,6 +18,7 @@ export default class AppButton extends Vue implements IAppButton {
   @Prop({ default: "" }) cls!: string;
 
   loading = false;
+  disabled = false;
 
   created() {
     appButtonEventBus.onStopLoading(() => {
@@ -33,6 +34,9 @@ export default class AppButton extends Vue implements IAppButton {
   }
   startLoading() {
     this.loading = true;
+  }
+  disable() {
+    this.disabled = true;
   }
 
   onClick(e: Event) {    

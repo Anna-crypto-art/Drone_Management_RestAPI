@@ -40,6 +40,9 @@ export default class Resumable extends Vue implements IResumable {
     this.resumable.on("progress", () => {
       this.$emit("progress");
     });
+    this.resumable.on("complete", () => {
+      this.$emit("complete");
+    });
   }
 
   get files(): IResumableFile[] {

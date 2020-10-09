@@ -7,7 +7,8 @@
       @fileSuccess="onFileSuccess"
       @fileProgress="onFileProgress"
       @fileRetry="onFileRetry"
-      @fileError="onFileError">
+      @fileError="onFileError"
+      @complete="onCompleted">
     </resumable>
     <div id="file-upload-dropzone-id" class="app-file-upload-dropzone">
       <div class="app-file-upload-dropzone-content">
@@ -76,6 +77,10 @@ export default class AppFileUpload extends Vue implements IAppFileUpload {
 
   getFileUploadFile(file: IResumableFile): IAppFileUploadFile {
     return this.uploadFiles.find(uploadFile => uploadFile.uniqueIdentifier === file.uniqueIdentifier)!;
+  }
+
+  onCompleted() {
+    this.$emit("completed");
   }
 
   onFileAdded(file: IResumableFile) {

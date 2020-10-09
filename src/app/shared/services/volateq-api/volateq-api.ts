@@ -6,7 +6,8 @@ import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/cu
 import { InviteUser, RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { baseUrl } from "@/environment/environment";
 import { RouteSchema } from "./api-schemas/route-schema";
-import { NewAnalysis } from "./api-requests/analysis-requests";
+import { NewAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
+import { AnalysisSchema } from "./api-schemas/analysis-schema";
 
 export class VolateqAPI extends HttpClientBase {
 
@@ -53,12 +54,20 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/routes`, params);
   }
 
-  public async createAnalyisis(newAnalyis: NewAnalysis): Promise<{ id: string }> {
+  public async createAnalysis(newAnalyis: NewAnalysis): Promise<{ id: string }> {
     return this.post(`/auth/analysis`, newAnalyis);
+  }
+
+  public async getAnalysis(customer_id?: string): Promise<AnalysisSchema[]> {
+    return this.get(`/auth/analysis`, customer_id && { customer_id } || undefined);
   }
 
   public getAnalyisisFileUploadUrl(analysisId: string): string {
     return `${this.baseURL}/auth/analysis/${analysisId}/file`;
+  }
+
+  public async updateAnalysisState(analysisId: string, analysisState: UpdateAnalysisState): Promise<void> {
+    await this.post(`/auth/analysis/${analysisId}/state`, analysisState);
   }
 }
 

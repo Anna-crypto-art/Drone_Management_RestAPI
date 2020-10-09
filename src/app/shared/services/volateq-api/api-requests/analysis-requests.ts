@@ -6,3 +6,7 @@ export interface NewAnalysis {
   plant_medatata_file_id?: string;
 }
 
+export interface UpdateAnalysisState {
+  analysis_id: string;
+  message?: string;
+}

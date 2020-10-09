@@ -16,14 +16,15 @@
         </b-row>
         <app-file-upload ref="appFileUpload" :title="$t('upload-your-files')"
           @fileAdded="checkFileCompleteness"
-          @fileRemoved="checkFileCompleteness">
+          @fileRemoved="checkFileCompleteness"
+          @completed="onCompleted">
           <app-checklist>
             <app-checklist-item :checked="checkListItems.videoFiles">{{ $t("video-files_descr") }}</app-checklist-item>
             <app-checklist-item :checked="checkListItems.droneMetaFile">{{ $t("drone-metadata-file_descr") }}</app-checklist-item>
             <app-checklist-item :checked="checkListItems.plantMetaFile">{{ $t("plant-metadata-file_descr") }}</app-checklist-item>
           </app-checklist>
         </app-file-upload>
-        <app-button type="submit" cls="pull-right">{{ $t("upload") }}</app-button>
+        <app-button ref="uploadButton" type="submit" cls="pull-right">{{ $t("upload") }}</app-button>
         <div class="clearfix"></div>
       </b-form>
     </div>
@@ -47,6 +48,7 @@ import AppChecklistItem from "@/app/shared/components/app-checklist/app-checklis
 import { CheckListItems } from "@/app/analysis/new-analysis/types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
+import { IAppButton } from "@/app/shared/components/app-button/types";
 
 @Component({
   name: "app-new-analysis",
@@ -60,6 +62,7 @@ import appButtonEventBus from "@/app/shared/components/app-button/app-button-eve
 })
 export default class AppNewAnalysis extends BaseAuthComponent {
   @Ref() appFileUpload!: IAppFileUpload;
+  @Ref() uploadButton!: IAppButton;
   
   customers: CustomerSchema[] | undefined;
   customerOptions: SelectOption[] = [];
@@ -109,16 +112,17 @@ export default class AppNewAnalysis extends BaseAuthComponent {
     let countMp4Files = 0;
     this.newAnalysis.files = [];
     for (const file of this.appFileUpload.files) {
-      this.newAnalysis.files.push(file.fileName)
-
       const ext = (file.fileName.split(".").pop() || "").toLowerCase();
 
       if (ext === "mp4") {
         this.checkListItems.videoFiles = true;
+        this.newAnalysis.files.push(file.fileName)
       } else if (ext === "srt") {
         this.checkListItems.droneMetaFile = true;
+        this.newAnalysis.files.push(file.fileName)
       } else if (ext === "xslx" || ext === "mdb") {
         this.checkListItems.plantMetaFile = true;
+        this.newAnalysis.plant_metadata_file = file.fileName;
       }
     }
   }
@@ -127,22 +131,26 @@ export default class AppNewAnalysis extends BaseAuthComponent {
     this.checkFileCompleteness();
     if (!this.checkListItems.droneMetaFile || !this.checkListItems.videoFiles) {
       appContentEventBus.showErrorAlert("MISSING_FILES");
-      appButtonEventBus.stopLoading();
+      this.uploadButton.stopLoading();
       return;
     }
 
     try {
-      appButtonEventBus.startLoading();
+      this.uploadButton.startLoading();
 
-      const analysis = await volateqApi.createAnalyisis(this.newAnalysis);
+      const analysis = await volateqApi.createAnalysis(this.newAnalysis);
 
-      // this.appFileUpload.upload('/api/auth/resumable')
       this.appFileUpload.upload(volateqApi.getAnalyisisFileUploadUrl(analysis.id));
     } catch (e) {
       appContentEventBus.showErrorAlert(this.$t(e.error).toString());
-      appButtonEventBus.stopLoading();
-    }
-    
+      this.uploadButton.stopLoading();
+      this.uploadButton.disable();
+    } 
+  }
+
+  onCompleted() {
+    appButtonEventBus.stopLoading();
+    appContentEventBus.showSuccessAlert(this.$t("upload-completed-successfully").toString());
   }
 }
 </script>

@@ -37,5 +37,6 @@
   "plant-metadata-file_descr": "(Optional) Metadata of the state of your plant (*.xslx, *.mdb)",
   "upload": "Upload",
   "retrying...": "Retrying...",
-  "ERROR": "ERROR"
+  "ERROR": "ERROR",
+  "upload-completed-successfully": "Upload completed successfully"
 }
