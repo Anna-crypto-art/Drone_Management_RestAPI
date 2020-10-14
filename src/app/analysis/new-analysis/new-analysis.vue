@@ -17,14 +17,15 @@
         <app-file-upload ref="appFileUpload" :title="$t('upload-your-files')"
           @fileAdded="checkFileCompleteness"
           @fileRemoved="checkFileCompleteness"
-          @completed="onCompleted">
+          @completed="onCompleted"
+          @failed="onFailed">
           <app-checklist>
             <app-checklist-item :checked="checkListItems.videoFiles">{{ $t("video-files_descr") }}</app-checklist-item>
             <app-checklist-item :checked="checkListItems.droneMetaFile">{{ $t("drone-metadata-file_descr") }}</app-checklist-item>
             <app-checklist-item :checked="checkListItems.plantMetaFile">{{ $t("plant-metadata-file_descr") }}</app-checklist-item>
           </app-checklist>
         </app-file-upload>
-        <app-button ref="uploadButton" type="submit" cls="pull-right">{{ $t("upload") }}</app-button>
+        <app-button ref="uploadButton" type="submit" cls="pull-right">{{ uploadButtonTxt }}</app-button>
         <div class="clearfix"></div>
       </b-form>
     </div>
@@ -49,6 +50,9 @@ import { CheckListItems } from "@/app/analysis/new-analysis/types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
 import { IAppButton } from "@/app/shared/components/app-button/types";
+import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
+import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
 
 @Component({
   name: "app-new-analysis",
@@ -63,6 +67,7 @@ import { IAppButton } from "@/app/shared/components/app-button/types";
 export default class AppNewAnalysis extends BaseAuthComponent {
   @Ref() appFileUpload!: IAppFileUpload;
   @Ref() uploadButton!: IAppButton;
+  uploadButtonTxt = "";
   
   customers: CustomerSchema[] | undefined;
   customerOptions: SelectOption[] = [];
@@ -70,23 +75,28 @@ export default class AppNewAnalysis extends BaseAuthComponent {
   routes: RouteSchema[] = [];
   routesOptions: SelectOption[] = [];
 
-  newAnalysis: NewAnalysis = { route_id: "", files: [], customer_id: "" };
+  newAnalysis: NewAnalysis = { route_id: "", files: [] };
   checkListItems: CheckListItems = {
     videoFiles: false,
     droneMetaFile: false,
     plantMetaFile: false
   }
 
+  analysis: { id: string } | undefined;
+
   async created() {
     try {
       if (this.isSuperAdmin) {
         this.customers = await volateqApi.getCustomers();
         this.customerOptions = this.customers.map(customer => ({ value: customer.id, text: customer.name }));
+        this.newAnalysis.customer_id = "";
       }
       this.routes = await volateqApi.getRoutes();
     } catch (e) {
       appContentEventBus.showErrorAlert(this.$t(e.error).toString());
     }
+
+    this.uploadButtonTxt = this.$t("upload").toString();
   }
 
   async onCustomerSelect() {
@@ -128,6 +138,12 @@ export default class AppNewAnalysis extends BaseAuthComponent {
   }
 
   async onSubmit() {
+    if (this.analysis) { // Upload failed before. Just trying to resume, now
+      this.uploadButton.startLoading();
+      this.appFileUpload.upload(volateqApi.getAnalyisisFileUploadUrl(this.analysis.id));
+      return;
+    }
+
     this.checkFileCompleteness();
     if (!this.checkListItems.droneMetaFile || !this.checkListItems.videoFiles) {
       appContentEventBus.showErrorAlert("MISSING_FILES");
@@ -138,19 +154,51 @@ export default class AppNewAnalysis extends BaseAuthComponent {
     try {
       this.uploadButton.startLoading();
 
-      const analysis = await volateqApi.createAnalysis(this.newAnalysis);
+      this.analysis = await volateqApi.createAnalysis(this.newAnalysis);
 
-      this.appFileUpload.upload(volateqApi.getAnalyisisFileUploadUrl(analysis.id));
+      this.appFileUpload.upload(volateqApi.getAnalyisisFileUploadUrl(this.analysis.id));
     } catch (e) {
       appContentEventBus.showErrorAlert(this.$t(e.error).toString());
       this.uploadButton.stopLoading();
-      this.uploadButton.disable();
     } 
   }
 
-  onCompleted() {
-    appButtonEventBus.stopLoading();
-    appContentEventBus.showSuccessAlert(this.$t("upload-completed-successfully").toString());
+  async onCompleted() {
+    if (!this.analysis) {
+      appContentEventBus.showErrorAlert(this.$t(ApiErrors.SOMETHING_WENT_WRONG).toString());
+      console.error('Missing analysis.id object!')
+      return;
+    }
+
+    this.uploadButton.stopLoading();
+    this.uploadButton.disable();
+
+    try {
+      await volateqApi.updateAnalysisState(this.analysis.id, { state: ApiStates.PICK_ME_UP })
+
+      appContentEventBus.showSuccessAlert(this.$t("upload-completed-successfully").toString());
+    } catch (e) {
+      appContentEventBus.showErrorAlert(this.$t(e.error).toString());
+    }
+  }
+
+  async onFailed(message: string) {
+    if (!this.analysis) {
+      appContentEventBus.showErrorAlert(this.$t(ApiErrors.SOMETHING_WENT_WRONG).toString());
+      console.error('Missing analysis.id object!')
+      return;
+    }
+
+    appContentEventBus.showErrorAlert(message);
+    this.uploadButton.stopLoading();
+    this.uploadButtonTxt = this.$t('resume-upload').toString();
+
+    try {
+      await volateqApi.updateAnalysisState(this.analysis.id, { state: ApiStates.UPLOAD_FAILED, message: message })
+    } catch (e) {
+      // Well, that is not a surprise...
+      console.error(e);
+    }
   }
 }
 </script>

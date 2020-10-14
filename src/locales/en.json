@@ -38,5 +38,7 @@
   "upload": "Upload",
   "retrying...": "Retrying...",
   "ERROR": "ERROR",
-  "upload-completed-successfully": "Upload completed successfully"
+  "upload-completed-successfully": "Upload completed successfully",
+  "resume-upload": "Resume upload",
+  "date": "Date"
 }

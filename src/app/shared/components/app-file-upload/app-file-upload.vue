@@ -8,7 +8,9 @@
       @fileProgress="onFileProgress"
       @fileRetry="onFileRetry"
       @fileError="onFileError"
-      @complete="onCompleted">
+      @complete="onCompleted"
+      @error="onError"
+      @progress="onProgress">
     </resumable>
     <div id="file-upload-dropzone-id" class="app-file-upload-dropzone">
       <div class="app-file-upload-dropzone-content">
@@ -52,6 +54,8 @@ export default class AppFileUpload extends Vue implements IAppFileUpload {
   keyResumFiles = 0; // changing the value forces vue to rerender the element with :key="keyResumFiles"
   uploading = false;
 
+  failedTimeout: any | undefined;
+
   mounted() {
     this.resumable.setBearerToken(store.state.auth.token);
   }
@@ -80,7 +84,25 @@ export default class AppFileUpload extends Vue implements IAppFileUpload {
   }
 
   onCompleted() {
-    this.$emit("completed");
+    const errorFile = this.files.map(file => this.getFileUploadFile(file)).find(appFile => !appFile.success);
+    if (errorFile) {
+      this.$emit("failed", errorFile.error);
+    } else {
+      this.$emit("completed");
+    }
+  }
+
+  onError(message: string, file: IResumableFile) {
+    this.failedTimeout = setTimeout(() => {
+      this.$emit("failed", message);
+    }, 10000) // wait 10 secs of progress event before fire
+  }
+
+  onProgress() {
+    if (this.failedTimeout) {
+      clearTimeout(this.failedTimeout);
+      this.failedTimeout = undefined;
+    }
   }
 
   onFileAdded(file: IResumableFile) {

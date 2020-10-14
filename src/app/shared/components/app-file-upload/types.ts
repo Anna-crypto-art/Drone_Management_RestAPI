@@ -26,6 +26,8 @@ export interface IAppFileUpload {
 export interface IAppFileUploadFile {
   uniqueIdentifier: string;
 
+  success: boolean;
+  error: string;
   emitError(msg: string): void;
   emitProgress(): void;
   emitSuccess(): void;

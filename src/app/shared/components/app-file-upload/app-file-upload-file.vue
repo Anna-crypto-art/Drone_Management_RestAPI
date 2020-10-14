@@ -25,6 +25,7 @@
 import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
 import { IAppFileUploadFile, IResumable, IResumableFile } from "@/app/shared/components/app-file-upload/types";
+import { ApiErrors } from "../../services/volateq-api/api-errors";
 
 @Component({
   name: "app-file-upload-file",
@@ -62,7 +63,15 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
   }
 
   emitError(msg: string) {
-    this.error = this.$t("ERROR") + ": " + msg;
+    try {
+      const erroMsg = JSON.parse(msg);
+      if (erroMsg.error) {
+        this.error = erroMsg.error;
+      }
+    } catch {
+      console.error(msg);
+      this.error = ApiErrors.SOMETHING_WENT_WRONG;
+    }
     this.retry = false;
 
     ++this.rerender;

@@ -1,3 +1,5 @@
+import { ApiStates } from "../api-states";
+
 export interface NewAnalysis {
   customer_id?: string;
   route_id: string;
@@ -7,6 +9,6 @@ export interface NewAnalysis {
 }
 
 export interface UpdateAnalysisState {
-  analysis_id: string;
+  state: ApiStates;
   message?: string;
 }
