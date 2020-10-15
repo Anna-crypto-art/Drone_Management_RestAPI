@@ -40,5 +40,6 @@
   "ERROR": "ERROR",
   "upload-completed-successfully": "Upload completed successfully",
   "resume-upload": "Resume upload",
-  "date": "Date"
+  "date": "Date",
+  "need-files-to-upload_descr": "The upload has been interrupted. To resume the upload please select the following files: "
 }

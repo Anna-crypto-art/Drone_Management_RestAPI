@@ -3,4 +3,5 @@ export interface IAppButton {
   startLoading(): void;
   
   disable(): void;
+  enable(): void;
 }

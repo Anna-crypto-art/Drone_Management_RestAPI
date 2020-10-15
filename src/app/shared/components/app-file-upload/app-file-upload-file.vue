@@ -24,7 +24,7 @@
 <script lang="ts">
 import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
-import { IAppFileUploadFile, IResumable, IResumableFile } from "@/app/shared/components/app-file-upload/types";
+import { IAppFileUploadFile, IResumableFile } from "@/app/shared/components/app-file-upload/types";
 import { ApiErrors } from "../../services/volateq-api/api-errors";
 
 @Component({
@@ -56,13 +56,13 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
     return `${Math.round(size)} ${sizes[i]}`;
   }
 
-  onFileRemove(e: Event) {
+  onFileRemove(): void {
     this.file.cancel();
 
     this.$emit('fileRemoved', this.file);
   }
 
-  emitError(msg: string) {
+  emitError(msg: string): void {
     try {
       const erroMsg = JSON.parse(msg);
       if (erroMsg.error) {
@@ -77,13 +77,13 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
     ++this.rerender;
   }
 
-  emitRetry() {
+  emitRetry(): void {
     this.retry = true;
 
     ++this.rerender;
   }
 
-  emitProgress() {
+  emitProgress(): void {
     this.progress = Math.round(this.file.progress(false) * 100);
     this.error = "";
     this.retry = false;
@@ -91,7 +91,7 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
     ++this.rerender;
   }
 
-  emitSuccess() {
+  emitSuccess(): void {
     this.error = "";
     this.retry = false;
     this.progress = 0;

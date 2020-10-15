@@ -42,6 +42,9 @@ export default class AppButton extends Vue implements IAppButton {
   disable() {
     this.disabled = true;
   }
+  enable() {
+    this.disabled = false;
+  }
 
   onClick(e: Event) {    
     this.$emit("click", e);

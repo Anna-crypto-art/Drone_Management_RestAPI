@@ -8,9 +8,7 @@
       @fileProgress="onFileProgress"
       @fileRetry="onFileRetry"
       @fileError="onFileError"
-      @complete="onCompleted"
-      @error="onError"
-      @progress="onProgress">
+      @complete="onCompleted">
     </resumable>
     <div id="file-upload-dropzone-id" class="app-file-upload-dropzone">
       <div class="app-file-upload-dropzone-content">
@@ -56,7 +54,7 @@ export default class AppFileUpload extends Vue implements IAppFileUpload {
 
   failedTimeout: any | undefined;
 
-  mounted() {
+  mounted(): void {
     this.resumable.setBearerToken(store.state.auth.token);
   }
 
@@ -64,7 +62,7 @@ export default class AppFileUpload extends Vue implements IAppFileUpload {
     return this.resumable.progress();
   }
 
-  upload(target: string) {
+  upload(target: string): void {
     this.uploading = true;
     this.keyResumFiles += 100;
 
@@ -75,7 +73,7 @@ export default class AppFileUpload extends Vue implements IAppFileUpload {
     return this.resumable.files;
   }
 
-  cancel() {
+  cancel(): void {
     this.resumable.cancel();
   }
 
@@ -83,50 +81,47 @@ export default class AppFileUpload extends Vue implements IAppFileUpload {
     return this.uploadFiles.find(uploadFile => uploadFile.uniqueIdentifier === file.uniqueIdentifier)!;
   }
 
-  onCompleted() {
+  onCompleted(): void {
     const errorFile = this.files.map(file => this.getFileUploadFile(file)).find(appFile => !appFile.success);
-    if (errorFile) {
-      this.$emit("failed", errorFile.error);
-    } else {
+    if (!errorFile) { // Resumable does fire "completed"-Event even if the upload failed
       this.$emit("completed");
     }
   }
 
-  onError(message: string, file: IResumableFile) {
-    this.failedTimeout = setTimeout(() => {
-      this.$emit("failed", message);
-    }, 10000) // wait 10 secs of progress event before fire
-  }
-
-  onProgress() {
-    if (this.failedTimeout) {
-      clearTimeout(this.failedTimeout);
-      this.failedTimeout = undefined;
-    }
-  }
-
-  onFileAdded(file: IResumableFile) {
+  onFileAdded(file: IResumableFile): void {
     this.keyResumFiles += 1;
 
     this.$emit("fileAdded", file);
   }
 
-  onFileRemoved(file: IResumableFile) {
+  onFileRemoved(file: IResumableFile): void {
     this.keyResumFiles -= 1;
 
     this.$emit("fileRemoved", file);
   }
 
-  onFileSuccess(file: IResumableFile) {
+  onFileSuccess(file: IResumableFile): void {
     this.getFileUploadFile(file).emitSuccess();
   }
-  onFileProgress(file: IResumableFile) {
+  onFileProgress(file: IResumableFile): void {
     this.getFileUploadFile(file).emitProgress();
   }
-  onFileError(file: IResumableFile, msg: string) {
+  onFileError(file: IResumableFile, msg: string): void {
+    // Resumable does not fire "error"-Event reliably
+    // So let's use "fileError"-Event instead 
+
+    this.failedTimeout = setTimeout(() => {
+      this.$emit("failed", msg);
+    }, 2000) // wait 2 secs for "fileRetry"-Event before fire
+
     this.getFileUploadFile(file).emitError(msg);
   }
-  onFileRetry(file: IResumableFile) {
+  onFileRetry(file: IResumableFile): void {
+    if (this.failedTimeout) {
+      clearTimeout(this.failedTimeout);
+      this.failedTimeout = undefined;
+    }
+
     this.getFileUploadFile(file).emitRetry();
   }
 

@@ -48,6 +48,9 @@ export default class AppContent extends Vue {
       this.alert = newAlert;
       this.showAlert = true
     });
+    appContentEventBus.onClearAlert(() => {
+      this.showAlert = false;
+    });
   }
 }
 </script>

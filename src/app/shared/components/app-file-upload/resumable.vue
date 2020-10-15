@@ -19,7 +19,8 @@ export default class Resumable extends Vue implements IResumable {
 
   created() {
     this.resumable = new ResumableJs({
-      chunkSize: 1*1024*1024*5 // 5MB
+      chunkSize: 1*1024*1024*5, // 5MB
+      chunkRetryInterval: 1000, // 1sec
     });
 
     this.resumable.on("fileSuccess", (file: any) => {
