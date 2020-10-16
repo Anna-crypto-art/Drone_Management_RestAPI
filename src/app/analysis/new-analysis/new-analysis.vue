@@ -47,7 +47,7 @@ import AppFileUpload from "@/app/shared/components/app-file-upload/app-file-uplo
 import { IAppFileUpload } from "@/app/shared/components/app-file-upload/types";
 import AppChecklist from "@/app/shared/components/app-checklist/app-checklist.vue"
 import AppChecklistItem from "@/app/shared/components/app-checklist/app-checklist-item.vue"
-import { CheckListItems, IAppNewAnalysisFetched } from "@/app/analysis/new-analysis/types";
+import { CheckListItems, IAnalysisId, IAppNewAnalysisFetched } from "@/app/analysis/new-analysis/types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { IAppButton } from "@/app/shared/components/app-button/types";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
@@ -55,7 +55,9 @@ import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
 import { FetchComponent } from "@/app/shared/components/fetch-component/fetch-component";
 import resumable from "@/app/shared/services/resumable/resumable";
-import { ResumableState } from "@/app/shared/services/resumable/types";
+import { ResumableEvent, ResumableState } from "@/app/shared/services/resumable/types";
+import { NEW_ANALYSIS_STORAGE_KEY } from "@/app/shared/components/fetch-component/storage-keys";
+import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
 
 @Component({
   name: "app-new-analysis",
@@ -89,7 +91,7 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
 
   analysis: { id: string } | undefined;
 
-  protected storageKey = "new-analysis-storage";
+  protected storageKey = NEW_ANALYSIS_STORAGE_KEY;
   protected waitForFiles: string[] | undefined;
 
   protected async onFetchData(data: IAppNewAnalysisFetched | undefined) {
@@ -137,6 +139,30 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
         this.uploadButton.startLoading();
       }
     }
+
+    // To continue and handle the upload, while the user is not on the upload page anymore,
+    // it must be distinguished between the compontent-"completed"-event and the service-"completed"-event.
+    resumable.on(ResumableEvent.COMPLETED, async () => {
+      try {
+        await volateqApi.updateAnalysisState(resumable.getMetadata<IAnalysisId>().id, { state: ApiStates.PICK_ME_UP })
+        appLocalStorage.removeItem(NEW_ANALYSIS_STORAGE_KEY);
+
+        appContentEventBus.showSuccessAlert(this.$t("upload-completed-successfully").toString());
+      } catch (e) {
+        appContentEventBus.showErrorAlert(this.$t(e.error).toString());
+      }
+    });
+    resumable.on(ResumableEvent.FAILED, async (message: string) => {
+      appContentEventBus.showErrorAlert(this.$t(ApiErrors.SOMETHING_WENT_WRONG).toString());
+      console.error(message);
+
+      try {
+        await volateqApi.updateAnalysisState(resumable.getMetadata<IAnalysisId>().id, { state: ApiStates.UPLOAD_FAILED, message: message })
+      } catch (e) {
+        // Well, that is not a surprise...
+        console.error(e);
+      }
+    })
   }
 
   protected onStoreData(): IAppNewAnalysisFetched | undefined {
@@ -221,44 +247,29 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
             
       this.storeData();
 
-      this.appFileUpload.upload(volateqApi.getAnalyisisFileUploadUrl(this.analysis.id));
+      this.appFileUpload.upload<IAnalysisId>(volateqApi.getAnalyisisFileUploadUrl(this.analysis.id), { id: this.analysis.id });
     } catch (e) {
       appContentEventBus.showErrorAlert(this.$t(e.error).toString());
       this.uploadButton.stopLoading();
     } 
   }
 
+  // Watch out: see resumable.on(COMPLETED, ...) in mounted() { ... } for the "this"-independent part of the function
   async onCompleted() {
     this.clearStorageData();
 
     this.uploadButton.stopLoading();
     this.uploadButton.disable();
 
-    try {
-      await volateqApi.updateAnalysisState(this.analysis!.id, { state: ApiStates.PICK_ME_UP })
-      this.analysis = undefined;
-
-      appContentEventBus.showSuccessAlert(this.$t("upload-completed-successfully").toString());
-    } catch (e) {
-      appContentEventBus.showErrorAlert(this.$t(e.error).toString());
-    }
+    this.analysis = undefined;
   }
 
+  // Watch out: see resumable.on(FAILED, ...) in mounted() { ... } for the "this"-independent part of the function
   async onFailed(message: string) {
-    appContentEventBus.showErrorAlert(this.$t(ApiErrors.SOMETHING_WENT_WRONG).toString());
-    console.error(message);
-
     this.uploadButton.stopLoading();
     this.uploadButtonTxt = this.$t("resume-upload").toString();
   
     this.showCancelButton = true;
-
-    try {
-      await volateqApi.updateAnalysisState(this.analysis!.id, { state: ApiStates.UPLOAD_FAILED, message: message })
-    } catch (e) {
-      // Well, that is not a surprise...
-      console.error(e);
-    }
   }
 
   async onCancelUpload() {

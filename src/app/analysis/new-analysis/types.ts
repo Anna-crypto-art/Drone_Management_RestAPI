@@ -18,3 +18,7 @@ export interface IAppNewAnalysisFetched {
   analysis: { id: string } | undefined;
   fileNames: string[];
 }
+
+export interface IAnalysisId {
+  id: string;
+}

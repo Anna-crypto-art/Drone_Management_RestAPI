@@ -4,7 +4,7 @@ export interface IAppFileUpload {
   files: IResumableFile[];
   
   cancel(): void;
-  upload(target: string): void;
+  upload<T>(target: string, metadata?: T): void;
 }
 
 export interface IAppFileUploadFile {

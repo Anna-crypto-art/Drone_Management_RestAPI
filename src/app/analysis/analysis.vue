@@ -15,10 +15,13 @@ import { Component } from "vue-property-decorator";
 
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import AppTable from "@/app/shared/components/app-table/app-table.vue";
-import { AppTableColumns, AppTableRows } from "../shared/components/app-table/types";
+import { AppTableColumns, AppTableRow, AppTableRows } from "../shared/components/app-table/types";
 import volateqApi from "../shared/services/volateq-api/volateq-api";
 import { AnalysisSchema } from "../shared/services/volateq-api/api-schemas/analysis-schema";
 import appContentEventBus from "../shared/components/app-content/app-content-event-bus";
+import resumable from "../shared/services/resumable/resumable";
+import { ResumableEvent } from "../shared/services/resumable/types";
+import { IAnalysisId } from "./new-analysis/types";
 
 @Component({
   name: "app-analysis",
@@ -29,7 +32,7 @@ import appContentEventBus from "../shared/components/app-content/app-content-eve
 })
 export default class AppAnalysis extends Vue {
   columns: AppTableColumns = [];
-  analysisRows: AppTableRows = [];
+  analysisRows: AppTableRow[] = [];
 
   async created() {
     this.columns = [
@@ -41,6 +44,18 @@ export default class AppAnalysis extends Vue {
     await this.updateAnalysisRows();
   }
 
+  mounted() {
+    resumable.on(ResumableEvent.PROGRESS, () => {
+      const analysisId = resumable.getMetadata<IAnalysisId>();
+      if (this.analysisRows && analysisId) {
+        const row = this.analysisRows.find(row => row.id === analysisId.id);
+        if (row && row.cells.length > 0) {
+          row.cells[row.cells.length - 1].value = this.$t("UPLOADING") + " " + Math.round(resumable.progress() * 100) + "%";
+        }
+      }
+    });
+  }
+
   private async updateAnalysisRows() {
     try {
       this.analysisRows = (await volateqApi.getAnalysis()).map((a: AnalysisSchema) => ({
@@ -48,7 +63,7 @@ export default class AppAnalysis extends Vue {
         cells: [
           { value: new Date(Date.parse(a.created_at)).toLocaleString() },
           { value: a.plant_route.route.abbrev },
-          { value: a.current_state.state.name }
+          { value: this.$t(a.current_state.state.name).toString() }
         ]
       }));
     } catch (e) {

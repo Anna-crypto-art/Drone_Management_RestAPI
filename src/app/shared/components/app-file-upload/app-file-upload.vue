@@ -84,11 +84,11 @@ export default class AppFileUpload extends Vue implements IAppFileUpload {
     });
   }
 
-  upload(target: string): void {
+  upload<T>(target: string, metadata?: T): void {
     this.uploading = true;
     this.keyResumFiles += 100;
     
-    resumable.upload(target);
+    resumable.upload<T>(target, metadata);
   }
   
   get files(): IResumableFile[] {

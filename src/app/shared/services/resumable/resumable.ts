@@ -9,6 +9,9 @@ export class Resumable extends Vue {
   private state = ResumableState.UNPREPARED;
   private failedTimeout: any | undefined;
 
+  private metadata: any | undefined;
+  private eventsRegistered = false;
+
   constructor() {
     super();
 
@@ -21,6 +24,8 @@ export class Resumable extends Vue {
 
   public init(dropzoneId: string, browseButtonId?: string) {
     this.checkState([ResumableState.UNPREPARED, ResumableState.INITIALIZED, ResumableState.FINISHED]);    
+
+    this.metadata = undefined;
 
     this.registerEvents();
 
@@ -61,12 +66,18 @@ export class Resumable extends Vue {
     return this.resumable.progress();
   }
 
-  public upload(target: string) {
+  public upload<T>(target: string, metadata?: T) {
     this.checkState([ResumableState.INITIALIZED, ResumableState.FAILED]);
     this.state = ResumableState.UPLOADING;
 
+    this.metadata = metadata;
+
     this.resumable.opts.target = target;
     this.resumable.upload();
+  }
+
+  public getMetadata<T>(): T {
+    return this.metadata;
   }
 
   public on(event: ResumableEvent, callbackFn: any) {
@@ -84,6 +95,10 @@ export class Resumable extends Vue {
   }
 
   private registerEvents() {
+    if (this.eventsRegistered) {
+      return;
+    }
+
     this.resumable.on("fileSuccess", (file: any) => {
       this.$emit(ResumableEvent.FILE_SUCCESS, file);
     });
@@ -120,11 +135,13 @@ export class Resumable extends Vue {
       // Resumable does fire "completed"-Event even if the upload has failed
       if (!this.failedTimeout && this.state !== ResumableState.FAILED) {
         this.state = ResumableState.FINISHED;
-
+        
         this.resumable.cancel();
         this.$emit(ResumableEvent.COMPLETED);
       }
     });
+
+    this.eventsRegistered = true;
   }
 }
 
