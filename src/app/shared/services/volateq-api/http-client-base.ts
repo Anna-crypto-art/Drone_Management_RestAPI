@@ -50,6 +50,10 @@ export class HttpClientBase {
     return this.httpClient.get(url + (params && this.getQueryParams(params) || ""), config);
   }
 
+  protected async delete(url: string, config?: AxiosRequestConfig | undefined): Promise<any> {
+    return this.httpClient.delete(url, config);
+  }
+
   private getQueryParams(params: any): string {
     return "?" + Object.keys(params).map(key => key + "=" + encodeURIComponent(params[key])).join("&");
   }

@@ -24,8 +24,9 @@
 <script lang="ts">
 import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
-import { IAppFileUploadFile, IResumableFile } from "@/app/shared/components/app-file-upload/types";
-import { ApiErrors } from "../../services/volateq-api/api-errors";
+import { IAppFileUploadFile } from "@/app/shared/components/app-file-upload/types";
+import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
+import { IResumableFile } from "@/app/shared/services/resumable/types";
 
 @Component({
   name: "app-file-upload-file",
@@ -40,6 +41,16 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
   error = "";
   retry = false;
   success = false;
+
+  created() {
+    if (this.uploading) {
+      this.emitProgress();
+
+      if (this.progress === 100) {
+        this.emitSuccess();
+      }
+    }
+  }
 
   get uniqueIdentifier(): string {
     return this.file.uniqueIdentifier;

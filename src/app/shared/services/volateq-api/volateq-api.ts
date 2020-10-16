@@ -69,6 +69,10 @@ export class VolateqAPI extends HttpClientBase {
   public async updateAnalysisState(analysisId: string, analysisState: UpdateAnalysisState): Promise<void> {
     await this.post(`/auth/analysis/${analysisId}/state`, analysisState);
   }
+
+  public async cancelAnalysisUpload(analysisId: string): Promise<void> {
+    await this.delete(`/auth/analysis/${analysisId}`);
+  }
 }
 
 const volateqApi = new VolateqAPI();

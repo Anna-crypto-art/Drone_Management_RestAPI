@@ -1,24 +1,8 @@
-export interface IResumable {
-  files: IResumableFile[];
-  
-  cancel(): void;
-  setBearerToken(token: string): void;
-  upload(target: string): void;
-  progress(): number;
-}
-
-export interface IResumableFile {
-  fileName: string;
-  uniqueIdentifier: string;
-
-  cancel(): void;
-  progress(relative: boolean): number;
-}
+import { IResumableFile } from "@/app/shared/services/resumable/types";
 
 export interface IAppFileUpload {
   files: IResumableFile[];
   
-  progress(): number;
   cancel(): void;
   upload(target: string): void;
 }

@@ -1,5 +1,5 @@
 <template>
-  <b-button variant="primary" :type="type" :class="cls" :disabled="isDisabled" @click="onClick">
+  <b-button :variant="variant" :type="type" :class="cls" :disabled="isDisabled" @click="onClick">
     <span class="app-button-loading" v-show="loading"><b-spinner small></b-spinner></span><slot></slot>
   </b-button>
 </template>
@@ -16,6 +16,7 @@ import appButtonEventBus from "@/app/shared/components/app-button/app-button-eve
 export default class AppButton extends Vue implements IAppButton {
   @Prop({ default: "button" }) type!: string;
   @Prop({ default: "" }) cls!: string;
+  @Prop({ default: "primary" }) variant!: string;
 
   loading = false;
   disabled = false;

@@ -26,6 +26,7 @@
           </app-checklist>
         </app-file-upload>
         <app-button ref="uploadButton" type="submit" cls="pull-right">{{ uploadButtonTxt }}</app-button>
+        <app-button ref="cancelUploadButton" v-show="showCancelButton" variant="secondary" type="button" @click="onCancelUpload">{{ $t("cancel") }}</app-button>
         <div class="clearfix"></div>
       </b-form>
     </div>
@@ -43,17 +44,18 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { NewAnalysis } from "@/app/shared/services/volateq-api/api-requests/analysis-requests";
 import { SelectOption } from "@/app/shared/types/select-option";
 import AppFileUpload from "@/app/shared/components/app-file-upload/app-file-upload.vue";
-import { IAppFileUpload, IResumableFile } from "@/app/shared/components/app-file-upload/types";
+import { IAppFileUpload } from "@/app/shared/components/app-file-upload/types";
 import AppChecklist from "@/app/shared/components/app-checklist/app-checklist.vue"
 import AppChecklistItem from "@/app/shared/components/app-checklist/app-checklist-item.vue"
 import { CheckListItems, IAppNewAnalysisFetched } from "@/app/analysis/new-analysis/types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
-import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
 import { IAppButton } from "@/app/shared/components/app-button/types";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
 import { FetchComponent } from "@/app/shared/components/fetch-component/fetch-component";
+import resumable from "@/app/shared/services/resumable/resumable";
+import { ResumableState } from "@/app/shared/services/resumable/types";
 
 @Component({
   name: "app-new-analysis",
@@ -68,7 +70,9 @@ import { FetchComponent } from "@/app/shared/components/fetch-component/fetch-co
 export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetched> {
   @Ref() appFileUpload!: IAppFileUpload;
   @Ref() uploadButton!: IAppButton;
+  @Ref() cancelUploadButton!: IAppButton;
   uploadButtonTxt = "";
+  showCancelButton = false;
   
   customers: CustomerSchema[] | undefined;
   customerOptions: SelectOption[] = [];
@@ -87,7 +91,7 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
 
   protected storageKey = "new-analysis-storage";
   protected waitForFiles: string[] | undefined;
-  
+
   protected async onFetchData(data: IAppNewAnalysisFetched | undefined) {
     if (data) {
       this.analysis = data.analysis;
@@ -98,7 +102,11 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
       this.newAnalysis = data.newAnalysis;
       this.waitForFiles = data.fileNames;
 
-      this.uploadButtonTxt = this.$t("resume-upload").toString();
+      if (resumable.hasState(ResumableState.UPLOADING)) {
+        // Mounted does not get called if compontent already has been loaded..
+        // So let's wait for a sec until uploadButton is available.
+        setTimeout(() => { this.uploadButton.startLoading(); }, 1000);
+      }
     } else {
       try {
         if (this.isSuperAdmin) {
@@ -110,15 +118,24 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
       } catch (e) {
         appContentEventBus.showErrorAlert(this.$t(e.error).toString());
       }
-
-      this.uploadButtonTxt = this.$t("upload").toString();
     }
+
+    this.uploadButtonTxt = this.$t("upload").toString();
   }
 
   mounted() {
-    if (this.analysis && this.waitForFiles && this.waitForFiles.length > 0) {
-      appContentEventBus.showInfoAlert(this.$t("need-files-to-upload_descr").toString() + this.waitForFiles.join(", "));
-      this.uploadButton.disable();
+    // an open analysis means resumable is still uploading or has been interrupted while uploading
+    if (this.analysis && this.waitForFiles) {
+      this.checkFileCompleteness();
+      if (this.waitForFiles.length > 0) { // resumable upload has been interrupted
+        appContentEventBus.showInfoAlert(this.$t("need-files-to-upload_descr").toString() + this.waitForFiles.join(", "));
+        this.uploadButtonTxt = this.$t("resume-upload").toString();
+        this.uploadButton.disable();
+
+        this.showCancelButton = true;
+      } else { // resumable upload is still running
+        this.uploadButton.startLoading();
+      }
     }
   }
 
@@ -188,12 +205,6 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
   }
 
   async onSubmit() {
-    if (this.analysis) { // Upload failed before. Just trying to resume, now
-      this.uploadButton.startLoading();
-      this.appFileUpload.upload(volateqApi.getAnalyisisFileUploadUrl(this.analysis.id));
-      return;
-    }
-
     this.checkFileCompleteness();
     if (!this.checkListItems.droneMetaFile || !this.checkListItems.videoFiles) {
       appContentEventBus.showErrorAlert("MISSING_FILES");
@@ -204,8 +215,10 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
     try {
       this.uploadButton.startLoading();
 
-      this.analysis = await volateqApi.createAnalysis(this.newAnalysis);
-      
+      if (!this.analysis) {
+        this.analysis = await volateqApi.createAnalysis(this.newAnalysis);
+      }
+            
       this.storeData();
 
       this.appFileUpload.upload(volateqApi.getAnalyisisFileUploadUrl(this.analysis.id));
@@ -218,17 +231,12 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
   async onCompleted() {
     this.clearStorageData();
 
-    if (!this.analysis) {
-      appContentEventBus.showErrorAlert(this.$t(ApiErrors.SOMETHING_WENT_WRONG).toString());
-      console.error("Missing analysis.id object!")
-      return;
-    }
-
     this.uploadButton.stopLoading();
     this.uploadButton.disable();
 
     try {
-      await volateqApi.updateAnalysisState(this.analysis.id, { state: ApiStates.PICK_ME_UP })
+      await volateqApi.updateAnalysisState(this.analysis!.id, { state: ApiStates.PICK_ME_UP })
+      this.analysis = undefined;
 
       appContentEventBus.showSuccessAlert(this.$t("upload-completed-successfully").toString());
     } catch (e) {
@@ -237,22 +245,50 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
   }
 
   async onFailed(message: string) {
-    if (!this.analysis) {
-      appContentEventBus.showErrorAlert(this.$t(ApiErrors.SOMETHING_WENT_WRONG).toString());
-      console.error("Missing analysis.id object!")
-      return;
-    }
+    appContentEventBus.showErrorAlert(this.$t(ApiErrors.SOMETHING_WENT_WRONG).toString());
+    console.error(message);
 
-    appContentEventBus.showErrorAlert(message);
     this.uploadButton.stopLoading();
     this.uploadButtonTxt = this.$t("resume-upload").toString();
+  
+    this.showCancelButton = true;
 
     try {
-      await volateqApi.updateAnalysisState(this.analysis.id, { state: ApiStates.UPLOAD_FAILED, message: message })
+      await volateqApi.updateAnalysisState(this.analysis!.id, { state: ApiStates.UPLOAD_FAILED, message: message })
     } catch (e) {
       // Well, that is not a surprise...
       console.error(e);
     }
+  }
+
+  async onCancelUpload() {
+    if (!this.analysis) {
+      return;
+    }
+
+    this.cancelUploadButton.startLoading();
+
+    this.appFileUpload.cancel();
+    this.clearStorageData();
+    this.uploadButton.stopLoading();
+    this.uploadButton.enable();
+    this.uploadButtonTxt = this.$t("upload").toString();
+    
+    appContentEventBus.clearAlert();
+
+    try {
+      await volateqApi.cancelAnalysisUpload(this.analysis.id)
+    } catch (e) {
+      // and that is neither a surprise...
+      console.error(e);
+    } finally {
+      this.analysis = undefined;
+      this.checkFileCompleteness();
+
+      this.cancelUploadButton.stopLoading();
+      this.showCancelButton = false;
+    }
+
   }
 }
 </script>
