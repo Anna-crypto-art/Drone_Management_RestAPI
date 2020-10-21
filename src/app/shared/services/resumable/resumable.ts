@@ -18,6 +18,7 @@ export class Resumable extends Vue {
     this.resumable = new ResumableJs({
       chunkSize: 1*1024*1024*5, // 5MB
       chunkRetryInterval: 1000, // 1sec
+      simultaneousUploads: 1,
       headers: { "Authorization": `Bearer ${store.state.auth.token}`}
     });
   }
