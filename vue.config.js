@@ -7,7 +7,7 @@ module.exports = {
         changeOrigin: true
       }
     },
-    headers: { "Access-Control-Allow-Origin": "*" }
+    // headers: { "Access-Control-Allow-Origin": "*" }
   },
   pluginOptions: {
     i18n: {

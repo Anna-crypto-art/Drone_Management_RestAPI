@@ -22,6 +22,7 @@ import appContentEventBus from "../shared/components/app-content/app-content-eve
 import resumable from "../shared/services/resumable/resumable";
 import { ResumableEvent } from "../shared/services/resumable/types";
 import { IAnalysisId } from "./new-analysis/types";
+import { ApiStates } from "../shared/services/volateq-api/api-states";
 
 @Component({
   name: "app-analysis",
@@ -63,10 +64,12 @@ export default class AppAnalysis extends Vue {
         cells: [
           { value: new Date(Date.parse(a.created_at)).toLocaleString() },
           { value: a.plant_route.route.abbrev },
-          { value: this.$t(a.current_state.state.name).toString() }
+          { value: this.$t(a.current_state && a.current_state.state.name || "UNKNOWN").toString() }
         ]
       }));
     } catch (e) {
+      console.error(e);
+
       appContentEventBus.showErrorAlert(this.$t(e.error).toString());
     }
   }
