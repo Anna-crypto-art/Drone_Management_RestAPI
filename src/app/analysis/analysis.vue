@@ -15,7 +15,7 @@ import { Component } from "vue-property-decorator";
 
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import AppTable from "@/app/shared/components/app-table/app-table.vue";
-import { AppTableColumns, AppTableRow, AppTableRows } from "../shared/components/app-table/types";
+import { AppTableColumn, AppTableColumns, AppTableRow, AppTableRows } from "../shared/components/app-table/types";
 import volateqApi from "../shared/services/volateq-api/volateq-api";
 import { AnalysisSchema } from "../shared/services/volateq-api/api-schemas/analysis-schema";
 import appContentEventBus from "../shared/components/app-content/app-content-event-bus";
@@ -23,6 +23,7 @@ import resumable from "../shared/services/resumable/resumable";
 import { ResumableEvent } from "../shared/services/resumable/types";
 import { IAnalysisId } from "./new-analysis/types";
 import { ApiStates } from "../shared/services/volateq-api/api-states";
+import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
 
 @Component({
   name: "app-analysis",
@@ -31,16 +32,21 @@ import { ApiStates } from "../shared/services/volateq-api/api-states";
     AppTable
   }
 })
-export default class AppAnalysis extends Vue {
-  columns: AppTableColumns = [];
+export default class AppAnalysis extends BaseAuthComponent {
+  columns: AppTableColumn[] = [];
   analysisRows: AppTableRow[] = [];
 
   async created() {
     this.columns = [
+      { name: '#' },
       { name: this.$t("date").toString() },
       { name: this.$t("route").toString() },
-      { name: this.$t("state").toString() }
+      { name: this.$t("state").toString() },
     ];
+
+    if (this.isSuperAdmin) {
+      this.columns.splice(0, 0, { name: this.$t("customer").toString() });
+    }
 
     await this.updateAnalysisRows();
   }
@@ -59,14 +65,23 @@ export default class AppAnalysis extends Vue {
 
   private async updateAnalysisRows() {
     try {
-      this.analysisRows = (await volateqApi.getAnalysis()).map((a: AnalysisSchema) => ({
-        id: a.id,
-        cells: [
-          { value: new Date(Date.parse(a.created_at)).toLocaleString() },
-          { value: a.plant_route.route.abbrev },
-          { value: this.$t(a.current_state && a.current_state.state.name || "UNKNOWN").toString() }
-        ]
-      }));
+      this.analysisRows = (await volateqApi.getAnalysis()).map((a: AnalysisSchema) => {
+        const row: AppTableRow = {
+          id: a.id,
+          cells: [
+            { value: a.id },
+            { value: new Date(Date.parse(a.created_at)).toLocaleString() },
+            { value: a.plant_route.route.abbrev },
+            { value: this.$t(a.current_state && a.current_state.state.name || "UNKNOWN").toString() }
+          ]
+        };
+
+        if (this.isSuperAdmin) {
+          row.cells.splice(0, 0, { value: a.plant_route.customer.name });
+        }
+
+        return row;
+      });
     } catch (e) {
       console.error(e);
 
