@@ -18,6 +18,10 @@ $theme-colors: (
 
   &-primary {
     background-color: $blue;
+
+    &:hover {
+      background-color: $hover-blue;
+    }
   }
 
   &.btn-secondary {

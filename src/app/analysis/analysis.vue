@@ -2,7 +2,7 @@
   <app-content :title="$t('overview')" :subtitle="$t('overview_descr')">
     <div class="app-analysis">
       <router-link :to="{ name: 'Analysis-New' }">
-        <b-button variant="primary">{{ $t("create-new-analysis") }}</b-button>
+        <b-button variant="primary">{{ createNewAnalysisBtnText }}</b-button>
       </router-link>
       <app-table :columns="columns" :rows="analysisRows"></app-table>
     </div>
@@ -36,7 +36,11 @@ export default class AppAnalysis extends BaseAuthComponent {
   columns: AppTableColumn[] = [];
   analysisRows: AppTableRow[] = [];
 
+  createNewAnalysisBtnText = "";
+
   async created() {
+    this.createNewAnalysisBtnText = this.$t("create-new-analysis").toString();
+
     this.columns = [
       { name: '#' },
       { name: this.$t("date").toString() },
@@ -53,14 +57,31 @@ export default class AppAnalysis extends BaseAuthComponent {
 
   mounted() {
     resumable.on(ResumableEvent.PROGRESS, () => {
-      const analysisId = resumable.getMetadata<IAnalysisId>();
-      if (this.analysisRows && analysisId) {
-        const row = this.analysisRows.find(row => row.id === analysisId.id);
-        if (row && row.cells.length > 0) {
-          row.cells[row.cells.length - 1].value = this.$t("UPLOADING") + " " + Math.round(resumable.progress() * 100) + "%";
-        }
+      if (this.updateTableRowState(this.$t("UPLOADING") + " " + Math.round(resumable.progress() * 100) + "%")) {
+        this.createNewAnalysisBtnText = this.$t("return-to-upload").toString();
       }
     });
+    resumable.on(ResumableEvent.COMPLETED, () => {
+      this.createNewAnalysisBtnText = this.$t("create-new-analysis").toString();
+      this.updateTableRowState(this.$t("PICK_ME_UP").toString());
+    });
+    resumable.on(ResumableEvent.FAILED, () => {
+      this.updateTableRowState(this.$t("UPLOAD_FAILED").toString());
+    });
+  }
+
+  private updateTableRowState(value: string): boolean {
+    const analysisId = resumable.getMetadata<IAnalysisId>();
+    if (this.analysisRows && analysisId) {
+      const row = this.analysisRows.find(row => row.id === analysisId.id);
+      if (row && row.cells.length > 0) {
+        row.cells[row.cells.length - 1].value = value;
+
+        return true;
+      }
+    }
+
+    return false;
   }
 
   private async updateAnalysisRows() {

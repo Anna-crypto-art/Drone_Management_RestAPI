@@ -2,12 +2,13 @@
   <div class="app-file-upload-file" :key="rerender">
     <div class="app-file-upload-file-infos">
       <div class="app-file-upload-file-name">
+        <small class="app-file-upload-file-name-size grayed">{{ getFileSize(file.size) }}</small>
         {{ file.fileName }}
         <span v-show="error" class="app-file-upload-file-name-error" v-bind:class="{ 'text-danger': !retry }">
           {{ retry && $t("retrying...") || error }}
         </span>
       </div>
-      <div class="app-file-upload-file-size"><small class="grayed">{{ getFileSize(file.size) }}</small></div>
+      <!-- <div class="app-file-upload-file-size"><small class="grayed">{{ getFileSize(file.size) }}</small></div> -->
       <div v-show="!uploading" class="app-file-upload-file-remove" @click="onFileRemove">
         <b-icon icon="x"></b-icon>
       </div>
@@ -122,14 +123,13 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
   background-color: $white;
   border: 1px solid $dark-20pc;
   position: relative;
-  height: 60px;
+  height: 38px;
 
   &-infos {
     position: absolute;
     z-index: 1;
     width: 100%;
-    padding: 10px 20px;
-    height: 40px;
+    padding: 0.45rem 1.2rem;
     line-height: 20px;
   }
 
@@ -139,6 +139,10 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
     white-space: nowrap;
     overflow: hidden;
 
+    &-size {
+      margin-right: 20px;
+    }
+
     &-error {
       margin-left: 20px;
     }
@@ -146,8 +150,8 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
 
   &-remove {
     position: absolute;
-    right: 20px;
-    top: 20px;
+    right: 15px;
+    top: 8px;
     font-size: 1.25em;
     cursor: pointer;
 
@@ -158,8 +162,8 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
 
   &-progress {
     position: absolute;
-    right: 20px;
-    top: 20px;
+    right: 15px;
+    top: 8px;
   }
 
   &-progressbar {

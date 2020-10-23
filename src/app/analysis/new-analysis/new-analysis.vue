@@ -2,7 +2,7 @@
   <app-content :title="$t('create-new-analysis')" :navback="true" :subtitle="$t('create-new-analysis_descr')">
     <div class="app-new-analysis">
       <b-form @submit.prevent="onSubmit" style="margin-bottom: 50px;">
-        <b-row>
+        <b-row style="margin-bottom: 25px;">
           <b-col sm="4" v-if="isSuperAdmin">
             <b-form-group label-cols="auto" :label="$t('customer')">
               <b-form-select required v-model="newAnalysis.customer_id" :options="customerOptions" @change="onCustomerSelect"></b-form-select>
