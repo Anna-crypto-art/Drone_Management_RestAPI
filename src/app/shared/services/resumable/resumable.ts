@@ -108,7 +108,7 @@ export class Resumable extends Vue {
     });
     this.resumable.on("fileError", (file: any, msg: string) => {
       // Resumable does not fire "error"-Event reliably
-      // So let's use "fileError"-Event instead 
+      // So let's use "fileError"-Event additionaly
 
       this.failedTimeout = setTimeout(() => {
         this.state = ResumableState.FAILED;
@@ -140,6 +140,9 @@ export class Resumable extends Vue {
         this.resumable.cancel();
         this.$emit(ResumableEvent.COMPLETED);
       }
+    });
+    this.resumable.on("error", (msg: string) => {
+      this.$emit(ResumableEvent.FAILED, msg);
     });
 
     this.eventsRegistered = true;

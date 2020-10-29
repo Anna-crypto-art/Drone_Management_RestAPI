@@ -1,5 +1,5 @@
 <template>
-  <div class="app-file-upload-file" :key="rerender">
+  <div class="app-file-upload-file">
     <div class="app-file-upload-file-infos">
       <div class="app-file-upload-file-name">
         <small class="app-file-upload-file-name-size grayed">{{ getFileSize(file.size) }}</small>
@@ -8,7 +8,6 @@
           {{ retry && $t("retrying...") || error }}
         </span>
       </div>
-      <!-- <div class="app-file-upload-file-size"><small class="grayed">{{ getFileSize(file.size) }}</small></div> -->
       <div v-show="!uploading" class="app-file-upload-file-remove" @click="onFileRemove">
         <b-icon icon="x"></b-icon>
       </div>
@@ -18,13 +17,13 @@
       </div>
       
     </div>
-    <div v-show="uploading" class="app-file-upload-file-progressbar" :style="`width: ${progress}%`"></div>
+    <div ref="uploadProgressBar" v-show="uploading" class="app-file-upload-file-progressbar"></div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Ref } from "vue-property-decorator";
 import { IAppFileUploadFile } from "@/app/shared/components/app-file-upload/types";
 import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
 import { IResumableFile } from "@/app/shared/services/resumable/types";
@@ -35,8 +34,7 @@ import { IResumableFile } from "@/app/shared/services/resumable/types";
 export default class AppFileUploadFile extends Vue implements IAppFileUploadFile {
   @Prop({ required: true }) file!: IResumableFile;
   @Prop({ required: true }) uploading!: boolean;
-
-  rerender = 0;
+  @Ref() uploadProgressBar: HTMLElement | undefined;
 
   progress = 0;
   error = "";
@@ -84,15 +82,14 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
       console.error(msg);
       this.error = ApiErrors.SOMETHING_WENT_WRONG;
     }
-    this.retry = false;
 
-    ++this.rerender;
+    this.success = false;
+    this.retry = false;
   }
 
   emitRetry(): void {
+    this.success = false;
     this.retry = true;
-
-    ++this.rerender;
   }
 
   emitProgress(): void {
@@ -100,7 +97,9 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
     this.error = "";
     this.retry = false;
 
-    ++this.rerender;
+    if (this.uploadProgressBar) {
+      this.uploadProgressBar.style.width = this.progress + "%";
+    }
   }
 
   emitSuccess(): void {
@@ -109,7 +108,9 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
     this.progress = 0;
     this.success = true;
 
-    ++this.rerender;
+    if (this.uploadProgressBar) {
+      this.uploadProgressBar.style.display = "none";
+    }
   }
 }
 </script>
@@ -173,6 +174,8 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
     left: 0;
     height: 100%;
     background-color: $progressbar;
+    width: 0;
+    transition: ease 300ms width;
   }
   &:last-child {
     margin-bottom: 0;
