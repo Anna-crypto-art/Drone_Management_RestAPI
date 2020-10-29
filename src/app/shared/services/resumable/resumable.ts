@@ -19,11 +19,12 @@ export class Resumable extends Vue {
       chunkSize: 1*1024*1024*10, // 10MB
       chunkRetryInterval: 1000, // 1sec
       simultaneousUploads: 1,
-      headers: { "Authorization": `Bearer ${store.state.auth.token}`}
     });
   }
 
   public init(dropzoneId: string, browseButtonId?: string) {
+    this.resumable.opts.headers = { "Authorization": `Bearer ${store.state.auth.token}`};
+
     this.checkState([ResumableState.UNPREPARED, ResumableState.INITIALIZED, ResumableState.FINISHED]);    
 
     this.metadata = undefined;
