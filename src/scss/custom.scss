@@ -34,6 +34,15 @@ $theme-colors: (
       border-color: $blue;
     }
   }
+
+  &.btn-sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+  &.icon-btn .b-icon {
+    margin-right: 5px;
+  }
 }
 
 .form-control {
@@ -90,4 +99,36 @@ $theme-colors: (
     padding: 1.5rem;
     border: none;
   }
+}
+
+.table {
+  color: $dark;
+}
+
+.table.b-table > thead > tr > [aria-sort="none"] {
+  background-size: 0 0;
+  
+  &:hover {
+    background-size: 0.65em 1em;
+  }
+}
+.table .thead-light th {
+  color: $dark;
+  background-color: $background-grey;
+  border-color: $border-color-grey;
+}
+.table-hover tbody tr:hover {
+  background-color: $background-grey-60pc;
+  td .hover-cell {    
+    opacity: 1;
+  }
+}
+.table-hover tbody tr > td .hover-cell {
+  opacity: 0;
+  transition: ease 100ms opacity;
+}
+
+.b-table-empty-row > td {
+  text-align: center;
+  padding: 2rem;
 }

@@ -122,7 +122,7 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
   margin-bottom: 10px;
   width: 100%;
   background-color: $white;
-  border: 1px solid $dark-20pc;
+  border: 1px solid $border-color-grey;
   position: relative;
   height: 38px;
 

@@ -4,7 +4,22 @@
       <router-link :to="{ name: 'Analysis-New' }">
         <b-button variant="primary">{{ createNewAnalysisBtnText }}</b-button>
       </router-link>
-      <app-table :columns="columns" :rows="analysisRows"></app-table>
+      <b-table hover :fields="columns" :items="analysisRows"
+        head-variant="light" style="margin-top: 30px;"
+        show-empty :emptyText="$t('no-data')">
+        <template #empty="scope">
+          <span class="grayed">{{ scope.emptyText }}</span>
+        </template>
+        <template #head(actions)>
+          <span class="hidden">{{ $t("actions") }}</span>
+        </template>
+        <template #cell(actions)>
+          <div class="hover-cell pull-right">
+            <b-button class="icon-btn" size="sm" variant="secondary"><b-icon icon="cloud-download"></b-icon> {{ $t("download...") }}</b-button>
+          </div>
+          <div class="clearfix"></div>
+        </template>
+      </b-table>
     </div>
   </app-content>
 </template>
@@ -24,6 +39,7 @@ import { ResumableEvent } from "../shared/services/resumable/types";
 import { IAnalysisId } from "./new-analysis/types";
 import { ApiStates } from "../shared/services/volateq-api/api-states";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
+import { BvTableField, BvTableFieldArray } from "bootstrap-vue";
 
 @Component({
   name: "app-analysis",
@@ -33,8 +49,8 @@ import { BaseAuthComponent } from "../shared/components/base-auth-component/base
   }
 })
 export default class AppAnalysis extends BaseAuthComponent {
-  columns: AppTableColumn[] = [];
-  analysisRows: AppTableRow[] = [];
+  columns: BvTableFieldArray = [];
+  analysisRows: Array<any> = [];
 
   createNewAnalysisBtnText = "";
 
@@ -42,14 +58,14 @@ export default class AppAnalysis extends BaseAuthComponent {
     this.createNewAnalysisBtnText = this.$t("create-new-analysis").toString();
 
     this.columns = [
-      { name: '#' },
-      { name: this.$t("date").toString() },
-      { name: this.$t("route").toString() },
-      { name: this.$t("state").toString() },
+      { key: "date", label: this.$t("date").toString(), sortable: true },
+      { key: "route", label: this.$t("route").toString(), sortable: true },
+      { key: "state", label: this.$t("state").toString(), sortable: true },
+      { key: "actions" }
     ];
 
     if (this.isSuperAdmin) {
-      this.columns.splice(0, 0, { name: this.$t("customer").toString() });
+      this.columns.splice(0, 0, { key: "customer", label: this.$t("customer").toString(), sortable: true });
     }
 
     await this.updateAnalysisRows();
@@ -74,8 +90,8 @@ export default class AppAnalysis extends BaseAuthComponent {
     const analysisId = resumable.getMetadata<IAnalysisId>();
     if (this.analysisRows && analysisId) {
       const row = this.analysisRows.find(row => row.id === analysisId.id);
-      if (row && row.cells.length > 0) {
-        row.cells[row.cells.length - 1].value = value;
+      if (row) {
+        row.state = value;
 
         return true;
       }
@@ -87,18 +103,15 @@ export default class AppAnalysis extends BaseAuthComponent {
   private async updateAnalysisRows() {
     try {
       this.analysisRows = (await volateqApi.getAnalysis()).map((a: AnalysisSchema) => {
-        const row: AppTableRow = {
+        const row = {
           id: a.id,
-          cells: [
-            { value: a.id },
-            { value: new Date(Date.parse(a.created_at)).toLocaleString() },
-            { value: a.plant_route.route.abbrev },
-            { value: this.$t(a.current_state && a.current_state.state.name || "UNKNOWN").toString() }
-          ]
+          date: new Date(Date.parse(a.created_at)).toLocaleString(),
+          route: a.plant_route.route.abbrev,
+          state: this.$t(a.current_state && a.current_state.state.name || "UNKNOWN").toString(),
         };
 
         if (this.isSuperAdmin) {
-          row.cells.splice(0, 0, { value: a.plant_route.customer.name });
+          row["customer"] = a.plant_route.customer.name;
         }
 
         return row;
