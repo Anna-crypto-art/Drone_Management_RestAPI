@@ -5,6 +5,7 @@ export interface AppTableColumns {
   [index: number]: AppTableColumn;
 }
 export interface AppTableCell {
+  showOnHoverOnly?: boolean;
   value: string;
 }
 export interface AppTableRow {

@@ -45,5 +45,6 @@
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",
   "PICK_ME_UP": "Pick me up",
-  "return-to-upload": "Return to upload"
+  "return-to-upload": "Return to upload",
+  "no-data": "No data"
 }

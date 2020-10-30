@@ -6,7 +6,10 @@
       </thead>
       <tbody>
         <tr v-for="row in computedRows" :key="row.id">
-          <td v-for="(cell, index) in row.cells" :key="index" v-html="cell.value"></td>
+          <td v-for="(cell, index) in row.cells" :key="index" v-html="cell.value" v-bind:class="{ 'hover-cell': cell.showOnHoverOnly }"></td>
+        </tr>
+        <tr v-if="computedRows && computedRows.length === 0">
+          <td :colspan="computedColumns.length" style="text-align: center" ><span class="grayed">{{ $t("no-data") }}</span></td>
         </tr>
       </tbody>
     </table>
@@ -34,7 +37,7 @@ export default class AppTable extends Vue {
 @import "@/scss/_colors.scss";
 
 $table-padding: 20px 40px;
-$left-padding: 5px;
+$left-padding: 15px;
 
 .app-table {
   table {
@@ -52,8 +55,17 @@ $left-padding: 5px;
 
     tr {
       border-bottom: 1px solid $dark-20pc;
+      transition: ease 100ms background-color;
+
       &:last-child {
         border: none;
+      }
+      &:hover {
+        background-color: $background-grey;
+
+        td.hover-cell {
+          opacity: 0;
+        }
       }
     }
 
@@ -62,6 +74,10 @@ $left-padding: 5px;
 
       &:first-child {
         padding-left: $left-padding;
+      }
+      &.hover-cell {
+        opacity: 0;
+        transition: ease 100ms opacity;
       }
     }
   }

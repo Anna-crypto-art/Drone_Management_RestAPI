@@ -10,7 +10,12 @@
           </b-col>
           <b-col sm="4">
             <b-form-group label-cols="auto" :label="$t('route')">
-              <b-form-select required v-model="newAnalysis.route_id" :options="routesOptions"></b-form-select>
+              <b-form-select required v-model="newAnalysis.route_id">
+                <b-form-select-option v-for="routesOption in routesOptions"
+                  :key="routesOption.value"
+                  :value="routesOption.value"
+                  :title="routesOption.title">{{ routesOption.text }}</b-form-select-option>
+              </b-form-select>
             </b-form-group>
           </b-col>
         </b-row>
@@ -195,7 +200,7 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
 
   @Watch("routes")
   onRoutesChanged(routes: RouteSchema[], oldRoutes: RouteSchema[]) {
-    this.routesOptions = this.routes.map(route => ({ value: route.id, text: route.abbrev }));
+    this.routesOptions = this.routes.map(route => ({ value: route.id, text: route.abbrev, title: route.description }));
   }
 
   checkFileCompleteness() {
