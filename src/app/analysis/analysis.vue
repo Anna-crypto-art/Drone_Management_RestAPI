@@ -13,9 +13,12 @@
         <template #head(actions)>
           <span class="hidden">{{ $t("actions") }}</span>
         </template>
-        <template #cell(actions)>
+        <template #cell(actions)="row">
           <div class="hover-cell pull-right">
-            <b-button class="icon-btn" size="sm" variant="secondary"><b-icon icon="cloud-download"></b-icon> {{ $t("download...") }}</b-button>
+            <b-dropdown right size="sm" variant="secondary" :title="$t('download...')">
+              <template #button-content><b-icon icon="cloud-download"></b-icon></template>
+              <b-dropdown-item href="#" v-for="file in getAnalysisFiles(row)" :key="file">{{ file }}</b-dropdown-item>
+            </b-dropdown>
           </div>
           <div class="clearfix"></div>
         </template>
@@ -39,7 +42,7 @@ import { ResumableEvent } from "../shared/services/resumable/types";
 import { IAnalysisId } from "./new-analysis/types";
 import { ApiStates } from "../shared/services/volateq-api/api-states";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
-import { BvTableField, BvTableFieldArray } from "bootstrap-vue";
+import { BvTableCtxObject, BvTableField, BvTableFieldArray } from "bootstrap-vue";
 
 @Component({
   name: "app-analysis",
@@ -86,6 +89,28 @@ export default class AppAnalysis extends BaseAuthComponent {
     });
   }
 
+  getAnalysisFiles(row: any): string[] {
+    const files: string[] = [];
+    const analysis: AnalysisSchema = row.item || {};
+
+    if (!analysis.files) {
+      return files;
+    }
+
+    if (analysis.files.video_files) {
+      for (const videoFile of analysis.files.video_files) {
+        files.push(videoFile);
+      }
+    }
+    if (analysis.files.drone_metadata_files) {
+      for (const droneFile of analysis.files.drone_metadata_files) {
+        files.push(droneFile);
+      }
+    }
+
+    return files;
+  }
+
   private updateTableRowState(value: string): boolean {
     const analysisId = resumable.getMetadata<IAnalysisId>();
     if (this.analysisRows && analysisId) {
@@ -108,6 +133,7 @@ export default class AppAnalysis extends BaseAuthComponent {
           date: new Date(Date.parse(a.created_at)).toLocaleString(),
           route: a.plant_route.route.abbrev,
           state: this.$t(a.current_state && a.current_state.state.name || "UNKNOWN").toString(),
+          files: a.files,
         };
 
         if (this.isSuperAdmin) {

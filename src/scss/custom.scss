@@ -40,10 +40,14 @@ $theme-colors: (
     font-size: 0.875rem;
     line-height: 1.5;
   }
-  &.icon-btn .b-icon {
-    margin-right: 5px;
+  
+  &.btn-secondary.dropdown-toggle {
+    color: $blue;
+    background-color: $blue-05pc;
+    border-color: $blue;
   }
 }
+
 
 .form-control {
   border-radius: 0;
