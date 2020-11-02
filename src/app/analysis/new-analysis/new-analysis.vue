@@ -252,7 +252,7 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
             
       this.storeData();
 
-      this.appFileUpload.upload<IAnalysisId>(volateqApi.getAnalyisisFileUploadUrl(this.analysis.id), { id: this.analysis.id });
+      this.appFileUpload.upload<IAnalysisId>(volateqApi.getAnalysisFileUploadUrl(this.analysis.id), { id: this.analysis.id });
     } catch (e) {
       appContentEventBus.showErrorAlert(this.$t(e.error).toString());
       this.uploadButton.stopLoading();

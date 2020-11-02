@@ -17,7 +17,9 @@
           <div class="hover-cell pull-right">
             <b-dropdown right size="sm" variant="secondary" :title="$t('download...')">
               <template #button-content><b-icon icon="cloud-download"></b-icon></template>
-              <b-dropdown-item href="#" v-for="file in getAnalysisFiles(row)" :key="file">{{ file }}</b-dropdown-item>
+              <b-dropdown-item v-for="file in getAnalysisFiles(row)" :key="file.fileName" :href="file.fileURL">
+                {{ file.fileName }}
+              </b-dropdown-item>
             </b-dropdown>
           </div>
           <div class="clearfix"></div>
@@ -89,22 +91,22 @@ export default class AppAnalysis extends BaseAuthComponent {
     });
   }
 
-  getAnalysisFiles(row: any): string[] {
-    const files: string[] = [];
+  getAnalysisFiles(row: any): { fileURL: string, fileName: string}[] {
+    const files: { fileURL: string, fileName: string }[] = [];
     const analysis: AnalysisSchema = row.item || {};
 
-    if (!analysis.files) {
-      return files;
+    if (!analysis.files || !analysis.id) {
+      return [];
     }
 
     if (analysis.files.video_files) {
       for (const videoFile of analysis.files.video_files) {
-        files.push(videoFile);
+        files.push({ fileName: videoFile, fileURL: volateqApi.getAnalysisFileDownloadUrl(analysis.id, videoFile) });
       }
     }
     if (analysis.files.drone_metadata_files) {
       for (const droneFile of analysis.files.drone_metadata_files) {
-        files.push(droneFile);
+        files.push({ fileName: droneFile, fileURL: volateqApi.getAnalysisFileDownloadUrl(analysis.id, droneFile) });
       }
     }
 

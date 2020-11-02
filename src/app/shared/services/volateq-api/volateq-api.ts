@@ -62,7 +62,7 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/analysis`, customer_id && { customer_id } || undefined);
   }
 
-  public getAnalyisisFileUploadUrl(analysisId: string): string {
+  public getAnalysisFileUploadUrl(analysisId: string): string {
     return `${this.baseURL}/auth/analysis/${analysisId}/file`;
   }
 
@@ -72,6 +72,10 @@ export class VolateqAPI extends HttpClientBase {
 
   public async cancelAnalysisUpload(analysisId: string): Promise<void> {
     await this.delete(`/auth/analysis/${analysisId}`);
+  }
+
+  public getAnalysisFileDownloadUrl(analysisId: string, fileName: string): string {
+    return `${this.baseURL}/auth/analysis/${analysisId}/file/${fileName}`;
   }
 }
 
