@@ -74,8 +74,8 @@ export class VolateqAPI extends HttpClientBase {
     await this.delete(`/auth/analysis/${analysisId}`);
   }
 
-  public getAnalysisFileDownloadUrl(analysisId: string, fileName: string): string {
-    return `${this.baseURL}/auth/analysis/${analysisId}/file/${fileName}`;
+  public getAnalysisFileDownloadUrl(analysisId: string, fileName: string): Promise<{url: string}> {
+    return this.get(`${this.baseURL}/auth/analysis/${analysisId}/file/${fileName}`);
   }
 }
 

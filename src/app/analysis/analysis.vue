@@ -17,8 +17,8 @@
           <div class="hover-cell pull-right">
             <b-dropdown right size="sm" variant="secondary" :title="$t('download...')">
               <template #button-content><b-icon icon="cloud-download"></b-icon></template>
-              <b-dropdown-item v-for="file in getAnalysisFiles(row)" :key="file.fileName" :href="file.fileURL">
-                {{ file.fileName }}
+              <b-dropdown-item v-for="file in getAnalysisFiles(row)" :key="file" @click="onFileClick(row.item, file)">
+                {{ file }}
               </b-dropdown-item>
             </b-dropdown>
           </div>
@@ -45,6 +45,7 @@ import { IAnalysisId } from "./new-analysis/types";
 import { ApiStates } from "../shared/services/volateq-api/api-states";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
 import { BvTableCtxObject, BvTableField, BvTableFieldArray } from "bootstrap-vue";
+import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
 
 @Component({
   name: "app-analysis",
@@ -91,8 +92,8 @@ export default class AppAnalysis extends BaseAuthComponent {
     });
   }
 
-  getAnalysisFiles(row: any): { fileURL: string, fileName: string}[] {
-    const files: { fileURL: string, fileName: string }[] = [];
+  getAnalysisFiles(row: any): string[] {
+    const files: string[] = [];
     const analysis: AnalysisSchema = row.item || {};
 
     if (!analysis.files || !analysis.id) {
@@ -101,16 +102,28 @@ export default class AppAnalysis extends BaseAuthComponent {
 
     if (analysis.files.video_files) {
       for (const videoFile of analysis.files.video_files) {
-        files.push({ fileName: videoFile, fileURL: volateqApi.getAnalysisFileDownloadUrl(analysis.id, videoFile) });
+        files.push(videoFile);
       }
     }
     if (analysis.files.drone_metadata_files) {
       for (const droneFile of analysis.files.drone_metadata_files) {
-        files.push({ fileName: droneFile, fileURL: volateqApi.getAnalysisFileDownloadUrl(analysis.id, droneFile) });
+        files.push(droneFile);
       }
     }
 
     return files;
+  }
+
+  async onFileClick(analysis: AnalysisSchema, fileName: string) {
+    try {
+      const downloadUrl = await volateqApi.getAnalysisFileDownloadUrl(analysis.id, fileName);
+      
+      AppDownloader.download(downloadUrl.url, fileName);
+    } catch (e) {
+      console.error(e);
+
+      appContentEventBus.showErrorAlert(this.$t(e.error).toString());
+    }
   }
 
   private updateTableRowState(value: string): boolean {
