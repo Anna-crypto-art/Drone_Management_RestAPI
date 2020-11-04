@@ -99,7 +99,12 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
   protected storageKey = NEW_ANALYSIS_STORAGE_KEY;
   protected waitForFiles: string[] | undefined;
 
-  protected async onFetchData(data: IAppNewAnalysisFetched | undefined) {
+  /**
+   * Replaces created event
+   */
+  protected async onFetchData(data: IAppNewAnalysisFetched | undefined): Promise<boolean> {
+    this.uploadButtonTxt = this.$t("upload").toString();
+
     if (data) {
       this.analysis = data.analysis;
       this.customerOptions = data.customerOptions;
@@ -113,6 +118,9 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
         // Mounted does not get called if compontent already has been loaded..
         // So let's wait for a sec until uploadButton is available.
         setTimeout(() => { this.uploadButton.startLoading(); }, 1000);
+
+        // Upload is still running, so lets keep stored data
+        return false;
       }
     } else {
       try {
@@ -127,7 +135,7 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
       }
     }
 
-    this.uploadButtonTxt = this.$t("upload").toString();
+    return true;
   }
 
   mounted() {

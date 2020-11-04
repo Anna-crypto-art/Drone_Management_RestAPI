@@ -4,7 +4,25 @@
       <b-button variant="primary" class="btn-invite" @click="showInviteUserModal()" v-b-modal.invite-modal>{{ $t("invite") }}</b-button>
     </div>
     <div class="clearfix"></div>
-    <app-table :columns="columns" :rows="rows"></app-table>
+    <app-table-container>
+      <b-table :fields="columns" :items="rows" head-variant="light">
+        <template #cell(name)="row">
+          <span v-if="row.item.name.userName">
+            {{ row.item.name.userName }}<br>
+            <small class="grayed">{{ row.item.name.email }}</small>
+          </span>
+          <span v-else>{{ row.item.name.email }}</span>
+        </template>
+        <template #cell(state)="row">
+          {{ row.item.state.userState }}
+          <span v-if="row.item.state.date"><br><small class="grayed">{{ row.item.state.date }}</small></span>
+        </template>
+        <template #cell(role)="row">
+          {{ row.item.role.userRole }}
+          <span v-if="row.item.role.customer"><br><small class="grayed">{{ row.item.role.customer }}</small></span>
+        </template>
+      </b-table>
+    </app-table-container>
     <app-modal-form 
       id="inivite-modal" 
       ref="appInviteModal" 
@@ -34,27 +52,27 @@
 <script lang="ts">
 import Vue from "vue";
 import { Component, Ref } from "vue-property-decorator";
-import AppTable from "@/app/shared/components/app-table/app-table.vue";
+import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { UserSchema, UserStateSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
-import { AppTableRows, AppTableColumns } from "@/app/shared/components/app-table/types";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import { InviteUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
 import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
+import { BvTableFieldArray } from "bootstrap-vue";
 
 @Component({
   name: "app-settings-users",
   components: {
-    AppTable,
-    AppModalForm
+    AppTableContainer,
+    AppModalForm,
   }
 })
 export default class AppSettingsUsers extends Vue {
-  rows: AppTableRows = [];
-  columns: AppTableColumns = [];
+  columns: BvTableFieldArray = [];
+  rows: Array<any> = [];
 
   @Ref() appInviteModal!: IAppModalForm;
   customers: any[] = []; 
@@ -67,9 +85,9 @@ export default class AppSettingsUsers extends Vue {
 
   async created() {
     this.columns = [
-      { name: this.$t("name").toString() },
-      { name: this.$t("state").toString() },
-      { name: this.$t("role").toString() }
+      { key: "name", label: this.$t("name").toString() },
+      { key: "state", label: this.$t("state").toString() },
+      { key: "role", label: this.$t("role").toString() }
     ];
 
     await this.updateUserRows();
@@ -84,29 +102,27 @@ export default class AppSettingsUsers extends Vue {
     }
     
     this.rows = users.map((user: UserSchema) => {
-      let userName = ((user.first_name || "") + " " + (user.last_name || "")).trim();
-      userName = userName && `${userName}<br><small class="grayed">${user.email}</small>` || user.email;
-
       let stateDate = ""; 
       if (user.state === UserStateSchema.REGISTERED) {
         stateDate = this.$t("registered-at").toString() + ' ' + new Date(Date.parse(user.registered_at)).toLocaleString();
       } else if (user.state === UserStateSchema.PENDING) {
         stateDate = this.$t("invited-at").toString() + ' ' + new Date(Date.parse(user.invited_at)).toLocaleString();
       }
-      const userState = this.$t(user.state.toLowerCase()) + (stateDate && `<br><small class="grayed">${stateDate}</small>` || "");
-
-      let userRole = user.role.name.toString();
-      if (user.role.name === ApiRoles.CUSTOMER_ADMIN && user.customer) {
-        userRole += `<br><small class="grayed">${user.customer.name}</small>`;
-      }
 
       return {
         id: user.id,
-        cells: [
-          { value: userName },
-          { value: userState },
-          { value: userRole }
-        ]
+        name: {
+          userName: ((user.first_name || "") + " " + (user.last_name || "")).trim(),
+          email: user.email
+        },
+        state: {
+          date: stateDate,
+          userState: this.$t(user.state.toLowerCase()).toString()
+        },
+        role: {
+          userRole: user.role.name.toString(),
+          customer: user.role.name === ApiRoles.CUSTOMER_ADMIN && user.customer ? user.customer.name : null
+        },
       };
     });
   }
@@ -184,16 +200,4 @@ export default class AppSettingsUsers extends Vue {
 </script>
 
 <style lang="scss">
-.app-settings-users {
-  &-table-toolbar {
-    .btn-invite {
-      float: right;
-      margin-right: 5px;
-
-      &::after {
-        clear: both;
-      }
-    }
-  }
-}
 </style>

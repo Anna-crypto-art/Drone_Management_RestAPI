@@ -11,7 +11,11 @@ import { Component } from "vue-property-decorator";
 })
 export class FetchComponent<T> extends BaseAuthComponent {
   protected storageKey = "";
-  protected onFetchData(data: T | undefined): void { /* override me */ }
+  /**
+   * if returns true storage data will be cleared after fetching
+   * @param data 
+   */
+  protected onFetchData(data: T | undefined): boolean | Promise<boolean> { return true; }
   protected onStoreData(): T | undefined { return undefined }
 
   created() {
@@ -22,9 +26,10 @@ export class FetchComponent<T> extends BaseAuthComponent {
     this.storeData();
   }
 
-  private fetchData() {
-    this.onFetchData(appLocalStorage.getItem(this.storageKey));
-    this.clearStorageData();
+  private async fetchData() {
+    if (await this.onFetchData(appLocalStorage.getItem(this.storageKey))) {
+      this.clearStorageData();
+    }
   }
 
   protected storeData() {

@@ -4,27 +4,30 @@
       <router-link :to="{ name: 'Analysis-New' }">
         <b-button variant="primary">{{ createNewAnalysisBtnText }}</b-button>
       </router-link>
-      <b-table hover :fields="columns" :items="analysisRows"
-        head-variant="light" style="margin-top: 30px;"
-        show-empty :emptyText="$t('no-data')">
-        <template #empty="scope">
-          <span class="grayed">{{ scope.emptyText }}</span>
-        </template>
-        <template #head(actions)>
-          <span class="hidden">{{ $t("actions") }}</span>
-        </template>
-        <template #cell(actions)="row">
-          <div class="hover-cell pull-right">
-            <b-dropdown right size="sm" variant="secondary" :title="$t('download...')">
-              <template #button-content><b-icon icon="cloud-download"></b-icon></template>
-              <b-dropdown-item v-for="file in getAnalysisFiles(row)" :key="file" @click="onFileClick(row.item, file)">
-                {{ file }}
-              </b-dropdown-item>
-            </b-dropdown>
-          </div>
-          <div class="clearfix"></div>
-        </template>
-      </b-table>
+      <app-table-container>
+        <b-table hover :fields="columns" :items="analysisRows"
+          head-variant="light"
+          show-empty 
+          :emptyText="$t('no-data')">
+          <template #empty="scope">
+            <span class="grayed">{{ scope.emptyText }}</span>
+          </template>
+          <template #head(actions)>
+            <span class="hidden">{{ $t("actions") }}</span>
+          </template>
+          <template #cell(actions)="row">
+            <div class="hover-cell pull-right">
+              <b-dropdown right size="sm" variant="secondary" :title="$t('download...')">
+                <template #button-content><b-icon icon="cloud-download"></b-icon></template>
+                <b-dropdown-item v-for="file in getAnalysisFiles(row)" :key="file" @click="onFileClick(row.item, file)">
+                  {{ file }}
+                </b-dropdown-item>
+              </b-dropdown>
+            </div>
+            <div class="clearfix"></div>
+          </template>
+        </b-table>
+      </app-table-container>
     </div>
   </app-content>
 </template>
@@ -34,8 +37,7 @@ import Vue from "vue";
 import { Component } from "vue-property-decorator";
 
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
-import AppTable from "@/app/shared/components/app-table/app-table.vue";
-import { AppTableColumn, AppTableColumns, AppTableRow, AppTableRows } from "../shared/components/app-table/types";
+import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import volateqApi from "../shared/services/volateq-api/volateq-api";
 import { AnalysisSchema } from "../shared/services/volateq-api/api-schemas/analysis-schema";
 import appContentEventBus from "../shared/components/app-content/app-content-event-bus";
@@ -51,7 +53,7 @@ import { AppDownloader } from "@/app/shared/services/app-downloader/app-download
   name: "app-analysis",
   components: {
     AppContent,
-    AppTable
+    AppTableContainer
   }
 })
 export default class AppAnalysis extends BaseAuthComponent {
