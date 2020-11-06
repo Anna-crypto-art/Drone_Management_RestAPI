@@ -10,11 +10,16 @@
           </b-col>
           <b-col sm="4">
             <b-form-group label-cols="auto" :label="$t('route')">
-              <b-form-select required v-model="newAnalysis.route_id">
-                <b-form-select-option v-for="routesOption in routesOptions"
+              <b-form-select required v-model="selectedRoute" @change="onRouteSelect">
+                <b-form-select-option-group v-for="routesOption in routesOptions"
+                  :label="routesOption.label"
                   :key="routesOption.value"
-                  :value="routesOption.value"
-                  :title="routesOption.title">{{ routesOption.text }}</b-form-select-option>
+                  :title="routesOption.title">
+                  <b-form-select-option v-for="routeBlockOption in routesOption.options" 
+                    :key="routeBlockOption.value">
+                    {{ routeBlockOption.text }}
+                  </b-form-select-option>
+                </b-form-select-option-group>
               </b-form-select>
             </b-form-group>
           </b-col>
@@ -47,7 +52,6 @@ import { RouteSchema } from "@/app/shared/services/volateq-api/api-schemas/route
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { NewAnalysis } from "@/app/shared/services/volateq-api/api-requests/analysis-requests";
-import { SelectOption } from "@/app/shared/types/select-option";
 import AppFileUpload from "@/app/shared/components/app-file-upload/app-file-upload.vue";
 import { IAppFileUpload } from "@/app/shared/components/app-file-upload/types";
 import AppChecklist from "@/app/shared/components/app-checklist/app-checklist.vue"
@@ -63,6 +67,8 @@ import resumable from "@/app/shared/services/resumable/resumable";
 import { ResumableEvent, ResumableState } from "@/app/shared/services/resumable/types";
 import { NEW_ANALYSIS_STORAGE_KEY } from "@/app/shared/components/fetch-component/storage-keys";
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
+import { BFormSelectOption, BFormSelectOptionGroup } from "bootstrap-vue";
+import { PlantBlockSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-block-schema";
 
 @Component({
   name: "app-new-analysis",
@@ -82,12 +88,14 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
   showCancelButton = false;
   
   customers: CustomerSchema[] | undefined;
-  customerOptions: SelectOption[] = [];
+  customerOptions: Array<any> = [];
 
+  plantBlocks: PlantBlockSchema[] = [];
   routes: RouteSchema[] = [];
-  routesOptions: SelectOption[] = [];
+  routesOptions: Array<any> = [];
+  selectedRoute = "";
 
-  newAnalysis: NewAnalysis = { route_id: "", files: [] };
+  newAnalysis: NewAnalysis = { route_id: "", files: [], plant_block_id: "" };
   checkListItems: CheckListItems = {
     videoFiles: false,
     droneMetaFile: false,
@@ -110,6 +118,7 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
       this.customerOptions = data.customerOptions;
       this.customers = data.customers;
       this.routesOptions = data.routesOptions;
+      this.plantBlocks = data.plantBlocks;
       this.routes = data.routes;
       this.newAnalysis = data.newAnalysis;
       this.waitForFiles = data.fileNames;
@@ -128,7 +137,10 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
           this.customers = await volateqApi.getCustomers();
           this.customerOptions = this.customers.map(customer => ({ value: customer.id, text: customer.name }));
           this.newAnalysis.customer_id = "";
+        } else {
+          this.plantBlocks = (await volateqApi.getPlants())[0].blocks
         }
+        
         this.routes = await volateqApi.getRoutes();
       } catch (e) {
         appContentEventBus.showErrorAlert(this.$t(e.error).toString());
@@ -184,10 +196,12 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
       customerOptions: this.customerOptions,
       routes: this.routes,
       routesOptions: this.routesOptions,
+      plantBlocks: this.plantBlocks,
       newAnalysis: { 
         route_id: this.newAnalysis.route_id,
         files: [],
         customer_id: this.newAnalysis.customer_id,
+        plant_block_id: this.newAnalysis.plant_block_id,
         plant_metadata_file: undefined,
         plant_medatata_file_id: this.newAnalysis.plant_medatata_file_id,
       },
@@ -199,6 +213,7 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
   async onCustomerSelect() {
     if (this.newAnalysis.customer_id) {
       try {
+        this.plantBlocks = (await volateqApi.getPlants(this.newAnalysis.customer_id))[0].blocks;
         this.routes = await volateqApi.getRoutes({ customer_id: this.newAnalysis.customer_id });
       } catch (e) {
         appContentEventBus.showErrorAlert(this.$t(e.error).toString());
@@ -208,7 +223,16 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
 
   @Watch("routes")
   onRoutesChanged(routes: RouteSchema[], oldRoutes: RouteSchema[]) {
-    this.routesOptions = this.routes.map(route => ({ value: route.id, text: route.abbrev, title: route.description }));
+    this.routesOptions = this.routes.map(route => ({
+      value: route.id,
+      label: route.label,
+      title: route.description,
+      options: this.plantBlocks.map(block => ({ value: [route.id, block.id].join('#'), text: [route.label, block.name].join('#') }))
+    }));
+  }
+
+  onRouteSelect() {
+    [this.newAnalysis.route_id, this.newAnalysis.plant_block_id] = this.selectedRoute.split('#');
   }
 
   checkFileCompleteness() {

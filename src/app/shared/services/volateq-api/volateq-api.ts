@@ -8,6 +8,7 @@ import { baseUrl } from "@/environment/environment";
 import { RouteSchema } from "./api-schemas/route-schema";
 import { NewAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
 import { AnalysisSchema } from "./api-schemas/analysis-schema";
+import { PlantSchema } from "./api-schemas/plant-schema";
 
 export class VolateqAPI extends HttpClientBase {
 
@@ -19,13 +20,13 @@ export class VolateqAPI extends HttpClientBase {
       }
     });
 
-    await store.dispatch.auth.updateToken({ token: authResult.token, role: authResult.role });    
+    await store.dispatch.auth.updateToken({ token: authResult.token, role: authResult.role, customer_id: authResult.customer_id });    
   }
 
   public async logout(): Promise<void> {
     await this.post("/auth/logout");
 
-    await store.dispatch.auth.updateToken({ token: "", role: "" });
+    await store.dispatch.auth.updateToken({ token: "", role: "", customer_id: undefined });
   }
 
   public async getUsers(): Promise<UserSchema[]> {
@@ -75,7 +76,16 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public getAnalysisFileDownloadUrl(analysisId: string, fileName: string): Promise<{url: string}> {
-    return this.get(`${this.baseURL}/auth/analysis/${analysisId}/file/${fileName}`);
+    return this.get(`/auth/analysis/${analysisId}/file/${fileName}`);
+  }
+
+  public getPlants(customerId?: string): Promise<PlantSchema[]> {
+    customerId = customerId || store.state.auth.customer_id;
+    if (!customerId) {
+      throw Error('Missing customer_id');
+    }
+
+    return this.get(`/auth/customer/${customerId}/plants`)
   }
 }
 

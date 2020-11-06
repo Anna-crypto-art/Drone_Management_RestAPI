@@ -1,7 +1,8 @@
 import { NewAnalysis } from "@/app/shared/services/volateq-api/api-requests/analysis-requests";
 import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
+import { PlantBlockSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-block-schema";
 import { RouteSchema } from "@/app/shared/services/volateq-api/api-schemas/route-schema";
-import { SelectOption } from "@/app/shared/types/select-option";
+import { BFormSelectOption, BFormSelectOptionGroup } from "bootstrap-vue";
 
 export interface CheckListItems {
   videoFiles: boolean;
@@ -11,9 +12,10 @@ export interface CheckListItems {
 
 export interface IAppNewAnalysisFetched {
   customers: CustomerSchema[] | undefined;
-  customerOptions: SelectOption[];
+  customerOptions: Array<any>;
   routes: RouteSchema[];
-  routesOptions: SelectOption[];
+  plantBlocks: PlantBlockSchema[];
+  routesOptions: Array<any>;
   newAnalysis: NewAnalysis;
   analysis: { id: string } | undefined;
   fileNames: string[];

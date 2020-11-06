@@ -25,7 +25,7 @@ export class HttpClientBase {
       }, (error: AxiosError) => {
         if (error.response && error.response.data && error.response.data.error) {
           if (error.response.data.error === ApiErrors.INVALID_TOKEN || error.response.data.error === ApiErrors.TOKEN_EXPIRED) {
-            store.dispatch.auth.updateToken({ token: "", role: "" });
+            store.dispatch.auth.updateToken({ token: "", role: "", customer_id: undefined });
           }
 
           return Promise.reject(error.response.data);
