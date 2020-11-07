@@ -148,7 +148,8 @@ export default class AppAnalysis extends BaseAuthComponent {
         const row = {
           id: a.id,
           date: new Date(Date.parse(a.created_at)).toLocaleString(),
-          route: a.plant_route.route.abbrev,
+          route: a.plant_route.route.label + 
+            (a.plant_blocks && a.plant_blocks.length > 0 ? "#" + a.plant_blocks[0].name : ""),
           state: this.$t(a.current_state && a.current_state.state.name || "UNKNOWN").toString(),
           files: a.files,
         };

@@ -11,12 +11,16 @@
           <b-col sm="4">
             <b-form-group label-cols="auto" :label="$t('route')">
               <b-form-select required v-model="selectedRoute" @change="onRouteSelect">
+                <template #first>
+                  <b-form-select-option :value="null"></b-form-select-option>
+                </template>
                 <b-form-select-option-group v-for="routesOption in routesOptions"
                   :label="routesOption.label"
                   :key="routesOption.value"
                   :title="routesOption.title">
                   <b-form-select-option v-for="routeBlockOption in routesOption.options" 
-                    :key="routeBlockOption.value">
+                    :key="routeBlockOption.value"
+                    :value="routeBlockOption.value">
                     {{ routeBlockOption.text }}
                   </b-form-select-option>
                 </b-form-select-option-group>
@@ -122,6 +126,7 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
       this.routes = data.routes;
       this.newAnalysis = data.newAnalysis;
       this.waitForFiles = data.fileNames;
+      this.selectedRoute = data.selectedRoute;
 
       if (resumable.hasState(ResumableState.UPLOADING)) {
         // Mounted does not get called if compontent already has been loaded..
@@ -138,7 +143,7 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
           this.customerOptions = this.customers.map(customer => ({ value: customer.id, text: customer.name }));
           this.newAnalysis.customer_id = "";
         } else {
-          this.plantBlocks = (await volateqApi.getPlants())[0].blocks
+          this.plantBlocks = await this.getPlantBlocks();
         }
         
         this.routes = await volateqApi.getRoutes();
@@ -148,6 +153,15 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
     }
 
     return true;
+  }
+
+  private async getPlantBlocks(customerId?: string): Promise<PlantBlockSchema[]> {
+    const plants = await volateqApi.getPlants(customerId);
+    if (plants.length > 0) {
+      return plants[0].blocks;
+    }
+
+    return [];
   }
 
   mounted() {
@@ -205,6 +219,7 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
         plant_metadata_file: undefined,
         plant_medatata_file_id: this.newAnalysis.plant_medatata_file_id,
       },
+      selectedRoute: this.selectedRoute,
       analysis: this.analysis,
       fileNames: this.appFileUpload.files.map(file => file.fileName)
     } || undefined;
@@ -213,7 +228,7 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
   async onCustomerSelect() {
     if (this.newAnalysis.customer_id) {
       try {
-        this.plantBlocks = (await volateqApi.getPlants(this.newAnalysis.customer_id))[0].blocks;
+        this.plantBlocks = await this.getPlantBlocks(this.newAnalysis.customer_id);
         this.routes = await volateqApi.getRoutes({ customer_id: this.newAnalysis.customer_id });
       } catch (e) {
         appContentEventBus.showErrorAlert(this.$t(e.error).toString());
