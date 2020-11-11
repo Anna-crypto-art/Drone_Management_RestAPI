@@ -114,7 +114,7 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
   /**
    * Replaces created event
    */
-  protected async onFetchData(data: IAppNewAnalysisFetched | undefined): Promise<boolean> {
+  protected async onFetchData(data: IAppNewAnalysisFetched | undefined) {
     this.uploadButtonTxt = this.$t("upload").toString();
 
     if (data) {
@@ -127,32 +127,20 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
       this.newAnalysis = data.newAnalysis;
       this.waitForFiles = data.fileNames;
       this.selectedRoute = data.selectedRoute;
-
-      if (resumable.hasState(ResumableState.UPLOADING)) {
-        // Mounted does not get called if compontent already has been loaded..
-        // So let's wait for a sec until uploadButton is available.
-        setTimeout(() => { this.uploadButton.startLoading(); }, 1000);
-
-        // Upload is still running, so lets keep stored data
-        return false;
-      }
     } else {
       try {
         if (this.isSuperAdmin) {
           this.customers = await volateqApi.getCustomers();
           this.customerOptions = this.customers.map(customer => ({ value: customer.id, text: customer.name }));
           this.newAnalysis.customer_id = "";
-        } else {
+        } else { // The routes depend on the selected customer
           this.plantBlocks = await this.getPlantBlocks();
+          this.routes = await volateqApi.getRoutes();
         }
-        
-        this.routes = await volateqApi.getRoutes();
       } catch (e) {
         appContentEventBus.showErrorAlert(this.$t(e.error).toString());
       }
     }
-
-    return true;
   }
 
   private async getPlantBlocks(customerId?: string): Promise<PlantBlockSchema[]> {
@@ -165,20 +153,6 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
   }
 
   mounted() {
-    // an open analysis means resumable is still uploading or has been interrupted while uploading
-    if (this.analysis && this.waitForFiles) {
-      this.checkFileCompleteness();
-      if (this.waitForFiles.length > 0) { // resumable upload has been interrupted
-        appContentEventBus.showInfoAlert(this.$t("need-files-to-upload_descr").toString() + this.waitForFiles.join(", "));
-        this.uploadButtonTxt = this.$t("resume-upload").toString();
-        this.uploadButton.disable();
-
-        this.showCancelButton = true;
-      } else { // resumable upload is still running
-        this.uploadButton.startLoading();
-      }
-    }
-
     // To continue and handle the upload, while the user is not on the upload page anymore,
     // it must be distinguished between the compontent-"completed"-event and the service-"completed"-event.
     resumable.on(ResumableEvent.COMPLETED, async () => {
@@ -202,6 +176,22 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
         console.error(e);
       }
     })
+  }
+
+  updated() {
+    if (resumable.hasState(ResumableState.UPLOADING)) { // Upload is still running...
+      this.uploadButton.startLoading();
+    } else if (this.analysis && this.waitForFiles) { // Upload has been interrupted
+      this.checkFileCompleteness();
+      if (this.waitForFiles.length > 0) {
+        appContentEventBus.showInfoAlert(this.$t("need-files-to-upload_descr").toString() + this.waitForFiles.join(", "));
+        
+        this.uploadButtonTxt = this.$t("resume-upload").toString();
+        this.uploadButton.disable();
+
+        this.showCancelButton = true;
+      }
+    }
   }
 
   protected onStoreData(): IAppNewAnalysisFetched | undefined {
@@ -350,6 +340,9 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
 
       this.cancelUploadButton.stopLoading();
       this.showCancelButton = false;
+
+      // Reload page
+      this.$router.go(0);
     }
 
   }

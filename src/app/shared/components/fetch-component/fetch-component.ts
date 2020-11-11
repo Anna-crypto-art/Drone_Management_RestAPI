@@ -9,13 +9,16 @@ import { Component } from "vue-property-decorator";
     next();
   }
 })
+/**
+ * Actually this should be an abstract class, but decorator @Component does not work with abstract classes...
+ */
 export class FetchComponent<T> extends BaseAuthComponent {
   protected storageKey = "";
   /**
    * if returns true storage data will be cleared after fetching
    * @param data 
    */
-  protected onFetchData(data: T | undefined): boolean | Promise<boolean> { return true; }
+  protected onFetchData(data: T | undefined): void | Promise<void> { /* abstract */ }
   protected onStoreData(): T | undefined { return undefined }
 
   created() {
@@ -26,10 +29,8 @@ export class FetchComponent<T> extends BaseAuthComponent {
     this.storeData();
   }
 
-  private async fetchData() {
-    if (await this.onFetchData(appLocalStorage.getItem(this.storageKey))) {
-      this.clearStorageData();
-    }
+  private fetchData() {
+    this.onFetchData(appLocalStorage.getItem(this.storageKey));
   }
 
   protected storeData() {
