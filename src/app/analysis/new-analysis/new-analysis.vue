@@ -99,7 +99,7 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
   routesOptions: Array<any> = [];
   selectedRoute = "";
 
-  newAnalysis: NewAnalysis = { route_id: "", files: [], plant_block_id: "" };
+  newAnalysis: NewAnalysis = { route_id: "", files: [], plant_block_id: "", customer_id: "" };
   checkListItems: CheckListItems = {
     videoFiles: false,
     droneMetaFile: false,
@@ -117,29 +117,28 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
   protected async onFetchData(data: IAppNewAnalysisFetched | undefined) {
     this.uploadButtonTxt = this.$t("upload").toString();
 
+    try {
+      if (this.isSuperAdmin) {
+        this.customers = await volateqApi.getCustomers();
+        this.customerOptions = this.customers.map(customer => ({ value: customer.id, text: customer.name }));
+      } else { // The routes depend on the selected customer
+        this.plantBlocks = await this.getPlantBlocks();
+        this.routes = await volateqApi.getRoutes();
+      }
+    } catch (e) {
+      appContentEventBus.showErrorAlert(this.$t(e.error).toString());
+    }
+
     if (data) {
       this.analysis = data.analysis;
-      this.customerOptions = data.customerOptions;
-      this.customers = data.customers;
-      this.routesOptions = data.routesOptions;
-      this.plantBlocks = data.plantBlocks;
-      this.routes = data.routes;
       this.newAnalysis = data.newAnalysis;
       this.waitForFiles = data.fileNames;
-      this.selectedRoute = data.selectedRoute;
-    } else {
-      try {
-        if (this.isSuperAdmin) {
-          this.customers = await volateqApi.getCustomers();
-          this.customerOptions = this.customers.map(customer => ({ value: customer.id, text: customer.name }));
-          this.newAnalysis.customer_id = "";
-        } else { // The routes depend on the selected customer
-          this.plantBlocks = await this.getPlantBlocks();
-          this.routes = await volateqApi.getRoutes();
-        }
-      } catch (e) {
-        appContentEventBus.showErrorAlert(this.$t(e.error).toString());
+      
+      if (this.isSuperAdmin) {
+        await this.onCustomerSelect();
       }
+      
+      this.selectedRoute = data.selectedRoute;
     }
   }
 

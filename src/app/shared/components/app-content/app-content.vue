@@ -14,7 +14,7 @@
         </div>
         <div class="app-content-content">
           <div class="app-content-content-alert">
-            <b-alert v-model="showAlert" :variant="alert.variant" v-html="alert.msg" dismissible></b-alert>
+            <b-alert v-for="(alert, i) in alerts" :key="i" show :variant="alert.variant" v-html="alert.msg" dismissible></b-alert>
           </div>
           <slot></slot>
         </div>
@@ -40,16 +40,16 @@ export default class AppContent extends Vue {
   @Prop() subtitle: string | undefined;
   @Prop({ default: false }) navback: boolean | undefined;
 
-  alert: AppContentAlert = { msg: '', variant: undefined };
-  showAlert = false;
+  alerts: AppContentAlert[] = [];
 
   created() {
     appContentEventBus.onShowAlert((newAlert: AppContentAlert) => {
-      this.alert = newAlert;
-      this.showAlert = true
+      if (!this.alerts.find(alert => alert.variant === newAlert.variant && alert.msg === newAlert.msg)) {
+        this.alerts.push(newAlert);
+      }
     });
     appContentEventBus.onClearAlert(() => {
-      this.showAlert = false;
+      this.alerts = [];
     });
   }
 }
