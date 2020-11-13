@@ -13,6 +13,7 @@ export enum ResumableState {
   PAUSED = "PAUSED",
   FINISHED = "FINISHED",
   FAILED = "FAILED",
+  RETRYING = "RETRYING",
 }
 
 export enum ResumableEvent {

@@ -6,8 +6,14 @@ import store from "@/app/app-state";
 export class Resumable extends Vue {
   private readonly resumable: ResumableJs;
 
+  private readonly failedTimeoutInterval = 4000;
+  private readonly maxRetries = 100;
+  private readonly chunkRetryInterval = 3000;
+
   private state = ResumableState.UNPREPARED;
   private failedTimeout: any | undefined;
+  private retries = 0;
+  private currentProgress = 0;
 
   private metadata: any | undefined;
   private eventsRegistered = false;
@@ -17,8 +23,9 @@ export class Resumable extends Vue {
 
     this.resumable = new ResumableJs({
       chunkSize: 1*1024*1024*10, // 10MB
-      chunkRetryInterval: 1000, // 1sec
+      chunkRetryInterval: this.chunkRetryInterval,
       simultaneousUploads: 1,
+      maxChunkRetries: this.maxRetries,
     });
   }
 
@@ -65,7 +72,7 @@ export class Resumable extends Vue {
   }
 
   public progress(): number {
-    return this.resumable.progress();
+    return this.currentProgress;
   }
 
   public upload<T>(target: string, metadata?: T) {
@@ -96,6 +103,24 @@ export class Resumable extends Vue {
     }
   }
 
+  private onProgress() {
+    this.state = ResumableState.UPLOADING;
+    this.$emit(ResumableEvent.PROGRESS);
+  }
+  private onRetry(file: IResumableFile) {
+    this.state = ResumableState.RETRYING;
+    this.$emit(ResumableEvent.FILE_RETRY, file, ++this.retries, this.maxRetries);
+  }
+  private onFailed(msg: string) {
+    this.state = ResumableState.FAILED;
+    this.$emit(ResumableEvent.FAILED, msg);
+  }
+  private onCompleted() {
+    this.state = ResumableState.FINISHED;
+    this.resumable.cancel();
+    this.$emit(ResumableEvent.COMPLETED);
+  }
+
   private registerEvents() {
     if (this.eventsRegistered) {
       return;
@@ -112,10 +137,8 @@ export class Resumable extends Vue {
       // So let's use "fileError"-Event additionaly
 
       this.failedTimeout = setTimeout(() => {
-        this.state = ResumableState.FAILED;
-
-        this.$emit(ResumableEvent.FAILED, msg);
-      }, 2000) // wait 2 secs for "fileRetry"-Event before fire
+        this.onFailed(msg);
+      }, this.failedTimeoutInterval) // wait for "fileRetry"-Event before fire
 
       this.$emit(ResumableEvent.FILE_ERROR, file, msg);
     });
@@ -125,25 +148,28 @@ export class Resumable extends Vue {
         this.failedTimeout = undefined;
       }
 
-      this.$emit(ResumableEvent.FILE_RETRY, file);
+      this.onRetry(file);
     });
     this.resumable.on("fileAdded", (file: any) => {
       this.$emit(ResumableEvent.FILE_ADDED, file);
     });
     this.resumable.on("progress", () => {
-      this.$emit(ResumableEvent.PROGRESS);
+      // Resumable fires "progress"-Event even if the current chunk upload has failed.. so that's not a real progress, isn't it?
+      const progress = this.resumable.progress();
+      if (this.currentProgress !== progress) {
+        this.currentProgress = progress;
+
+        this.onProgress();
+      }
     });
     this.resumable.on("complete", () => {
       // Resumable does fire "completed"-Event even if the upload has failed
       if (!this.failedTimeout && this.state !== ResumableState.FAILED) {
-        this.state = ResumableState.FINISHED;
-        
-        this.resumable.cancel();
-        this.$emit(ResumableEvent.COMPLETED);
+        this.onCompleted();
       }
     });
     this.resumable.on("error", (msg: string) => {
-      this.$emit(ResumableEvent.FAILED, msg);
+      this.onFailed(msg);
     });
 
     this.eventsRegistered = true;

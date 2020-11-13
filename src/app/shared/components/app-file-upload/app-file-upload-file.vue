@@ -93,12 +93,15 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
   }
 
   emitProgress(): void {
-    this.progress = Math.round(this.file.progress(false) * 100);
-    this.error = "";
-    this.retry = false;
+    const newProgress = Math.round(this.file.progress(false) * 100);
+    if (newProgress !== this.progress) {
+      this.progress = newProgress
+      this.error = "";
+      this.retry = false;
 
-    if (this.uploadProgressBar) {
-      this.uploadProgressBar.style.width = this.progress + "%";
+      if (this.uploadProgressBar) {
+        this.uploadProgressBar.style.width = this.progress + "%";
+      }
     }
   }
 

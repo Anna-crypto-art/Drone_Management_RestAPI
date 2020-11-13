@@ -44,7 +44,11 @@ export default class AppContent extends Vue {
 
   created() {
     appContentEventBus.onShowAlert((newAlert: AppContentAlert) => {
-      if (!this.alerts.find(alert => alert.variant === newAlert.variant && alert.msg === newAlert.msg)) {
+      const alert = this.alerts.find(alert => !!alert.id && alert.id === newAlert.id);
+      if (alert) {
+        alert.msg = newAlert.msg;
+        alert.variant = newAlert.variant
+      } else if (!this.alerts.find(alert => (alert.variant === newAlert.variant && alert.msg === newAlert.msg))) {
         this.alerts.push(newAlert);
       }
     });

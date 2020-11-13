@@ -42,7 +42,7 @@ import volateqApi from "../shared/services/volateq-api/volateq-api";
 import { AnalysisSchema } from "../shared/services/volateq-api/api-schemas/analysis-schema";
 import appContentEventBus from "../shared/components/app-content/app-content-event-bus";
 import resumable from "../shared/services/resumable/resumable";
-import { ResumableEvent } from "../shared/services/resumable/types";
+import { ResumableEvent, ResumableState } from "../shared/services/resumable/types";
 import { IAnalysisId } from "./new-analysis/types";
 import { ApiStates } from "../shared/services/volateq-api/api-states";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
@@ -77,13 +77,15 @@ export default class AppAnalysis extends BaseAuthComponent {
     }
 
     await this.updateAnalysisRows();
+
+    if (resumable.hasState(ResumableState.UPLOADING)) {
+      this.updateToResumableUploadState();
+    }
   }
 
   mounted() {
     resumable.on(ResumableEvent.PROGRESS, () => {
-      if (this.updateTableRowState(this.$t("UPLOADING") + " " + Math.round(resumable.progress() * 100) + "%")) {
-        this.createNewAnalysisBtnText = this.$t("return-to-upload").toString();
-      }
+      this.updateToResumableUploadState();
     });
     resumable.on(ResumableEvent.COMPLETED, () => {
       this.createNewAnalysisBtnText = this.$t("create-new-analysis").toString();
@@ -125,6 +127,12 @@ export default class AppAnalysis extends BaseAuthComponent {
       console.error(e);
 
       appContentEventBus.showErrorAlert(this.$t(e.error).toString());
+    }
+  }
+
+  private updateToResumableUploadState() {
+    if (this.updateTableRowState(this.$t("UPLOADING") + " " + Math.round(resumable.progress() * 100) + "%")) {
+      this.createNewAnalysisBtnText = this.$t("return-to-upload").toString();
     }
   }
 

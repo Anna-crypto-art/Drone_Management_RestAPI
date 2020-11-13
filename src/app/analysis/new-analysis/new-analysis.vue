@@ -68,7 +68,7 @@ import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
 import { FetchComponent } from "@/app/shared/components/fetch-component/fetch-component";
 import resumable from "@/app/shared/services/resumable/resumable";
-import { ResumableEvent, ResumableState } from "@/app/shared/services/resumable/types";
+import { IResumableFile, ResumableEvent, ResumableState } from "@/app/shared/services/resumable/types";
 import { NEW_ANALYSIS_STORAGE_KEY } from "@/app/shared/components/fetch-component/storage-keys";
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
 import { BFormSelectOption, BFormSelectOptionGroup } from "bootstrap-vue";
@@ -165,7 +165,7 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
       }
     });
     resumable.on(ResumableEvent.FAILED, async (message: string) => {
-      appContentEventBus.showErrorAlert(this.$t(ApiErrors.SOMETHING_WENT_WRONG).toString());
+      appContentEventBus.showErrorAlert(this.$t(ApiStates.UPLOAD_FAILED).toString());
       console.error(message);
 
       try {
@@ -174,12 +174,21 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
         // Well, that is not a surprise...
         console.error(e);
       }
-    })
+    });
+    resumable.on(ResumableEvent.FILE_RETRY, (file: IResumableFile, retries: number, maxRetries: number) => {
+      // appContentEventBus.showWarningAlert() continue here!!!
+    });
   }
 
   updated() {
     if (resumable.hasState(ResumableState.UPLOADING)) { // Upload is still running...
       this.uploadButton.startLoading();
+    } else if (resumable.hasState(ResumableState.RETRYING)) {
+
+    } else if (resumable.hasState(ResumableState.FAILED)) {
+
+    } else if (resumable.hasState(ResumableState.PAUSED)) {
+
     } else if (this.analysis && this.waitForFiles) { // Upload has been interrupted
       this.checkFileCompleteness();
       if (this.waitForFiles.length > 0) {
