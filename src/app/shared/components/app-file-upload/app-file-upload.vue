@@ -66,11 +66,13 @@ export default class AppFileUpload extends Vue implements IAppFileUpload {
         uploadFile.emitProgress();
       }
     });
-    resumable.on(ResumableEvent.FILE_RETRY, (file: IResumableFile) => {
+    resumable.on(ResumableEvent.FILE_RETRY, (file: IResumableFile, retries: number, maxRetries: number) => {
       const uploadFile = this.getFileUploadFile(file);
       if (uploadFile) {
         uploadFile.emitRetry();
       }
+
+      this.$emit("fileRetry", file, retries, maxRetries);
     });
     resumable.on(ResumableEvent.FILE_ADDED, (file: IResumableFile) => {
       this.keyResumFiles += 1;

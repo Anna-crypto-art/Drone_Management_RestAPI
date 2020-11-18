@@ -64,7 +64,7 @@ export class Resumable extends Vue {
   }
 
   public cancel() {
-    this.checkState([ResumableState.FAILED, ResumableState.UPLOADING, ResumableState.INITIALIZED])
+    this.checkState([ResumableState.FAILED, ResumableState.UPLOADING, ResumableState.INITIALIZED, ResumableState.PAUSED])
 
     this.resumable.cancel();
 
@@ -76,7 +76,7 @@ export class Resumable extends Vue {
   }
 
   public upload<T>(target: string, metadata?: T) {
-    this.checkState([ResumableState.INITIALIZED, ResumableState.FAILED]);
+    this.checkState([ResumableState.INITIALIZED, ResumableState.FAILED, ResumableState.PAUSED]);
     this.state = ResumableState.UPLOADING;
 
     this.metadata = metadata;
@@ -87,6 +87,13 @@ export class Resumable extends Vue {
 
   public getMetadata<T>(): T {
     return this.metadata;
+  }
+
+  public pause() {
+    this.checkState([ResumableState.UPLOADING, ResumableState.RETRYING]);
+    this.state = ResumableState.PAUSED;
+
+    this.resumable.pause();
   }
 
   public on(event: ResumableEvent, callbackFn: any) {

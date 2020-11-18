@@ -32,7 +32,8 @@
           @fileAdded="checkFileCompleteness"
           @fileRemoved="checkFileCompleteness"
           @completed="onCompleted"
-          @failed="onFailed">
+          @failed="onFailed"
+          @fileRetry="onFileRetry">
           <app-checklist>
             <app-checklist-item :checked="checkListItems.videoFiles">{{ $t("video-files_descr") }}</app-checklist-item>
             <app-checklist-item :checked="checkListItems.droneMetaFile">{{ $t("drone-metadata-file_descr") }}</app-checklist-item>
@@ -40,6 +41,7 @@
           </app-checklist>
         </app-file-upload>
         <app-button ref="uploadButton" type="submit" cls="pull-right">{{ uploadButtonTxt }}</app-button>
+        <app-button type="button" cls="pull-right" v-show="showPauseButton" @click="onPauseClick">{{ $t("pause") }}</app-button>
         <app-button ref="cancelUploadButton" v-show="showCancelButton" variant="secondary" type="button" @click="onCancelUpload">{{ $t("cancel") }}</app-button>
         <div class="clearfix"></div>
       </b-form>
@@ -90,6 +92,7 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
   @Ref() cancelUploadButton!: IAppButton;
   uploadButtonTxt = "";
   showCancelButton = false;
+  showPauseButton = false;
   
   customers: CustomerSchema[] | undefined;
   customerOptions: Array<any> = [];
@@ -153,7 +156,7 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
 
   mounted() {
     // To continue and handle the upload, while the user is not on the upload page anymore,
-    // it must be distinguished between the compontent-"completed"-event and the service-"completed"-event.
+    // it must be distinguished between the AppFileUploadComponent-Events and the Resumbale-Events.
     resumable.on(ResumableEvent.COMPLETED, async () => {
       try {
         await volateqApi.updateAnalysisState(resumable.getMetadata<IAnalysisId>().id, { state: ApiStates.PICK_ME_UP })
@@ -176,7 +179,7 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
       }
     });
     resumable.on(ResumableEvent.FILE_RETRY, (file: IResumableFile, retries: number, maxRetries: number) => {
-      // appContentEventBus.showWarningAlert() continue here!!!
+      appContentEventBus.showWarningAlert(`${this.$t("upload-error-retry").toString()} ${retries}/${maxRetries}`, "resumable-upload-error-retry");
     });
   }
 
@@ -184,11 +187,11 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
     if (resumable.hasState(ResumableState.UPLOADING)) { // Upload is still running...
       this.uploadButton.startLoading();
     } else if (resumable.hasState(ResumableState.RETRYING)) {
-
+      this.onFileRetry();
     } else if (resumable.hasState(ResumableState.FAILED)) {
-
+      this.onFailed();
     } else if (resumable.hasState(ResumableState.PAUSED)) {
-
+      this.onPaused();
     } else if (this.analysis && this.waitForFiles) { // Upload has been interrupted
       this.checkFileCompleteness();
       if (this.waitForFiles.length > 0) {
@@ -305,21 +308,44 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
   }
 
   // Watch out: see resumable.on(COMPLETED, ...) in mounted() { ... } for the "this"-independent part of the function
-  async onCompleted() {
+  onCompleted() {
     this.clearStorageData();
 
     this.uploadButton.stopLoading();
     this.uploadButton.disable();
 
     this.analysis = undefined;
+
+    this.showCancelButton = false;
+    this.showPauseButton = false;
   }
 
   // Watch out: see resumable.on(FAILED, ...) in mounted() { ... } for the "this"-independent part of the function
-  async onFailed(message: string) {
+  onFailed() {
     this.uploadButton.stopLoading();
     this.uploadButtonTxt = this.$t("resume-upload").toString();
   
     this.showCancelButton = true;
+    this.showPauseButton = false;
+  }
+
+  // Watch out: see resumable.on(FILE_RETRY, ...) in mounted() { ... } for the "this"-independent part of the function
+  onFileRetry() {
+    this.showPauseButton = true;
+    this.showCancelButton = true;
+  }
+
+  onPauseClick() {
+    resumable.pause();
+    this.onPaused();
+  }
+
+  onPaused() {
+    this.uploadButton.stopLoading();
+    this.uploadButtonTxt = this.$t("resume-upload").toString();
+    this.uploadButton.enable();
+
+    this.showPauseButton = false;
   }
 
   async onCancelUpload() {

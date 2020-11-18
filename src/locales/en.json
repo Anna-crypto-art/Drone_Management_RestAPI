@@ -48,5 +48,7 @@
   "return-to-upload": "Return to upload",
   "no-data": "No data",
   "actions": "Actions",
-  "download...": "Download..."
+  "download...": "Download...",
+  "pause": "Pause",
+  "upload-error-retry": "Upload error occured! Retrying..."
 }
