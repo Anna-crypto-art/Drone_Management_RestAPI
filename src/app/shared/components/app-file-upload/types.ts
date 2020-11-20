@@ -1,4 +1,4 @@
-import { IResumableFile } from "@/app/shared/services/resumable/types";
+import { IResumableFile } from "@/app/shared/services/upload-service/types";
 
 export interface IAppFileUpload {
   files: IResumableFile[];

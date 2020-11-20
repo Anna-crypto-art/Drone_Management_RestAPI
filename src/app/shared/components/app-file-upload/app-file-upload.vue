@@ -11,8 +11,7 @@
       <div class="app-file-upload-dropzone-files" style="margin-top: 30px;" :key="keyResumFiles" v-show="keyResumFiles > 0">
         <app-file-upload-file v-for="file in files" :key="file.uniqueIdentifier" ref="uploadFiles"
           :uploading="uploading"
-          :file="file"
-          @fileRemoved="onFileRemoved">
+          :file="file">
         </app-file-upload-file>
       </div>
     </div>
@@ -24,8 +23,8 @@ import Vue from "vue";
 import { Component, Prop, Ref } from "vue-property-decorator";
 import AppFileUploadFile from "@/app/shared/components/app-file-upload/app-file-upload-file.vue";
 import { IAppFileUpload, IAppFileUploadFile } from "@/app/shared/components/app-file-upload/types";
-import resumable from "@/app/shared/services/resumable/resumable";
-import { IResumableFile, ResumableEvent, ResumableState } from "../../services/resumable/types";
+import uploadService, { UploadService } from "@/app/shared/services/upload-service/upload-service";
+import { IResumableFile, IUploadListener, UploadEvent, UploadState } from "../../services/upload-service/types";
 
 @Component({
   name: "app-file-upload",
@@ -33,7 +32,7 @@ import { IResumableFile, ResumableEvent, ResumableState } from "../../services/r
     AppFileUploadFile
   }
 })
-export default class AppFileUpload extends Vue implements IAppFileUpload {
+export default class AppFileUpload extends Vue implements IAppFileUpload, IUploadListener {
   @Ref() uploadFiles!: IAppFileUploadFile[];
   @Prop() title: string | undefined;
   
@@ -41,62 +40,65 @@ export default class AppFileUpload extends Vue implements IAppFileUpload {
   uploading = false;
 
   mounted(): void {
-    if (resumable.hasState(ResumableState.UPLOADING)) {
+    this.checkUploadState();
+    this.registerUploadEvents();
+  }
+
+  checkUploadState() {
+    if (uploadService.hasState(UploadState.UPLOADING)) {
       this.uploading = true;
-      this.keyResumFiles = resumable.files.length;
+      this.keyResumFiles = (uploadService as UploadService).files.length;
     } else {
-      resumable.init("file-upload-dropzone-id", "file-upload-browsebutton-id");
+      (uploadService as UploadService).init("file-upload-dropzone-id", "file-upload-browsebutton-id");
     }
-    
-    resumable.on(ResumableEvent.FILE_SUCCESS, (file: IResumableFile) => {
+  }
+
+  registerUploadEvents() {
+    uploadService.on(UploadEvent.FILE_SUCCESS, (file: IResumableFile) => {
       const uploadFile = this.getFileUploadFile(file);
       if (uploadFile) {
         uploadFile.emitSuccess();
       }
     });
-    resumable.on(ResumableEvent.FILE_ERROR, (file: IResumableFile, msg: string) => {
+    uploadService.on(UploadEvent.FILE_ERROR, (file: IResumableFile, msg: string) => {
       const uploadFile = this.getFileUploadFile(file);
       if (uploadFile) {
         uploadFile.emitError(msg);
       }
     });
-    resumable.on(ResumableEvent.FILE_PROGRESS, (file: IResumableFile) => {
+    uploadService.on(UploadEvent.FILE_PROGRESS, (file: IResumableFile) => {
       const uploadFile = this.getFileUploadFile(file);
       if (uploadFile) {
         uploadFile.emitProgress();
       }
     });
-    resumable.on(ResumableEvent.FILE_RETRY, (file: IResumableFile) => {
+    uploadService.on(UploadEvent.FILE_RETRY, (file: IResumableFile, retries: number) => {
       const uploadFile = this.getFileUploadFile(file);
       if (uploadFile) {
         uploadFile.emitRetry();
       }
     });
-    resumable.on(ResumableEvent.FILE_ADDED, (file: IResumableFile) => {
+    uploadService.on(UploadEvent.FILE_ADDED, (file: IResumableFile) => {
       this.keyResumFiles += 1;
-      this.$emit("fileAdded")
     });
-    resumable.on(ResumableEvent.COMPLETED, () => {
-      this.$emit("completed");
-    });
-    resumable.on(ResumableEvent.FAILED, () => {
-      this.$emit("failed");
+    uploadService.on(UploadEvent.FILE_REMOVED, (file: IResumableFile) => {
+      this.keyResumFiles -= 1;
     });
   }
-
+  
   upload<T>(target: string, metadata?: T): void {
     this.uploading = true;
     this.keyResumFiles += 100;
     
-    resumable.upload<T>(target, metadata);
+    (uploadService as UploadService).upload<T>(target, metadata);
   }
-  
+
   get files(): IResumableFile[] {
-    return resumable.files;
+    return (uploadService as UploadService).files;
   }
 
   cancel(): void {
-    resumable.cancel();
+    (uploadService as UploadService).cancel();
 
     this.uploading = false;
     this.keyResumFiles -= 100;
@@ -104,11 +106,6 @@ export default class AppFileUpload extends Vue implements IAppFileUpload {
 
   getFileUploadFile(file: IResumableFile): IAppFileUploadFile {
     return this.uploadFiles.find(uploadFile => uploadFile.uniqueIdentifier === file.uniqueIdentifier)!;
-  }
-
-  onFileRemoved(file: IResumableFile): void {
-    this.keyResumFiles -= 1;
-    this.$emit("fileRemoved")
   }
 }
 </script>

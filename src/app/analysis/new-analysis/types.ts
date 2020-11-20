@@ -11,11 +11,6 @@ export interface CheckListItems {
 }
 
 export interface IAppNewAnalysisFetched {
-  customers: CustomerSchema[] | undefined;
-  customerOptions: Array<any>;
-  routes: RouteSchema[];
-  plantBlocks: PlantBlockSchema[];
-  routesOptions: Array<any>;
   newAnalysis: NewAnalysis;
   analysis: { id: string } | undefined;
   fileNames: string[];

@@ -1,8 +1,9 @@
 import Vue from "vue"
 
 export interface AppContentAlert {
-  variant: "success" | "danger" | "info" | undefined;
+  variant: "success" | "danger" | "info" | "warning" | undefined;
   msg: string | undefined;
+  id?: string;
 }
 
 export enum AppContentEvents {
@@ -17,14 +18,17 @@ export class AppContentEventBus extends Vue {
   onClearAlert(callbackFn: () => void) {
     this.$on(AppContentEvents.clearAlert, callbackFn);
   }
-  showErrorAlert(msg: string) {
-    this.showAlert({ msg, variant: "danger" });
+  showErrorAlert(msg: string, id?: string) {
+    this.showAlert({ msg, variant: "danger", id });
   }
-  showSuccessAlert(msg: string) {
-    this.showAlert({ msg, variant: "success" });
+  showSuccessAlert(msg: string, id?: string) {
+    this.showAlert({ msg, variant: "success", id });
   }
-  showInfoAlert(msg: string) {
-    this.showAlert({ msg, variant: "info" });
+  showInfoAlert(msg: string, id?: string) {
+    this.showAlert({ msg, variant: "info", id });
+  }
+  showWarningAlert(msg: string, id?: string) {
+    this.showAlert({ msg, variant: "warning", id });
   }
   showAlert(appContentAlert: AppContentAlert) {
     this.$emit(AppContentEvents.showAlert, appContentAlert);

@@ -41,13 +41,13 @@ import AppTableContainer from "@/app/shared/components/app-table-container/app-t
 import volateqApi from "../shared/services/volateq-api/volateq-api";
 import { AnalysisSchema } from "../shared/services/volateq-api/api-schemas/analysis-schema";
 import appContentEventBus from "../shared/components/app-content/app-content-event-bus";
-import resumable from "../shared/services/resumable/resumable";
-import { ResumableEvent } from "../shared/services/resumable/types";
+import uploadService, { UploadService } from "@/app/shared/services/upload-service/upload-service";
 import { IAnalysisId } from "./new-analysis/types";
 import { ApiStates } from "../shared/services/volateq-api/api-states";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
 import { BvTableCtxObject, BvTableField, BvTableFieldArray } from "bootstrap-vue";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
+import { IUploadListener, UploadEvent, UploadState } from "../shared/services/upload-service/types";
 
 @Component({
   name: "app-analysis",
@@ -56,7 +56,7 @@ import { AppDownloader } from "@/app/shared/services/app-downloader/app-download
     AppTableContainer
   }
 })
-export default class AppAnalysis extends BaseAuthComponent {
+export default class AppAnalysis extends BaseAuthComponent implements IUploadListener {
   columns: BvTableFieldArray = [];
   analysisRows: Array<any> = [];
 
@@ -77,21 +77,31 @@ export default class AppAnalysis extends BaseAuthComponent {
     }
 
     await this.updateAnalysisRows();
+
+    this.checkUploadState();
   }
 
   mounted() {
-    resumable.on(ResumableEvent.PROGRESS, () => {
-      if (this.updateTableRowState(this.$t("UPLOADING") + " " + Math.round(resumable.progress() * 100) + "%")) {
-        this.createNewAnalysisBtnText = this.$t("return-to-upload").toString();
-      }
+    this.registerUploadEvents();
+  }
+
+  registerUploadEvents() {
+    uploadService.on(UploadEvent.PROGRESS, () => {
+      this.updateToResumableUploadState();
     });
-    resumable.on(ResumableEvent.COMPLETED, () => {
+    uploadService.on(UploadEvent.COMPLETED, () => {
       this.createNewAnalysisBtnText = this.$t("create-new-analysis").toString();
       this.updateTableRowState(this.$t("PICK_ME_UP").toString());
     });
-    resumable.on(ResumableEvent.FAILED, () => {
+    uploadService.on(UploadEvent.FAILED, () => {
       this.updateTableRowState(this.$t("UPLOAD_FAILED").toString());
     });
+  }
+
+  checkUploadState() {
+    if (uploadService.hasState(UploadState.UPLOADING)) {
+      this.updateToResumableUploadState();
+    }
   }
 
   getAnalysisFiles(row: any): string[] {
@@ -128,8 +138,14 @@ export default class AppAnalysis extends BaseAuthComponent {
     }
   }
 
+  private updateToResumableUploadState() {
+    if (this.updateTableRowState(this.$t("UPLOADING") + " " + Math.round(uploadService.progress() * 100) + "%")) {
+      this.createNewAnalysisBtnText = this.$t("return-to-upload").toString();
+    }
+  }
+
   private updateTableRowState(value: string): boolean {
-    const analysisId = resumable.getMetadata<IAnalysisId>();
+    const analysisId = uploadService.getMetadata<IAnalysisId>();
     if (this.analysisRows && analysisId) {
       const row = this.analysisRows.find(row => row.id === analysisId.id);
       if (row) {
