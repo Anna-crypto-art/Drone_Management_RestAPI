@@ -26,7 +26,8 @@ import Vue from "vue";
 import { Component, Prop, Ref } from "vue-property-decorator";
 import { IAppFileUploadFile } from "@/app/shared/components/app-file-upload/types";
 import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
-import { IResumableFile } from "@/app/shared/services/resumable/types";
+import { IResumableFile } from "@/app/shared/services/upload-service/types";
+import uploadService, { UploadService } from "@/app/shared/services/upload-service/upload-service";
 
 @Component({
   name: "app-file-upload-file",
@@ -69,7 +70,7 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
   onFileRemove(): void {
     this.file.cancel();
 
-    this.$emit('fileRemoved', this.file);
+    (uploadService as UploadService).emitFileRemoved(this.file);
   }
 
   emitError(msg: string): void {

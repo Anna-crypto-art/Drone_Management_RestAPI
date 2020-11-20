@@ -28,12 +28,7 @@
             </b-form-group>
           </b-col>
         </b-row>
-        <app-file-upload ref="appFileUpload" :title="$t('upload-your-files')"
-          @fileAdded="checkFileCompleteness"
-          @fileRemoved="checkFileCompleteness"
-          @completed="onCompleted"
-          @failed="onFailed"
-          @fileRetry="onFileRetry">
+        <app-file-upload ref="appFileUpload" :title="$t('upload-your-files')">
           <app-checklist>
             <app-checklist-item :checked="checkListItems.videoFiles">{{ $t("video-files_descr") }}</app-checklist-item>
             <app-checklist-item :checked="checkListItems.droneMetaFile">{{ $t("drone-metadata-file_descr") }}</app-checklist-item>
@@ -41,7 +36,6 @@
           </app-checklist>
         </app-file-upload>
         <app-button ref="uploadButton" type="submit" cls="pull-right">{{ uploadButtonTxt }}</app-button>
-        <app-button type="button" cls="pull-right" v-show="showPauseButton" @click="onPauseClick">{{ $t("pause") }}</app-button>
         <app-button ref="cancelUploadButton" v-show="showCancelButton" variant="secondary" type="button" @click="onCancelUpload">{{ $t("cancel") }}</app-button>
         <div class="clearfix"></div>
       </b-form>
@@ -68,9 +62,9 @@ import { IAppButton } from "@/app/shared/components/app-button/types";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
-import { FetchComponent } from "@/app/shared/components/fetch-component/fetch-component";
-import resumable from "@/app/shared/services/resumable/resumable";
-import { IResumableFile, ResumableEvent, ResumableState } from "@/app/shared/services/resumable/types";
+import { IFetchComponent } from "@/app/shared/components/fetch-component/fetch-component";
+import uploadService from "@/app/shared/services/upload-service/upload-service";
+import { IUploadListener, IResumableFile, UploadState, UploadEvent } from "@/app/shared/services/upload-service/types";
 import { NEW_ANALYSIS_STORAGE_KEY } from "@/app/shared/components/fetch-component/storage-keys";
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
 import { BFormSelectOption, BFormSelectOptionGroup } from "bootstrap-vue";
@@ -86,13 +80,12 @@ import { PlantBlockSchema } from "@/app/shared/services/volateq-api/api-schemas/
     AppButton
   }
 })
-export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetched> {
+export default class AppNewAnalysis extends BaseAuthComponent implements IFetchComponent<IAppNewAnalysisFetched>, IUploadListener {
   @Ref() appFileUpload!: IAppFileUpload;
   @Ref() uploadButton!: IAppButton;
   @Ref() cancelUploadButton!: IAppButton;
   uploadButtonTxt = "";
   showCancelButton = false;
-  showPauseButton = false;
   
   customers: CustomerSchema[] | undefined;
   customerOptions: Array<any> = [];
@@ -109,15 +102,19 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
     plantMetaFile: false
   }
 
-  analysis: { id: string } | undefined;
-
-  protected storageKey = NEW_ANALYSIS_STORAGE_KEY;
   protected waitForFiles: string[] | undefined;
 
-  /**
-   * Replaces created event
-   */
-  protected async onFetchData(data: IAppNewAnalysisFetched | undefined) {
+  analysis: { id: string } | undefined;
+
+  storageKey = NEW_ANALYSIS_STORAGE_KEY;
+
+  mounted() {
+    this.registerUploadEvents();
+  }
+
+  async created() {
+    await super.created();
+
     this.uploadButtonTxt = this.$t("upload").toString();
 
     try {
@@ -132,6 +129,7 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
       appContentEventBus.showErrorAlert(this.$t(e.error).toString());
     }
 
+    const data = this.fetchData();
     if (data) {
       this.analysis = data.analysis;
       this.newAnalysis = data.newAnalysis;
@@ -145,53 +143,65 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
     }
   }
 
-  private async getPlantBlocks(customerId?: string): Promise<PlantBlockSchema[]> {
-    const plants = await volateqApi.getPlants(customerId);
-    if (plants.length > 0) {
-      return plants[0].blocks;
-    }
-
-    return [];
+  updated() {
+    this.checkUploadState();
   }
 
-  mounted() {
-    // To continue and handle the upload, while the user is not on the upload page anymore,
-    // it must be distinguished between the AppFileUploadComponent-Events and the Resumbale-Events.
-    resumable.on(ResumableEvent.COMPLETED, async () => {
+  registerUploadEvents() {
+    uploadService.on(UploadEvent.COMPLETED, async (metadata: IAnalysisId) => {
       try {
-        await volateqApi.updateAnalysisState(resumable.getMetadata<IAnalysisId>().id, { state: ApiStates.PICK_ME_UP })
+        await volateqApi.updateAnalysisState(metadata.id, { state: ApiStates.PICK_ME_UP })
         appLocalStorage.removeItem(NEW_ANALYSIS_STORAGE_KEY);
 
         appContentEventBus.showSuccessAlert(this.$t("upload-completed-successfully").toString());
       } catch (e) {
         appContentEventBus.showErrorAlert(this.$t(e.error).toString());
       }
+
+      if (this.isCreated) {
+        this.uploadButton.stopLoading();
+        this.uploadButton.disable();
+
+        this.analysis = undefined;
+
+        this.showCancelButton = false;
+      }
     });
-    resumable.on(ResumableEvent.FAILED, async (message: string) => {
+    uploadService.on(UploadEvent.FAILED, async (message: string) => {
       appContentEventBus.showErrorAlert(this.$t(ApiStates.UPLOAD_FAILED).toString());
       console.error(message);
 
       try {
-        await volateqApi.updateAnalysisState(resumable.getMetadata<IAnalysisId>().id, { state: ApiStates.UPLOAD_FAILED, message: message })
+        await volateqApi.updateAnalysisState(uploadService.getMetadata<IAnalysisId>().id, { state: ApiStates.UPLOAD_FAILED, message: message })
       } catch (e) {
         // Well, that is not a surprise...
         console.error(e);
       }
+
+      if (this.isCreated) {
+        this.onFailed();
+      }
     });
-    resumable.on(ResumableEvent.FILE_RETRY, (file: IResumableFile, retries: number, maxRetries: number) => {
-      appContentEventBus.showWarningAlert(`${this.$t("upload-error-retry").toString()} ${retries}/${maxRetries}`, "resumable-upload-error-retry");
+    uploadService.on(UploadEvent.FILE_RETRY, (file: IResumableFile, retries: number) => {
+      appContentEventBus.showWarningAlert(`${this.$t("upload-error-retry").toString()} ${retries}/${uploadService.getMaxRetries()}`, "resumable-upload-error-retry");
+    });
+    uploadService.on(UploadEvent.FILE_ADDED, (file: IResumableFile) => {
+      if (this.isCreated) {
+        this.checkFileCompleteness();
+      }
+    });
+    uploadService.on(UploadEvent.FILE_REMOVED, (file: IResumableFile) => {
+      if (this.isCreated) {
+        this.checkFileCompleteness();
+      }
     });
   }
 
-  updated() {
-    if (resumable.hasState(ResumableState.UPLOADING)) { // Upload is still running...
+  checkUploadState() {
+    if (uploadService.hasState(UploadState.UPLOADING)) {
       this.uploadButton.startLoading();
-    } else if (resumable.hasState(ResumableState.RETRYING)) {
-      this.onFileRetry();
-    } else if (resumable.hasState(ResumableState.FAILED)) {
+    } else if (uploadService.hasState(UploadState.FAILED)) {
       this.onFailed();
-    } else if (resumable.hasState(ResumableState.PAUSED)) {
-      this.onPaused();
     } else if (this.analysis && this.waitForFiles) { // Upload has been interrupted
       this.checkFileCompleteness();
       if (this.waitForFiles.length > 0) {
@@ -205,13 +215,19 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
     }
   }
 
-  protected onStoreData(): IAppNewAnalysisFetched | undefined {
+  fetchData(): IAppNewAnalysisFetched | undefined {
+    return appLocalStorage.getItem(this.storageKey);
+  }
+  storeData() {
+    const data = this.getStorageData()
+    if (data) {
+      appLocalStorage.setItem(this.storageKey, data);
+    } else {
+      appLocalStorage.removeItem(this.storageKey);
+    }
+  }
+  getStorageData(): IAppNewAnalysisFetched | undefined {
     return this.analysis && {
-      customers: this.customers,
-      customerOptions: this.customerOptions,
-      routes: this.routes,
-      routesOptions: this.routesOptions,
-      plantBlocks: this.plantBlocks,
       newAnalysis: { 
         route_id: this.newAnalysis.route_id,
         files: [],
@@ -284,6 +300,11 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
   }
 
   async onSubmit() {
+    if (uploadService.hasState(UploadState.FAILED)) {
+      this.$router.go(0);
+      return;
+    }
+
     this.checkFileCompleteness();
     if (!this.checkListItems.droneMetaFile || !this.checkListItems.videoFiles) {
       appContentEventBus.showErrorAlert("MISSING_FILES");
@@ -292,7 +313,7 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
     }
 
     try {
-      this.uploadButton.startLoading();
+      this.onUploading();
 
       if (!this.analysis) {
         this.analysis = await volateqApi.createAnalysis(this.newAnalysis);
@@ -307,45 +328,15 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
     } 
   }
 
-  // Watch out: see resumable.on(COMPLETED, ...) in mounted() { ... } for the "this"-independent part of the function
-  onCompleted() {
-    this.clearStorageData();
-
-    this.uploadButton.stopLoading();
-    this.uploadButton.disable();
-
-    this.analysis = undefined;
-
-    this.showCancelButton = false;
-    this.showPauseButton = false;
-  }
-
-  // Watch out: see resumable.on(FAILED, ...) in mounted() { ... } for the "this"-independent part of the function
   onFailed() {
     this.uploadButton.stopLoading();
-    this.uploadButtonTxt = this.$t("resume-upload").toString();
+    this.uploadButtonTxt = this.$t("retry-upload").toString();
   
     this.showCancelButton = true;
-    this.showPauseButton = false;
   }
-
-  // Watch out: see resumable.on(FILE_RETRY, ...) in mounted() { ... } for the "this"-independent part of the function
-  onFileRetry() {
-    this.showPauseButton = true;
-    this.showCancelButton = true;
-  }
-
-  onPauseClick() {
-    resumable.pause();
-    this.onPaused();
-  }
-
-  onPaused() {
-    this.uploadButton.stopLoading();
-    this.uploadButtonTxt = this.$t("resume-upload").toString();
-    this.uploadButton.enable();
-
-    this.showPauseButton = false;
+  onUploading() {
+    this.uploadButton.startLoading();
+    this.showCancelButton = false;
   }
 
   async onCancelUpload() {
@@ -356,7 +347,7 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
     this.cancelUploadButton.startLoading();
 
     this.appFileUpload.cancel();
-    this.clearStorageData();
+    appLocalStorage.removeItem(this.storageKey);
     this.uploadButton.stopLoading();
     this.uploadButton.enable();
     this.uploadButtonTxt = this.$t("upload").toString();
@@ -378,7 +369,15 @@ export default class AppNewAnalysis extends FetchComponent<IAppNewAnalysisFetche
       // Reload page
       this.$router.go(0);
     }
+  }
 
+  private async getPlantBlocks(customerId?: string): Promise<PlantBlockSchema[]> {
+    const plants = await volateqApi.getPlants(customerId);
+    if (plants.length > 0) {
+      return plants[0].blocks;
+    }
+
+    return [];
   }
 }
 </script>

@@ -50,5 +50,6 @@
   "actions": "Actions",
   "download...": "Download...",
   "pause": "Pause",
-  "upload-error-retry": "Upload error occured! Retrying..."
+  "upload-error-retry": "Upload error occured! Retrying...",
+  "retry-upload": "Retry upload"
 }
