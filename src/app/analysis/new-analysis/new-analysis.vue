@@ -5,10 +5,10 @@
         <b-row style="margin-bottom: 25px;">
           <b-col sm="4" v-if="isSuperAdmin">
             <b-form-group label-cols="auto" :label="$t('customer')">
-              <b-form-select required v-model="newAnalysis.customer_id" :options="customerOptions" @change="onCustomerSelect"></b-form-select>
+              <b-form-select required v-model="newAnalysis.customer_id" :options="customerOptions"></b-form-select>
             </b-form-group>
           </b-col>
-          <b-col sm="4">
+          <!-- <b-col sm="4">
             <b-form-group label-cols="auto" :label="$t('route')">
               <b-form-select required v-model="selectedRoute" @change="onRouteSelect">
                 <template #first>
@@ -26,7 +26,7 @@
                 </b-form-select-option-group>
               </b-form-select>
             </b-form-group>
-          </b-col>
+          </b-col> -->
         </b-row>
         <app-file-upload ref="appFileUpload" :title="$t('upload-your-files')">
           <app-checklist>
@@ -90,12 +90,12 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
   customers: CustomerSchema[] | undefined;
   customerOptions: Array<any> = [];
 
-  plantBlocks: PlantBlockSchema[] = [];
-  routes: RouteSchema[] = [];
-  routesOptions: Array<any> = [];
-  selectedRoute = "";
+  // plantBlocks: PlantBlockSchema[] = [];
+  // routes: RouteSchema[] = [];
+  // routesOptions: Array<any> = [];
+  // selectedRoute = "";
 
-  newAnalysis: NewAnalysis = { route_id: "", files: [], plant_block_id: "", customer_id: "" };
+  newAnalysis: NewAnalysis = { /*route_id: "",*/ files: [], /*plant_block_id: "",*/ customer_id: "" };
   checkListItems: CheckListItems = {
     videoFiles: false,
     droneMetaFile: false,
@@ -122,8 +122,8 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
         this.customers = await volateqApi.getCustomers();
         this.customerOptions = this.customers.map(customer => ({ value: customer.id, text: customer.name }));
       } else { // The routes depend on the selected customer
-        this.plantBlocks = await this.getPlantBlocks();
-        this.routes = await volateqApi.getRoutes();
+        // this.plantBlocks = await this.getPlantBlocks();
+        // this.routes = await volateqApi.getRoutes();
       }
     } catch (e) {
       appContentEventBus.showErrorAlert(this.$t(e.error).toString());
@@ -136,10 +136,10 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
       this.waitForFiles = data.fileNames;
       
       if (this.isSuperAdmin) {
-        await this.onCustomerSelect();
+        // await this.onCustomerSelect();
       }
       
-      this.selectedRoute = data.selectedRoute;
+      // this.selectedRoute = data.selectedRoute;
     }
   }
 
@@ -229,43 +229,43 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
   getStorageData(): IAppNewAnalysisFetched | undefined {
     return this.analysis && {
       newAnalysis: { 
-        route_id: this.newAnalysis.route_id,
+        // route_id: this.newAnalysis.route_id,
         files: [],
         customer_id: this.newAnalysis.customer_id,
-        plant_block_id: this.newAnalysis.plant_block_id,
+        // plant_block_id: this.newAnalysis.plant_block_id,
         plant_metadata_file: undefined,
         plant_medatata_file_id: this.newAnalysis.plant_medatata_file_id,
       },
-      selectedRoute: this.selectedRoute,
+      // selectedRoute: this.selectedRoute,
       analysis: this.analysis,
       fileNames: this.appFileUpload.files.map(file => file.fileName)
     } || undefined;
   }
 
-  async onCustomerSelect() {
-    if (this.newAnalysis.customer_id) {
-      try {
-        this.plantBlocks = await this.getPlantBlocks(this.newAnalysis.customer_id);
-        this.routes = await volateqApi.getRoutes({ customer_id: this.newAnalysis.customer_id });
-      } catch (e) {
-        appContentEventBus.showErrorAlert(this.$t(e.error).toString());
-      }
-    }
-  }
+  // async onCustomerSelect() {
+  //   if (this.newAnalysis.customer_id) {
+  //     try {
+  //       this.plantBlocks = await this.getPlantBlocks(this.newAnalysis.customer_id);
+  //       this.routes = await volateqApi.getRoutes({ customer_id: this.newAnalysis.customer_id });
+  //     } catch (e) {
+  //       appContentEventBus.showErrorAlert(this.$t(e.error).toString());
+  //     }
+  //   }
+  // }
 
-  @Watch("routes")
-  onRoutesChanged(routes: RouteSchema[], oldRoutes: RouteSchema[]) {
-    this.routesOptions = this.routes.map(route => ({
-      value: route.id,
-      label: route.label,
-      title: route.description,
-      options: this.plantBlocks.map(block => ({ value: [route.id, block.id].join('#'), text: [route.label, block.name].join('#') }))
-    }));
-  }
+  // @Watch("routes")
+  // onRoutesChanged(routes: RouteSchema[], oldRoutes: RouteSchema[]) {
+  //   this.routesOptions = this.routes.map(route => ({
+  //     value: route.id,
+  //     label: route.label,
+  //     title: route.description,
+  //     options: this.plantBlocks.map(block => ({ value: [route.id, block.id].join('#'), text: [route.label, block.name].join('#') }))
+  //   }));
+  // }
 
-  onRouteSelect() {
-    [this.newAnalysis.route_id, this.newAnalysis.plant_block_id] = this.selectedRoute.split('#');
-  }
+  // onRouteSelect() {
+  //   [this.newAnalysis.route_id, this.newAnalysis.plant_block_id] = this.selectedRoute.split('#');
+  // }
 
   checkFileCompleteness() {
     if (this.waitForFiles) {
@@ -283,18 +283,22 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
 
     let countMp4Files = 0;
     this.newAnalysis.files = [];
-    for (const file of this.appFileUpload.files) {
-      const ext = (file.fileName.split(".").pop() || "").toLowerCase();
 
-      if (ext === "mp4") {
-        this.checkListItems.videoFiles = true;
-        this.newAnalysis.files.push(file.fileName)
-      } else if (ext === "srt") {
-        this.checkListItems.droneMetaFile = true;
-        this.newAnalysis.files.push(file.fileName)
-      } else if (ext === "xslx" || ext === "mdb") {
-        this.checkListItems.plantMetaFile = true;
-        this.newAnalysis.plant_metadata_file = file.fileName;
+    // For some reason this.appFileUpload is undefined, sometimes.. feel free to do further investigation
+    if (this.appFileUpload) {
+      for (const file of this.appFileUpload.files) {
+        const ext = (file.fileName.split(".").pop() || "").toLowerCase();
+  
+        if (ext === "mp4") {
+          this.checkListItems.videoFiles = true;
+          this.newAnalysis.files.push(file.fileName)
+        } else if (ext === "srt") {
+          this.checkListItems.droneMetaFile = true;
+          this.newAnalysis.files.push(file.fileName)
+        } else if (ext === "xslx" || ext === "mdb") {
+          this.checkListItems.plantMetaFile = true;
+          this.newAnalysis.plant_metadata_file = file.fileName;
+        }
       }
     }
   }
@@ -316,6 +320,10 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
       this.onUploading();
 
       if (!this.analysis) {
+        if (!this.newAnalysis.customer_id && 'customer_id' in this.newAnalysis) {
+          delete this.newAnalysis.customer_id;
+        }
+
         this.analysis = await volateqApi.createAnalysis(this.newAnalysis);
       }
             

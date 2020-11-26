@@ -67,7 +67,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
 
     this.columns = [
       { key: "date", label: this.$t("date").toString(), sortable: true },
-      { key: "route", label: this.$t("route").toString(), sortable: true },
+      // { key: "route", label: this.$t("route").toString(), sortable: true },
       { key: "state", label: this.$t("state").toString(), sortable: true },
       { key: "actions" }
     ];
@@ -164,14 +164,14 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
         const row = {
           id: a.id,
           date: new Date(Date.parse(a.created_at)).toLocaleString(),
-          route: a.plant_route.route.label + 
-            (a.plant_blocks && a.plant_blocks.length > 0 ? "#" + a.plant_blocks[0].name : ""),
+          // route: a.plant_route.route.label + 
+          //   (a.plant_blocks && a.plant_blocks.length > 0 ? "#" + a.plant_blocks[0].name : ""),
           state: this.$t(a.current_state && a.current_state.state.name || "UNKNOWN").toString(),
           files: a.files,
         };
 
         if (this.isSuperAdmin) {
-          row["customer"] = a.plant_route.customer.name;
+          row["customer"] = a.customer.name;
         }
 
         return row;
