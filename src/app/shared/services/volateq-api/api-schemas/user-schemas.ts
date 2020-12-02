@@ -35,3 +35,10 @@ export interface UserSchema {
   state: UserStateSchema;
   customer?: CustomerSchema;
 }
+
+export interface UserInfoSchema {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+}

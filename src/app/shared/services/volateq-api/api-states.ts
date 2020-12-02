@@ -7,3 +7,13 @@ export enum ApiStates {
   ABANDONED = "ABANDONED",
   FINISHED = "FINISHED",
 }
+
+export const ApiStateStruct = {
+  UPLOADING: [ApiStates.PICK_ME_UP, ApiStates.UPLOAD_FAILED, ApiStates.ABANDONED],
+  UPLOAD_FAILED: [ApiStates.UPLOADING, ApiStates.ABANDONED, ApiStates.PICK_ME_UP],
+  PICK_ME_UP: [ApiStates.PROCESSING, ApiStates.ABANDONED],
+  PROCESSING: [ApiStates.FINISHED, ApiStates.ABANDONED, ApiStates.PROCESS_FAILED],
+  PROCESS_FAILED: [ApiStates.PROCESSING, ApiStates.ABANDONED],
+  ABANDONED: [],
+  FINISHED: []
+}

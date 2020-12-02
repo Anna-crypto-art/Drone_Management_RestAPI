@@ -15,6 +15,22 @@
           <template #head(actions)>
             <span class="hidden">{{ $t("actions") }}</span>
           </template>
+          <template #cell(user)="row">
+            <span v-if="row.item.user.userName">
+              {{ row.item.user.userName }}<br>
+              <small class="grayed">{{ row.item.user.email }}</small>
+            </span>
+            <span v-else>{{ row.item.user.email }}</span>
+          </template>
+          <template #cell(state)="row">
+            <div v-if="row.item.state">
+              {{ $t(row.item.state.state.name) }}
+              <span v-if="row.item.state.state.name === 'UPLOADING'"> {{ uploadStateProcess }}</span>
+              <br>
+              <small class="grayed">{{ trans(getTimeDiff(row.item.state.started_at)) }}</small>
+            </div>
+            <div v-else>UNKNOWN</div>
+          </template>
           <template #cell(actions)="row">
             <div class="hover-cell pull-right">
               <b-dropdown right size="sm" variant="secondary" :title="$t('download...')">
@@ -61,13 +77,15 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
   analysisRows: Array<any> = [];
 
   createNewAnalysisBtnText = "";
+  uploadStateProcess = "";
 
   async created() {
     this.createNewAnalysisBtnText = this.$t("create-new-analysis").toString();
 
     this.columns = [
-      { key: "date", label: this.$t("date").toString(), sortable: true },
+      { key: "date", label: this.$t("created-at").toString(), sortable: true },
       // { key: "route", label: this.$t("route").toString(), sortable: true },
+      { key: "user", label: this.$t("created-by").toString(), sortable: true },
       { key: "state", label: this.$t("state").toString(), sortable: true },
       { key: "actions" }
     ];
@@ -87,7 +105,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
 
   registerUploadEvents() {
     uploadService.on(UploadEvent.PROGRESS, () => {
-      this.updateToResumableUploadState();
+      this.updateToUploadState();
     });
     uploadService.on(UploadEvent.COMPLETED, () => {
       this.createNewAnalysisBtnText = this.$t("create-new-analysis").toString();
@@ -100,8 +118,13 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
 
   checkUploadState() {
     if (uploadService.hasState(UploadState.UPLOADING)) {
-      this.updateToResumableUploadState();
+      this.updateToUploadState();
     }
+  }
+
+  // "this" is undefined in html component... so (")this(") is a workaround...
+  trans(args: [string, any]): string {
+    return this.$t(...args).toString();
   }
 
   getAnalysisFiles(row: any): string[] {
@@ -138,8 +161,8 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     }
   }
 
-  private updateToResumableUploadState() {
-    if (this.updateTableRowState(this.$t("UPLOADING") + " " + Math.round(uploadService.progress() * 100) + "%")) {
+  private updateToUploadState() {
+    if (this.updateTableRowState(Math.round(uploadService.progress() * 100) + "%")) {
       this.createNewAnalysisBtnText = this.$t("return-to-upload").toString();
     }
   }
@@ -147,12 +170,9 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
   private updateTableRowState(value: string): boolean {
     const analysisId = uploadService.getMetadata<IAnalysisId>();
     if (this.analysisRows && analysisId) {
-      const row = this.analysisRows.find(row => row.id === analysisId.id);
-      if (row) {
-        row.state = value;
+      this.uploadStateProcess = value;
 
-        return true;
-      }
+      return true;
     }
 
     return false;
@@ -164,9 +184,13 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
         const row = {
           id: a.id,
           date: new Date(Date.parse(a.created_at)).toLocaleString(),
+          user: a.user && {
+            userName: ((a.user.first_name || "") + " " + (a.user.last_name || "")).trim(),
+            email: a.user.email
+          } || '',
           // route: a.plant_route.route.label + 
           //   (a.plant_blocks && a.plant_blocks.length > 0 ? "#" + a.plant_blocks[0].name : ""),
-          state: this.$t(a.current_state && a.current_state.state.name || "UNKNOWN").toString(),
+          state: a.current_state, // this.$t(a.current_state && a.current_state.state.name || "UNKNOWN").toString(),
           files: a.files,
         };
 

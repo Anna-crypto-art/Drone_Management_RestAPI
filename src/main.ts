@@ -6,12 +6,19 @@ import "./main.scss";
 import App from "@/app/app.vue";
 import router from "@/app/app-routes";
 import store from "@/app/app-state";
+import DateHelper from "@/app/shared/services/helper/date-helper";
 
 Vue.use(BootstrapVue);
 Vue.use(IconsPlugin);
 Vue.use(VueI18n);
 
 Vue.config.productionTip = false;
+
+Vue.mixin({
+  methods: {
+    ...DateHelper
+  }
+})
 
 const i18n = new VueI18n({
   locale: "en",

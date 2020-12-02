@@ -3,6 +3,7 @@ import { CustomerSchema } from "./customer-schemas";
 import { PlantBlockSchema } from "./plant-block-schema";
 import { PlantMetadataFileSchema } from "./plant-metadata-file-schema";
 import { PlantRouteSchema } from "./plant-route-schema";
+import { UserInfoSchema } from "./user-schemas";
 
 export interface AnalysisFilesSchema {
   video_files: string[];
@@ -19,4 +20,5 @@ export interface AnalysisSchema {
   customer: CustomerSchema;
   files: AnalysisFilesSchema;
   created_at: string;
+  user: UserInfoSchema;
 }

@@ -51,5 +51,13 @@
   "download...": "Download...",
   "pause": "Pause",
   "upload-error-retry": "Upload error occured! Retrying...",
-  "retry-upload": "Retry upload"
+  "retry-upload": "Retry upload",
+  "created-at": "Created at",
+  "created-by": "Created by",
+  "seconds-ago": "{time} seconds ago",
+  "minutes-ago": "{time} minutes ago",
+  "hours-ago": "{time} hours ago",
+  "days-ago": "{time} days ago",
+  "months-ago": "{time} months ago",
+  "years-ago": "{time} years ago"
 }
