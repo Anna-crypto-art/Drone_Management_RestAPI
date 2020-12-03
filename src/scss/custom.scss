@@ -130,6 +130,13 @@ $theme-colors: (
 .table-hover tbody tr > td .hover-cell {
   opacity: 0;
   transition: ease 100ms opacity;
+
+  & > .b-dropdown {
+    margin-right: 5px;
+    &:last-child {
+      margin-right: 0;
+    }
+  }
 }
 
 .b-table-empty-row > td {

@@ -45,6 +45,10 @@
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",
   "PICK_ME_UP": "Pick me up",
+  "PROCESSING": "Processing",
+  "ABANDONED": "Abandoned",
+  "FINISHED": "Finished",
+  "PROCESS_FAILED": "Processing failed",
   "return-to-upload": "Return to upload",
   "no-data": "No data",
   "actions": "Actions",
@@ -59,5 +63,11 @@
   "hours-ago": "{time} hours ago",
   "days-ago": "{time} days ago",
   "months-ago": "{time} months ago",
-  "years-ago": "{time} years ago"
+  "years-ago": "{time} years ago",
+  "update-analysis-state": "Update state of analysis",
+  "update": "Update",
+  "update-analysis-state_descr": "The responsible user receive an E-Mail with your message",
+  "message": "Message",
+  "update-analysis-state-to": "Update state of analysis to <b>{state}</b>",
+  "update-analysis-state-success": "State of analysis successfully updated"
 }

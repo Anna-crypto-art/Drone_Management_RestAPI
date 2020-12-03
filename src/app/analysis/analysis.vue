@@ -39,37 +39,63 @@
                   {{ file }}
                 </b-dropdown-item>
               </b-dropdown>
+              <b-dropdown v-show="canUpdateState(row.item.state)" right size="sm" variant="secondary" :title="$t('update-analysis-state')">
+                <template #button-content><b-icon icon="flag"></b-icon></template>
+                <b-dropdown-item v-for="state in getPossibleUpdateStates(row.item.state)" :key="state" @click="onUpdateStateClick(row.item, state)">
+                  {{ $t(state) }}
+                </b-dropdown-item>
+              </b-dropdown>
             </div>
             <div class="clearfix"></div>
           </template>
         </b-table>
       </app-table-container>
+      <app-modal-form 
+        id="update-state-modal" 
+        ref="appUpdateStateModal" 
+        :title="$t('update-analysis-state')" 
+        :subtitle="$t('update-analysis-state_descr')" 
+        :ok-title="$t('update')"
+        @submit="updateAnalysisState">
+        <app-modal-form-info-area v-if="updateStateData.state" v-html="$t('update-analysis-state-to', { state: $t(updateStateData.state).toString() })">
+        </app-modal-form-info-area>
+        <b-form-group :label="$t('message')" label-for="message">
+          <b-form-textarea id="message" v-model="updateStateData.message" :placeholder="$t('message')" row="5"></b-form-textarea>
+        </b-form-group>
+      </app-modal-form>
     </div>
   </app-content>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import { Component } from "vue-property-decorator";
+import { Component, Ref } from "vue-property-decorator";
 
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import volateqApi from "../shared/services/volateq-api/volateq-api";
 import { AnalysisSchema } from "../shared/services/volateq-api/api-schemas/analysis-schema";
 import appContentEventBus from "../shared/components/app-content/app-content-event-bus";
+import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
 import uploadService, { UploadService } from "@/app/shared/services/upload-service/upload-service";
 import { IAnalysisId } from "./new-analysis/types";
-import { ApiStates } from "../shared/services/volateq-api/api-states";
+import { ApiStates, ApiStateStruct } from "../shared/services/volateq-api/api-states";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
 import { BvTableCtxObject, BvTableField, BvTableFieldArray } from "bootstrap-vue";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
 import { IUploadListener, UploadEvent, UploadState } from "../shared/services/upload-service/types";
+import { AnalysisStateSchema } from "../shared/services/volateq-api/api-schemas/analysis-state-schema";
+import { IAppModalForm } from "../shared/components/app-modal/types";
+import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
+import AppModalFormInfoArea from "@/app/shared/components/app-modal/app-modal-form-info-area.vue";
 
 @Component({
   name: "app-analysis",
   components: {
     AppContent,
-    AppTableContainer
+    AppTableContainer,
+    AppModalForm,
+    AppModalFormInfoArea
   }
 })
 export default class AppAnalysis extends BaseAuthComponent implements IUploadListener {
@@ -78,6 +104,9 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
 
   createNewAnalysisBtnText = "";
   uploadStateProcess = "";
+
+  @Ref() appUpdateStateModal!: IAppModalForm;
+  updateStateData: { analysisId?: string, state?: ApiStates, message?: string } = { analysisId: undefined, state: undefined, message: "" };
 
   async created() {
     this.createNewAnalysisBtnText = this.$t("create-new-analysis").toString();
@@ -158,6 +187,48 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
       console.error(e);
 
       appContentEventBus.showErrorAlert(this.$t(e.error).toString());
+    }
+  }
+
+  canUpdateState(analysisState: AnalysisStateSchema): boolean {
+    return this.isSuperAdmin && analysisState && 
+      [ApiStates.PICK_ME_UP, ApiStates.PROCESSING, ApiStates.PROCESS_FAILED].indexOf(analysisState.state.name) !== -1;
+  }
+
+  getPossibleUpdateStates(analysisState: AnalysisStateSchema): ApiStates[] {
+    return analysisState && ApiStateStruct[analysisState.state.name] || [];
+  }
+
+  onUpdateStateClick(analysis: AnalysisSchema, state: ApiStates) {
+    if (!this.updateStateData.analysisId || this.updateStateData.analysisId !== analysis.id || this.updateStateData.state !== state) {
+      this.updateStateData.message = "";
+    }
+    this.updateStateData.analysisId = analysis.id;
+    this.updateStateData.state = state;
+    
+    this.appUpdateStateModal.show();
+  }
+
+  async updateAnalysisState() {
+    this.appUpdateStateModal.hideAlert();
+    appButtonEventBus.startLoading();
+
+    try {
+      await volateqApi.updateAnalysisState(this.updateStateData.analysisId!, { 
+        state: this.updateStateData.state!, 
+        message: this.updateStateData.message 
+      });
+
+      await this.updateAnalysisRows();
+
+      this.appUpdateStateModal.hide();
+
+      appContentEventBus.showSuccessAlert(this.$t("update-analysis-state-success").toString());
+    } catch (e) {
+      console.error(e);
+      this.appUpdateStateModal.alertError(e.error);
+    } finally {
+      appButtonEventBus.stopLoading();
     }
   }
 
