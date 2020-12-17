@@ -33,7 +33,8 @@ export default class AppHeader extends BaseAuthComponent {
     try {
       await volateqApi.logout();
       
-      this.$router.push({ name: "Login" })
+      this.$router.push({ name: "Login" });
+      this.$router.go(0); // Reload the page to refresh the js cache
     } catch (e) {
       console.error(e);
     }
