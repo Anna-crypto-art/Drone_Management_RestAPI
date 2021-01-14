@@ -85,7 +85,19 @@ export class VolateqAPI extends HttpClientBase {
       throw Error('Missing customer_id');
     }
 
-    return this.get(`/auth/customer/${customerId}/plants`)
+    return this.get(`/auth/customer/${customerId}/plants`);
+  }
+
+  public forgotPassword(email: string): Promise<void> {
+    return this.post(`/forgot-password`, { email });
+  }
+
+  public confirmPasswordReset(confirmationKey: string): Promise<void> {
+    return this.get(`/reset-password/${confirmationKey}`);
+  }
+
+  public resetPassword(confirmationKey: string, new_password: string, new_password_repeat: string): Promise<void> {
+    return this.post(`/reset-password/${confirmationKey}`, { new_password, new_password_repeat });
   }
 }
 

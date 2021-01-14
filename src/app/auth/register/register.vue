@@ -2,7 +2,7 @@
   <div class="app-auth-register">
     <app-auth-container title="">
       <div v-if="hasUser">
-        <b-form @submit.prevent="onSubmit" ref="registerForm">
+        <b-form @submit.prevent="onSubmit">
           <div v-show="company">
             <b-form-group :label="$t('company')" label-for="company">
               <b-form-input id="company" v-model="company" disabled></b-form-input>
@@ -26,9 +26,6 @@
           <app-button type="submit" cls="width-100pc">{{ $t("register") }}</app-button>
         </b-form>
       </div>
-      <b-alert class="invalid-register-alert" v-model="alertVisible" variant="danger" dismissible>
-        {{ alertMsg }}
-      </b-alert>
     </app-auth-container>
   </div>
 </template>
@@ -43,6 +40,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
 import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
+import authContainerEventBus from "@/app/auth/shared/components/auth-container-event-bus";
 
 @Component({
   name: "app-auth-register",
@@ -52,15 +50,10 @@ import appButtonEventBus from "@/app/shared/components/app-button/app-button-eve
   }
 })
 export default class AppAuthRegister extends Vue {
-  @Ref() registerForm!: HTMLFormElement;
-
   hasUser = false;
   email = "";
   company = "";
   user!: RegisterUser;
-
-  alertMsg = "";
-  alertVisible = false;
 
   async created() {
     try {
@@ -103,18 +96,11 @@ export default class AppAuthRegister extends Vue {
   }
 
   showAlert(msg: string) {
-    this.alertMsg = msg;
-    this.alertVisible = true;
-
+    authContainerEventBus.showErrorAlert(msg);
     appButtonEventBus.stopLoading();
   }
 }
 </script>
 
 <style lang="scss">
-.app-auth-register {
-  .invalid-register-alert {
-    margin-top: 1rem;
-  }
-}
 </style>

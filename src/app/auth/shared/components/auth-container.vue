@@ -5,8 +5,12 @@
         <b-col cols="12" md="auto">
           <img src="@/assets/logos/logo_default.jpg" alt="Volateq" class="logo-img">
           <div class="app-auth-box">
-            <h1 v-if="title" class="app-auth-box-title">{{title}}</h1>
+            <div v-if="title" class="app-auth-box-title">
+              <h1>{{title}}</h1>
+              <div v-if="subtitle" v-html="subtitle" class="app-auth-box-subtitle grayed"></div>
+            </div>
             <slot></slot>
+            <b-alert class="app-auth-container-alert" v-model="showAlert" :variant="alert.variant" v-html="alert.msg" dismissible></b-alert>
           </div>
         </b-col>
       </b-row>
@@ -15,10 +19,31 @@
 </template>
 
 <script lang="ts">
-export default {
+import { AppAlert } from "@/app/shared/services/app-alert/app-alert";
+import Vue from "vue";
+import { Component, Prop } from "vue-property-decorator";
+import authContainerEventBus from "@/app/auth/shared/components/auth-container-event-bus";
+
+@Component({
   name: "app-auth-container",
-  props: ["title"]
-};
+})
+export default class AppAuthContainer extends Vue {
+  @Prop({ default: "" }) title!: string;
+  @Prop({ default: "" }) subtitle!: string;
+
+  alert: AppAlert = { msg: "", variant: "success" };
+  showAlert = false;
+
+  created() {
+    authContainerEventBus.onShowAlert((newAlert: AppAlert) => {
+      this.alert = newAlert;
+      this.showAlert = true;
+    });
+    authContainerEventBus.onClearAlert(() => {
+      this.showAlert = false;
+    });
+  }
+}
 </script>
 
 <style lang="scss">
@@ -29,16 +54,25 @@ export default {
 
 .app-auth-container {
   .app-auth-box {
-    width: 100%;
     padding: 20px;
     box-shadow: 0px 0px 30px $grey;
     position: relative;
     z-index: 1;
-    min-width: 400px;
+    width: 400px;
 
     &-title {
-      margin-bottom: 1em;
+      margin-bottom: 2em;
+
+      h1 {
+        font-size: 2rem;
+      }
     }
+    &-subtitle {
+      font-size: 1rem;
+    }
+  }
+  &-alert {
+    margin: 1rem 0 0;
   }
   .logo-img {
     max-width: 100%;
@@ -53,7 +87,7 @@ export default {
 @include media-breakpoint-down(sm) {
   .app-auth-container {
     .app-auth-box {
-      min-width: 0;
+      width: 100%;
     }
   }
 }

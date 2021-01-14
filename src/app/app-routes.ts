@@ -28,11 +28,13 @@ const router = new Router({
   ]
 });
 
-const nonAuthRoutes = ["Login", "Register"];
+// well... I admit this naming is confusing!
+// authRoutes are necessery for the authoriation. There are not auth protected!
+const nonAuthProtectRoutes = authRoutes.map(a => a.name);
 
 router.beforeEach((to, from, next) => {
   if (!store.getters.auth.isAuthenticated) {
-    if (nonAuthRoutes.indexOf(to.name || "") === -1) {
+    if (nonAuthProtectRoutes.indexOf(to.name || "") === -1) {
       next({ name: "Login" });
       return;
     }

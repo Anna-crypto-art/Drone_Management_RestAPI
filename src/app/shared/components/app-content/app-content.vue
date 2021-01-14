@@ -27,7 +27,8 @@
 import Vue from "vue";
 import { Prop, Component } from "vue-property-decorator";
 import AppHeader from "@/app/shared/components/app-header/app-header.vue";
-import appContentEventBus, { AppContentAlert } from "@/app/shared/components/app-content/app-content-event-bus";
+import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
+import { AppAlert } from "@/app/shared/services/app-alert/app-alert";
 
 @Component({
   name: "app-content",
@@ -40,10 +41,10 @@ export default class AppContent extends Vue {
   @Prop() subtitle: string | undefined;
   @Prop({ default: false }) navback: boolean | undefined;
 
-  alerts: AppContentAlert[] = [];
+  alerts: AppAlert[] = [];
 
   created() {
-    appContentEventBus.onShowAlert((newAlert: AppContentAlert) => {
+    appContentEventBus.onShowAlert((newAlert: AppAlert) => {
       const alert = this.alerts.find(alert => !!alert.id && alert.id === newAlert.id);
       if (alert) {
         alert.msg = newAlert.msg;

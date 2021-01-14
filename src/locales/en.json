@@ -69,5 +69,11 @@
   "update-analysis-state_descr": "The responsible user receive an E-Mail with your message",
   "message": "Message",
   "update-analysis-state-to": "Update state of analysis to <b>{state}</b>",
-  "update-analysis-state-success": "State of analysis successfully updated"
+  "update-analysis-state-success": "State of analysis successfully updated",
+  "forgot-password": "Forgot your password?",
+  "forgot-password_descr": "Enter your E-mail to receive a message with a link to reset your password",
+  "send": "send",
+  "request-sent": "Request sent",
+  "apply": "Apply",
+  "reset-password": "Reset password"
 }

@@ -37,6 +37,14 @@ form [type="submit"] {
   }
 }
 
+.input-info-link {
+  font-size: .9rem;
+  text-align: right;
+  display: block;
+  text-decoration: underline;
+  margin-bottom: -1rem;
+}
+
 .grayed {
   color: $dark-60pc;
 }

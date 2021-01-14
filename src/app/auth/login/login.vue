@@ -7,12 +7,10 @@
         </b-form-group>
         <b-form-group :label="$t('password')" label-for="password">
           <b-form-input id="password" v-model="password" type="password" :placeholder="$t('password')" required></b-form-input>
+          <router-link :to="{name: 'ForgotPassword'}" class="input-info-link">{{ $t('forgot-password') }}</router-link>
         </b-form-group>
         <app-button type="submit" cls="width-100pc">{{ $t("login") }}</app-button>
       </b-form>
-      <b-alert class="invalid-login-alert" v-model="show" variant="danger" dismissible>
-        {{msg}}
-      </b-alert>
     </app-auth-container>
   </div>
 </template>
@@ -25,6 +23,7 @@ import AppAuthContainer from "@/app/auth/shared/components/auth-container.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
+import authContainerEventBus from "@/app/auth/shared/components/auth-container-event-bus";
 
 @Component({
   name: "app-login",
@@ -36,8 +35,6 @@ import appButtonEventBus from "@/app/shared/components/app-button/app-button-eve
 export default class AppAuthLogin extends Vue {
   email = "";
   password = "";
-  msg = "";
-  show = false;
 
   async onSubmit(e: Event): Promise<void> {
     try {
@@ -47,9 +44,7 @@ export default class AppAuthLogin extends Vue {
 
       this.$router.push({ name: "Home" })
     } catch (e) {
-      this.msg = e.message;
-      this.show = true;
-
+      authContainerEventBus.showErrorAlert(e.message);
       appButtonEventBus.stopLoading();
     }
   }
@@ -57,9 +52,4 @@ export default class AppAuthLogin extends Vue {
 </script>
 
 <style lang="scss">
-.app-auth-login {
-  .invalid-login-alert {
-    margin-top: 1rem;
-  }
-}
 </style>
