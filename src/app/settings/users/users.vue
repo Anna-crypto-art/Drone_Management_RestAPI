@@ -154,10 +154,11 @@ export default class AppSettingsUsers extends Vue {
     this.appInviteModal.hideAlert();
 
     try {
-      const confirmUrl = await volateqApi.inviteUser(this.newUser);
+      appButtonEventBus.startLoading();
+      await volateqApi.inviteUser(this.newUser);
       
       this.appInviteModal.hide();
-      appContentEventBus.showSuccessAlert(confirmUrl);
+      appContentEventBus.showSuccessAlert(this.$t("user-invited-successfully").toString());
 
       await this.updateUserRows();
     } catch (e) {

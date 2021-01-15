@@ -75,5 +75,6 @@
   "send": "send",
   "request-sent": "Request sent",
   "apply": "Apply",
-  "reset-password": "Reset password"
+  "reset-password": "Reset password",
+  "user-invited-successfully": "User invited successfully"
 }
