@@ -1,7 +1,7 @@
 <template>
   <app-content :title="$t('overview')" :subtitle="$t('overview_descr')">
     <div class="app-analysis">
-      <router-link :to="{ name: 'Analysis-New' }">
+      <router-link :to="{ name: 'AnalysisNew' }">
         <b-button variant="primary">{{ createNewAnalysisBtnText }}</b-button>
       </router-link>
       <app-table-container>
@@ -45,6 +45,7 @@
                   {{ $t(state) }}
                 </b-dropdown-item>
               </b-dropdown>
+              <router-link :to="{name: 'AnalysisResults'}"><b-button variant="primary" size="sm"><b-icon icon="graph-up"></b-icon></b-button></router-link>
             </div>
             <div class="clearfix"></div>
           </template>

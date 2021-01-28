@@ -76,5 +76,18 @@
   "request-sent": "Request sent",
   "apply": "Apply",
   "reset-password": "Reset password",
-  "user-invited-successfully": "User invited successfully"
+  "user-invited-successfully": "User invited successfully",
+  "results-of-analysis": "Results of the analysis",
+  "results-of-analysis_descr": "Oil temperature in the absorber tube: <b>257°</b><br>Ambient temperature: <b>23°</b><br>Time: <b>17:14</b>",
+  "absorber-tubes": "Absorber tubes",
+  "single-collector-elements": "SCE",
+  "mirrors": "Mirrors",
+  "search-kks": "Search KKS code",
+  "export-csv": "Export CSV",
+  "kks": "KKS",
+  "ir-intensity": "IR Intensity",
+  "class-subfield": "Class. (subfield)",
+  "class-sca": "Class. (SCA)",
+  "order-subfield": "Order (subfield)",
+  "order-sca": "Order (SCA)"
 }

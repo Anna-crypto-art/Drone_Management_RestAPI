@@ -108,6 +108,10 @@ $theme-colors: (
 .table {
   color: $dark;
 }
+.table.bordered {
+  border: 1px solid $border-color-grey;
+  border-top: none;
+}
 
 .table.b-table > thead > tr > [aria-sort="none"] {
   background-size: 0 0;
@@ -142,4 +146,31 @@ $theme-colors: (
 .b-table-empty-row > td {
   text-align: center;
   padding: 2rem;
+}
+
+// .card {
+//   border-radius: 0;
+//   border-color: $border-color-grey;
+
+//   .card-header {
+//     background-color: $dark-10pc;
+//     border-radius: 0;
+//     border-bottom: none;
+//   }
+// }
+
+.nav-tabs .nav-link {
+  color: $dark-60pc;
+  border-radius: 0;
+
+  &.active, &:hover {
+    border-color: transparent;
+    border-bottom-color: $blue-60pc;
+    color: $dark
+  }
+  // &:hover {
+  //   border-color: transparent;
+  //   border-bottom-color: $blue-60pc;
+  //   color: $dark
+  // }
 }
