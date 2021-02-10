@@ -4,6 +4,7 @@ import { PlantBlockSchema } from "./plant-block-schema";
 import { PlantMetadataFileSchema } from "./plant-metadata-file-schema";
 import { PlantRouteSchema } from "./plant-route-schema";
 import { UserInfoSchema } from "./user-schemas";
+import { AnalysisResultSchema } from "./analysis-result-schema";
 
 export interface AnalysisFilesSchema {
   video_files: string[];
@@ -21,4 +22,5 @@ export interface AnalysisSchema {
   files: AnalysisFilesSchema;
   created_at: string;
   user: UserInfoSchema;
+  analysis_result: AnalysisResultSchema;
 }

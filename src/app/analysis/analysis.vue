@@ -260,6 +260,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
             userName: ((a.user.first_name || "") + " " + (a.user.last_name || "")).trim(),
             email: a.user.email
           } || '',
+          
           // route: a.plant_route.route.label + 
           //   (a.plant_blocks && a.plant_blocks.length > 0 ? "#" + a.plant_blocks[0].name : ""),
           state: a.current_state, // this.$t(a.current_state && a.current_state.state.name || "UNKNOWN").toString(),
