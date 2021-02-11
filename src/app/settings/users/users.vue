@@ -98,7 +98,7 @@ export default class AppSettingsUsers extends Vue {
     try {
       users = await volateqApi.getUsers();
     } catch (e) {
-      appContentEventBus.showErrorAlert(this.$t(e.error).toString());
+      appContentEventBus.showError(e);
     }
     
     this.rows = users.map((user: UserSchema) => {

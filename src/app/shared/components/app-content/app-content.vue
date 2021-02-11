@@ -14,7 +14,10 @@
         </div>
         <div class="app-content-content">
           <div class="app-content-content-alert">
-            <b-alert v-for="(alert, i) in alerts" :key="i" show :variant="alert.variant" v-html="alert.msg" dismissible></b-alert>
+            <!--<b-alert v-for="(alert, i) in alerts" :key="i" show :variant="alert.variant" v-html="alert.msg" dismissible></b-alert>-->
+            <b-alert v-model="showAlert" :variant="alert.variant" dismissible fade>
+              <div v-html="alert.msg"></div>
+            </b-alert>
           </div>
           <slot></slot>
         </div>
@@ -41,20 +44,26 @@ export default class AppContent extends Vue {
   @Prop() subtitle: string | undefined;
   @Prop({ default: false }) navback: boolean | undefined;
 
-  alerts: AppAlert[] = [];
+  // alerts: AppAlert[] = [];
+  alert: AppAlert = { msg: "", variant: "info" };
+  showAlert = false;
 
   created() {
     appContentEventBus.onShowAlert((newAlert: AppAlert) => {
-      const alert = this.alerts.find(alert => !!alert.id && alert.id === newAlert.id);
-      if (alert) {
-        alert.msg = newAlert.msg;
-        alert.variant = newAlert.variant
-      } else if (!this.alerts.find(alert => (alert.variant === newAlert.variant && alert.msg === newAlert.msg))) {
-        this.alerts.push(newAlert);
-      }
+      this.alert = newAlert;
+      this.showAlert = true;
+      
+      // const alert = this.alerts.find(alert => !!alert.id && alert.id === newAlert.id);
+      // if (alert) {
+      //   alert.msg = newAlert.msg;
+      //   alert.variant = newAlert.variant
+      // } else if (!this.alerts.find(alert => (alert.variant === newAlert.variant && alert.msg === newAlert.msg))) {
+      //   this.alerts.push(newAlert);
+      // }
     });
     appContentEventBus.onClearAlert(() => {
-      this.alerts = [];
+      // this.alerts = [];
+      this.showAlert = false;
     });
   }
 }

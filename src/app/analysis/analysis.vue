@@ -45,7 +45,9 @@
                   {{ $t(state) }}
                 </b-dropdown-item>
               </b-dropdown>
-              <router-link :to="{name: 'AnalysisResults'}"><b-button variant="primary" size="sm"><b-icon icon="graph-up"></b-icon></b-button></router-link>
+              <router-link v-if="row.item.analysisResultId" :to="{ name: 'AnalysisResult', params: { id: row.item.analysisResultId }}">
+                <b-button variant="primary" size="sm"><b-icon icon="graph-up"></b-icon></b-button>
+              </router-link>
             </div>
             <div class="clearfix"></div>
           </template>
@@ -78,11 +80,11 @@ import volateqApi from "../shared/services/volateq-api/volateq-api";
 import { AnalysisSchema } from "../shared/services/volateq-api/api-schemas/analysis-schema";
 import appContentEventBus from "../shared/components/app-content/app-content-event-bus";
 import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
-import uploadService, { UploadService } from "@/app/shared/services/upload-service/upload-service";
+import uploadService from "@/app/shared/services/upload-service/upload-service";
 import { IAnalysisId } from "./new-analysis/types";
 import { ApiStates, ApiStateStruct } from "../shared/services/volateq-api/api-states";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
-import { BvTableCtxObject, BvTableField, BvTableFieldArray } from "bootstrap-vue";
+import { BvTableFieldArray } from "bootstrap-vue";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
 import { IUploadListener, UploadEvent, UploadState } from "../shared/services/upload-service/types";
 import { AnalysisStateSchema } from "../shared/services/volateq-api/api-schemas/analysis-state-schema";
@@ -114,7 +116,6 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
 
     this.columns = [
       { key: "date", label: this.$t("created-at").toString(), sortable: true },
-      // { key: "route", label: this.$t("route").toString(), sortable: true },
       { key: "user", label: this.$t("created-by").toString(), sortable: true },
       { key: "state", label: this.$t("state").toString(), sortable: true },
       { key: "actions" }
@@ -185,9 +186,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
       
       AppDownloader.download(downloadUrl.url, fileName);
     } catch (e) {
-      console.error(e);
-
-      appContentEventBus.showErrorAlert(this.$t(e.error).toString());
+      appContentEventBus.showError(e);
     }
   }
 
@@ -260,10 +259,8 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
             userName: ((a.user.first_name || "") + " " + (a.user.last_name || "")).trim(),
             email: a.user.email
           } || '',
-          
-          // route: a.plant_route.route.label + 
-          //   (a.plant_blocks && a.plant_blocks.length > 0 ? "#" + a.plant_blocks[0].name : ""),
-          state: a.current_state, // this.$t(a.current_state && a.current_state.state.name || "UNKNOWN").toString(),
+          analysisResultId: a.analysis_result && a.analysis_result.id,
+          state: a.current_state, 
           files: a.files,
         };
 
@@ -274,9 +271,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
         return row;
       });
     } catch (e) {
-      console.error(e);
-
-      appContentEventBus.showErrorAlert(this.$t(e.error).toString());
+      appContentEventBus.showError(e);
     }
   }
 }

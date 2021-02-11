@@ -14,9 +14,14 @@ const anaylsisRoutes: RouteConfig[] = [
     path: "/analysis/new",
     component: AppNewAnalysis
   },
-  {
+  { // Result MockUp
     name: "AnalysisResults",
     path: "/analysis/results",
+    component: AppAnalysisResult
+  },
+  {
+    name: "AnalysisResult",
+    path: "/analysis/result/:id",
     component: AppAnalysisResult
   }
 ];

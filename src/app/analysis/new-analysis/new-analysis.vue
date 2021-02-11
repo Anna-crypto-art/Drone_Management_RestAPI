@@ -8,25 +8,6 @@
               <b-form-select required v-model="newAnalysis.customer_id" :options="customerOptions"></b-form-select>
             </b-form-group>
           </b-col>
-          <!-- <b-col sm="4">
-            <b-form-group label-cols="auto" :label="$t('route')">
-              <b-form-select required v-model="selectedRoute" @change="onRouteSelect">
-                <template #first>
-                  <b-form-select-option :value="null"></b-form-select-option>
-                </template>
-                <b-form-select-option-group v-for="routesOption in routesOptions"
-                  :label="routesOption.label"
-                  :key="routesOption.value"
-                  :title="routesOption.title">
-                  <b-form-select-option v-for="routeBlockOption in routesOption.options" 
-                    :key="routeBlockOption.value"
-                    :value="routeBlockOption.value">
-                    {{ routeBlockOption.text }}
-                  </b-form-select-option>
-                </b-form-select-option-group>
-              </b-form-select>
-            </b-form-group>
-          </b-col> -->
         </b-row>
         <app-file-upload ref="appFileUpload" :title="$t('upload-your-files')">
           <app-checklist>
@@ -44,11 +25,10 @@
 </template>
 
 <script lang="ts">
-import { Component, Watch, Ref } from "vue-property-decorator";
+import { Component, Ref } from "vue-property-decorator";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
-import { RouteSchema } from "@/app/shared/services/volateq-api/api-schemas/route-schema";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { NewAnalysis } from "@/app/shared/services/volateq-api/api-requests/analysis-requests";
@@ -59,15 +39,12 @@ import AppChecklistItem from "@/app/shared/components/app-checklist/app-checklis
 import { CheckListItems, IAnalysisId, IAppNewAnalysisFetched } from "@/app/analysis/new-analysis/types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { IAppButton } from "@/app/shared/components/app-button/types";
-import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
-import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
 import { IFetchComponent } from "@/app/shared/components/fetch-component/fetch-component";
 import uploadService from "@/app/shared/services/upload-service/upload-service";
 import { IUploadListener, IResumableFile, UploadState, UploadEvent } from "@/app/shared/services/upload-service/types";
 import { NEW_ANALYSIS_STORAGE_KEY } from "@/app/shared/components/fetch-component/storage-keys";
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
-import { BFormSelectOption, BFormSelectOptionGroup } from "bootstrap-vue";
 import { PlantBlockSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-block-schema";
 
 @Component({
@@ -90,12 +67,7 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
   customers: CustomerSchema[] | undefined;
   customerOptions: Array<any> = [];
 
-  // plantBlocks: PlantBlockSchema[] = [];
-  // routes: RouteSchema[] = [];
-  // routesOptions: Array<any> = [];
-  // selectedRoute = "";
-
-  newAnalysis: NewAnalysis = { /*route_id: "",*/ files: [], /*plant_block_id: "",*/ customer_id: "" };
+  newAnalysis: NewAnalysis = { files: [], customer_id: "" };
   checkListItems: CheckListItems = {
     videoFiles: false,
     droneMetaFile: false,
@@ -121,12 +93,9 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
       if (this.isSuperAdmin) {
         this.customers = await volateqApi.getCustomers();
         this.customerOptions = this.customers.map(customer => ({ value: customer.id, text: customer.name }));
-      } else { // The routes depend on the selected customer
-        // this.plantBlocks = await this.getPlantBlocks();
-        // this.routes = await volateqApi.getRoutes();
       }
     } catch (e) {
-      appContentEventBus.showErrorAlert(this.$t(e.error).toString());
+      appContentEventBus.showError(e);
     }
 
     const data = this.fetchData();
@@ -134,12 +103,6 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
       this.analysis = data.analysis;
       this.newAnalysis = data.newAnalysis;
       this.waitForFiles = data.fileNames;
-      
-      if (this.isSuperAdmin) {
-        // await this.onCustomerSelect();
-      }
-      
-      // this.selectedRoute = data.selectedRoute;
     }
   }
 
@@ -155,7 +118,7 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
 
         appContentEventBus.showSuccessAlert(this.$t("upload-completed-successfully").toString());
       } catch (e) {
-        appContentEventBus.showErrorAlert(this.$t(e.error).toString());
+        appContentEventBus.showError(e);
       }
 
       if (this.isCreated) {
@@ -205,7 +168,8 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
     } else if (this.analysis && this.waitForFiles) { // Upload has been interrupted
       this.checkFileCompleteness();
       if (this.waitForFiles.length > 0) {
-        appContentEventBus.showInfoAlert(this.$t("need-files-to-upload_descr").toString() + this.waitForFiles.join(", "));
+        appContentEventBus.showInfoAlert(this.$t("need-files-to-upload_descr").toString() + 
+          "<ul style=\"margin: 5px 0 0 40px;\"><li>" + this.waitForFiles.join("</li><li>") + "</li></ul>");
         
         this.uploadButtonTxt = this.$t("resume-upload").toString();
         this.uploadButton.disable();
@@ -228,44 +192,16 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
   }
   getStorageData(): IAppNewAnalysisFetched | undefined {
     return this.analysis && {
-      newAnalysis: { 
-        // route_id: this.newAnalysis.route_id,
+      newAnalysis: {
         files: [],
         customer_id: this.newAnalysis.customer_id,
-        // plant_block_id: this.newAnalysis.plant_block_id,
         plant_metadata_file: undefined,
         plant_medatata_file_id: this.newAnalysis.plant_medatata_file_id,
       },
-      // selectedRoute: this.selectedRoute,
       analysis: this.analysis,
       fileNames: this.appFileUpload.files.map(file => file.fileName)
     } || undefined;
   }
-
-  // async onCustomerSelect() {
-  //   if (this.newAnalysis.customer_id) {
-  //     try {
-  //       this.plantBlocks = await this.getPlantBlocks(this.newAnalysis.customer_id);
-  //       this.routes = await volateqApi.getRoutes({ customer_id: this.newAnalysis.customer_id });
-  //     } catch (e) {
-  //       appContentEventBus.showErrorAlert(this.$t(e.error).toString());
-  //     }
-  //   }
-  // }
-
-  // @Watch("routes")
-  // onRoutesChanged(routes: RouteSchema[], oldRoutes: RouteSchema[]) {
-  //   this.routesOptions = this.routes.map(route => ({
-  //     value: route.id,
-  //     label: route.label,
-  //     title: route.description,
-  //     options: this.plantBlocks.map(block => ({ value: [route.id, block.id].join('#'), text: [route.label, block.name].join('#') }))
-  //   }));
-  // }
-
-  // onRouteSelect() {
-  //   [this.newAnalysis.route_id, this.newAnalysis.plant_block_id] = this.selectedRoute.split('#');
-  // }
 
   checkFileCompleteness() {
     if (this.waitForFiles) {
@@ -281,7 +217,6 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
     this.checkListItems.videoFiles = false;
     this.checkListItems.plantMetaFile = false;
 
-    let countMp4Files = 0;
     this.newAnalysis.files = [];
 
     // For some reason this.appFileUpload is undefined, sometimes.. feel free to do further investigation
@@ -310,7 +245,7 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
     }
 
     this.checkFileCompleteness();
-    if (!this.checkListItems.droneMetaFile || !this.checkListItems.videoFiles) {
+    if (!this.checkListItems.droneMetaFile || !this.checkListItems.videoFiles || !this.checkListItems.plantMetaFile) {
       appContentEventBus.showErrorAlert("MISSING_FILES");
       this.uploadButton.stopLoading();
       return;
@@ -331,7 +266,7 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
 
       this.appFileUpload.upload<IAnalysisId>(volateqApi.getAnalysisFileUploadUrl(this.analysis.id), { id: this.analysis.id });
     } catch (e) {
-      appContentEventBus.showErrorAlert(this.$t(e.error).toString());
+      appContentEventBus.showError(e);
       this.uploadButton.stopLoading();
     } 
   }

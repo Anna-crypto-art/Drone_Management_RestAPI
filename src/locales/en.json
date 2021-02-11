@@ -34,7 +34,7 @@
   "upload-your-files": "Upload your files",
   "video-files_descr": "Video files (*.mp4)",
   "drone-metadata-file_descr": "Drone metadata file (*.srt)",
-  "plant-metadata-file_descr": "(Optional) Metadata of the state of your plant (*.xslx, *.mdb)",
+  "plant-metadata-file_descr": "Metadata of the state of your plant (*.xslx, *.mdb)",
   "upload": "Upload",
   "retrying...": "Retrying...",
   "ERROR": "ERROR",

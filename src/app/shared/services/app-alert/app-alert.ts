@@ -1,4 +1,6 @@
+import { BIconTelephoneForwardFill } from "bootstrap-vue";
 import Vue from "vue"
+import { ApiErrors } from "../volateq-api/api-errors";
 
 export interface AppAlert {
   variant: "success" | "danger" | "info" | "warning" | undefined;
@@ -32,6 +34,15 @@ export class AppAlertEventBus extends Vue {
   }
   showAlert(appAlert: AppAlert) {
     this.$emit(AppAlertEvents.showAlert, appAlert);
+  }
+  showError(error: { error: string, message: string; }) {
+    console.error(error);
+
+    if (error && error.error) {
+      this.showErrorAlert(error.error + (error.message && "<br><small>" + error.message + "</small>" || ""));
+    } else {
+      this.showErrorAlert(ApiErrors.SOMETHING_WENT_WRONG);
+    }
   }
   clearAlert() {
     this.$emit(AppAlertEvents.clearAlert);
