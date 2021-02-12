@@ -159,7 +159,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
   }
 
   getAnalysisFiles(row: any): string[] {
-    const files: string[] = [];
+    let files: string[] = [];
     const analysis: AnalysisSchema = row.item || {};
 
     if (!analysis.files || !analysis.id) {
@@ -167,15 +167,14 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     }
 
     if (analysis.files.video_files) {
-      for (const videoFile of analysis.files.video_files) {
-        files.push(videoFile);
-      }
+      files = files.concat(analysis.files.video_files);
     }
     if (analysis.files.drone_metadata_files) {
-      for (const droneFile of analysis.files.drone_metadata_files) {
-        files.push(droneFile);
-      }
+      files = files.concat(analysis.files.drone_metadata_files)
     }
+    analysis.files.plant_metadata_file && files.push(analysis.files.plant_metadata_file)
+
+    files.sort()
 
     return files;
   }

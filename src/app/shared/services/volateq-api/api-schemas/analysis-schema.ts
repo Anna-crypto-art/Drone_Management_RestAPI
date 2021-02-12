@@ -1,7 +1,6 @@
 import { AnalysisStateSchema } from "./analysis-state-schema";
 import { CustomerSchema } from "./customer-schemas";
 import { PlantBlockSchema } from "./plant-block-schema";
-import { PlantMetadataFileSchema } from "./plant-metadata-file-schema";
 import { PlantRouteSchema } from "./plant-route-schema";
 import { UserInfoSchema } from "./user-schemas";
 import { AnalysisResultSchema } from "./analysis-result-schema";
@@ -9,6 +8,7 @@ import { AnalysisResultSchema } from "./analysis-result-schema";
 export interface AnalysisFilesSchema {
   video_files: string[];
   drone_metadata_files: string[];
+  plant_metadata_file: string;
 }
 
 export interface AnalysisSchema {
@@ -16,7 +16,6 @@ export interface AnalysisSchema {
   in_debug_phase: boolean;
   current_state: AnalysisStateSchema;
   plant_route?: PlantRouteSchema;
-  plant_metadata_file?: PlantMetadataFileSchema;
   plant_blocks?: PlantBlockSchema[];
   customer: CustomerSchema;
   files: AnalysisFilesSchema;
