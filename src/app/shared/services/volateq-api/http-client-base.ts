@@ -42,6 +42,22 @@ export class HttpClientBase {
     );
   }
 
+  protected async postFile(url: string, filePropertyName: string, file: any, data?: any, config?: AxiosRequestConfig | undefined): Promise<any> {
+    const formData = new FormData();
+    formData.append(filePropertyName, file)
+
+    if (data) {
+      for (const property in data) {
+        formData.append(property, data[property])
+      }
+    }
+
+    config = config || {};
+    config['headers'] = { 'Content-Type': 'multipart/form-data' };
+
+    return this.httpClient.post(url, formData, config);
+  }
+
   protected async post(url: string, data?: any, config?: AxiosRequestConfig | undefined): Promise<any> {
     return this.httpClient.post(url, data, config);
   }

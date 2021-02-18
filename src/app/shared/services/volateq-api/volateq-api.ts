@@ -9,6 +9,9 @@ import { RouteSchema } from "./api-schemas/route-schema";
 import { NewAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
 import { AnalysisSchema } from "./api-schemas/analysis-schema";
 import { PlantSchema } from "./api-schemas/plant-schema";
+import { TaskSchema } from "./api-schemas/task-schema";
+import { AnalysisResultDetailedSchema } from "./api-schemas/analysis-result-schema";
+import { AnalysisResultCspPtcIrIntensitySchema } from "./api-schemas/analysis-result-csp-ptc-ir-intensity-schema";
 
 export class VolateqAPI extends HttpClientBase {
 
@@ -98,6 +101,20 @@ export class VolateqAPI extends HttpClientBase {
 
   public resetPassword(confirmationKey: string, new_password: string, new_password_repeat: string): Promise<void> {
     return this.post(`/reset-password/${confirmationKey}`, { new_password, new_password_repeat });
+  }
+
+  public importAnalysisResult(file: any, analysisId: string): Promise<TaskSchema> {
+    return this.postFile(`/import-analysis-result/${analysisId}`, 'file', file);
+  }
+
+  public getAnalysisResult(analysisResultId: string): Promise<AnalysisResultDetailedSchema> {
+    return this.get(`/analysis-result/${analysisResultId}`);
+  }
+
+  public getSpecificAnalysisResult(analysisResultId: string, componentKeyFigureId: string): 
+    Promise<AnalysisResultCspPtcIrIntensitySchema>
+  {
+    return this.get(`/analysis-result/${analysisResultId}/${componentKeyFigureId}`);
   }
 }
 
