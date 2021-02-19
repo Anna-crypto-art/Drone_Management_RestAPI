@@ -38,6 +38,8 @@ export default class AppSearchInput extends Vue {
 </script>
 
 <style lang="scss">
+@import "@/scss/_colors.scss";
+
 .app-search-input {
   max-width: 300px;
   margin-right: 10px;

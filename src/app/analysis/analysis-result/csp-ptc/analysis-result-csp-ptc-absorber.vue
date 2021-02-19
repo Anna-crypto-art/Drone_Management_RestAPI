@@ -1,33 +1,33 @@
 <template>
-  <b-table hover :fields="columns" :items="rows" class="bordered"
-    head-variant="light"
-    :emptyText="$t('no-data')">
-    <template #head(irIntensity)="column">
-      {{ column.label }} <span class="help-icon"><b-icon icon="question-circle-fill"></b-icon></span>
-    </template>
-    <template #head(classSubfield)="column">
-      {{ column.label }} <span class="help-icon"><b-icon icon="question-circle-fill"></b-icon></span>
-    </template>
-    <template #head(classSca)="column">
-      {{ column.label }} <span class="help-icon"><b-icon icon="question-circle-fill"></b-icon></span>
-    </template>
-  </b-table>
+  <div>
+    <b-table id="cspPtcAbsorberTable" hover :fields="columns" :items="rows" class="bordered"
+      head-variant="light"
+      :emptyText="$t('no-data')"
+      :per-page="pagination.perPage"
+      :current-page="pagination.currentPage">
+      <template #head(irIntensity)="column">
+        {{ column.label }} <span class="help-icon"><b-icon icon="question-circle-fill"></b-icon></span>
+      </template>
+      <template #head(classSubfield)="column">
+        {{ column.label }} <span class="help-icon"><b-icon icon="question-circle-fill"></b-icon></span>
+      </template>
+      <template #head(classSca)="column">
+        {{ column.label }} <span class="help-icon"><b-icon icon="question-circle-fill"></b-icon></span>
+      </template>
+    </b-table>
+    <b-pagination
+        v-model="pagination.currentPage"
+        :total-rows="pagination.total"
+        :per-page="pagination.perPage"
+        aria-controls="cspPtcAbsorberTable"
+      ></b-pagination>
+  </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import AppButton from "@/app/shared/components/app-button/app-button.vue";
-import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
-import AppSearchInput from "@/app/shared/components/app-search-input/app-search-input.vue";
 import { BvTableFieldArray } from "bootstrap-vue";
-import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { IAnalysisResultComponent } from "@/app/analysis/analysis-result/analysis-result";
-import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
-import { IComponentTab } from "./types";
-import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-analysis-result-components";
 import { AnalysisResultCspPtcIrIntensitySchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-ir-intensity-schema";
 
 @Component({
@@ -41,6 +41,7 @@ export default class AppAnalysisResultCspPtcAbsorber extends Vue {
   columns: BvTableFieldArray = [];
   rows: Array<any> = [];
 
+  pagination = { currentPage: 1, perPage: 10, total: 0 };
 
   created() {
     this.columns = [
@@ -57,7 +58,9 @@ export default class AppAnalysisResultCspPtcAbsorber extends Vue {
       pcs: result.fieldgeometry_component.kks,
       absorberTemperature: result.absorber_temperature,
       irIntensity: result.ir_intensity
-    }))
+    }));
+
+    this.pagination.total = this.rows.length;
   }
 }
 </script>

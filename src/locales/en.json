@@ -92,5 +92,8 @@
   "class-subfield": "Class. (subfield)",
   "class-sca": "Class. (SCA)",
   "order-subfield": "Order (subfield)",
-  "order-sca": "Order (SCA)"
+  "order-sca": "Order (SCA)",
+  "select-result-data-file": "Select result data file",
+  "absorber-temperature": "Absorber temperature",
+  "pcs": "PCS"
 }

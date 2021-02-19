@@ -1,6 +1,6 @@
-import { BvTableFieldArray } from "bootstrap-vue";
-
-export interface IComponentTab {
-  name: string;
-  title: string;
+export interface IActiveComponent {
+  tabIndex: number;
+  active?: boolean;
+  results?: any;
+  componentKeyFigureId?: string;
 }

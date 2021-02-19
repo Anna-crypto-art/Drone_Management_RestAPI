@@ -148,17 +148,6 @@ $theme-colors: (
   padding: 2rem;
 }
 
-// .card {
-//   border-radius: 0;
-//   border-color: $border-color-grey;
-
-//   .card-header {
-//     background-color: $dark-10pc;
-//     border-radius: 0;
-//     border-bottom: none;
-//   }
-// }
-
 .nav-tabs .nav-link {
   color: $dark-60pc;
   border-radius: 0;
@@ -168,9 +157,39 @@ $theme-colors: (
     border-bottom-color: $blue-60pc;
     color: $dark
   }
-  // &:hover {
-  //   border-color: transparent;
-  //   border-bottom-color: $blue-60pc;
-  //   color: $dark
-  // }
+}
+
+// b-form-file
+.custom-file-label {
+  border-radius: 0;
+  border-color: $blue-60pc;
+
+  &::after {
+    border-radius: 0;
+    background-color: $white;
+    color: $blue;
+    text-transform: uppercase;
+    font-weight: normal;
+    letter-spacing: 1px;
+    padding: 0.45rem 1.2rem;
+    height: calc(1.5em + 0.9rem);
+    font-size: 0.9rem;
+  }
+}
+
+.pagination {
+  justify-content: center;
+  border-radius: 0;
+
+  .page-link {
+    border-color: $blue-60pc;
+    color: $blue;
+  }
+
+  .page-item:first-child .page-link {
+    border-radius: 0;
+  }
+  .page-item:last-child .page-link {
+    border-radius: 0;
+  }
 }

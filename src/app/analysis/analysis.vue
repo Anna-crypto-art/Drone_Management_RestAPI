@@ -59,9 +59,12 @@
         :title="$t('update-analysis-state')" 
         :subtitle="$t('update-analysis-state_descr')" 
         :ok-title="$t('update')"
-        @submit="updateAnalysisState">
+        @submit="changeAnalysisState">
         <app-modal-form-info-area v-if="updateStateData.state" v-html="$t('update-analysis-state-to', { state: $t(updateStateData.state).toString() })">
         </app-modal-form-info-area>
+        <b-form-group v-if="updateStateData.state === 'FINISHED'">
+          <b-form-file v-model="updateStateData.file" :placeholder="$t('select-result-data-file')" required></b-form-file>
+        </b-form-group>
         <b-form-group :label="$t('message')" label-for="message">
           <b-form-textarea id="message" v-model="updateStateData.message" :placeholder="$t('message')" row="5"></b-form-textarea>
         </b-form-group>
@@ -109,7 +112,12 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
   uploadStateProcess = "";
 
   @Ref() appUpdateStateModal!: IAppModalForm;
-  updateStateData: { analysisId?: string, state?: ApiStates, message?: string } = { analysisId: undefined, state: undefined, message: "" };
+  updateStateData: { 
+    analysisId?: string,
+    state?: ApiStates,
+    message?: string,
+    file?: string,
+  } = { message: "", state: undefined, analysisId: undefined };
 
   async created() {
     this.createNewAnalysisBtnText = this.$t("create-new-analysis").toString();
@@ -208,10 +216,18 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     this.appUpdateStateModal.show();
   }
 
-  async updateAnalysisState() {
+  async changeAnalysisState() {
     this.appUpdateStateModal.hideAlert();
     appButtonEventBus.startLoading();
+    
+    if (this.updateStateData.state === ApiStates.FINISHED) {
+      this.updateToFinalAnalysisState();
+    } else {
+      this.updateAnalysisState();
+    }
+  }
 
+  async updateAnalysisState() {
     try {
       await volateqApi.updateAnalysisState(this.updateStateData.analysisId!, { 
         state: this.updateStateData.state!, 
@@ -227,6 +243,32 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
       console.error(e);
       this.appUpdateStateModal.alertError(e.error);
     } finally {
+      appButtonEventBus.stopLoading();
+    }
+  }
+
+  private async updateToFinalAnalysisState() {
+    try {
+      const task = await volateqApi.importAnalysisResult(this.updateStateData.file, this.updateStateData.analysisId!);
+      let interval = setInterval(async () => {
+        try {
+          const taskState = await volateqApi.getTask(task.id);
+          if (taskState.state === "SUCCESS") {
+            clearInterval(interval);
+            this.updateAnalysisState();
+          } else if (taskState.state === "FAILURE") {
+            clearInterval(interval);
+            throw { error: "SOMETHING_WENT_WRONG", details: taskState.result };
+          }
+        } catch (e) {
+          console.error(e);
+          this.appUpdateStateModal.alertError(e.error)
+          appButtonEventBus.stopLoading();
+        }
+      }, 3000)
+    } catch (e) {
+      console.error(e);
+      this.appUpdateStateModal.alertError(e.error);
       appButtonEventBus.stopLoading();
     }
   }

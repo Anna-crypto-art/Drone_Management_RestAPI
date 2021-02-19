@@ -104,17 +104,21 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public importAnalysisResult(file: any, analysisId: string): Promise<TaskSchema> {
-    return this.postFile(`/import-analysis-result/${analysisId}`, 'file', file);
+    return this.postFile(`/auth/import-analysis-result/${analysisId}`, 'file', file);
   }
 
   public getAnalysisResult(analysisResultId: string): Promise<AnalysisResultDetailedSchema> {
-    return this.get(`/analysis-result/${analysisResultId}`);
+    return this.get(`/auth/analysis-result/${analysisResultId}`);
   }
 
   public getSpecificAnalysisResult(analysisResultId: string, componentKeyFigureId: string): 
     Promise<AnalysisResultCspPtcIrIntensitySchema>
   {
-    return this.get(`/analysis-result/${analysisResultId}/${componentKeyFigureId}`);
+    return this.get(`/auth/analysis-result/${analysisResultId}/${componentKeyFigureId}`);
+  }
+
+  public getTask(taskId: string): Promise<TaskSchema> {
+    return this.get(`/auth/task/${taskId}`);
   }
 }
 

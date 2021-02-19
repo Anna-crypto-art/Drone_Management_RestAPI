@@ -1,4 +1,4 @@
 export interface IAnalysisResultComponent {
   setSubtitle(): void;
-  onSearch(): void;
+  onSearch(searchText): void;
 }

@@ -10,26 +10,16 @@
       <div class="clearfix"></div>
     </div>
     <app-table-container>
-      <b-tabs>
-        <b-tab :title="$t('absorber-tubes')" active>
-          <b-table hover :fields="columns" :items="analysisResultRows" class="bordered"
-            head-variant="light"
-            :emptyText="$t('no-data')">
-            <template #head(irIntensity)="column">
-              {{ column.label }} <span class="help-icon"><b-icon icon="question-circle-fill"></b-icon></span>
-            </template>
-            <template #head(classSubfield)="column">
-              {{ column.label }} <span class="help-icon"><b-icon icon="question-circle-fill"></b-icon></span>
-            </template>
-            <template #head(classSca)="column">
-              {{ column.label }} <span class="help-icon"><b-icon icon="question-circle-fill"></b-icon></span>
-            </template>
-          </b-table>
+      <b-tabs @activate-tab="loadComponentData">
+        <b-tab v-if="activeComponents.cspPtcAbsorber" :title="$t('absorber-tubes')" active>
+          <app-analysis-result-csp-ptc-absorber v-if="activeComponents.cspPtcAbsorber.results" :results="activeComponents.cspPtcAbsorber.results">
+          </app-analysis-result-csp-ptc-absorber>
+          <app-loading v-if="!activeComponents.cspPtcAbsorber.results"></app-loading>
         </b-tab>
-        <b-tab :title="$t('single-collector-elements')">
+        <!-- <b-tab :title="$t('single-collector-elements')">
         </b-tab>
         <b-tab :title="$t('mirrors')">
-        </b-tab>
+        </b-tab> -->
       </b-tabs>
     </app-table-container>
   </div>
@@ -39,14 +29,16 @@
 import { Component, Prop } from "vue-property-decorator";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
+import AppLoading from "@/app/shared/components/app-loading/app-loading.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import AppSearchInput from "@/app/shared/components/app-search-input/app-search-input.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { IAnalysisResultComponent } from "@/app/analysis/analysis-result/analysis-result";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
-import { IComponentTab } from "./types";
+import { IActiveComponent} from "./types";
 import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-analysis-result-components";
+import AppAnalysisResultCspPtcAbsorber from "@/app/analysis/analysis-result/csp-ptc/analysis-result-csp-ptc-absorber.vue";
 
 @Component({
   name: "app-analysis-result-csp-ptc",
@@ -54,42 +46,66 @@ import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-a
     AppButton,
     AppTableContainer,
     AppSearchInput,
+    AppAnalysisResultCspPtcAbsorber,
+    AppLoading
   }
 })
 export default class AppAnalysisResultCspPtc extends BaseAuthComponent implements IAnalysisResultComponent {
   @Prop() analysisResult!: AnalysisResultDetailedSchema;
 
-  subtitle = "";
-
-  tabs: IComponentTab[] = [];
+  activeComponents: { [comp_key: string]: IActiveComponent } = {
+    cspPtcAbsorber: { tabIndex: 0, results: null }
+  }
 
   async created() {
     this.setSubtitle();
 
-    this.tabs = this.analysisResult.component_key_figures.map((comp_key_figure) => ({
-      name: comp_key_figure.component.abbrev,
-      title: this.$t(comp_key_figure.component.abbrev).toString()
-    }));
-
+    
     for (const comp_key_figure of this.analysisResult.component_key_figures) {
-      if (comp_key_figure.component.id === AnalysisResultComponent.CSP_PTC_ABSORBER) {
-
+      switch (comp_key_figure.component.id) {
+        case AnalysisResultComponent.CSP_PTC_ABSORBER:
+          this.activeComponents.cspPtcAbsorber.active = true;
+          this.activeComponents.cspPtcAbsorber.componentKeyFigureId = comp_key_figure.id
+          break;
       }
+    }
+
+    await this.loadComponentData(0);
+  }
+
+  async loadComponentData(newTabIndex: number) {
+    try {
+      let activeComponent: IActiveComponent | undefined;
+      for (const component_key in this.activeComponents) {
+        if (this.activeComponents[component_key].tabIndex === newTabIndex) {
+          activeComponent = this.activeComponents[component_key];
+        }
+      }
+
+      if (!activeComponent) {
+        throw new Error("tabindex " + newTabIndex + " not mapped to a component")
+      }
+
+      if (!activeComponent.results) {
+        activeComponent.results = await volateqApi.getSpecificAnalysisResult(this.analysisResult.id, activeComponent.componentKeyFigureId!);
+      }
+    } catch (e) {
+      appContentEventBus.showError(e)
     }
   }
 
-  onSearch() {
-
+  onSearch(searchText: string) {
+    console.log("search: " + searchText);
   }
 
   setSubtitle() {
-    this.subtitle = [
-      this.$t("oil-temp-of-absorber-tube").toString() + ": <b>" + this.analysisResult.csp_ptc.absorber_temperatur + "</b>",
-      this.$t("ambient-temperature").toString() + ": <b>" + this.analysisResult.csp_ptc.ambient_temperatur + "</b>",
-      this.$t("time").toString() + ": <b>" + new Date(Date.parse(this.analysisResult.csp_ptc.time)).toTimeString() + "</b>"
+    const subtitle = [
+      this.$t("oil-temp-of-absorber-tube").toString() + ": <b>&oslash; " + Math.round(this.analysisResult.csp_ptc.absorber_temperatur) + " °</b>",
+      this.$t("ambient-temperature").toString() + ": <b>" + (this.analysisResult.csp_ptc.ambient_temperatur || "-") + "</b>",
+      this.$t("time").toString() + ": <b>" + new Date(Date.parse(this.analysisResult.csp_ptc.time)).toLocaleTimeString() + "</b>"
     ].join("<br>");
 
-    this.$emit('setSubtitle', this.subtitle);
+    this.$emit('setSubtitle', subtitle);
   }
 }
 </script>
