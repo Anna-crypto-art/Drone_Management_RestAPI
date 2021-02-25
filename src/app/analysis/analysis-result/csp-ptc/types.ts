@@ -1,6 +1,7 @@
+import { ComponentKeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/component-key-figure-schema";
+
 export interface IActiveComponent {
-  tabIndex: number;
+  exists: boolean;
   active?: boolean;
-  results?: any;
-  componentKeyFigureId?: string;
+  componentKeyFigure?: ComponentKeyFigureSchema;
 }

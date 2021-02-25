@@ -10,11 +10,12 @@
       <div class="clearfix"></div>
     </div>
     <app-table-container>
-      <b-tabs @activate-tab="loadComponentData">
-        <b-tab v-if="activeComponents.cspPtcAbsorber" :title="$t('absorber-tubes')" active>
-          <app-analysis-result-csp-ptc-absorber v-if="activeComponents.cspPtcAbsorber.results" :results="activeComponents.cspPtcAbsorber.results">
+      <b-tabs v-model="tabIndex">
+        <b-tab v-if="activeComponents.cspPtcAbsorber.exists" :title="$t('absorber-tubes')">
+          <app-analysis-result-csp-ptc-absorber 
+            :analysisResultId="analysisResult.id" 
+            :componentKeyFigure="activeComponents.cspPtcAbsorber.componentKeyFigure">
           </app-analysis-result-csp-ptc-absorber>
-          <app-loading v-if="!activeComponents.cspPtcAbsorber.results"></app-loading>
         </b-tab>
         <!-- <b-tab :title="$t('single-collector-elements')">
         </b-tab>
@@ -53,44 +54,22 @@ import AppAnalysisResultCspPtcAbsorber from "@/app/analysis/analysis-result/csp-
 export default class AppAnalysisResultCspPtc extends BaseAuthComponent implements IAnalysisResultComponent {
   @Prop() analysisResult!: AnalysisResultDetailedSchema;
 
+  tabIndex = 0;
+
   activeComponents: { [comp_key: string]: IActiveComponent } = {
-    cspPtcAbsorber: { tabIndex: 0, results: null }
-  }
+    cspPtcAbsorber: { exists: false }
+  };
 
   async created() {
     this.setSubtitle();
 
-    
     for (const comp_key_figure of this.analysisResult.component_key_figures) {
       switch (comp_key_figure.component.id) {
         case AnalysisResultComponent.CSP_PTC_ABSORBER:
-          this.activeComponents.cspPtcAbsorber.active = true;
-          this.activeComponents.cspPtcAbsorber.componentKeyFigureId = comp_key_figure.id
+          this.activeComponents.cspPtcAbsorber.exists = true;
+          this.activeComponents.cspPtcAbsorber.componentKeyFigure = comp_key_figure
           break;
       }
-    }
-
-    await this.loadComponentData(0);
-  }
-
-  async loadComponentData(newTabIndex: number) {
-    try {
-      let activeComponent: IActiveComponent | undefined;
-      for (const component_key in this.activeComponents) {
-        if (this.activeComponents[component_key].tabIndex === newTabIndex) {
-          activeComponent = this.activeComponents[component_key];
-        }
-      }
-
-      if (!activeComponent) {
-        throw new Error("tabindex " + newTabIndex + " not mapped to a component")
-      }
-
-      if (!activeComponent.results) {
-        activeComponent.results = await volateqApi.getSpecificAnalysisResult(this.analysisResult.id, activeComponent.componentKeyFigureId!);
-      }
-    } catch (e) {
-      appContentEventBus.showError(e)
     }
   }
 

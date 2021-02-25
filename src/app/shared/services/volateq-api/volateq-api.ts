@@ -12,6 +12,7 @@ import { PlantSchema } from "./api-schemas/plant-schema";
 import { TaskSchema } from "./api-schemas/task-schema";
 import { AnalysisResultDetailedSchema } from "./api-schemas/analysis-result-schema";
 import { AnalysisResultCspPtcIrIntensitySchema } from "./api-schemas/analysis-result-csp-ptc-ir-intensity-schema";
+import { TableRequest } from "./api-requests/common/table-requests";
 
 export class VolateqAPI extends HttpClientBase {
 
@@ -111,10 +112,13 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/analysis-result/${analysisResultId}`);
   }
 
-  public getSpecificAnalysisResult(analysisResultId: string, componentKeyFigureId: string): 
-    Promise<AnalysisResultCspPtcIrIntensitySchema>
+  public getSpecificAnalysisResult(
+    analysisResultId: string,
+    componentKeyFigureId: string,
+    params: TableRequest): 
+    Promise<AnalysisResultCspPtcIrIntensitySchema[]>
   {
-    return this.get(`/auth/analysis-result/${analysisResultId}/${componentKeyFigureId}`);
+    return this.get(`/auth/analysis-result/${analysisResultId}/${componentKeyFigureId}`, params);
   }
 
   public getTask(taskId: string): Promise<TaskSchema> {
