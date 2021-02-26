@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="app-analysis-result-csp-ptc-absorber">
     <b-table id="cspPtcAbsorberTable" hover :fields="columns" :items="absorberDataProvider" class="bordered"
       head-variant="light"
       :emptyText="$t('no-data')"
@@ -15,14 +15,13 @@
         {{ column.label }} <span class="help-icon"><b-icon icon="question-circle-fill"></b-icon></span>
       </template>
     </b-table>
+    <app-loading v-show="loading"></app-loading>
     <b-pagination
       v-model="pagination.currentPage"
       :total-rows="pagination.total"
       :per-page="pagination.perPage"
       aria-controls="cspPtcAbsorberTable">
     </b-pagination>
-    <app-loading v-show="loading"></app-loading>
-
   </div>
 </template>
 
@@ -32,13 +31,14 @@ import { Component, Prop } from "vue-property-decorator";
 import { BvTableCtxObject, BvTableFieldArray } from "bootstrap-vue";
 import { AnalysisResultCspPtcIrIntensitySchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-ir-intensity-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { ComponentKeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/component-key-figure-schema";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
+import AppLoading from "@/app/shared/components/app-loading/app-loading.vue";
 
 @Component({
   name: "app-analysis-result-csp-ptc-absorber",
   components: {
+    AppLoading
   }
 })
 export default class AppAnalysisResultCspPtcAbsorber extends Vue {
@@ -64,35 +64,48 @@ export default class AppAnalysisResultCspPtcAbsorber extends Vue {
     ];
   }
 
-  async absorberDataProvider(ctx: BvTableCtxObject, callback: (items: Array<any>) => void) {
-    try {
-      const items = (await volateqApi.getSpecificAnalysisResult(
-          this.analysisResultId, 
-          this.componentKeyFigure.id, 
-          {
-            limit: ctx.perPage,
-            page: ctx.currentPage,
-            order_by: ctx.sortBy && {
-              pcs: "kks", 
-              absorberTemperature: "absorber_temperature",
-              irIntensity: "ir_intensity",
-              classSubfield: "class_subfield"
-            }[ctx.sortBy],
-            order_direction: ctx.sortDesc ? 'desc' : 'asc'
-          }
-        )).map((absorberDataRow: AnalysisResultCspPtcIrIntensitySchema) => ({
-          pcs: absorberDataRow.fieldgeometry_component.kks,
-          absorberTemperature: absorberDataRow.absorber_temperature,
-          irIntensity: absorberDataRow.ir_intensity,
-          classSubfield: absorberDataRow.class_subfield
-        }));
-      
-      this.pagination.total = items.length;
+  async absorberDataProvider(ctx: BvTableCtxObject) {
+    this.loading = true;
 
-      callback(items)
+    try {
+      const tableResult = (await volateqApi.getSpecificAnalysisResult(
+        this.analysisResultId, 
+        this.componentKeyFigure.id, 
+        {
+          limit: ctx.perPage,
+          page: ctx.currentPage,
+          order_by: ctx.sortBy && {
+            pcs: "kks", 
+            absorberTemperature: "absorber_temperature",
+            irIntensity: "ir_intensity",
+            classSubfield: "class_subfield"
+          }[ctx.sortBy],
+          order_direction: ctx.sortDesc ? 'desc' : 'asc'
+        }
+      ));
+      const items = tableResult.items.map((absorberDataRow: AnalysisResultCspPtcIrIntensitySchema) => ({
+        pcs: absorberDataRow.fieldgeometry_component.kks,
+        absorberTemperature: absorberDataRow.absorber_temperature,
+        irIntensity: absorberDataRow.ir_intensity,
+        classSubfield: absorberDataRow.class_subfield
+      }));
+      
+      this.pagination.total = tableResult.total;
+
+      return items;
     } catch (e) {
       appContentEventBus.showError(e)
+    } finally {
+      this.loading = false;
     }
+
+    return [];
   }
 }
 </script>
+
+<style lang="scss">
+.app-analysis-result-csp-ptc-absorber {
+  position: relative;
+}
+</style>

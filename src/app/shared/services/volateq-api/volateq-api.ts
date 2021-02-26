@@ -13,6 +13,7 @@ import { TaskSchema } from "./api-schemas/task-schema";
 import { AnalysisResultDetailedSchema } from "./api-schemas/analysis-result-schema";
 import { AnalysisResultCspPtcIrIntensitySchema } from "./api-schemas/analysis-result-csp-ptc-ir-intensity-schema";
 import { TableRequest } from "./api-requests/common/table-requests";
+import { TableResultSchema } from "./api-schemas/table-result-schema";
 
 export class VolateqAPI extends HttpClientBase {
 
@@ -116,7 +117,7 @@ export class VolateqAPI extends HttpClientBase {
     analysisResultId: string,
     componentKeyFigureId: string,
     params: TableRequest): 
-    Promise<AnalysisResultCspPtcIrIntensitySchema[]>
+    Promise<TableResultSchema<AnalysisResultCspPtcIrIntensitySchema>>
   {
     return this.get(`/auth/analysis-result/${analysisResultId}/${componentKeyFigureId}`, params);
   }
