@@ -2,7 +2,7 @@
   <div class="app-auth-register">
     <app-auth-container title="">
       <div v-if="hasUser">
-        <b-form @submit.prevent="onSubmit">
+        <b-form @submit.prevent="onSubmit" autocomplete="off">
           <div v-show="company">
             <b-form-group :label="$t('company')" label-for="company">
               <b-form-input id="company" v-model="company" disabled></b-form-input>
