@@ -245,7 +245,7 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
     }
 
     this.checkFileCompleteness();
-    if (!this.checkListItems.droneMetaFile || !this.checkListItems.videoFiles || !this.checkListItems.plantMetaFile) {
+    if (!this.checkListItems.droneMetaFile || !this.checkListItems.videoFiles/* || !this.checkListItems.plantMetaFile*/) {
       appContentEventBus.showErrorAlert("MISSING_FILES");
       this.uploadButton.stopLoading();
       return;
