@@ -1,27 +1,22 @@
 <template>
   <div class="app-analysis-result-csp-ptc-absorber">
-    <b-table id="cspPtcAbsorberTable" hover :fields="columns" :items="absorberDataProvider" class="bordered"
-      head-variant="light"
-      :emptyText="$t('no-data')"
-      :per-page="pagination.perPage"
-      :current-page="pagination.currentPage">
-      <template #head(irIntensity)="column">
-        {{ column.label }} <span class="help-icon"><b-icon icon="question-circle-fill"></b-icon></span>
-      </template>
-      <template #head(classSubfield)="column">
-        {{ column.label }} <span class="help-icon"><b-icon icon="question-circle-fill"></b-icon></span>
-      </template>
-      <template #head(classSca)="column">
-        {{ column.label }} <span class="help-icon"><b-icon icon="question-circle-fill"></b-icon></span>
-      </template>
-    </b-table>
-    <app-loading v-show="loading"></app-loading>
-    <b-pagination
-      v-model="pagination.currentPage"
-      :total-rows="pagination.total"
-      :per-page="pagination.perPage"
-      aria-controls="cspPtcAbsorberTable">
-    </b-pagination>
+    <app-analysis-result-csp-ptc-container ref="container" tableName="cspPtcAbsorberTable" :pagination="pagination">
+      <b-table id="cspPtcAbsorberTable" hover :fields="columns" :items="dataProvider" class="bordered"
+        head-variant="light"
+        :emptyText="$t('no-data')"
+        :per-page="pagination.perPage"
+        :current-page="pagination.currentPage">
+        <template #head(irIntensity)="column">
+          {{ column.label }} <span class="help-icon"><b-icon icon="question-circle-fill"></b-icon></span>
+        </template>
+        <template #head(classSubfield)="column">
+          {{ column.label }} <span class="help-icon"><b-icon icon="question-circle-fill"></b-icon></span>
+        </template>
+        <template #head(classSca)="column">
+          {{ column.label }} <span class="help-icon"><b-icon icon="question-circle-fill"></b-icon></span>
+        </template>
+      </b-table>
+    </app-analysis-result-csp-ptc-container>
   </div>
 </template>
 
@@ -31,27 +26,17 @@ import { Component, Prop } from "vue-property-decorator";
 import { BvTableCtxObject, BvTableFieldArray } from "bootstrap-vue";
 import { AnalysisResultCspPtcIrIntensitySchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-ir-intensity-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { ComponentKeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/component-key-figure-schema";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
-import AppLoading from "@/app/shared/components/app-loading/app-loading.vue";
+import AppAnalysisResultCspPtcContainer from "@/app/analysis/analysis-result/csp-ptc/components/shared/analysis-result-csp-ptc-container.vue";
+import { AppAnalysisResultCspPtcBase } from "@/app/analysis/analysis-result/csp-ptc/components/shared/analysis-result-csp-ptc-base";
 
 @Component({
   name: "app-analysis-result-csp-ptc-absorber",
   components: {
-    AppLoading
+    AppAnalysisResultCspPtcContainer
   }
 })
-export default class AppAnalysisResultCspPtcAbsorber extends Vue {
-  @Prop() analysisResultId!: string;
-  @Prop() componentKeyFigure!: ComponentKeyFigureSchema;
-
-  columns: BvTableFieldArray = [];
-  rows: Array<any> = [];
-
-  loading = true;
-
-  pagination = { currentPage: 1, perPage: 10, total: 0 };
-
+export default class AppAnalysisResultCspPtcAbsorber extends AppAnalysisResultCspPtcBase {
   created() {
     this.columns = [
       { key: "pcs", label: this.$t("pcs").toString(), sortable: true },
@@ -64,11 +49,11 @@ export default class AppAnalysisResultCspPtcAbsorber extends Vue {
     ];
   }
 
-  async absorberDataProvider(ctx: BvTableCtxObject) {
-    this.loading = true;
+  async dataProvider(ctx: BvTableCtxObject) {
+    this.startLoading()
 
     try {
-      const tableResult = (await volateqApi.getSpecificAnalysisResult(
+      const tableResult = (await volateqApi.getSpecificAnalysisResult<AnalysisResultCspPtcIrIntensitySchema>(
         this.analysisResultId, 
         this.componentKeyFigure.id, 
         {
@@ -96,16 +81,10 @@ export default class AppAnalysisResultCspPtcAbsorber extends Vue {
     } catch (e) {
       appContentEventBus.showError(e)
     } finally {
-      this.loading = false;
+      this.stopLoading()
     }
 
     return [];
   }
 }
 </script>
-
-<style lang="scss">
-.app-analysis-result-csp-ptc-absorber {
-  position: relative;
-}
-</style>

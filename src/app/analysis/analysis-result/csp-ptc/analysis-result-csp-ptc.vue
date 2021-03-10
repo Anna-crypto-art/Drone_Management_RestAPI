@@ -17,10 +17,12 @@
             :componentKeyFigure="activeComponents.cspPtcAbsorber.componentKeyFigure">
           </app-analysis-result-csp-ptc-absorber>
         </b-tab>
-        <!-- <b-tab :title="$t('single-collector-elements')">
+        <b-tab v-if="activeComponents.cspPtcSce.exists" :title="$t('single-collector-elements')">
+          <app-analysis-result-csp-ptc-sce 
+            :analysisResultId="analysisResult.id" 
+            :componentKeyFigure="activeComponents.cspPtcSce.componentKeyFigure">
+          </app-analysis-result-csp-ptc-sce>
         </b-tab>
-        <b-tab :title="$t('mirrors')">
-        </b-tab> -->
       </b-tabs>
     </app-table-container>
   </div>
@@ -33,13 +35,12 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppLoading from "@/app/shared/components/app-loading/app-loading.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import AppSearchInput from "@/app/shared/components/app-search-input/app-search-input.vue";
-import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { IAnalysisResultComponent } from "@/app/analysis/analysis-result/analysis-result";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import { IActiveComponent} from "./types";
 import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-analysis-result-components";
-import AppAnalysisResultCspPtcAbsorber from "@/app/analysis/analysis-result/csp-ptc/analysis-result-csp-ptc-absorber.vue";
+import AppAnalysisResultCspPtcAbsorber from "@/app/analysis/analysis-result/csp-ptc/components/analysis-result-csp-ptc-absorber.vue";
+import AppAnalysisResultCspPtcSce from "@/app/analysis/analysis-result/csp-ptc/components/analysis-result-csp-ptc-sce.vue";
 
 @Component({
   name: "app-analysis-result-csp-ptc",
@@ -48,6 +49,7 @@ import AppAnalysisResultCspPtcAbsorber from "@/app/analysis/analysis-result/csp-
     AppTableContainer,
     AppSearchInput,
     AppAnalysisResultCspPtcAbsorber,
+    AppAnalysisResultCspPtcSce,
     AppLoading
   }
 })
@@ -57,7 +59,8 @@ export default class AppAnalysisResultCspPtc extends BaseAuthComponent implement
   tabIndex = 0;
 
   activeComponents: { [comp_key: string]: IActiveComponent } = {
-    cspPtcAbsorber: { exists: false }
+    cspPtcAbsorber: { exists: false },
+    cspPtcSce: { exists: false }
   };
 
   async created() {
@@ -68,6 +71,11 @@ export default class AppAnalysisResultCspPtc extends BaseAuthComponent implement
         case AnalysisResultComponent.CSP_PTC_ABSORBER:
           this.activeComponents.cspPtcAbsorber.exists = true;
           this.activeComponents.cspPtcAbsorber.componentKeyFigure = comp_key_figure
+          break;
+
+        case AnalysisResultComponent.CSP_PTC_SCE:
+          this.activeComponents.cspPtcSce.exists = true;
+          this.activeComponents.cspPtcSce.componentKeyFigure = comp_key_figure
           break;
       }
     }
@@ -88,34 +96,3 @@ export default class AppAnalysisResultCspPtc extends BaseAuthComponent implement
   }
 }
 </script>
-
-<style lang="scss">
-@import "@/scss/_colors.scss";
-.app-analysis-results {
-  .help-icon {
-    color: $blue;
-    margin-left: 5px;
-  }
-
-  .app-analysis-results-toolbox-search {
-  max-width: 300px;
-  margin-right: 10px;
-
-  &-input {
-    input {
-      border-right: none;
-    }
-    .input-group-append {
-      margin-left: 0;
-      border: 1px solid $blue-60pc;
-      border-left: none;
-      background-color: $white;
-      padding: 10px;
-      color: $blue;
-    }
-  }
-}
-}
-
-
-</style>
