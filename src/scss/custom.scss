@@ -178,7 +178,6 @@ $theme-colors: (
 }
 
 .pagination {
-  justify-content: center;
   border-radius: 0;
 
   .page-link {
@@ -192,4 +191,8 @@ $theme-colors: (
   .page-item:last-child .page-link {
     border-radius: 0;
   }
+}
+
+.popover.b-popover {
+  border-radius: 0 !important;
 }

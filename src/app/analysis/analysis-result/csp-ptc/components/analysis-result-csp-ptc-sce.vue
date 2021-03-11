@@ -6,17 +6,17 @@
         :emptyText="$t('no-data')"
         :per-page="pagination.perPage"
         :current-page="pagination.currentPage">
-        <template #head(setAngle)="column">
-          {{ column.label }} <span class="help-icon"><b-icon icon="question-circle-fill"></b-icon></span>
+        <template #head(pcs)="column">
+          {{ column.label }} <app-explanation>{{ $t("pcs_expl") }}</app-explanation>
         </template>
         <template #head(angleValue)="column">
-          {{ column.label }} <span class="help-icon"><b-icon icon="question-circle-fill"></b-icon></span>
+          {{ column.label }} <app-explanation>{{ $t("angle-value_expl") }}</app-explanation>
         </template>
         <template #head(actualAngle)="column">
-          {{ column.label }} <span class="help-icon"><b-icon icon="question-circle-fill"></b-icon></span>
+          {{ column.label }} <app-explanation>{{ $t("actual-angle_expl") }}</app-explanation>
         </template>
         <template #head(angleDeviation)="column">
-          {{ column.label }} <span class="help-icon"><b-icon icon="question-circle-fill"></b-icon></span>
+          {{ column.label }} <app-explanation>{{ $t("angle-deviation_expl") }}</app-explanation>
         </template>
       </b-table>
     </app-analysis-result-csp-ptc-container>
@@ -32,11 +32,13 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import AppAnalysisResultCspPtcContainer from "@/app/analysis/analysis-result/csp-ptc/components/shared/analysis-result-csp-ptc-container.vue";
 import { AppAnalysisResultCspPtcBase } from "./shared/analysis-result-csp-ptc-base";
+import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 
 @Component({
   name: "app-analysis-result-csp-ptc-sce",
   components: {
-    AppAnalysisResultCspPtcContainer
+    AppAnalysisResultCspPtcContainer,
+    AppExplanation
   }
 })
 export default class AppAnalysisResultCspPtcSce extends AppAnalysisResultCspPtcBase {

@@ -2,12 +2,7 @@
   <div class="app-analysis-result-csp-ptc-container">
     <slot></slot>
     <app-loading v-show="loading"></app-loading>
-    <b-pagination
-      v-model="pagination.currentPage"
-      :total-rows="pagination.total"
-      :per-page="pagination.perPage"
-      :aria-controls="tableName">
-    </b-pagination>
+    <app-table-pagination :pagination="pagination" :tableName="tableName"></app-table-pagination>
   </div>
 </template>
 
@@ -15,16 +10,19 @@
 import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
 import AppLoading from "@/app/shared/components/app-loading/app-loading.vue";
+import { ITablePagination } from "@/app/shared/components/app-table-pagination/table-pagination";
+import AppTablePagination from "@/app/shared/components/app-table-pagination/app-table-pagination.vue";
 
 @Component({
   name: "app-analysis-result-csp-ptc-container",
   components: {
-    AppLoading
+    AppLoading,
+    AppTablePagination,
   }
 })
 export default class AppAnalysisResultCspPtcContainer extends Vue {
-  @Prop() tableName!: string;
-  @Prop() pagination!: any;
+  @Prop({ required: true }) tableName!: string;
+  @Prop({ required: true }) pagination!: ITablePagination;
 
   loading = true;
 
@@ -38,13 +36,6 @@ export default class AppAnalysisResultCspPtcContainer extends Vue {
 </script>
 
 <style lang="scss">
-@import "@/scss/_colors.scss";
-
-.help-icon {
-  color: $blue;
-  margin-left: 5px;
-}
-
 .app-analysis-result-csp-ptc-container {
   position: relative;
 }

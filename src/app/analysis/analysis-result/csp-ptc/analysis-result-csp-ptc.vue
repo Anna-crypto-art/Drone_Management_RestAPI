@@ -2,7 +2,7 @@
   <div class="app-analysis-result-csp-ptc">
     <div>
       <div class="pull-left">
-        <app-search-input :placeholder="$t('search-kks')" @search="onSearch"></app-search-input>
+        <app-search-input :placeholder="$t('search-pcs')" @search="onSearch"></app-search-input>
       </div>
       <div class="pull-right">
         <app-button variant="secondary" :title="$t('export-csv')"><b-icon icon="download"></b-icon> {{ $t("export-csv") }}</app-button>
@@ -18,6 +18,10 @@
           </app-analysis-result-csp-ptc-absorber>
         </b-tab>
         <b-tab v-if="activeComponents.cspPtcSce.exists" :title="$t('single-collector-elements')">
+          <template #title>
+            {{ $t('single-collector-elements') }}
+            <app-explanation>{{ $t('sce_expl') }}</app-explanation>
+          </template>
           <app-analysis-result-csp-ptc-sce 
             :analysisResultId="analysisResult.id" 
             :componentKeyFigure="activeComponents.cspPtcSce.componentKeyFigure">
@@ -41,6 +45,7 @@ import { IActiveComponent} from "./types";
 import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-analysis-result-components";
 import AppAnalysisResultCspPtcAbsorber from "@/app/analysis/analysis-result/csp-ptc/components/analysis-result-csp-ptc-absorber.vue";
 import AppAnalysisResultCspPtcSce from "@/app/analysis/analysis-result/csp-ptc/components/analysis-result-csp-ptc-sce.vue";
+import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 
 @Component({
   name: "app-analysis-result-csp-ptc",
@@ -50,7 +55,7 @@ import AppAnalysisResultCspPtcSce from "@/app/analysis/analysis-result/csp-ptc/c
     AppSearchInput,
     AppAnalysisResultCspPtcAbsorber,
     AppAnalysisResultCspPtcSce,
-    AppLoading
+    AppExplanation
   }
 })
 export default class AppAnalysisResultCspPtc extends BaseAuthComponent implements IAnalysisResultComponent {
