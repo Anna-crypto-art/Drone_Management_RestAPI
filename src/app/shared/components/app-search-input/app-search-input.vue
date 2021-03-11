@@ -20,10 +20,8 @@ export default class AppSearchInput extends Vue {
   
   searchText = "";
   
-  onKeyUp() {
-    debounce(() => { this.search(); })
-  }
-
+  onKeyUp = debounce(() => this.search())
+  
   onKeyDown(e: KeyboardEvent) {
     if (e.key === "Enter") {
       this.search();

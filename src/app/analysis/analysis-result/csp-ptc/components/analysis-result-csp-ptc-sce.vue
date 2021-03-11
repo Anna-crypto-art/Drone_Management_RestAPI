@@ -1,7 +1,7 @@
 <template>
   <div class="app-analysis-result-csp-ptc-sce">
     <app-analysis-result-csp-ptc-container ref="container" tableName="cspPtcSceTable" :pagination="pagination">
-      <b-table id="cspPtcSceTable" hover :fields="columns" :items="dataProvider" class="bordered"
+      <b-table id="cspPtcSceTable" hover :fields="columns" :items="dataProvider" class="bordered" ref="table"
         head-variant="light"
         :emptyText="$t('no-data')"
         :per-page="pagination.perPage"
@@ -69,7 +69,8 @@ export default class AppAnalysisResultCspPtcSce extends AppAnalysisResultCspPtcB
             actualAngle: "actual_angle",
             angleDeviation: "angle_deviation"
           }[ctx.sortBy],
-          order_direction: ctx.sortDesc ? 'desc' : 'asc'
+          order_direction: ctx.sortDesc ? 'desc' : 'asc',
+          filter: this.searchText
         }
       ));
       const items = tableResult.items.map((sceDataRow: AnalysisResultCspPtcSceAngleSchema) => ({

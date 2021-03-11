@@ -1,7 +1,7 @@
 <template>
   <div class="app-analysis-result-csp-ptc-absorber">
     <app-analysis-result-csp-ptc-container ref="container" tableName="cspPtcAbsorberTable" :pagination="pagination">
-      <b-table id="cspPtcAbsorberTable" hover :fields="columns" :items="dataProvider" class="bordered"
+      <b-table id="cspPtcAbsorberTable" hover :fields="columns" :items="dataProvider" class="bordered" ref="table"
         head-variant="light"
         :emptyText="$t('no-data')"
         :per-page="pagination.perPage"
@@ -70,7 +70,8 @@ export default class AppAnalysisResultCspPtcAbsorber extends AppAnalysisResultCs
             irIntensity: "ir_intensity",
             classSubfield: "class_subfield"
           }[ctx.sortBy],
-          order_direction: ctx.sortDesc ? 'desc' : 'asc'
+          order_direction: ctx.sortDesc ? 'desc' : 'asc',
+          filter: this.searchText
         }
       ));
       const items = tableResult.items.map((absorberDataRow: AnalysisResultCspPtcIrIntensitySchema) => ({

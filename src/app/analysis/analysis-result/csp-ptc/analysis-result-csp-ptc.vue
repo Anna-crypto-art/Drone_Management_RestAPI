@@ -12,7 +12,7 @@
     <app-table-container>
       <b-tabs v-model="tabIndex">
         <b-tab v-if="activeComponents.cspPtcAbsorber.exists" :title="$t('absorber-tubes')">
-          <app-analysis-result-csp-ptc-absorber 
+          <app-analysis-result-csp-ptc-absorber ref="absorberComponent"
             :analysisResultId="analysisResult.id" 
             :componentKeyFigure="activeComponents.cspPtcAbsorber.componentKeyFigure">
           </app-analysis-result-csp-ptc-absorber>
@@ -22,7 +22,7 @@
             {{ $t('single-collector-elements') }}
             <app-explanation>{{ $t('sce_expl') }}</app-explanation>
           </template>
-          <app-analysis-result-csp-ptc-sce 
+          <app-analysis-result-csp-ptc-sce ref="sceComponent"
             :analysisResultId="analysisResult.id" 
             :componentKeyFigure="activeComponents.cspPtcSce.componentKeyFigure">
           </app-analysis-result-csp-ptc-sce>
@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Ref } from "vue-property-decorator";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppLoading from "@/app/shared/components/app-loading/app-loading.vue";
@@ -46,6 +46,7 @@ import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-a
 import AppAnalysisResultCspPtcAbsorber from "@/app/analysis/analysis-result/csp-ptc/components/analysis-result-csp-ptc-absorber.vue";
 import AppAnalysisResultCspPtcSce from "@/app/analysis/analysis-result/csp-ptc/components/analysis-result-csp-ptc-sce.vue";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
+import { IAnalysisResultCspPtcComponent } from "./components/shared/analysis-result-csp-ptc-base";
 
 @Component({
   name: "app-analysis-result-csp-ptc",
@@ -60,6 +61,9 @@ import AppExplanation from "@/app/shared/components/app-explanation/app-explanat
 })
 export default class AppAnalysisResultCspPtc extends BaseAuthComponent implements IAnalysisResultComponent {
   @Prop() analysisResult!: AnalysisResultDetailedSchema;
+
+  @Ref() absorberComponent: IAnalysisResultCspPtcComponent | undefined;
+  @Ref() sceComponent: IAnalysisResultCspPtcComponent | undefined;
 
   tabIndex = 0;
 
@@ -87,7 +91,9 @@ export default class AppAnalysisResultCspPtc extends BaseAuthComponent implement
   }
 
   onSearch(searchText: string) {
-    console.log("search: " + searchText);
+    console.log(searchText);
+    this.absorberComponent && this.absorberComponent.search(searchText);
+    this.sceComponent && this.sceComponent.search(searchText);
   }
 
   setSubtitle() {

@@ -8,14 +8,21 @@ export interface IAnalysisResultCspPtcContainer {
   stopLoading(): void;
 }
 
-export abstract class AppAnalysisResultCspPtcBase extends Vue {
+export interface IAnalysisResultCspPtcComponent {
+  search(searchText: string): void;
+}
+
+export abstract class AppAnalysisResultCspPtcBase extends Vue implements IAnalysisResultCspPtcComponent {
   @Prop() analysisResultId!: string;
   @Prop() componentKeyFigure!: ComponentKeyFigureSchema;
   @Ref() container!: IAnalysisResultCspPtcContainer;
+  @Ref() table!: any;
 
   columns: BvTableFieldArray = [];
 
   pagination = { currentPage: 1, perPage: 10, total: 0 };
+
+  protected searchText = "";
 
   abstract dataProvider(ctx: BvTableCtxObject);
 
@@ -24,5 +31,11 @@ export abstract class AppAnalysisResultCspPtcBase extends Vue {
   }
   protected stopLoading() {
     this.container.stopLoading()
+  }
+
+  public search(searchText: string) {
+    this.searchText = searchText.trim();
+
+    this.table.refresh()
   }
 }
