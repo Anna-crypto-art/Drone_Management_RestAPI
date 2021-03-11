@@ -224,7 +224,7 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
       for (const file of this.appFileUpload.files) {
         const ext = (file.fileName.split(".").pop() || "").toLowerCase();
   
-        if (ext === "mp4") {
+        if (ext === "mp4" || ext == "mov") {
           this.checkListItems.videoFiles = true;
           this.newAnalysis.files.push(file.fileName)
         } else if (ext === "srt") {
