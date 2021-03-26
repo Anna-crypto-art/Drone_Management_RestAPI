@@ -1,4 +1,3 @@
-import { BIconTelephoneForwardFill } from "bootstrap-vue";
 import Vue from "vue"
 import { ApiErrors } from "../volateq-api/api-errors";
 

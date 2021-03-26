@@ -8,18 +8,22 @@ export class HttpClientBase {
 
   protected readonly baseURL: string | undefined;
 
-  constructor() {
-    this.baseURL = apiBaseUrl;
-    this.httpClient = Axios.create({
-      baseURL: this.baseURL
-    });
-    this.httpClient.interceptors.request.use((config: AxiosRequestConfig): AxiosRequestConfig => {
+  static createAuthHttpClient(baseURL: string): AxiosInstance {
+    const httpClient = Axios.create({ baseURL });
+    httpClient.interceptors.request.use((config: AxiosRequestConfig): AxiosRequestConfig => {
       if (store.getters.auth.isAuthenticated) {
         config.headers = { "Authorization": `Bearer ${store.state.auth.token}`};
       }
       
       return config;
     });
+
+    return httpClient
+  }
+
+  constructor() {
+    this.baseURL = apiBaseUrl;
+    this.httpClient = HttpClientBase.createAuthHttpClient(this.baseURL!);
     this.httpClient.interceptors.response.use((response: AxiosResponse) => {
         return response.data;
       }, (error: AxiosError) => {

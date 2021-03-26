@@ -4,7 +4,7 @@ import { UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-s
 import { HttpClientBase } from "@/app/shared/services/volateq-api/http-client-base";
 import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
 import { InviteUser, RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
-import { baseUrl } from "@/environment/environment";
+import { baseUrl, apiBaseUrl } from "@/environment/environment";
 import { RouteSchema } from "./api-schemas/route-schema";
 import { NewAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
 import { AnalysisSchema } from "./api-schemas/analysis-schema";
@@ -120,6 +120,10 @@ export class VolateqAPI extends HttpClientBase {
     Promise<TableResultSchema<T>>
   {
     return this.get(`/auth/analysis-result/${analysisResultId}/${componentKeyFigureId}`, params);
+  }
+
+  public getSpecificAnalysisResultCsvDownloadUrl(analysisResultId: string, componentKeyFigureId: string): string {
+    return `${apiBaseUrl}/auth/analysis-result/${analysisResultId}/${componentKeyFigureId}?csv=1`;
   }
 
   public getTask(taskId: string): Promise<TaskSchema> {
