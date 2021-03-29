@@ -33,6 +33,7 @@ import appContentEventBus from "@/app/shared/components/app-content/app-content-
 import AppAnalysisResultCspPtcContainer from "@/app/analysis/analysis-result/csp-ptc/components/shared/analysis-result-csp-ptc-container.vue";
 import { AppAnalysisResultCspPtcBase } from "@/app/analysis/analysis-result/csp-ptc/components/shared/analysis-result-csp-ptc-base";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
+import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 
 @Component({
   name: "app-analysis-result-csp-ptc-absorber",
@@ -54,25 +55,43 @@ export default class AppAnalysisResultCspPtcAbsorber extends AppAnalysisResultCs
     ];
   }
 
+  getCsvColumnMappingsParam(): { [column_name: string]: string } {
+    return {
+      [this.$t("pcs").toString()]: 'fieldgeometry_component.kks',
+      [this.$t("absorber-temperature").toString()]: 'absorber_temperature',
+      [this.$t("ir-intensity").toString()]: 'ir_intensity',
+      [this.$t("class-subfield").toString()]: 'class_subfield'
+    }
+  }
+
+  getTableRequestParam(): TableRequest {
+    if (!this.last_ctx) {
+      throw Error('Missing last_ctx');
+    }
+
+    return {
+      limit: this.last_ctx.perPage,
+      page: this.last_ctx.currentPage,
+      order_by: this.last_ctx.sortBy && {
+        pcs: "kks", 
+        absorberTemperature: "absorber_temperature",
+        irIntensity: "ir_intensity",
+        classSubfield: "class_subfield"
+      }[this.last_ctx.sortBy],
+      order_direction: this.last_ctx.sortDesc ? 'desc' : 'asc',
+      filter: this.searchText
+    }
+  }
+
   async dataProvider(ctx: BvTableCtxObject) {
     this.startLoading()
+    this.last_ctx = ctx;
 
     try {
       const tableResult = (await volateqApi.getSpecificAnalysisResult<AnalysisResultCspPtcIrIntensitySchema>(
         this.analysisResultId, 
         this.componentKeyFigure.id, 
-        {
-          limit: ctx.perPage,
-          page: ctx.currentPage,
-          order_by: ctx.sortBy && {
-            pcs: "kks", 
-            absorberTemperature: "absorber_temperature",
-            irIntensity: "ir_intensity",
-            classSubfield: "class_subfield"
-          }[ctx.sortBy],
-          order_direction: ctx.sortDesc ? 'desc' : 'asc',
-          filter: this.searchText
-        }
+        this.getTableRequestParam()
       ));
       const items = tableResult.items.map((absorberDataRow: AnalysisResultCspPtcIrIntensitySchema) => ({
         pcs: absorberDataRow.fieldgeometry_component.kks,

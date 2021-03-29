@@ -5,6 +5,7 @@ export interface IActiveComponent {
   tabIndex: number;
   label: string;
   componentId: number;
+  refComponentName: string;
   active?: boolean;
   componentKeyFigure?: ComponentKeyFigureSchema;
 }

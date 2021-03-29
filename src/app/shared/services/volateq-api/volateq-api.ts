@@ -122,8 +122,20 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/analysis-result/${analysisResultId}/${componentKeyFigureId}`, params);
   }
 
-  public getSpecificAnalysisResultCsvDownloadUrl(analysisResultId: string, componentKeyFigureId: string): string {
-    return `${apiBaseUrl}/auth/analysis-result/${analysisResultId}/${componentKeyFigureId}?csv=1`;
+  public getSpecificAnalysisResultCsvUrl(
+    analysisResultId: string, 
+    componentKeyFigureId: string, 
+    params: TableRequest,
+    csvMappings?: { [key: string]: string }): string {
+    const encodedCsvMappings = csvMappings && `&csv_mappings=${encodeURIComponent(this.getQueryParams(csvMappings).substring(1))}` || '';
+
+    return `${apiBaseUrl}/auth/analysis-result/${analysisResultId}/${componentKeyFigureId}?${this.getQueryParams(params)}&csv=1${encodedCsvMappings}`;
+  }
+
+  public async generateDownloadUrl(downloadUrl: string): Promise<string> {
+    const urlTokenResponse: { url_token: string } = await this.get(`/auth/user/generate-url-token/${encodeURIComponent(encodeURIComponent(downloadUrl))}`);
+    
+    return `${apiBaseUrl}/temp-url/${urlTokenResponse.url_token}`;
   }
 
   public getTask(taskId: string): Promise<TaskSchema> {

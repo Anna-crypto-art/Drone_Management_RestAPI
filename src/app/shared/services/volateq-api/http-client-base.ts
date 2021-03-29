@@ -74,7 +74,7 @@ export class HttpClientBase {
     return this.httpClient.delete(url, config);
   }
 
-  private getQueryParams(params: any): string {
+  protected getQueryParams(params: any): string {
     return "?" + Object.keys(params).map(key => key + "=" + encodeURIComponent(params[key])).join("&");
   }
 }

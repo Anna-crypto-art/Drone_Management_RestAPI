@@ -72,8 +72,8 @@ export default class AppAnalysisResultCspPtc extends BaseAuthComponent implement
   activeTabLabel = "";
 
   activeComponents: { [comp_key: string]: IActiveComponent } = {
-    cspPtcAbsorber: { componentId: AnalysisResultComponent.CSP_PTC_ABSORBER, label: "absorber-tubes", tabIndex: -1, exists: false },
-    cspPtcSce: { componentId: AnalysisResultComponent.CSP_PTC_SCE, label: "single-collector-elements", tabIndex: -1, exists: false }
+    cspPtcAbsorber: { componentId: AnalysisResultComponent.CSP_PTC_ABSORBER, label: "absorber-tubes", tabIndex: -1, exists: false, refComponentName: 'absorberComponent' },
+    cspPtcSce: { componentId: AnalysisResultComponent.CSP_PTC_SCE, label: "single-collector-elements", tabIndex: -1, exists: false, refComponentName: 'sceComponent' }
   };
 
   async created() {
@@ -107,11 +107,20 @@ export default class AppAnalysisResultCspPtc extends BaseAuthComponent implement
     }
   }
 
-  onExportCsv() {
+  async onExportCsv() {
     const activeComponent = Object.values(this.activeComponents).find(comp => comp.tabIndex === this.tabIndex);
     if (activeComponent) {
-      // const downloadUrl = volateqApi.getSpecificAnalysisResultCsvDownloadUrl(this.analysisResult.id, activeComponent.componentKeyFigure!.id);
-      // AppDownloader.download(downloadUrl, "acsv.csv");
+      const refComponent: IAnalysisResultCspPtcComponent = this[activeComponent.refComponentName]; 
+
+      const authCsvDownloadUrl = volateqApi.getSpecificAnalysisResultCsvUrl(
+        this.analysisResult.id, 
+        activeComponent.componentKeyFigure!.id,
+        refComponent.getTableRequestParam(),
+        refComponent.getCsvColumnMappingsParam()
+      );
+
+      const csvFileName = "analysis_" + new Date(Date.parse(this.analysisResult.csp_ptc.time)).toLocaleDateString() + "_" + activeComponent.label + ".csv";
+      AppDownloader.download(await volateqApi.generateDownloadUrl(authCsvDownloadUrl), csvFileName);
     }
   }
 

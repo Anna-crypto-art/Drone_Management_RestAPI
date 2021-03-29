@@ -33,6 +33,7 @@ import appContentEventBus from "@/app/shared/components/app-content/app-content-
 import AppAnalysisResultCspPtcContainer from "@/app/analysis/analysis-result/csp-ptc/components/shared/analysis-result-csp-ptc-container.vue";
 import { AppAnalysisResultCspPtcBase } from "./shared/analysis-result-csp-ptc-base";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
+import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 
 @Component({
   name: "app-analysis-result-csp-ptc-sce",
@@ -52,26 +53,45 @@ export default class AppAnalysisResultCspPtcSce extends AppAnalysisResultCspPtcB
     ];
   }
 
+  getCsvColumnMappingsParam(): { [column_name: string]: string } {
+    return {
+      [this.$t("pcs").toString()]: 'fieldgeometry_component.kks',
+      [this.$t("set-angle").toString()]: 'set_angle',
+      [this.$t("angle-value").toString()]: 'angle_value',
+      [this.$t("actual-angle").toString()]: 'actual_angle',
+      [this.$t("angle-deviation").toString()]: 'angle_deviation',
+    }
+  }
+
+  getTableRequestParam(): TableRequest {
+    if (!this.last_ctx) {
+      throw Error('Missing last_ctx');
+    }
+
+    return {
+      limit: this.last_ctx.perPage,
+      page: this.last_ctx.currentPage,
+      order_by: this.last_ctx.sortBy && {
+        pcs: "kks", 
+        setAngle: "set_angle",
+        angleValue: "angle_value",
+        actualAngle: "actual_angle",
+        angleDeviation: "angle_deviation"
+      }[this.last_ctx.sortBy],
+      order_direction: this.last_ctx.sortDesc ? 'desc' : 'asc',
+      filter: this.searchText
+    }
+  }
+
   async dataProvider(ctx: BvTableCtxObject) {
     this.startLoading();
+    this.last_ctx = ctx;
 
     try {
       const tableResult = (await volateqApi.getSpecificAnalysisResult<AnalysisResultCspPtcSceAngleSchema>(
         this.analysisResultId, 
         this.componentKeyFigure.id, 
-        {
-          limit: ctx.perPage,
-          page: ctx.currentPage,
-          order_by: ctx.sortBy && {
-            pcs: "kks", 
-            setAngle: "set_angle",
-            angleValue: "angle_value",
-            actualAngle: "actual_angle",
-            angleDeviation: "angle_deviation"
-          }[ctx.sortBy],
-          order_direction: ctx.sortDesc ? 'desc' : 'asc',
-          filter: this.searchText
-        }
+        this.getTableRequestParam()
       ));
       const items = tableResult.items.map((sceDataRow: AnalysisResultCspPtcSceAngleSchema) => ({
         pcs: sceDataRow.fieldgeometry_component.kks,
