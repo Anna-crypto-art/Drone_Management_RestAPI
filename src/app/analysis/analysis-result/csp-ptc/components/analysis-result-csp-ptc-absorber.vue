@@ -46,7 +46,7 @@ export default class AppAnalysisResultCspPtcAbsorber extends AppAnalysisResultCs
   created() {
     this.columns = [
       { key: "pcs", label: this.$t("pcs").toString(), sortable: true },
-      { key: "absorberTemperature", label: this.$t("absorber-temperature").toString(), sortable: true },
+      { key: "absorberTemperature", label: this.$t("absorber-temperature").toString() + ' (°C)', sortable: true },
       { key: "irIntensity", label: this.$t("ir-intensity").toString(), sortable: true },
       { key: "classSubfield", label: this.$t("class-subfield").toString(), sortable: true },
       // { key: "classSca", label: this.$t("class-sca").toString(), sortable: true },

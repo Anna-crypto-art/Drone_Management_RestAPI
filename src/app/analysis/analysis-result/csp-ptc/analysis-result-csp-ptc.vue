@@ -50,6 +50,8 @@ import AppExplanation from "@/app/shared/components/app-explanation/app-explanat
 import { IAnalysisResultCspPtcComponent } from "./components/shared/analysis-result-csp-ptc-base";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
+import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 
 @Component({
   name: "app-analysis-result-csp-ptc",
@@ -120,7 +122,15 @@ export default class AppAnalysisResultCspPtc extends BaseAuthComponent implement
       );
 
       const csvFileName = "analysis_" + new Date(Date.parse(this.analysisResult.csp_ptc.time)).toLocaleDateString() + "_" + activeComponent.label + ".csv";
-      AppDownloader.download(await volateqApi.generateDownloadUrl(authCsvDownloadUrl), csvFileName);
+
+      try {
+        appButtonEventBus.startLoading();
+        AppDownloader.download(await volateqApi.generateDownloadUrl(authCsvDownloadUrl), csvFileName);
+      } catch (e) {
+        appContentEventBus.showError(e);
+      } finally {
+        appButtonEventBus.stopLoading();
+      }
     }
   }
 

@@ -129,7 +129,7 @@ export class VolateqAPI extends HttpClientBase {
     csvMappings?: { [key: string]: string }): string {
     const encodedCsvMappings = csvMappings && `&csv_mappings=${encodeURIComponent(this.getQueryParams(csvMappings).substring(1))}` || '';
 
-    return `${apiBaseUrl}/auth/analysis-result/${analysisResultId}/${componentKeyFigureId}?${this.getQueryParams(params)}&csv=1${encodedCsvMappings}`;
+    return `${apiBaseUrl}/auth/analysis-result/${analysisResultId}/${componentKeyFigureId}${this.getQueryParams(params)}&csv=1${encodedCsvMappings}`;
   }
 
   public async generateDownloadUrl(downloadUrl: string): Promise<string> {

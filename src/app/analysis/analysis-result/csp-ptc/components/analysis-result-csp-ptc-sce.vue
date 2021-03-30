@@ -10,13 +10,13 @@
           {{ column.label }} <app-explanation>{{ $t("pcs_expl") }}</app-explanation>
         </template>
         <template #head(angleValue)="column">
-          {{ column.label }} <app-explanation>{{ $t("angle-value_expl") }}</app-explanation>
+          {{ column.label }} (<b>°</b>)<app-explanation>{{ $t("angle-value_expl") }}</app-explanation>
         </template>
         <template #head(actualAngle)="column">
-          {{ column.label }} <app-explanation>{{ $t("actual-angle_expl") }}</app-explanation>
+          {{ column.label }} (<b>°</b>)<app-explanation>{{ $t("actual-angle_expl") }}</app-explanation>
         </template>
         <template #head(angleDeviation)="column">
-          {{ column.label }} <app-explanation>{{ $t("angle-deviation_expl") }}</app-explanation>
+          {{ column.label }} (<b>°</b>)<app-explanation>{{ $t("angle-deviation_expl") }}</app-explanation>
         </template>
       </b-table>
     </app-analysis-result-csp-ptc-container>
@@ -34,6 +34,7 @@ import AppAnalysisResultCspPtcContainer from "@/app/analysis/analysis-result/csp
 import { AppAnalysisResultCspPtcBase } from "./shared/analysis-result-csp-ptc-base";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
+import { MathHelper } from "@/app/shared/services/helper/math-helper";
 
 @Component({
   name: "app-analysis-result-csp-ptc-sce",
@@ -96,9 +97,9 @@ export default class AppAnalysisResultCspPtcSce extends AppAnalysisResultCspPtcB
       const items = tableResult.items.map((sceDataRow: AnalysisResultCspPtcSceAngleSchema) => ({
         pcs: sceDataRow.fieldgeometry_component.kks,
         setAngle: Math.round(sceDataRow.set_angle),
-        angleValue: sceDataRow.angle_value,
-        actualAngle: sceDataRow.actual_angle,
-        angleDeviation: sceDataRow.angle_deviation
+        angleValue: MathHelper.roundTo(sceDataRow.angle_value, 3),
+        actualAngle: MathHelper.roundTo(sceDataRow.actual_angle, 3),
+        angleDeviation: MathHelper.roundTo(sceDataRow.angle_deviation, 3)
       }));
       
       this.pagination.total = tableResult.total;
