@@ -46,7 +46,7 @@ export class HttpClientBase {
     );
   }
 
-  protected async postFile(url: string, filePropertyName: string, file: any, data?: any, config?: AxiosRequestConfig | undefined): Promise<any> {
+  protected async postFile(url: string, filePropertyName: string, file: File, data?: any, config?: AxiosRequestConfig | undefined): Promise<any> {
     const formData = new FormData();
     formData.append(filePropertyName, file)
 

@@ -63,7 +63,8 @@
         <app-modal-form-info-area v-if="updateStateData.state" v-html="$t('update-analysis-state-to', { state: $t(updateStateData.state).toString() })">
         </app-modal-form-info-area>
         <b-form-group v-if="updateStateData.state === 'FINISHED'">
-          <b-form-file v-model="updateStateData.file" :placeholder="$t('select-result-data-file')" required></b-form-file>
+          <b-form-file v-model="updateStateData.files" multiple :placeholder="$t('select-result-data-files')" required></b-form-file>
+          <small>{{ fileImportInfoTextValue }}</small>
         </b-form-group>
         <b-form-group :label="$t('message')" label-for="message">
           <b-form-textarea id="message" v-model="updateStateData.message" :placeholder="$t('message')" row="5"></b-form-textarea>
@@ -94,6 +95,7 @@ import { AnalysisStateSchema } from "../shared/services/volateq-api/api-schemas/
 import { IAppModalForm } from "../shared/components/app-modal/types";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import AppModalFormInfoArea from "@/app/shared/components/app-modal/app-modal-form-info-area.vue";
+import { TaskSchema } from "../shared/services/volateq-api/api-schemas/task-schema";
 
 @Component({
   name: "app-analysis",
@@ -110,13 +112,14 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
 
   createNewAnalysisBtnText = "";
   uploadStateProcess = "";
+  fileImportInfoText = "";
 
   @Ref() appUpdateStateModal!: IAppModalForm;
   updateStateData: { 
     analysisId?: string,
     state?: ApiStates,
     message?: string,
-    file?: string,
+    files?: File[],
   } = { message: "", state: undefined, analysisId: undefined };
 
   async created() {
@@ -213,6 +216,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     this.updateStateData.analysisId = analysis.id;
     this.updateStateData.state = state;
     
+    this.fileImportInfoText = "";
     this.appUpdateStateModal.show();
   }
 
@@ -247,29 +251,49 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     }
   }
 
+  get fileImportInfoTextValue() {
+    return this.fileImportInfoText;
+  }
+
   private async updateToFinalAnalysisState() {
     try {
-      const task = await volateqApi.importAnalysisResult(this.updateStateData.file, this.updateStateData.analysisId!);
-      let interval = setInterval(async () => {
+      this.fileImportInfoText = "Importing " + this.updateStateData.files!.map(file => file.name).join(", ") + " ...";
+
+      await this.importAnalyisResults(this.updateStateData.files!, this.updateStateData.analysisId!, (event: { task: TaskSchema, file: File, finished: boolean }) => {
         try {
-          const taskState = await volateqApi.getTask(task.id);
-          if (taskState.state === "SUCCESS") {
-            clearInterval(interval);
+          if (event.task.state === "SUCCESS" && event.finished) {
             this.updateAnalysisState();
-          } else if (taskState.state === "FAILURE") {
-            clearInterval(interval);
-            throw { error: "SOMETHING_WENT_WRONG", details: taskState.result };
+          } else if (event.task.state === "FAILURE") {
+            throw { error: "SOMETHING_WENT_WRONG", details: event.task.result };
           }
         } catch (e) {
           console.error(e);
-          this.appUpdateStateModal.alertError(e.error)
-          appButtonEventBus.stopLoading();
+          this.appUpdateStateModal.alertError(e.error);
+
+          if (event.finished) {
+            appButtonEventBus.stopLoading();
+          }
         }
-      }, 3000)
+      });
     } catch (e) {
       console.error(e);
       this.appUpdateStateModal.alertError(e.error);
       appButtonEventBus.stopLoading();
+    }
+  }
+
+  private async importAnalyisResults(files: File[], analysisId: string, eventCallback: (event: { task: TaskSchema, file: File, finished: boolean }) => void) {
+    let filesCount = files.length;
+
+    for (const file of files) {
+      const task = await volateqApi.importAnalysisResult(file, analysisId);
+      let interval = setInterval(async () => {
+        const taskState = await volateqApi.getTask(task.id);
+          if (taskState.state === "SUCCESS" || taskState.state === "FAILURE") {
+            clearInterval(interval);
+            eventCallback({ task: taskState, file: file, finished: --filesCount <= 0 });
+          }
+      }, 3000);
     }
   }
 

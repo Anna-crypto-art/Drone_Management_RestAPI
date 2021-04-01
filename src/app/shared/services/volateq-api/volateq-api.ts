@@ -105,7 +105,7 @@ export class VolateqAPI extends HttpClientBase {
     return this.post(`/reset-password/${confirmationKey}`, { new_password, new_password_repeat });
   }
 
-  public importAnalysisResult(file: any, analysisId: string): Promise<TaskSchema> {
+  public importAnalysisResult(file: File, analysisId: string): Promise<TaskSchema> {
     return this.postFile(`/auth/import-analysis-result/${analysisId}`, 'file', file);
   }
 

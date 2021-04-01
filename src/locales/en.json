@@ -93,7 +93,7 @@
   "class-sca": "Class. (SCA)",
   "order-subfield": "Order (subfield)",
   "order-sca": "Order (SCA)",
-  "select-result-data-file": "Select result data file",
+  "select-result-data-files": "Select result data files",
   "absorber-temperature": "Absorber temperature",
   "pcs": "PCS",
   "pcs_expl": "Powerplant coding system",
@@ -108,5 +108,7 @@
   "angle-deviation_expl": "Difference between alignment value and actual alignment",
   "sce_expl": "Single collector element - One module",
   "per-page": "Per page",
-  "total": "Total"
+  "total": "Total",
+  "successfully-imported": "successfully imported",
+  "import-failed-for": "import failed for"
 }
