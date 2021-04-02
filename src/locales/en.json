@@ -110,5 +110,9 @@
   "per-page": "Per page",
   "total": "Total",
   "successfully-imported": "successfully imported",
-  "import-failed-for": "import failed for"
+  "import-failed-for": "import failed for",
+  "import-further-result-files": "Import further result files",
+  "import-further-result-files_descr": "Select further JSON result files and click on Import",
+  "import": "Import",
+  "import-further-result-files-success": "Further result files successfully imported"
 }

@@ -141,6 +141,12 @@ $theme-colors: (
       margin-right: 0;
     }
   }
+  & > .btn {
+    margin-right: 5px;
+    &:last-child {
+      margin-right: 0;
+    }
+  }
 }
 
 .b-table-empty-row > td {

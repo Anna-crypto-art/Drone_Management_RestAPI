@@ -45,6 +45,14 @@
                   {{ $t(state) }}
                 </b-dropdown-item>
               </b-dropdown>
+              <b-button 
+                v-show="!canUpdateState(row.item.state) && row.item.analysisResultId && isSuperAdmin" 
+                @click="onImportMoreResultFilesClick(row.item)" 
+                variant="secondary"
+                size="sm"
+                :title="$t('import-further-result-files')">
+                <b-icon icon="cloud-upload"></b-icon>
+              </b-button>
               <router-link v-if="row.item.analysisResultId" :to="{ name: 'AnalysisResult', params: { id: row.item.analysisResultId }}">
                 <b-button variant="primary" size="sm"><b-icon icon="graph-up"></b-icon></b-button>
               </router-link>
@@ -64,10 +72,20 @@
         </app-modal-form-info-area>
         <b-form-group v-if="updateStateData.state === 'FINISHED'">
           <b-form-file v-model="updateStateData.files" multiple :placeholder="$t('select-result-data-files')" required></b-form-file>
-          <small>{{ fileImportInfoTextValue }}</small>
         </b-form-group>
         <b-form-group :label="$t('message')" label-for="message">
           <b-form-textarea id="message" v-model="updateStateData.message" :placeholder="$t('message')" row="5"></b-form-textarea>
+        </b-form-group>
+      </app-modal-form>
+      <app-modal-form 
+        id="import-more-result-files-modal"
+        ref="appImportMoreResultFilesModal"
+        :title="$t('import-further-result-files')"
+        :subtitle="$t('import-further-result-files_descr')"
+        :ok-title="$t('import')"
+        @submit="importMoreResultFiles">
+        <b-form-group>
+          <b-form-file v-model="furtherImportFiles.files" multiple :placeholder="$t('select-result-data-files')" required></b-form-file>
         </b-form-group>
       </app-modal-form>
     </div>
@@ -112,7 +130,6 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
 
   createNewAnalysisBtnText = "";
   uploadStateProcess = "";
-  fileImportInfoText = "";
 
   @Ref() appUpdateStateModal!: IAppModalForm;
   updateStateData: { 
@@ -121,6 +138,13 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     message?: string,
     files?: File[],
   } = { message: "", state: undefined, analysisId: undefined };
+
+  @Ref() appImportMoreResultFilesModal!: IAppModalForm;
+  furtherImportFiles: {
+    analysisId?: string,
+    files?: File[],
+  } = {};
+
 
   async created() {
     this.createNewAnalysisBtnText = this.$t("create-new-analysis").toString();
@@ -216,8 +240,39 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     this.updateStateData.analysisId = analysis.id;
     this.updateStateData.state = state;
     
-    this.fileImportInfoText = "";
     this.appUpdateStateModal.show();
+  }
+
+  onImportMoreResultFilesClick(anaylsis: AnalysisSchema) {
+    this.furtherImportFiles = {};
+    this.furtherImportFiles.analysisId = anaylsis.id;
+    this.appImportMoreResultFilesModal.show();
+  }
+
+  async importMoreResultFiles() {
+    try {
+      appButtonEventBus.startLoading()
+
+      await this.importAnalyisResults(this.furtherImportFiles.files!, this.furtherImportFiles.analysisId!, (event: { task: TaskSchema, file: File, finished: boolean }) => {
+        try {
+          if (event.task.state === "SUCCESS" && event.finished) {
+            this.appImportMoreResultFilesModal.hide();
+            appContentEventBus.showSuccessAlert(this.$t("import-further-result-files-success").toString());
+          } else if (event.task.state === "FAILURE") {
+            throw { error: "SOMETHING_WENT_WRONG", details: event.task.result };
+          }
+        } catch (e) {
+          this.appImportMoreResultFilesModal.alertError(e);
+
+          if (event.finished) {
+            appButtonEventBus.stopLoading();
+          }
+        }
+      });
+    } catch (e) {
+      this.appImportMoreResultFilesModal.alertError(e)
+      appButtonEventBus.stopLoading();
+    }
   }
 
   async changeAnalysisState() {
@@ -244,21 +299,14 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
 
       appContentEventBus.showSuccessAlert(this.$t("update-analysis-state-success").toString());
     } catch (e) {
-      console.error(e);
       this.appUpdateStateModal.alertError(e.error);
     } finally {
       appButtonEventBus.stopLoading();
     }
   }
 
-  get fileImportInfoTextValue() {
-    return this.fileImportInfoText;
-  }
-
   private async updateToFinalAnalysisState() {
     try {
-      this.fileImportInfoText = "Importing " + this.updateStateData.files!.map(file => file.name).join(", ") + " ...";
-
       await this.importAnalyisResults(this.updateStateData.files!, this.updateStateData.analysisId!, (event: { task: TaskSchema, file: File, finished: boolean }) => {
         try {
           if (event.task.state === "SUCCESS" && event.finished) {

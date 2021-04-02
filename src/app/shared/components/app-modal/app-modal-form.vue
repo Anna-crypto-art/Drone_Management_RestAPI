@@ -46,9 +46,16 @@ export default class AppModalForm extends Vue implements IAppModalForm {
     this.$bvModal.hide(this.id || "");
   }
 
-  alertError(msg: string) {
+  alertError(msg: string | any) {
     this.showAlert = true;
-    this.alertMsg = msg;
+
+    console.error(msg)
+
+    if (typeof msg === "string") {
+      this.alertMsg = msg;
+    } else {
+      this.alertMsg = msg.error;
+    }
   }
 
   onSubmit(e: Event) {
