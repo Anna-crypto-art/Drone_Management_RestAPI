@@ -23,7 +23,12 @@
           <b-form-group :label="$t('repeat-password')" label-for="repeat-password">
             <b-form-input id="repeat-password" v-model="user.repeat_password" type="password" :placeholder="$t('repeat-password')" required></b-form-input>
           </b-form-group>
-          <app-button type="submit" cls="width-100pc">{{ $t("register") }}</app-button>
+          <div>
+            <b-form-checkbox id="terms-of-service" v-model="checkedTermsOfService" required>
+              <span v-html="$t('accept-terms-of-service')"></span>
+            </b-form-checkbox>
+          </div>
+          <app-button type="submit" cls="width-100pc" :disabled="!checkedTermsOfService">{{ $t("register") }}</app-button>
         </b-form>
       </div>
     </app-auth-container>
@@ -53,6 +58,7 @@ export default class AppAuthRegister extends Vue {
   hasUser = false;
   email = "";
   company = "";
+  checkedTermsOfService = false;
   user!: RegisterUser;
 
   async created() {
@@ -81,6 +87,11 @@ export default class AppAuthRegister extends Vue {
   async onSubmit(e: Event): Promise<void> {
     if (this.user.password !== this.user.repeat_password) {
       this.showAlert("PASSWORDS_DONT_MATCH");
+      return;
+    }
+
+    if (!this.checkedTermsOfService) {
+      this.showAlert("ACCEPT_TERMS_OF_SERVICE");
       return;
     }
 

@@ -114,5 +114,6 @@
   "import-further-result-files": "Import further result files",
   "import-further-result-files_descr": "Select further JSON result files and click on Import",
   "import": "Import",
-  "import-further-result-files-success": "Further result files successfully imported"
+  "import-further-result-files-success": "Further result files successfully imported",
+  "accept-terms-of-service": "I agree to the <a href='https://www.volateq.de/privacy-policy/' target='_blank'>terms of service</a>"
 }

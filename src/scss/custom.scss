@@ -202,3 +202,7 @@ $theme-colors: (
 .popover.b-popover {
   border-radius: 0 !important;
 }
+
+.custom-checkbox .custom-control-label::before {
+  border-radius: 0 !important;
+}
