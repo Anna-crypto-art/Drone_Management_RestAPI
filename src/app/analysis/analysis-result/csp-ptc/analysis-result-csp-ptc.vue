@@ -136,9 +136,9 @@ export default class AppAnalysisResultCspPtc extends BaseAuthComponent implement
 
   setSubtitle() {
     const subtitle = [
-      this.$t("oil-temp-of-absorber-tube").toString() + ": <b>&oslash; " + Math.round(this.analysisResult.csp_ptc.absorber_temperatur) + " ° Celcius</b>",
+      this.$t("oil-temp-of-absorber-tube").toString() + ": <b>&oslash; " + Math.round(this.analysisResult.csp_ptc.absorber_temperatur) + " ° C</b>",
       this.$t("ambient-temperature").toString() + ": <b>" + (this.analysisResult.csp_ptc.ambient_temperatur || "-") + "</b>",
-      this.$t("time").toString() + ": <b>" + new Date(Date.parse(this.analysisResult.csp_ptc.time)).toLocaleTimeString() + "</b>"
+      this.$t("time").toString() + ": <b>" + new Date(Date.parse(this.analysisResult.csp_ptc.time)).toLocaleString() + "</b>"
     ].join("<br>");
 
     this.$emit('setSubtitle', subtitle);
