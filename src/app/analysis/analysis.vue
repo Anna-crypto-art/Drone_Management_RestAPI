@@ -53,7 +53,7 @@
                 :title="$t('import-further-result-files')">
                 <b-icon icon="cloud-upload"></b-icon>
               </b-button>
-              <router-link v-if="row.item.analysisResultId" :to="{ name: 'AnalysisResult', params: { id: row.item.analysisResultId }}">
+              <router-link v-if="row.item.analysisResultId" :to="{ name: 'AnalysisResult', params: { id: row.item.id }}">
                 <b-button variant="primary" size="sm"><b-icon icon="graph-up"></b-icon></b-button>
               </router-link>
             </div>
@@ -364,7 +364,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
 
   private async updateAnalysisRows() {
     try {
-      this.analysisRows = (await volateqApi.getAnalysis()).map((a: AnalysisSchema) => {
+      this.analysisRows = (await volateqApi.getAllAnalysis()).map((a: AnalysisSchema) => {
         const row = {
           id: a.id,
           date: new Date(Date.parse(a.created_at)).toLocaleString(),

@@ -52,6 +52,8 @@ import { AppDownloader } from "@/app/shared/services/app-downloader/app-download
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
+import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import dateHelper from "@/app/shared/services/helper/date-helper";
 
 @Component({
   name: "app-analysis-result-csp-ptc",
@@ -65,6 +67,7 @@ import appContentEventBus from "@/app/shared/components/app-content/app-content-
   }
 })
 export default class AppAnalysisResultCspPtc extends BaseAuthComponent implements IAnalysisResultComponent {
+  @Prop() analysis!: AnalysisSchema;
   @Prop() analysisResult!: AnalysisResultDetailedSchema;
 
   @Ref() absorberComponent: IAnalysisResultCspPtcComponent | undefined;
@@ -121,11 +124,11 @@ export default class AppAnalysisResultCspPtc extends BaseAuthComponent implement
         refComponent.getCsvColumnMappingsParam()
       );
 
-      const csvFileName = "analysis_" + new Date(Date.parse(this.analysisResult.csp_ptc.time)).toLocaleDateString() + "_" + activeComponent.label + ".csv";
+      const csvFileName = dateHelper.toDateTime(new Date()) + "_" + this.analysis.plant.name + "_" + new Date(Date.parse(this.analysisResult.csp_ptc.time)).toLocaleDateString() + "_" + activeComponent.label + ".csv";
 
       try {
         appButtonEventBus.startLoading();
-        AppDownloader.download(await volateqApi.generateDownloadUrl(authCsvDownloadUrl), csvFileName);
+        AppDownloader.download(await volateqApi.generateDownloadUrl(authCsvDownloadUrl, csvFileName), csvFileName);
       } catch (e) {
         appContentEventBus.showError(e);
       } finally {

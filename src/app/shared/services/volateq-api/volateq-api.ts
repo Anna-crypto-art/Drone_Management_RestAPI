@@ -64,8 +64,12 @@ export class VolateqAPI extends HttpClientBase {
     return this.post(`/auth/analysis`, newAnalyis);
   }
 
-  public async getAnalysis(customer_id?: string): Promise<AnalysisSchema[]> {
+  public async getAllAnalysis(customer_id?: string): Promise<AnalysisSchema[]> {
     return this.get(`/auth/analysis`, customer_id && { customer_id } || undefined);
+  }
+
+  public getAnalysis(analysisId?: string): Promise<AnalysisSchema> {
+    return this.get(`/auth/analysis/${analysisId}`);
   }
 
   public getAnalysisFileUploadUrl(analysisId: string): string {
@@ -132,8 +136,11 @@ export class VolateqAPI extends HttpClientBase {
     return `${apiBaseUrl}/auth/analysis-result/${analysisResultId}/${componentKeyFigureId}${this.getQueryParams(params)}&csv=1${encodedCsvMappings}`;
   }
 
-  public async generateDownloadUrl(downloadUrl: string): Promise<string> {
-    const urlTokenResponse: { url_token: string } = await this.get(`/auth/user/generate-url-token/${encodeURIComponent(encodeURIComponent(downloadUrl))}`);
+  public async generateDownloadUrl(downloadUrl: string, filename?: string): Promise<string> {
+    const encodedUrl= encodeURIComponent(encodeURIComponent(downloadUrl));
+    const filenameParam = filename && `?filename=${encodeURIComponent(filename)}` || '';
+
+    const urlTokenResponse: { url_token: string } = await this.get(`/auth/user/generate-url-token/${encodedUrl}${filenameParam}`);
     
     return `${apiBaseUrl}/temp-url/${urlTokenResponse.url_token}`;
   }
