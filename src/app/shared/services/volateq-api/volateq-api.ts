@@ -4,7 +4,7 @@ import { UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-s
 import { HttpClientBase } from "@/app/shared/services/volateq-api/http-client-base";
 import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
 import { InviteUser, RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
-import { baseUrl, apiBaseUrl } from "@/environment/environment";
+import { baseUrl, apiBaseUrl, environment } from "@/environment/environment";
 import { RouteSchema } from "./api-schemas/route-schema";
 import { NewAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
 import { AnalysisSchema } from "./api-schemas/analysis-schema";
@@ -135,7 +135,11 @@ export class VolateqAPI extends HttpClientBase {
   public async generateDownloadUrl(downloadUrl: string): Promise<string> {
     const urlTokenResponse: { url_token: string } = await this.get(`/auth/user/generate-url-token/${encodeURIComponent(encodeURIComponent(downloadUrl))}`);
     
-    return `${apiBaseUrl}/temp-url/${urlTokenResponse.url_token}`;
+    if (environment === 'development') {
+      return `${apiBaseUrl}/temp-url/${urlTokenResponse.url_token}`;
+    }
+
+    return `${baseUrl}/download/${urlTokenResponse.url_token}`;
   }
 
   public getTask(taskId: string): Promise<TaskSchema> {
