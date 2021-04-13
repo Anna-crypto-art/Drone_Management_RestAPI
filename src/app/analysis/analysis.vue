@@ -46,12 +46,12 @@
                 </b-dropdown-item>
               </b-dropdown>
               <b-button 
-                v-show="!canUpdateState(row.item.state) && row.item.analysisResultId && isSuperAdmin" 
-                @click="onImportMoreResultFilesClick(row.item)" 
+                v-show="isSuperAdmin" 
+                @click="onManageResultFilesClick(row.item)" 
                 variant="secondary"
                 size="sm"
-                :title="$t('import-further-result-files')">
-                <b-icon icon="cloud-upload"></b-icon>
+                :title="$t('manage-result-files')">
+                <b-icon icon="hammer"></b-icon>
               </b-button>
               <router-link v-if="row.item.analysisResultId" :to="{ name: 'AnalysisResult', params: { id: row.item.id }}">
                 <b-button variant="primary" size="sm"><b-icon icon="graph-up"></b-icon></b-button>
@@ -78,14 +78,21 @@
         </b-form-group>
       </app-modal-form>
       <app-modal-form 
-        id="import-more-result-files-modal"
-        ref="appImportMoreResultFilesModal"
-        :title="$t('import-further-result-files')"
-        :subtitle="$t('import-further-result-files_descr')"
+        id="manage-result-files-modal"
+        ref="appManageResultFilesModal"
+        :title="$t('manage-result-files')"
+        :subtitle="$t('manage-result-files_descr')"
         :ok-title="$t('import')"
-        @submit="importMoreResultFiles">
+        @submit="saveManageResultFiles">
+        <b-form-group v-show="manageImportFiles.analysisResultId" :label="$t('remove-result-files')">
+          <b-form-checkbox-group
+            id="remove-result-files-checkbox-group"
+            v-model="manageImportFiles.selectedResultFilesToRemove"
+            :options="manageImportFiles.existingFilesOptions">
+          </b-form-checkbox-group>
+        </b-form-group>
         <b-form-group>
-          <b-form-file v-model="furtherImportFiles.files" multiple :placeholder="$t('select-result-data-files')" required></b-form-file>
+          <b-form-file v-model="manageImportFiles.newFiles" multiple :placeholder="$t('select-result-data-files')" required></b-form-file>
         </b-form-group>
       </app-modal-form>
     </div>
@@ -139,11 +146,14 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     files?: File[],
   } = { message: "", state: undefined, analysisId: undefined };
 
-  @Ref() appImportMoreResultFilesModal!: IAppModalForm;
-  furtherImportFiles: {
+  @Ref() appManageResultFilesModal!: IAppModalForm;
+  manageImportFiles: {
     analysisId?: string,
-    files?: File[],
-  } = {};
+    analysisResultId?: string,
+    existingFilesOptions: { text: string, value: string }[],
+    selectedResultFilesToRemove: string[],
+    newFiles?: File[],
+  } = { analysisResultId: "", existingFilesOptions: [], selectedResultFilesToRemove: [] };
 
 
   async created() {
@@ -243,34 +253,65 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     this.appUpdateStateModal.show();
   }
 
-  onImportMoreResultFilesClick(anaylsis: AnalysisSchema) {
-    this.furtherImportFiles = {};
-    this.furtherImportFiles.analysisId = anaylsis.id;
-    this.appImportMoreResultFilesModal.show();
+  async onManageResultFilesClick(analysisRowItem: any) {
+    this.manageImportFiles.analysisId = analysisRowItem.id;
+    this.manageImportFiles.analysisResultId = analysisRowItem.analysisResultId;
+    
+    // clear arrays but keep the references
+    this.manageImportFiles.existingFilesOptions.length = 0;
+    this.manageImportFiles.selectedResultFilesToRemove.length = 0;
+
+    if (this.manageImportFiles.analysisResultId) {
+      const analysisResultFiles = await volateqApi.getAnalysisResultFiles(this.manageImportFiles.analysisResultId);
+      for (const analysisResultFile of analysisResultFiles) {
+        this.manageImportFiles.existingFilesOptions.push({ text: analysisResultFile.filename, value: analysisResultFile.id });
+      }
+    }
+
+    this.appManageResultFilesModal.show();
   }
 
-  async importMoreResultFiles() {
+  async saveManageResultFiles() {
     try {
       appButtonEventBus.startLoading()
 
-      await this.importAnalyisResults(this.furtherImportFiles.files!, this.furtherImportFiles.analysisId!, (event: { task: TaskSchema, file: File, finished: boolean }) => {
-        try {
-          if (event.task.state === "SUCCESS" && event.finished) {
-            this.appImportMoreResultFilesModal.hide();
-            appContentEventBus.showSuccessAlert(this.$t("import-further-result-files-success").toString());
-          } else if (event.task.state === "FAILURE") {
-            throw { error: "SOMETHING_WENT_WRONG", details: event.task.result };
-          }
-        } catch (e) {
-          this.appImportMoreResultFilesModal.alertError(e);
+      const successfullyFinished = () => {
+        this.appManageResultFilesModal.hide();
+        appContentEventBus.showSuccessAlert(this.$t("success-managing-result-files").toString());
+        appButtonEventBus.stopLoading();
+      }
 
-          if (event.finished) {
-            appButtonEventBus.stopLoading();
-          }
+      if (this.manageImportFiles.analysisResultId && this.manageImportFiles.selectedResultFilesToRemove.length > 0) {
+        for (const analysisResultFileId of this.manageImportFiles.selectedResultFilesToRemove) {
+          await volateqApi.deleteAnalysisResultFile(this.manageImportFiles.analysisResultId, analysisResultFileId);
         }
-      });
+      }
+
+      if (this.manageImportFiles.newFiles && this.manageImportFiles.newFiles.length > 0) {
+        await this.importAnalyisResults(
+          this.manageImportFiles.newFiles!, 
+          this.manageImportFiles.analysisId!, 
+          (event: { task: TaskSchema, file: File, finished: boolean }) => {
+            try {
+              if (event.task.state === "SUCCESS" && event.finished) {
+                successfullyFinished();
+              } else if (event.task.state === "FAILURE") {
+                throw { error: "SOMETHING_WENT_WRONG", details: event.task.result };
+              }
+            } catch (e) {
+              this.appManageResultFilesModal.alertError(e);
+
+              if (event.finished) {
+                appButtonEventBus.stopLoading();
+              }
+            }
+          }
+        );
+      } else {
+        successfullyFinished();
+      }
     } catch (e) {
-      this.appImportMoreResultFilesModal.alertError(e)
+      this.appManageResultFilesModal.alertError(e)
       appButtonEventBus.stopLoading();
     }
   }

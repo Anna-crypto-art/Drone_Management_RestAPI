@@ -14,6 +14,7 @@ import { AnalysisResultDetailedSchema } from "./api-schemas/analysis-result-sche
 import { AnalysisResultCspPtcIrIntensitySchema } from "./api-schemas/analysis-result-csp-ptc-ir-intensity-schema";
 import { TableRequest } from "./api-requests/common/table-requests";
 import { TableResultSchema } from "./api-schemas/table-result-schema";
+import { AnalysisResultFileSchema } from "./api-schemas/analysis-result-file-schema";
 
 export class VolateqAPI extends HttpClientBase {
 
@@ -147,6 +148,14 @@ export class VolateqAPI extends HttpClientBase {
 
   public getTask(taskId: string): Promise<TaskSchema> {
     return this.get(`/auth/task/${taskId}`);
+  }
+
+  public getAnalysisResultFiles(analysisResultId: string): Promise<AnalysisResultFileSchema[]> {
+    return this.get(`/auth/analysis-result/${analysisResultId}/files`);
+  }
+
+  public deleteAnalysisResultFile(analysisResultId: string, analysisResultFileId: string): Promise<{ results_deleted: number }> {
+    return this.delete(`/auth/analysis-result/${analysisResultId}/file/${analysisResultFileId}`);
   }
 }
 
