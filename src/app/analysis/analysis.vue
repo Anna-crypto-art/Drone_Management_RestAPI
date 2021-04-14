@@ -82,7 +82,7 @@
         ref="appManageResultFilesModal"
         :title="$t('manage-result-files')"
         :subtitle="$t('manage-result-files_descr')"
-        :ok-title="$t('import')"
+        :ok-title="$t('apply')"
         @submit="saveManageResultFiles">
         <b-form-group v-show="manageImportFiles.analysisResultId" :label="$t('remove-result-files')">
           <b-form-checkbox-group
@@ -91,7 +91,7 @@
             :options="manageImportFiles.existingFilesOptions">
           </b-form-checkbox-group>
         </b-form-group>
-        <b-form-group>
+        <b-form-group :label="$t('select-new-results-file-import')">
           <b-form-file v-model="manageImportFiles.newFiles" multiple :placeholder="$t('select-result-data-files')" required></b-form-file>
         </b-form-group>
       </app-modal-form>
@@ -279,6 +279,8 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
         this.appManageResultFilesModal.hide();
         appContentEventBus.showSuccessAlert(this.$t("success-managing-result-files").toString());
         appButtonEventBus.stopLoading();
+
+        this.updateAnalysisRows()
       }
 
       if (this.manageImportFiles.analysisResultId && this.manageImportFiles.selectedResultFilesToRemove.length > 0) {
