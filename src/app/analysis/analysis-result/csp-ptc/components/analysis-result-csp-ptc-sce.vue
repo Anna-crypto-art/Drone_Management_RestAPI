@@ -18,6 +18,12 @@
         <template #head(angleDeviation)="column">
           {{ column.label }} (<b>°</b>)<app-explanation>{{ $t("angle-deviation_expl") }}</app-explanation>
         </template>
+        <template #head(uncertainty)="column">
+          {{ column.label }} (<b>°</b>)<app-explanation>{{ $t("uncertainty_expl") }}</app-explanation>
+        </template>
+        <template #head(deviationToDrive)="column">
+          {{ column.label }} (<b>°</b>)<app-explanation>{{ $t("deviation-to-drive_expl") }}</app-explanation>
+        </template>
       </b-table>
     </app-analysis-result-csp-ptc-container>
   </div>
@@ -51,6 +57,8 @@ export default class AppAnalysisResultCspPtcSce extends AppAnalysisResultCspPtcB
       { key: "angleValue", label: this.$t("angle-value").toString(), sortable: true },
       { key: "actualAngle", label: this.$t("actual-angle").toString(), sortable: true },
       { key: "angleDeviation", label: this.$t("angle-deviation").toString(), sortable: true },
+      { key: "uncertainty", label: this.$t("uncertainty").toString(), sortable: true },
+      { key: "deviationToDrive", label: this.$t("deviation-to-drive").toString(), sortable: true }
     ];
   }
 
@@ -61,6 +69,8 @@ export default class AppAnalysisResultCspPtcSce extends AppAnalysisResultCspPtcB
       [this.$t("angle-value").toString()]: 'angle_value',
       [this.$t("actual-angle").toString()]: 'actual_angle',
       [this.$t("angle-deviation").toString()]: 'angle_deviation',
+      [this.$t("uncertainty").toString()]: 'uncertainty',
+      [this.$t("deviation-to-drive").toString()]: 'deviation_to_drive',
     }
   }
 
@@ -77,7 +87,9 @@ export default class AppAnalysisResultCspPtcSce extends AppAnalysisResultCspPtcB
         setAngle: "set_angle",
         angleValue: "angle_value",
         actualAngle: "actual_angle",
-        angleDeviation: "angle_deviation"
+        angleDeviation: "angle_deviation",
+        uncertainty: "uncertainty",
+        deviationToDrive: "deviation_to_drive"
       }[this.last_ctx.sortBy],
       order_direction: this.last_ctx.sortDesc ? 'desc' : 'asc',
       filter: this.searchText
@@ -97,9 +109,11 @@ export default class AppAnalysisResultCspPtcSce extends AppAnalysisResultCspPtcB
       const items = tableResult.items.map((sceDataRow: AnalysisResultCspPtcSceAngleSchema) => ({
         pcs: sceDataRow.fieldgeometry_component.kks,
         setAngle: Math.round(sceDataRow.set_angle),
-        angleValue: MathHelper.roundTo(sceDataRow.angle_value, 3),
-        actualAngle: MathHelper.roundTo(sceDataRow.actual_angle, 3),
-        angleDeviation: MathHelper.roundTo(sceDataRow.angle_deviation, 3)
+        angleValue: MathHelper.roundTo(sceDataRow.angle_value, 2),
+        actualAngle: MathHelper.roundTo(sceDataRow.actual_angle, 2),
+        angleDeviation: MathHelper.roundTo(sceDataRow.angle_deviation, 2),
+        uncertainty: MathHelper.roundTo(sceDataRow.uncertainty, 2),
+        deviationToDrive: MathHelper.roundTo(sceDataRow.deviation_to_drive, 2),
       }));
       
       this.pagination.total = tableResult.total;

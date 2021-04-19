@@ -7,4 +7,6 @@ export interface AnalysisResultCspPtcSceAngleSchema {
   actual_angle: number;
   fieldgeometry_component: FieldgeometryComponentSchema;
   angle_deviation: number;
+  uncertainty: number;
+  deviation_to_drive: number;
 }

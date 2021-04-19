@@ -29,6 +29,16 @@
             :componentKeyFigure="activeComponents.cspPtcSce.componentKeyFigure">
           </app-analysis-result-csp-ptc-sce>
         </b-tab>
+        <b-tab v-if="activeComponents.cspPtcSca.exists" :title="$t('solar-collector-assembly')">
+          <template #title>
+            {{ $t('solar-collector-assembly') }}
+            <app-explanation>{{ $t('sca_expl') }}</app-explanation>
+          </template>
+          <app-analysis-result-csp-ptc-sca ref="scaComponent"
+            :analysisResultId="analysisResult.id" 
+            :componentKeyFigure="activeComponents.cspPtcSca.componentKeyFigure">
+          </app-analysis-result-csp-ptc-sca>
+        </b-tab>
       </b-tabs>
     </app-table-container>
   </div>
@@ -46,6 +56,7 @@ import { IActiveComponent} from "./types";
 import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-analysis-result-components";
 import AppAnalysisResultCspPtcAbsorber from "@/app/analysis/analysis-result/csp-ptc/components/analysis-result-csp-ptc-absorber.vue";
 import AppAnalysisResultCspPtcSce from "@/app/analysis/analysis-result/csp-ptc/components/analysis-result-csp-ptc-sce.vue";
+import AppAnalysisResultCspPtcSca from "@/app/analysis/analysis-result/csp-ptc/components/analysis-result-csp-ptc-sca.vue";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import { IAnalysisResultCspPtcComponent } from "./components/shared/analysis-result-csp-ptc-base";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
@@ -63,6 +74,7 @@ import dateHelper from "@/app/shared/services/helper/date-helper";
     AppSearchInput,
     AppAnalysisResultCspPtcAbsorber,
     AppAnalysisResultCspPtcSce,
+    AppAnalysisResultCspPtcSca,
     AppExplanation
   }
 })
@@ -72,13 +84,15 @@ export default class AppAnalysisResultCspPtc extends BaseAuthComponent implement
 
   @Ref() absorberComponent: IAnalysisResultCspPtcComponent | undefined;
   @Ref() sceComponent: IAnalysisResultCspPtcComponent | undefined;
+  @Ref() scaComponent: IAnalysisResultCspPtcComponent | undefined;
 
   tabIndex = 0;
   activeTabLabel = "";
 
   activeComponents: { [comp_key: string]: IActiveComponent } = {
     cspPtcAbsorber: { componentId: AnalysisResultComponent.CSP_PTC_ABSORBER, label: "absorber-tubes", tabIndex: -1, exists: false, refComponentName: 'absorberComponent' },
-    cspPtcSce: { componentId: AnalysisResultComponent.CSP_PTC_SCE, label: "single-collector-elements", tabIndex: -1, exists: false, refComponentName: 'sceComponent' }
+    cspPtcSce: { componentId: AnalysisResultComponent.CSP_PTC_SCE, label: "single-collector-elements", tabIndex: -1, exists: false, refComponentName: 'sceComponent' },
+    cspPtcSca: { componentId: AnalysisResultComponent.CSP_PTC_SCA, label: "solar-collector-assembly", tabIndex: -1, exists: false, refComponentName: 'scaComponent' },
   };
 
   async created() {
@@ -103,6 +117,7 @@ export default class AppAnalysisResultCspPtc extends BaseAuthComponent implement
     console.log(searchText);
     this.absorberComponent && this.absorberComponent.search(searchText);
     this.sceComponent && this.sceComponent.search(searchText);
+    this.scaComponent && this.scaComponent.search(searchText);
   }
 
   onTabChanged(newTabIndex: number) {

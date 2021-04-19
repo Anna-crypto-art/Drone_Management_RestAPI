@@ -38,5 +38,9 @@ export default class AppAnalysisResultCspPtcContainer extends Vue {
 <style lang="scss">
 .app-analysis-result-csp-ptc-container {
   position: relative;
+
+  .b-table {
+    font-size: 14px;
+  }
 }
 </style>
