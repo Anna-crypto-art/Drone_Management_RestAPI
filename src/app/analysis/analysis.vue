@@ -350,22 +350,26 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
 
   private async updateToFinalAnalysisState() {
     try {
-      await this.importAnalyisResults(this.updateStateData.files!, this.updateStateData.analysisId!, (event: { task: TaskSchema, file: File, finished: boolean }) => {
-        try {
-          if (event.task.state === "SUCCESS" && event.finished) {
-            this.updateAnalysisState();
-          } else if (event.task.state === "FAILURE") {
-            throw { error: "SOMETHING_WENT_WRONG", details: event.task.result };
-          }
-        } catch (e) {
-          console.error(e);
-          this.appUpdateStateModal.alertError(e.error);
+      if (this.updateStateData.files) {
+        await this.importAnalyisResults(this.updateStateData.files!, this.updateStateData.analysisId!, (event: { task: TaskSchema, file: File, finished: boolean }) => {
+          try {
+            if (event.task.state === "SUCCESS" && event.finished) {
+              this.updateAnalysisState();
+            } else if (event.task.state === "FAILURE") {
+              throw { error: "SOMETHING_WENT_WRONG", details: event.task.result };
+            }
+          } catch (e) {
+            console.error(e);
+            this.appUpdateStateModal.alertError(e.error);
 
-          if (event.finished) {
-            appButtonEventBus.stopLoading();
+            if (event.finished) {
+              appButtonEventBus.stopLoading();
+            }
           }
-        }
-      });
+        });
+      } else {
+        this.updateAnalysisState()
+      }
     } catch (e) {
       console.error(e);
       this.appUpdateStateModal.alertError(e.error);
