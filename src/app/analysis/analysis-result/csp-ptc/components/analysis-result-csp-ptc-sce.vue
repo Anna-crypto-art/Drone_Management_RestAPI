@@ -103,7 +103,7 @@ export default class AppAnalysisResultCspPtcSce extends AppAnalysisResultCspPtcB
     try {
       const tableResult = (await volateqApi.getSpecificAnalysisResult<AnalysisResultCspPtcSceAngleSchema>(
         this.analysisResultId, 
-        this.componentKeyFigure.id, 
+        this.componentKeyFigures[0].id, 
         this.getTableRequestParam()
       ));
       const items = tableResult.items.map((sceDataRow: AnalysisResultCspPtcSceAngleSchema) => ({

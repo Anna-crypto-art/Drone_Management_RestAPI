@@ -16,7 +16,7 @@
         <b-tab v-if="activeComponents.cspPtcAbsorber.exists" :title="$t('absorber-tubes')">
           <app-analysis-result-csp-ptc-absorber ref="absorberComponent"
             :analysisResultId="analysisResult.id" 
-            :componentKeyFigure="activeComponents.cspPtcAbsorber.componentKeyFigure">
+            :componentKeyFigures="activeComponents.cspPtcAbsorber.componentKeyFigures">
           </app-analysis-result-csp-ptc-absorber>
         </b-tab>
         <b-tab v-if="activeComponents.cspPtcSce.exists" :title="$t('single-collector-elements')">
@@ -26,7 +26,7 @@
           </template>
           <app-analysis-result-csp-ptc-sce ref="sceComponent"
             :analysisResultId="analysisResult.id" 
-            :componentKeyFigure="activeComponents.cspPtcSce.componentKeyFigure">
+            :componentKeyFigures="activeComponents.cspPtcSce.componentKeyFigures">
           </app-analysis-result-csp-ptc-sce>
         </b-tab>
         <b-tab v-if="activeComponents.cspPtcSca.exists" :title="$t('solar-collector-assembly')">
@@ -36,7 +36,7 @@
           </template>
           <app-analysis-result-csp-ptc-sca ref="scaComponent"
             :analysisResultId="analysisResult.id" 
-            :componentKeyFigure="activeComponents.cspPtcSca.componentKeyFigure">
+            :componentKeyFigures="activeComponents.cspPtcSca.componentKeyFigures">
           </app-analysis-result-csp-ptc-sca>
         </b-tab>
       </b-tabs>
@@ -90,9 +90,30 @@ export default class AppAnalysisResultCspPtc extends BaseAuthComponent implement
   activeTabLabel = "";
 
   activeComponents: { [comp_key: string]: IActiveComponent } = {
-    cspPtcAbsorber: { componentId: AnalysisResultComponent.CSP_PTC_ABSORBER, label: "absorber-tubes", tabIndex: -1, exists: false, refComponentName: 'absorberComponent' },
-    cspPtcSce: { componentId: AnalysisResultComponent.CSP_PTC_SCE, label: "single-collector-elements", tabIndex: -1, exists: false, refComponentName: 'sceComponent' },
-    cspPtcSca: { componentId: AnalysisResultComponent.CSP_PTC_SCA, label: "solar-collector-assembly", tabIndex: -1, exists: false, refComponentName: 'scaComponent' },
+    cspPtcAbsorber: { 
+      componentId: AnalysisResultComponent.CSP_PTC_ABSORBER,
+      label: "absorber-tubes",
+      refComponentName: 'absorberComponent',
+      componentKeyFigures: [], 
+      tabIndex: -1,
+      exists: false,
+    },
+    cspPtcSce: {
+      componentId: AnalysisResultComponent.CSP_PTC_SCE,
+      label: "single-collector-elements",
+      refComponentName: 'sceComponent',
+      componentKeyFigures: [],
+      tabIndex: -1,
+      exists: false,
+    },
+    cspPtcSca: {
+      componentId: AnalysisResultComponent.CSP_PTC_SCA,
+      label: "solar-collector-assembly",
+      refComponentName: 'scaComponent',
+      componentKeyFigures: [],
+      tabIndex: -1,
+      exists: false,
+    },
   };
 
   async created() {
@@ -103,9 +124,12 @@ export default class AppAnalysisResultCspPtc extends BaseAuthComponent implement
       for (const comp_key in this.activeComponents) {
         const activeComponent = this.activeComponents[comp_key];
         if (activeComponent.componentId === comp_key_figure.component.id) {
-          activeComponent.componentKeyFigure = comp_key_figure;
-          activeComponent.exists = true;
-          activeComponent.tabIndex = tabIdx++;
+          activeComponent.componentKeyFigures.push(comp_key_figure);
+
+          if (!activeComponent.exists) {
+            activeComponent.exists = true;
+            activeComponent.tabIndex = tabIdx++;
+          }
         }
       }
     }
@@ -134,7 +158,7 @@ export default class AppAnalysisResultCspPtc extends BaseAuthComponent implement
 
       const authCsvDownloadUrl = volateqApi.getSpecificAnalysisResultCsvUrl(
         this.analysisResult.id, 
-        activeComponent.componentKeyFigure!.id,
+        activeComponent.componentKeyFigures[0].id,
         refComponent.getTableRequestParam(),
         refComponent.getCsvColumnMappingsParam()
       );

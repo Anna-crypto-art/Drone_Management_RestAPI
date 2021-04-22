@@ -124,5 +124,11 @@
   "deviation-to-drive_expl": "Internal misalignment between SCE and drive",
   "solar-collector-assembly": "SCA",
   "sca_expl": "Solar collector assembly",
-  "orientation-at-drive": "Orientation at drive"
+  "orientation-at-drive": "Orientation at drive",
+  "torsion-caused-friction-mean": "Friction avg",
+  "torsion-caused-friction-north": "Friction north",
+  "torsion-caused-friction-south": "Friction south",
+  "torsion-caused-friction-mean_expl": "Averaged torsion caused by friction between two operating states",
+  "torsion-caused-friction-north_expl": "Torsion caused by friction between two operating states at the northern end of the collector",
+  "torsion-caused-friction-south_expl": "Torsion caused by friction between two operating states at the southern end of the collector"
 }

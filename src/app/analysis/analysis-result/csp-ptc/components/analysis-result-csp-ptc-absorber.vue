@@ -84,7 +84,7 @@ export default class AppAnalysisResultCspPtcAbsorber extends AppAnalysisResultCs
     try {
       const tableResult = (await volateqApi.getSpecificAnalysisResult<AnalysisResultCspPtcIrIntensitySchema>(
         this.analysisResultId, 
-        this.componentKeyFigure.id, 
+        this.componentKeyFigures[0].id, 
         this.getTableRequestParam()
       ));
       const items = tableResult.items.map((absorberDataRow: AnalysisResultCspPtcIrIntensitySchema) => ({

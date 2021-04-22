@@ -17,7 +17,7 @@ export interface IAnalysisResultCspPtcComponent {
 
 export abstract class AppAnalysisResultCspPtcBase extends Vue implements IAnalysisResultCspPtcComponent {
   @Prop() analysisResultId!: string;
-  @Prop() componentKeyFigure!: ComponentKeyFigureSchema;
+  @Prop() componentKeyFigures!: ComponentKeyFigureSchema[];
   @Ref() container!: IAnalysisResultCspPtcContainer;
   @Ref() table!: any;
 

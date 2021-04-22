@@ -7,5 +7,5 @@ export interface IActiveComponent {
   componentId: number;
   refComponentName: string;
   active?: boolean;
-  componentKeyFigure?: ComponentKeyFigureSchema;
+  componentKeyFigures: ComponentKeyFigureSchema[];
 }
