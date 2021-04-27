@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 files:
   - source: /
-    destination: /home/ubuntu/volateq-web-app
+    destination: /home/vqonaws/volateq-web-app
 hooks:
   ApplicationStop:
     - location: scripts/stop.sh
