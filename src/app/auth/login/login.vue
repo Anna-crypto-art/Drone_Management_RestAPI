@@ -26,7 +26,7 @@ import appButtonEventBus from "@/app/shared/components/app-button/app-button-eve
 import authContainerEventBus from "@/app/auth/shared/components/auth-container-event-bus";
 
 @Component({
-  name: "app-login",
+  name: "app-auth-login",
   components: {
     AppAuthContainer,
     AppButton,
@@ -40,9 +40,13 @@ export default class AppAuthLogin extends Vue {
     try {
       appButtonEventBus.startLoading()
 
-      await volateqApi.login(this.email, this.password);
-
-      this.$router.push({ name: "Home" })
+      const confirmationKey = await volateqApi.login(this.email, this.password);
+      
+      if (confirmationKey) {
+        this.$router.push({ name: "ConfirmLogin", params: { confirmKey: confirmationKey } });
+      } else {
+        this.$router.push({ name: "Home" });
+      }
     } catch (e) {
       authContainerEventBus.showErrorAlert(e.message);
       appButtonEventBus.stopLoading();

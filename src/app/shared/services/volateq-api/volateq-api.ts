@@ -1,5 +1,5 @@
 import store from "@/app/app-state";
-import { AuthResult } from "@/app/shared/services/volateq-api/api-schemas/auth-schema";
+import { AuthResult, ConfirmLoginResult, TokenResult } from "@/app/shared/services/volateq-api/api-schemas/auth-schema";
 import { UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 import { HttpClientBase } from "@/app/shared/services/volateq-api/http-client-base";
 import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
@@ -11,14 +11,16 @@ import { AnalysisSchema } from "./api-schemas/analysis-schema";
 import { PlantSchema } from "./api-schemas/plant-schema";
 import { TaskSchema } from "./api-schemas/task-schema";
 import { AnalysisResultDetailedSchema } from "./api-schemas/analysis-result-schema";
-import { AnalysisResultCspPtcIrIntensitySchema } from "./api-schemas/analysis-result-csp-ptc-ir-intensity-schema";
 import { TableRequest } from "./api-requests/common/table-requests";
 import { TableResultSchema } from "./api-schemas/table-result-schema";
 import { AnalysisResultFileSchema } from "./api-schemas/analysis-result-file-schema";
 
 export class VolateqAPI extends HttpClientBase {
 
-  public async login(email: string, password: string): Promise<void> {
+  /**
+   * @returns confirmation_key if user logs in with an unkown host, else undefined.
+   */
+  public async login(email: string, password: string): Promise<string | undefined> {
     const authResult: AuthResult = await this.post("/auth/login", {}, {
       auth: {
         username: email,
@@ -26,7 +28,20 @@ export class VolateqAPI extends HttpClientBase {
       }
     });
 
-    await store.dispatch.auth.updateToken({ token: authResult.token, role: authResult.role, customer_id: authResult.customer_id });    
+    if ((authResult as ConfirmLoginResult).login_with_unknown_host) {
+      return (authResult as ConfirmLoginResult).confirmation_key
+    }
+
+    const tokenResult = authResult as TokenResult;
+    await store.dispatch.auth.updateToken({ token: tokenResult.token, role: tokenResult.role, customer_id: tokenResult.customer_id });
+
+    return undefined;
+  }
+
+  public async confirmLogin(confirmationKey: string, securityCode: string): Promise<void> {
+    const tokenResult: TokenResult = await this.post(`/confirm-login/${confirmationKey}`, { security_code: securityCode });
+
+    await store.dispatch.auth.updateToken({ token: tokenResult.token, role: tokenResult.role, customer_id: tokenResult.customer_id });
   }
 
   public async logout(): Promise<void> {
@@ -156,6 +171,10 @@ export class VolateqAPI extends HttpClientBase {
 
   public deleteAnalysisResultFile(analysisResultId: string, analysisResultFileId: string): Promise<{ results_deleted: number }> {
     return this.delete(`/auth/analysis-result/${analysisResultId}/file/${analysisResultFileId}`);
+  }
+
+  public async resendSecurityCode(confirmationKey: string): Promise<void> {
+    await this.post(`/confirm-login-resend/${confirmationKey}`, {});
   }
 }
 
