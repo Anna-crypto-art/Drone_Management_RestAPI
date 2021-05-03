@@ -1,5 +1,5 @@
 import store from "@/app/app-state";
-import { AuthResult, ConfirmLoginResult, TokenResult } from "@/app/shared/services/volateq-api/api-schemas/auth-schema";
+import { ConfirmLoginResult, TokenResult } from "@/app/shared/services/volateq-api/api-schemas/auth-schema";
 import { UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 import { HttpClientBase } from "@/app/shared/services/volateq-api/http-client-base";
 import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
@@ -20,22 +20,31 @@ export class VolateqAPI extends HttpClientBase {
   /**
    * @returns confirmation_key if user logs in with an unkown host, else undefined.
    */
-  public async login(email: string, password: string): Promise<string | undefined> {
-    const authResult: AuthResult = await this.post("/auth/login", {}, {
+  public async login(email: string, password: string): Promise<string> {
+    const confirmLoginResult: ConfirmLoginResult = await this.post("/auth/login", {}, {
       auth: {
         username: email,
         password: password
       }
     });
 
-    if ((authResult as ConfirmLoginResult).login_with_unknown_host) {
-      return (authResult as ConfirmLoginResult).confirmation_key
+    return confirmLoginResult.confirmation_key
+  }
+
+  public async isLoggedIn(): Promise<boolean> {
+    if (store.getters.auth.isAuthenticated) {
+      try {
+        const pong: { pong: true; } = await this.get("/auth/ping");
+
+        if (pong.pong) {
+          return true;
+        }
+      } catch {
+        return false;
+      } 
     }
 
-    const tokenResult = authResult as TokenResult;
-    await store.dispatch.auth.updateToken({ token: tokenResult.token, role: tokenResult.role, customer_id: tokenResult.customer_id });
-
-    return undefined;
+    return false;
   }
 
   public async confirmLogin(confirmationKey: string, securityCode: string): Promise<void> {

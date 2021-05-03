@@ -131,8 +131,8 @@
   "torsion-caused-friction-mean_expl": "Averaged torsion caused by friction between two operating states",
   "torsion-caused-friction-north_expl": "Torsion caused by friction between two operating states at the northern end of the collector",
   "torsion-caused-friction-south_expl": "Torsion caused by friction between two operating states at the southern end of the collector",
-  "new-login-from-unknown-origin": "New Login from unknown origin",
-  "new-login-from-unknown-origin_descr": "We did send you an E-Mail with the security code to enter.",
+  "mfa": "Multi-Factor Authentication",
+  "mfa-email_descr": "We did send you an E-Mail with the security code to enter.",
   "security-code": "Security code",
   "resend-security-code": "Resend security code",
   "resend-security-code-success": "Successfully resent security code"

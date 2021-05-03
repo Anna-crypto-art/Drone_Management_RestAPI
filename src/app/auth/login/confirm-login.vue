@@ -1,7 +1,7 @@
 <template>
   <div class="app-auth-confirm-login">
-    <app-auth-container :title="$t('new-login-from-unknown-origin')"
-    :subtitle="$t('new-login-from-unknown-origin_descr')">
+    <app-auth-container :title="$t('mfa')"
+    :subtitle="$t('mfa-email_descr')">
       <b-form @submit.prevent="onSubmit">
         <b-form-group :label="$t('security-code')" label-for="securityCode">
           <b-form-input id="securityCode" v-model="securityCode" type="text" :placeholder="$t('security-code')" required></b-form-input>          

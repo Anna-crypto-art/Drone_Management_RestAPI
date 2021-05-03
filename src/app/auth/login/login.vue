@@ -36,17 +36,13 @@ export default class AppAuthLogin extends Vue {
   email = "";
   password = "";
 
-  async onSubmit(e: Event): Promise<void> {
+  async onSubmit(e: Event) {
     try {
       appButtonEventBus.startLoading()
 
       const confirmationKey = await volateqApi.login(this.email, this.password);
       
-      if (confirmationKey) {
-        this.$router.push({ name: "ConfirmLogin", params: { confirmKey: confirmationKey } });
-      } else {
-        this.$router.push({ name: "Home" });
-      }
+      this.$router.push({ name: "ConfirmLogin", params: { confirmKey: confirmationKey } });
     } catch (e) {
       authContainerEventBus.showErrorAlert(e.message);
       appButtonEventBus.stopLoading();
