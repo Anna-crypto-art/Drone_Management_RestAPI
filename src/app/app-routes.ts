@@ -4,6 +4,7 @@ import Router, { RouteConfig } from "vue-router";
 import authRoutes from "@/app/auth/auth-routes";
 import analysisRoutes from "@/app/analysis/analysis-routes";
 import settingsRoutes from "@/app/settings/settings-routes";
+import plantRoutes from "@/app/plant/plant-routes";
 import AppPageNotFound from "@/app/shared/components/page-not-found/page-not-found.vue";
 import store from "@/app/app-state";
 import { ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
@@ -24,7 +25,8 @@ const router = new Router({
     ...appRoutes, 
     ...authRoutes,
     ...analysisRoutes,
-    ...settingsRoutes
+    ...settingsRoutes,
+    ...plantRoutes
   ]
 });
 

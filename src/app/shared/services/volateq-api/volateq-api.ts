@@ -185,6 +185,10 @@ export class VolateqAPI extends HttpClientBase {
   public async resendSecurityCode(confirmationKey: string): Promise<void> {
     await this.post(`/confirm-login-resend/${confirmationKey}`, {});
   }
+
+  public getPlant(plantId: string): Promise<PlantSchema> {
+    return this.get(`/auth/plant/${plantId}`);
+  }
 }
 
 const volateqApi = new VolateqAPI();
