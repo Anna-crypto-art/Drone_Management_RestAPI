@@ -189,6 +189,10 @@ export class VolateqAPI extends HttpClientBase {
   public getPlant(plantId: string): Promise<PlantSchema> {
     return this.get(`/auth/plant/${plantId}`);
   }
+
+  public getFieldgeometry(customerId: string, plantId: string): Promise<any> {
+    return this.get(`/auth/fieldgeometry/${customerId}/${plantId}`);
+  }
 }
 
 const volateqApi = new VolateqAPI();

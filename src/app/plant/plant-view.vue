@@ -23,7 +23,7 @@ import appContentEventBus from '../shared/components/app-content/app-content-eve
   }
 })
 export default class AppPlantView extends Vue {
-  plant!: PlantSchema;
+  plant: PlantSchema | null = null;
   
   async created() {
     try {
@@ -33,11 +33,11 @@ export default class AppPlantView extends Vue {
     } 
   }
 
-  get isCspPtc() {
-    return this.plant?.technology_id === 1; // CSP_PTC
+  get isCspPtc(): boolean {
+    return this.plant && this.plant.technology_id === 1 || false; // CSP_PTC
   }
-  get plantName() {
-    return this.plant?.name;
+  get plantName(): string {
+    return this.plant && this.plant.name || "";
   }
 }
 </script>
