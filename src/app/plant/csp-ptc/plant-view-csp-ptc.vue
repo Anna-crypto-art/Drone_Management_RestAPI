@@ -9,6 +9,7 @@ import { LayerType, OpenLayers } from 'volateq-geovisualization';
 import volateqApi from '@/app/shared/services/volateq-api/volateq-api';
 import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
 import { Style, Stroke } from 'ol/style';
+import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-analysis-result-components";
 
 
 @Component({
@@ -31,7 +32,7 @@ export default class AppPlantViewCspPtc extends Vue {
           stroke: new Stroke({
             color: 'rgba(0, 0, 0, 1)',
             width: 1
-          })
+          }),
         });
       },
       geoJSONOptions: {
@@ -41,7 +42,7 @@ export default class AppPlantViewCspPtc extends Vue {
       geoJSONLoader: (): Promise<Record<string, unknown>> => {
         console.log('load dt...');
 
-        return volateqApi.getFieldgeometry(this.plant.customer_id, this.plant.id)
+        return volateqApi.getComponentsGeoVisual(this.plant.id, [AnalysisResultComponent.CSP_PTC_SCA]);
       }
     });
   }
