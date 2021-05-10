@@ -1,5 +1,8 @@
 <template>
-  <open-layers v-if="hasLayers" :layers="layers" :zoom="5" :center="center"></open-layers>
+  <div>
+    <b-form-checkbox :checked="showPcs" :change="toggleShowPCS">{{ $t('show-pcs') }}</b-form-checkbox>
+    <open-layers v-if="hasLayers" :layers="layers" :zoom="5" :center="[0, 0]"></open-layers>
+  </div>
 </template>
 
 <script lang="ts">
@@ -8,7 +11,8 @@ import { Component, Prop } from 'vue-property-decorator';
 import { LayerType, OpenLayers } from 'volateq-geovisualization';
 import volateqApi from '@/app/shared/services/volateq-api/volateq-api';
 import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
-import { Style, Stroke } from 'ol/style';
+import { Style, Stroke, Text, Fill } from 'ol/style';
+import { FeatureLike } from "ol/Feature";
 import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-analysis-result-components";
 
 
@@ -21,18 +25,25 @@ export default class AppPlantViewCspPtc extends Vue {
   @Prop() plant!: PlantSchema;
 
   layers: LayerType[] = [];
-  center = [0, 0];
+  showPCS = true;
 
   async created() {
     this.layers.push({
-      name: "dt",
+      name: "SCAs",
       type: "geojson",
-      style: () => {
+      style: (feature: FeatureLike, resolution: number) => {
+        console.log(this.showPCS)
+
         return new Style({
           stroke: new Stroke({
             color: 'rgba(0, 0, 0, 1)',
-            width: 1
+            width: 1,
           }),
+          text: new Text({
+            text: this.showPCS && feature.get('name') || '',
+            overflow: true,
+            rotation: -(Math.PI / 2),
+          }) || undefined
         });
       },
       geoJSONOptions: {
@@ -43,12 +54,18 @@ export default class AppPlantViewCspPtc extends Vue {
         console.log('load dt...');
 
         return volateqApi.getComponentsGeoVisual(this.plant.id, [AnalysisResultComponent.CSP_PTC_SCA]);
-      }
+      },
+      selected: true,
+      autoZoom: true
     });
   }
 
   get hasLayers(): boolean {
     return this.layers.length > 0;
+  }
+
+  toggleShowPCS(showPcs: boolean) {
+    this.showPCS = showPcs;
   }
 }
 </script>
