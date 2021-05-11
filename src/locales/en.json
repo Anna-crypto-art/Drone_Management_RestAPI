@@ -135,5 +135,7 @@
   "mfa-email_descr": "We did send you an E-Mail with the security code to enter.",
   "security-code": "Security code",
   "resend-security-code": "Resend security code",
-  "resend-security-code-success": "Successfully resent security code"
+  "resend-security-code-success": "Successfully resent security code",
+  "components": "Components",
+  "world-map": "World map"
 }
