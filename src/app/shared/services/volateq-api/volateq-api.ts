@@ -15,6 +15,7 @@ import { TableRequest } from "./api-requests/common/table-requests";
 import { TableResultSchema } from "./api-schemas/table-result-schema";
 import { AnalysisResultFileSchema } from "./api-schemas/analysis-result-file-schema";
 import { AnalysisResultComponent } from "./api-analysis-result-components";
+import { AnalysisResultKeyFigure } from "./api-analysis-result-key-figures";
 
 export class VolateqAPI extends HttpClientBase {
 
@@ -193,6 +194,10 @@ export class VolateqAPI extends HttpClientBase {
 
   public getComponentsGeoVisual(plantId: string, componentIds: AnalysisResultComponent[]): Promise<any> {
     return this.get(`/auth/geo-visual/${plantId}/components`, { ids: componentIds });
+  }
+
+  public getKeyFiguresGeoVisual(plantId: string, analysisResultId: string, componentKeyFiguresIds: AnalysisResultKeyFigure[]): Promise<any> {
+    return this.get(`/auth/geo-visual/${plantId}/component-key-figures/${analysisResultId}`, { ids: componentKeyFiguresIds });
   }
 }
 

@@ -137,5 +137,6 @@
   "resend-security-code": "Resend security code",
   "resend-security-code-success": "Successfully resent security code",
   "components": "Components",
-  "world-map": "World map"
+  "world-map": "World map",
+  "kpi": "Key performance indicator"
 }

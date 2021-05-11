@@ -13,6 +13,8 @@ import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant
 import { Style, Stroke, Text, Fill } from 'ol/style';
 import { FeatureLike } from "ol/Feature";
 import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-analysis-result-components";
+import { AnalysisResultKeyFigure } from '@/app/shared/services/volateq-api/api-analysis-result-key-figures';
+import { AnalysisResultDetailedSchema, AnalysisResultSchema } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-schema';
 
 
 @Component({
@@ -27,6 +29,12 @@ export default class AppPlantViewCspPtc extends Vue {
   showPCS = false;
 
   async created() {
+    // Temporary code....
+    const analysisResultId = (await volateqApi.getAllAnalysis(this.plant.customer_id))
+      .filter(analysis => analysis.analysis_result)[0].analysis_result.id;
+    const analysisResult = await volateqApi.getAnalysisResult(analysisResultId);
+    
+
     const geoJSONOptions = { dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857' };
     const showText = (feature: FeatureLike): Text | undefined => {
       return new Text({
@@ -106,11 +114,49 @@ export default class AppPlantViewCspPtc extends Vue {
       }
     );
 
+    const kpiLayers: LayerType[] = [];
+    if (this.hasKeyFigure(analysisResult, AnalysisResultKeyFigure.IR_INTENSITY_ID)) {
+      const classColors = {"1": "blue", "2": "green" ,"3": "yellow", "4": "red"};
+
+      kpiLayers.push({
+        name: this.$t("ir-intensity").toString(),
+        type: "geojson",
+        style: (feature: FeatureLike) => {
+          const classification = feature.get('class')
+          const color = classification && classColors[classification]
+
+          return new Style({
+            stroke: color && new Stroke({
+              color: color,
+              width: 3,
+            }),
+            text: showText(feature),
+          });
+        },
+        geoJSONOptions,
+        geoJSONLoader: () => volateqApi.getKeyFiguresGeoVisual(this.plant.id, analysisResult.id, [AnalysisResultKeyFigure.IR_INTENSITY_ID]),
+        selected: false,
+      })
+    }
+
+    if (kpiLayers.length > 0) {
+      this.layers.push({
+        name: this.$t("kpi").toString(),
+        type: "group",
+        childLayers: kpiLayers
+      })
+    }
+
     console.log(this.layers);
   }
 
   get hasLayers(): boolean {
     return this.layers.length > 0;
+  }
+
+  private hasKeyFigure(analysisResult: AnalysisResultDetailedSchema, key_figue_id: number): boolean {
+    return !!analysisResult.component_key_figures
+      .find(comp_key_figure => comp_key_figure.key_figure.id === key_figue_id);
   }
 }
 </script>
