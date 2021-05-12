@@ -54,7 +54,7 @@ export default class AppPlantViewCspPtc extends Vue {
       {
         name: this.$t('pcs').toString(),
         type: "custom",
-        customLoader: () => undefined,
+        customLoader: () => { return; },
         onSelected: (selected: boolean) => { this.showPCS = selected; },
         selected: false
       },
@@ -119,31 +119,70 @@ export default class AppPlantViewCspPtc extends Vue {
       const classColors = {"1": "blue", "2": "green" ,"3": "yellow", "4": "red"};
 
       kpiLayers.push({
-        name: this.$t("ir-intensity").toString(),
+          name: this.$t("ir-intensity").toString(),
+          type: "geojson",
+          style: (feature: FeatureLike) => {
+            const classification = feature.get('class');
+            const color = classification && classColors[classification];
+
+            return new Style({
+              stroke: color && new Stroke({
+                color: color,
+                width: 3,
+              }),
+              text: showText(feature),
+            });
+          },
+          geoJSONOptions,
+          geoJSONLoader: () => volateqApi.getKeyFiguresGeoVisual(this.plant.id, analysisResult.id, [AnalysisResultKeyFigure.IR_INTENSITY_ID]),
+          selected: false,
+      });
+    }
+    if (this.hasKeyFigure(analysisResult, AnalysisResultKeyFigure.SCE_ANGLE_ID)) {
+      const offsetColorRanges = [0.01, 0.15, 0.3];
+      const offsetColors = [undefined, 'green', 'yellow', 'red'];
+      const getOffsetColor = (offset: number): string | undefined => {
+        if (!offset) {
+          return undefined;
+        }
+        offset = offset < 0 ? offset * -1 : offset;
+
+        let i = 0;
+        while (i < offsetColors.length) {
+          if (offset < offsetColorRanges[i]) {
+            return offsetColors[i];
+          }
+          i++;
+        }
+        return offsetColors[i - 1];
+      }
+
+      kpiLayers.push({
+        name: this.$t("sce-alignment-offset").toString(),
         type: "geojson",
         style: (feature: FeatureLike) => {
-          const classification = feature.get('class')
-          const color = classification && classColors[classification]
+          const offset = feature.get('value');
+          const offsetColor = getOffsetColor(offset);
 
           return new Style({
-            stroke: color && new Stroke({
-              color: color,
-              width: 3,
-            }),
+            fill: offsetColor && new Fill({
+              color: offsetColor,
+            }) || undefined,
             text: showText(feature),
           });
         },
         geoJSONOptions,
-        geoJSONLoader: () => volateqApi.getKeyFiguresGeoVisual(this.plant.id, analysisResult.id, [AnalysisResultKeyFigure.IR_INTENSITY_ID]),
+        geoJSONLoader: () => volateqApi.getKeyFiguresGeoVisual(this.plant.id, analysisResult.id, [AnalysisResultKeyFigure.SCE_ANGLE_ID]),
         selected: false,
-      })
+      });
     }
 
     if (kpiLayers.length > 0) {
       this.layers.push({
         name: this.$t("kpi").toString(),
         type: "group",
-        childLayers: kpiLayers
+        singleSelection: true,
+        childLayers: kpiLayers,
       })
     }
 

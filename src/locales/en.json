@@ -103,6 +103,7 @@
   "angle-value": "Encoder value",
   "actual-angle": "Measured orientation",
   "angle-deviation": "Offset",
+  "sce-alignment-offset": "SCE alignment offset",
   "angle-value_expl": "Alignment of the SCE according to plant data",
   "actual-angle_expl": "Measured alignment due to video data",
   "angle-deviation_expl": "Difference between Encoder value and Measured orientation",
