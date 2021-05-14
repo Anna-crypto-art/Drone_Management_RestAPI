@@ -1,9 +1,7 @@
-import { FieldgeometryComponentSchema } from "./fieldgeometry-component-schema";
+import { AnalysisResultCspPtcSchemaBase } from "./analysis-result-csp-ptc-schema-base";
 
-export interface AnalysisResultCspPtcIrIntensitySchema {
-    id: string;
+export interface AnalysisResultCspPtcIrIntensitySchema extends AnalysisResultCspPtcSchemaBase {
     ir_intensity: number;
     absorber_temperature: number;
-    fieldgeometry_component: FieldgeometryComponentSchema;
     class_subfield: number
 }
