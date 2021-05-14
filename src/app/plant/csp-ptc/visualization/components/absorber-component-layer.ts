@@ -3,7 +3,7 @@ import { ComponentLayer } from "./shared/component-layer";
 import { Style, Stroke } from 'ol/style';
 import { FeatureLike } from "ol/Feature";
 
-export class SceComponentLayer extends ComponentLayer {
+export class AbsorberComponentLayer extends ComponentLayer {
   protected readonly componentId = AnalysisResultComponent.CSP_PTC_ABSORBER;
   public readonly name = "absorber-tubes";
 

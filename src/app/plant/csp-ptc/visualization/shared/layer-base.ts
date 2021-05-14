@@ -1,6 +1,11 @@
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import Feature, { FeatureLike } from "ol/Feature";
+import { FeatureLike } from "ol/Feature";
 import { Style, Stroke, Text, Fill } from 'ol/style';
+import { GeoJSONLayer } from "volateq-geovisualization";
+
+
+const GEO_JSON_OPTIONS = { dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857' };
+
 
 /**
  * Represents a geojson layer
@@ -19,7 +24,7 @@ export abstract class LayerBase {
   protected abstract getPcs(feature: FeatureLike): string | undefined;
   public abstract load(): Promise<Record<string, unknown>>;
 
-  public getStyle(feature: FeatureLike): Style | undefined {
+  public getStyle(feature: FeatureLike): Style {
     return new Style({
       text: this.showText(feature),
     });
@@ -27,6 +32,18 @@ export abstract class LayerBase {
 
   public showPCS(show: boolean): void {
     this._showPCS = show;
+  }
+
+  public toGeoLayer(): GeoJSONLayer {
+    return {
+      type: "geojson",
+      name:this.name,
+      selected:this.selected,
+      autoZoom:this.autoZoom,
+      geoJSONLoader:this.load,
+      geoJSONOptions: GEO_JSON_OPTIONS,
+      style: this.getStyle,
+    }
   }
 
   protected showText(feature: FeatureLike, props: Record<string, unknown> = {}): Text | undefined {
