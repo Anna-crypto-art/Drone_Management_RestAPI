@@ -135,9 +135,7 @@ export default class AppAnalysisResultCspPtcSca extends AppAnalysisResultCspPtcB
   }
 
   private get hasKeyFigureFriction(): boolean {
-    return this.componentKeyFigures.filter(
-      (comp_key_figure) => comp_key_figure.key_figure.id === AnalysisResultKeyFigure.SCA_FRICTION_ID
-    ).length > 0
+    return this.hasKeyFigure(AnalysisResultKeyFigure.SCA_FRICTION_ID);
   }
 }
 </script>

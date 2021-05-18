@@ -15,6 +15,9 @@
         <template #head(classSubfield)="column">
           {{ column.label }} <app-explanation><span v-html="$t('class-sca_expl')"></span></app-explanation>
         </template>
+        <template #head(missingGlass)="column">
+          {{ column.label }} <app-explanation><span v-html="$t('missing-gct_expl')"></span></app-explanation>
+        </template>
       </b-table>
     </app-analysis-result-csp-ptc-container>
   </div>
@@ -31,6 +34,7 @@ import AppAnalysisResultCspPtcContainer from "@/app/analysis/analysis-result/csp
 import { AppAnalysisResultCspPtcBase } from "@/app/analysis/analysis-result/csp-ptc/components/shared/analysis-result-csp-ptc-base";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
+import { AnalysisResultKeyFigure } from "@/app/shared/services/volateq-api/api-analysis-result-key-figures";
 
 @Component({
   name: "app-analysis-result-csp-ptc-absorber",
@@ -47,15 +51,24 @@ export default class AppAnalysisResultCspPtcAbsorber extends AppAnalysisResultCs
       { key: "irIntensity", label: this.$t("ir-intensity").toString(), sortable: true },
       { key: "classSubfield", label: this.$t("class-subfield").toString(), sortable: true },
     ];
+    if (this.hasKeyFigure(AnalysisResultKeyFigure.MISSING_GLASS_CLADDING_TUBE_ID)) {
+      this.columns.push({ key: "missingGlass", label: this.$t("missing-gct").toString(), sortable: true });
+    }
   }
 
   getCsvColumnMappingsParam(): { [column_name: string]: string } {
-    return {
+    const columnMappingParams = {
       [this.$t("pcs").toString()]: 'fieldgeometry_component.kks',
       [this.$t("absorber-temperature").toString()]: 'absorber_temperature',
       [this.$t("ir-intensity").toString()]: 'ir_intensity',
       [this.$t("class-subfield").toString()]: 'class_subfield'
+    };
+
+    if (this.hasKeyFigure(AnalysisResultKeyFigure.MISSING_GLASS_CLADDING_TUBE_ID)) {
+      columnMappingParams[this.$t("missing-gct").toString()] = 'missing_glass_cladding_tube';
     }
+
+    return columnMappingParams;
   }
 
   getTableRequestParam(): TableRequest {
@@ -63,15 +76,18 @@ export default class AppAnalysisResultCspPtcAbsorber extends AppAnalysisResultCs
       throw Error('Missing last_ctx');
     }
 
+    const orderByMappings = {
+      pcs: "kks", 
+      absorberTemperature: "absorber_temperature",
+      irIntensity: "ir_intensity",
+      classSubfield: "class_subfield",
+      missingGlass: "missing_glass_cladding_tube",
+    };
+
     return {
       limit: this.last_ctx.perPage,
       page: this.last_ctx.currentPage,
-      order_by: this.last_ctx.sortBy && {
-        pcs: "kks", 
-        absorberTemperature: "absorber_temperature",
-        irIntensity: "ir_intensity",
-        classSubfield: "class_subfield"
-      }[this.last_ctx.sortBy],
+      order_by: this.last_ctx.sortBy && orderByMappings[this.last_ctx.sortBy],
       order_direction: this.last_ctx.sortDesc ? 'desc' : 'asc',
       filter: this.searchText
     }
@@ -91,7 +107,8 @@ export default class AppAnalysisResultCspPtcAbsorber extends AppAnalysisResultCs
         pcs: absorberDataRow.fieldgeometry_component.kks,
         absorberTemperature: absorberDataRow.absorber_temperature,
         irIntensity: absorberDataRow.ir_intensity,
-        classSubfield: absorberDataRow.class_subfield
+        missingGlass: absorberDataRow.missing_glass_cladding_tube,
+        classSubfield: absorberDataRow.class_subfield,
       }));
       
       this.pagination.total = tableResult.total;
