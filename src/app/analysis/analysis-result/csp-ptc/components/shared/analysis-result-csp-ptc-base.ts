@@ -3,6 +3,7 @@ import { BvTableCtxObject, BvTableFieldArray } from "bootstrap-vue";
 import { Prop, Ref } from "vue-property-decorator";
 import { ComponentKeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/component-key-figure-schema";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
+import { AnalysisResultKeyFigure } from "@/app/shared/services/volateq-api/api-analysis-result-key-figures";
 
 export interface IAnalysisResultCspPtcContainer {
   startLoading(): void;
@@ -37,6 +38,12 @@ export abstract class AppAnalysisResultCspPtcBase extends Vue implements IAnalys
   }
   protected stopLoading() {
     this.container.stopLoading()
+  }
+
+  protected hasKeyFigure(keyFigureId: AnalysisResultKeyFigure): boolean {
+    return this.componentKeyFigures.filter(
+      (comp_key_figure) => comp_key_figure.key_figure.id === keyFigureId
+    ).length > 0
   }
 
   public search(searchText: string) {
