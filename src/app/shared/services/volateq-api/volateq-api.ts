@@ -144,6 +144,10 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/analysis-result/${analysisResultId}`);
   }
 
+  public getAllSpecificAnalysisResult<T>(analysisResultId: string, componentKeyFigureId: string): Promise<T[]> {
+    return this.get(`/auth/analysis-result/${analysisResultId}/${componentKeyFigureId}`);
+  }
+
   public getSpecificAnalysisResult<T>(
     analysisResultId: string,
     componentKeyFigureId: string,

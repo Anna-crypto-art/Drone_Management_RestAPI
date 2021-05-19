@@ -4,40 +4,17 @@ import { Style, Stroke, Text, Fill } from 'ol/style';
 import { FeatureLike } from "ol/Feature";
 import { AnalysisResultCspPtcIrIntensitySchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-ir-intensity-schema";
 import { FeatureInfos } from "./shared/types";
+import analysisResultCspPtcMappingIrIntensity from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-ir-intensity";
 
 const IR_INTENSITY_CLASS_COLORS = {"1": "blue", "2": "green" ,"3": "yellow", "4": "red"};
 
 export class IrIntensityKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcIrIntensitySchema> {
   protected readonly keyFigureId = AnalysisResultKeyFigure.IR_INTENSITY_ID;
-  public readonly name = "ir-intensity";
-
-  protected getOnClickInfo(feature: FeatureLike): FeatureInfos {
-    const resultSchema = this.getProperties(feature)!;
-
-    return {
-      title: resultSchema.fieldgeometry_component.kks,
-      records: [
-        {
-          name: "absorber-temperature",
-          value: resultSchema.absorber_temperature.toString(),
-        }, 
-        {
-          name: "ir-intensity",
-          descr: "ir-intensity_expl",
-          value: resultSchema.ir_intensity.toString(),
-        },
-        {
-          name: "class-subfield",
-          descr: "class-sca_expl",
-          value: resultSchema.class_subfield.toString(),
-          bold: true,
-        }
-      ]
-    };
-  }
+  protected readonly analysisResultMapping = analysisResultCspPtcMappingIrIntensity;
+  public readonly name = "ir-intensity";  
 
   public getStyle(feature: FeatureLike): Style {
-    const classification = this.getProperties(feature)?.class_subfield;
+    const classification = this.getProperties(feature)?.value;
     const color = classification && IR_INTENSITY_CLASS_COLORS[classification];
 
     return new Style({

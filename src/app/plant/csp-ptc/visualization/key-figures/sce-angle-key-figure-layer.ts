@@ -4,6 +4,7 @@ import { FeatureLike } from "ol/Feature";
 import { Style, Stroke, Text, Fill } from 'ol/style';
 import { AnalysisResultCspPtcSceAngleSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-sce-angle-schema";
 import { FeatureInfos } from "./shared/types";
+import analysisResultCspPtcMappingSceAngle from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-sce-angle";
 
 
 const SCE_ANGLE_OFFSET_COLOR_RANGES = [0.01, 0.15, 0.3];
@@ -12,26 +13,11 @@ const SCE_ANGLE_OFFSET_COLORS = [undefined, 'green', 'yellow', 'red'];
 
 export class SceAngleKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcSceAngleSchema> {
   protected readonly keyFigureId = AnalysisResultKeyFigure.SCE_ANGLE_ID;
+  protected readonly analysisResultMapping = analysisResultCspPtcMappingSceAngle;
   public readonly name = "sce-alignment-offset";
 
-  protected getOnClickInfo(feature: FeatureLike): FeatureInfos {
-    const resultSchema = this.getProperties(feature)!;
-    
-    return {
-      title: resultSchema.fieldgeometry_component.kks,
-      records: [
-        { name: "set-angle", value: resultSchema.set_angle.toString() },
-        { name: "angle-value", descr: "angle-value_expl", value: resultSchema.angle_value.toString() },
-        { name: "actual-angle", descr: "actual-angle_expl", value: resultSchema.actual_angle.toString() },
-        { name: "angle-deviation", descr: "angle-deviation_expl", value: resultSchema.angle_deviation.toString(), bold: true },
-        { name: "uncertainty", descr: "uncertainty_expl", value: resultSchema.uncertainty.toString() },
-        { name: "deviation-to-drive", descr: "deviation-to-drive_expl", value: resultSchema.deviation_to_drive.toString() },
-      ]
-    };
-  }
-
   public getStyle(feature: FeatureLike): Style {
-    const offsetColor = this.getOffsetColor(feature.get('value'));
+    const offsetColor = this.getOffsetColor(this.getProperties(feature).value);
 
     return new Style({
       fill: offsetColor && new Fill({

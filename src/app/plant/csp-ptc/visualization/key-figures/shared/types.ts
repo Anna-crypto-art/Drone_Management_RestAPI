@@ -1,3 +1,8 @@
+export interface FeatureProperties {
+  name: string;
+  value: number;
+}
+
 export interface FeatureInfos {
   title: string;
   records: FeatureInfo[];

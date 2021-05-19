@@ -5,23 +5,44 @@ import { LayerBase } from "../../shared/layer-base";
 import { FeatureLike } from "ol/Feature";
 import { AnalysisResultCspPtcSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-schema-base";
 import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-analysis-result-components";
-import { FeatureInfos } from "./types";
+import { FeatureInfos, FeatureProperties } from "./types";
 import { GeoJSONLayer } from "volateq-geovisualization";
+import apiResultsLoader from "@/app/shared/services/volateq-api/api-results-loader";
+import { AnalysisResultCspPtcMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 
 
 export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> extends LayerBase {
   protected abstract readonly keyFigureId: AnalysisResultKeyFigure;
+  protected abstract readonly analysisResultMapping: AnalysisResultCspPtcMappings<T>;
   
   private analysisResult?: AnalysisResultDetailedSchema;
 
-  protected abstract getOnClickInfo(feature: FeatureLike): FeatureInfos | undefined;
+  protected getOnClickInfo(feature: FeatureLike): FeatureInfos | undefined {
+    // TODO: implment this
+    return undefined
+  }
 
-  protected getProperties(feature: FeatureLike): T | undefined {
-    return feature.getProperties() as T;
+  protected getProperties(feature: FeatureLike): FeatureProperties {
+    return feature.getProperties() as FeatureProperties;
+  }
+
+  protected getResultDetails(feature: FeatureLike): T | undefined {
+    if (this.isAvailable()) {
+      const results = apiResultsLoader.getResults<T>(this.analysisResult!.id, this.getComponentKeyFigureId()!);
+      if (results) {
+        const pcs = this.getPcs(feature);
+        const resultsFiltered = results.filter(result => result.fieldgeometry_component.kks === pcs);
+        if (resultsFiltered.length > 0) {
+          return resultsFiltered[0];
+        }
+      }
+    }
+
+    return undefined;
   }
 
   protected getPcs(feature: FeatureLike): string | undefined {
-    return this.getProperties(feature)?.fieldgeometry_component?.kks;
+    return this.getProperties(feature).name;
   }
 
   public setAnalysisResult(analysisResult: AnalysisResultDetailedSchema): void {
@@ -37,12 +58,14 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
       throw Error('KeyFigure not available');
     }
 
+    apiResultsLoader.loadResults<T>(this.analysisResult!.id, this.getComponentKeyFigureId()!);
+
     return volateqApi.getKeyFiguresGeoVisual(this.plant.id, this.analysisResult!.id, [this.getComponentKeyFigureId()!])
   }
 
   public onClick(features: FeatureLike[]): FeatureInfos | undefined {
     for (const feature of features) {
-      const fieldgeo_component = this.getProperties(feature)?.fieldgeometry_component;
+      const fieldgeo_component = this.getResultDetails(feature)?.fieldgeometry_component;
       if (fieldgeo_component) {
         const keyFigureId = this.getKeyFigureIdByComponentId(fieldgeo_component.component_id);
         if (keyFigureId) {
