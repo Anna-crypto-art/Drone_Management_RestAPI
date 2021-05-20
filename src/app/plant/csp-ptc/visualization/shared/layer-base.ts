@@ -1,3 +1,4 @@
+import Vue from "vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { FeatureLike } from "ol/Feature";
 import { Style, Stroke, Text, Fill } from 'ol/style';
@@ -11,20 +12,24 @@ const GEO_JSON_OPTIONS = { dataProjection: 'EPSG:4326', featureProjection: 'EPSG
  * Represents a geojson layer
  */
 export abstract class LayerBase {
-  private _showPCS: boolean = false;
+  private _showPCS = false;
 
-  public abstract readonly name: string;
-  public readonly selected: boolean = false;
-  public readonly autoZoom: boolean = false;
+  protected geoLayerObject?: GeoJSONLayer;
+
+  protected abstract readonly name: string;
+  protected selected = false;
+  protected readonly autoZoom: boolean = false;
+  protected visible = true;
 
   constructor(
-    protected readonly plant: PlantSchema
+    protected readonly plant: PlantSchema,
+    protected readonly vueComponent: Vue
   ) {}
 
   protected abstract getPcs(feature: FeatureLike): string | undefined;
-  public abstract load(): Promise<Record<string, unknown>>;
+  protected abstract load(): Promise<Record<string, unknown>>;
 
-  public getStyle(feature: FeatureLike): Style {
+  protected getStyle(feature: FeatureLike): Style {
     return new Style({
       text: this.showText(feature),
     });
@@ -35,15 +40,21 @@ export abstract class LayerBase {
   }
 
   public toGeoLayer(): GeoJSONLayer {
-    return {
+    this.geoLayerObject = {
       type: "geojson",
-      name:this.name,
-      selected:this.selected,
-      autoZoom:this.autoZoom,
-      geoJSONLoader:this.load,
+      name: this.vueComponent.$t(this.name).toString(),
+      selected: this.selected,
+      autoZoom: this.autoZoom,
+      geoJSONLoader: () => this.load(),
       geoJSONOptions: GEO_JSON_OPTIONS,
-      style: this.getStyle,
-    }
+      style: (feature: FeatureLike) => this.getStyle(feature),
+      onSelected: (selected) => {
+        this.selected = selected;
+      },
+      visible: this.visible,
+    };
+
+    return this.geoLayerObject;
   }
 
   protected showText(feature: FeatureLike, props: Record<string, unknown> = {}): Text | undefined {

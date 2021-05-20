@@ -2,7 +2,6 @@
   <app-content :title="plantName">
     <app-plant-view-csp-ptc v-if="isCspPtc" :plant="plant">
     </app-plant-view-csp-ptc>
-
   </app-content>
 </template>
 

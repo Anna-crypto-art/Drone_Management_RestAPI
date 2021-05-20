@@ -5,7 +5,7 @@ import { AnalysisResultCspPtcMappingEntry, AnalysisResultCspPtcMappings } from "
 import VueI18n from "vue-i18n";
 import { AnalysisResultKeyFigure } from "../api-analysis-result-key-figures";
 
-export class AnalysisResultCspPtcMapping<T extends AnalysisResultCspPtcSchemaBase> {
+export class AnalysisResultCspPtcMappingHelper<T extends AnalysisResultCspPtcSchemaBase> {
   constructor(
     private readonly analysisResultMapping: AnalysisResultCspPtcMappings<T>,
     private readonly analysisResult: AnalysisResultDetailedSchema,
