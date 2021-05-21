@@ -130,7 +130,7 @@ export default class AppVisualCspPtc extends Vue implements IAppVisualCspPtc {
 
 <style lang="scss">
 .openlayers-map {
-  height: 500px;
+  height: 100%;
   width: 100%;
 }
 </style>

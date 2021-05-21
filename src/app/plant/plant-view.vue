@@ -1,14 +1,16 @@
 <template>
-  <app-content :title="plantName">
+  <div>
+    <app-header fluid></app-header>
     <app-plant-view-csp-ptc v-if="isCspPtc" :plant="plant">
     </app-plant-view-csp-ptc>
-  </app-content>
+  </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 import { Component } from 'vue-property-decorator';
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
+import AppHeader from "@/app/shared/components/app-header/app-header.vue";
 import volateqApi from '@/app/shared/services/volateq-api/volateq-api';
 import AppPlantViewCspPtc from "@/app/plant/csp-ptc/plant-view-csp-ptc.vue";
 import { PlantSchema } from '../shared/services/volateq-api/api-schemas/plant-schema';
@@ -19,6 +21,7 @@ import appContentEventBus from '../shared/components/app-content/app-content-eve
   components: {
     AppContent,
     AppPlantViewCspPtc,
+    AppHeader
   }
 })
 export default class AppPlantView extends Vue {

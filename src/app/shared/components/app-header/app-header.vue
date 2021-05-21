@@ -1,6 +1,6 @@
 <template>
   <div class="app-header">
-    <b-container>
+    <b-container :fluid="fluid">
       <img class="app-header-logo" src="@/assets/logos/logo_white.png" alt="volateq">
       <div class="app-header-menu float-right">
         <b-nav pills>
@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { Component } from "vue-property-decorator";
+import { Component, Prop } from "vue-property-decorator";
 
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
@@ -29,6 +29,8 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
   name: "app-header",
 })
 export default class AppHeader extends BaseAuthComponent {
+  @Prop({ default: false }) fluid!: boolean;
+
   async logout() {
     try {
       await volateqApi.logout();
@@ -53,6 +55,12 @@ $header-height: 80px;
   align-items: center;
   background-color: $blue;
   color: $white;
+
+  &-menu {
+    .nav-pills {
+      height: $header-height;
+    }
+  }
 
   &-logo {
     max-height: $header-height;
