@@ -1,5 +1,16 @@
 <template>
-  <open-layers ref="openlayercomp" v-if="hasLayers" :layers="layers"></open-layers>
+  <div class="visual-csp-ptc">
+    <open-layers ref="openlayercomp" v-if="hasLayers" :layers="layers">
+      <div slot="legend" :key="updateLegend">
+        <div v-if="hasLegend" class="visual-csp-ptc-legend">
+          <div v-for="entry in legendary.entries" :key="entry.color" class="visual-csp-ptc-legend-entry">
+            <div class="visual-csp-ptc-legend-entry-color" :style="`background: ${entry.color}`"></div>
+            <div class="visual-csp-ptc-legend-entry-name" v-html="entry.name"></div>
+          </div>
+        </div>
+      </div>
+    </open-layers>
+  </div>
 </template>
 
 <script lang="ts">
@@ -19,6 +30,7 @@ import { ScaComponentLayer } from './components/sca-component-layer';
 import { AbsorberComponentLayer } from './components/absorber-component-layer';
 import { SceComponentLayer } from './components/sce-component-layer';
 import { IAppVisualCspPtc } from './types';
+import { FeatureInfos, Legend } from './key-figures/shared/types';
 
 
 @Component({
@@ -34,9 +46,12 @@ export default class AppVisualCspPtc extends Vue implements IAppVisualCspPtc {
 
   private selectedAnalysisResult?: AnalysisResultDetailedSchema;
   private kpiLayers!: KeyFigureLayer<AnalysisResultCspPtcSchemaBase>[];
+  private componentLayers!: ComponentLayer[];
 
   layers: LayerType[] = [];
   showPCS = false;
+  legendary: Legend | null = null;
+  updateLegend = 1;
 
   async created() {
     this.createLayers();
@@ -54,7 +69,12 @@ export default class AppVisualCspPtc extends Vue implements IAppVisualCspPtc {
     return this.layers.length > 0;
   }
 
+  get hasLegend(): boolean {
+    return this.legendary !== null;
+  }
+
   private createLayers(): void {
+    this.createComponentLayers();
     this.createKPILayers();
 
     this.layers.push(
@@ -68,7 +88,12 @@ export default class AppVisualCspPtc extends Vue implements IAppVisualCspPtc {
         name: this.$t('pcs').toString(),
         type: "custom",
         customLoader: () => { return; },
-        onSelected: (selected: boolean) => { this.showPCS = selected; },
+        onSelected: (selected: boolean) => { 
+          this.showPCS = selected;
+
+          this.kpiLayers.forEach(kpiLayer => kpiLayer.showPCS(selected));
+          this.componentLayers.forEach(compLayer => compLayer.showPCS(selected));
+        },
         selected: false,
       },
       {
@@ -80,7 +105,7 @@ export default class AppVisualCspPtc extends Vue implements IAppVisualCspPtc {
       {
         name: this.$t('components').toString(),
         type: "group",
-        childLayers: this.getComponentLayers().map(compLayer => compLayer.toGeoLayer())
+        childLayers: this.componentLayers.map(compLayer => compLayer.toGeoLayer())
       }
     );
   }
@@ -109,26 +134,48 @@ export default class AppVisualCspPtc extends Vue implements IAppVisualCspPtc {
 
     switch (compKeyFigure.key_figure.id) {
       case AnalysisResultKeyFigure.IR_INTENSITY_ID:
-        return new IrIntensityKeyFigureLayer(this.plant, this, anaysisResult) as any;
+        return new IrIntensityKeyFigureLayer(this.plant, this, anaysisResult, legend => this.onSetLegend(legend)) as any;
       
       case AnalysisResultKeyFigure.SCE_ANGLE_ID:
-        return new SceAngleKeyFigureLayer(this.plant, this, anaysisResult) as any;
+        return new SceAngleKeyFigureLayer(this.plant, this, anaysisResult, legend => this.onSetLegend(legend)) as any;
     }
 
     return undefined;
   }
 
-  private getComponentLayers(): ComponentLayer[] {
-    return [
+  private createComponentLayers(): void {
+    this.componentLayers = [
       new ScaComponentLayer(this.plant, this),
       new AbsorberComponentLayer(this.plant, this),
       new SceComponentLayer(this.plant, this)
     ];
   }
+
+  private onSetLegend(legend: Legend) {
+    this.legendary = legend;
+    this.updateLegend += 1;
+    // this.$forceUpdate();
+  }
 }
 </script>
 
 <style lang="scss">
+.visual-csp-ptc {
+  height: 100%;
+  width: 100%;
+
+  &-legend-entry {
+    display: flex;
+    &-color {
+      width: 25px;
+      height: 25px;
+      padding-right: 20px;
+    }
+    &-name {
+      width: calc(100% - 45px)
+    }
+  }
+}
 .openlayers-map {
   height: 100%;
   width: 100%;

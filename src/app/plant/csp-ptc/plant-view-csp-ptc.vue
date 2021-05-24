@@ -2,13 +2,30 @@
   <div class="plant-view-csp-ptc">
     <div class="plant-view-csp-ptc-leftside">
       <h2 class="plant-view-csp-ptc-title">{{ this.plant.name }}</h2>
-      <b-table 
-      :items="analysisResultsTableItems" 
-      :fields="analysisResultsTableColumns"
-      select-mode="single"
-      selectable
-      @row-selected="onAnalysisResultSelected">
-      </b-table>
+      <app-table-container size="sm">
+        <b-table 
+        :items="analysisResultsTableItems" 
+        :fields="analysisResultsTableColumns"
+        select-mode="single"
+        selectable
+        hover
+        head-variant="light"
+        @row-selected="onAnalysisResultSelected">
+          <template #head(selected)>
+            <b-icon icon="check2" />
+          </template>
+          <template #cell(selected)="{ rowSelected }">
+            <template v-if="rowSelected">
+              <b-icon icon="check2" />
+            </template>
+          </template>
+          <template #cell(kpis)="row">
+            <div v-for="kpi in row.item.kpis" :key="kpi">
+              <b-badge variant="primary">{{ kpi }}</b-badge>
+            </div>
+          </template>
+        </b-table>
+      </app-table-container>
     </div>
     <div class="plant-view-csp-ptc-rightside">
       <app-visual-csp-ptc v-if="hasResults" ref="visualCspPtc" :analysisResults="analysisResults" :plant="plant" />
@@ -25,12 +42,14 @@ import { AnalysisResultDetailedSchema } from '@/app/shared/services/volateq-api/
 import AppVisualCspPtc from '@/app/plant/csp-ptc/visualization/visual-csp-ptc.vue';
 import { IAppVisualCspPtc } from './visualization/types';
 import { BvTableFieldArray } from 'bootstrap-vue';
+import AppTableContainer from '@/app/shared/components/app-table-container/app-table-container.vue';
 
 
 @Component({
   name: 'app-plant-view-csp-ptc',
   components: {
-    AppVisualCspPtc
+    AppVisualCspPtc,
+    AppTableContainer
   }
 })
 export default class AppPlantViewCspPtc extends Vue {
@@ -38,8 +57,10 @@ export default class AppPlantViewCspPtc extends Vue {
   @Ref() visualCspPtc!: IAppVisualCspPtc;
 
   analysisResultsTableColumns: BvTableFieldArray = [
+    { key: 'selected', label: '' },
     { key: 'id', label: 'ID' },
-    { key: 'createdAt', label: this.$t('created-at').toString() }
+    { key: 'createdAt', label: this.$t('created-at').toString() },
+    { key: 'kpis', label: this.$t('kpis').toString() },
   ];
   analysisResultsTableItems: Record<string, unknown>[] = [];
 
@@ -51,7 +72,8 @@ export default class AppPlantViewCspPtc extends Vue {
     for (const analysisResult of this.analysisResults) {
       this.analysisResultsTableItems.push({
         id: analysisResult.id,
-        createdAt: new Date(Date.parse(analysisResult.created_at)).toLocaleDateString()
+        createdAt: new Date(Date.parse(analysisResult.created_at)).toLocaleDateString(),
+        kpis: analysisResult.component_key_figures.map(compKeyFigure => compKeyFigure.key_figure.name)
       })
     }
   }
@@ -70,9 +92,12 @@ export default class AppPlantViewCspPtc extends Vue {
 
 <style lang="scss">
 @import "@/scss/_colors.scss";
+@import "@/scss/_variables.scss";
+
+$left-width: 400px;
 
 .plant-view-csp-ptc {
-  height: calc(100vh - 80px);
+  height: calc(100vh - #{$header-height});
   width: 100%;
   display: flex;
 
@@ -84,18 +109,12 @@ export default class AppPlantViewCspPtc extends Vue {
   &-leftside {
     padding: 20px;
     height: 100%;
-    width: 25%;
-    max-width: 400px;
-    border-right: $border-color-grey 1px solid; 
-    resize: horizontal;
-    background-color: $background-grey;
-    overflow: auto;
+    width: $left-width;
+    border-right: $border-color-grey 1px solid;
   }
   &-rightside {
     height: 100%;
-    width: calc(75% - 1px);
-    resize: horizontal;
-    overflow: auto;
+    width: calc(100% - #{$left-width});
   }
 }
 </style>

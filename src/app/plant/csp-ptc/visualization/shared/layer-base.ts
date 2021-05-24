@@ -35,6 +35,10 @@ export abstract class LayerBase {
     });
   }
 
+  protected onSelected(selected: boolean): void {
+    this.selected = selected;
+  }
+
   public showPCS(show: boolean): void {
     this._showPCS = show;
   }
@@ -48,9 +52,7 @@ export abstract class LayerBase {
       geoJSONLoader: () => this.load(),
       geoJSONOptions: GEO_JSON_OPTIONS,
       style: (feature: FeatureLike) => this.getStyle(feature),
-      onSelected: (selected) => {
-        this.selected = selected;
-      },
+      onSelected: (selected: boolean) => this.onSelected(selected),
       visible: this.visible,
     };
 

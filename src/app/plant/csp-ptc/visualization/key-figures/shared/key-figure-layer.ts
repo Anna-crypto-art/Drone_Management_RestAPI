@@ -5,7 +5,7 @@ import { LayerBase } from "../../shared/layer-base";
 import { FeatureLike } from "ol/Feature";
 import { AnalysisResultCspPtcSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-schema-base";
 import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-analysis-result-components";
-import { FeatureInfo, FeatureInfos, FeatureProperties } from "./types";
+import { FeatureInfo, FeatureInfos, FeatureProperties, Legend } from "./types";
 import { GeoJSONLayer } from "volateq-geovisualization";
 import apiResultsLoader from "@/app/shared/services/volateq-api/api-results-loader";
 import { AnalysisResultCspPtcMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
@@ -22,10 +22,19 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
     plant: PlantSchema,
     vueComponent: Vue,
     public readonly analysisResult: AnalysisResultDetailedSchema,
+    protected readonly onSetLegend: (legend: Legend) => void,
   ) {
     super(plant, vueComponent);
 
     this.visible = false;
+  }
+
+  protected abstract getLegend(): Legend;
+
+  protected onSelected(selected: boolean): void {
+    super.onSelected(selected);
+
+    this.onSetLegend(this.getLegend());
   }
 
   protected mapRecordEntryToFeatureInfo(key: string, value: unknown): FeatureInfo | undefined {

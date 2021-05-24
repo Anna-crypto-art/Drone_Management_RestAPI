@@ -3,7 +3,7 @@ import { KeyFigureLayer } from "./shared/key-figure-layer";
 import { Style, Stroke, Text, Fill } from 'ol/style';
 import { FeatureLike } from "ol/Feature";
 import { AnalysisResultCspPtcIrIntensitySchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-ir-intensity-schema";
-import { FeatureInfos } from "./shared/types";
+import { FeatureInfos, Legend } from "./shared/types";
 import analysisResultCspPtcMappingIrIntensity from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-ir-intensity";
 
 const IR_INTENSITY_CLASS_COLORS = {"1": "blue", "2": "green" ,"3": "yellow", "4": "red"};
@@ -24,5 +24,16 @@ export class IrIntensityKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspP
       }),
       text: this.showText(feature),
     });
+  }
+
+  protected getLegend(): Legend{
+    return {
+      entries: [
+        { color: "blue", name: "class 1" },
+        { color: "green", name: "class 2" },
+        { color: "yellow", name: "class 3" },
+        { color: "red", name: "class 4" },
+      ]
+    }
   }
 }

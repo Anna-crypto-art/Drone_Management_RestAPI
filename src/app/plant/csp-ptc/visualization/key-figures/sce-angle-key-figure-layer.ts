@@ -3,7 +3,7 @@ import { KeyFigureLayer } from "./shared/key-figure-layer";
 import { FeatureLike } from "ol/Feature";
 import { Style, Stroke, Text, Fill } from 'ol/style';
 import { AnalysisResultCspPtcSceAngleSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-sce-angle-schema";
-import { FeatureInfos } from "./shared/types";
+import { FeatureInfos, Legend } from "./shared/types";
 import analysisResultCspPtcMappingSceAngle from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-sce-angle";
 
 
@@ -25,6 +25,16 @@ export class SceAngleKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcS
       }) || undefined,
       text: this.showText(feature),
     });
+  }
+
+  protected getLegend(): Legend {
+    return {
+      entries: [
+        { color: "green", name: "0 - 0.149" },
+        { color: "yellow", name: "0.15 - 0.299" },
+        { color: "red", name: "0.3 - &infin;" },
+      ]
+    }
   }
 
   private getOffsetColor(offsetValue?: number) {

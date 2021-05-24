@@ -46,8 +46,8 @@ export default class AppHeader extends BaseAuthComponent {
 
 <style lang="scss">
 @import "@/scss/_colors.scss";
+@import "@/scss/_variables.scss";
 
-$header-height: 80px;
 
 .app-header {
   height: $header-height;

@@ -14,3 +14,7 @@ export interface FeatureInfo {
   descr?: string;
   bold?: boolean;
 }
+
+export interface Legend {
+  entries: { color: string, name: string }[];
+}
