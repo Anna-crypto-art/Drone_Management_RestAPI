@@ -83,8 +83,6 @@ export default class AppPlantViewCspPtc extends Vue {
   }
 
   onAnalysisResultSelected(selectedAnalysisResult: { id: string, createdAt: string }[]) {
-    console.log(selectedAnalysisResult);
-
     this.visualCspPtc.selectAnalysisResult(selectedAnalysisResult[0].id);
   }
 }

@@ -22,7 +22,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
     plant: PlantSchema,
     vueComponent: Vue,
     public readonly analysisResult: AnalysisResultDetailedSchema,
-    protected readonly onSetLegend: (legend: Legend) => void,
+    protected readonly onSetLegend: (legend: Legend | null) => void,
   ) {
     super(plant, vueComponent);
 
@@ -34,7 +34,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
   protected onSelected(selected: boolean): void {
     super.onSelected(selected);
 
-    this.onSetLegend(this.getLegend());
+    this.onSetLegend(selected && this.getLegend() || null);
   }
 
   protected mapRecordEntryToFeatureInfo(key: string, value: unknown): FeatureInfo | undefined {

@@ -1,15 +1,23 @@
 <template>
   <div class="visual-csp-ptc">
-    <open-layers ref="openlayercomp" v-if="hasLayers" :layers="layers">
-      <div slot="legend" :key="updateLegend">
-        <div v-if="hasLegend" class="visual-csp-ptc-legend">
-          <div v-for="entry in legendary.entries" :key="entry.color" class="visual-csp-ptc-legend-entry">
-            <div class="visual-csp-ptc-legend-entry-color" :style="`background: ${entry.color}`"></div>
-            <div class="visual-csp-ptc-legend-entry-name" v-html="entry.name"></div>
-          </div>
-        </div>
+    <open-layers ref="openlayercomp" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick"></open-layers>
+    <div v-if="hasLegend" class="visual-csp-ptc-legend">
+      <div v-for="entry in legend.entries" :key="entry.color" class="visual-csp-ptc-legend-entry">
+        <div class="visual-csp-ptc-legend-entry-color" :style="`background: ${entry.color}`"></div>
+        <div class="visual-csp-ptc-legend-entry-name" v-html="entry.name"></div>
       </div>
-    </open-layers>
+    </div>
+    <b-toast id="piInfoToast" no-auto-hide solid toaster="b-toaster-bottom-center">
+      <template #toast-title>
+        <h3 v-if="piToastInfo">{{ piToastInfo.title }}</h3>
+      </template>
+      <div v-if="piToastInfo">
+        <b-row v-for="featureInfo in piToastInfo.records" :key="featureInfo.name">
+          <b-col v-html="featureInfo.name"></b-col>
+          <b-col v-html="featureInfo.value"></b-col>
+        </b-row>
+      </div>
+    </b-toast>
   </div>
 </template>
 
@@ -31,6 +39,7 @@ import { AbsorberComponentLayer } from './components/absorber-component-layer';
 import { SceComponentLayer } from './components/sce-component-layer';
 import { IAppVisualCspPtc } from './types';
 import { FeatureInfos, Legend } from './key-figures/shared/types';
+import { FeatureLike } from "ol/Feature";
 
 
 @Component({
@@ -50,8 +59,8 @@ export default class AppVisualCspPtc extends Vue implements IAppVisualCspPtc {
 
   layers: LayerType[] = [];
   showPCS = false;
-  legendary: Legend | null = null;
-  updateLegend = 1;
+  legend: Legend | null = null;
+  piToastInfo: FeatureInfos | null = null;
 
   async created() {
     this.createLayers();
@@ -70,7 +79,21 @@ export default class AppVisualCspPtc extends Vue implements IAppVisualCspPtc {
   }
 
   get hasLegend(): boolean {
-    return this.legendary !== null;
+    return this.legend !== null;
+  }
+
+  onOpenLayersClick(features: FeatureLike[]) {
+    const piToastInfo = this.kpiLayers.map(kpiLayer => kpiLayer.onClick(features))
+      .find(featureInfos => featureInfos !== undefined); 
+    if (piToastInfo) {
+      this.piToastInfo = piToastInfo;
+    }
+
+    if (piToastInfo) {
+      this.$bvToast.show("piInfoToast");
+    } else {
+      this.$bvToast.hide("piInfoToast");
+    }
   }
 
   private createLayers(): void {
@@ -151,28 +174,48 @@ export default class AppVisualCspPtc extends Vue implements IAppVisualCspPtc {
     ];
   }
 
-  private onSetLegend(legend: Legend) {
-    this.legendary = legend;
-    this.updateLegend += 1;
-    // this.$forceUpdate();
+  private onSetLegend(legend: Legend | null) {
+    this.legend = legend;
   }
 }
 </script>
 
 <style lang="scss">
 .visual-csp-ptc {
+  position: relative;
   height: 100%;
   width: 100%;
 
-  &-legend-entry {
-    display: flex;
-    &-color {
-      width: 25px;
-      height: 25px;
-      padding-right: 20px;
+  &-legend {
+    @supports (backdrop-filter: blur(5px)) {
+      backdrop-filter: blur(5px);
+      background: rgba(255, 255, 255, 0.5);
     }
-    &-name {
-      width: calc(100% - 45px)
+    @supports not (backdrop-filter: blur(5px)) {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    position: absolute;
+    bottom: 0.5em;
+    left: 0.5em;
+    width: auto;
+    height: auto;
+    padding: 10px 15px 0px 15px;
+
+    &-entry {
+      display: flex;
+      height: 25px;
+      margin-bottom: 10px;
+
+      &-color {
+        width: 15px;
+        height: 15px;
+        margin-right: 10px;
+        margin-top: 5px;
+      }
+      &-name {
+        width: auto;
+      }
     }
   }
 }

@@ -20,20 +20,19 @@ export class IrIntensityKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspP
     return new Style({
       stroke: color && new Stroke({
         color: color,
-        width: 3,
+        width: 5,
       }),
       text: this.showText(feature),
     });
   }
 
-  protected getLegend(): Legend{
+  protected getLegend(): Legend {
+
     return {
-      entries: [
-        { color: "blue", name: "class 1" },
-        { color: "green", name: "class 2" },
-        { color: "yellow", name: "class 3" },
-        { color: "red", name: "class 4" },
-      ]
+      entries: Object.keys(IR_INTENSITY_CLASS_COLORS).map(clsKey => ({
+        color: IR_INTENSITY_CLASS_COLORS[clsKey],
+        name: this.vueComponent.$t('class-subfield').toString() + " " + clsKey,
+      })),
     }
   }
 }
