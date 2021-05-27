@@ -139,8 +139,8 @@
   "resend-security-code-success": "Successfully resent security code",
   "components": "Components",
   "world-map": "World map",
-  "kpi": "Key performance indicator",
-  "kpis": "KPIs",
+  "performance-indicators": "Performance indicators",
+  "pi": "PI",
   "missing-gct": "Broken glass",
   "missing-gct_expl": "Glass cladding tube is missing or broken"
 }

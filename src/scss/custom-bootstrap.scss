@@ -203,6 +203,9 @@ $theme-colors: (
   border-radius: 0 !important;
 }
 
+.custom-checkbox .custom-control-input:checked ~ .custom-control-label::before {
+  background-color: $blue;
+}
 .custom-checkbox .custom-control-label::before {
   border-radius: 0 !important;
 }

@@ -11,13 +11,12 @@
         hover
         head-variant="light"
         @row-selected="onAnalysisResultSelected">
-          <template #head(selected)>
-            <b-icon icon="check2" />
+          <template #head(selected)></template>
+          <template #head(kpis)="column">
+            {{ column.label }} <app-explanation>{{ $t('performance-indicators') }}</app-explanation>
           </template>
           <template #cell(selected)="{ rowSelected }">
-            <template v-if="rowSelected">
-              <b-icon icon="check2" />
-            </template>
+            <b-checkbox :checked="rowSelected" disabled class="b-table-selectable-checkbox"></b-checkbox>
           </template>
           <template #cell(kpis)="row">
             <div v-for="kpi in row.item.kpis" :key="kpi">
@@ -43,13 +42,15 @@ import AppVisualCspPtc from '@/app/plant/csp-ptc/visualization/visual-csp-ptc.vu
 import { IAppVisualCspPtc } from './visualization/types';
 import { BvTableFieldArray } from 'bootstrap-vue';
 import AppTableContainer from '@/app/shared/components/app-table-container/app-table-container.vue';
+import AppExplanation from '@/app/shared/components/app-explanation/app-explanation.vue';
 
 
 @Component({
   name: 'app-plant-view-csp-ptc',
   components: {
     AppVisualCspPtc,
-    AppTableContainer
+    AppTableContainer,
+    AppExplanation
   }
 })
 export default class AppPlantViewCspPtc extends Vue {
@@ -60,7 +61,7 @@ export default class AppPlantViewCspPtc extends Vue {
     { key: 'selected', label: '' },
     { key: 'id', label: 'ID' },
     { key: 'createdAt', label: this.$t('created-at').toString() },
-    { key: 'kpis', label: this.$t('kpis').toString() },
+    { key: 'kpis', label: this.$t('pi').toString() },
   ];
   analysisResultsTableItems: Record<string, unknown>[] = [];
 

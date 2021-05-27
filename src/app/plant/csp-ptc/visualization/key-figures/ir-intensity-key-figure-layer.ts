@@ -11,7 +11,7 @@ const IR_INTENSITY_CLASS_COLORS = {"1": "blue", "2": "green" ,"3": "yellow", "4"
 export class IrIntensityKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcIrIntensitySchema> {
   protected readonly keyFigureId = AnalysisResultKeyFigure.IR_INTENSITY_ID;
   protected readonly analysisResultMapping = analysisResultCspPtcMappingIrIntensity;
-  public readonly name = "ir-intensity";  
+  public readonly name = "irIntensity";  
 
   public getStyle(feature: FeatureLike): Style {
     const classification = this.getProperties(feature)?.value;

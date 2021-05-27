@@ -1,5 +1,6 @@
 @import './scss/custom-bootstrap.scss';
 @import './scss/custom-geovisual.scss';
+@import './scss/_colors.scss';
 
 @import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro);
 
@@ -67,4 +68,16 @@ form [type="submit"] {
 .help-icon {
   color: $blue;
   margin-left: 5px;
+}
+
+.b-table-selectable-checkbox {
+  .custom-control-label {
+    cursor: pointer;
+  }
+  .custom-control-input:disabled:checked ~ .custom-control-label::before {
+    background-color: $blue;
+  }
+  .custom-control-input[disabled] ~ .custom-control-label::before, .custom-control-input:disabled ~ .custom-control-label::before {
+    background-color: #fff;
+  }
 }

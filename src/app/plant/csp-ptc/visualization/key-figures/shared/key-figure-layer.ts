@@ -37,22 +37,31 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
     this.onSetLegend(selected && this.getLegend() || null);
   }
 
-  protected mapRecordEntryToFeatureInfo(key: string, value: unknown): FeatureInfo | undefined {
-    return {
+  protected mapRecordEntryToFeatureInfo(key: string, value: unknown, descr?: string): FeatureInfo | undefined {
+    const featureInfo = {
       name: this.vueComponent.$t(key).toString(),
       value: (value as any).toString(),
-    }
+      descr: descr,
+    };
+
+    return featureInfo;
   }
 
   protected mapResultToFeatureInfos(result: T): FeatureInfos | undefined {
     const mappingHelper = new AnalysisResultCspPtcMappingHelper(this.analysisResultMapping, this.analysisResult!);
     const record = mappingHelper.getItem(result)
 
+    const getDescr = (key: string) => this.analysisResultMapping.find(entry => entry.transName === key)?.transDescr;
+
     const featureInfos: FeatureInfos = {
       title: result.fieldgeometry_component.kks,
       records: Object.keys(record).filter(k => k !== 'pcs')
-        .map(k => this.mapRecordEntryToFeatureInfo(k, record[k])!)
-        .filter(featureInfo => featureInfo !== undefined)
+        .map(k => this.mapRecordEntryToFeatureInfo(
+            k, 
+            record[k]!,
+            this.analysisResultMapping.find(entry => entry.transName === k)?.transDescr
+          )
+        ).filter(featureInfo => featureInfo !== undefined) as any
     }
 
     return featureInfos

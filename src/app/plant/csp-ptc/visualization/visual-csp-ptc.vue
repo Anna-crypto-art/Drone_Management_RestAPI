@@ -1,6 +1,13 @@
 <template>
   <div class="visual-csp-ptc">
-    <open-layers ref="openlayercomp" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick"></open-layers>
+    <open-layers ref="openlayercomp" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick">
+      <template #irIntensity>
+        {{ $t("ir-intensity") }} <app-explanation><span v-html="$t('class-sca_expl')"></span></app-explanation>
+      </template>
+      <template #sceAngle>
+        {{ $t("sce-alignment-offset") }} <app-explanation>{{ $t("angle-deviation_expl") }}</app-explanation>
+      </template>
+    </open-layers>
     <div v-if="hasLegend" class="visual-csp-ptc-legend">
       <div v-for="entry in legend.entries" :key="entry.color" class="visual-csp-ptc-legend-entry">
         <div class="visual-csp-ptc-legend-entry-color" :style="`background: ${entry.color}`"></div>
@@ -9,12 +16,17 @@
     </div>
     <b-toast id="piInfoToast" no-auto-hide solid toaster="b-toaster-bottom-center">
       <template #toast-title>
-        <h3 v-if="piToastInfo">{{ piToastInfo.title }}</h3>
+        <h3>{{ piToastInfo.title }}</h3>
       </template>
-      <div v-if="piToastInfo">
+      <div>
         <b-row v-for="featureInfo in piToastInfo.records" :key="featureInfo.name">
-          <b-col v-html="featureInfo.name"></b-col>
-          <b-col v-html="featureInfo.value"></b-col>
+          <b-col :class="featureInfo.bold && 'bold'">
+            {{ featureInfo.name }} 
+            <app-explanation v-if="featureInfo.descr">
+              {{ featureInfo.descr }}
+            </app-explanation>
+          </b-col>
+          <b-col :class="featureInfo.bold && 'bold'">{{ featureInfo.value }}</b-col>
         </b-row>
       </div>
     </b-toast>
@@ -40,12 +52,14 @@ import { SceComponentLayer } from './components/sce-component-layer';
 import { IAppVisualCspPtc } from './types';
 import { FeatureInfos, Legend } from './key-figures/shared/types';
 import { FeatureLike } from "ol/Feature";
+import AppExplanation from '@/app/shared/components/app-explanation/app-explanation.vue';
 
 
 @Component({
   name: 'app-visual-csp-ptc',
   components: {
     OpenLayers,
+    AppExplanation
   }
 })
 export default class AppVisualCspPtc extends Vue implements IAppVisualCspPtc {
@@ -60,7 +74,7 @@ export default class AppVisualCspPtc extends Vue implements IAppVisualCspPtc {
   layers: LayerType[] = [];
   showPCS = false;
   legend: Legend | null = null;
-  piToastInfo: FeatureInfos | null = null;
+  piToastInfo: FeatureInfos = { title: "", records: [{ name: "", descr: "", value: "" }] };
 
   async created() {
     this.createLayers();
@@ -120,7 +134,7 @@ export default class AppVisualCspPtc extends Vue implements IAppVisualCspPtc {
         selected: false,
       },
       {
-        name: this.$t("kpi").toString(),
+        name: this.$t("performance-indicators").toString(),
         type: "group",
         singleSelection: true,
         childLayers: this.kpiLayers.map(kpiLayer => kpiLayer.toGeoLayer())

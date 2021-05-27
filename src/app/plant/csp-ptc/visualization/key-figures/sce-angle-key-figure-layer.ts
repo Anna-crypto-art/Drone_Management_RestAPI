@@ -14,7 +14,7 @@ const SCE_ANGLE_OFFSET_COLORS = [undefined, 'green', 'yellow', 'red'];
 export class SceAngleKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcSceAngleSchema> {
   protected readonly keyFigureId = AnalysisResultKeyFigure.SCE_ANGLE_ID;
   protected readonly analysisResultMapping = analysisResultCspPtcMappingSceAngle;
-  public readonly name = "sce-alignment-offset";
+  public readonly name = "sceAngle";
 
   public getStyle(feature: FeatureLike): Style {
     const offsetColor = this.getOffsetColor(this.getProperties(feature).value);
