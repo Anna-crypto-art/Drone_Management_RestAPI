@@ -1,6 +1,6 @@
 import Vue from "vue";
 import VueI18n from "vue-i18n";
-import { BootstrapVue, IconsPlugin } from "bootstrap-vue"
+import { BootstrapVue, IconsPlugin } from "bootstrap-vue";
 
 import "./main.scss";
 import App from "@/app/app.vue";

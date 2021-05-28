@@ -11,6 +11,10 @@ export abstract class ComponentLayer extends LayerBase {
     return feature.get('name');
   }
 
+  protected getName(): string {
+    return this.vueComponent.$t(this.name).toString();
+  }
+
   public load(): Promise<Record<string, unknown>> {
     return volateqApi.getComponentsGeoVisual(this.plant.id, [this.componentId]);
   }

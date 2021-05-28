@@ -1,8 +1,11 @@
 <template>
   <div class="visual-csp-ptc">
     <open-layers ref="openlayercomp" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick">
+      <template #pcs>
+        {{ $t("pcs") }} <app-explanation>{{ $t("pcs_expl") }}</app-explanation>
+      </template>
       <template #irIntensity>
-        {{ $t("ir-intensity") }} <app-explanation><span v-html="$t('class-sca_expl')"></span></app-explanation>
+        {{ $t("ir-intensity-class") }} <app-explanation><span v-html="$t('class-sca_expl')"></span></app-explanation>
       </template>
       <template #sceAngle>
         {{ $t("sce-alignment-offset") }} <app-explanation>{{ $t("angle-deviation_expl") }}</app-explanation>
@@ -19,14 +22,14 @@
         <h3>{{ piToastInfo.title }}</h3>
       </template>
       <div>
-        <b-row v-for="featureInfo in piToastInfo.records" :key="featureInfo.name">
-          <b-col :class="featureInfo.bold && 'bold'">
+        <b-row v-for="featureInfo in piToastInfo.records" :key="featureInfo.name" :class="featureInfo.bold && 'font-weight-bold'">
+          <b-col>
             {{ featureInfo.name }} 
             <app-explanation v-if="featureInfo.descr">
-              {{ featureInfo.descr }}
+              <span v-html="$t(featureInfo.descr)"></span>
             </app-explanation>
           </b-col>
-          <b-col :class="featureInfo.bold && 'bold'">{{ featureInfo.value }}</b-col>
+          <b-col>{{ featureInfo.value }}</b-col>
         </b-row>
       </div>
     </b-toast>
@@ -86,6 +89,8 @@ export default class AppVisualCspPtc extends Vue implements IAppVisualCspPtc {
     for (const kpiLayer of this.kpiLayers) {
       kpiLayer.setVisible(kpiLayer.analysisResult.id == this.selectedAnalysisResult.id);
     }
+
+    this.hideToast();
   }
 
   get hasLayers(): boolean {
@@ -106,7 +111,7 @@ export default class AppVisualCspPtc extends Vue implements IAppVisualCspPtc {
     if (piToastInfo) {
       this.$bvToast.show("piInfoToast");
     } else {
-      this.$bvToast.hide("piInfoToast");
+      this.hideToast();
     }
   }
 
@@ -122,7 +127,7 @@ export default class AppVisualCspPtc extends Vue implements IAppVisualCspPtc {
         childLayers: undefined,
       },
       {
-        name: this.$t('pcs').toString(),
+        name: "pcs",
         type: "custom",
         customLoader: () => { return; },
         onSelected: (selected: boolean) => { 
@@ -171,10 +176,12 @@ export default class AppVisualCspPtc extends Vue implements IAppVisualCspPtc {
 
     switch (compKeyFigure.key_figure.id) {
       case AnalysisResultKeyFigure.IR_INTENSITY_ID:
-        return new IrIntensityKeyFigureLayer(this.plant, this, anaysisResult, legend => this.onSetLegend(legend)) as any;
+        return new IrIntensityKeyFigureLayer(this.plant, this, anaysisResult, 
+          (selected, legend) => this.onSelected(selected, legend)) as any;
       
       case AnalysisResultKeyFigure.SCE_ANGLE_ID:
-        return new SceAngleKeyFigureLayer(this.plant, this, anaysisResult, legend => this.onSetLegend(legend)) as any;
+        return new SceAngleKeyFigureLayer(this.plant, this, anaysisResult, 
+          (selected, legend) => this.onSelected(selected, legend)) as any;
     }
 
     return undefined;
@@ -188,13 +195,27 @@ export default class AppVisualCspPtc extends Vue implements IAppVisualCspPtc {
     ];
   }
 
-  private onSetLegend(legend: Legend | null) {
-    this.legend = legend;
+  private onSelected(selected: boolean, legend: Legend) {
+    this.legend = selected && legend || null;
+
+    this.hideToast();
+  }
+
+  private hideToast() {
+    this.$bvToast.hide("piInfoToast");
   }
 }
 </script>
 
 <style lang="scss">
+// Fix that toaster overlays popover
+.b-popover {
+  z-index: 1;
+}
+.b-toaster {
+  z-index: 0;
+}
+
 .visual-csp-ptc {
   position: relative;
   height: 100%;

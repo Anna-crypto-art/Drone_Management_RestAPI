@@ -17,12 +17,12 @@ import Vue from "vue";
 export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> extends LayerBase {
   protected abstract readonly keyFigureId: AnalysisResultKeyFigure;
   protected abstract readonly analysisResultMapping: AnalysisResultCspPtcMappings<T>;
-  
+
   constructor(
     plant: PlantSchema,
     vueComponent: Vue,
     public readonly analysisResult: AnalysisResultDetailedSchema,
-    protected readonly onSetLegend: (legend: Legend | null) => void,
+    protected readonly onSelectedEvent: (selected: boolean, legend: Legend) => void,
   ) {
     super(plant, vueComponent);
 
@@ -34,7 +34,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
   protected onSelected(selected: boolean): void {
     super.onSelected(selected);
 
-    this.onSetLegend(selected && this.getLegend() || null);
+    this.onSelectedEvent(selected, this.getLegend());
   }
 
   protected mapRecordEntryToFeatureInfo(key: string, value: unknown, descr?: string): FeatureInfo | undefined {

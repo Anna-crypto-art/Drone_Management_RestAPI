@@ -3,7 +3,7 @@ import { KeyFigureLayer } from "./shared/key-figure-layer";
 import { FeatureLike } from "ol/Feature";
 import { Style, Stroke, Text, Fill } from 'ol/style';
 import { AnalysisResultCspPtcSceAngleSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-sce-angle-schema";
-import { FeatureInfos, Legend } from "./shared/types";
+import { FeatureInfo, FeatureInfos, Legend } from "./shared/types";
 import analysisResultCspPtcMappingSceAngle from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-sce-angle";
 
 
@@ -15,6 +15,16 @@ export class SceAngleKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcS
   protected readonly keyFigureId = AnalysisResultKeyFigure.SCE_ANGLE_ID;
   protected readonly analysisResultMapping = analysisResultCspPtcMappingSceAngle;
   public readonly name = "sceAngle";
+
+  protected mapRecordEntryToFeatureInfo(key: string, value: unknown, descr?: string): FeatureInfo | undefined {
+    const featureInfo = super.mapRecordEntryToFeatureInfo(key, value, descr);
+    
+    if (featureInfo && key == 'angle-deviation') {
+      featureInfo.bold = true;
+    }
+
+    return featureInfo;
+  }
 
   public getStyle(feature: FeatureLike): Style {
     const offsetColor = this.getOffsetColor(this.getProperties(feature).value);

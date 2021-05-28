@@ -39,6 +39,10 @@ export abstract class LayerBase {
     this.selected = selected;
   }
 
+  protected getName(): string {
+    return this.name;
+  }
+
   public showPCS(show: boolean): void {
     this._showPCS = show;
   }
@@ -46,7 +50,7 @@ export abstract class LayerBase {
   public toGeoLayer(): GeoJSONLayer {
     this.geoLayerObject = {
       type: "geojson",
-      name: this.vueComponent.$t(this.name).toString(),
+      name: this.getName(),
       selected: this.selected,
       autoZoom: this.autoZoom,
       geoJSONLoader: () => this.load(),
