@@ -143,5 +143,6 @@
   "performance-indicators": "Performance indicators",
   "pi": "PI",
   "missing-gct": "Broken glass",
-  "missing-gct_expl": "Glass cladding tube is missing or broken"
+  "missing-gct_expl": "Glass cladding tube is missing or broken",
+  "view": "View"
 }

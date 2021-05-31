@@ -2,6 +2,18 @@
   <div class="plant-view-csp-ptc">
     <div class="plant-view-csp-ptc-leftside">
       <h2 class="plant-view-csp-ptc-title">{{ this.plant.name }}</h2>
+      <div class="plant-view-csp-ptc-subtitle">{{ $t('View analysed data of your plant') }}</div>
+      <div class="plant-view-csp-ptc-view">
+        <div class="plant-view-csp-ptc-view-text">
+          {{ $t('view') }}:
+        </div>
+        <div class="plant-view-csp-ptc-view-buttons">
+          <b-button-group size="sm">
+            <b-button :pressed="mapView" @click="changeView('map')"><b-icon icon="map" /></b-button>
+            <b-button :pressed="tableView" @click="changeView('table')"><b-icon icon="table" /></b-button>
+          </b-button-group>
+        </div>
+      </div>
       <app-table-container size="sm">
         <b-table 
         :items="analysisResultsTableItems" 
@@ -27,7 +39,7 @@
       </app-table-container>
     </div>
     <div class="plant-view-csp-ptc-rightside">
-      <app-visual-csp-ptc v-if="hasResults" ref="visualCspPtc" :analysisResults="analysisResults" :plant="plant" />
+      <app-visual-csp-ptc v-if="hasResults" ref="visualCspPtc" :analysisResults="analysisResults" :plant="plant" v-show="mapView" />
     </div>
   </div>
 </template>
@@ -67,6 +79,8 @@ export default class AppPlantViewCspPtc extends Vue {
 
   analysisResults: AnalysisResultDetailedSchema[] | null = null;
 
+  private view: 'map' | 'table' = 'map';
+
   async created() {
     this.analysisResults = await volateqApi.getAnalysisResults(this.plant.id);
 
@@ -83,8 +97,20 @@ export default class AppPlantViewCspPtc extends Vue {
     return !!this.analysisResults;
   }
 
+  get mapView(): boolean {
+    return this.view === 'map';
+  }
+
+  get tableView(): boolean {
+    return this.view === 'table';
+  }
+
   onAnalysisResultSelected(selectedAnalysisResult: { id: string, createdAt: string }[]) {
     this.visualCspPtc.selectAnalysisResult(selectedAnalysisResult[0].id);
+  }
+
+  changeView(view: 'map' | 'table') {
+    this.view = view;
   }
 }
 </script>
@@ -102,6 +128,11 @@ $left-width: 400px;
 
   &-title {
     font-size: 3rem;
+    margin-bottom: 0px;
+  }
+  &-subtitle {
+    color: $dark-60pc;
+    font-size: 1.25rem;
     margin-bottom: 30px;
   }
 
@@ -111,9 +142,19 @@ $left-width: 400px;
     width: $left-width;
     border-right: $border-color-grey 1px solid;
   }
+
   &-rightside {
     height: 100%;
     width: calc(100% - #{$left-width});
+  }
+
+  &-view {
+    display: flex;
+
+    &-text {
+      margin-right: 10px;
+      line-height: 30px;
+    }
   }
 }
 </style>

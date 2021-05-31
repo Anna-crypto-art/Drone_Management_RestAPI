@@ -47,6 +47,9 @@ $theme-colors: (
     border-color: $blue;
   }
 }
+.btn-sm, .btn-group-sm > .btn {
+  border-radius: 0 !important;
+}
 
 
 .form-control {
