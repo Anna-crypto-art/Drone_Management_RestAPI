@@ -51,7 +51,7 @@ import volateqApi from '@/app/shared/services/volateq-api/volateq-api';
 import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
 import { AnalysisResultDetailedSchema } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-schema';
 import AppVisualCspPtc from '@/app/plant/csp-ptc/visualization/visual-csp-ptc.vue';
-import { IAppVisualCspPtc } from './visualization/types';
+import { IAnalysisResultSelection } from './types';
 import { BvTableFieldArray } from 'bootstrap-vue';
 import AppTableContainer from '@/app/shared/components/app-table-container/app-table-container.vue';
 import AppExplanation from '@/app/shared/components/app-explanation/app-explanation.vue';
@@ -67,7 +67,7 @@ import AppExplanation from '@/app/shared/components/app-explanation/app-explanat
 })
 export default class AppPlantViewCspPtc extends Vue {
   @Prop() plant!: PlantSchema;
-  @Ref() visualCspPtc!: IAppVisualCspPtc;
+  @Ref() visualCspPtc!: IAnalysisResultSelection;
 
   analysisResultsTableColumns: BvTableFieldArray = [
     { key: 'selected', label: '' },

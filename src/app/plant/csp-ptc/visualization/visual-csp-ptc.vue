@@ -52,7 +52,7 @@ import { ComponentLayer } from './components/shared/component-layer';
 import { ScaComponentLayer } from './components/sca-component-layer';
 import { AbsorberComponentLayer } from './components/absorber-component-layer';
 import { SceComponentLayer } from './components/sce-component-layer';
-import { IAppVisualCspPtc } from './types';
+import { IAnalysisResultSelection } from '../types';
 import { FeatureInfos, Legend } from './key-figures/shared/types';
 import { FeatureLike } from "ol/Feature";
 import AppExplanation from '@/app/shared/components/app-explanation/app-explanation.vue';
@@ -65,7 +65,7 @@ import AppExplanation from '@/app/shared/components/app-explanation/app-explanat
     AppExplanation
   }
 })
-export default class AppVisualCspPtc extends Vue implements IAppVisualCspPtc {
+export default class AppVisualCspPtc extends Vue implements IAnalysisResultSelection {
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
   @Ref() openlayercomp!: Vue;
