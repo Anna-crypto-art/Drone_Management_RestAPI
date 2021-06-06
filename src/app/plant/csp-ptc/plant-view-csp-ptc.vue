@@ -40,6 +40,7 @@
     </div>
     <div class="plant-view-csp-ptc-rightside">
       <app-visual-csp-ptc v-if="hasResults" ref="visualCspPtc" :analysisResults="analysisResults" :plant="plant" v-show="mapView" />
+      <app-tables-csp-ptc v-if="hasResults" ref="tablesCspPtc" :analysisResults="analysisResults" :plant="plant" v-show="tableView" />
     </div>
   </div>
 </template>
@@ -55,6 +56,7 @@ import { IAnalysisResultSelection } from './types';
 import { BvTableFieldArray } from 'bootstrap-vue';
 import AppTableContainer from '@/app/shared/components/app-table-container/app-table-container.vue';
 import AppExplanation from '@/app/shared/components/app-explanation/app-explanation.vue';
+import AppTablesCspPtc from '@/app/plant/csp-ptc/tables/tables-csp-ptc.vue';
 
 
 @Component({
@@ -62,12 +64,14 @@ import AppExplanation from '@/app/shared/components/app-explanation/app-explanat
   components: {
     AppVisualCspPtc,
     AppTableContainer,
-    AppExplanation
+    AppExplanation,
+    AppTablesCspPtc,
   }
 })
 export default class AppPlantViewCspPtc extends Vue {
   @Prop() plant!: PlantSchema;
   @Ref() visualCspPtc!: IAnalysisResultSelection;
+  @Ref() tablesCspPtc!: IAnalysisResultSelection;
 
   analysisResultsTableColumns: BvTableFieldArray = [
     { key: 'selected', label: '' },
@@ -107,6 +111,7 @@ export default class AppPlantViewCspPtc extends Vue {
 
   onAnalysisResultSelected(selectedAnalysisResult: { id: string, createdAt: string }[]) {
     this.visualCspPtc.selectAnalysisResult(selectedAnalysisResult[0].id);
+    this.tablesCspPtc.selectAnalysisResult(selectedAnalysisResult[0].id);
   }
 
   changeView(view: 'map' | 'table') {

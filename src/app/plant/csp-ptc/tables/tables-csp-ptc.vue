@@ -49,6 +49,7 @@ import analysisResultCspPtcMappingIrIntensity from "@/app/shared/services/volate
 import analysisResultCspPtcMappingSceAngle from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-sce-angle";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { IAnalysisResultSelection } from "../types";
+import AppTableCspPtc from "./table-component/table-csp-ptc.vue";
 
 
 const ACTIVE_COMPONENTS: IActiveComponent[] = [
@@ -72,7 +73,8 @@ const ACTIVE_COMPONENTS: IActiveComponent[] = [
     AppButton,
     AppTableContainer,
     AppSearchInput,
-    AppExplanation
+    AppExplanation,
+    AppTableCspPtc,
   }
 })
 export default class AppTablesCspPtc extends BaseAuthComponent implements IAnalysisResultSelection {
@@ -103,6 +105,12 @@ export default class AppTablesCspPtc extends BaseAuthComponent implements IAnaly
           });
         }
       }
+
+      const activeComponent = this.getSelectedActiveComponent();
+      if (activeComponent) {
+        const tableComponent = this.getRefTableComponent(activeComponent.componentId);
+        tableComponent.refresh();
+      }
     }
 
     this.onTabChanged(0);
@@ -115,14 +123,14 @@ export default class AppTablesCspPtc extends BaseAuthComponent implements IAnaly
   }
 
   onTabChanged(newTabIndex: number) {
-    const activeComponent = Object.values(this.activeTabComponents).find(comp => comp.tabIndex === newTabIndex);
+    const activeComponent = this.getSelectedActiveComponent();
     if (activeComponent) {
       this.activeTabLabel = this.$t(activeComponent.label).toString();
     }
   }
 
   async onExportCsv() {
-    const activeComponent = Object.values(this.activeTabComponents).find(comp => comp.tabIndex === this.tabIndex);
+    const activeComponent = this.getSelectedActiveComponent();
     if (activeComponent) {
       const tableComponent = this.getRefTableComponent(activeComponent.componentId);
 
@@ -149,6 +157,10 @@ export default class AppTablesCspPtc extends BaseAuthComponent implements IAnaly
 
   private getRefTableComponent(componentId: AnalysisResultComponent): ITableComponent {
     return this.$refs[this.tableComponentRefAlias + componentId] as any;
+  }
+
+  private getSelectedActiveComponent(): IActiveTabComponent | undefined {
+    return Object.values(this.activeTabComponents).find(comp => comp.tabIndex === this.tabIndex);
   }
 }
 </script>
