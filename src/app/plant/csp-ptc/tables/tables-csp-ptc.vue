@@ -42,11 +42,11 @@ import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-a
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import analysisResultCspPtcMappingIrIntensity from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-ir-intensity";
 import analysisResultCspPtcMappingSceAngle from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-sce-angle";
+import analysisResultCspPtcMappingScaOrientation from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-sca-orientation";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { IAnalysisResultSelection } from "../types";
 import AppTableCspPtc from "./table-component/table-csp-ptc.vue";
@@ -64,6 +64,12 @@ const ACTIVE_COMPONENTS: IActiveComponent[] = [
     componentId: AnalysisResultComponent.CSP_PTC_SCE,
     mapping: analysisResultCspPtcMappingSceAngle as any,
     descr: "sce_expl",
+  },
+  {
+    label: "solar-collector-assembly",
+    componentId: AnalysisResultComponent.CSP_PTC_SCA,
+    mapping: analysisResultCspPtcMappingScaOrientation as any,
+    descr: "sca_expl",
   }
 ];
 
