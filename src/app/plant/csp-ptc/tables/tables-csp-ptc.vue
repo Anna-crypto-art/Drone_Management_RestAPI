@@ -5,7 +5,7 @@
         <app-search-input :placeholder="$t('search-pcs')" @search="onSearch"></app-search-input>
       </div>
       <div class="pull-right">
-        <app-button variant="secondary" :title="$t('export-csv')" @click="onExportCsv">
+        <app-button ref="csvExportBtn" variant="secondary" :title="$t('export-csv')" @click="onExportCsv">
           <b-icon icon="download"></b-icon> {{ $t("export-csv") }}: {{ activeTabLabel }}
         </app-button>
       </div>
@@ -13,14 +13,14 @@
     </div>
     <app-table-container>
       <b-tabs v-model="tabIndex" @activate-tab="onTabChanged">
-        <b-tab v-for="activeTabComponent in activeTabComponents" :key="activeTabComponent.label">
+        <b-tab v-for="activeTabComponent in activeTabComponents" :key="analysisResult.id + '_' + activeTabComponent.label">
           <template #title>
             {{ $t(activeTabComponent.label) }}
             <app-explanation v-if="activeTabComponent.descr">
               <span v-html="$t(activeTabComponent.descr)"></span>
             </app-explanation>
           </template>
-          <app-table-csp-ptc :ref="tableComponentRefAlias + activeTabComponent.componentId"
+          <app-table-csp-ptc :ref="generateRefTableName(activeTabComponent)"
             :analysisResult="analysisResult"
             :activeComponent="activeTabComponent">
           </app-table-csp-ptc>
@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Ref } from "vue-property-decorator";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
@@ -50,6 +50,7 @@ import analysisResultCspPtcMappingSceAngle from "@/app/shared/services/volateq-a
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { IAnalysisResultSelection } from "../types";
 import AppTableCspPtc from "./table-component/table-csp-ptc.vue";
+import { IAppButton } from "@/app/shared/components/app-button/types";
 
 
 const ACTIVE_COMPONENTS: IActiveComponent[] = [
@@ -80,11 +81,11 @@ const ACTIVE_COMPONENTS: IActiveComponent[] = [
 export default class AppTablesCspPtc extends BaseAuthComponent implements IAnalysisResultSelection {
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
+  @Ref() csvExportBtn!: IAppButton;
 
   tabIndex = 0;
   activeTabLabel = "";
   readonly activeTabComponents: IActiveTabComponent[] = [];
-  readonly tableComponentRefAlias = "tableComponent_";
 
   private analysisResult?: AnalysisResultDetailedSchema;
 
@@ -105,24 +106,23 @@ export default class AppTablesCspPtc extends BaseAuthComponent implements IAnaly
           });
         }
       }
-
-      const activeComponent = this.getSelectedActiveComponent();
-      if (activeComponent) {
-        const tableComponent = this.getRefTableComponent(activeComponent.componentId);
-        tableComponent.refresh();
-      }
     }
 
     this.onTabChanged(0);
   }
 
   onSearch(searchText: string) {
-    ACTIVE_COMPONENTS.forEach(activeComponent => {
-      this.getRefTableComponent(activeComponent.componentId).search(searchText);
-    });
+    for (const activeComponent of ACTIVE_COMPONENTS) {
+      const tableComponent = this.getRefTableComponent(activeComponent)
+      if (tableComponent) {
+        tableComponent.search(searchText);
+      }
+    }
   }
 
   onTabChanged(newTabIndex: number) {
+    this.tabIndex = newTabIndex;
+
     const activeComponent = this.getSelectedActiveComponent();
     if (activeComponent) {
       this.activeTabLabel = this.$t(activeComponent.label).toString();
@@ -132,31 +132,37 @@ export default class AppTablesCspPtc extends BaseAuthComponent implements IAnaly
   async onExportCsv() {
     const activeComponent = this.getSelectedActiveComponent();
     if (activeComponent) {
-      const tableComponent = this.getRefTableComponent(activeComponent.componentId);
-
-      const authCsvDownloadUrl = volateqApi.getSpecificAnalysisResultCsvUrl(
-        this.analysisResult!.id,
-        this.analysisResult!.component_key_figures
-          .filter(compKeyFigure => compKeyFigure.component.id === activeComponent.componentId)[0].id,
-        tableComponent.getTableRequestParam(),
-        tableComponent.getCsvColumnMappingsParam()
-      );
-
-      const csvFileName = dateHelper.toDateTime(new Date()) + "_" + this.plant.name + "_" + new Date(Date.parse(this.analysisResult!.csp_ptc.time)).toLocaleDateString() + "_" + activeComponent.label + ".csv";
-
       try {
-        appButtonEventBus.startLoading();
+        this.csvExportBtn.startLoading();
+
+        const tableComponent = this.getRefTableComponent(activeComponent);
+
+        const authCsvDownloadUrl = volateqApi.getSpecificAnalysisResultCsvUrl(
+          this.analysisResult!.id,
+          this.analysisResult!.component_key_figures
+            .filter(compKeyFigure => compKeyFigure.component.id === activeComponent.componentId)[0].id,
+          tableComponent.getTableRequestParam(),
+          tableComponent.getCsvColumnMappingsParam()
+        );
+
+        const csvFileName = dateHelper.toDateTime(new Date()) + "_" + this.plant.name + "_" + 
+          new Date(Date.parse(this.analysisResult!.csp_ptc.time)).toLocaleDateString() + "_" + activeComponent.label + ".csv";
+
         AppDownloader.download(await volateqApi.generateDownloadUrl(authCsvDownloadUrl, csvFileName), csvFileName);
       } catch (e) {
         appContentEventBus.showError(e);
       } finally {
-        appButtonEventBus.stopLoading();
+        this.csvExportBtn.stopLoading();
       }
     }
   }
 
-  private getRefTableComponent(componentId: AnalysisResultComponent): ITableComponent {
-    return this.$refs[this.tableComponentRefAlias + componentId] as any;
+  private getRefTableComponent(activeTabComponent: IActiveComponent): ITableComponent {
+    return (this.$refs[this.generateRefTableName(activeTabComponent)] as any[])[0];
+  }
+
+  private generateRefTableName(activeTabComponent: IActiveComponent): string {
+    return ["tableComponent", this.analysisResult!.id, activeTabComponent.componentId].join("_");
   }
 
   private getSelectedActiveComponent(): IActiveTabComponent | undefined {
@@ -164,3 +170,8 @@ export default class AppTablesCspPtc extends BaseAuthComponent implements IAnaly
   }
 }
 </script>
+<style lang="scss">
+.app-tables-csp-ptc {
+  padding: 20px;
+}
+</style>

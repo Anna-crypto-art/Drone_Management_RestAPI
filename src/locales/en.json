@@ -144,5 +144,6 @@
   "pi": "PI",
   "missing-gct": "Broken glass",
   "missing-gct_expl": "Glass cladding tube is missing or broken",
-  "view": "View"
+  "view": "View",
+  "view-analysed-data-of-your-plant": "View analysed data of your plant"
 }

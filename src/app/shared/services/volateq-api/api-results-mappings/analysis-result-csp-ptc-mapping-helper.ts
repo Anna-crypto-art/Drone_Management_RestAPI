@@ -76,6 +76,6 @@ export class AnalysisResultCspPtcMappingHelper<T extends AnalysisResultCspPtcSch
   }
 
   public getPropertyName(mappingEntry: AnalysisResultCspPtcMappingEntry<T>): string {
-    return mappingEntry.getValue.toString().match(/=>[^.]*\.(.*)/)![1];
+    return mappingEntry.getValue.toString().match(/({|=>)[^.]*\.([^;]*)/)![2];
   }
 }

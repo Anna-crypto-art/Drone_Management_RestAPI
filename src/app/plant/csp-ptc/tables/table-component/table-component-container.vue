@@ -2,7 +2,7 @@
   <div class="app-table-component-container">
     <slot></slot>
     <app-loading v-show="loading"></app-loading>
-    <app-table-pagination :pagination="pagination" :tableName="tableName"></app-table-pagination>
+    <app-table-pagination :pagination="pagination" :tableName="tableName" v-show="!loading"></app-table-pagination>
   </div>
 </template>
 
@@ -38,9 +38,10 @@ export default class AppTableComponentContainer extends Vue {
 <style lang="scss">
 .app-table-component-container {
   position: relative;
+  min-height: 250px;
 
   .b-table {
-    font-size: 14px;
+    font-size: .7rem;
   }
 }
 </style>

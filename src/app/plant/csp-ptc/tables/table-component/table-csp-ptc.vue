@@ -1,13 +1,16 @@
 <template>
   <div class="app-app-table-csp-ptc">
-    <app-table-component-container ref="container" :tableName="tableName" :pagination="pagination">
+    <app-table-component-container ref="container" :tableName="tableName" :pagination="pagination" size="sm">
       <b-table :id="tableName" hover :fields="columns" :items="dataProvider" class="bordered" ref="table"
         head-variant="light"
         :emptyText="$t('no-data')"
         :per-page="pagination.perPage"
         :current-page="pagination.currentPage">
-        <template v-for="column in columns" :slot="column.key" slot-scope="data">
-          {{ data.item.label }} <app-explanation v-if="column.labelExpl" v-html="column.labelExpl" :key="column.key" />
+        <template #head()="column">
+          {{ column.label }}
+          <app-explanation v-if="column.field.labelExpl">
+            <span v-html="$t(column.field.labelExpl)"></span>
+          </app-explanation>
         </template>
       </b-table>
     </app-table-component-container>
@@ -53,6 +56,7 @@ export default class AppTableCspPtc extends Vue implements ITableComponent {
 
   private mappingHelper!: AnalysisResultCspPtcMappingHelper<AnalysisResultCspPtcSchemaBase>;
   private componentKeyFigureId!: string;
+  private columnsMapping!: Record<string, string>;
 
   protected startLoading() {
     this.container.startLoading()
@@ -74,6 +78,7 @@ export default class AppTableCspPtc extends Vue implements ITableComponent {
 
     this.mappingHelper = new AnalysisResultCspPtcMappingHelper(this.activeComponent.mapping, this.analysisResult);
     this.columns = this.mappingHelper.getColumns(transName => this.$t(transName));
+    this.columnsMapping = this.mappingHelper.getColumnsMapping();
   }
 
   getTableRequestParam(): TableRequest {
@@ -81,12 +86,10 @@ export default class AppTableCspPtc extends Vue implements ITableComponent {
       throw Error('Missing last_ctx');
     }
 
-    const orderByMappings = this.mappingHelper.getColumnsMapping();
-
     return {
       limit: this.last_ctx.perPage,
       page: this.last_ctx.currentPage,
-      order_by: this.last_ctx.sortBy && orderByMappings[this.last_ctx.sortBy],
+      order_by: this.last_ctx.sortBy && this.columnsMapping[this.last_ctx.sortBy],
       order_direction: this.last_ctx.sortDesc ? 'desc' : 'asc',
       filter: this.searchText
     }
@@ -107,17 +110,33 @@ export default class AppTableCspPtc extends Vue implements ITableComponent {
     try {
       await apiResultsLoader.loadResults(this.analysisResult.id, this.componentKeyFigureId);
 
-      let items = apiResultsLoader.getResults(this.analysisResult.id, this.componentKeyFigureId)!;
+      let results = apiResultsLoader.getResults(this.analysisResult.id, this.componentKeyFigureId)!;
       
       if (this.searchText) {
-        items = items.filter(item => item.fieldgeometry_component.kks.toUpperCase().startsWith(this.searchText.toUpperCase()));
+        results = results.filter(item => item.fieldgeometry_component.kks.toUpperCase().startsWith(this.searchText.toUpperCase()));
       }
-    
-      const slicedItems = items.slice((ctx.currentPage - 1) * ctx.perPage, (ctx.currentPage - 1) * ctx.perPage + ctx.perPage);
 
+      const items = this.mappingHelper.getItems(results);
       this.pagination.total = items.length;
 
-      return this.mappingHelper.getItems(slicedItems);
+      if (ctx.sortBy) {
+        items.sort((a, b) => {
+          const valA = a[ctx.sortBy!] as string | number;
+          const valB = b[ctx.sortBy!] as string | number;
+
+          if (valA < valB) {
+            return ctx.sortDesc ? 1 : -1;
+          }
+          if (valA > valB) {
+            return ctx.sortDesc ? -1 : 1;
+          }
+          return 0;
+        });
+      }
+
+      const slicedItems = items.slice((ctx.currentPage - 1) * ctx.perPage, (ctx.currentPage - 1) * ctx.perPage + ctx.perPage);
+
+      return slicedItems;
     } catch (e) {
       appContentEventBus.showError(e)
     } finally {

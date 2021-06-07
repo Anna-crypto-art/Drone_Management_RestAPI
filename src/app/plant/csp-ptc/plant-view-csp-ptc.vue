@@ -2,7 +2,7 @@
   <div class="plant-view-csp-ptc">
     <div class="plant-view-csp-ptc-leftside">
       <h2 class="plant-view-csp-ptc-title">{{ this.plant.name }}</h2>
-      <div class="plant-view-csp-ptc-subtitle">{{ $t('View analysed data of your plant') }}</div>
+      <div class="plant-view-csp-ptc-subtitle">{{ $t('view-analysed-data-of-your-plant') }}</div>
       <div class="plant-view-csp-ptc-view">
         <div class="plant-view-csp-ptc-view-text">
           {{ $t('view') }}:
@@ -15,7 +15,7 @@
         </div>
       </div>
       <app-table-container size="sm">
-        <b-table 
+        <b-table ref="analysisResultsTable"
         :items="analysisResultsTableItems" 
         :fields="analysisResultsTableColumns"
         select-mode="single"
@@ -70,6 +70,7 @@ import AppTablesCspPtc from '@/app/plant/csp-ptc/tables/tables-csp-ptc.vue';
 })
 export default class AppPlantViewCspPtc extends Vue {
   @Prop() plant!: PlantSchema;
+  @Ref() analysisResultsTable!: any; // b-table
   @Ref() visualCspPtc!: IAnalysisResultSelection;
   @Ref() tablesCspPtc!: IAnalysisResultSelection;
 
@@ -95,6 +96,21 @@ export default class AppPlantViewCspPtc extends Vue {
         kpis: analysisResult.component_key_figures.map(compKeyFigure => compKeyFigure.key_figure.name)
       })
     }
+
+    if (this.analysisResults.length > 0) {
+      let tableRowIndex = 0;
+      const analysisResultId = this.$route.query.result;
+      if (analysisResultId && typeof analysisResultId === "string") {
+        tableRowIndex = this.analysisResults.findIndex(analysisResult => analysisResult.id === analysisResultId);
+      }
+
+      setTimeout(() => this.analysisResultsTable.selectRow(tableRowIndex), 1000); // wait for DOM
+    }
+
+    const view = this.$route.query.view;
+    if (view === 'map' || view === 'table') {
+      setTimeout(() => this.changeView(view), 1000); // first load openlayers else openlayers keeps blank... (bug!?)
+    }
   }
 
   get hasResults(): boolean {
@@ -109,7 +125,11 @@ export default class AppPlantViewCspPtc extends Vue {
     return this.view === 'table';
   }
 
-  onAnalysisResultSelected(selectedAnalysisResult: { id: string, createdAt: string }[]) {
+  onAnalysisResultSelected(selectedAnalysisResult: { id: string }[]) {
+    if (!selectedAnalysisResult || selectedAnalysisResult.length === 0) {
+      return;
+    }
+
     this.visualCspPtc.selectAnalysisResult(selectedAnalysisResult[0].id);
     this.tablesCspPtc.selectAnalysisResult(selectedAnalysisResult[0].id);
   }
