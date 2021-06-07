@@ -1,10 +1,10 @@
 <template>
   <div>
-    <app-header></app-header>
+    <app-header v-if="showHeader"></app-header>
     <div class="app-content">
       <b-container>
         <div v-if="navback" class="app-content-navback">
-          <router-link class="link" :to="{ name: 'Home' }">
+          <router-link class="link" to="/analyses">
             <b-icon icon="chevron-left"></b-icon> {{ $t("back-to-overview") }}
           </router-link>
         </div>
@@ -14,7 +14,6 @@
         </div>
         <div class="app-content-content">
           <div class="app-content-content-alert">
-            <!--<b-alert v-for="(alert, i) in alerts" :key="i" show :variant="alert.variant" v-html="alert.msg" dismissible></b-alert>-->
             <b-alert v-model="showAlert" :variant="alert.variant" dismissible fade>
               <div v-html="alert.msg"></div>
             </b-alert>
@@ -43,6 +42,7 @@ export default class AppContent extends Vue {
   @Prop({ required: true }) title: string | undefined;
   @Prop() subtitle: string | undefined;
   @Prop({ default: false }) navback: boolean | undefined;
+  @Prop({ default: true }) showHeader!: boolean;
 
   // alerts: AppAlert[] = [];
   alert: AppAlert = { msg: "", variant: "info" };

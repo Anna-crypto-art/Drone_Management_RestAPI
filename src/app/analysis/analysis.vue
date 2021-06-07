@@ -1,5 +1,5 @@
 <template>
-  <app-content :title="$t('overview')" :subtitle="$t('overview_descr')">
+  <app-content :title="$t('analysis-overview')" :subtitle="$t('analysis-overview_descr')">
     <div class="app-analysis">
       <router-link :to="{ name: 'AnalysisNew' }">
         <b-button variant="primary">{{ createNewAnalysisBtnText }}</b-button>
@@ -157,7 +157,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
 
 
   async created() {
-    this.createNewAnalysisBtnText = this.$t("create-new-analysis").toString();
+    this.createNewAnalysisBtnText = this.$t("new-data-upload").toString();
 
     this.columns = [
       { key: "date", label: this.$t("created-at").toString(), sortable: true },
@@ -184,7 +184,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
       this.updateToUploadState();
     });
     uploadService.on(UploadEvent.COMPLETED, () => {
-      this.createNewAnalysisBtnText = this.$t("create-new-analysis").toString();
+      this.createNewAnalysisBtnText = this.$t("new-data-upload").toString();
       this.updateTableRowState(this.$t("PICK_ME_UP").toString());
     });
     uploadService.on(UploadEvent.FAILED, () => {

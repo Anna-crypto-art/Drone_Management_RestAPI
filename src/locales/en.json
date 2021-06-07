@@ -6,7 +6,7 @@
   "profile": "Profile",
   "overview": "Overview",
   "back-to-overview": "Back to overview",
-  "overview_descr": "Manage all your analysis.",
+  "analysis-overview_descr": "Manage all your analyses.",
   "users": "Users",
   "users_descr": "Manage your users.",
   "name": "Name",
@@ -29,7 +29,7 @@
   "repeat-password": "Repeat password",
   "browse...": "Browse...",
   "create-new-analysis": "Create new analysis",
-  "create-new-analysis_descr": "Your uploaded files will be processed",
+  "create-new-analysis_descr": "A new analysis will be created and processed after the data upload has been finished.",
   "route": "Route",
   "upload-your-files": "Upload your files",
   "video-files_descr": "Video files (*.mp4, *.mov)",
@@ -145,5 +145,11 @@
   "missing-gct": "Broken glass",
   "missing-gct_expl": "Glass cladding tube is missing or broken",
   "view": "View",
-  "view-analysed-data-of-your-plant": "View analysed data of your plant"
+  "view-analysed-data-of-your-plant": "View analysed data of your plant",
+  "analysis-overview": "Overview of analyses",
+  "new-data-upload": "New data upload",
+  "plants": "Plants",
+  "plants-overview": "Overview of plants",
+  "plants-overview_descr": "Select a digitized power plant in order to determine its condition on the basis of the analyzed data.",
+  "digitized": "Digitized"
 }

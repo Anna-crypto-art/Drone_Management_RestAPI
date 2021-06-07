@@ -1,5 +1,5 @@
 <template>
-  <app-content :title="$t('create-new-analysis')" :navback="true" :subtitle="$t('create-new-analysis_descr')">
+  <app-content :title="$t('new-data-upload')" :navback="true" :subtitle="$t('create-new-analysis_descr')">
     <div class="app-new-analysis">
       <b-form @submit.prevent="onSubmit" style="margin-bottom: 50px;">
         <b-row style="margin-bottom: 25px;">
