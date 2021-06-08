@@ -207,6 +207,20 @@ export class VolateqAPI extends HttpClientBase {
   public getAnalysisResults(plantId: string): Promise<AnalysisResultDetailedSchema[]> {
     return this.get(`/auth/plant/${plantId}/analysis-results`);
   }
+
+  public importFieldgeometry(file: File, customerId: string, plantId: string, clearBefore: boolean): Promise<TaskSchema> {
+    return this.postFile(`/auth/fieldgeometry/${customerId}/${plantId}?clear_before=${clearBefore}`, 'file', file);
+  }
+
+  public waitForTask(taskId: string, finished: (task: TaskSchema) => void): void {
+    const interval = setInterval(async () => {
+      const task = await this.getTask(taskId);
+      if (task.state === "SUCCESS" || task.state === "FAILURE") {
+        clearInterval(interval);
+        finished(task);
+      }
+    }, 3000);
+  }
 }
 
 const volateqApi = new VolateqAPI();

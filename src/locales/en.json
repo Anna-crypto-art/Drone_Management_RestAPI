@@ -152,5 +152,11 @@
   "plants-overview": "Overview of plants",
   "plants-overview_descr": "Select a digitized power plant in order to determine its condition on the basis of the analyzed data.",
   "digitized": "Digitized",
-  "number-of-analyses": "Number of analyses"
+  "number-of-analyses": "Number of analyses",
+  "upload-dt": "Upload digital twin",
+  "upload-dt_descr": "Select a valid json file with the fieldgeometry of the plant",
+  "clear-before": "Clear before",
+  "select-dt-json-file": "Select Digital twin JSON file",
+  "dt-imported-successfully": "Digital twin successfully imported",
+  "plant": "Plant"
 }

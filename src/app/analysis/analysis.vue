@@ -161,15 +161,12 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     this.createNewAnalysisBtnText = this.$t("new-data-upload").toString();
 
     this.columns = [
+      { key: "plant", label: this.$t("plant").toString(), sortable: true },
       { key: "date", label: this.$t("created-at").toString(), sortable: true },
       { key: "user", label: this.$t("created-by").toString(), sortable: true },
       { key: "state", label: this.$t("state").toString(), sortable: true },
       { key: "actions" }
     ];
-
-    if (this.isSuperAdmin) {
-      this.columns.splice(0, 0, { key: "customer", label: this.$t("customer").toString(), sortable: true });
-    }
 
     await this.updateAnalysisRows();
 
@@ -383,13 +380,9 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
 
     for (const file of files) {
       const task = await volateqApi.importAnalysisResult(file, analysisId);
-      let interval = setInterval(async () => {
-        const taskState = await volateqApi.getTask(task.id);
-          if (taskState.state === "SUCCESS" || taskState.state === "FAILURE") {
-            clearInterval(interval);
-            eventCallback({ task: taskState, file: file, finished: --filesCount <= 0 });
-          }
-      }, 3000);
+      volateqApi.waitForTask(task.id, (task) => {
+        eventCallback({ task: task, file: file, finished: --filesCount <= 0 });
+      });
     }
   }
 
@@ -424,11 +417,8 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
           state: a.current_state, 
           files: a.files,
           plantId: a.plant.id,
+          plant: a.plant.name
         };
-
-        if (this.isSuperAdmin) {
-          row["customer"] = a.customer.name;
-        }
 
         return row;
       });
