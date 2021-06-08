@@ -44,7 +44,7 @@ export default class AppAuthConfirmLogin extends Vue {
 
       await volateqApi.confirmLogin(this.$route.params.confirmKey, this.securityCode);
 
-      this.$router.push({ name: "Plants" });
+      this.$router.push({ name: "Home" });
     } catch (e) {
       if (e.error && e.error === ApiErrors.RESOURCE_NOT_FOUND) {
         this.$router.push({ name: "Login" });
