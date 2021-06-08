@@ -53,7 +53,8 @@
                 :title="$t('manage-result-files')">
                 <b-icon icon="hammer"></b-icon>
               </b-button>
-              <router-link v-if="row.item.analysisResultId" :to="{ name: 'AnalysisResult', params: { id: row.item.id }}">
+              <router-link v-if="row.item.analysisResultId" 
+              :to="{ name: 'Plant', params: { id: row.item.plantId }, query: { view: 'table', result: row.item.analysisResultId }}">
                 <b-button variant="primary" size="sm"><b-icon icon="graph-up"></b-icon></b-button>
               </router-link>
             </div>
@@ -422,6 +423,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
           analysisResultId: a.analysis_result && a.analysis_result.id,
           state: a.current_state, 
           files: a.files,
+          plantId: a.plant.id,
         };
 
         if (this.isSuperAdmin) {

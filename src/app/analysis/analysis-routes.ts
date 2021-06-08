@@ -5,7 +5,7 @@ import { RouteConfig } from "vue-router";
 
 const anaylsisRoutes: RouteConfig[] = [
   {
-    name: "analyses",
+    name: "Analyses",
     path: "/analyses",
     component: AppAnalysis
   },

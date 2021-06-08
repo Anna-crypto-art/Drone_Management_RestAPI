@@ -45,7 +45,7 @@ import uploadService from "@/app/shared/services/upload-service/upload-service";
 import { IUploadListener, IResumableFile, UploadState, UploadEvent } from "@/app/shared/services/upload-service/types";
 import { NEW_ANALYSIS_STORAGE_KEY } from "@/app/shared/components/fetch-component/storage-keys";
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
-import { PlantBlockSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-block-schema";
+
 
 @Component({
   name: "app-new-analysis",
@@ -312,15 +312,6 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
       // Reload page
       this.$router.go(0);
     }
-  }
-
-  private async getPlantBlocks(customerId?: string): Promise<PlantBlockSchema[]> {
-    const plants = await volateqApi.getPlants(customerId);
-    if (plants.length > 0) {
-      return plants[0].blocks;
-    }
-
-    return [];
   }
 }
 </script>

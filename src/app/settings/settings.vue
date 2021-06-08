@@ -1,5 +1,5 @@
 <template>
-  <app-content :title="$t($route.meta.title)" :navback="true" :subtitle="$t($route.meta.subtitle)">
+  <app-content :title="$t($route.meta.title)" :subtitle="$t($route.meta.subtitle)">
     <router-view></router-view>
   </app-content>
 </template>
