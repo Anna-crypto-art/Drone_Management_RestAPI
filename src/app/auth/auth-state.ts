@@ -30,6 +30,7 @@ const authStore = defineModule({
     updateToken (state, newState: AuthState) {
       state.token = newState.token;
       state.role = newState.role;
+      state.customer_id = newState.customer_id;
 
       appLocalStorage.setItem(key, newState);
     }
