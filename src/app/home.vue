@@ -21,6 +21,9 @@ import appContentEventBus from './shared/components/app-content/app-content-even
 })
 export default class AppHome extends BaseAuthComponent {
   async created() {
+    // Very dirty workaround to fix sync probs with customer_id in store...
+    this.$router.go(0); // Reload the page
+
     try {
       if (this.isSuperAdmin) {
         this.$router.push({ name: "Plants" });
