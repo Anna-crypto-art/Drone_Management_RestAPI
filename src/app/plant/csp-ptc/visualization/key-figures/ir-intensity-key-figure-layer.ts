@@ -6,7 +6,7 @@ import { AnalysisResultCspPtcIrIntensitySchema } from "@/app/shared/services/vol
 import { FeatureInfo, FeatureInfos, Legend } from "./shared/types";
 import analysisResultCspPtcMappingIrIntensity from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-ir-intensity";
 
-const IR_INTENSITY_CLASS_COLORS = {"1": "blue", "2": "green" ,"3": "yellow", "4": "red"};
+const IR_INTENSITY_CLASS_COLORS = {"1": "green", "2": "yellow" ,"3": "red"};
 
 export class IrIntensityKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcIrIntensitySchema> {
   protected readonly keyFigureId = AnalysisResultKeyFigure.IR_INTENSITY_ID;
@@ -16,7 +16,7 @@ export class IrIntensityKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspP
   protected mapRecordEntryToFeatureInfo(key: string, value: unknown, descr?: string): FeatureInfo | undefined {
     const featureInfo = super.mapRecordEntryToFeatureInfo(key, value, descr);
     
-    if (featureInfo && key == 'class-subfield') {
+    if (featureInfo && key == 'ir-intensity-class') {
       featureInfo.bold = true;
     }
 
@@ -40,7 +40,7 @@ export class IrIntensityKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspP
     return {
       entries: Object.keys(IR_INTENSITY_CLASS_COLORS).map(clsKey => ({
         color: IR_INTENSITY_CLASS_COLORS[clsKey],
-        name: this.vueComponent.$t('class-subfield').toString() + " " + clsKey,
+        name: this.vueComponent.$t(`ir-intensity-class-${clsKey}`).toString(),
       })),
     }
   }

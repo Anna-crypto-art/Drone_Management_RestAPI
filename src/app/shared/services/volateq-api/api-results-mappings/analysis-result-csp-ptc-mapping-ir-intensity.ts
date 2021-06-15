@@ -16,9 +16,9 @@ const analysisResultCspPtcMappingIrIntensity: AnalysisResultCspPtcMappings<Analy
     keyFigureId: AnalysisResultKeyFigure.IR_INTENSITY_ID,
   },
   {
-    getValue: r => r.class_subfield,
-    transName: "class-subfield",
-    transDescr: "class-sca_expl",
+    getValue: r => r.ir_intensity_class,
+    transName: "ir-intensity-class",
+    transDescr: "ir-intensity-class_expl",
     keyFigureId: AnalysisResultKeyFigure.IR_INTENSITY_ID,
   },
   {
