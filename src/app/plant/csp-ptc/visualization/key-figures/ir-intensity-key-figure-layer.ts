@@ -6,12 +6,12 @@ import { AnalysisResultCspPtcIrIntensitySchema } from "@/app/shared/services/vol
 import { FeatureInfo, FeatureInfos, Legend } from "./shared/types";
 import analysisResultCspPtcMappingIrIntensity from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-ir-intensity";
 
-const IR_INTENSITY_CLASS_COLORS = {"1": "green", "2": "yellow" ,"3": "red"};
+const IR_INTENSITY_CLASS_COLORS = {1: "green", 2: "yellow", 3: "red"};
 
 export class IrIntensityKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcIrIntensitySchema> {
   protected readonly keyFigureId = AnalysisResultKeyFigure.IR_INTENSITY_ID;
   protected readonly analysisResultMapping = analysisResultCspPtcMappingIrIntensity;
-  public readonly name = "irIntensity";  
+  public readonly name = "irIntensity";
 
   protected mapRecordEntryToFeatureInfo(key: string, value: unknown, descr?: string): FeatureInfo | undefined {
     const featureInfo = super.mapRecordEntryToFeatureInfo(key, value, descr);
@@ -37,10 +37,15 @@ export class IrIntensityKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspP
   }
 
   protected getLegend(): Legend {
+    console.log("this.geoJSON:");
+    console.log(this.geoJSON);
+
     return {
       entries: Object.keys(IR_INTENSITY_CLASS_COLORS).map(clsKey => ({
         color: IR_INTENSITY_CLASS_COLORS[clsKey],
-        name: this.vueComponent.$t(`ir-intensity-class-${clsKey}`).toString(),
+        name: this.vueComponent.$t(`ir-intensity-class-${clsKey}`).toString() + ` (<b>${
+          this.geoJSON.features.filter(feature => feature.properties.value?.toString() === clsKey).length
+        }</b>)`,
       })),
     }
   }

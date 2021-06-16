@@ -68,6 +68,7 @@ import { IAnalysisResultSelection } from '../types';
 import { FeatureInfos, Legend } from './key-figures/shared/types';
 import { FeatureLike } from "ol/Feature";
 import AppExplanation from '@/app/shared/components/app-explanation/app-explanation.vue';
+import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
 
 
 @Component({
@@ -77,7 +78,7 @@ import AppExplanation from '@/app/shared/components/app-explanation/app-explanat
     AppExplanation
   }
 })
-export default class AppVisualCspPtc extends Vue implements IAnalysisResultSelection {
+export default class AppVisualCspPtc extends BaseAuthComponent implements IAnalysisResultSelection {
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
   @Ref() openlayercomp!: Vue;
@@ -159,7 +160,8 @@ export default class AppVisualCspPtc extends Vue implements IAnalysisResultSelec
       {
         name: this.$t('components').toString(),
         type: "group",
-        childLayers: this.componentLayers.map(compLayer => compLayer.toGeoLayer())
+        childLayers: this.componentLayers.map(compLayer => compLayer.toGeoLayer()),
+        visible: this.isSuperAdmin
       }
     );
   }
@@ -248,10 +250,10 @@ export default class AppVisualCspPtc extends Vue implements IAnalysisResultSelec
   &-legend {
     @supports (backdrop-filter: blur(5px)) {
       backdrop-filter: blur(5px);
-      background: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.7);
     }
     @supports not (backdrop-filter: blur(5px)) {
-      background: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.8);
     }
 
     position: absolute;

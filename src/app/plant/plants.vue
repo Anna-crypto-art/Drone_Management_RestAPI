@@ -9,6 +9,11 @@
         <template #head(actions)>
           <span class="hidden">{{ $t("actions") }}</span>
         </template>
+        <template #cell(name)="row">
+          <router-link v-show="row.item.digitized" :to="{ name: 'Plant', params: { id: row.item.id }}">
+            {{ row.item.name }}
+          </router-link>
+        </template>
         <template #cell(digitized)="row">
           <b-icon :class="row.item.digitized ? 'green' : 'red'" :icon="row.item.digitized ? 'check2' : 'x'"></b-icon>
         </template>
@@ -22,9 +27,6 @@
             :title="$t('upload-dt')">
               <b-icon icon="hammer"></b-icon>
             </b-button>
-            <router-link v-show="row.item.digitized" :to="{ name: 'Plant', params: { id: row.item.id }}">
-              <b-button variant="primary" size="sm"><b-icon icon="graph-up"></b-icon></b-button>
-            </router-link>
           </div>
           <div class="clearfix"></div>
         </template>
@@ -90,8 +92,11 @@ export default class AppPlants extends BaseAuthComponent {
       { key: "name", label: this.$t("name").toString() },
       { key: "digitized", label: this.$t("digitized").toString() },
       { key: "analysesCount", label: this.$t("number-of-analyses").toString() },
-      { key: "actions" }
     ];
+
+    if (this.isSuperAdmin) {
+      this.columns.push({ key: "actions" });
+    }
 
     await this.updatePlants(); 
   }

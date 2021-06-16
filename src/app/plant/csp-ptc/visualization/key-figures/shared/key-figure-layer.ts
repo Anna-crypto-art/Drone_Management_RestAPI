@@ -11,12 +11,15 @@ import apiResultsLoader from "@/app/shared/services/volateq-api/api-results-load
 import { AnalysisResultCspPtcMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultCspPtcMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-helper";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import { Style } from 'ol/style';
 import Vue from "vue";
 
 
 export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> extends LayerBase {
   protected abstract readonly keyFigureId: AnalysisResultKeyFigure;
   protected abstract readonly analysisResultMapping: AnalysisResultCspPtcMappings<T>;
+
+  protected geoJSON?: any;
 
   constructor(
     plant: PlantSchema,
@@ -31,7 +34,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
 
   protected abstract getLegend(): Legend;
 
-  protected onSelected(selected: boolean): void {
+  protected async onSelected(selected: boolean): Promise<void> {
     super.onSelected(selected);
 
     this.onSelectedEvent(selected, this.getLegend());
@@ -88,10 +91,14 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
     return this.getProperties(feature).name;
   }
   
-  public load(): Promise<Record<string, unknown>> {
-    apiResultsLoader.loadResults<T>(this.analysisResult.id, this.getComponentKeyFigureId());
+  public async load(): Promise<Record<string, unknown>> {
+    const compKeyFigureId = this.getComponentKeyFigureId();
 
-    return volateqApi.getKeyFiguresGeoVisual(this.plant.id, this.analysisResult.id, [this.getComponentKeyFigureId()])
+    apiResultsLoader.loadResults<T>(this.analysisResult.id, compKeyFigureId);
+
+    this.geoJSON = await volateqApi.getKeyFiguresGeoVisual(this.plant.id, this.analysisResult.id, [compKeyFigureId]);
+
+    return this.geoJSON;
   }
 
   public onClick(features: FeatureLike[]): FeatureInfos | undefined {

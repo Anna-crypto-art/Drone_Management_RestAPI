@@ -37,7 +37,7 @@ export class MissingGhrKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPt
       entries: [
         {
           color: 'red',
-          name: this.vueComponent.$t('missing-gct').toString(),
+          name: this.vueComponent.$t('missing-gct').toString() + ` (<b>${this.geoJSON.features.length}</b>)`,
         }
       ]
     };
