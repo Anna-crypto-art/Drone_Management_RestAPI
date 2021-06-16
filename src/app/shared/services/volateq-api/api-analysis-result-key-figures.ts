@@ -4,4 +4,6 @@ export enum AnalysisResultKeyFigure {
     SCA_ORIENTATION_ID = 3,
     SCA_FRICTION_ID = 4,
     MISSING_GLASS_CLADDING_TUBE_ID = 5,
+    COATING_DEGRATION_ID = 6,
+    H2_CONCENTRATION_ID = 7,
   }

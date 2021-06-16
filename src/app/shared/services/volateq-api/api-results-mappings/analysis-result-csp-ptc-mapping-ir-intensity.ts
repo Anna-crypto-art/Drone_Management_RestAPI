@@ -27,6 +27,25 @@ const analysisResultCspPtcMappingIrIntensity: AnalysisResultCspPtcMappings<Analy
     transDescr: "missing-gct_expl",
     keyFigureId: AnalysisResultKeyFigure.MISSING_GLASS_CLADDING_TUBE_ID,
   },
+  {
+    getValue: r => r.coating_degration,
+    transName: "coating-degration",
+    transDescr: "coating-degration_expl",
+    keyFigureId: AnalysisResultKeyFigure.COATING_DEGRATION_ID,
+  },
+  {
+    getValue: r => r.coating_degrated,
+    transName: "oxygen-penetration",
+    transDescr: "oxygen-penetration_expl",
+    keyFigureId: AnalysisResultKeyFigure.COATING_DEGRATION_ID,
+  },
+  {
+    getValue: r => r.h2_concentration,
+    transName: "high-hydrogen-concentration",
+    transDescr: "high-hydrogen-concentration_expl",
+    keyFigureId: AnalysisResultKeyFigure.H2_CONCENTRATION_ID,
+  }
+
 ];
 
 export default analysisResultCspPtcMappingIrIntensity;

@@ -5,7 +5,16 @@
         {{ $t("pcs") }} <app-explanation>{{ $t("pcs_expl") }}</app-explanation>
       </template>
       <template #irIntensity>
-        {{ $t("ir-intensity-class") }} <app-explanation><span v-html="$t('class-sca_expl')"></span></app-explanation>
+        {{ $t("ir-intensity-class") }} <app-explanation><span v-html="$t('ir-intensity-class_expl')"></span></app-explanation>
+      </template>
+      <template #missingGhr>
+        {{ $t("missing-gct") }} <app-explanation><span v-html="$t('missing-gct_expl')"></span></app-explanation>
+      </template>
+      <template #O2Penetration>
+        {{ $t("oxygen-penetration") }} <app-explanation><span v-html="$t('oxygen-penetration_expl')"></span></app-explanation>
+      </template>
+      <template #H2Concentration>
+        {{ $t("high-hydrogen-concentration") }} <app-explanation><span v-html="$t('high-hydrogen-concentration_expl')"></span></app-explanation>
       </template>
       <template #sceAngle>
         {{ $t("sce-alignment-offset") }} <app-explanation>{{ $t("angle-deviation_expl") }}</app-explanation>
@@ -48,6 +57,9 @@ import { KeyFigureLayer } from './key-figures/shared/key-figure-layer';
 import { AnalysisResultCspPtcSchemaBase } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-schema-base';
 import { IrIntensityKeyFigureLayer } from './key-figures/ir-intensity-key-figure-layer';
 import { SceAngleKeyFigureLayer } from './key-figures/sce-angle-key-figure-layer';
+import { MissingGhrKeyFigureLayer } from './key-figures/missing-ghr-key-figure-layer';
+import { CoatingDegratedKeyFigureLayer } from './key-figures/coating-degrated-key-figure-layer';
+import { H2ConcentrationKeyFigureLayer } from './key-figures/h2-concentration-key-figure-layer';
 import { ComponentLayer } from './components/shared/component-layer';
 import { ScaComponentLayer } from './components/sca-component-layer';
 import { AbsorberComponentLayer } from './components/absorber-component-layer';
@@ -181,6 +193,18 @@ export default class AppVisualCspPtc extends Vue implements IAnalysisResultSelec
       
       case AnalysisResultKeyFigure.SCE_ANGLE_ID:
         return new SceAngleKeyFigureLayer(this.plant, this, anaysisResult, 
+          (selected, legend) => this.onSelected(selected, legend)) as any;
+
+      case AnalysisResultKeyFigure.MISSING_GLASS_CLADDING_TUBE_ID:
+        return new MissingGhrKeyFigureLayer(this.plant, this, anaysisResult,
+          (selected, legend) => this.onSelected(selected, legend)) as any;
+
+      case AnalysisResultKeyFigure.COATING_DEGRATION_ID:
+        return new CoatingDegratedKeyFigureLayer(this.plant, this, anaysisResult,
+          (selected, legend) => this.onSelected(selected, legend)) as any;
+
+      case AnalysisResultKeyFigure.H2_CONCENTRATION_ID:
+        return new H2ConcentrationKeyFigureLayer(this.plant, this, anaysisResult,
           (selected, legend) => this.onSelected(selected, legend)) as any;
     }
 
