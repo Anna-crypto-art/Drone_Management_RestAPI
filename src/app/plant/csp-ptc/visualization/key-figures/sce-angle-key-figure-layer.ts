@@ -39,6 +39,7 @@ export class SceAngleKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcS
 
   protected getLegend(): Legend {
     return {
+      id: this.keyFigureId.toString(),
       entries: [
         { color: "green", name: "0 - 0.149" },
         { color: "yellow", name: "0.15 - 0.299" },

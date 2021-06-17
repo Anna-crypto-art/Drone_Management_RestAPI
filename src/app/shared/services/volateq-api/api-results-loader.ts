@@ -4,20 +4,20 @@ import volateqApi from "./volateq-api";
 export class ApiResultsLoader {
   private readonly loadedResults: Record<string, Record<string, AnalysisResultCspPtcSchemaBase[]>> = {};
 
-  public async loadResults<T extends AnalysisResultCspPtcSchemaBase>(analysisResultId: string, componentKeyFigureId: string): Promise<void>
+  public async loadResults<T extends AnalysisResultCspPtcSchemaBase>(analysisResultId: string, componentId: number): Promise<void>
   {
     if (!(analysisResultId in this.loadedResults)) {
       this.loadedResults[analysisResultId] = {};
     }
-    if (!(componentKeyFigureId in this.loadedResults[analysisResultId])) {
-      this.loadedResults[analysisResultId][componentKeyFigureId] = await volateqApi.getAllSpecificAnalysisResult<T>(
-        analysisResultId, componentKeyFigureId);
+    if (!(componentId in this.loadedResults[analysisResultId])) {
+      this.loadedResults[analysisResultId][componentId] = await volateqApi.getAllSpecificAnalysisResult<T>(
+        analysisResultId, componentId);
     }
   }
 
-  public getResults<T extends AnalysisResultCspPtcSchemaBase>(analysisResultId: string, componentKeyFigureId: string): T[] | undefined {
-    return (analysisResultId in this.loadedResults && componentKeyFigureId in this.loadedResults[analysisResultId] && 
-      this.loadedResults[analysisResultId][componentKeyFigureId] as T[]) || undefined
+  public getResults<T extends AnalysisResultCspPtcSchemaBase>(analysisResultId: string, componentId: number): T[] | undefined {
+    return (analysisResultId in this.loadedResults && componentId in this.loadedResults[analysisResultId] && 
+      this.loadedResults[analysisResultId][componentId] as T[]) || undefined
   }
 }
 

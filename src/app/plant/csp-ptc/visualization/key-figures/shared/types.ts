@@ -16,5 +16,6 @@ export interface FeatureInfo {
 }
 
 export interface Legend {
+  id: string;
   entries: { color: string, name: string }[];
 }

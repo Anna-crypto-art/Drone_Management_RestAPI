@@ -144,27 +144,27 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/analysis-result/${analysisResultId}`);
   }
 
-  public getAllSpecificAnalysisResult<T>(analysisResultId: string, componentKeyFigureId: string): Promise<T[]> {
-    return this.get(`/auth/analysis-result/${analysisResultId}/${componentKeyFigureId}`);
+  public getAllSpecificAnalysisResult<T>(analysisResultId: string, componentId: AnalysisResultComponent): Promise<T[]> {
+    return this.get(`/auth/analysis-result/${analysisResultId}/${componentId}`);
   }
 
   public getSpecificAnalysisResult<T>(
     analysisResultId: string,
-    componentKeyFigureId: string,
+    componentId: number,
     params: TableRequest): 
     Promise<TableResultSchema<T>>
   {
-    return this.get(`/auth/analysis-result/${analysisResultId}/${componentKeyFigureId}`, params);
+    return this.get(`/auth/analysis-result/${analysisResultId}/${componentId}`, params);
   }
 
   public getSpecificAnalysisResultCsvUrl(
     analysisResultId: string, 
-    componentKeyFigureId: string, 
+    componentId: number,
     params: TableRequest,
     csvMappings?: { [key: string]: string }): string {
     const encodedCsvMappings = csvMappings && `&csv_mappings=${encodeURIComponent(this.getQueryParams(csvMappings).substring(1))}` || '';
 
-    return `${apiBaseUrl}/auth/analysis-result/${analysisResultId}/${componentKeyFigureId}${this.getQueryParams(params)}&csv=1${encodedCsvMappings}`;
+    return `${apiBaseUrl}/auth/analysis-result/${analysisResultId}/${componentId}${this.getQueryParams(params)}&csv=1${encodedCsvMappings}`;
   }
 
   public async generateDownloadUrl(downloadUrl: string, filename?: string): Promise<string> {

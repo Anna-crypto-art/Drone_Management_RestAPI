@@ -55,7 +55,6 @@ export default class AppTableCspPtc extends Vue implements ITableComponent {
   private searchText = "";
 
   private mappingHelper!: AnalysisResultCspPtcMappingHelper<AnalysisResultCspPtcSchemaBase>;
-  private componentKeyFigureId!: string;
   private columnsMapping!: Record<string, string>;
 
   protected startLoading() {
@@ -73,8 +72,6 @@ export default class AppTableCspPtc extends Vue implements ITableComponent {
 
   created() {
     this.tableName = "table_" + this.analysisResult.id + "_" + this.activeComponent.componentId;
-    this.componentKeyFigureId = this.analysisResult.component_key_figures
-          .find(compKeyFigure => compKeyFigure.component.id === this.activeComponent.componentId)!.id
 
     this.mappingHelper = new AnalysisResultCspPtcMappingHelper(this.activeComponent.mapping, this.analysisResult);
     this.columns = this.mappingHelper.getColumns(transName => this.$t(transName));
@@ -108,9 +105,9 @@ export default class AppTableCspPtc extends Vue implements ITableComponent {
     this.last_ctx = ctx;
 
     try {
-      await apiResultsLoader.loadResults(this.analysisResult.id, this.componentKeyFigureId);
+      await apiResultsLoader.loadResults(this.analysisResult.id, this.activeComponent.componentId);
 
-      let results = apiResultsLoader.getResults(this.analysisResult.id, this.componentKeyFigureId)!;
+      let results = apiResultsLoader.getResults(this.analysisResult.id, this.activeComponent.componentId)!;
       
       if (this.searchText) {
         results = results.filter(item => item.fieldgeometry_component.kks.toUpperCase().startsWith(this.searchText.toUpperCase()));

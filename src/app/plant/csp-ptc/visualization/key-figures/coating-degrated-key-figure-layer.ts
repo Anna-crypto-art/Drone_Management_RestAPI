@@ -10,7 +10,9 @@ import analysisResultCspPtcMappingIrIntensity from "@/app/shared/services/volate
 export class CoatingDegratedKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcIrIntensitySchema> {
   protected readonly keyFigureId = AnalysisResultKeyFigure.COATING_DEGRATION_ID;
   protected readonly analysisResultMapping = analysisResultCspPtcMappingIrIntensity;
-  public readonly name = "O2Penetration";  
+  public readonly name = "O2Penetration";
+
+  protected zIndex = 2;
 
   protected mapRecordEntryToFeatureInfo(key: string, value: unknown, descr?: string): FeatureInfo | undefined {
     const featureInfo = super.mapRecordEntryToFeatureInfo(key, value, descr);
@@ -25,7 +27,7 @@ export class CoatingDegratedKeyFigureLayer extends KeyFigureLayer<AnalysisResult
   public getStyle(feature: FeatureLike): Style {
     return new Style({
       stroke: new Stroke({
-        color: 'red',
+        color: '#5d0085',
         width: 5,
       }),
       text: this.showText(feature),
@@ -34,9 +36,10 @@ export class CoatingDegratedKeyFigureLayer extends KeyFigureLayer<AnalysisResult
 
   protected getLegend(): Legend {
     return {
+      id: this.keyFigureId.toString(),
       entries: [
         {
-          color: 'red',
+          color: '#5d0085',
           name: this.vueComponent.$t('oxygen-penetration').toString() + ` (<b>${this.geoJSON.features.length}</b>)`,
         }
       ]

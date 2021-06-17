@@ -1,15 +1,26 @@
 @import '~volateq-geovisualization/dist/volateq-geovisualization.css';
 
-// .layer-switcher-sidebar.b-sidebar-outer {
-//   position: absolute !important;
-//   height: 100% !important;
-// }
-// .layer-switcher-sidebar .b-sidebar {
-//   position: absolute !important;
-//   height: 100% !important;
-// }
+$width: 400px;
 
-.layer-display-group {
-  font-size: 1.5rem;
-  margin-top: 20px;
+.layer-switcher {
+  &.open {
+    flex-basis: $width;
+  }
+  .content {
+    margin-top: 20px;
+    margin-left: -20px;
+    width: $width;
+  }
+}
+.layer-display {
+  padding-left: 20px;
+  &-group {
+    font-size: 1.5rem;
+    margin-top: 20px;
+  
+    &-sub {
+      font-size: 1.3rem;
+      margin-top: 20px;
+    }
+  }
 }

@@ -10,7 +10,9 @@ import analysisResultCspPtcMappingIrIntensity from "@/app/shared/services/volate
 export class H2ConcentrationKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcIrIntensitySchema> {
   protected readonly keyFigureId = AnalysisResultKeyFigure.H2_CONCENTRATION_ID;
   protected readonly analysisResultMapping = analysisResultCspPtcMappingIrIntensity;
-  public readonly name = "H2Concentration";  
+  public readonly name = "H2Concentration"; 
+
+  protected zIndex = 2;
 
   protected mapRecordEntryToFeatureInfo(key: string, value: unknown, descr?: string): FeatureInfo | undefined {
     const featureInfo = super.mapRecordEntryToFeatureInfo(key, value, descr);
@@ -25,7 +27,7 @@ export class H2ConcentrationKeyFigureLayer extends KeyFigureLayer<AnalysisResult
   public getStyle(feature: FeatureLike): Style {
     return new Style({
       stroke: new Stroke({
-        color: 'red',
+        color: '#ad0045',
         width: 5,
       }),
       text: this.showText(feature),
@@ -34,9 +36,10 @@ export class H2ConcentrationKeyFigureLayer extends KeyFigureLayer<AnalysisResult
 
   protected getLegend(): Legend {
     return {
+      id: this.keyFigureId.toString(),
       entries: [
         {
-          color: 'red',
+          color: '#ad0045',
           name: this.vueComponent.$t('high-hydrogen-concentration').toString() + ` (<b>${this.geoJSON.features.length}</b>)`,
         }
       ]

@@ -4,15 +4,13 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { LayerBase } from "../../shared/layer-base";
 import { FeatureLike } from "ol/Feature";
 import { AnalysisResultCspPtcSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-schema-base";
-import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-analysis-result-components";
 import { FeatureInfo, FeatureInfos, FeatureProperties, Legend } from "./types";
-import { GeoJSONLayer } from "volateq-geovisualization";
 import apiResultsLoader from "@/app/shared/services/volateq-api/api-results-loader";
 import { AnalysisResultCspPtcMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultCspPtcMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-helper";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { Style } from 'ol/style';
 import Vue from "vue";
+import { ComponentKeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/component-key-figure-schema";
 
 
 export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> extends LayerBase {
@@ -54,8 +52,6 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
     const mappingHelper = new AnalysisResultCspPtcMappingHelper(this.analysisResultMapping, this.analysisResult!);
     const record = mappingHelper.getItem(result)
 
-    const getDescr = (key: string) => this.analysisResultMapping.find(entry => entry.transName === key)?.transDescr;
-
     const featureInfos: FeatureInfos = {
       title: result.fieldgeometry_component.kks,
       records: Object.keys(record).filter(k => k !== 'pcs')
@@ -75,7 +71,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
   }
 
   protected getResultDetails(feature: FeatureLike): T | undefined {
-    const results = apiResultsLoader.getResults<T>(this.analysisResult!.id, this.getComponentKeyFigureId()!);
+    const results = apiResultsLoader.getResults<T>(this.analysisResult!.id, this.componentKeyFigure.component.id);
     if (results) {
       const pcs = this.getPcs(feature);
       const resultsFiltered = results.filter(result => result.fieldgeometry_component.kks === pcs);
@@ -92,11 +88,9 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
   }
   
   public async load(): Promise<Record<string, unknown>> {
-    const compKeyFigureId = this.getComponentKeyFigureId();
+    apiResultsLoader.loadResults<T>(this.analysisResult.id, this.componentKeyFigure.component.id);
 
-    apiResultsLoader.loadResults<T>(this.analysisResult.id, compKeyFigureId);
-
-    this.geoJSON = await volateqApi.getKeyFiguresGeoVisual(this.plant.id, this.analysisResult.id, [compKeyFigureId]);
+    this.geoJSON = await volateqApi.getKeyFiguresGeoVisual(this.plant.id, this.analysisResult.id, [this.componentKeyFigure.id]);
 
     return this.geoJSON;
   }
@@ -107,7 +101,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
         const result = this.getResultDetails(feature);
         if (result) {
           const fieldgeo_component = result.fieldgeometry_component;
-          if (fieldgeo_component && this.hasComponentId(fieldgeo_component.component_id)) {
+          if (fieldgeo_component && fieldgeo_component.component_id === this.componentKeyFigure.component.id) {
             return this.mapResultToFeatureInfos(result);
           }
         }
@@ -124,20 +118,8 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
     }
   }
 
-  private getComponentKeyFigureId(): string {
-    const comp_key_figures = this.analysisResult.component_key_figures
-      .filter(comp_key_figure => comp_key_figure.key_figure.id === this.keyFigureId)
-
-    if (comp_key_figures.length > 0) {
-      return comp_key_figures[0].id;
-    }
-
-    throw new Error('Invalid analysis result for key figure layer');
-  }
-
-  private hasComponentId(componentId: AnalysisResultComponent): boolean {
+  private get componentKeyFigure(): ComponentKeyFigureSchema {
     return this.analysisResult.component_key_figures
-      .filter(compKeyFigure => compKeyFigure.component.id === componentId && compKeyFigure.key_figure.id === this.keyFigureId)
-      .length > 0;
+      .find(compKeyFigure => compKeyFigure.key_figure.id === this.keyFigureId)!;
   }
 }

@@ -10,7 +10,9 @@ import analysisResultCspPtcMappingIrIntensity from "@/app/shared/services/volate
 export class MissingGhrKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcIrIntensitySchema> {
   protected readonly keyFigureId = AnalysisResultKeyFigure.MISSING_GLASS_CLADDING_TUBE_ID;
   protected readonly analysisResultMapping = analysisResultCspPtcMappingIrIntensity;
-  public readonly name = "missingGhr";  
+  public readonly name = "missingGhr";
+
+  protected zIndex = 2;
 
   protected mapRecordEntryToFeatureInfo(key: string, value: unknown, descr?: string): FeatureInfo | undefined {
     const featureInfo = super.mapRecordEntryToFeatureInfo(key, value, descr);
@@ -25,7 +27,7 @@ export class MissingGhrKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPt
   public getStyle(feature: FeatureLike): Style {
     return new Style({
       stroke: new Stroke({
-        color: 'red',
+        color: '#850000',
         width: 5,
       }),
       text: this.showText(feature),
@@ -34,9 +36,10 @@ export class MissingGhrKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPt
 
   protected getLegend(): Legend {
     return {
+      id: this.keyFigureId.toString(),
       entries: [
         {
-          color: 'red',
+          color: '#850000',
           name: this.vueComponent.$t('missing-gct').toString() + ` (<b>${this.geoJSON.features.length}</b>)`,
         }
       ]

@@ -145,8 +145,7 @@ export default class AppTablesCspPtc extends BaseAuthComponent implements IAnaly
 
         const authCsvDownloadUrl = volateqApi.getSpecificAnalysisResultCsvUrl(
           this.analysisResult!.id,
-          this.analysisResult!.component_key_figures
-            .filter(compKeyFigure => compKeyFigure.component.id === activeComponent.componentId)[0].id,
+          activeComponent.componentId,
           tableComponent.getTableRequestParam(),
           tableComponent.getCsvColumnMappingsParam()
         );

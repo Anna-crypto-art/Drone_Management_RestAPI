@@ -20,6 +20,7 @@ export abstract class LayerBase {
   protected selected = false;
   protected readonly autoZoom: boolean = false;
   protected visible = true;
+  protected zIndex?: number;
 
   constructor(
     protected readonly plant: PlantSchema,
@@ -48,17 +49,20 @@ export abstract class LayerBase {
   }
 
   public toGeoLayer(): GeoJSONLayer {
-    this.geoLayerObject = {
-      type: "geojson",
-      name: this.getName(),
-      selected: this.selected,
-      autoZoom: this.autoZoom,
-      geoJSONLoader: () => this.load(),
-      geoJSONOptions: GEO_JSON_OPTIONS,
-      style: (feature: FeatureLike) => this.getStyle(feature),
-      onSelected: (selected: boolean) => this.onSelected(selected),
-      visible: this.visible,
-    };
+    if (!this.geoLayerObject) {
+      this.geoLayerObject = {
+        type: "geojson",
+        name: this.getName(),
+        selected: this.selected,
+        autoZoom: this.autoZoom,
+        geoJSONLoader: () => this.load(),
+        geoJSONOptions: GEO_JSON_OPTIONS,
+        style: (feature: FeatureLike) => this.getStyle(feature),
+        onSelected: (selected: boolean) => this.onSelected(selected),
+        visible: this.visible,
+        zIndex: this.zIndex
+      };
+    }
 
     return this.geoLayerObject;
   }

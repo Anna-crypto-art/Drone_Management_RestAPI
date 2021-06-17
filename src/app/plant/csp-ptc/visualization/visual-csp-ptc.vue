@@ -21,7 +21,7 @@
       </template>
     </open-layers>
     <div v-if="hasLegend" class="visual-csp-ptc-legend">
-      <div v-for="entry in legend.entries" :key="entry.color" class="visual-csp-ptc-legend-entry">
+      <div v-for="entry in legendEntries" :key="entry.color" class="visual-csp-ptc-legend-entry">
         <div class="visual-csp-ptc-legend-entry-color" :style="`background: ${entry.color}`"></div>
         <div class="visual-csp-ptc-legend-entry-name" v-html="entry.name"></div>
       </div>
@@ -48,7 +48,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { Component, Prop, Ref } from 'vue-property-decorator';
-import { LayerType, OpenLayers } from 'volateq-geovisualization';
+import { GroupLayer, LayerType, OpenLayers } from 'volateq-geovisualization';
 import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
 import { AnalysisResultKeyFigure } from '@/app/shared/services/volateq-api/api-analysis-result-key-figures';
 import { AnalysisResultDetailedSchema } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-schema';
@@ -69,6 +69,8 @@ import { FeatureInfos, Legend } from './key-figures/shared/types';
 import { FeatureLike } from "ol/Feature";
 import AppExplanation from '@/app/shared/components/app-explanation/app-explanation.vue';
 import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
+import { AnalysisResultComponent } from '@/app/shared/services/volateq-api/api-analysis-result-components';
+import { GroupKPILayer } from "./types";
 
 
 @Component({
@@ -84,12 +86,12 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
   @Ref() openlayercomp!: Vue;
 
   private selectedAnalysisResult?: AnalysisResultDetailedSchema;
-  private kpiLayers!: KeyFigureLayer<AnalysisResultCspPtcSchemaBase>[];
+  private parentComponentKpiLayers!: GroupKPILayer[];
   private componentLayers!: ComponentLayer[];
 
   layers: LayerType[] = [];
   showPCS = false;
-  legend: Legend | null = null;
+  legends: Legend[] = [];
   piToastInfo: FeatureInfos = { title: "", records: [{ name: "", descr: "", value: "" }] };
 
   async created() {
@@ -99,8 +101,18 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
   selectAnalysisResult(analysisResultId: string): void {
     this.selectedAnalysisResult = this.analysisResults.filter(analysisResult => analysisResult.id === analysisResultId)[0];
 
-    for (const kpiLayer of this.kpiLayers) {
-      kpiLayer.setVisible(kpiLayer.analysisResult.id == this.selectedAnalysisResult.id);
+    for (const parentComponentKpiLayer of this.parentComponentKpiLayers) {
+      let allInvisble = true;
+      for (const kpiLayer of parentComponentKpiLayer.kpiLayers) {
+        const visible = kpiLayer.analysisResult.id == this.selectedAnalysisResult.id;
+        kpiLayer.setVisible(visible);
+
+        if (visible) {
+          allInvisble = false;
+        }
+      }
+
+      parentComponentKpiLayer.groupLayer.visible = !allInvisble
     }
 
     this.hideToast();
@@ -111,11 +123,20 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
   }
 
   get hasLegend(): boolean {
-    return this.legend !== null;
+    return this.legends.length > 0;
+  }
+
+  get legendEntries(): { color: string, name: string }[] {
+    let legendEntries: { color: string, name: string }[] = [];
+    for (const legend of this.legends) {
+      legendEntries = legendEntries.concat(legend.entries)
+    }
+    
+    return legendEntries;
   }
 
   onOpenLayersClick(features: FeatureLike[]) {
-    const piToastInfo = this.kpiLayers.map(kpiLayer => kpiLayer.onClick(features))
+    const piToastInfo = this.getKpiLayers().map(kpiLayer => kpiLayer.onClick(features))
       .find(featureInfos => featureInfos !== undefined); 
     if (piToastInfo) {
       this.piToastInfo = piToastInfo;
@@ -137,7 +158,6 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
         name: this.$t('world-map').toString(),
         type: "osm",
         selected: true,
-        childLayers: undefined,
       },
       {
         name: "pcs",
@@ -146,7 +166,7 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
         onSelected: (selected: boolean) => { 
           this.showPCS = selected;
 
-          this.kpiLayers.forEach(kpiLayer => kpiLayer.showPCS(selected));
+          this.getKpiLayers().forEach(kpiLayer => kpiLayer.showPCS(selected));
           this.componentLayers.forEach(compLayer => compLayer.showPCS(selected));
         },
         selected: false,
@@ -154,8 +174,7 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
       {
         name: this.$t("performance-indicators").toString(),
         type: "group",
-        singleSelection: true,
-        childLayers: this.kpiLayers.map(kpiLayer => kpiLayer.toGeoLayer())
+        childLayers: this.parentComponentKpiLayers.map(parentComponentKpiLayer => parentComponentKpiLayer.groupLayer),
       },
       {
         name: this.$t('components').toString(),
@@ -167,28 +186,45 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
   }
 
   private createKPILayers(): void {
-    this.kpiLayers = [];
+    const parentComponentLayers: Record<number, GroupKPILayer> = {};
 
     for (const analysisResult of this.analysisResults) {
       for (const compKeyFigure of analysisResult.component_key_figures) {
-        const kpiLayer = this.getKPILayer(analysisResult, compKeyFigure);
+        if (!(compKeyFigure.component.id in parentComponentLayers)) {
+          parentComponentLayers[compKeyFigure.component.id] = {
+            componentId: compKeyFigure.component.id,
+            groupLayer: {
+              name: this.getComponentName(compKeyFigure.component.id),
+              type: "group",
+              childLayers: [],
+              visible: false,
+            },
+            kpiLayers: [],
+          }
+        }
+
+        const kpiLayer = this.getKPILayer(analysisResult, compKeyFigure.key_figure.id);
         if (kpiLayer) {
-          this.kpiLayers.push(kpiLayer);
+          const groupLayer = parentComponentLayers[compKeyFigure.component.id];
+          groupLayer.kpiLayers.push(kpiLayer)
+          groupLayer.groupLayer.childLayers.push(kpiLayer.toGeoLayer())
         }
       }
     }
+
+    this.parentComponentKpiLayers = Object.keys(parentComponentLayers).map(componentId => parentComponentLayers[componentId])
   }
 
   private getKPILayer(
     anaysisResult: AnalysisResultDetailedSchema,
-    compKeyFigure: ComponentKeyFigureSchema
+    keyFigureId: AnalysisResultKeyFigure
   ): KeyFigureLayer<AnalysisResultCspPtcSchemaBase> | undefined {
     // I get a Vetur(2322) that i do not understand... 
     // maybe it is a ts bug or (more likley) i am just too stupid to understand
     // anyhow... to solve this i use the so famous "any" type!
     // Please feel free to do further investigations and remove the "any" type if you can!
 
-    switch (compKeyFigure.key_figure.id) {
+    switch (keyFigureId) {
       case AnalysisResultKeyFigure.IR_INTENSITY_ID:
         return new IrIntensityKeyFigureLayer(this.plant, this, anaysisResult, 
           (selected, legend) => this.onSelected(selected, legend)) as any;
@@ -221,8 +257,36 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
     ];
   }
 
+  private getComponentName(componentId: AnalysisResultComponent): string {
+    switch (componentId) {
+      case AnalysisResultComponent.CSP_PTC_ABSORBER:
+        return this.$t('absorber-tubes').toString();
+      
+      case AnalysisResultComponent.CSP_PTC_SCA:
+        return this.$t('solar-collector-assembly').toString();
+
+      case AnalysisResultComponent.CSP_PTC_SCE:
+        return this.$t('single-collector-elements').toString();
+    }
+
+    throw new Error(`Name for componentId ${componentId} not supported`);
+  }
+
+  private getKpiLayers(): KeyFigureLayer<AnalysisResultCspPtcSchemaBase>[] {
+    let kpiLayers: KeyFigureLayer<AnalysisResultCspPtcSchemaBase>[] = []
+    for (const parentComponentKpiLayer of this.parentComponentKpiLayers) {
+      kpiLayers = kpiLayers.concat(parentComponentKpiLayer.kpiLayers);
+    }
+
+    return kpiLayers;
+  }
+
   private onSelected(selected: boolean, legend: Legend) {
-    this.legend = selected && legend || null;
+    if (selected) {
+      this.legends.push(legend);
+    } else {
+      this.legends.splice(this.legends.findIndex(l => l.id === legend.id), 1);
+    }
 
     this.hideToast();
   }

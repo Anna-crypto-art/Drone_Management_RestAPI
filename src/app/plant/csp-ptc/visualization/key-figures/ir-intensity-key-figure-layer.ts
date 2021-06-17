@@ -13,6 +13,8 @@ export class IrIntensityKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspP
   protected readonly analysisResultMapping = analysisResultCspPtcMappingIrIntensity;
   public readonly name = "irIntensity";
 
+  protected zIndex = 1;
+
   protected mapRecordEntryToFeatureInfo(key: string, value: unknown, descr?: string): FeatureInfo | undefined {
     const featureInfo = super.mapRecordEntryToFeatureInfo(key, value, descr);
     
@@ -41,6 +43,7 @@ export class IrIntensityKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspP
     console.log(this.geoJSON);
 
     return {
+      id: this.keyFigureId.toString(),
       entries: Object.keys(IR_INTENSITY_CLASS_COLORS).map(clsKey => ({
         color: IR_INTENSITY_CLASS_COLORS[clsKey],
         name: this.vueComponent.$t(`ir-intensity-class-${clsKey}`).toString() + ` (<b>${
