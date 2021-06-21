@@ -1,3 +1,3 @@
 export interface IAnalysisResultSelection {
-  selectAnalysisResult(analysisResultId: string): void;
+  selectAnalysisResult(analysisResultId: string | undefined): void;
 }

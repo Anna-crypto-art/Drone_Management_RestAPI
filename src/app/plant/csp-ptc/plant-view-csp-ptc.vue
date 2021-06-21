@@ -126,12 +126,11 @@ export default class AppPlantViewCspPtc extends Vue {
   }
 
   onAnalysisResultSelected(selectedAnalysisResult: { id: string }[]) {
-    if (!selectedAnalysisResult || selectedAnalysisResult.length === 0) {
-      return;
-    }
+    const selectedAnalysisResultId = selectedAnalysisResult && selectedAnalysisResult.length > 0 && 
+      selectedAnalysisResult[0].id || undefined;
 
-    this.visualCspPtc.selectAnalysisResult(selectedAnalysisResult[0].id);
-    this.tablesCspPtc.selectAnalysisResult(selectedAnalysisResult[0].id);
+    this.visualCspPtc.selectAnalysisResult(selectedAnalysisResultId);
+    this.tablesCspPtc.selectAnalysisResult(selectedAnalysisResultId);
   }
 
   changeView(view: 'map' | 'table') {

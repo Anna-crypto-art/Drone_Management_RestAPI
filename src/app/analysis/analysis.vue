@@ -53,7 +53,7 @@
                 :title="$t('manage-result-files')">
                 <b-icon icon="hammer"></b-icon>
               </b-button>
-              <router-link v-if="row.item.analysisResultId" 
+              <router-link v-if="row.item.analysisResultId" :title="$t('show-results')"
               :to="{ name: 'Plant', params: { id: row.item.plantId }, query: { view: 'table', result: row.item.analysisResultId }}">
                 <b-button variant="primary" size="sm"><b-icon icon="graph-up"></b-icon></b-button>
               </router-link>

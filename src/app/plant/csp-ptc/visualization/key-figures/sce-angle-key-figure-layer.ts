@@ -41,9 +41,9 @@ export class SceAngleKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcS
     return {
       id: this.keyFigureId.toString(),
       entries: [
-        { color: "green", name: "0 - 0.149" },
-        { color: "yellow", name: "0.15 - 0.299" },
-        { color: "red", name: "0.3 - &infin;" },
+        { color: "green", name: "0° - 0.149°" },
+        { color: "yellow", name: "0.15° - 0.299°" },
+        { color: "red", name: "0.3° - &infin;" },
       ]
     }
   }

@@ -164,6 +164,7 @@
   "oxygen-penetration": "Oxygen penetration",
   "oxygen-penetration_expl": "HCE has coating degration which proves oxygen penetration.",
   "high-hydrogen-concentration": "High hydrogen concentration",
-  "high-hydrogen-concentration_expl": "Increased probability for high hydrogen concentration. Cuncluded by missing coating degration but very high infrared intensity."
-  
+  "high-hydrogen-concentration_expl": "Increased probability for high hydrogen concentration. Cuncluded by missing coating degration but very high infrared intensity.",
+  "no-analysis-result-selected": "Select an analysis to see table data",
+  "show-results": "Show results"
 }

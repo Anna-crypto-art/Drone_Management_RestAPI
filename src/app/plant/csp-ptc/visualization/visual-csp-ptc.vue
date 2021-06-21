@@ -98,13 +98,13 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
     this.createLayers();
   }
 
-  selectAnalysisResult(analysisResultId: string): void {
-    this.selectedAnalysisResult = this.analysisResults.filter(analysisResult => analysisResult.id === analysisResultId)[0];
-
+  selectAnalysisResult(analysisResultId: string | undefined): void {
+    this.selectedAnalysisResult = this.analysisResults.find(analysisResult => analysisResult.id === analysisResultId);
+    
     for (const parentComponentKpiLayer of this.parentComponentKpiLayers) {
       let allInvisble = true;
       for (const kpiLayer of parentComponentKpiLayer.kpiLayers) {
-        const visible = kpiLayer.analysisResult.id == this.selectedAnalysisResult.id;
+        const visible = this.selectedAnalysisResult && kpiLayer.analysisResult.id == this.selectedAnalysisResult.id || false;
         kpiLayer.setVisible(visible);
 
         if (visible) {
@@ -158,6 +158,7 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
         name: this.$t('world-map').toString(),
         type: "osm",
         selected: true,
+        styleClass: "to-bottom",
       },
       {
         name: "pcs",
@@ -170,6 +171,7 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
           this.componentLayers.forEach(compLayer => compLayer.showPCS(selected));
         },
         selected: false,
+        styleClass: "to-bottom",
       },
       {
         name: this.$t("performance-indicators").toString(),

@@ -23,4 +23,13 @@ $width: 400px;
       margin-top: 20px;
     }
   }
+  &.to-bottom {
+    position: absolute;
+  }
+  &.to-bottom:nth-child(1) {
+    bottom: 20px;
+  }
+  &.to-bottom:nth-child(2) {
+    bottom: 45px;
+  }
 }

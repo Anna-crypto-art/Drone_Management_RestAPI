@@ -71,7 +71,12 @@ export abstract class LayerBase {
     return new Text({
       text: this._showPCS && this.getPcs(feature) || '',
       overflow: true,
-      rotation: -(Math.PI / 2),
+      rotation: -(Math.PI / 2.3),
+      stroke: new Stroke({
+        color: '#fff',
+        width: 1,
+      }),
+
       ...props
     });
   }

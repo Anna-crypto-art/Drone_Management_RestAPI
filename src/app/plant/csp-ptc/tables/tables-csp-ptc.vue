@@ -1,32 +1,37 @@
 <template>
   <div class="app-tables-csp-ptc">
-    <div>
-      <div class="pull-left">
-        <app-search-input :placeholder="$t('search-pcs')" @search="onSearch"></app-search-input>
-      </div>
-      <div class="pull-right">
-        <app-button ref="csvExportBtn" variant="secondary" :title="$t('export-csv')" @click="onExportCsv">
-          <b-icon icon="download"></b-icon> {{ $t("export-csv") }}: {{ activeTabLabel }}
-        </app-button>
-      </div>
-      <div class="clearfix"></div>
+    <div class="no-data-placeholder" v-show="!analysisResult">
+      {{ $t('no-analysis-result-selected') }}
     </div>
-    <app-table-container>
-      <b-tabs v-model="tabIndex" @activate-tab="onTabChanged">
-        <b-tab v-for="activeTabComponent in activeTabComponents" :key="analysisResult.id + '_' + activeTabComponent.label">
-          <template #title>
-            {{ $t(activeTabComponent.label) }}
-            <app-explanation v-if="activeTabComponent.descr">
-              <span v-html="$t(activeTabComponent.descr)"></span>
-            </app-explanation>
-          </template>
-          <app-table-csp-ptc :ref="generateRefTableName(activeTabComponent)"
-            :analysisResult="analysisResult"
-            :activeComponent="activeTabComponent">
-          </app-table-csp-ptc>
-        </b-tab>
-      </b-tabs>
-    </app-table-container>
+    <div v-show="analysisResult">
+      <div>
+        <div class="pull-left">
+          <app-search-input :placeholder="$t('search-pcs')" @search="onSearch"></app-search-input>
+        </div>
+        <div class="pull-right">
+          <app-button ref="csvExportBtn" variant="secondary" :title="$t('export-csv')" @click="onExportCsv">
+            <b-icon icon="download"></b-icon> {{ $t("export-csv") }}: {{ activeTabLabel }}
+          </app-button>
+        </div>
+        <div class="clearfix"></div>
+      </div>
+      <app-table-container>
+        <b-tabs v-model="tabIndex" @activate-tab="onTabChanged">
+          <b-tab v-for="activeTabComponent in activeTabComponents" :key="analysisResult.id + '_' + activeTabComponent.label">
+            <template #title>
+              {{ $t(activeTabComponent.label) }}
+              <app-explanation v-if="activeTabComponent.descr">
+                <span v-html="$t(activeTabComponent.descr)"></span>
+              </app-explanation>
+            </template>
+            <app-table-csp-ptc :ref="generateRefTableName(activeTabComponent)"
+              :analysisResult="analysisResult"
+              :activeComponent="activeTabComponent">
+            </app-table-csp-ptc>
+          </b-tab>
+        </b-tabs>
+      </app-table-container>
+    </div>
   </div>
 </template>
 
@@ -93,14 +98,15 @@ export default class AppTablesCspPtc extends BaseAuthComponent implements IAnaly
   activeTabLabel = "";
   readonly activeTabComponents: IActiveTabComponent[] = [];
 
-  private analysisResult?: AnalysisResultDetailedSchema;
+  private analysisResult: AnalysisResultDetailedSchema | null = null;
 
-  selectAnalysisResult(analysisResultId: string) {
-    this.analysisResult = this.analysisResults.find(analysisResult => analysisResult.id === analysisResultId);
+  selectAnalysisResult(analysisResultId: string | undefined) {
+    this.analysisResult = this.analysisResults.find(analysisResult => analysisResult.id === analysisResultId) || null;
+
+    this.activeTabComponents.length = 0;
 
     if (this.analysisResult) {
       let tabIdx = 0;
-      this.activeTabComponents.length = 0;
 
       for (const activeComponent of ACTIVE_COMPONENTS) {
         const compKeyFigure = this.analysisResult.component_key_figures
@@ -178,5 +184,11 @@ export default class AppTablesCspPtc extends BaseAuthComponent implements IAnaly
 <style lang="scss">
 .app-tables-csp-ptc {
   padding: 20px;
+
+  .no-data-placeholder {
+    margin-top: 50px;
+    width: 100%;
+    text-align: center;
+  }
 }
 </style>
