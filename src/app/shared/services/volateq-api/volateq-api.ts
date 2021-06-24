@@ -200,8 +200,8 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/geo-visual/${plantId}/components`, { ids: componentIds });
   }
 
-  public getKeyFiguresGeoVisual(plantId: string, analysisResultId: string, componentKeyFiguresIds: string[]): Promise<any> {
-    return this.get(`/auth/geo-visual/${plantId}/component-key-figures/${analysisResultId}`, { ids: componentKeyFiguresIds });
+  public getKeyFiguresGeoVisual(plantId: string, analysisResultId: string, keyFiguresIds: AnalysisResultKeyFigure[]): Promise<any> {
+    return this.get(`/auth/geo-visual/${plantId}/key-figures/${analysisResultId}`, { ids: keyFiguresIds });
   }
 
   public getAnalysisResults(plantId: string): Promise<AnalysisResultDetailedSchema[]> {

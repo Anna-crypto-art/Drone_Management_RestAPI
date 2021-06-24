@@ -2,14 +2,14 @@ import { AnalysisResultKeyFigure } from "@/app/shared/services/volateq-api/api-a
 import { KeyFigureLayer } from "./shared/key-figure-layer";
 import { Style, Stroke } from 'ol/style';
 import { FeatureLike } from "ol/Feature";
-import { AnalysisResultCspPtcIrIntensitySchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-ir-intensity-schema";
+import { AnalysisResultCspPtcHceSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-hce-schema";
 import { FeatureInfo, Legend } from "./shared/types";
-import analysisResultCspPtcMappingIrIntensity from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-ir-intensity";
+import analysisResultCspPtcMappingHce from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-hce";
 
 
-export class H2ConcentrationKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcIrIntensitySchema> {
+export class H2ConcentrationKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcHceSchema> {
   protected readonly keyFigureId = AnalysisResultKeyFigure.H2_CONCENTRATION_ID;
-  protected readonly analysisResultMapping = analysisResultCspPtcMappingIrIntensity;
+  protected readonly analysisResultMapping = analysisResultCspPtcMappingHce;
   public readonly name = "H2Concentration"; 
 
   protected zIndex = 2;

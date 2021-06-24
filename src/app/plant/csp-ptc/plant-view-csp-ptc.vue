@@ -93,7 +93,7 @@ export default class AppPlantViewCspPtc extends Vue {
       this.analysisResultsTableItems.push({
         id: analysisResult.id,
         createdAt: new Date(Date.parse(analysisResult.created_at)).toLocaleDateString(),
-        kpis: analysisResult.component_key_figures.map(compKeyFigure => compKeyFigure.key_figure.name)
+        kpis: analysisResult.key_figures.map(keyFigure => keyFigure.name)
       })
     }
 

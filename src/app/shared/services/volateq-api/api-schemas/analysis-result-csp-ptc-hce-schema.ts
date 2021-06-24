@@ -1,6 +1,6 @@
 import { AnalysisResultCspPtcSchemaBase } from "./analysis-result-csp-ptc-schema-base";
 
-export interface AnalysisResultCspPtcIrIntensitySchema extends AnalysisResultCspPtcSchemaBase {
+export interface AnalysisResultCspPtcHceSchema extends AnalysisResultCspPtcSchemaBase {
     ir_intensity: number;
     absorber_temperature: number;
     missing_glass_cladding_tube: boolean;

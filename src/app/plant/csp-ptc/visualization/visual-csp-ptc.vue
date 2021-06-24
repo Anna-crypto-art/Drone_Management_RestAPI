@@ -52,7 +52,6 @@ import { GroupLayer, LayerType, OpenLayers } from 'volateq-geovisualization';
 import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
 import { AnalysisResultKeyFigure } from '@/app/shared/services/volateq-api/api-analysis-result-key-figures';
 import { AnalysisResultDetailedSchema } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-schema';
-import { ComponentKeyFigureSchema } from '@/app/shared/services/volateq-api/api-schemas/component-key-figure-schema';
 import { KeyFigureLayer } from './key-figures/shared/key-figure-layer';
 import { AnalysisResultCspPtcSchemaBase } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-schema-base';
 import { IrIntensityKeyFigureLayer } from './key-figures/ir-intensity-key-figure-layer';
@@ -191,12 +190,12 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
     const parentComponentLayers: Record<number, GroupKPILayer> = {};
 
     for (const analysisResult of this.analysisResults) {
-      for (const compKeyFigure of analysisResult.component_key_figures) {
-        if (!(compKeyFigure.component.id in parentComponentLayers)) {
-          parentComponentLayers[compKeyFigure.component.id] = {
-            componentId: compKeyFigure.component.id,
+      for (const keyFigure of analysisResult.key_figures) {
+        if (!(keyFigure.component.id in parentComponentLayers)) {
+          parentComponentLayers[keyFigure.component.id] = {
+            componentId: keyFigure.component.id,
             groupLayer: {
-              name: this.getComponentName(compKeyFigure.component.id),
+              name: this.getComponentName(keyFigure.component.id),
               type: "group",
               childLayers: [],
               visible: false,
@@ -205,9 +204,9 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
           }
         }
 
-        const kpiLayer = this.getKPILayer(analysisResult, compKeyFigure.key_figure.id);
+        const kpiLayer = this.getKPILayer(analysisResult, keyFigure.id);
         if (kpiLayer) {
-          const groupLayer = parentComponentLayers[compKeyFigure.component.id];
+          const groupLayer = parentComponentLayers[keyFigure.component.id];
           groupLayer.kpiLayers.push(kpiLayer)
           groupLayer.groupLayer.childLayers.push(kpiLayer.toGeoLayer())
         }

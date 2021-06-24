@@ -2,15 +2,15 @@ import { AnalysisResultKeyFigure } from "@/app/shared/services/volateq-api/api-a
 import { KeyFigureLayer } from "./shared/key-figure-layer";
 import { Style, Stroke, Text, Fill } from 'ol/style';
 import { FeatureLike } from "ol/Feature";
-import { AnalysisResultCspPtcIrIntensitySchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-ir-intensity-schema";
+import { AnalysisResultCspPtcHceSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-hce-schema";
 import { FeatureInfo, FeatureInfos, Legend } from "./shared/types";
-import analysisResultCspPtcMappingIrIntensity from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-ir-intensity";
+import analysisResultCspPtcMappingHce from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-hce";
 
 const IR_INTENSITY_CLASS_COLORS = {1: "green", 2: "yellow", 3: "red"};
 
-export class IrIntensityKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcIrIntensitySchema> {
+export class IrIntensityKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcHceSchema> {
   protected readonly keyFigureId = AnalysisResultKeyFigure.IR_INTENSITY_ID;
-  protected readonly analysisResultMapping = analysisResultCspPtcMappingIrIntensity;
+  protected readonly analysisResultMapping = analysisResultCspPtcMappingHce;
   public readonly name = "irIntensity";
 
   protected zIndex = 1;

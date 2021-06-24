@@ -2,14 +2,14 @@ import { AnalysisResultKeyFigure } from "@/app/shared/services/volateq-api/api-a
 import { KeyFigureLayer } from "./shared/key-figure-layer";
 import { Style, Stroke } from 'ol/style';
 import { FeatureLike } from "ol/Feature";
-import { AnalysisResultCspPtcIrIntensitySchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-ir-intensity-schema";
+import { AnalysisResultCspPtcHceSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-hce-schema";
 import { FeatureInfo, Legend } from "./shared/types";
-import analysisResultCspPtcMappingIrIntensity from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-ir-intensity";
+import analysisResultCspPtcMappingHce from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-hce";
 
 
-export class CoatingDegratedKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcIrIntensitySchema> {
+export class CoatingDegratedKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcHceSchema> {
   protected readonly keyFigureId = AnalysisResultKeyFigure.COATING_DEGRATION_ID;
-  protected readonly analysisResultMapping = analysisResultCspPtcMappingIrIntensity;
+  protected readonly analysisResultMapping = analysisResultCspPtcMappingHce;
   public readonly name = "O2Penetration";
 
   protected zIndex = 2;

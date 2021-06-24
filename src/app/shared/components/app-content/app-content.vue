@@ -44,7 +44,6 @@ export default class AppContent extends Vue {
   @Prop({ default: false }) navback: boolean | undefined;
   @Prop({ default: true }) showHeader!: boolean;
 
-  // alerts: AppAlert[] = [];
   alert: AppAlert = { msg: "", variant: "info" };
   showAlert = false;
 
@@ -52,17 +51,8 @@ export default class AppContent extends Vue {
     appContentEventBus.onShowAlert((newAlert: AppAlert) => {
       this.alert = newAlert;
       this.showAlert = true;
-      
-      // const alert = this.alerts.find(alert => !!alert.id && alert.id === newAlert.id);
-      // if (alert) {
-      //   alert.msg = newAlert.msg;
-      //   alert.variant = newAlert.variant
-      // } else if (!this.alerts.find(alert => (alert.variant === newAlert.variant && alert.msg === newAlert.msg))) {
-      //   this.alerts.push(newAlert);
-      // }
     });
     appContentEventBus.onClearAlert(() => {
-      // this.alerts = [];
       this.showAlert = false;
     });
   }

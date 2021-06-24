@@ -1,9 +1,9 @@
 import { AnalysisResultKeyFigure } from "../api-analysis-result-key-figures";
-import { AnalysisResultCspPtcSceAngleSchema } from "../api-schemas/analysis-result-csp-ptc-sce-angle-schema";
+import { AnalysisResultCspPtcSceSchema } from "../api-schemas/analysis-result-csp-ptc-sce-schema";
 import analysisResultCspPtcMappingBase from "./analysis-result-csp-ptc-mapping-base";
 import { AnalysisResultCspPtcMappings } from "./types";
 
-const analysisResultCspPtcMappingSceAngle: AnalysisResultCspPtcMappings<AnalysisResultCspPtcSceAngleSchema> = [
+const analysisResultCspPtcMappingSce: AnalysisResultCspPtcMappings<AnalysisResultCspPtcSceSchema> = [
   ...analysisResultCspPtcMappingBase,
   {
     getValue: r => r.set_angle,
@@ -41,4 +41,4 @@ const analysisResultCspPtcMappingSceAngle: AnalysisResultCspPtcMappings<Analysis
   },
 ];
 
-export default analysisResultCspPtcMappingSceAngle;
+export default analysisResultCspPtcMappingSce;

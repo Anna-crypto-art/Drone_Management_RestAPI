@@ -60,19 +60,9 @@ export class AnalysisResultCspPtcMappingHelper<T extends AnalysisResultCspPtcSch
     return columnsMapping;
   }
 
-  public getComponentKeyFigureId(keyFigureId: AnalysisResultKeyFigure): string | undefined {
-    const comp_key_figures = this.analysisResult.component_key_figures
-      .filter(comp_key_figure => comp_key_figure.key_figure.id === keyFigureId)
-
-    if (comp_key_figures.length > 0) {
-      return comp_key_figures[0].id;
-    }
-
-    return undefined;
-  }
-
   public hasKeyFigure(mappingEntry: AnalysisResultCspPtcMappingEntry<T>): boolean {
-    return mappingEntry.keyFigureId === undefined || !!this.getComponentKeyFigureId(mappingEntry.keyFigureId)
+    return mappingEntry.keyFigureId === undefined || 
+      !!this.analysisResult.key_figures.find(keyFigure => keyFigure.id === mappingEntry.keyFigureId)
   }
 
   public getPropertyName(mappingEntry: AnalysisResultCspPtcMappingEntry<T>): string {

@@ -1,6 +1,6 @@
 import { AnalysisResultCspPtcSchemaBase } from "./analysis-result-csp-ptc-schema-base";
 
-export interface AnalysisResultCspPtcScaOrientationSchema extends AnalysisResultCspPtcSchemaBase {
+export interface AnalysisResultCspPtcScaSchema extends AnalysisResultCspPtcSchemaBase {
   orientation_at_drive: number;
   uncertainty: number;
   torsion_caused_friction_mean: number;

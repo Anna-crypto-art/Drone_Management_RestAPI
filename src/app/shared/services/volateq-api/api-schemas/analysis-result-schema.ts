@@ -1,5 +1,5 @@
 import { AnalysisResultCspPtcSchema } from "./analysis-result-csp-ptc-schema";
-import { ComponentKeyFigureSchema } from "./component-key-figure-schema";
+import { KeyFigureSchema } from "./key-figure-schema";
 
 export interface AnalysisResultSchema {
   id: string;
@@ -9,6 +9,6 @@ export interface AnalysisResultSchema {
 
 export interface AnalysisResultDetailedSchema extends AnalysisResultSchema {
   analysis_id: string;
-  component_key_figures: ComponentKeyFigureSchema[];
+  key_figures: KeyFigureSchema[];
   csp_ptc: AnalysisResultCspPtcSchema;
 }

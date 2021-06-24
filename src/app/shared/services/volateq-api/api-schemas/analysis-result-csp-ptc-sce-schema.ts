@@ -1,6 +1,6 @@
 import { AnalysisResultCspPtcSchemaBase } from "./analysis-result-csp-ptc-schema-base";
 
-export interface AnalysisResultCspPtcSceAngleSchema extends AnalysisResultCspPtcSchemaBase {
+export interface AnalysisResultCspPtcSceSchema extends AnalysisResultCspPtcSchemaBase {
   set_angle: number;
   angle_value: number;
   actual_angle: number;

@@ -2,18 +2,18 @@ import { AnalysisResultKeyFigure } from "@/app/shared/services/volateq-api/api-a
 import { KeyFigureLayer } from "./shared/key-figure-layer";
 import { FeatureLike } from "ol/Feature";
 import { Style, Stroke, Text, Fill } from 'ol/style';
-import { AnalysisResultCspPtcSceAngleSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-sce-angle-schema";
+import { AnalysisResultCspPtcSceSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-sce-schema";
 import { FeatureInfo, FeatureInfos, Legend } from "./shared/types";
-import analysisResultCspPtcMappingSceAngle from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-sce-angle";
+import analysisResultCspPtcMappingSce from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-sce";
 
 
 const SCE_ANGLE_OFFSET_COLOR_RANGES = [0.01, 0.15, 0.3];
 const SCE_ANGLE_OFFSET_COLORS = [undefined, 'green', 'yellow', 'red'];
 
 
-export class SceAngleKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcSceAngleSchema> {
+export class SceAngleKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcSceSchema> {
   protected readonly keyFigureId = AnalysisResultKeyFigure.SCE_ANGLE_ID;
-  protected readonly analysisResultMapping = analysisResultCspPtcMappingSceAngle;
+  protected readonly analysisResultMapping = analysisResultCspPtcMappingSce;
   public readonly name = "sceAngle";
 
   protected mapRecordEntryToFeatureInfo(key: string, value: unknown, descr?: string): FeatureInfo | undefined {

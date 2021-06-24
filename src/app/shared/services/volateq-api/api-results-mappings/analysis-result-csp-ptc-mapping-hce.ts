@@ -1,9 +1,9 @@
 import { AnalysisResultKeyFigure } from "../api-analysis-result-key-figures";
-import { AnalysisResultCspPtcIrIntensitySchema } from "../api-schemas/analysis-result-csp-ptc-ir-intensity-schema";
+import { AnalysisResultCspPtcHceSchema } from "../api-schemas/analysis-result-csp-ptc-hce-schema";
 import analysisResultCspPtcMappingBase from "./analysis-result-csp-ptc-mapping-base";
 import { AnalysisResultCspPtcMappings } from "./types";
 
-const analysisResultCspPtcMappingIrIntensity: AnalysisResultCspPtcMappings<AnalysisResultCspPtcIrIntensitySchema> = [
+const analysisResultCspPtcMappingHce: AnalysisResultCspPtcMappings<AnalysisResultCspPtcHceSchema> = [
   ...analysisResultCspPtcMappingBase,
   {
     getValue: r => r.absorber_temperature,
@@ -48,4 +48,4 @@ const analysisResultCspPtcMappingIrIntensity: AnalysisResultCspPtcMappings<Analy
 
 ];
 
-export default analysisResultCspPtcMappingIrIntensity;
+export default analysisResultCspPtcMappingHce;

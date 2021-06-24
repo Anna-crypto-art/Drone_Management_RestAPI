@@ -1,10 +1,9 @@
 import { AnalysisResultKeyFigure } from "../api-analysis-result-key-figures";
-import { AnalysisResultCspPtcIrIntensitySchema } from "../api-schemas/analysis-result-csp-ptc-ir-intensity-schema";
-import { AnalysisResultCspPtcScaOrientationSchema } from "../api-schemas/analysis-result-csp-ptc-sca-orientation-schema";
+import { AnalysisResultCspPtcScaSchema } from "../api-schemas/analysis-result-csp-ptc-sca-schema";
 import analysisResultCspPtcMappingBase from "./analysis-result-csp-ptc-mapping-base";
 import { AnalysisResultCspPtcMappings } from "./types";
 
-const analysisResultCspPtcMappingScaOrientation: AnalysisResultCspPtcMappings<AnalysisResultCspPtcScaOrientationSchema> = [
+const analysisResultCspPtcMappingSca: AnalysisResultCspPtcMappings<AnalysisResultCspPtcScaSchema> = [
   ...analysisResultCspPtcMappingBase,
   {
     getValue: r => r.orientation_at_drive,
@@ -37,4 +36,4 @@ const analysisResultCspPtcMappingScaOrientation: AnalysisResultCspPtcMappings<An
   },
 ];
 
-export default analysisResultCspPtcMappingScaOrientation;
+export default analysisResultCspPtcMappingSca;
