@@ -41,11 +41,17 @@ export class SceAngleKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcS
     return {
       id: this.keyFigureId.toString(),
       entries: [
-        { color: "green", name: "0° - 0.149°" },
-        { color: "yellow", name: "0.15° - 0.299°" },
-        { color: "red", name: "0.3° - &infin;" },
+        { color: "green", name: "0° - 0.149°" + ` (<b>${
+          this.geoJSON.features.filter(feature => this.getOffsetColor(feature.properties.value) == SCE_ANGLE_OFFSET_COLORS[0]).length
+        }</b>)`, },
+        { color: "yellow", name: "0.15° - 0.299°" + ` (<b>${
+          this.geoJSON.features.filter(feature => this.getOffsetColor(feature.properties.value) == SCE_ANGLE_OFFSET_COLORS[1]).length
+        }</b>)`, },
+        { color: "red", name: "0.3° - &infin;" + ` (<b>${
+          this.geoJSON.features.filter(feature => this.getOffsetColor(feature.properties.value) == SCE_ANGLE_OFFSET_COLORS[2]).length
+        }</b>)`, },
       ]
-    }
+    };
   }
 
   private getOffsetColor(offsetValue?: number) {
