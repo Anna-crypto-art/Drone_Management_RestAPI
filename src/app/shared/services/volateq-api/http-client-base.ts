@@ -46,20 +46,22 @@ export class HttpClientBase {
     );
   }
 
-  protected async postFile(url: string, filePropertyName: string, file: File, data?: any, config?: AxiosRequestConfig | undefined): Promise<any> {
+  protected async postForm(url: string, data: Record<string, string | File | File[]>): Promise<any> {
     const formData = new FormData();
-    formData.append(filePropertyName, file)
 
-    if (data) {
-      for (const property in data) {
-        formData.append(property, data[property])
+    for (const key in data) {
+      const value = data[key];
+
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          formData.append(key, item);
+        }
+      } else {
+        formData.append(key, value);
       }
     }
 
-    config = config || {};
-    config['headers'] = { 'Content-Type': 'multipart/form-data' };
-
-    return this.httpClient.post(url, formData, config);
+    return this.httpClient.post(url, formData, { headers: { 'Content-Type': 'multipart/form-data' }});
   }
 
   protected async post(url: string, data?: any, config?: AxiosRequestConfig | undefined): Promise<any> {

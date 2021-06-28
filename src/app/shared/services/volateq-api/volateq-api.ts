@@ -137,7 +137,7 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public importAnalysisResult(file: File, analysisId: string): Promise<TaskSchema> {
-    return this.postFile(`/auth/import-analysis-result/${analysisId}`, 'file', file);
+    return this.postForm(`/auth/import-analysis-result/${analysisId}`, { file });
   }
 
   public getAnalysisResult(analysisResultId: string): Promise<AnalysisResultDetailedSchema> {
@@ -209,7 +209,7 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public importFieldgeometry(file: File, customerId: string, plantId: string, clearBefore: boolean): Promise<TaskSchema> {
-    return this.postFile(`/auth/fieldgeometry/${customerId}/${plantId}?clear_before=${clearBefore}`, 'file', file);
+    return this.postForm(`/auth/fieldgeometry/${customerId}/${plantId}?clear_before=${clearBefore}`, { file });
   }
 
   public waitForTask(taskId: string, finished: (task: TaskSchema) => void): void {

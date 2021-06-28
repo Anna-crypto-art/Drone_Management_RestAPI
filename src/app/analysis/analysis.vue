@@ -71,9 +71,6 @@
         @submit="changeAnalysisState">
         <app-modal-form-info-area v-if="updateStateData.state" v-html="$t('update-analysis-state-to', { state: $t(updateStateData.state).toString() })">
         </app-modal-form-info-area>
-        <b-form-group v-if="updateStateData.state === 'FINISHED'">
-          <b-form-file v-model="updateStateData.files" multiple :placeholder="$t('select-result-data-files')" required></b-form-file>
-        </b-form-group>
         <b-form-group :label="$t('message')" label-for="message">
           <b-form-textarea id="message" v-model="updateStateData.message" :placeholder="$t('message')" row="5"></b-form-textarea>
         </b-form-group>
@@ -93,7 +90,10 @@
           </b-form-checkbox-group>
         </b-form-group>
         <b-form-group :label="$t('select-new-results-file-import')">
-          <b-form-file v-model="manageImportFiles.newFiles" multiple :placeholder="$t('select-result-data-files')" required></b-form-file>
+          <b-form-file v-model="manageImportFiles.jsonFile" accept=".json" :placeholder="$t('select-result-data-file')"></b-form-file>
+        </b-form-group>
+        <b-form-group :label="$t('select-result-image-files')">
+          <b-form-file v-model="manageImportFiles.imageFiles" accept="image/png, image/jpeg" multiple :placeholder="$t('select-result-image-files')"></b-form-file>
         </b-form-group>
       </app-modal-form>
     </div>
@@ -144,7 +144,6 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     analysisId?: string,
     state?: ApiStates,
     message?: string,
-    files?: File[],
   } = { message: "", state: undefined, analysisId: undefined };
 
   @Ref() appManageResultFilesModal!: IAppModalForm;
@@ -153,7 +152,8 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     analysisResultId?: string,
     existingFilesOptions: { text: string, value: string }[],
     selectedResultFilesToRemove: string[],
-    newFiles?: File[],
+    jsonFile?: File,
+    imageFiles?: File[],
   } = { analysisResultId: "", existingFilesOptions: [], selectedResultFilesToRemove: [] };
 
 
@@ -287,26 +287,24 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
         }
       }
 
-      if (this.manageImportFiles.newFiles && this.manageImportFiles.newFiles.length > 0) {
-        await this.importAnalyisResults(
-          this.manageImportFiles.newFiles!, 
-          this.manageImportFiles.analysisId!, 
-          (event: { task: TaskSchema, file: File, finished: boolean }) => {
-            try {
-              if (event.task.state === "SUCCESS" && event.finished) {
-                successfullyFinished();
-              } else if (event.task.state === "FAILURE") {
-                throw { error: "SOMETHING_WENT_WRONG", details: event.task.result };
-              }
-            } catch (e) {
-              this.appManageResultFilesModal.alertError(e);
-
-              if (event.finished) {
-                appButtonEventBus.stopLoading();
-              }
-            }
-          }
+      if (this.manageImportFiles.jsonFile) {
+        const task = await volateqApi.importAnalysisResult(
+          this.manageImportFiles.jsonFile,
+          this.manageImportFiles.analysisId!,
+          // this.manageImportFiles.imageFiles!
         );
+
+        volateqApi.waitForTask(task.id, (task) => {
+          appButtonEventBus.stopLoading();
+
+          if (task.state === 'SUCCESS') {
+            successfullyFinished();
+          } else if (task.state === 'FAILURE') {
+            this.appManageResultFilesModal.alertError({ error: "SOMETHING_WENT_WRONG", details: task.result });
+          } else {
+            this.appManageResultFilesModal.alertError({ error: "UNEXPECTED_TASK_STATE", details: task.state + ". " + task.result });
+          }
+        });
       } else {
         successfullyFinished();
       }
@@ -320,11 +318,8 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     this.appUpdateStateModal.hideAlert();
     appButtonEventBus.startLoading();
     
-    if (this.updateStateData.state === ApiStates.FINISHED) {
-      this.updateToFinalAnalysisState();
-    } else {
-      this.updateAnalysisState();
-    }
+
+    this.updateAnalysisState();
   }
 
   async updateAnalysisState() {
@@ -343,46 +338,6 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
       this.appUpdateStateModal.alertError(e.error);
     } finally {
       appButtonEventBus.stopLoading();
-    }
-  }
-
-  private async updateToFinalAnalysisState() {
-    try {
-      if (this.updateStateData.files) {
-        await this.importAnalyisResults(this.updateStateData.files!, this.updateStateData.analysisId!, (event: { task: TaskSchema, file: File, finished: boolean }) => {
-          try {
-            if (event.task.state === "SUCCESS" && event.finished) {
-              this.updateAnalysisState();
-            } else if (event.task.state === "FAILURE") {
-              throw { error: "SOMETHING_WENT_WRONG", details: event.task.result };
-            }
-          } catch (e) {
-            console.error(e);
-            this.appUpdateStateModal.alertError(e.error);
-
-            if (event.finished) {
-              appButtonEventBus.stopLoading();
-            }
-          }
-        });
-      } else {
-        this.updateAnalysisState()
-      }
-    } catch (e) {
-      console.error(e);
-      this.appUpdateStateModal.alertError(e.error);
-      appButtonEventBus.stopLoading();
-    }
-  }
-
-  private async importAnalyisResults(files: File[], analysisId: string, eventCallback: (event: { task: TaskSchema, file: File, finished: boolean }) => void) {
-    let filesCount = files.length;
-
-    for (const file of files) {
-      const task = await volateqApi.importAnalysisResult(file, analysisId);
-      volateqApi.waitForTask(task.id, (task) => {
-        eventCallback({ task: task, file: file, finished: --filesCount <= 0 });
-      });
     }
   }
 
