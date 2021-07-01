@@ -6,4 +6,5 @@ export enum AnalysisResultKeyFigure {
     MISSING_GLASS_CLADDING_TUBE_ID = 5,
     COATING_DEGRATION_ID = 6,
     H2_CONCENTRATION_ID = 7,
+    SCA_SDX_IMAGE_ID = 8,
   }

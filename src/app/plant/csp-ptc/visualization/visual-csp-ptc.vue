@@ -59,6 +59,7 @@ import { SceAngleKeyFigureLayer } from './key-figures/sce-angle-key-figure-layer
 import { MissingGhrKeyFigureLayer } from './key-figures/missing-ghr-key-figure-layer';
 import { CoatingDegratedKeyFigureLayer } from './key-figures/coating-degrated-key-figure-layer';
 import { H2ConcentrationKeyFigureLayer } from './key-figures/h2-concentration-key-figure-layer';
+import { ScaSdxImageKeyFigureLayer } from './key-figures/sca-sdx-image-key-figure-layer';
 import { ComponentLayer } from './components/shared/component-layer';
 import { ScaComponentLayer } from './components/sca-component-layer';
 import { AbsorberComponentLayer } from './components/absorber-component-layer';
@@ -245,6 +246,10 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
       case AnalysisResultKeyFigure.H2_CONCENTRATION_ID:
         return new H2ConcentrationKeyFigureLayer(this.plant, this, anaysisResult,
           (selected, legend) => this.onSelected(selected, legend)) as any;
+
+      case AnalysisResultKeyFigure.SCA_SDX_IMAGE_ID:
+        return new ScaSdxImageKeyFigureLayer(this.plant, this, anaysisResult,
+          (selected, legend) => this.onSelected(selected, legend)) as any;
     }
 
     return undefined;
@@ -282,11 +287,13 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
     return kpiLayers;
   }
 
-  private onSelected(selected: boolean, legend: Legend) {
-    if (selected) {
-      this.legends.push(legend);
-    } else {
-      this.legends.splice(this.legends.findIndex(l => l.id === legend.id), 1);
+  private onSelected(selected: boolean, legend?: Legend) {
+    if (legend) {
+      if (selected) {
+        this.legends.push(legend);
+      } else {
+        this.legends.splice(this.legends.findIndex(l => l.id === legend.id), 1);
+      }
     }
 
     this.hideToast();

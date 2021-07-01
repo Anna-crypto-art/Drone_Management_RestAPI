@@ -89,11 +89,11 @@
             :options="manageImportFiles.existingFilesOptions">
           </b-form-checkbox-group>
         </b-form-group>
-        <b-form-group :label="$t('select-new-results-file-import')">
-          <b-form-file v-model="manageImportFiles.jsonFile" accept=".json" :placeholder="$t('select-result-data-file')"></b-form-file>
+        <b-form-group :label="$t('select-json-result-file-import')">
+          <b-form-file v-model="manageImportFiles.jsonFile" accept=".json"></b-form-file>
         </b-form-group>
         <b-form-group :label="$t('select-result-image-files')">
-          <b-form-file v-model="manageImportFiles.imageFiles" accept="image/png, image/jpeg" multiple :placeholder="$t('select-result-image-files')"></b-form-file>
+          <b-form-file v-model="manageImportFiles.imageFiles" accept="image/png, image/jpeg" multiple ></b-form-file>
         </b-form-group>
       </app-modal-form>
     </div>
@@ -291,7 +291,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
         const task = await volateqApi.importAnalysisResult(
           this.manageImportFiles.jsonFile,
           this.manageImportFiles.analysisId!,
-          // this.manageImportFiles.imageFiles!
+          this.manageImportFiles.imageFiles
         );
 
         volateqApi.waitForTask(task.id, (task) => {

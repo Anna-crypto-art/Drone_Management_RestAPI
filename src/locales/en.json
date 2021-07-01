@@ -118,7 +118,7 @@
   "success-managing-result-files": "Result files successfully managed",
   "accept-terms-of-service": "I agree to the <a href='https://www.volateq.de/privacy-policy/' target='_blank'>terms of service</a>",
   "remove-result-files": "Remove imported results by file",
-  "select-new-results-file-import": "Select new result files to import",
+  "select-json-result-file-import": "Select JSON result file to import",
   "uncertainty": "Measurment uncertainty",
   "deviation-to-drive": "Alignment error",
   "uncertainty_expl": "Uncertainty of the measured orientation",

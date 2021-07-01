@@ -136,8 +136,13 @@ export class VolateqAPI extends HttpClientBase {
     return this.post(`/reset-password/${confirmationKey}`, { new_password, new_password_repeat });
   }
 
-  public importAnalysisResult(file: File, analysisId: string): Promise<TaskSchema> {
-    return this.postForm(`/auth/import-analysis-result/${analysisId}`, { file });
+  public importAnalysisResult(jsonFile: File, analysisId: string, imageFiles?: File[]): Promise<TaskSchema> {
+    const fileData = { json_file: jsonFile };
+    if (imageFiles) {
+      fileData["image_files"] = imageFiles;
+    }
+
+    return this.postForm(`/auth/import-analysis-result/${analysisId}`, fileData);
   }
 
   public getAnalysisResult(analysisResultId: string): Promise<AnalysisResultDetailedSchema> {

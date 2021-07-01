@@ -23,14 +23,16 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
     plant: PlantSchema,
     vueComponent: Vue,
     public readonly analysisResult: AnalysisResultDetailedSchema,
-    protected readonly onSelectedEvent: (selected: boolean, legend: Legend) => void,
+    protected readonly onSelectedEvent: (selected: boolean, legend?: Legend) => void,
   ) {
     super(plant, vueComponent);
 
     this.visible = false;
   }
 
-  protected abstract getLegend(): Legend;
+  protected getLegend(): Legend | undefined {
+    return undefined;
+  }
 
   protected async onSelected(selected: boolean): Promise<void> {
     super.onSelected(selected);
