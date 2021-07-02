@@ -5,7 +5,7 @@
     </div>
     <div class="clearfix"></div>
     <app-table-container>
-      <b-table :fields="columns" :items="rows" head-variant="light">
+      <b-table :fields="columns" :items="rows" head-variant="light" hover>
         <template #cell(name)="row">
           <span v-if="row.item.name.userName">
             {{ row.item.name.userName }}<br>
@@ -14,13 +14,33 @@
           <span v-else>{{ row.item.name.email }}</span>
         </template>
         <template #cell(state)="row">
-          {{ row.item.state.userState }}
+          {{ $t(row.item.state.userState) }}
           <span v-if="row.item.state.date"><br><small class="grayed">{{ row.item.state.date }}</small></span>
         </template>
         <template #cell(role)="row">
           {{ row.item.role.userRole }}
           <span v-if="row.item.role.customer"><br><small class="grayed">{{ row.item.role.customer }}</small></span>
         </template>
+        <template #cell(actions)="row">
+          <div class="hover-cell pull-right">
+            <b-button 
+            v-show="row.item.state.userState == 'pending'" 
+            @click="onResendInvitationClick(row.item)"
+            variant="secondary"
+            size="sm"
+            :title="$t('resend-invitation')">
+              <b-icon icon="envelope"></b-icon>
+            </b-button>
+            <b-button
+            @click="onUnLockClick(row.item)"
+            variant="secondary"
+            size="sm"
+            :title="$t((row.item.state.userState === 'locked' ? 'unlock' : 'lock'))">
+              <b-icon :icon="row.item.state.userState === 'locked' ? 'unlock' : 'lock'"></b-icon>
+            </b-button>
+          </div>
+        </template>
+
       </b-table>
     </app-table-container>
     <app-modal-form 
@@ -87,7 +107,8 @@ export default class AppSettingsUsers extends Vue {
     this.columns = [
       { key: "name", label: this.$t("name").toString() },
       { key: "state", label: this.$t("state").toString() },
-      { key: "role", label: this.$t("role").toString() }
+      { key: "role", label: this.$t("role").toString() },
+      { key: "actions", label: "" }
     ];
 
     await this.updateUserRows();
@@ -103,10 +124,15 @@ export default class AppSettingsUsers extends Vue {
     
     this.rows = users.map((user: UserSchema) => {
       let stateDate = ""; 
-      if (user.state === UserStateSchema.REGISTERED) {
-        stateDate = this.$t("registered-at").toString() + ' ' + new Date(Date.parse(user.registered_at)).toLocaleString();
-      } else if (user.state === UserStateSchema.PENDING) {
-        stateDate = this.$t("invited-at").toString() + ' ' + new Date(Date.parse(user.invited_at)).toLocaleString();
+      let userState = user.state.toLowerCase();
+      if (user.is_locked) {
+        userState = "locked";
+      } else {
+        if (user.state === UserStateSchema.REGISTERED) {
+          stateDate = this.$t("registered-at").toString() + ' ' + new Date(Date.parse(user.registered_at)).toLocaleString();
+        } else if (user.state === UserStateSchema.PENDING) {
+          stateDate = this.$t("invited-at").toString() + ' ' + new Date(Date.parse(user.invited_at)).toLocaleString();
+        }
       }
 
       return {
@@ -117,7 +143,7 @@ export default class AppSettingsUsers extends Vue {
         },
         state: {
           date: stateDate,
-          userState: this.$t(user.state.toLowerCase()).toString()
+          userState: userState,
         },
         role: {
           userRole: user.role.name.toString(),
@@ -181,6 +207,32 @@ export default class AppSettingsUsers extends Vue {
       this.newUser.customer_id = undefined;  
     } else {
       this.customerSelectionDisabled = false;  
+    }
+  }
+
+  async onResendInvitationClick(user: { id: string }) {
+    try {
+      await volateqApi.resendUserInvitation(user.id);
+      
+      appContentEventBus.showSuccessAlert(this.$t("user-invitation-sent-successfully").toString());
+    } catch (e) {
+      appContentEventBus.showError(e);
+    }
+  }
+
+  async onUnLockClick(user: { id: string, state: { userState: 'locked' | 'registered' | 'pending' }}) {
+    try {
+      const lock = user.state.userState !== 'locked';
+
+      await volateqApi.unLockUser(user.id, lock);
+
+      appContentEventBus.showSuccessAlert(
+        this.$t(lock ? "user-locked-successfully" : "user-unlocked-successfully").toString()
+      );
+
+      await this.updateUserRows();
+    } catch (e) {
+      appContentEventBus.showError(e);
     }
   }
 

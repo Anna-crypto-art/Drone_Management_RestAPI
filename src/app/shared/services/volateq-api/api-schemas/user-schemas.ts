@@ -34,6 +34,7 @@ export interface UserSchema {
   role: RoleSchema;
   state: UserStateSchema;
   customer?: CustomerSchema;
+  is_locked: boolean;
 }
 
 export interface UserInfoSchema {

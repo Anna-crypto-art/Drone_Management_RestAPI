@@ -167,5 +167,10 @@
   "high-hydrogen-concentration_expl": "Increased probability for high hydrogen concentration. Cuncluded by missing coating degration but very high infrared intensity.",
   "no-analysis-result-selected": "Select an analysis to see table data",
   "show-results": "Show results",
-  "select-result-image-files": "Select images files related to result file (optional)"
+  "select-result-image-files": "Select images files related to result file (optional)",
+  "locked": "Locked",
+  "resend-invitation": "Resend invitation",
+  "user-invitation-sent-successfully": "User invitation sent successfully",
+  "user-unlocked-successfully": "User unlocked successfully",
+  "user-locked-successfully": "User locked successfully"
 }
