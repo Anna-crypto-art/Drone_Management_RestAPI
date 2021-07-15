@@ -1,18 +1,17 @@
-import Vue from "vue"
-
+import Vue from "vue";
 
 export abstract class BaseAuthComponent extends Vue {
-  isCreated = false;
+    isCreated = false;
 
-  async created() {
-    this.isCreated = true;
-  }
+    async created(): Promise<void> {
+        this.isCreated = true;
+    }
 
-  get isSuperAdmin(): boolean {
-    return this.$store.getters["auth/isSuperAdmin"];
-  }
+    get isSuperAdmin(): boolean {
+        return this.$store.getters["auth/isSuperAdmin"];
+    }
 
-  get isCustomerAdmin(): boolean {
-    return this.$store.getters["auth/isCustomerAdmin"];
-  }
+    get isCustomerAdmin(): boolean {
+        return this.$store.getters["auth/isCustomerAdmin"];
+    }
 }

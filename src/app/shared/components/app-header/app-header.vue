@@ -1,26 +1,50 @@
 <template>
   <div class="app-header">
     <b-container :fluid="fluid">
-      <img class="app-header-logo float-left" src="@/assets/logos/logo_white.png" alt="volateq">
+      <img
+        class="app-header-logo float-left"
+        src="@/assets/logos/logo_white.png"
+        alt="volateq"
+      />
       <div class="app-header-menu float-left">
         <b-nav pills>
-          <b-nav-item class="link" href="/plants" :active="isActiveRoute(['/plants', '/plant/*'])">
+          <b-nav-item
+            class="link"
+            href="/plants"
+            :active="isActiveRoute(['/plants', '/plant/*'])"
+          >
             <span class="nav-item-text">{{ $t("plants") }}</span>
           </b-nav-item>
-          <b-nav-item class="link" href="/analyses" :active="isActiveRoute(['/analyses', '/analysis/new'])">
+          <b-nav-item
+            class="link"
+            href="/analyses"
+            :active="isActiveRoute(['/analyses', '/analysis/new'])"
+          >
             <span class="nav-item-text">{{ $t("analysis") }}</span>
           </b-nav-item>
         </b-nav>
       </div>
+
       <div class="app-header-settings-menu float-right">
         <b-nav pills>
           <b-nav-item-dropdown toggle-class="app-header-nav-dropdown" right>
-            <template slot="button-content"><b-icon icon="gear-fill" font-scale="1.5"></b-icon></template>
-            <b-dropdown-item href="/" class="link">{{ $t("profile") }}</b-dropdown-item>
-            <b-dropdown-item href="/settings/users" v-if="isSuperAdmin" class="link">{{ $t("users") }}</b-dropdown-item>
-            <b-dropdown-divider></b-dropdown-divider>
+            <template slot="button-content"
+              ><b-icon icon="gear-fill" font-scale="1.5"></b-icon
+            ></template>
+            <b-dropdown-item href="/" class="link">{{
+              $t("profile")
+            }}</b-dropdown-item>
+            <b-dropdown-item
+              href="/settings/users"
+              v-if="isSuperAdmin"
+              class="link"
+              >{{ $t("users") }}</b-dropdown-item
+            >
+            <b-dropdown-divider />
             <b-dropdown-form>
-              <b-button @click="logout" class="width-100pc">{{ $t("logout") }}</b-button>
+              <b-button @click="logout" class="width-100pc">{{
+                $t("logout")
+              }}</b-button>
             </b-dropdown-form>
           </b-nav-item-dropdown>
         </b-nav>
@@ -41,10 +65,10 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 export default class AppHeader extends BaseAuthComponent {
   @Prop({ default: true }) fluid!: boolean;
 
-  async logout() {
+  async logout(): Promise<void> {
     try {
       await volateqApi.logout();
-      
+
       this.$router.push({ name: "Login" });
       this.$router.go(0); // Reload the page to refresh the js cache
     } catch (e) {
@@ -53,9 +77,13 @@ export default class AppHeader extends BaseAuthComponent {
   }
 
   isActiveRoute(routes: string[]): boolean {
-    return !!routes.find(route => route.indexOf("*") != -1 ? 
-      this.$router.currentRoute.path.replace(route.replace("*", ""), "").indexOf("/") == -1 :
-      this.$router.currentRoute.path === route);
+    return !!routes.find((route) =>
+      route.indexOf("*") != -1
+        ? this.$router.currentRoute.path
+            .replace(route.replace("*", ""), "")
+            .indexOf("/") == -1
+        : this.$router.currentRoute.path === route
+    );
   }
 }
 </script>
@@ -63,7 +91,6 @@ export default class AppHeader extends BaseAuthComponent {
 <style lang="scss">
 @import "@/scss/_colors.scss";
 @import "@/scss/_variables.scss";
-
 
 .app-header {
   height: $header-height;
@@ -78,7 +105,7 @@ export default class AppHeader extends BaseAuthComponent {
       padding: 0 30px;
       color: $white;
       transition: all 0.2s ease-in-out;
-      
+
       &:hover {
         background-color: $hover-light-blue !important;
         color: $blue;
@@ -89,7 +116,6 @@ export default class AppHeader extends BaseAuthComponent {
 
       span {
         position: relative;
-        top: 4px;
       }
     }
   }
@@ -98,6 +124,7 @@ export default class AppHeader extends BaseAuthComponent {
     .nav-pills {
       height: $header-height;
     }
+
     .dropdown-item {
       color: $blue;
     }
@@ -108,37 +135,47 @@ export default class AppHeader extends BaseAuthComponent {
     margin-left: -15px;
   }
 
-  &-nav-dropdown {
-    &::after {
-      content: none;
+  .dropdown {
+    &.show > .app-header-nav-dropdown {
+      background-color: $white;
+
+      .bi-gear-fill {
+        color: $blue;
+        transform: rotate(225deg);
+      }
     }
-    height: calc(100% - 1rem);
+
+    &-menu {
+      line-height: 20px;
+      width: 200px;
+
+      .dropdown-item {
+        text-align: right;
+        padding: 0.75rem 1.5rem;
+      }
+
+      .b-dropdown-form {
+        padding: 0.75rem 1.5rem;
+      }
+    }
+
+    &-toggle {
+      height: 100%;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      &::after {
+        content: none;
+      }
+    }
   }
 
-  .dropdown.show > .app-header-nav-dropdown {
-    background-color: $white;
-    .bi-gear-fill {
-      color: $blue;
-      transform: rotate(225deg);
-    }
-  }
   .bi-gear-fill {
     color: $white;
     transform-origin: center;
     transition: 300ms linear all;
-  }
-
-  .dropdown-menu {
-    line-height: 20px;
-    width: 200px;
-
-    .dropdown-item {
-      text-align: right;
-      padding: 0.75rem 1.5rem;
-    }
-    .b-dropdown-form {
-      padding: 0.75rem 1.5rem;
-    }
   }
 }
 </style>

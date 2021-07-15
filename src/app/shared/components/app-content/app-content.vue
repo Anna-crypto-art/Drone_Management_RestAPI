@@ -47,7 +47,7 @@ export default class AppContent extends Vue {
   alert: AppAlert = { msg: "", variant: "info" };
   showAlert = false;
 
-  created() {
+  created(): void {
     appContentEventBus.onShowAlert((newAlert: AppAlert) => {
       this.alert = newAlert;
       this.showAlert = true;

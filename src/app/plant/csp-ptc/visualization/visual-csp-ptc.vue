@@ -48,7 +48,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { Component, Prop, Ref } from 'vue-property-decorator';
-import { GroupLayer, LayerType, OpenLayers } from 'volateq-geovisualization';
+import { LayerType, OpenLayers } from 'volateq-geovisualization';
 import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
 import { AnalysisResultKeyFigure } from '@/app/shared/services/volateq-api/api-analysis-result-key-figures';
 import { AnalysisResultDetailedSchema } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-schema';
@@ -94,7 +94,7 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
   legends: Legend[] = [];
   piToastInfo: FeatureInfos = { title: "", records: [{ name: "", descr: "", value: "" }] };
 
-  async created() {
+  async created(): Promise<void> {
     this.createLayers();
   }
 
@@ -135,7 +135,7 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
     return legendEntries;
   }
 
-  onOpenLayersClick(features: FeatureLike[]) {
+  onOpenLayersClick(features: FeatureLike[]): void {
     const piToastInfo = this.getKpiLayers().map(kpiLayer => kpiLayer.onClick(features))
       .find(featureInfos => featureInfos !== undefined); 
     if (piToastInfo) {
