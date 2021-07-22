@@ -1,60 +1,58 @@
 <template>
-  <b-navbar class="app-header">
-    <b-container :fluid="fluid">
-      <b-navbar-brand href="#">
-        <img
-          class="app-header-logo float-left"
-          src="@/assets/logos/logo_white.png"
-          alt="volateq"
-        />
-      </b-navbar-brand>
+  <b-navbar class="app-header" toggleable="lg" sticky>
+    <b-navbar-brand href="#">
+      <img
+        class="app-header-logo"
+        src="@/assets/logos/logo_white.png"
+        alt="volateq"
+      />
+    </b-navbar-brand>
 
-      <b-navbar-toggle target="nav-collapse" />
+    <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
-      <b-collapse class="app-header-menu" id="nav-collapse" is-nav>
-        <b-navbar-nav>
-          <b-nav-item
+    <b-collapse class="app-header-menu" id="nav-collapse" is-nav>
+      <b-navbar-nav>
+        <b-nav-item
+          class="link"
+          href="/plants"
+          :active="isActiveRoute(['/plants', '/plant/*'])"
+        >
+          <span class="nav-item-text">{{ $t("plants") }}</span>
+        </b-nav-item>
+
+        <b-nav-item
+          class="link"
+          href="/analyses"
+          :active="isActiveRoute(['/analyses', '/analysis/new'])"
+        >
+          <span class="nav-item-text">{{ $t("analysis") }}</span>
+        </b-nav-item>
+      </b-navbar-nav>
+
+      <b-navbar-nav class="ml-auto">
+        <b-nav-item-dropdown toggle-class="app-header-nav-dropdown" right>
+          <template #button-content>
+            <b-icon icon="gear-fill" font-scale="1.5" />
+          </template>
+
+          <b-dropdown-item href="/" class="link">{{
+            $t("profile")
+          }}</b-dropdown-item>
+          <b-dropdown-item
+            href="/settings/users"
+            v-if="isSuperAdmin"
             class="link"
-            href="/plants"
-            :active="isActiveRoute(['/plants', '/plant/*'])"
+            >{{ $t("users") }}</b-dropdown-item
           >
-            <span class="nav-item-text">{{ $t("plants") }}</span>
-          </b-nav-item>
-
-          <b-nav-item
-            class="link"
-            href="/analyses"
-            :active="isActiveRoute(['/analyses', '/analysis/new'])"
-          >
-            <span class="nav-item-text">{{ $t("analysis") }}</span>
-          </b-nav-item>
-        </b-navbar-nav>
-
-        <b-navbar-nav class="ml-auto">
-          <b-nav-item-dropdown toggle-class="app-header-nav-dropdown" right>
-            <template slot="button-content">
-              <b-icon icon="gear-fill" font-scale="1.5" />
-            </template>
-
-            <b-dropdown-item href="/" class="link">{{
-              $t("profile")
-            }}</b-dropdown-item>
-            <b-dropdown-item
-              href="/settings/users"
-              v-if="isSuperAdmin"
-              class="link"
-              >{{ $t("users") }}</b-dropdown-item
-            >
-            <b-dropdown-divider />
-            <b-dropdown-form>
-              <b-button @click="logout" class="width-100pc">{{
-                $t("logout")
-              }}</b-button>
-            </b-dropdown-form>
-          </b-nav-item-dropdown>
-        </b-navbar-nav>
-      </b-collapse>
-    </b-container>
+          <b-dropdown-divider />
+          <b-dropdown-form>
+            <b-button @click="logout" class="width-100pc">{{
+              $t("logout")
+            }}</b-button>
+          </b-dropdown-form>
+        </b-nav-item-dropdown>
+      </b-navbar-nav>
+    </b-collapse>
   </b-navbar>
 </template>
 
@@ -100,41 +98,47 @@ export default class AppHeader extends BaseAuthComponent {
 .app-header {
   height: $header-height;
   line-height: $header-height;
-  align-items: center;
   background-color: $blue;
   color: $white;
 
   .navbar-nav {
-    height: $header-height;
+    height: 100%;
+
+    &.ml-auto {
+      height: $header-height;
+    }
+  }
+
+  .navbar-toggler {
+    border-radius: 0;
   }
 
   &-menu {
-    margin-left: 15px;
+    .nav-link {
+      background: $blue;
+      height: $header-height;
 
-    .nav-link:not(.dropdown .nav-link) {
-      padding: 0 30px !important;
-      color: $white !important;
-      transition: all 0.2s ease-in-out;
+      &:not(.dropdown .nav-link) {
+        padding: 0 30px !important;
+        color: $white !important;
+        transition: all 0.2s ease-in-out;
 
-      &:hover {
-        background-color: $hover-light-blue !important;
-        color: $blue !important;
-      }
-      &.active {
-        background-color: $hover-blue;
-      }
+        &:hover {
+          background-color: $hover-light-blue !important;
+          color: $blue !important;
+        }
+        &.active {
+          background-color: $hover-blue;
+        }
 
-      span {
-        position: relative;
+        span {
+          position: relative;
+        }
       }
     }
   }
 
   &-settings-menu {
-    .nav-pills {
-      height: $header-height;
-    }
-
     .dropdown-item {
       color: $blue;
     }
@@ -157,7 +161,6 @@ export default class AppHeader extends BaseAuthComponent {
 
     &-menu {
       line-height: 20px;
-      width: 200px;
 
       .dropdown-item {
         text-align: right;
@@ -170,7 +173,7 @@ export default class AppHeader extends BaseAuthComponent {
     }
 
     &-toggle {
-      height: 100%;
+      height: $header-height;
 
       display: flex;
       justify-content: center;
