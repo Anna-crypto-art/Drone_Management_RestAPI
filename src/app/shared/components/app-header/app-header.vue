@@ -1,13 +1,18 @@
 <template>
-  <div class="app-header">
+  <b-navbar class="app-header">
     <b-container :fluid="fluid">
-      <img
-        class="app-header-logo float-left"
-        src="@/assets/logos/logo_white.png"
-        alt="volateq"
-      />
-      <div class="app-header-menu float-left">
-        <b-nav pills>
+      <b-navbar-brand href="#">
+        <img
+          class="app-header-logo float-left"
+          src="@/assets/logos/logo_white.png"
+          alt="volateq"
+        />
+      </b-navbar-brand>
+
+      <b-navbar-toggle target="nav-collapse" />
+
+      <b-collapse class="app-header-menu" id="nav-collapse" is-nav>
+        <b-navbar-nav>
           <b-nav-item
             class="link"
             href="/plants"
@@ -15,6 +20,7 @@
           >
             <span class="nav-item-text">{{ $t("plants") }}</span>
           </b-nav-item>
+
           <b-nav-item
             class="link"
             href="/analyses"
@@ -22,15 +28,14 @@
           >
             <span class="nav-item-text">{{ $t("analysis") }}</span>
           </b-nav-item>
-        </b-nav>
-      </div>
+        </b-navbar-nav>
 
-      <div class="app-header-settings-menu float-right">
-        <b-nav pills>
+        <b-navbar-nav class="ml-auto">
           <b-nav-item-dropdown toggle-class="app-header-nav-dropdown" right>
-            <template slot="button-content"
-              ><b-icon icon="gear-fill" font-scale="1.5"></b-icon
-            ></template>
+            <template slot="button-content">
+              <b-icon icon="gear-fill" font-scale="1.5" />
+            </template>
+
             <b-dropdown-item href="/" class="link">{{
               $t("profile")
             }}</b-dropdown-item>
@@ -47,10 +52,10 @@
               }}</b-button>
             </b-dropdown-form>
           </b-nav-item-dropdown>
-        </b-nav>
-      </div>
+        </b-navbar-nav>
+      </b-collapse>
     </b-container>
-  </div>
+  </b-navbar>
 </template>
 
 <script lang="ts">
@@ -99,16 +104,21 @@ export default class AppHeader extends BaseAuthComponent {
   background-color: $blue;
   color: $white;
 
+  .navbar-nav {
+    height: $header-height;
+  }
+
   &-menu {
     margin-left: 15px;
-    .nav-link {
-      padding: 0 30px;
-      color: $white;
+
+    .nav-link:not(.dropdown .nav-link) {
+      padding: 0 30px !important;
+      color: $white !important;
       transition: all 0.2s ease-in-out;
 
       &:hover {
         background-color: $hover-light-blue !important;
-        color: $blue;
+        color: $blue !important;
       }
       &.active {
         background-color: $hover-blue;
@@ -179,5 +189,3 @@ export default class AppHeader extends BaseAuthComponent {
   }
 }
 </style>
-
-
