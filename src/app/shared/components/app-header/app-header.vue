@@ -1,5 +1,5 @@
 <template>
-  <b-navbar class="app-header" toggleable="lg" sticky>
+  <b-navbar class="app-header" toggleable="lg" type="dark" sticky>
     <b-navbar-brand href="#">
       <img
         class="app-header-logo"
@@ -38,6 +38,7 @@
           <b-dropdown-item href="/" class="link">{{
             $t("profile")
           }}</b-dropdown-item>
+
           <b-dropdown-item
             href="/settings/users"
             v-if="isSuperAdmin"
@@ -45,6 +46,7 @@
             >{{ $t("users") }}</b-dropdown-item
           >
           <b-dropdown-divider />
+
           <b-dropdown-form>
             <b-button @click="logout" class="width-100pc">{{
               $t("logout")
@@ -98,6 +100,7 @@ export default class AppHeader extends BaseAuthComponent {
 .app-header {
   height: $header-height;
   line-height: $header-height;
+  align-items: center;
   background-color: $blue;
   color: $white;
 
@@ -119,9 +122,10 @@ export default class AppHeader extends BaseAuthComponent {
       height: $header-height;
 
       &:not(.dropdown .nav-link) {
+        $transition: 0.2s ease-in-out;
         padding: 0 30px !important;
         color: $white !important;
-        transition: all 0.2s ease-in-out;
+        transition: background $transition, color $transition;
 
         &:hover {
           background-color: $hover-light-blue !important;
@@ -145,7 +149,7 @@ export default class AppHeader extends BaseAuthComponent {
   }
 
   &-logo {
-    max-height: $header-height;
+    height: $header-height;
     margin-left: -15px;
   }
 
