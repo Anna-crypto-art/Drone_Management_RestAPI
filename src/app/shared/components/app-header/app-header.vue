@@ -1,7 +1,9 @@
 <template>
   <div class="app-header">
     <b-container :fluid="fluid">
-      <img class="app-header-logo float-left" src="@/assets/logos/logo_white.png" alt="volateq">
+      <router-link :to="{name: 'Home'}">
+        <img class="app-header-logo float-left" src="@/assets/logos/logo_white.png" alt="volateq">
+      </router-link>
       <div class="app-header-menu float-left">
         <b-nav pills>
           <b-nav-item class="link" href="/plants" :active="isActiveRoute(['/plants', '/plant/*'])">

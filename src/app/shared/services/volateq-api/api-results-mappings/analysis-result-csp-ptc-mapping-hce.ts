@@ -25,7 +25,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultCspPtcMappings<AnalysisResul
     getValue: r => r.missing_glass_cladding_tube,
     transName: "missing-gct",
     transDescr: "missing-gct_expl",
-    keyFigureId: AnalysisResultKeyFigure.MISSING_GLASS_CLADDING_TUBE_ID,
+    keyFigureId: AnalysisResultKeyFigure.MISSING_GLASS_TUBE_ID,
   },
   {
     getValue: r => r.coating_degration,

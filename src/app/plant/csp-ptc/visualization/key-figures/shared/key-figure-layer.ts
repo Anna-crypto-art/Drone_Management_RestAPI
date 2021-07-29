@@ -17,7 +17,11 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
   protected abstract readonly keyFigureId: AnalysisResultKeyFigure;
   protected abstract readonly analysisResultMapping: AnalysisResultCspPtcMappings<T>;
 
-  protected geoJSON?: any;
+  protected geoJSON?: { 
+    type: string, 
+    features: { properties: { name: string, value: string | boolean | number }}[], 
+    custom: { components_total_count: { [componentId: number]: number }},
+  };
 
   constructor(
     plant: PlantSchema,
@@ -94,7 +98,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
 
     this.geoJSON = await volateqApi.getKeyFiguresGeoVisual(this.plant.id, this.analysisResult.id, [this.keyFigure.id]);
 
-    return this.geoJSON;
+    return this.geoJSON as Record<string, unknown>;
   }
 
   public onClick(features: FeatureLike[]): FeatureInfos | undefined {
@@ -120,7 +124,14 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
     }
   }
 
-  private get keyFigure(): KeyFigureSchema {
+  protected get keyFigure(): KeyFigureSchema {
     return this.analysisResult.key_figures.find(keyFigure => keyFigure.id === this.keyFigureId)!;
+  }
+
+  protected getLegendEntryCount(feature_count?: number): string {
+    feature_count = feature_count || this.geoJSON!.features.length;
+    const totalCount = this.geoJSON!.custom.components_total_count[this.keyFigure.component_id];
+
+    return ` (<b>${Math.round(feature_count / totalCount * 100)}%</b> - <small>${feature_count}</small>)`
   }
 }

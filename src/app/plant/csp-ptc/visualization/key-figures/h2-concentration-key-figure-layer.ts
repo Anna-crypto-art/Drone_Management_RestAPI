@@ -40,7 +40,7 @@ export class H2ConcentrationKeyFigureLayer extends KeyFigureLayer<AnalysisResult
       entries: [
         {
           color: '#ad0045',
-          name: this.vueComponent.$t('high-hydrogen-concentration').toString() + ` (<b>${this.geoJSON.features.length}</b>)`,
+          name: this.vueComponent.$t('high-hydrogen-concentration').toString() + this.getLegendEntryCount(),
         }
       ]
     };

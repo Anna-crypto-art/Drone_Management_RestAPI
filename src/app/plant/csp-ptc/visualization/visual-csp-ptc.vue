@@ -235,7 +235,7 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
         return new SceAngleKeyFigureLayer(this.plant, this, anaysisResult, 
           (selected, legend) => this.onSelected(selected, legend)) as any;
 
-      case AnalysisResultKeyFigure.MISSING_GLASS_CLADDING_TUBE_ID:
+      case AnalysisResultKeyFigure.MISSING_GLASS_TUBE_ID:
         return new MissingGhrKeyFigureLayer(this.plant, this, anaysisResult,
           (selected, legend) => this.onSelected(selected, legend)) as any;
 

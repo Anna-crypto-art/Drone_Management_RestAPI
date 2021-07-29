@@ -8,7 +8,7 @@ import analysisResultCspPtcMappingHce from "@/app/shared/services/volateq-api/ap
 
 
 export class MissingGhrKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcHceSchema> {
-  protected readonly keyFigureId = AnalysisResultKeyFigure.MISSING_GLASS_CLADDING_TUBE_ID;
+  protected readonly keyFigureId = AnalysisResultKeyFigure.MISSING_GLASS_TUBE_ID;
   protected readonly analysisResultMapping = analysisResultCspPtcMappingHce;
   public readonly name = "missingGhr";
 
@@ -40,7 +40,7 @@ export class MissingGhrKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPt
       entries: [
         {
           color: '#850000',
-          name: this.vueComponent.$t('missing-gct').toString() + ` (<b>${this.geoJSON.features.length}</b>)`,
+          name: this.vueComponent.$t('missing-gct').toString() + this.getLegendEntryCount(),
         }
       ]
     };

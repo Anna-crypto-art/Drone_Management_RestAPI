@@ -40,7 +40,7 @@ export class CoatingDegratedKeyFigureLayer extends KeyFigureLayer<AnalysisResult
       entries: [
         {
           color: '#5d0085',
-          name: this.vueComponent.$t('oxygen-penetration').toString() + ` (<b>${this.geoJSON.features.length}</b>)`,
+          name: this.vueComponent.$t('oxygen-penetration').toString() + this.getLegendEntryCount(),
         }
       ]
     };
