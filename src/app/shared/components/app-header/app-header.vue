@@ -45,6 +45,7 @@
             class="link"
             >{{ $t("users") }}</b-dropdown-item
           >
+
           <b-dropdown-divider />
 
           <b-dropdown-form>
@@ -100,17 +101,8 @@ export default class AppHeader extends BaseAuthComponent {
 .app-header {
   height: $header-height;
   line-height: $header-height;
-  align-items: center;
   background-color: $blue;
   color: $white;
-
-  .navbar-nav {
-    height: 100%;
-
-    &.ml-auto {
-      height: $header-height;
-    }
-  }
 
   .navbar-toggler {
     border-radius: 0;
@@ -119,7 +111,6 @@ export default class AppHeader extends BaseAuthComponent {
   &-menu {
     .nav-link {
       background: $blue;
-      height: $header-height;
 
       &:not(.dropdown .nav-link) {
         $transition: 0.2s ease-in-out;
@@ -131,12 +122,9 @@ export default class AppHeader extends BaseAuthComponent {
           background-color: $hover-light-blue !important;
           color: $blue !important;
         }
+
         &.active {
           background-color: $hover-blue;
-        }
-
-        span {
-          position: relative;
         }
       }
     }
