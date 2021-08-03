@@ -306,6 +306,8 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
 </script>
 
 <style lang="scss">
+@import '@/scss/_colors.scss';
+
 // Fix that toaster overlays popover
 .b-popover {
   z-index: 1;
@@ -357,6 +359,10 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
   width: 100%;
 }
 .toggle-button {
-  border-right: none;
+  border: none;
+
+  &:hover {
+    background-color: $background-grey !important;
+  }
 }
 </style>
