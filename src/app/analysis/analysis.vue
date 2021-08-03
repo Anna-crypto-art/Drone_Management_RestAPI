@@ -4,6 +4,7 @@
       <router-link :to="{ name: 'AnalysisNew' }">
         <b-button variant="primary">{{ createNewAnalysisBtnText }}</b-button>
       </router-link>
+
       <app-table-container>
         <b-table hover :fields="columns" :items="analysisRows"
           head-variant="light"
@@ -12,9 +13,11 @@
           <template #empty="scope">
             <span class="grayed">{{ scope.emptyText }}</span>
           </template>
+
           <template #head(actions)>
             <span class="hidden">{{ $t("actions") }}</span>
           </template>
+
           <template #cell(user)="row">
             <span v-if="row.item.user.userName">
               {{ row.item.user.userName }}<br>
@@ -22,6 +25,7 @@
             </span>
             <span v-else>{{ row.item.user.email }}</span>
           </template>
+
           <template #cell(state)="row">
             <div v-if="row.item.state">
               {{ $t(row.item.state.state.name) }}
@@ -31,6 +35,7 @@
             </div>
             <div v-else>UNKNOWN</div>
           </template>
+
           <template #cell(actions)="row">
             <div class="hover-cell pull-right">
               <b-dropdown right size="sm" variant="secondary" :title="$t('download...')">
@@ -39,12 +44,14 @@
                   {{ file }}
                 </b-dropdown-item>
               </b-dropdown>
+
               <b-dropdown v-show="canUpdateState(row.item.state)" right size="sm" variant="secondary" :title="$t('update-analysis-state')">
                 <template #button-content><b-icon icon="flag"></b-icon></template>
                 <b-dropdown-item v-for="state in getPossibleUpdateStates(row.item.state)" :key="state" @click="onUpdateStateClick(row.item, state)">
                   {{ $t(state) }}
                 </b-dropdown-item>
               </b-dropdown>
+
               <b-button 
                 v-show="isSuperAdmin" 
                 @click="onManageResultFilesClick(row.item)" 
@@ -53,6 +60,7 @@
                 :title="$t('manage-result-files')">
                 <b-icon icon="hammer"></b-icon>
               </b-button>
+
               <router-link v-if="row.item.analysisResultId" :title="$t('show-results')"
               :to="{ name: 'Plant', params: { id: row.item.plantId }, query: { view: 'table', result: row.item.analysisResultId }}">
                 <b-button variant="primary" size="sm"><b-icon icon="graph-up"></b-icon></b-button>
@@ -62,6 +70,7 @@
           </template>
         </b-table>
       </app-table-container>
+
       <app-modal-form 
         id="update-state-modal" 
         ref="appUpdateStateModal" 
@@ -75,6 +84,7 @@
           <b-form-textarea id="message" v-model="updateStateData.message" :placeholder="$t('message')" row="5"></b-form-textarea>
         </b-form-group>
       </app-modal-form>
+
       <app-modal-form 
         id="manage-result-files-modal"
         ref="appManageResultFilesModal"
@@ -89,9 +99,11 @@
             :options="manageImportFiles.existingFilesOptions">
           </b-form-checkbox-group>
         </b-form-group>
+
         <b-form-group :label="$t('select-json-result-file-import')">
           <b-form-file v-model="manageImportFiles.jsonFile" accept=".json"></b-form-file>
         </b-form-group>
+
         <b-form-group :label="$t('select-result-image-files')">
           <b-form-file v-model="manageImportFiles.imageFiles" accept="image/png, image/jpeg" multiple ></b-form-file>
         </b-form-group>
@@ -101,27 +113,24 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import { Component, Ref } from "vue-property-decorator";
-
-import AppContent from "@/app/shared/components/app-content/app-content.vue";
-import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
-import volateqApi from "../shared/services/volateq-api/volateq-api";
-import { AnalysisSchema } from "../shared/services/volateq-api/api-schemas/analysis-schema";
-import appContentEventBus from "../shared/components/app-content/app-content-event-bus";
 import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
-import uploadService from "@/app/shared/services/upload-service/upload-service";
-import { IAnalysisId } from "./new-analysis/types";
-import { ApiStates, ApiStateStruct } from "../shared/services/volateq-api/api-states";
-import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
-import { BvTableFieldArray } from "bootstrap-vue";
-import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
-import { IUploadListener, UploadEvent, UploadState } from "../shared/services/upload-service/types";
-import { AnalysisStateSchema } from "../shared/services/volateq-api/api-schemas/analysis-state-schema";
-import { IAppModalForm } from "../shared/components/app-modal/types";
-import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
+import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import AppModalFormInfoArea from "@/app/shared/components/app-modal/app-modal-form-info-area.vue";
-import { TaskSchema } from "../shared/services/volateq-api/api-schemas/task-schema";
+import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
+import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
+import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
+import uploadService from "@/app/shared/services/upload-service/upload-service";
+import { BvTableFieldArray } from "bootstrap-vue";
+import { Component, Ref } from "vue-property-decorator";
+import appContentEventBus from "../shared/components/app-content/app-content-event-bus";
+import { IAppModalForm } from "../shared/components/app-modal/types";
+import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
+import { IUploadListener, UploadEvent, UploadState } from "../shared/services/upload-service/types";
+import { AnalysisSchema } from "../shared/services/volateq-api/api-schemas/analysis-schema";
+import { AnalysisStateSchema } from "../shared/services/volateq-api/api-schemas/analysis-state-schema";
+import { ApiStates, ApiStateStruct } from "../shared/services/volateq-api/api-states";
+import volateqApi from "../shared/services/volateq-api/volateq-api";
+import { IAnalysisId } from "./new-analysis/types";
 
 @Component({
   name: "app-analysis",
@@ -190,7 +199,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     });
   }
 
-  checkUploadState() {
+  checkUploadState(): void {
     if (uploadService.hasState(UploadState.UPLOADING)) {
       this.updateToUploadState();
     }
@@ -222,7 +231,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     return files;
   }
 
-  async onFileClick(analysis: AnalysisSchema, fileName: string) {
+  async onFileClick(analysis: AnalysisSchema, fileName: string): Promise<void> {
     try {
       const downloadUrl = await volateqApi.getAnalysisFileDownloadUrl(analysis.id, fileName);
       
@@ -241,7 +250,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     return analysisState && ApiStateStruct[analysisState.state.name] || [];
   }
 
-  onUpdateStateClick(analysis: AnalysisSchema, state: ApiStates) {
+  onUpdateStateClick(analysis: AnalysisSchema, state: ApiStates): void {
     if (!this.updateStateData.analysisId || this.updateStateData.analysisId !== analysis.id || this.updateStateData.state !== state) {
       this.updateStateData.message = "";
     }
@@ -251,7 +260,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     this.appUpdateStateModal.show();
   }
 
-  async onManageResultFilesClick(analysisRowItem: any) {
+  async onManageResultFilesClick(analysisRowItem: any): Promise<void> {
     this.manageImportFiles.analysisId = analysisRowItem.id;
     this.manageImportFiles.analysisResultId = analysisRowItem.analysisResultId;
     
@@ -269,7 +278,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     this.appManageResultFilesModal.show();
   }
 
-  async saveManageResultFiles() {
+  async saveManageResultFiles(): Promise<void> {
     try {
       appButtonEventBus.startLoading()
 
@@ -384,6 +393,6 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
 }
 </script>
 
-<style>
+<style lang="scss">
 
 </style>
