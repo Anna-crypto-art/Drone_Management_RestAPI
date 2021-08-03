@@ -1,43 +1,45 @@
 <template>
   <div class="plant-view-csp-ptc">
-    <div class="plant-view-csp-ptc-leftside">
-      <h2 class="plant-view-csp-ptc-title">{{ this.plant.name }}</h2>
-      <div class="plant-view-csp-ptc-subtitle">{{ $t('view-analysed-data-of-your-plant') }}</div>
-      <div class="plant-view-csp-ptc-view">
-        <div class="plant-view-csp-ptc-view-text">
-          {{ $t('view') }}:
+    <app-sidebar :open="true">
+      <div class="plant-view-csp-ptc-leftside">
+        <h2 class="plant-view-csp-ptc-title">{{ this.plant.name }}</h2>
+        <div class="plant-view-csp-ptc-subtitle">{{ $t('view-analysed-data-of-your-plant') }}</div>
+        <div class="plant-view-csp-ptc-view">
+          <div class="plant-view-csp-ptc-view-text">
+            {{ $t('view') }}:
+          </div>
+          <div class="plant-view-csp-ptc-view-buttons">
+            <b-button-group size="sm">
+              <b-button :pressed="mapView" @click="changeView('map')"><b-icon icon="map" /></b-button>
+              <b-button :pressed="tableView" @click="changeView('table')"><b-icon icon="table" /></b-button>
+            </b-button-group>
+          </div>
         </div>
-        <div class="plant-view-csp-ptc-view-buttons">
-          <b-button-group size="sm">
-            <b-button :pressed="mapView" @click="changeView('map')"><b-icon icon="map" /></b-button>
-            <b-button :pressed="tableView" @click="changeView('table')"><b-icon icon="table" /></b-button>
-          </b-button-group>
-        </div>
+        <app-table-container size="sm">
+          <b-table ref="analysisResultsTable"
+          :items="analysisResultsTableItems" 
+          :fields="analysisResultsTableColumns"
+          select-mode="single"
+          selectable
+          hover
+          head-variant="light"
+          @row-selected="onAnalysisResultSelected">
+            <template #head(selected)></template>
+            <template #head(kpis)="column">
+              {{ column.label }} <app-explanation>{{ $t('performance-indicators') }}</app-explanation>
+            </template>
+            <template #cell(selected)="{ rowSelected }">
+              <b-checkbox :checked="rowSelected" disabled class="b-table-selectable-checkbox"></b-checkbox>
+            </template>
+            <template #cell(kpis)="row">
+              <div v-for="kpi in row.item.kpis" :key="kpi">
+                <b-badge variant="primary">{{ kpi }}</b-badge>
+              </div>
+            </template>
+          </b-table>
+        </app-table-container>
       </div>
-      <app-table-container size="sm">
-        <b-table ref="analysisResultsTable"
-        :items="analysisResultsTableItems" 
-        :fields="analysisResultsTableColumns"
-        select-mode="single"
-        selectable
-        hover
-        head-variant="light"
-        @row-selected="onAnalysisResultSelected">
-          <template #head(selected)></template>
-          <template #head(kpis)="column">
-            {{ column.label }} <app-explanation>{{ $t('performance-indicators') }}</app-explanation>
-          </template>
-          <template #cell(selected)="{ rowSelected }">
-            <b-checkbox :checked="rowSelected" disabled class="b-table-selectable-checkbox"></b-checkbox>
-          </template>
-          <template #cell(kpis)="row">
-            <div v-for="kpi in row.item.kpis" :key="kpi">
-              <b-badge variant="primary">{{ kpi }}</b-badge>
-            </div>
-          </template>
-        </b-table>
-      </app-table-container>
-    </div>
+    </app-sidebar>
     <div class="plant-view-csp-ptc-rightside">
       <app-visual-csp-ptc v-if="hasResults" ref="visualCspPtc" :analysisResults="analysisResults" :plant="plant" v-show="mapView" />
       <app-tables-csp-ptc v-if="hasResults" ref="tablesCspPtc" :analysisResults="analysisResults" :plant="plant" v-show="tableView" />
@@ -56,6 +58,7 @@ import { IAnalysisResultSelection } from './types';
 import { BvTableFieldArray } from 'bootstrap-vue';
 import AppTableContainer from '@/app/shared/components/app-table-container/app-table-container.vue';
 import AppExplanation from '@/app/shared/components/app-explanation/app-explanation.vue';
+import AppSidebar from '@/app/shared/components/app-sidebar/app-sidebar.vue';
 import AppTablesCspPtc from '@/app/plant/csp-ptc/tables/tables-csp-ptc.vue';
 
 
@@ -66,6 +69,7 @@ import AppTablesCspPtc from '@/app/plant/csp-ptc/tables/tables-csp-ptc.vue';
     AppTableContainer,
     AppExplanation,
     AppTablesCspPtc,
+    AppSidebar,
   }
 })
 export default class AppPlantViewCspPtc extends Vue {

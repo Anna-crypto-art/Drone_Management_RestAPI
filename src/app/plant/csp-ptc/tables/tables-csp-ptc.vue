@@ -183,7 +183,7 @@ export default class AppTablesCspPtc extends BaseAuthComponent implements IAnaly
 </script>
 <style lang="scss">
 .app-tables-csp-ptc {
-  padding: 20px;
+  padding: 60px 20px;
 
   .no-data-placeholder {
     margin-top: 50px;
