@@ -356,4 +356,7 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
   height: 100%;
   width: 100%;
 }
+.toggle-button {
+  border-right: none;
+}
 </style>
