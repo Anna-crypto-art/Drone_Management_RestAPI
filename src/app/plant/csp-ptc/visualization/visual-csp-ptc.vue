@@ -1,6 +1,6 @@
 <template>
   <div class="visual-csp-ptc">
-    <open-layers ref="openlayercomp" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick">
+    <open-layers ref="openlayercomp" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick" @sidebarToggle="onSidebarToggled">
       <template #pcs>
         {{ $t("pcs") }} <app-explanation>{{ $t("pcs_expl") }}</app-explanation>
       </template>
@@ -147,6 +147,12 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
     } else {
       this.hideToast();
     }
+  }
+
+  onSidebarToggled(toggleState: boolean) {
+
+    console.log("blub2");
+    this.$emit("sidebarToggle", toggleState);
   }
 
   private createLayers(): void {

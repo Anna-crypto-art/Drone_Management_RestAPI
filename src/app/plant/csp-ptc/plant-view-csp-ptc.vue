@@ -1,6 +1,6 @@
 <template>
   <div class="plant-view-csp-ptc">
-    <app-sidebar :open="true">
+    <app-sidebar :open="sidebarOpen" @toggled="onSidebarToggled">
       <div class="plant-view-csp-ptc-leftside">
         <h2 class="plant-view-csp-ptc-title">{{ this.plant.name }}</h2>
         <div class="plant-view-csp-ptc-subtitle">{{ $t('view-analysed-data-of-your-plant') }}</div>
@@ -40,8 +40,8 @@
         </app-table-container>
       </div>
     </app-sidebar>
-    <div class="plant-view-csp-ptc-rightside">
-      <app-visual-csp-ptc v-if="hasResults" ref="visualCspPtc" :analysisResults="analysisResults" :plant="plant" v-show="mapView" />
+    <div :class="'plant-view-csp-ptc-rightside ' + (sidebarOpen ? 'open' : '')">
+      <app-visual-csp-ptc v-if="hasResults" ref="visualCspPtc" :analysisResults="analysisResults" :plant="plant" v-show="mapView" @sidebarToggle="onRightSidebarToggle" />
       <app-tables-csp-ptc v-if="hasResults" ref="tablesCspPtc" :analysisResults="analysisResults" :plant="plant" v-show="tableView" />
     </div>
   </div>
@@ -88,9 +88,11 @@ export default class AppPlantViewCspPtc extends Vue {
 
   analysisResults: AnalysisResultDetailedSchema[] | null = null;
 
+  sidebarOpen = true;
+
   private view: 'map' | 'table' = 'map';
 
-  async created() {
+  async created(): Promise<void> {
     this.analysisResults = await volateqApi.getAnalysisResults(this.plant.id);
 
     for (const analysisResult of this.analysisResults) {
@@ -129,7 +131,7 @@ export default class AppPlantViewCspPtc extends Vue {
     return this.view === 'table';
   }
 
-  onAnalysisResultSelected(selectedAnalysisResult: { id: string }[]) {
+  onAnalysisResultSelected(selectedAnalysisResult: { id: string }[]): void {
     const selectedAnalysisResultId = selectedAnalysisResult && selectedAnalysisResult.length > 0 && 
       selectedAnalysisResult[0].id || undefined;
 
@@ -137,8 +139,33 @@ export default class AppPlantViewCspPtc extends Vue {
     this.tablesCspPtc.selectAnalysisResult(selectedAnalysisResultId);
   }
 
-  changeView(view: 'map' | 'table') {
+  changeView(view: 'map' | 'table'): void {
     this.view = view;
+
+    if (this.view === 'map') {
+      this.rerenderOLCanvas();
+    }
+  }
+
+  onSidebarToggled(open: boolean): void {
+    this.sidebarOpen = open;
+
+    if (!this.sidebarOpen) {
+      this.rerenderOLCanvas(300);
+    }
+  }
+
+  onRightSidebarToggle(toggleState: boolean): void {
+    console.log("blub3");
+
+    this.rerenderOLCanvas(300);
+  }
+
+  private rerenderOLCanvas(timeout = 0): void {
+    setTimeout(() => {
+      // triggers openlayers canvas element to rerender
+      window.dispatchEvent(new UIEvent("resize"));
+    }, timeout)
   }
 }
 </script>
@@ -173,8 +200,13 @@ $left-width: 400px;
 
   &-rightside {
     height: 100%;
-    width: calc(100% - #{$left-width});
+    width: 100%;
+
+    &.open {
+      width: calc(100% - #{$left-width});
+    }
   }
+
 
   &-view {
     display: flex;

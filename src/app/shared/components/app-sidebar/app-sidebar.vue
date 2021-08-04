@@ -1,12 +1,12 @@
 <template>
-  <div :class="'app-sidebar ' + (open && 'open' || '')">
+  <div :class="'app-sidebar ' + (isOpen && 'open' || '')">
     <div class="app-sidebar-container">
       <div class="app-sidebar-inner">
         <slot></slot>
       </div>
     </div>
     <b-button variant="secondary" size="sm" class="toggle-button"  @click="onToggle()">
-      <b-icon :icon="open && 'arrow-bar-left' || 'arrow-bar-right'"></b-icon>
+      <b-icon :icon="isOpen && 'arrow-bar-left' || 'arrow-bar-right'"></b-icon>
     </b-button>
   </div>
 </template>
@@ -21,8 +21,12 @@ import { Prop, Component } from "vue-property-decorator";
 export default class AppSidebar extends Vue {
   @Prop({ default: true }) open!: boolean;
 
+  isOpen = this.open;
+
   onToggle(): void {
-    this.open = !this.open;
+    this.isOpen = !this.isOpen;
+
+    this.$emit("toggled", this.isOpen);
   }
 }
 
