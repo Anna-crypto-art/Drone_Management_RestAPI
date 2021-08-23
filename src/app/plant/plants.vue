@@ -13,6 +13,7 @@
           <router-link v-show="row.item.digitized" :to="{ name: 'Plant', params: { id: row.item.id }}">
             {{ row.item.name }}
           </router-link>
+          <span v-if="!row.item.digitized">{{ row.item.name }}</span>
         </template>
         <template #cell(digitized)="row">
           <b-icon :class="row.item.digitized ? 'green' : 'red'" :icon="row.item.digitized ? 'check2' : 'x'"></b-icon>
