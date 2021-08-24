@@ -28,13 +28,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultCspPtcMappings<AnalysisResul
     keyFigureId: AnalysisResultKeyFigure.MISSING_GLASS_TUBE_ID,
   },
   {
-    getValue: r => r.coating_degration,
-    transName: "coating-degration",
-    transDescr: "coating-degration_expl",
-    keyFigureId: AnalysisResultKeyFigure.COATING_DEGRATION_ID,
-  },
-  {
-    getValue: r => r.coating_degrated,
+    getValue: r => r.coating_degraded,
     transName: "oxygen-penetration",
     transDescr: "oxygen-penetration_expl",
     keyFigureId: AnalysisResultKeyFigure.COATING_DEGRATION_ID,
