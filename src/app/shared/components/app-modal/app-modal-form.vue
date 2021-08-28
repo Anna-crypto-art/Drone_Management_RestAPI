@@ -55,6 +55,9 @@ export default class AppModalForm extends Vue implements IAppModalForm {
       this.alertMsg = msg;
     } else {
       this.alertMsg = msg.error;
+      if (msg.details) {
+        this.alertMsg += "<br><small>Details: " + msg.details + "</small>";
+      }
     }
   }
 

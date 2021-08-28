@@ -8,7 +8,7 @@ import analysisResultCspPtcMappingHce from "@/app/shared/services/volateq-api/ap
 
 
 export class CoatingDegratedKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcHceSchema> {
-  protected readonly keyFigureId = AnalysisResultKeyFigure.COATING_DEGRATION_ID;
+  protected readonly keyFigureId = AnalysisResultKeyFigure.COATING_DEGRADATION_ID;
   protected readonly analysisResultMapping = analysisResultCspPtcMappingHce;
   public readonly name = "O2Penetration";
 

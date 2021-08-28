@@ -157,7 +157,7 @@ export default class AppTablesCspPtc extends BaseAuthComponent implements IAnaly
         );
 
         const csvFileName = dateHelper.toDateTime(new Date()) + "_" + this.plant.name + "_" + 
-          new Date(Date.parse(this.analysisResult!.csp_ptc.time)).toLocaleDateString() + "_" + activeComponent.label + ".csv";
+          new Date(Date.parse(this.analysisResult!.csp_ptc.created_at)).toLocaleDateString() + "_" + activeComponent.label + ".csv";
 
         AppDownloader.download(await volateqApi.generateDownloadUrl(authCsvDownloadUrl, csvFileName), csvFileName);
       } catch (e) {

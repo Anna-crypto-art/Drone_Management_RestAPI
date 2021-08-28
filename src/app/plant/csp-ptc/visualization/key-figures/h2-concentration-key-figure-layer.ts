@@ -8,7 +8,7 @@ import analysisResultCspPtcMappingHce from "@/app/shared/services/volateq-api/ap
 
 
 export class H2ConcentrationKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcHceSchema> {
-  protected readonly keyFigureId = AnalysisResultKeyFigure.H2_CONCENTRATION_ID;
+  protected readonly keyFigureId = AnalysisResultKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID;
   protected readonly analysisResultMapping = analysisResultCspPtcMappingHce;
   public readonly name = "H2Concentration"; 
 

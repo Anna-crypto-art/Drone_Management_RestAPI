@@ -7,6 +7,9 @@
       <template #irIntensity>
         {{ $t("ir-intensity-class") }} <app-explanation><span v-html="$t('ir-intensity-class_expl')"></span></app-explanation>
       </template>
+      <template #glassTubeTemperature>
+        {{ $t("glass-tube-temperature-class") }} <app-explanation><span v-html="$t('glass-tube-temperature-class_expl')"></span></app-explanation>
+      </template>
       <template #missingGhr>
         {{ $t("missing-gct") }} <app-explanation><span v-html="$t('missing-gct_expl')"></span></app-explanation>
       </template>
@@ -55,6 +58,7 @@ import { AnalysisResultDetailedSchema } from '@/app/shared/services/volateq-api/
 import { KeyFigureLayer } from './key-figures/shared/key-figure-layer';
 import { AnalysisResultCspPtcSchemaBase } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-schema-base';
 import { IrIntensityKeyFigureLayer } from './key-figures/ir-intensity-key-figure-layer';
+import { GlassTubeTemperatureKeyFigureLayer } from './key-figures/glass-tube-temperature-key-figure-layer';
 import { SceAngleKeyFigureLayer } from './key-figures/sce-angle-key-figure-layer';
 import { MissingGhrKeyFigureLayer } from './key-figures/missing-ghr-key-figure-layer';
 import { CoatingDegratedKeyFigureLayer } from './key-figures/coating-degrated-key-figure-layer';
@@ -236,6 +240,10 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
       case AnalysisResultKeyFigure.IR_INTENSITY_ID:
         return new IrIntensityKeyFigureLayer(this.plant, this, anaysisResult, 
           (selected, legend) => this.onSelected(selected, legend)) as any;
+
+      case AnalysisResultKeyFigure.GLASS_TUBE_TEMPERATURE_ID:
+        return new GlassTubeTemperatureKeyFigureLayer(this.plant, this, anaysisResult, 
+          (selected, legend) => this.onSelected(selected, legend)) as any;
       
       case AnalysisResultKeyFigure.SCE_ANGLE_ID:
         return new SceAngleKeyFigureLayer(this.plant, this, anaysisResult, 
@@ -245,11 +253,11 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
         return new MissingGhrKeyFigureLayer(this.plant, this, anaysisResult,
           (selected, legend) => this.onSelected(selected, legend)) as any;
 
-      case AnalysisResultKeyFigure.COATING_DEGRATION_ID:
+      case AnalysisResultKeyFigure.COATING_DEGRADATION_ID:
         return new CoatingDegratedKeyFigureLayer(this.plant, this, anaysisResult,
           (selected, legend) => this.onSelected(selected, legend)) as any;
 
-      case AnalysisResultKeyFigure.H2_CONCENTRATION_ID:
+      case AnalysisResultKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID:
         return new H2ConcentrationKeyFigureLayer(this.plant, this, anaysisResult,
           (selected, legend) => this.onSelected(selected, legend)) as any;
 

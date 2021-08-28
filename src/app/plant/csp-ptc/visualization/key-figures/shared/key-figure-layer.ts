@@ -47,7 +47,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
   protected mapRecordEntryToFeatureInfo(key: string, value: unknown, descr?: string): FeatureInfo | undefined {
     const featureInfo = {
       name: this.vueComponent.$t(key).toString(),
-      value: (value as any).toString(),
+      value: value === null || value === undefined ? "" : (value as any).toString(),
       descr: descr,
     };
 
