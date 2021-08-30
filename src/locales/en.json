@@ -179,5 +179,6 @@
   "resend-invitation": "Resend invitation",
   "user-invitation-sent-successfully": "User invitation sent successfully",
   "user-unlocked-successfully": "User unlocked successfully",
-  "user-locked-successfully": "User locked successfully"
+  "user-locked-successfully": "User locked successfully",
+  "wind-speed": "Wind speed (m/s)"
 }

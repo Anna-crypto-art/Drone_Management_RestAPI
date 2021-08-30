@@ -10,6 +10,18 @@ const analysisResultCspPtcMappingHce: AnalysisResultCspPtcMappings<AnalysisResul
     transName: "absorber-temperature",
   },
   {
+    getValue: r => r.ambient_temperature,
+    transName: "ambient-temperature",
+  },
+  {
+    getValue: r => r.wind_speed,
+    transName: "wind-speed",
+  },
+  {
+    getValue: r => r.timestamp,
+    transName: "time",
+  },
+  {
     getValue: r => r.ir_intensity,
     transName: "ir-intensity",
     transDescr: "ir-intensity_expl",
@@ -50,8 +62,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultCspPtcMappings<AnalysisResul
     transName: "high-hydrogen-concentration",
     transDescr: "high-hydrogen-concentration_expl",
     keyFigureId: AnalysisResultKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID,
-  }
-
+  },
 ];
 
 export default analysisResultCspPtcMappingHce;
