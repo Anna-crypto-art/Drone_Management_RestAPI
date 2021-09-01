@@ -132,6 +132,6 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
     feature_count = feature_count || this.geoJSON!.features.length;
     const totalCount = this.geoJSON!.custom.components_total_count[this.keyFigure.component_id];
 
-    return ` (<b>${Math.round(feature_count / totalCount * 100)}%</b> - <small>${feature_count}</small>)`
+    return ` (<b>${(feature_count / totalCount * 100).toFixed(1)}%</b> - <small>${feature_count}</small>)`
   }
 }

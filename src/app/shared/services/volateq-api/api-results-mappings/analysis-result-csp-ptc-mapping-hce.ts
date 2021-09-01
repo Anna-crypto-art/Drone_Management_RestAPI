@@ -63,6 +63,12 @@ const analysisResultCspPtcMappingHce: AnalysisResultCspPtcMappings<AnalysisResul
     transDescr: "high-hydrogen-concentration_expl",
     keyFigureId: AnalysisResultKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID,
   },
+  {
+    getValue: r => r.recommended_action_class,
+    transName: "recommended-action",
+    transDescr: "recommended-action_expl",
+    keyFigureId: AnalysisResultKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID,
+  }
 ];
 
 export default analysisResultCspPtcMappingHce;

@@ -22,6 +22,10 @@
       <template #sceAngle>
         {{ $t("sce-alignment-offset") }} <app-explanation>{{ $t("angle-deviation_expl") }}</app-explanation>
       </template>
+      <template #recommendedAction>
+        {{ $t("recommended-action") }} <app-explanation><span v-html="$t('recommended-action_expl')"></span></app-explanation>
+      </template>
+
     </open-layers>
     <div v-if="hasLegend" class="visual-csp-ptc-legend">
       <div v-for="entry in legendEntries" :key="entry.color" class="visual-csp-ptc-legend-entry">
@@ -59,6 +63,7 @@ import { KeyFigureLayer } from './key-figures/shared/key-figure-layer';
 import { AnalysisResultCspPtcSchemaBase } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-schema-base';
 import { IrIntensityKeyFigureLayer } from './key-figures/ir-intensity-key-figure-layer';
 import { GlassTubeTemperatureKeyFigureLayer } from './key-figures/glass-tube-temperature-key-figure-layer';
+import { RecommendedActionKeyFigureLayer } from './key-figures/recommended-action-key-figure-layer';
 import { SceAngleKeyFigureLayer } from './key-figures/sce-angle-key-figure-layer';
 import { MissingGhrKeyFigureLayer } from './key-figures/missing-ghr-key-figure-layer';
 import { CoatingDegratedKeyFigureLayer } from './key-figures/coating-degrated-key-figure-layer';
@@ -264,6 +269,11 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
       case AnalysisResultKeyFigure.SCA_SDX_IMAGE_ID:
         return new ScaSdxImageKeyFigureLayer(this.plant, this, anaysisResult,
           (selected, legend) => this.onSelected(selected, legend)) as any;
+
+      case AnalysisResultKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID:
+        return new RecommendedActionKeyFigureLayer(this.plant, this, anaysisResult,
+          (selected, legend) => this.onSelected(selected, legend)) as any;
+
     }
 
     return undefined;
