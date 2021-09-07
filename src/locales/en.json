@@ -185,5 +185,6 @@
   "recommended-action_expl": "Recommended action. <br> <b>1</b>: All well. <br> <b>2</b>: Observe. <br> <b>3</b>: Fix it.",
   "recommended-action-class-1": "All well",
   "recommended-action-class-2": "Observe",
-  "recommended-action-class-3": "Fix it"
+  "recommended-action-class-3": "Fix it",
+  "loop": "Loop"
 }

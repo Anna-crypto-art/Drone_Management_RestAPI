@@ -71,6 +71,7 @@ import { H2ConcentrationKeyFigureLayer } from './key-figures/h2-concentration-ke
 import { ScaSdxImageKeyFigureLayer } from './key-figures/sca-sdx-image-key-figure-layer';
 import { ComponentLayer } from './components/shared/component-layer';
 import { ScaComponentLayer } from './components/sca-component-layer';
+import { LoopComponentLayer } from './components/loop-component-layer';
 import { AbsorberComponentLayer } from './components/absorber-component-layer';
 import { SceComponentLayer } from './components/sce-component-layer';
 import { IAnalysisResultSelection } from '../types';
@@ -283,7 +284,8 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
     this.componentLayers = [
       new ScaComponentLayer(this.plant, this),
       new AbsorberComponentLayer(this.plant, this),
-      new SceComponentLayer(this.plant, this)
+      new SceComponentLayer(this.plant, this),
+      new LoopComponentLayer(this.plant, this),
     ];
   }
 
@@ -297,6 +299,9 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
 
       case AnalysisResultComponent.CSP_PTC_SCE:
         return this.$t('single-collector-elements').toString();
+
+      case AnalysisResultComponent.CSP_PTC_LOOP:
+        return this.$t('loop').toString();
     }
 
     throw new Error(`Name for componentId ${componentId} not supported`);
