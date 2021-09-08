@@ -217,6 +217,7 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
               type: "group",
               childLayers: [],
               visible: false,
+              groupSelection: true,
             },
             kpiLayers: [],
           }
