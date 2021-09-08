@@ -72,6 +72,7 @@ import { ScaSdxImageKeyFigureLayer } from './key-figures/sca-sdx-image-key-figur
 import { ComponentLayer } from './components/shared/component-layer';
 import { ScaComponentLayer } from './components/sca-component-layer';
 import { LoopComponentLayer } from './components/loop-component-layer';
+import { MirrorComponentLayer } from './components/mirror-component-layer';
 import { AbsorberComponentLayer } from './components/absorber-component-layer';
 import { SceComponentLayer } from './components/sce-component-layer';
 import { IAnalysisResultSelection } from '../types';
@@ -286,6 +287,7 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
       new AbsorberComponentLayer(this.plant, this),
       new SceComponentLayer(this.plant, this),
       new LoopComponentLayer(this.plant, this),
+      new MirrorComponentLayer(this.plant, this),
     ];
   }
 
@@ -302,6 +304,9 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
 
       case AnalysisResultComponent.CSP_PTC_LOOP:
         return this.$t('loop').toString();
+
+      case AnalysisResultComponent.CSP_PTC_MIRROR:
+        return this.$t('mirrors').toString();
     }
 
     throw new Error(`Name for componentId ${componentId} not supported`);
