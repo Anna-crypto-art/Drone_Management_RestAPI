@@ -283,11 +283,11 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
 
   private createComponentLayers(): void {
     this.componentLayers = [
-      new ScaComponentLayer(this.plant, this),
       new AbsorberComponentLayer(this.plant, this),
-      new SceComponentLayer(this.plant, this),
-      new LoopComponentLayer(this.plant, this),
       new MirrorComponentLayer(this.plant, this),
+      new SceComponentLayer(this.plant, this),
+      new ScaComponentLayer(this.plant, this),
+      new LoopComponentLayer(this.plant, this),
     ];
   }
 
