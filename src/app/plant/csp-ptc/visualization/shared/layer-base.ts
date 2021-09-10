@@ -2,7 +2,7 @@ import Vue from "vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { FeatureLike } from "ol/Feature";
 import { Style, Stroke, Text, Fill } from 'ol/style';
-import { GeoJSONLayer } from "volateq-geovisualization";
+import { GeoJSONLayer, IOpenLayersComponent } from "volateq-geovisualization";
 
 
 const GEO_JSON_OPTIONS = { dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857' };
@@ -21,6 +21,7 @@ export abstract class LayerBase {
   protected readonly autoZoom: boolean = false;
   protected visible = true;
   protected zIndex?: number;
+  protected showPcsZoomLevel = 15;
 
   constructor(
     protected readonly plant: PlantSchema,
@@ -69,8 +70,10 @@ export abstract class LayerBase {
   }
 
   protected showText(feature: FeatureLike, props: Record<string, unknown> = {}): Text | undefined {
+    console.log("zoomlevel: " + (this.vueComponent as any).openLayers.getMap().getView().getZoom());
+
     return new Text({
-      text: this._showPCS && this.getPcs(feature) || '',
+      text: this._showPCS && (this.vueComponent as any).openLayers.getMap().getView().getZoom() >= this.showPcsZoomLevel && this.getPcs(feature) || '',
       overflow: true,
       rotation: -(Math.PI / 2.3),
       stroke: new Stroke({

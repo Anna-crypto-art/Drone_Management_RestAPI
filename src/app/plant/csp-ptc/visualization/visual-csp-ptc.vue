@@ -1,6 +1,6 @@
 <template>
   <div class="visual-csp-ptc">
-    <open-layers ref="openlayercomp" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick" @sidebarToggle="onSidebarToggled">
+    <open-layers ref="openLayers" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick" @sidebarToggle="onSidebarToggled">
       <template #pcs>
         {{ $t("pcs") }} <app-explanation>{{ $t("pcs_expl") }}</app-explanation>
       </template>
@@ -55,26 +55,13 @@
 <script lang="ts">
 import Vue from 'vue'
 import { Component, Prop, Ref } from 'vue-property-decorator';
-import { GroupLayer, LayerType, OpenLayers } from 'volateq-geovisualization';
+import { GroupLayer, IOpenLayersComponent, LayerType, OpenLayers } from 'volateq-geovisualization';
 import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
 import { AnalysisResultKeyFigure } from '@/app/shared/services/volateq-api/api-analysis-result-key-figures';
 import { AnalysisResultDetailedSchema } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-schema';
 import { KeyFigureLayer } from './key-figures/shared/key-figure-layer';
 import { AnalysisResultCspPtcSchemaBase } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-schema-base';
-import { IrIntensityKeyFigureLayer } from './key-figures/ir-intensity-key-figure-layer';
-import { GlassTubeTemperatureKeyFigureLayer } from './key-figures/glass-tube-temperature-key-figure-layer';
-import { RecommendedActionKeyFigureLayer } from './key-figures/recommended-action-key-figure-layer';
-import { SceAngleKeyFigureLayer } from './key-figures/sce-angle-key-figure-layer';
-import { MissingGhrKeyFigureLayer } from './key-figures/missing-ghr-key-figure-layer';
-import { CoatingDegratedKeyFigureLayer } from './key-figures/coating-degrated-key-figure-layer';
-import { H2ConcentrationKeyFigureLayer } from './key-figures/h2-concentration-key-figure-layer';
-import { ScaSdxImageKeyFigureLayer } from './key-figures/sca-sdx-image-key-figure-layer';
 import { ComponentLayer } from './components/shared/component-layer';
-import { ScaComponentLayer } from './components/sca-component-layer';
-import { LoopComponentLayer } from './components/loop-component-layer';
-import { MirrorComponentLayer } from './components/mirror-component-layer';
-import { AbsorberComponentLayer } from './components/absorber-component-layer';
-import { SceComponentLayer } from './components/sce-component-layer';
 import { IAnalysisResultSelection } from '../types';
 import { FeatureInfos, Legend } from './key-figures/shared/types';
 import { FeatureLike } from "ol/Feature";
@@ -82,6 +69,7 @@ import AppExplanation from '@/app/shared/components/app-explanation/app-explanat
 import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
 import { AnalysisResultComponent } from '@/app/shared/services/volateq-api/api-analysis-result-components';
 import { GroupKPILayer } from "./types";
+import { COMPONENT_LAYERS, KEY_FIGURE_LAYERS } from "./layers";
 
 
 @Component({
@@ -94,7 +82,7 @@ import { GroupKPILayer } from "./types";
 export default class AppVisualCspPtc extends BaseAuthComponent implements IAnalysisResultSelection {
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
-  @Ref() openlayercomp!: Vue;
+  @Ref() openLayers!: IOpenLayersComponent;
 
   private selectedAnalysisResult?: AnalysisResultDetailedSchema;
   private parentComponentKpiLayers!: GroupKPILayer[];
@@ -239,57 +227,17 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
     anaysisResult: AnalysisResultDetailedSchema,
     keyFigureId: AnalysisResultKeyFigure
   ): KeyFigureLayer<AnalysisResultCspPtcSchemaBase> | undefined {
-    // I get a Vetur(2322) that i do not understand... 
-    // maybe it is a ts bug or (more likley) i am just too stupid to understand
-    // anyhow... to solve this i use the so famous "any" type!
-    // Please feel free to do further investigations and remove the "any" type if you can!
-
-    switch (keyFigureId) {
-      case AnalysisResultKeyFigure.IR_INTENSITY_ID:
-        return new IrIntensityKeyFigureLayer(this.plant, this, anaysisResult, 
-          (selected, legend) => this.onSelected(selected, legend)) as any;
-
-      case AnalysisResultKeyFigure.GLASS_TUBE_TEMPERATURE_ID:
-        return new GlassTubeTemperatureKeyFigureLayer(this.plant, this, anaysisResult, 
-          (selected, legend) => this.onSelected(selected, legend)) as any;
-      
-      case AnalysisResultKeyFigure.SCE_ANGLE_ID:
-        return new SceAngleKeyFigureLayer(this.plant, this, anaysisResult, 
-          (selected, legend) => this.onSelected(selected, legend)) as any;
-
-      case AnalysisResultKeyFigure.MISSING_GLASS_TUBE_ID:
-        return new MissingGhrKeyFigureLayer(this.plant, this, anaysisResult,
-          (selected, legend) => this.onSelected(selected, legend)) as any;
-
-      case AnalysisResultKeyFigure.COATING_DEGRADATION_ID:
-        return new CoatingDegratedKeyFigureLayer(this.plant, this, anaysisResult,
-          (selected, legend) => this.onSelected(selected, legend)) as any;
-
-      case AnalysisResultKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID:
-        return new H2ConcentrationKeyFigureLayer(this.plant, this, anaysisResult,
-          (selected, legend) => this.onSelected(selected, legend)) as any;
-
-      case AnalysisResultKeyFigure.SCA_SDX_IMAGE_ID:
-        return new ScaSdxImageKeyFigureLayer(this.plant, this, anaysisResult,
-          (selected, legend) => this.onSelected(selected, legend)) as any;
-
-      case AnalysisResultKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID:
-        return new RecommendedActionKeyFigureLayer(this.plant, this, anaysisResult,
-          (selected, legend) => this.onSelected(selected, legend)) as any;
-
+    const keyFigureLayer = KEY_FIGURE_LAYERS.find(keyFigureLayer => keyFigureLayer.keyFigureId === keyFigureId);
+    if (keyFigureLayer) {
+      return new keyFigureLayer.layerType(this.plant, this, anaysisResult, 
+        (selected, legend) => this.onSelected(selected, legend));
     }
 
     return undefined;
   }
 
   private createComponentLayers(): void {
-    this.componentLayers = [
-      new AbsorberComponentLayer(this.plant, this),
-      new MirrorComponentLayer(this.plant, this),
-      new SceComponentLayer(this.plant, this),
-      new ScaComponentLayer(this.plant, this),
-      new LoopComponentLayer(this.plant, this),
-    ];
+    this.componentLayers = COMPONENT_LAYERS.map(componentType => new (componentType as any)(this.plant, this));
   }
 
   private getComponentName(componentId: AnalysisResultComponent): string {

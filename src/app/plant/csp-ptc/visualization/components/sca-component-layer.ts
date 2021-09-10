@@ -5,6 +5,9 @@ import { FeatureLike } from "ol/Feature";
 
 export class ScaComponentLayer extends ComponentLayer {
   protected readonly componentId = AnalysisResultComponent.CSP_PTC_SCA;
+
+  protected showPcsZoomLevel = 16.5;
+
   public readonly name = "solar-collector-assembly";
   public readonly selected = true;
   public readonly autoZoom = true;

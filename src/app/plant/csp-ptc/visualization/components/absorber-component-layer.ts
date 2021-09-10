@@ -7,6 +7,8 @@ export class AbsorberComponentLayer extends ComponentLayer {
   protected readonly componentId = AnalysisResultComponent.CSP_PTC_ABSORBER;
   public readonly name = "absorber-tubes";
 
+  protected showPcsZoomLevel = 19;
+
   public getStyle(feature: FeatureLike): Style {
     return new Style({
       stroke: new Stroke({
