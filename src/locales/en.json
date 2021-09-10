@@ -186,5 +186,11 @@
   "recommended-action-class-1": "All well",
   "recommended-action-class-2": "Observe",
   "recommended-action-class-3": "Fix it",
-  "loop": "Loop"
+  "loop": "Loop",
+
+  "CSP_PTC_Absorber": "Absorber tubes",
+  "CSP_PTC_SCA": "SCA",
+  "CSP_PTC_Mirror": "Mirrors",
+  "CSP_PTC_SCE": "SCE",
+  "CSP_PTC_Loop": "Loop"
 }

@@ -7,6 +7,8 @@ export class MirrorComponentLayer extends ComponentLayer {
   protected readonly componentId = AnalysisResultComponent.CSP_PTC_MIRROR;
   public readonly name = "mirrors";
 
+  protected showPcsZoomLevel = 22;
+
   public getStyle(feature: FeatureLike): Style {
     return new Style({
       fill: new Fill({

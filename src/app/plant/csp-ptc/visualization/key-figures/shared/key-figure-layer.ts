@@ -8,9 +8,9 @@ import { FeatureInfo, FeatureInfos, FeatureProperties, Legend } from "./types";
 import apiResultsLoader from "@/app/shared/services/volateq-api/api-results-loader";
 import { AnalysisResultCspPtcMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultCspPtcMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-helper";
-import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import Vue from "vue";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
+import { IPlantVisualization } from "../../types";
 
 
 export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> extends LayerBase {
@@ -24,12 +24,10 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
   };
 
   constructor(
-    plant: PlantSchema,
-    vueComponent: Vue,
+    vueComponent: Vue & IPlantVisualization,
     public readonly analysisResult: AnalysisResultDetailedSchema,
-    protected readonly onSelectedEvent: (selected: boolean, legend?: Legend) => void,
   ) {
-    super(plant, vueComponent);
+    super(vueComponent);
 
     this.visible = false;
   }
@@ -41,7 +39,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
   protected async onSelected(selected: boolean): Promise<void> {
     super.onSelected(selected);
 
-    this.onSelectedEvent(selected, this.getLegend());
+    this.vueComponent.onLayerSelected(selected, this.getLegend());
   }
 
   protected mapRecordEntryToFeatureInfo(key: string, value: unknown, descr?: string): FeatureInfo | undefined {
@@ -96,7 +94,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
   public async load(): Promise<Record<string, unknown>> {
     apiResultsLoader.loadResults<T>(this.analysisResult.id, this.keyFigure.component.id);
 
-    this.geoJSON = await volateqApi.getKeyFiguresGeoVisual(this.plant.id, this.analysisResult.id, [this.keyFigure.id]);
+    this.geoJSON = await volateqApi.getKeyFiguresGeoVisual(this.vueComponent.plant.id, this.analysisResult.id, [this.keyFigure.id]);
 
     return this.geoJSON as Record<string, unknown>;
   }

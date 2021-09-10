@@ -7,6 +7,8 @@ export class SceComponentLayer extends ComponentLayer {
   protected readonly componentId = AnalysisResultComponent.CSP_PTC_SCE;
   public readonly name = "single-collector-elements";
 
+  protected showPcsZoomLevel = 18;
+
   public getStyle(feature: FeatureLike): Style {
     return new Style({
       fill: new Fill({

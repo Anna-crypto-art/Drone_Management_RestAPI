@@ -13,6 +13,7 @@ export class RecommendedActionKeyFigureLayer extends KeyFigureLayer<AnalysisResu
   protected readonly analysisResultMapping = analysisResultCspPtcMappingHce;
   public readonly name = "recommendedAction";
 
+  protected showPcsZoomLevel = 19;
   protected zIndex = 2;
 
   protected mapRecordEntryToFeatureInfo(key: string, value: unknown, descr?: string): FeatureInfo | undefined {
@@ -38,7 +39,11 @@ export class RecommendedActionKeyFigureLayer extends KeyFigureLayer<AnalysisResu
     });
   }
 
-  protected getLegend(): Legend {
+  protected getLegend(): Legend | undefined {
+    if (!this.geoJSON) {
+      return undefined;
+    }
+
     return {
       id: this.keyFigureId.toString(),
       entries: Object.keys(RECOMMENDED_ACTION_CLASS_COLORS).map(clsKey => {

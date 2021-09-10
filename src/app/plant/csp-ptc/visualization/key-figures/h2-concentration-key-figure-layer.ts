@@ -12,6 +12,7 @@ export class H2ConcentrationKeyFigureLayer extends KeyFigureLayer<AnalysisResult
   protected readonly analysisResultMapping = analysisResultCspPtcMappingHce;
   public readonly name = "H2Concentration"; 
 
+  protected showPcsZoomLevel = 19;
   protected zIndex = 2;
 
   protected mapRecordEntryToFeatureInfo(key: string, value: unknown, descr?: string): FeatureInfo | undefined {
@@ -34,7 +35,11 @@ export class H2ConcentrationKeyFigureLayer extends KeyFigureLayer<AnalysisResult
     });
   }
 
-  protected getLegend(): Legend {
+  protected getLegend(): Legend | undefined {
+    if (!this.geoJSON) {
+      return undefined;
+    }
+
     return {
       id: this.keyFigureId.toString(),
       entries: [

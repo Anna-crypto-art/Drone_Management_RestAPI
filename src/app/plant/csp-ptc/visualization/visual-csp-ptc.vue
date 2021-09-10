@@ -67,8 +67,7 @@ import { FeatureInfos, Legend } from './key-figures/shared/types';
 import { FeatureLike } from "ol/Feature";
 import AppExplanation from '@/app/shared/components/app-explanation/app-explanation.vue';
 import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
-import { AnalysisResultComponent } from '@/app/shared/services/volateq-api/api-analysis-result-components';
-import { GroupKPILayer } from "./types";
+import { GroupKPILayer, IPlantVisualization } from "./types";
 import { COMPONENT_LAYERS, KEY_FIGURE_LAYERS } from "./layers";
 
 
@@ -79,7 +78,7 @@ import { COMPONENT_LAYERS, KEY_FIGURE_LAYERS } from "./layers";
     AppExplanation
   }
 })
-export default class AppVisualCspPtc extends BaseAuthComponent implements IAnalysisResultSelection {
+export default class AppVisualCspPtc extends BaseAuthComponent implements IAnalysisResultSelection, IPlantVisualization {
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
   @Ref() openLayers!: IOpenLayersComponent;
@@ -149,9 +148,19 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
   }
 
   onSidebarToggled(toggleState: boolean) {
-
-    console.log("blub2");
     this.$emit("sidebarToggle", toggleState);
+  }
+
+  onLayerSelected(selected: boolean, legend?: Legend) {
+    if (legend) {
+      if (selected) {
+        this.legends.push(legend);
+      } else {
+        this.legends.splice(this.legends.findIndex(l => l.id === legend.id), 1);
+      }
+    }
+
+    this.hideToast();
   }
 
   private createLayers(): void {
@@ -201,7 +210,7 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
           parentComponentLayers[keyFigure.component.id] = {
             componentId: keyFigure.component.id,
             groupLayer: {
-              name: this.getComponentName(keyFigure.component.id),
+              name: this.$t(keyFigure.component.abbrev).toString(),
               type: "group",
               childLayers: [],
               visible: false,
@@ -229,36 +238,14 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
   ): KeyFigureLayer<AnalysisResultCspPtcSchemaBase> | undefined {
     const keyFigureLayer = KEY_FIGURE_LAYERS.find(keyFigureLayer => keyFigureLayer.keyFigureId === keyFigureId);
     if (keyFigureLayer) {
-      return new keyFigureLayer.layerType(this.plant, this, anaysisResult, 
-        (selected, legend) => this.onSelected(selected, legend));
+      return new (keyFigureLayer.layerType)(this, anaysisResult);
     }
 
     return undefined;
   }
 
   private createComponentLayers(): void {
-    this.componentLayers = COMPONENT_LAYERS.map(componentType => new (componentType as any)(this.plant, this));
-  }
-
-  private getComponentName(componentId: AnalysisResultComponent): string {
-    switch (componentId) {
-      case AnalysisResultComponent.CSP_PTC_ABSORBER:
-        return this.$t('absorber-tubes').toString();
-      
-      case AnalysisResultComponent.CSP_PTC_SCA:
-        return this.$t('solar-collector-assembly').toString();
-
-      case AnalysisResultComponent.CSP_PTC_SCE:
-        return this.$t('single-collector-elements').toString();
-
-      case AnalysisResultComponent.CSP_PTC_LOOP:
-        return this.$t('loop').toString();
-
-      case AnalysisResultComponent.CSP_PTC_MIRROR:
-        return this.$t('mirrors').toString();
-    }
-
-    throw new Error(`Name for componentId ${componentId} not supported`);
+    this.componentLayers = COMPONENT_LAYERS.map(componentType => new (componentType as any)(this));
   }
 
   private getKpiLayers(): KeyFigureLayer<AnalysisResultCspPtcSchemaBase>[] {
@@ -268,18 +255,6 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
     }
 
     return kpiLayers;
-  }
-
-  private onSelected(selected: boolean, legend?: Legend) {
-    if (legend) {
-      if (selected) {
-        this.legends.push(legend);
-      } else {
-        this.legends.splice(this.legends.findIndex(l => l.id === legend.id), 1);
-      }
-    }
-
-    this.hideToast();
   }
 
   private hideToast() {

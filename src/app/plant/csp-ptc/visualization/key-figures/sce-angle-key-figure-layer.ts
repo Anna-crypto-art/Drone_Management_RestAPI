@@ -16,6 +16,8 @@ export class SceAngleKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcS
   protected readonly analysisResultMapping = analysisResultCspPtcMappingSce;
   public readonly name = "sceAngle";
 
+  protected showPcsZoomLevel = 18;
+
   protected mapRecordEntryToFeatureInfo(key: string, value: unknown, descr?: string): FeatureInfo | undefined {
     const featureInfo = super.mapRecordEntryToFeatureInfo(key, value, descr);
     
@@ -37,23 +39,27 @@ export class SceAngleKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcS
     });
   }
 
-  protected getLegend(): Legend {
+  protected getLegend(): Legend | undefined {
+    if (!this.geoJSON) {
+      return undefined;
+    }
+
     return {
       id: this.keyFigureId.toString(),
       entries: [
         { 
           color: "green",
-          name: "0° - 0.149°" + this.getLegendEntryCount(this.geoJSON!.features
+          name: "0° - 0.149°" + this.getLegendEntryCount(this.geoJSON.features
             .filter(feature => this.getOffsetColor(feature.properties.value as number) == SCE_ANGLE_OFFSET_COLORS[1]).length) 
         },
         { 
           color: "yellow", 
-          name: "0.15° - 0.299°" + this.getLegendEntryCount(this.geoJSON!.features
+          name: "0.15° - 0.299°" + this.getLegendEntryCount(this.geoJSON.features
             .filter(feature => this.getOffsetColor(feature.properties.value as number) == SCE_ANGLE_OFFSET_COLORS[2]).length) 
         },
         { 
           color: "red",
-          name: "0.3° - &infin;" + this.getLegendEntryCount(this.geoJSON!.features
+          name: "0.3° - &infin;" + this.getLegendEntryCount(this.geoJSON.features
             .filter(feature => this.getOffsetColor(feature.properties.value as number) == SCE_ANGLE_OFFSET_COLORS[3]).length)
         },
       ]

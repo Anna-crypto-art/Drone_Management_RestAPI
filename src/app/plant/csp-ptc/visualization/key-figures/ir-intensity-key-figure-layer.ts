@@ -13,6 +13,7 @@ export class IrIntensityKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspP
   protected readonly analysisResultMapping = analysisResultCspPtcMappingHce;
   public readonly name = "irIntensity";
 
+  protected showPcsZoomLevel = 19;
   protected zIndex = 1;
 
   protected mapRecordEntryToFeatureInfo(key: string, value: unknown, descr?: string): FeatureInfo | undefined {
@@ -38,7 +39,11 @@ export class IrIntensityKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspP
     });
   }
 
-  protected getLegend(): Legend {
+  protected getLegend(): Legend | undefined {
+    if (!this.geoJSON) {
+      return undefined;
+    }
+
     return {
       id: this.keyFigureId.toString(),
       entries: Object.keys(IR_INTENSITY_CLASS_COLORS).map(clsKey => {
