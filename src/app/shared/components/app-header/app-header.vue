@@ -17,7 +17,7 @@
           href="/plants"
           :active="isActiveRoute(['/plants', '/plant/*'])"
         >
-          <span class="nav-item-text">{{ $t("plants") }}</span>
+          <span class="nav-item-text">{{ $t('plants') }}</span>
         </b-nav-item>
 
         <b-nav-item
@@ -25,7 +25,7 @@
           href="/analyses"
           :active="isActiveRoute(['/analyses', '/analysis/new'])"
         >
-          <span class="nav-item-text">{{ $t("analysis") }}</span>
+          <span class="nav-item-text">{{ $t('analysis') }}</span>
         </b-nav-item>
       </b-navbar-nav>
 
@@ -36,21 +36,21 @@
           </template>
 
           <b-dropdown-item href="/" class="link">{{
-            $t("profile")
+            $t('profile')
           }}</b-dropdown-item>
 
           <b-dropdown-item
             href="/settings/users"
             v-if="isSuperAdmin"
             class="link"
-            >{{ $t("users") }}</b-dropdown-item
+            >{{ $t('users') }}</b-dropdown-item
           >
 
           <b-dropdown-divider />
 
           <b-dropdown-form>
             <b-button @click="logout" class="width-100pc">{{
-              $t("logout")
+              $t('logout')
             }}</b-button>
           </b-dropdown-form>
         </b-nav-item-dropdown>
@@ -60,13 +60,13 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop } from 'vue-property-decorator';
 
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
+import volateqApi from '@/app/shared/services/volateq-api/volateq-api';
 
 @Component({
-  name: "app-header",
+  name: 'app-header'
 })
 export default class AppHeader extends BaseAuthComponent {
   @Prop({ default: true }) fluid!: boolean;
@@ -75,7 +75,7 @@ export default class AppHeader extends BaseAuthComponent {
     try {
       await volateqApi.logout();
 
-      this.$router.push({ name: "Login" });
+      this.$router.push({ name: 'Login' });
       this.$router.go(0); // Reload the page to refresh the js cache
     } catch (e) {
       console.error(e);
@@ -83,11 +83,11 @@ export default class AppHeader extends BaseAuthComponent {
   }
 
   isActiveRoute(routes: string[]): boolean {
-    return !!routes.find((route) =>
-      route.indexOf("*") != -1
+    return !!routes.find(route =>
+      route.indexOf('*') != -1
         ? this.$router.currentRoute.path
-            .replace(route.replace("*", ""), "")
-            .indexOf("/") == -1
+            .replace(route.replace('*', ''), '')
+            .indexOf('/') == -1
         : this.$router.currentRoute.path === route
     );
   }
@@ -95,8 +95,16 @@ export default class AppHeader extends BaseAuthComponent {
 </script>
 
 <style lang="scss">
-@import "@/scss/_colors.scss";
-@import "@/scss/_variables.scss";
+@import '@/scss/_colors.scss';
+@import '@/scss/_variables.scss';
+@import '~bootstrap/scss/_functions';
+@import '~bootstrap/scss/_variables';
+@import '~bootstrap/scss/mixins/_breakpoints';
+
+%padtopbot-0 {
+  padding-top: 0;
+  padding-bottom: 0;
+}
 
 .app-header {
   height: $header-height;
@@ -104,8 +112,17 @@ export default class AppHeader extends BaseAuthComponent {
   background-color: $blue;
   color: $white;
 
+  @extend %padtopbot-0;
+
   .navbar-toggler {
     border-radius: 0;
+  }
+
+  @include media-breakpoint-down(sm) {
+    .navbar-collapse {
+      margin-right: -1rem;
+      margin-left: -1rem;
+    }
   }
 
   &-menu {
@@ -136,9 +153,15 @@ export default class AppHeader extends BaseAuthComponent {
     }
   }
 
+  .navbar-brand {
+    height: $header-height;
+    @extend %padtopbot-0;
+  }
+
   &-logo {
     height: $header-height;
     margin-left: -15px;
+    @extend %padtopbot-0;
   }
 
   .dropdown {
@@ -170,6 +193,7 @@ export default class AppHeader extends BaseAuthComponent {
       display: flex;
       justify-content: center;
       align-items: center;
+      transition: all 0.15s linear;
 
       &::after {
         content: none;
@@ -180,7 +204,7 @@ export default class AppHeader extends BaseAuthComponent {
   .bi-gear-fill {
     color: $white;
     transform-origin: center;
-    transition: 300ms linear all;
+    transition: all 0.3s linear;
   }
 }
 </style>

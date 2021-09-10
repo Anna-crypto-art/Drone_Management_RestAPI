@@ -1,3 +1,6 @@
+/**
+ * @type {import {  } from "eslint";}
+ */
 module.exports = {
   "env": {
       "browser": true,

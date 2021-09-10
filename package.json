@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/VolaTeQ/volateq-web-app#readme",
   "dependencies": {
+    "@vue/babel-preset-app": "^4.5.13",
     "axios": "0.19.2",
     "bootstrap": "4.5.0",
     "bootstrap-vue": "^2.21.2",
