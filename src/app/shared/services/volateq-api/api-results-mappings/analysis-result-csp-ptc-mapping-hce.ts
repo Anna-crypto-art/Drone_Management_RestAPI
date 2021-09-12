@@ -6,8 +6,20 @@ import { AnalysisResultCspPtcMappings } from "./types";
 const analysisResultCspPtcMappingHce: AnalysisResultCspPtcMappings<AnalysisResultCspPtcHceSchema> = [
   ...analysisResultCspPtcMappingBase,
   {
-    getValue: r => r.absorber_temperature,
+    getValue: r => r.htf_temperature,
     transName: "absorber-temperature",
+  },
+  {
+    getValue: r => r.ambient_temperature,
+    transName: "ambient-temperature",
+  },
+  {
+    getValue: r => r.wind_speed,
+    transName: "wind-speed",
+  },
+  {
+    getValue: r => r.timestamp,
+    transName: "time",
   },
   {
     getValue: r => r.ir_intensity,
@@ -22,30 +34,41 @@ const analysisResultCspPtcMappingHce: AnalysisResultCspPtcMappings<AnalysisResul
     keyFigureId: AnalysisResultKeyFigure.IR_INTENSITY_ID,
   },
   {
-    getValue: r => r.missing_glass_cladding_tube,
+    getValue: r => r.glass_tube_temperature,
+    transName: "glass-tube-temperature",
+    transDescr: "glass-tube-temperature_expl",
+    keyFigureId: AnalysisResultKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
+  },
+  {
+    getValue: r => r.glass_tube_temperature_class,
+    transName: "glass-tube-temperature-class",
+    transDescr: "glass-tube-temperature-class_expl",
+    keyFigureId: AnalysisResultKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
+  },
+  {
+    getValue: r => r.missing_glass_tube,
     transName: "missing-gct",
     transDescr: "missing-gct_expl",
-    keyFigureId: AnalysisResultKeyFigure.MISSING_GLASS_CLADDING_TUBE_ID,
+    keyFigureId: AnalysisResultKeyFigure.MISSING_GLASS_TUBE_ID,
   },
   {
-    getValue: r => r.coating_degration,
-    transName: "coating-degration",
-    transDescr: "coating-degration_expl",
-    keyFigureId: AnalysisResultKeyFigure.COATING_DEGRATION_ID,
-  },
-  {
-    getValue: r => r.coating_degrated,
+    getValue: r => r.coating_degraded,
     transName: "oxygen-penetration",
     transDescr: "oxygen-penetration_expl",
-    keyFigureId: AnalysisResultKeyFigure.COATING_DEGRATION_ID,
+    keyFigureId: AnalysisResultKeyFigure.COATING_DEGRADATION_ID,
   },
   {
     getValue: r => r.h2_concentration,
     transName: "high-hydrogen-concentration",
     transDescr: "high-hydrogen-concentration_expl",
-    keyFigureId: AnalysisResultKeyFigure.H2_CONCENTRATION_ID,
+    keyFigureId: AnalysisResultKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID,
+  },
+  {
+    getValue: r => r.recommended_action_class,
+    transName: "recommended-action",
+    transDescr: "recommended-action_expl",
+    keyFigureId: AnalysisResultKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID,
   }
-
 ];
 
 export default analysisResultCspPtcMappingHce;

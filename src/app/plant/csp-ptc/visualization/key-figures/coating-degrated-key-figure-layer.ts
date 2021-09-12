@@ -8,7 +8,7 @@ import analysisResultCspPtcMappingHce from "@/app/shared/services/volateq-api/ap
 
 
 export class CoatingDegratedKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcHceSchema> {
-  protected readonly keyFigureId = AnalysisResultKeyFigure.COATING_DEGRATION_ID;
+  protected readonly keyFigureId = AnalysisResultKeyFigure.COATING_DEGRADATION_ID;
   protected readonly analysisResultMapping = analysisResultCspPtcMappingHce;
   public readonly name = "O2Penetration";
 
@@ -40,7 +40,7 @@ export class CoatingDegratedKeyFigureLayer extends KeyFigureLayer<AnalysisResult
       entries: [
         {
           color: '#5d0085',
-          name: this.vueComponent.$t('oxygen-penetration').toString() + ` (<b>${this.geoJSON.features.length}</b>)`,
+          name: this.vueComponent.$t('oxygen-penetration').toString() + this.getLegendEntryCount(),
         }
       ]
     };

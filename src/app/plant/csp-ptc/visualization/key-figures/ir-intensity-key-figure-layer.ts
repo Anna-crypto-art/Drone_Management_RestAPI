@@ -39,17 +39,15 @@ export class IrIntensityKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspP
   }
 
   protected getLegend(): Legend {
-    console.log("this.geoJSON:");
-    console.log(this.geoJSON);
-
     return {
       id: this.keyFigureId.toString(),
-      entries: Object.keys(IR_INTENSITY_CLASS_COLORS).map(clsKey => ({
-        color: IR_INTENSITY_CLASS_COLORS[clsKey],
-        name: this.vueComponent.$t(`ir-intensity-class-${clsKey}`).toString() + ` (<b>${
-          this.geoJSON.features.filter(feature => feature.properties.value?.toString() === clsKey).length
-        }</b>)`,
-      })),
+      entries: Object.keys(IR_INTENSITY_CLASS_COLORS).map(clsKey => {
+        const classCount = this.geoJSON!.features.filter(feature => feature.properties.value?.toString() === clsKey).length;
+        return {
+          color: IR_INTENSITY_CLASS_COLORS[clsKey],
+          name: this.vueComponent.$t(`ir-intensity-class-${clsKey}`).toString() + this.getLegendEntryCount(classCount),
+        }
+      }),
     }
   }
 }

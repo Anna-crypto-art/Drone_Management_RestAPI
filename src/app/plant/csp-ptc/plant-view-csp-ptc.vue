@@ -1,71 +1,48 @@
 <template>
   <div class="plant-view-csp-ptc">
-    <div class="plant-view-csp-ptc-leftside">
-      <h2 class="plant-view-csp-ptc-title">{{ this.plant.name }}</h2>
-      <div class="plant-view-csp-ptc-subtitle">
-        {{ $t('view-analysed-data-of-your-plant') }}
-      </div>
-      <div class="plant-view-csp-ptc-view">
-        <div class="plant-view-csp-ptc-view-text">{{ $t('view') }}:</div>
-        <div class="plant-view-csp-ptc-view-buttons">
-          <b-button-group size="sm">
-            <b-button :pressed="mapView" @click="changeView('map')"
-              ><b-icon icon="map"
-            /></b-button>
-            <b-button :pressed="tableView" @click="changeView('table')"
-              ><b-icon icon="table"
-            /></b-button>
-          </b-button-group>
+    <app-sidebar :open="sidebarOpen" @toggled="onSidebarToggled">
+      <div class="plant-view-csp-ptc-leftside">
+        <h2 class="plant-view-csp-ptc-title">{{ this.plant.name }}</h2>
+        <div class="plant-view-csp-ptc-subtitle">{{ $t('view-analysed-data-of-your-plant') }}</div>
+        <div class="plant-view-csp-ptc-view">
+          <div class="plant-view-csp-ptc-view-text">
+            {{ $t('view') }}:
+          </div>
+          <div class="plant-view-csp-ptc-view-buttons">
+            <b-button-group size="sm">
+              <b-button :pressed="mapView" @click="changeView('map')"><b-icon icon="map" /></b-button>
+              <b-button :pressed="tableView" @click="changeView('table')"><b-icon icon="table" /></b-button>
+            </b-button-group>
+          </div>
         </div>
-      </div>
-      <app-table-container size="sm">
-        <b-table
-          ref="analysisResultsTable"
-          :items="analysisResultsTableItems"
+        <app-table-container size="sm">
+          <b-table ref="analysisResultsTable"
+          :items="analysisResultsTableItems" 
           :fields="analysisResultsTableColumns"
           select-mode="single"
           selectable
           hover
           head-variant="light"
-          @row-selected="onAnalysisResultSelected"
-        >
-          <template #head(selected)></template>
-          <template #head(kpis)="column">
-            {{ column.label }}
-            <app-explanation>{{
-              $t('performance-indicators')
-            }}</app-explanation>
-          </template>
-          <template #cell(selected)="{ rowSelected }">
-            <b-checkbox
-              :checked="rowSelected"
-              disabled
-              class="b-table-selectable-checkbox"
-            ></b-checkbox>
-          </template>
-          <template #cell(kpis)="row">
-            <div v-for="kpi in row.item.kpis" :key="kpi">
-              <b-badge variant="primary">{{ kpi }}</b-badge>
-            </div>
-          </template>
-        </b-table>
-      </app-table-container>
-    </div>
-    <div class="plant-view-csp-ptc-rightside">
-      <app-visual-csp-ptc
-        v-if="hasResults"
-        ref="visualCspPtc"
-        :analysisResults="analysisResults"
-        :plant="plant"
-        v-show="mapView"
-      />
-      <app-tables-csp-ptc
-        v-if="hasResults"
-        ref="tablesCspPtc"
-        :analysisResults="analysisResults"
-        :plant="plant"
-        v-show="tableView"
-      />
+          @row-selected="onAnalysisResultSelected">
+            <template #head(selected)></template>
+            <template #head(kpis)="column">
+              {{ column.label }} <app-explanation>{{ $t('performance-indicators') }}</app-explanation>
+            </template>
+            <template #cell(selected)="{ rowSelected }">
+              <b-checkbox :checked="rowSelected" disabled class="b-table-selectable-checkbox"></b-checkbox>
+            </template>
+            <template #cell(kpis)="row">
+              <div v-for="kpi in row.item.kpis" :key="kpi">
+                <b-badge variant="primary">{{ kpi }}</b-badge>
+              </div>
+            </template>
+          </b-table>
+        </app-table-container>
+      </div>
+    </app-sidebar>
+    <div :class="'plant-view-csp-ptc-rightside ' + (sidebarOpen ? 'open' : '')">
+      <app-visual-csp-ptc v-if="hasResults" ref="visualCspPtc" :analysisResults="analysisResults" :plant="plant" v-show="mapView" @sidebarToggle="onRightSidebarToggle" />
+      <app-tables-csp-ptc v-if="hasResults" ref="tablesCspPtc" :analysisResults="analysisResults" :plant="plant" v-show="tableView" />
     </div>
   </div>
 </template>
@@ -81,6 +58,7 @@ import { IAnalysisResultSelection } from './types';
 import { BvTableFieldArray } from 'bootstrap-vue';
 import AppTableContainer from '@/app/shared/components/app-table-container/app-table-container.vue';
 import AppExplanation from '@/app/shared/components/app-explanation/app-explanation.vue';
+import AppSidebar from '@/app/shared/components/app-sidebar/app-sidebar.vue';
 import AppTablesCspPtc from '@/app/plant/csp-ptc/tables/tables-csp-ptc.vue';
 
 type View = 'map' | 'table';
@@ -91,7 +69,8 @@ type View = 'map' | 'table';
     AppVisualCspPtc,
     AppTableContainer,
     AppExplanation,
-    AppTablesCspPtc
+    AppTablesCspPtc,
+    AppSidebar,
   }
 })
 export default class AppPlantViewCspPtc extends Vue {
@@ -111,6 +90,7 @@ export default class AppPlantViewCspPtc extends Vue {
   analysisResults: AnalysisResultDetailedSchema[] | null = null;
 
   private view: View = 'map';
+  sidebarOpen = true;
 
   async created(): Promise<void> {
     this.analysisResults = await volateqApi.getAnalysisResults(this.plant.id);
@@ -159,11 +139,8 @@ export default class AppPlantViewCspPtc extends Vue {
   }
 
   onAnalysisResultSelected(selectedAnalysisResult: { id: string }[]): void {
-    const selectedAnalysisResultId =
-      (selectedAnalysisResult &&
-        selectedAnalysisResult.length > 0 &&
-        selectedAnalysisResult[0].id) ||
-      undefined;
+    const selectedAnalysisResultId = selectedAnalysisResult && selectedAnalysisResult.length > 0 && 
+      selectedAnalysisResult[0].id || undefined;
 
     this.visualCspPtc.selectAnalysisResult(selectedAnalysisResultId);
     this.tablesCspPtc.selectAnalysisResult(selectedAnalysisResultId);
@@ -171,6 +148,31 @@ export default class AppPlantViewCspPtc extends Vue {
 
   changeView(view: View): void {
     this.view = view;
+
+    if (this.view === 'map') {
+      this.rerenderOLCanvas();
+    }
+  }
+
+  onSidebarToggled(open: boolean): void {
+    this.sidebarOpen = open;
+
+    if (!this.sidebarOpen) {
+      this.rerenderOLCanvas(300);
+    }
+  }
+
+  onRightSidebarToggle(toggleState: boolean): void {
+    console.log("blub3");
+
+    this.rerenderOLCanvas(300);
+  }
+
+  private rerenderOLCanvas(timeout = 0): void {
+    setTimeout(() => {
+      // triggers openlayers canvas element to rerender
+      window.dispatchEvent(new UIEvent("resize"));
+    }, timeout)
   }
 }
 </script>
@@ -205,8 +207,13 @@ $left-width: 400px;
 
   &-rightside {
     height: 100%;
-    width: calc(100% - #{$left-width});
+    width: 100%;
+
+    &.open {
+      width: calc(100% - #{$left-width});
+    }
   }
+
 
   &-view {
     display: flex;

@@ -24,6 +24,7 @@
           >
             {{ row.item.name }}
           </router-link>
+          <span v-if="!row.item.digitized">{{ row.item.name }}</span>
         </template>
 
         <template #cell(digitized)="row">

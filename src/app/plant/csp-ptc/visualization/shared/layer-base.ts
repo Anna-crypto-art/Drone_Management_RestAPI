@@ -60,7 +60,8 @@ export abstract class LayerBase {
         style: (feature: FeatureLike) => this.getStyle(feature),
         onSelected: (selected: boolean) => this.onSelected(selected),
         visible: this.visible,
-        zIndex: this.zIndex
+        zIndex: this.zIndex,
+        layerType: 'VectorImageLayer',
       };
     }
 

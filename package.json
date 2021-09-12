@@ -26,6 +26,7 @@
     "bootstrap-vue": "^2.21.2",
     "core-js": "3.6.5",
     "direct-vuex": "0.12.0",
+    "ol": "^6.6.1",
     "resumablejs": "1.1.0",
     "volateq-geovisualization": "github:VolaTeQ/volateq-geovisualization#main",
     "vue": "2.6.12",

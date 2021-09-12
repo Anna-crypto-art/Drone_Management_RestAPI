@@ -1,11 +1,14 @@
 <template>
   <div class="visual-csp-ptc">
-    <open-layers ref="openlayercomp" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick">
+    <open-layers ref="openlayercomp" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick" @sidebarToggle="onSidebarToggled">
       <template #pcs>
         {{ $t("pcs") }} <app-explanation>{{ $t("pcs_expl") }}</app-explanation>
       </template>
       <template #irIntensity>
         {{ $t("ir-intensity-class") }} <app-explanation><span v-html="$t('ir-intensity-class_expl')"></span></app-explanation>
+      </template>
+      <template #glassTubeTemperature>
+        {{ $t("glass-tube-temperature-class") }} <app-explanation><span v-html="$t('glass-tube-temperature-class_expl')"></span></app-explanation>
       </template>
       <template #missingGhr>
         {{ $t("missing-gct") }} <app-explanation><span v-html="$t('missing-gct_expl')"></span></app-explanation>
@@ -19,6 +22,10 @@
       <template #sceAngle>
         {{ $t("sce-alignment-offset") }} <app-explanation>{{ $t("angle-deviation_expl") }}</app-explanation>
       </template>
+      <template #recommendedAction>
+        {{ $t("recommended-action") }} <app-explanation><span v-html="$t('recommended-action_expl')"></span></app-explanation>
+      </template>
+
     </open-layers>
     <div v-if="hasLegend" class="visual-csp-ptc-legend">
       <div v-for="entry in legendEntries" :key="entry.color" class="visual-csp-ptc-legend-entry">
@@ -55,6 +62,8 @@ import { AnalysisResultDetailedSchema } from '@/app/shared/services/volateq-api/
 import { KeyFigureLayer } from './key-figures/shared/key-figure-layer';
 import { AnalysisResultCspPtcSchemaBase } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-schema-base';
 import { IrIntensityKeyFigureLayer } from './key-figures/ir-intensity-key-figure-layer';
+import { GlassTubeTemperatureKeyFigureLayer } from './key-figures/glass-tube-temperature-key-figure-layer';
+import { RecommendedActionKeyFigureLayer } from './key-figures/recommended-action-key-figure-layer';
 import { SceAngleKeyFigureLayer } from './key-figures/sce-angle-key-figure-layer';
 import { MissingGhrKeyFigureLayer } from './key-figures/missing-ghr-key-figure-layer';
 import { CoatingDegratedKeyFigureLayer } from './key-figures/coating-degrated-key-figure-layer';
@@ -62,6 +71,7 @@ import { H2ConcentrationKeyFigureLayer } from './key-figures/h2-concentration-ke
 import { ScaSdxImageKeyFigureLayer } from './key-figures/sca-sdx-image-key-figure-layer';
 import { ComponentLayer } from './components/shared/component-layer';
 import { ScaComponentLayer } from './components/sca-component-layer';
+import { LoopComponentLayer } from './components/loop-component-layer';
 import { AbsorberComponentLayer } from './components/absorber-component-layer';
 import { SceComponentLayer } from './components/sce-component-layer';
 import { IAnalysisResultSelection } from '../types';
@@ -149,6 +159,12 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
     }
   }
 
+  onSidebarToggled(toggleState: boolean) {
+
+    console.log("blub2");
+    this.$emit("sidebarToggle", toggleState);
+  }
+
   private createLayers(): void {
     this.createComponentLayers();
     this.createKPILayers();
@@ -230,26 +246,35 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
       case AnalysisResultKeyFigure.IR_INTENSITY_ID:
         return new IrIntensityKeyFigureLayer(this.plant, this, anaysisResult, 
           (selected, legend) => this.onSelected(selected, legend)) as any;
+
+      case AnalysisResultKeyFigure.GLASS_TUBE_TEMPERATURE_ID:
+        return new GlassTubeTemperatureKeyFigureLayer(this.plant, this, anaysisResult, 
+          (selected, legend) => this.onSelected(selected, legend)) as any;
       
       case AnalysisResultKeyFigure.SCE_ANGLE_ID:
         return new SceAngleKeyFigureLayer(this.plant, this, anaysisResult, 
           (selected, legend) => this.onSelected(selected, legend)) as any;
 
-      case AnalysisResultKeyFigure.MISSING_GLASS_CLADDING_TUBE_ID:
+      case AnalysisResultKeyFigure.MISSING_GLASS_TUBE_ID:
         return new MissingGhrKeyFigureLayer(this.plant, this, anaysisResult,
           (selected, legend) => this.onSelected(selected, legend)) as any;
 
-      case AnalysisResultKeyFigure.COATING_DEGRATION_ID:
+      case AnalysisResultKeyFigure.COATING_DEGRADATION_ID:
         return new CoatingDegratedKeyFigureLayer(this.plant, this, anaysisResult,
           (selected, legend) => this.onSelected(selected, legend)) as any;
 
-      case AnalysisResultKeyFigure.H2_CONCENTRATION_ID:
+      case AnalysisResultKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID:
         return new H2ConcentrationKeyFigureLayer(this.plant, this, anaysisResult,
           (selected, legend) => this.onSelected(selected, legend)) as any;
 
       case AnalysisResultKeyFigure.SCA_SDX_IMAGE_ID:
         return new ScaSdxImageKeyFigureLayer(this.plant, this, anaysisResult,
           (selected, legend) => this.onSelected(selected, legend)) as any;
+
+      case AnalysisResultKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID:
+        return new RecommendedActionKeyFigureLayer(this.plant, this, anaysisResult,
+          (selected, legend) => this.onSelected(selected, legend)) as any;
+
     }
 
     return undefined;
@@ -259,7 +284,8 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
     this.componentLayers = [
       new ScaComponentLayer(this.plant, this),
       new AbsorberComponentLayer(this.plant, this),
-      new SceComponentLayer(this.plant, this)
+      new SceComponentLayer(this.plant, this),
+      new LoopComponentLayer(this.plant, this),
     ];
   }
 
@@ -273,6 +299,9 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
 
       case AnalysisResultComponent.CSP_PTC_SCE:
         return this.$t('single-collector-elements').toString();
+
+      case AnalysisResultComponent.CSP_PTC_LOOP:
+        return this.$t('loop').toString();
     }
 
     throw new Error(`Name for componentId ${componentId} not supported`);
@@ -306,6 +335,8 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
 </script>
 
 <style lang="scss">
+@import '@/scss/_colors.scss';
+
 // Fix that toaster overlays popover
 .b-popover {
   z-index: 1;
@@ -355,5 +386,12 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
 .openlayers-map {
   height: 100%;
   width: 100%;
+}
+.toggle-button {
+  border: none;
+
+  &:hover {
+    background-color: $background-grey !important;
+  }
 }
 </style>

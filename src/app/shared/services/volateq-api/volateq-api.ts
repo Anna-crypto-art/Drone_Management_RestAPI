@@ -145,8 +145,12 @@ export class VolateqAPI extends HttpClientBase {
     return this.postForm(`/auth/import-analysis-result/${analysisId}`, fileData);
   }
 
-  public getAnalysisResult(analysisResultId: string): Promise<AnalysisResultDetailedSchema> {
-    return this.get(`/auth/analysis-result/${analysisResultId}`);
+  public async getAnalysisResult(analysisResultId: string): Promise<AnalysisResultDetailedSchema> {
+    const analysisResults = [await this.get(`/auth/analysis-result/${analysisResultId}`)];
+    
+    this.filterKeyFigures(analysisResults);
+
+    return analysisResults[0];
   }
 
   public getAllSpecificAnalysisResult<T>(analysisResultId: string, componentId: AnalysisResultComponent): Promise<T[]> {
@@ -209,8 +213,12 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/geo-visual/${plantId}/key-figures/${analysisResultId}`, { ids: keyFiguresIds });
   }
 
-  public getAnalysisResults(plantId: string): Promise<AnalysisResultDetailedSchema[]> {
-    return this.get(`/auth/plant/${plantId}/analysis-results`);
+  public async getAnalysisResults(plantId: string): Promise<AnalysisResultDetailedSchema[]> {
+    const analysisResults = await this.get(`/auth/plant/${plantId}/analysis-results`);
+    
+    this.filterKeyFigures(analysisResults);
+
+    return analysisResults;
   }
 
   public importFieldgeometry(file: File, customerId: string, plantId: string, clearBefore: boolean): Promise<TaskSchema> {
@@ -233,6 +241,19 @@ export class VolateqAPI extends HttpClientBase {
 
   public unLockUser(userId: string, lock: boolean): Promise<void> {
     return this.post(`/auth/user/${userId}/un-lock`, { lock })
+  }
+
+  private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {
+    // Temporary special case for IR_INTENSITY: Replaced by GLASS_TUBE_TEMPERATURE
+    for (const analysisResult of analysisResults) {
+      const ir_intensity_index = analysisResult.key_figures.findIndex(
+        keyFigure => keyFigure.id === AnalysisResultKeyFigure.IR_INTENSITY_ID);
+      if (ir_intensity_index != -1 && 
+        analysisResult.key_figures.find(keyFigure => keyFigure.id === AnalysisResultKeyFigure.GLASS_TUBE_TEMPERATURE_ID)
+      ) {
+        analysisResult.key_figures.splice(ir_intensity_index, 1);
+      }
+    }
   }
 }
 
