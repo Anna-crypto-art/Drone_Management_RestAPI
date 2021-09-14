@@ -6,7 +6,7 @@ import { AnalysisResultCspPtcHceSchema } from "@/app/shared/services/volateq-api
 import { FeatureInfo, FeatureInfos, Legend } from "./shared/types";
 import analysisResultCspPtcMappingHce from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-hce";
 
-const RECOMMENDED_ACTION_CLASS_COLORS = {1: "green", 2: "yellow", 3: "red"};
+const RECOMMENDED_ACTION_CLASS_COLORS = {0: "grey", 1: "green", 2: "yellow", 3: "red"};
 
 export class RecommendedActionKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcHceSchema> {
   protected readonly keyFigureId = AnalysisResultKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID;
@@ -27,8 +27,16 @@ export class RecommendedActionKeyFigureLayer extends KeyFigureLayer<AnalysisResu
   }
 
   public getStyle(feature: FeatureLike): Style {
-    const classification = this.getProperties(feature)?.value;
-    const color = classification && RECOMMENDED_ACTION_CLASS_COLORS[classification];
+    let classification = this.getProperties(feature)?.value;
+    if (classification === undefined || classification === null) {
+      classification = 0;
+    }
+
+    if (!(classification in RECOMMENDED_ACTION_CLASS_COLORS)) {
+      console.error("unsupported classification: " + classification);
+    }
+
+    const color = RECOMMENDED_ACTION_CLASS_COLORS[classification];
 
     return new Style({
       stroke: color && new Stroke({

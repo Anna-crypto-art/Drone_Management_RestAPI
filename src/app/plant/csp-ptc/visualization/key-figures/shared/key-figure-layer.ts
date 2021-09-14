@@ -126,10 +126,10 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
     return this.analysisResult.key_figures.find(keyFigure => keyFigure.id === this.keyFigureId)!;
   }
 
-  protected getLegendEntryCount(feature_count?: number): string {
-    feature_count = feature_count || this.geoJSON!.features.length;
-    const totalCount = this.geoJSON!.custom.components_total_count[this.keyFigure.component_id];
+  protected getLegendEntryCount(featureCount?: number): string {
+    featureCount = featureCount || this.geoJSON!.features.length;
+    const totalCount = featureCount && this.geoJSON!.features.length || this.geoJSON!.custom.components_total_count[this.keyFigure.component_id];
 
-    return ` (<b>${(feature_count / totalCount * 100).toFixed(1)}%</b> - <small>${feature_count}</small>)`
+    return ` (<b>${(Math.round((featureCount / totalCount * 100) * 10) / 10).toString()}%</b> - <small>${featureCount}</small>)`
   }
 }

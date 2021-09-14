@@ -27,8 +27,16 @@ export class GlassTubeTemperatureKeyFigureLayer extends KeyFigureLayer<AnalysisR
   }
 
   public getStyle(feature: FeatureLike): Style {
-    const classification = this.getProperties(feature)?.value;
-    const color = classification && GLASS_TUBE_TEMPERATURE_CLASS_COLORS[classification];
+    let classification = this.getProperties(feature)?.value;
+    if (classification === undefined || classification === null) {
+      classification = 0;
+    }
+
+    if (!(classification in GLASS_TUBE_TEMPERATURE_CLASS_COLORS)) {
+      console.error("unsupported classification: " + classification);
+    }
+
+    const color = GLASS_TUBE_TEMPERATURE_CLASS_COLORS[classification];
 
     return new Style({
       stroke: color && new Stroke({
