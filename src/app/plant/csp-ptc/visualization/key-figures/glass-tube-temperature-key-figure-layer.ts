@@ -6,7 +6,7 @@ import { AnalysisResultCspPtcHceSchema } from "@/app/shared/services/volateq-api
 import { FeatureInfo, FeatureInfos, Legend } from "./shared/types";
 import analysisResultCspPtcMappingHce from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-hce";
 
-const GLASS_TUBE_TEMPERATURE_CLASS_COLORS = { 0: "grey", 1: "green", 2: "yellow", 3: "red" };
+const GLASS_TUBE_TEMPERATURE_CLASS_COLORS = { 1: "green", 2: "yellow", 3: "red", 0: "grey" };
 
 export class GlassTubeTemperatureKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcHceSchema> {
   protected readonly keyFigureId = AnalysisResultKeyFigure.GLASS_TUBE_TEMPERATURE_ID;
