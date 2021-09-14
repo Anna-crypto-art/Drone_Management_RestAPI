@@ -95,7 +95,7 @@ export default class AppTableCspPtc extends Vue implements ITableComponent {
   getCsvColumnMappingsParam(): { [column_name: string]: string } {
     const columnsMapping = this.mappingHelper.getColumnsMapping();
     const translatedColumnsMapping = {};
-    for (const transName in Object.keys(columnsMapping)) {
+    for (const transName of Object.keys(columnsMapping)) {
       translatedColumnsMapping[this.$t(transName).toString()] = columnsMapping[transName];
     }
 
