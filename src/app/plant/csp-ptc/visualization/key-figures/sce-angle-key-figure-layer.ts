@@ -29,7 +29,7 @@ export class SceAngleKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcS
   }
 
   public getStyle(feature: FeatureLike): Style {
-    const offsetColor = this.getOffsetColor(this.getProperties(feature).value);
+    const offsetColor = this.getOffsetColor(this.getProperties(feature).value as number);
 
     return new Style({
       fill: offsetColor && new Fill({

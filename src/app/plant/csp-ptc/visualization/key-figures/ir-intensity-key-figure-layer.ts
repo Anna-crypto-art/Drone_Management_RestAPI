@@ -27,7 +27,7 @@ export class IrIntensityKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspP
   }
 
   public getStyle(feature: FeatureLike): Style {
-    const classification = this.getProperties(feature)?.value;
+    const classification = this.getProperties(feature)?.value as number;
     const color = classification && IR_INTENSITY_CLASS_COLORS[classification];
 
     return new Style({
