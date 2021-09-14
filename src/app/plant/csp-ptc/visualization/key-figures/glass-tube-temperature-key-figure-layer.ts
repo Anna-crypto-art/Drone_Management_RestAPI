@@ -6,7 +6,7 @@ import { AnalysisResultCspPtcHceSchema } from "@/app/shared/services/volateq-api
 import { FeatureInfo, FeatureInfos, Legend } from "./shared/types";
 import analysisResultCspPtcMappingHce from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-hce";
 
-const GLASS_TUBE_TEMPERATURE_CLASS_COLORS = {1: "green", 2: "yellow", 3: "red"};
+const GLASS_TUBE_TEMPERATURE_CLASS_COLORS = { 0: "grey", 1: "green", 2: "yellow", 3: "red" };
 
 export class GlassTubeTemperatureKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcHceSchema> {
   protected readonly keyFigureId = AnalysisResultKeyFigure.GLASS_TUBE_TEMPERATURE_ID;
@@ -55,7 +55,9 @@ export class GlassTubeTemperatureKeyFigureLayer extends KeyFigureLayer<AnalysisR
     return {
       id: this.keyFigureId.toString(),
       entries: Object.keys(GLASS_TUBE_TEMPERATURE_CLASS_COLORS).map(clsKey => {
-        const classCount = this.geoJSON!.features.filter(feature => feature.properties.value?.toString() === clsKey).length;
+        const classCount = this.geoJSON!.features
+          .filter(feature => (clsKey === "0" && !feature.properties.value) || (clsKey !== "0" && feature.properties.value?.toString() === clsKey))
+          .length;
         return {
           color: GLASS_TUBE_TEMPERATURE_CLASS_COLORS[clsKey],
           name: this.vueComponent.$t(`glass-tube-temperature-class-${clsKey}`).toString() + this.getLegendEntryCount(classCount),

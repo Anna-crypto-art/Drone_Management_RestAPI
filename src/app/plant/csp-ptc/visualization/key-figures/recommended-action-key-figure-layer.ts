@@ -55,7 +55,9 @@ export class RecommendedActionKeyFigureLayer extends KeyFigureLayer<AnalysisResu
     return {
       id: this.keyFigureId.toString(),
       entries: Object.keys(RECOMMENDED_ACTION_CLASS_COLORS).map(clsKey => {
-        const classCount = this.geoJSON!.features.filter(feature => feature.properties.value?.toString() === clsKey).length;
+        const classCount = this.geoJSON!.features
+          .filter(feature => (clsKey === "0" && !feature.properties.value) || (clsKey !== "0" && feature.properties.value?.toString() === clsKey))
+          .length;
         return {
           color: RECOMMENDED_ACTION_CLASS_COLORS[clsKey],
           name: this.vueComponent.$t(`recommended-action-class-${clsKey}`).toString() + this.getLegendEntryCount(classCount),
