@@ -26,11 +26,13 @@ export class MissingGhrKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPt
   }
 
   public getStyle(feature: FeatureLike): Style {
+    const featureValue: boolean | undefined = this.getProperties(feature)?.value as boolean;
+
     return new Style({
-      stroke: new Stroke({
+      stroke: featureValue && new Stroke({
         color: '#850000',
         width: 5,
-      }),
+      }) || undefined,
       text: this.showText(feature),
     });
   }
@@ -40,12 +42,14 @@ export class MissingGhrKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPt
       return undefined;
     }
 
+    const featureCount = this.geoJSON.features.filter(feature => feature.properties.value === true).length;
+
     return {
       id: this.keyFigureId.toString(),
       entries: [
         {
           color: '#850000',
-          name: this.vueComponent.$t('missing-gct').toString() + this.getLegendEntryCount(),
+          name: this.vueComponent.$t('missing-gct').toString() + this.getLegendEntryCount(featureCount),
         }
       ]
     };

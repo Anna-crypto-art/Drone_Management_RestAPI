@@ -27,7 +27,7 @@ export class GlassTubeTemperatureKeyFigureLayer extends KeyFigureLayer<AnalysisR
   }
 
   public getStyle(feature: FeatureLike): Style {
-    let classification: string | number | null | undefined = this.getProperties(feature)?.value;
+    let classification: string | number = this.getProperties(feature)?.value as number;
     if (classification === undefined || classification === null) {
       classification = "null";
     }

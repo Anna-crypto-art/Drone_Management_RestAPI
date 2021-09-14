@@ -26,11 +26,13 @@ export class H2ConcentrationKeyFigureLayer extends KeyFigureLayer<AnalysisResult
   }
 
   public getStyle(feature: FeatureLike): Style {
+    const featureValue: boolean | undefined = this.getProperties(feature)?.value as boolean;
+
     return new Style({
-      stroke: new Stroke({
+      stroke: featureValue && new Stroke({
         color: '#ad0045',
         width: 5,
-      }),
+      }) || undefined,
       text: this.showText(feature),
     });
   }
@@ -40,12 +42,14 @@ export class H2ConcentrationKeyFigureLayer extends KeyFigureLayer<AnalysisResult
       return undefined;
     }
 
+    const featureCount = this.geoJSON.features.filter(feature => feature.properties.value === true).length;
+
     return {
       id: this.keyFigureId.toString(),
       entries: [
         {
           color: '#ad0045',
-          name: this.vueComponent.$t('high-hydrogen-concentration').toString() + this.getLegendEntryCount(),
+          name: this.vueComponent.$t('high-hydrogen-concentration').toString() + this.getLegendEntryCount(featureCount),
         }
       ]
     };

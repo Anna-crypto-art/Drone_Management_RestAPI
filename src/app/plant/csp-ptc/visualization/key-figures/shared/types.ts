@@ -1,6 +1,6 @@
 export interface FeatureProperties {
   name: string;
-  value: number;
+  value: number | boolean;
 }
 
 export interface FeatureInfos {
