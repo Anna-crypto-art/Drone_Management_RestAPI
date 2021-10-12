@@ -94,7 +94,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
   public async load(): Promise<Record<string, unknown>> {
     apiResultsLoader.loadResults<T>(this.analysisResult.id, this.keyFigure.component.id);
 
-    this.geoJSON = await volateqApi.getKeyFiguresGeoVisual(this.vueComponent.plant.id, this.analysisResult.id, [this.keyFigure.id]);
+    this.geoJSON = await volateqApi.getKeyFiguresGeoVisual(this.vueComponent.plant.id, this.analysisResult.id, this.keyFigure.id);
 
     return this.geoJSON as Record<string, unknown>;
   }
