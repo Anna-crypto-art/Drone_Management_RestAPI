@@ -5,7 +5,8 @@
         {{ $t("pcs") }} <app-explanation>{{ $t("pcs_expl") }}</app-explanation>
       </template>
       <template #irIntensity>
-        {{ $t("ir-intensity-class") }} <app-explanation><span v-html="$t('ir-intensity-class_expl')"></span></app-explanation>
+        blub
+        <!-- {{ $t("ir-intensity-class") }} <app-explanation><span v-html="$t('ir-intensity-class_expl')"></span></app-explanation> -->
       </template>
       <template #glassTubeTemperature>
         {{ $t("glass-tube-temperature-class") }} <app-explanation><span v-html="$t('glass-tube-temperature-class_expl')"></span></app-explanation>
@@ -69,6 +70,7 @@ import AppExplanation from '@/app/shared/components/app-explanation/app-explanat
 import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
 import { GroupKPILayer, IPlantVisualization } from "./types";
 import { COMPONENT_LAYERS, KEY_FIGURE_LAYERS } from "./layers";
+import { PILayersHierarchy } from "@/app/plant/csp-ptc/visualization/pi-layers-hierarchy";
 
 
 @Component({
@@ -84,8 +86,8 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
   @Ref() openLayers!: IOpenLayersComponent;
 
   private selectedAnalysisResult?: AnalysisResultDetailedSchema;
-  private parentComponentKpiLayers!: GroupKPILayer[];
   private componentLayers!: ComponentLayer[];
+  private piLayersHierarchy!: PILayersHierarchy;
 
   layers: LayerType[] = [];
   showPCS = false;
@@ -99,19 +101,7 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
   selectAnalysisResult(analysisResultId: string | undefined): void {
     this.selectedAnalysisResult = this.analysisResults.find(analysisResult => analysisResult.id === analysisResultId);
     
-    for (const parentComponentKpiLayer of this.parentComponentKpiLayers) {
-      let allInvisble = true;
-      for (const kpiLayer of parentComponentKpiLayer.kpiLayers) {
-        const visible = this.selectedAnalysisResult && kpiLayer.analysisResult.id == this.selectedAnalysisResult.id || false;
-        kpiLayer.setVisible(visible);
-
-        if (visible) {
-          allInvisble = false;
-        }
-      }
-
-      parentComponentKpiLayer.groupLayer.visible = !allInvisble
-    }
+    this.piLayersHierarchy.setVisibility(this.selectedAnalysisResult?.id);
 
     this.hideToast();
   }
@@ -134,7 +124,7 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
   }
 
   onOpenLayersClick(features: FeatureLike[]) {
-    const piToastInfo = this.getKpiLayers().map(kpiLayer => kpiLayer.onClick(features))
+    const piToastInfo = this.piLayersHierarchy.getAllChildLayers().map(kpiLayer => kpiLayer.onClick(features))
       .find(featureInfos => featureInfos !== undefined); 
     if (piToastInfo) {
       this.piToastInfo = piToastInfo;
@@ -165,7 +155,7 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
 
   private createLayers(): void {
     this.createComponentLayers();
-    this.createKPILayers();
+    this.piLayersHierarchy = new PILayersHierarchy(this, this.analysisResults);
 
     this.layers.push(
       {
@@ -181,7 +171,7 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
         onSelected: (selected: boolean) => { 
           this.showPCS = selected;
 
-          this.getKpiLayers().forEach(kpiLayer => kpiLayer.showPCS(selected));
+          this.piLayersHierarchy.getAllChildLayers().forEach(kpiLayer => kpiLayer.showPCS(selected));
           this.componentLayers.forEach(compLayer => compLayer.showPCS(selected));
         },
         selected: false,
@@ -190,7 +180,7 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
       {
         name: this.$t("performance-indicators").toString(),
         type: "group",
-        childLayers: this.parentComponentKpiLayers.map(parentComponentKpiLayer => parentComponentKpiLayer.groupLayer),
+        childLayers: this.piLayersHierarchy.getGeoJSONLayers(),
       },
       {
         name: this.$t('components').toString(),
@@ -199,62 +189,12 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
         visible: this.isSuperAdmin
       }
     );
-  }
 
-  private createKPILayers(): void {
-    const parentComponentLayers: Record<number, GroupKPILayer> = {};
-
-    for (const analysisResult of this.analysisResults) {
-      for (const keyFigure of analysisResult.key_figures) {
-        if (!(keyFigure.component.id in parentComponentLayers)) {
-          parentComponentLayers[keyFigure.component.id] = {
-            componentId: keyFigure.component.id,
-            groupLayer: {
-              name: this.$t(keyFigure.component.abbrev).toString(),
-              type: "group",
-              childLayers: [],
-              visible: false,
-              groupSelection: true,
-            },
-            kpiLayers: [],
-          }
-        }
-
-        const kpiLayer = this.getKPILayer(analysisResult, keyFigure.id);
-        if (kpiLayer) {
-          const groupLayer = parentComponentLayers[keyFigure.component.id];
-          groupLayer.kpiLayers.push(kpiLayer)
-          groupLayer.groupLayer.childLayers.push(kpiLayer.toGeoLayer())
-        }
-      }
-    }
-
-    this.parentComponentKpiLayers = Object.keys(parentComponentLayers).map(componentId => parentComponentLayers[componentId])
-  }
-
-  private getKPILayer(
-    anaysisResult: AnalysisResultDetailedSchema,
-    keyFigureId: AnalysisResultKeyFigure
-  ): KeyFigureLayer<AnalysisResultCspPtcSchemaBase> | undefined {
-    const keyFigureLayer = KEY_FIGURE_LAYERS.find(keyFigureLayer => keyFigureLayer.keyFigureId === keyFigureId);
-    if (keyFigureLayer) {
-      return new (keyFigureLayer.layerType)(this, anaysisResult);
-    }
-
-    return undefined;
+    console.log(this.layers);
   }
 
   private createComponentLayers(): void {
     this.componentLayers = COMPONENT_LAYERS.map(componentType => new (componentType as any)(this));
-  }
-
-  private getKpiLayers(): KeyFigureLayer<AnalysisResultCspPtcSchemaBase>[] {
-    let kpiLayers: KeyFigureLayer<AnalysisResultCspPtcSchemaBase>[] = []
-    for (const parentComponentKpiLayer of this.parentComponentKpiLayers) {
-      kpiLayers = kpiLayers.concat(parentComponentKpiLayer.kpiLayers);
-    }
-
-    return kpiLayers;
   }
 
   private hideToast() {

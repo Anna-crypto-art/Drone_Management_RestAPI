@@ -12,21 +12,9 @@ const SCE_ANGLE_OFFSET_COLORS = [undefined, 'green', 'yellow', 'red'];
 
 
 export class SceAngleKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcSceSchema> {
-  protected readonly keyFigureId = AnalysisResultKeyFigure.SCE_ANGLE_ID;
   protected readonly analysisResultMapping = analysisResultCspPtcMappingSce;
-  public readonly name = "sceAngle";
 
   protected showPcsZoomLevel = 18;
-
-  protected mapRecordEntryToFeatureInfo(key: string, value: unknown, descr?: string): FeatureInfo | undefined {
-    const featureInfo = super.mapRecordEntryToFeatureInfo(key, value, descr);
-    
-    if (featureInfo && key == 'angle-deviation') {
-      featureInfo.bold = true;
-    }
-
-    return featureInfo;
-  }
 
   public getStyle(feature: FeatureLike): Style {
     const offsetColor = this.getOffsetColor(this.getProperties(feature).value as number);

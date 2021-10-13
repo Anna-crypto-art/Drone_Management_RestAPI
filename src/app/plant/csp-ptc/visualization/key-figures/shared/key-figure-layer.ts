@@ -1,35 +1,41 @@
-import { AnalysisResultKeyFigure } from "@/app/shared/services/volateq-api/api-analysis-result-key-figures";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { LayerBase } from "../../shared/layer-base";
 import { FeatureLike } from "ol/Feature";
 import { AnalysisResultCspPtcSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-schema-base";
-import { FeatureInfo, FeatureInfos, FeatureProperties, Legend } from "./types";
+import { FeatureInfo, FeatureInfos, FeatureProperties, KeyFigureInfo, Legend, QueryColor } from "./types";
 import apiResultsLoader from "@/app/shared/services/volateq-api/api-results-loader";
 import { AnalysisResultCspPtcMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultCspPtcMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-helper";
 import Vue from "vue";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { IPlantVisualization } from "../../types";
+import { AnalysisResultKeyFigure } from "@/app/shared/services/volateq-api/api-analysis-result-key-figures";
 
 
 export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> extends LayerBase {
-  protected abstract readonly keyFigureId: AnalysisResultKeyFigure;
   protected abstract readonly analysisResultMapping: AnalysisResultCspPtcMappings<T>;
+  protected readonly name: string;
 
   protected geoJSON?: { 
     type: string, 
     features: { properties: { name: string, value: string | boolean | number }}[], 
-    custom: { components_total_count: { [componentId: number]: number }},
+    custom: { components_total_count: number },
   };
 
   constructor(
     vueComponent: Vue & IPlantVisualization,
     public readonly analysisResult: AnalysisResultDetailedSchema,
+    protected readonly keyFigureId: AnalysisResultKeyFigure,
+    public readonly keyFigureInfo: KeyFigureInfo,
+    protected readonly queryColor?: QueryColor,
   ) {
     super(vueComponent);
 
     this.visible = false;
+    this.name = (this.keyFigureInfo.templateName || 
+      (this.keyFigureInfo.displayName && this.vueComponent.$t(this.keyFigureInfo.displayName).toString()) ||
+      (this.keyFigureInfo.keyName && this.vueComponent.$t(this.keyFigureInfo.keyName).toString()))!;
   }
 
   protected getLegend(): Legend | undefined {
@@ -47,6 +53,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
       name: this.vueComponent.$t(key).toString(),
       value: value === null || value === undefined ? "" : (value as any).toString(),
       descr: descr,
+      bold: key == this.keyFigureInfo.keyName,
     };
 
     return featureInfo;
@@ -94,7 +101,12 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
   public async load(): Promise<Record<string, unknown>> {
     apiResultsLoader.loadResults<T>(this.analysisResult.id, this.keyFigure.component.id);
 
-    this.geoJSON = await volateqApi.getKeyFiguresGeoVisual(this.vueComponent.plant.id, this.analysisResult.id, this.keyFigure.id);
+    this.geoJSON = await volateqApi.getKeyFiguresGeoVisual(
+      this.vueComponent.plant.id, 
+      this.analysisResult.id,
+      this.keyFigure.id,
+      this.queryColor?.query
+    );
 
     return this.geoJSON as Record<string, unknown>;
   }
@@ -128,7 +140,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
 
   protected getLegendEntryCount(featureCount?: number): string {
     featureCount = featureCount || this.geoJSON!.features.length;
-    const totalCount = featureCount && this.geoJSON!.features.length || this.geoJSON!.custom.components_total_count[this.keyFigure.component_id];
+    const totalCount = this.geoJSON!.custom.components_total_count;
 
     return ` (<b>${(Math.round((featureCount / totalCount * 100) * 10) / 10).toString()}%</b> - <small>${featureCount}</small>)`
   }

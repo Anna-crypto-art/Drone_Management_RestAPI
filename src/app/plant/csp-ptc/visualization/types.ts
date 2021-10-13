@@ -6,9 +6,10 @@ import { KeyFigureLayer } from "./key-figures/shared/key-figure-layer";
 import { Legend } from "./key-figures/shared/types";
 
 export interface GroupKPILayer { 
-  componentId: AnalysisResultComponent;
+  componentId?: AnalysisResultComponent;
   groupLayer: GroupLayer;
-  kpiLayers: KeyFigureLayer<AnalysisResultCspPtcSchemaBase>[];
+  subGroupLayers?: GroupKPILayer[];
+  keyFigureLayers: KeyFigureLayer<AnalysisResultCspPtcSchemaBase>[];
 }
 
 export interface IPlantVisualization {

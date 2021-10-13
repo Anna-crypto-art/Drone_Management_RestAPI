@@ -4,7 +4,6 @@ import { AnalysisResultCspPtcScaSchema } from "@/app/shared/services/volateq-api
 import { KeyFigureLayer } from "./shared/key-figure-layer";
 
 export class ScaSdxImageKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcScaSchema> {
-  protected readonly keyFigureId = AnalysisResultKeyFigure.SCA_SDX_IMAGE_ID;
   protected readonly analysisResultMapping = analysisResultCspPtcMappingSca;
 
   public readonly name = "SDX-Images";
