@@ -1,7 +1,8 @@
+import { LayerType } from "@/app/shared/components/app-geovisualization/types/layers";
 import { AnalysisResultKeyFigure } from "@/app/shared/services/volateq-api/api-analysis-result-key-figures";
 import { AnalysisResultCspPtcSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-schema-base";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-import { LayerType } from "volateq-geovisualization";
+// import { LayerType } from "volateq-geovisualization";
 import { KeyFigureLayer } from "./key-figures/shared/key-figure-layer";
 import { KEY_FIGURE_LAYERS } from "./layers";
 import { GroupKPILayer } from "./types";

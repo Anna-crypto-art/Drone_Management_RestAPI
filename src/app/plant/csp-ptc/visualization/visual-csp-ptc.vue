@@ -1,12 +1,11 @@
 <template>
   <div class="visual-csp-ptc">
-    <open-layers ref="openLayers" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick" @sidebarToggle="onSidebarToggled">
-      <template #pcs>
+    <app-geovisualization ref="openLayers" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick" @sidebarToggle="onSidebarToggled">
+      <!-- <template #pcs>
         {{ $t("pcs") }} <app-explanation>{{ $t("pcs_expl") }}</app-explanation>
       </template>
       <template #irIntensity>
-        blub
-        <!-- {{ $t("ir-intensity-class") }} <app-explanation><span v-html="$t('ir-intensity-class_expl')"></span></app-explanation> -->
+        {{ $t("ir-intensity-class") }} <app-explanation><span v-html="$t('ir-intensity-class_expl')"></span></app-explanation>
       </template>
       <template #glassTubeTemperature>
         {{ $t("glass-tube-temperature-class") }} <app-explanation><span v-html="$t('glass-tube-temperature-class_expl')"></span></app-explanation>
@@ -25,9 +24,9 @@
       </template>
       <template #recommendedAction>
         {{ $t("recommended-action") }} <app-explanation><span v-html="$t('recommended-action_expl')"></span></app-explanation>
-      </template>
+      </template> -->
 
-    </open-layers>
+    </app-geovisualization>
     <div v-if="hasLegend" class="visual-csp-ptc-legend">
       <div v-for="entry in legendEntries" :key="entry.color" class="visual-csp-ptc-legend-entry">
         <div class="visual-csp-ptc-legend-entry-color" :style="`background: ${entry.color}`"></div>
@@ -56,7 +55,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import { Component, Prop, Ref } from 'vue-property-decorator';
-import { GroupLayer, IOpenLayersComponent, LayerType, OpenLayers } from 'volateq-geovisualization';
+// import { GroupLayer, IOpenLayersComponent, LayerType, OpenLayers } from 'volateq-geovisualization';
 import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
 import { AnalysisResultKeyFigure } from '@/app/shared/services/volateq-api/api-analysis-result-key-figures';
 import { AnalysisResultDetailedSchema } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-schema';
@@ -71,12 +70,15 @@ import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/b
 import { GroupKPILayer, IPlantVisualization } from "./types";
 import { COMPONENT_LAYERS, KEY_FIGURE_LAYERS } from "./layers";
 import { PILayersHierarchy } from "@/app/plant/csp-ptc/visualization/pi-layers-hierarchy";
+import AppGeovisualization from "@/app/shared/components/app-geovisualization/app-geovisualization.vue";
+import { IOpenLayersComponent } from '@/app/shared/components/app-geovisualization/types/components';
+import { LayerType } from '@/app/shared/components/app-geovisualization/types/layers';
 
 
 @Component({
   name: 'app-visual-csp-ptc',
   components: {
-    OpenLayers,
+    AppGeovisualization,
     AppExplanation
   }
 })
