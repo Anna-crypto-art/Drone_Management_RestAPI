@@ -11,12 +11,12 @@ import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
 import Map from "ol/Map";
 import { CustomControl } from "../custom-ol-control";
-import LayerSwitcher from "./layer-switcher.vue";
+import AppGeovisualLayerSwitcher from "./layer-switcher.vue";
 
 @Component({
   name: "app-geovisual-toggle-layer"
 })
-export default class ToggleLayer extends Vue {
+export default class AppGeovisualToggleLayer extends Vue {
   @Prop() layerIndex!: number;
   @Prop() map!: Map;
 
@@ -26,11 +26,11 @@ export default class ToggleLayer extends Vue {
   }
 
   toggleLayerSwitcher(): void {
-    LayerSwitcher.toggle(this.layerIndex);
+    AppGeovisualLayerSwitcher.toggle(this.layerIndex);
   }
 
   get isLayerSwitcherOpen(): boolean {
-    return LayerSwitcher.isOpen(this.layerIndex)
+    return AppGeovisualLayerSwitcher.isOpen(this.layerIndex)
   }
 }
 </script>

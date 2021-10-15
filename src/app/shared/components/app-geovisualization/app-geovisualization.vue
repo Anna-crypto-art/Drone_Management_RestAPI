@@ -11,9 +11,16 @@
       :map="map"
       :title="title"
       @loading="toggleLoading"
-      :layerIdx="intiallizeToggler"
+      :layerIdx="intializeToggler"
       @sidebarToggle="onSidebarToggle"
-    ></app-geovisual-layer-switcher>
+    >
+      <!-- Pass slots through -->
+      <template v-for="(_, slot) in $slots">
+        <template :slot="slot">
+          <slot :name="slot"></slot>
+        </template>
+      </template>
+    </app-geovisual-layer-switcher>
   </div>
 </template>
 
@@ -27,8 +34,8 @@ import Select, { SelectEvent } from "ol/interaction/Select";
 import { click } from "ol/events/condition";
 import "ol/ol.css";
 
-import LayerSwitcher from "./components/layer-switcher.vue";
-import ToggleLayer from "./components/toggle-layer.vue";
+import AppGeovisualLayerSwitcher from "./components/layer-switcher.vue";
+import AppGeovisualToggleLayer from "./components/toggle-layer.vue";
 import { LayerType } from "./types/layers";
 
 import { IOpenLayersComponent } from "./types/components";
@@ -36,8 +43,8 @@ import { IOpenLayersComponent } from "./types/components";
 @Component({
   name: "app-geovisualization",
   components: {
-    LayerSwitcher,
-    ToggleLayer,
+    AppGeovisualLayerSwitcher,
+    AppGeovisualToggleLayer,
   }
 })
 export default class AppGeovisualization extends Vue implements IOpenLayersComponent {
@@ -50,16 +57,31 @@ export default class AppGeovisualization extends Vue implements IOpenLayersCompo
   map: Map | null = null;
   loading = false;
 
-  mapIsReady = false;
+  // togglerInitialized = false;
+  // layerSwitcherIdx: number | null = null;
 
-  mounted(): void {
+  created(): void {
     this.mapSetup();
   }
 
-  intiallizeToggler(idx: number) {
-    new ToggleLayer({
+  mounted(): void {
+    this.map!.setTarget(this.$el.firstChild as HTMLElement);
+  }
+
+  intializeToggler(idx: number) {
+    // if (idx !== undefined) {
+    //   this.layerSwitcherIdx = idx;
+    // }
+
+    // if (!this.map || this.togglerInitialized) {
+    //   return;
+    // }
+
+    new AppGeovisualToggleLayer({
       propsData: { layerIndex: idx, map: this.map }
     }).$mount();
+
+    // this.togglerInitialized = true;
   }
 
   toggleLoading(e: any) {
@@ -78,14 +100,12 @@ export default class AppGeovisualization extends Vue implements IOpenLayersCompo
 
     this.map = new Map({
       layers: [],
-      target: this.$el.firstChild as HTMLElement,
       view: new View({
         center: this.center || [0, 0],
         zoom: this.zoom || 2
       })
     });
     this.map.addInteraction(selectClick);
-    this.mapIsReady = true;
   }
 
 

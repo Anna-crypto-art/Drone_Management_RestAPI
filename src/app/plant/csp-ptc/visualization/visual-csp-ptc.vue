@@ -1,7 +1,7 @@
 <template>
   <div class="visual-csp-ptc">
     <app-geovisualization ref="openLayers" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick" @sidebarToggle="onSidebarToggled">
-      <!-- <template #pcs>
+      <template #pcs>
         {{ $t("pcs") }} <app-explanation>{{ $t("pcs_expl") }}</app-explanation>
       </template>
       <template #irIntensity>
@@ -24,7 +24,7 @@
       </template>
       <template #recommendedAction>
         {{ $t("recommended-action") }} <app-explanation><span v-html="$t('recommended-action_expl')"></span></app-explanation>
-      </template> -->
+      </template>
 
     </app-geovisualization>
     <div v-if="hasLegend" class="visual-csp-ptc-legend">
@@ -161,10 +161,15 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
 
     this.layers.push(
       {
-        name: this.$t('world-map').toString(),
-        type: "osm",
-        selected: true,
-        styleClass: "to-bottom",
+        name: this.$t("performance-indicators").toString(),
+        type: "group",
+        childLayers: this.piLayersHierarchy.getGeoJSONLayers(),
+      },
+      {
+        name: this.$t('components').toString(),
+        type: "group",
+        childLayers: this.componentLayers.map(compLayer => compLayer.toGeoLayer()),
+        visible: this.isSuperAdmin
       },
       {
         name: "pcs",
@@ -177,19 +182,13 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
           this.componentLayers.forEach(compLayer => compLayer.showPCS(selected));
         },
         selected: false,
-        styleClass: "to-bottom",
+        styleClass: "margin-top",
       },
       {
-        name: this.$t("performance-indicators").toString(),
-        type: "group",
-        childLayers: this.piLayersHierarchy.getGeoJSONLayers(),
+        name: this.$t('world-map').toString(),
+        type: "osm",
+        selected: true,
       },
-      {
-        name: this.$t('components').toString(),
-        type: "group",
-        childLayers: this.componentLayers.map(compLayer => compLayer.toGeoLayer()),
-        visible: this.isSuperAdmin
-      }
     );
 
     console.log(this.layers);

@@ -1,7 +1,14 @@
 <template>
   <div :class="'layer-switcher' + (open ? ' open' : '')">
     <div class="content">
-      <app-geovisual-layer-display :layer="rootLayer"></app-geovisual-layer-display>
+      <app-geovisual-layer-display :layer="rootLayer">
+        <!-- Pass slots through -->
+        <template v-for="(_, slot) in $slots">
+          <template :slot="slot">
+            <slot :name="slot"></slot>
+          </template>
+        </template>
+      </app-geovisual-layer-display>
     </div>
   </div>
 </template>
@@ -15,17 +22,17 @@ import { LayerStructure } from "../layer-structure";
 import { OSMLoader } from "../loader/osm-loader";
 import { GeoJSONLoader } from "../loader/geojson-loader";
 import { CustomLoader } from "../loader/custom-loader";
-import LayerDisplay from "./layer-display.vue";
+import AppGeovisualLayerDisplay from "./layer-display.vue";
 import { LayerType } from "../types/layers";
 
 @Component({
   name: "app-geovisual-layer-switcher",
   components: {
-    LayerDisplay
+    AppGeovisualLayerDisplay
   }
 })
-export default class LayerSwitcher extends Vue {
-  private static layerUIs: LayerSwitcher[] = [];
+export default class AppGeovisualLayerSwitcher extends Vue {
+  private static layerUIs: AppGeovisualLayerSwitcher[] = [];
 
   public static toggle(id: number): void {
     this.layerUIs[id].toggle();
@@ -45,8 +52,8 @@ export default class LayerSwitcher extends Vue {
     this.layerIdx && this.layerIdx(this.layerIndex);
   }
   readonly layerIndex = (() => {
-    const id = LayerSwitcher.layerUIs.length;
-    LayerSwitcher.layerUIs[id] = this;
+    const id = AppGeovisualLayerSwitcher.layerUIs.length;
+    AppGeovisualLayerSwitcher.layerUIs[id] = this;
     return id;
   })();
 
@@ -92,9 +99,6 @@ export default class LayerSwitcher extends Vue {
             layer
           );
           parentLayer.addChildLayer(groupLayerStruct);
-
-          console.log("group layer name:");
-          console.log(groupLayerStruct.name);
 
           this.layerSetup(groupLayerStruct, layer.childLayers);
 

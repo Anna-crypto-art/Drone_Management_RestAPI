@@ -47,19 +47,24 @@ export class PILayersHierarchy {
     function setVisibilityRec(groupKpiLayers: GroupKPILayer[]) {
       let allInvisble = true;
       for (const groupKpiLayer of groupKpiLayers) {
+        let allKeyFiguresInvisible = true;
         for (const keyFigureLayer of groupKpiLayer.keyFigureLayers) {
           const visible = analysisResultId && keyFigureLayer.analysisResult.id == analysisResultId || false;
           keyFigureLayer.setVisible(visible);
 
           if (visible) {
-            allInvisble = false;
+            allKeyFiguresInvisible = false;
           }
         }
 
         if (groupKpiLayer.subGroupLayers) {
           groupKpiLayer.groupLayer.visible = setVisibilityRec(groupKpiLayer.subGroupLayers);
         } else {
-          groupKpiLayer.groupLayer.visible = !allInvisble
+          groupKpiLayer.groupLayer.visible = !allKeyFiguresInvisible
+        }
+
+        if (!allKeyFiguresInvisible) {
+          allInvisble = false;
         }
       }
 
