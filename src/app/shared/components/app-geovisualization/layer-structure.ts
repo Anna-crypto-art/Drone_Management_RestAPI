@@ -100,8 +100,4 @@ export class LayerStructure extends EventEmitter {
   public get styleClass(): string {
     return this.getLayerType()?.styleClass || "";
   }
-
-  public get groupSelection(): boolean {
-    return (this.layerType as GroupLayer)?.groupSelection || false;
-  }
 }

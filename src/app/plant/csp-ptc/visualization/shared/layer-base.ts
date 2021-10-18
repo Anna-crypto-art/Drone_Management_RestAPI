@@ -71,8 +71,6 @@ export abstract class LayerBase {
   }
 
   protected showText(feature: FeatureLike, props: Record<string, unknown> = {}): Text | undefined {
-    console.log("zoomlevel: " + this.vueComponent.openLayers.getMap().getView().getZoom());
-
     return new Text({
       text: this._showPCS && this.hasZoomLevelForPcs() && this.getPcs(feature) || '',
       overflow: true,

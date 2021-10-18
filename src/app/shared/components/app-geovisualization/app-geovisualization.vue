@@ -57,9 +57,6 @@ export default class AppGeovisualization extends Vue implements IOpenLayersCompo
   map: Map | null = null;
   loading = false;
 
-  // togglerInitialized = false;
-  // layerSwitcherIdx: number | null = null;
-
   created(): void {
     this.mapSetup();
   }
@@ -69,19 +66,9 @@ export default class AppGeovisualization extends Vue implements IOpenLayersCompo
   }
 
   intializeToggler(idx: number) {
-    // if (idx !== undefined) {
-    //   this.layerSwitcherIdx = idx;
-    // }
-
-    // if (!this.map || this.togglerInitialized) {
-    //   return;
-    // }
-
     new AppGeovisualToggleLayer({
       propsData: { layerIndex: idx, map: this.map }
     }).$mount();
-
-    // this.togglerInitialized = true;
   }
 
   toggleLoading(e: any) {

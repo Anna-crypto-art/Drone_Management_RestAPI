@@ -36,6 +36,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
     this.name = (this.keyFigureInfo.templateName || 
       (this.keyFigureInfo.displayName && this.vueComponent.$t(this.keyFigureInfo.displayName).toString()) ||
       (this.keyFigureInfo.keyName && this.vueComponent.$t(this.keyFigureInfo.keyName).toString()))!;
+    this.zIndex = this.keyFigureInfo.zIndex;
   }
 
   protected getLegend(): Legend | undefined {
@@ -96,6 +97,10 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
 
   protected getPcs(feature: FeatureLike): string | undefined {
     return this.getProperties(feature).name;
+  }
+
+  protected getPropertyValue<T>(feature: FeatureLike): T | undefined {
+    return (this.getProperties(feature)?.value as unknown) as T;
   }
   
   public async load(): Promise<Record<string, unknown>> {

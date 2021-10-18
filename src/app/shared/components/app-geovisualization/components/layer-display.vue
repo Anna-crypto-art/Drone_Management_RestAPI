@@ -31,26 +31,16 @@ export default class AppGeovisualLayerDisplay extends Vue {
   @Prop() layer!: LayerStructure;
 
   onChange(e: boolean): void {
-    // groupSelection: If set to true all other groups on same level (siblings) will be unselected
-    let groupSelectionLayer = this.layer.parentLayer;
-    while (groupSelectionLayer && !groupSelectionLayer.groupSelection) {
-      groupSelectionLayer = groupSelectionLayer?.parentLayer;
-    }
-    if (groupSelectionLayer && groupSelectionLayer.parentLayer) {
-      for (const childLayer of groupSelectionLayer.parentLayer.getChildLayers()) {
-        if (childLayer.name !== groupSelectionLayer.name) {
-          childLayer.selected = false;
-        }
+    (function unselectRec(layer: LayerStructure) {
+      if (layer.parentLayer?.singleSelection) {
+          layer.parentLayer?.getChildLayers().forEach(sibling => {
+          if (sibling.selected) {
+            sibling.selected = false;
+          }
+        });
       }
-    }
-
-    if (this.layer.parentLayer?.singleSelection) {
-      this.layer.parentLayer?.getChildLayers().forEach(sibling => {
-        if (sibling.selected) {
-          sibling.selected = false;
-        }
-      });
-    }
+      layer.parentLayer && unselectRec(layer.parentLayer);
+    })(this.layer);
 
     this.layer.selected = e;
   }

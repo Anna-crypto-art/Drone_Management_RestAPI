@@ -7,8 +7,9 @@ import { SceComponentLayer } from "./components/sce-component-layer";
 import { ComponentLayer } from "./components/shared/component-layer";
 import { ScaSdxImageKeyFigureLayer } from "./key-figures/sca-sdx-image-key-figure-layer";
 import { SceAngleKeyFigureLayer } from "./key-figures/sce-angle-key-figure-layer";
+import { BoolUndefinedHceKeyFigureLayer } from "./key-figures/shared/bool-hce-key-figure-layer";
 import { HceKeyFigureLayer } from "./key-figures/shared/hce-key-figure-layer";
-import { KeyFigureInfo, QueryColor } from "./key-figures/shared/types";
+import { KeyFigureColors, KeyFigureInfo, QueryColor } from "./key-figures/shared/types";
 
 export const COMPONENT_LAYERS: (typeof ComponentLayer)[] = [
   AbsorberComponentLayer,
@@ -18,18 +19,21 @@ export const COMPONENT_LAYERS: (typeof ComponentLayer)[] = [
   SceComponentLayer,
 ];
 
-enum KeyFigureColors {
-  green = "green",
-  yellow = "yellow",
-  red = "red",
-  grey = "grey",
-}
-
 type KeyFigureTypeMap = {
   keyFigureId: AnalysisResultKeyFigure,
   layerType: any, // (typeof KeyFigureLayer) leads to: Type "T" is not assignable to type "AnalysisResultCspPtcHceSchema"
-  keyFigureInfo?: KeyFigureInfo, // for all layers
-  layers?: { keyFigureInfo?: KeyFigureInfo, queryColor: QueryColor }[],
+  /**
+   * applies to all subLayers if not overwritten
+   */
+  keyFigureInfo?: KeyFigureInfo,
+  /**
+   * URL query parameters and color for the layer
+   */
+  queryColor?: QueryColor,
+  /**
+   * If the layer has subLayers it will be handled as a group layer.
+   */
+  subLayers?: { keyFigureInfo?: KeyFigureInfo, queryColor: QueryColor }[],
 };
 
 export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
@@ -37,85 +41,88 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     keyFigureId: AnalysisResultKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
     layerType: HceKeyFigureLayer,
     keyFigureInfo: { templateName: "glassTubeTemperature", keyName: "glass-tube-temperature-class" },
-    layers: [
+    subLayers: [
       { 
-        keyFigureInfo: { displayName: "glass-tube-temperature-class-3" }, 
+        keyFigureInfo: { displayName: "glass-tube-temperature-class-3", zIndex: 3 }, 
         queryColor: { color: KeyFigureColors.red, query: { glass_tube_temperature_class: 3 }},
       }, 
       { 
-        keyFigureInfo: { displayName: "glass-tube-temperature-class-2" }, 
+        keyFigureInfo: { displayName: "glass-tube-temperature-class-2", zIndex: 2 }, 
         queryColor: { color: KeyFigureColors.yellow, query: { glass_tube_temperature_class: 2 }},
       },
       {
-        keyFigureInfo: { displayName: "glass-tube-temperature-class-1" }, 
+        keyFigureInfo: { displayName: "glass-tube-temperature-class-1", zIndex: 0 }, 
         queryColor: { color: KeyFigureColors.green, query: { glass_tube_temperature_class: 1 }},
       }, 
+      {
+        keyFigureInfo: { displayName: "not-measured", zIndex: 1 },
+        queryColor: { color: KeyFigureColors.grey, query: { undefined: 1 }}
+      }
     ]
   },
   {
     keyFigureId: AnalysisResultKeyFigure.IR_INTENSITY_ID,
     layerType: HceKeyFigureLayer,
     keyFigureInfo: { templateName: "irIntensity", keyName: "ir-intensity-class" },
-    layers: [
+    subLayers: [
       { 
-        keyFigureInfo: { displayName: "ir-intensity-class-3" }, 
+        keyFigureInfo: { displayName: "ir-intensity-class-3", zIndex: 3 }, 
         queryColor: { color: KeyFigureColors.red, query: { ir_intensity_class: 3 }},
       }, 
       { 
-        keyFigureInfo: { displayName: "ir-intensity-class-2" }, 
+        keyFigureInfo: { displayName: "ir-intensity-class-2", zIndex: 2 }, 
         queryColor: { color: KeyFigureColors.yellow, query: { ir_intensity_class: 2 }},
       },
       {
-        keyFigureInfo: { displayName: "ir-intensity-class-1" }, 
+        keyFigureInfo: { displayName: "ir-intensity-class-1", zIndex: 0 }, 
         queryColor: { color: KeyFigureColors.green, query: { ir_intensity_class: 1 }},
-      }, 
+      },
+      {
+        keyFigureInfo: { displayName: "not-measured", zIndex: 1 },
+        queryColor: { color: KeyFigureColors.grey, query: { undefined: 1 }}
+      }
     ]
   },
   {
     keyFigureId: AnalysisResultKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID,
     layerType: HceKeyFigureLayer,
     keyFigureInfo: { templateName: "recommendedAction", keyName: "recommended-action" },
-    layers: [
+    subLayers: [
       { 
-        keyFigureInfo: { displayName: "recommended-action-class--3" }, 
+        keyFigureInfo: { displayName: "recommended-action-class-3", zIndex: 3 }, 
         queryColor: { color: KeyFigureColors.red, query: { recommended_action_class: 3 }},
       }, 
       { 
-        keyFigureInfo: { displayName: "recommended-action-class--2" }, 
+        keyFigureInfo: { displayName: "recommended-action-class-2", zIndex: 2 }, 
         queryColor: { color: KeyFigureColors.yellow, query: { recommended_action_class: 2 }},
       },
       {
-        keyFigureInfo: { displayName: "recommended-action-class--1" }, 
+        keyFigureInfo: { displayName: "recommended-action-class-1", zIndex: 0 }, 
         queryColor: { color: KeyFigureColors.green, query: { recommended_action_class: 1 }},
       }, 
+      {
+        keyFigureInfo: { displayName: "not-measured", zIndex: 1 },
+        queryColor: { color: KeyFigureColors.grey, query: { undefined: 1 }}
+      }
     ]
   },
   {
     keyFigureId: AnalysisResultKeyFigure.COATING_DEGRADATION_ID,
-    layerType: HceKeyFigureLayer,
+    layerType: BoolUndefinedHceKeyFigureLayer,
     keyFigureInfo: { templateName: "O2Penetration", keyName: "oxygen-penetration" },
-    layers: [
-      { keyFigureInfo: { displayName: "oxygen-penetration" }, queryColor: { color: "#ad0045", query: { missing_glass_tube: 1 }}},
-      { keyFigureInfo: { displayName: "no-oxygen-penetration" }, queryColor: { color: KeyFigureColors.green, query: { missing_glass_tube: 0 }}},
-    ]
+    queryColor: { color: KeyFigureColors.red, query: { coating_degraded: 1, undefined: 1 }}
   },
   {
     keyFigureId: AnalysisResultKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID,
-    layerType: HceKeyFigureLayer,
+    layerType: BoolUndefinedHceKeyFigureLayer,
     keyFigureInfo: { templateName: "H2Concentration", keyName: "high-hydrogen-concentration" },
-    layers: [
-      { keyFigureInfo: { displayName: "high-hydrogen-concentration" }, queryColor: { color: "#ad0045", query: { h2_concentration: 1 }}},
-      { keyFigureInfo: { displayName: "no-high-hydrogen-concentration" }, queryColor: { color: KeyFigureColors.green, query: { h2_concentration: 0 }}},
-    ]
+    queryColor: { color: KeyFigureColors.red, query: { h2_concentration: 1, undefined: 1 }}
   },
   {
     keyFigureId: AnalysisResultKeyFigure.MISSING_GLASS_TUBE_ID,
-    layerType: HceKeyFigureLayer,
+    layerType: BoolUndefinedHceKeyFigureLayer,
     keyFigureInfo: { templateName: "missingGhr", keyName: "missing-gct" },
-    layers: [
-      { keyFigureInfo: { displayName: "missing-gct" }, queryColor: { color: "#850000", query: { missing_glass_tube: 1 }}},
-      { keyFigureInfo: { displayName: "no-missing-gct" }, queryColor: { color: KeyFigureColors.green, query: { missing_glass_tube: 0 }}},
-    ]
+    queryColor: { color: KeyFigureColors.red, query: { missing_glass_tube: 1, undefined: 1 }}
   },
   {
     keyFigureId: AnalysisResultKeyFigure.SCE_ANGLE_ID, 

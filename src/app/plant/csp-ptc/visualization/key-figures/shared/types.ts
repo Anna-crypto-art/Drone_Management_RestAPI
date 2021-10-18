@@ -3,7 +3,7 @@ import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/g
 
 export interface FeatureProperties {
   name: string;
-  value: number | boolean;
+  value?: number | boolean | string | null;
 }
 
 export interface FeatureInfos {
@@ -23,14 +23,35 @@ export interface Legend {
   entries: { color: string, name: string }[];
 }
 
+/**
+ * URL query parameters and color for a layer
+ */
 export interface QueryColor {
   query: GeoVisualQuery;
   color: string;
 }
 
 export interface KeyFigureInfo {
+  /**
+   * will translated (i18n)
+   * unique name used as a (logical) id for a KeyFigureLayer
+   */
   keyName?: string;
+  /**
+   * Define this name as a reference within template of visual-csp-tpc -> app-geovisualization
+   */
   templateName?: string;
-  // if displayName is undefined, keyName will be used
+  /**
+   * will translated (i18n)
+   * If the displayed name differs from keyName define displayName. If undefined, keyName will be used
+   */
   displayName?: string;
+  zIndex?: number;
+}
+
+export enum KeyFigureColors {
+  green = "green",
+  yellow = "yellow",
+  red = "red",
+  grey = "grey",
 }

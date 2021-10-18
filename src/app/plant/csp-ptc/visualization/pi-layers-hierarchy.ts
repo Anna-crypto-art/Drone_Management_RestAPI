@@ -87,7 +87,7 @@ export class PILayersHierarchy {
               type: "group",
               childLayers: [],
               visible: false,
-              groupSelection: true,
+              singleSelection: true,
             },
             keyFigureLayers: [],
             subGroupLayers: [],
@@ -120,8 +120,13 @@ export class PILayersHierarchy {
       return undefined;
     }
 
-    if (!keyFigureLayer.layers) {
-      return new (keyFigureLayer.layerType)(this.vueComponent, anaysisResult, keyFigureLayer.keyFigureId, keyFigureLayer.keyFigureInfo);
+    if (!keyFigureLayer.subLayers) {
+      return new (keyFigureLayer.layerType)(
+        this.vueComponent, anaysisResult,
+        keyFigureLayer.keyFigureId,
+        keyFigureLayer.keyFigureInfo,
+        keyFigureLayer.queryColor,
+      );
     }
 
     const groupKpiLayer: GroupKPILayer = {
@@ -130,12 +135,11 @@ export class PILayersHierarchy {
         type: "group",
         childLayers: [],
         visible: false,
-        groupSelection: true,
       },
       keyFigureLayers: [],
     };
 
-    for (const childLayer of keyFigureLayer.layers) {
+    for (const childLayer of keyFigureLayer.subLayers) {
       const childKeyFigureInfo = childLayer.keyFigureInfo || {};
       childKeyFigureInfo.displayName = childLayer.keyFigureInfo!.displayName || keyFigureLayer.keyFigureInfo?.displayName;
       childKeyFigureInfo.keyName = childLayer.keyFigureInfo!.keyName || keyFigureLayer.keyFigureInfo?.keyName;

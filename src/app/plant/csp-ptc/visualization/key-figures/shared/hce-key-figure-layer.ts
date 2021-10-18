@@ -5,19 +5,18 @@ import { Stroke, Style } from "ol/style";
 import { KeyFigureLayer } from "./key-figure-layer";
 import { Legend } from "./types";
 
-export abstract class HceKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcHceSchema> {
+export class HceKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcHceSchema> {
   protected readonly analysisResultMapping = analysisResultCspPtcMappingHce;
 
+  protected readonly stokeWidth = 5;
   protected showPcsZoomLevel = 19;
 
   public getStyle(feature: FeatureLike): Style {
-    const featureValue: boolean | undefined = this.getProperties(feature)?.value as boolean;
-
     return new Style({
-      stroke: featureValue && new Stroke({
+      stroke: new Stroke({
         color: this.queryColor!.color,
-        width: 5,
-      }) || undefined,
+        width: this.stokeWidth,
+      }),
       text: this.showText(feature),
     });
   }
@@ -32,7 +31,8 @@ export abstract class HceKeyFigureLayer extends KeyFigureLayer<AnalysisResultCsp
       entries: [
         {
           color: this.queryColor!.color,
-          name: this.vueComponent.$t(this.keyFigureInfo.displayName!).toString() + this.getLegendEntryCount(),
+          name: this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
+            this.getLegendEntryCount(),
         }
       ]
     };

@@ -30,7 +30,6 @@ export interface GroupLayer extends BaseLayerType {
   type: "group";
   childLayers: LayerType[];
   singleSelection?: boolean;
-  groupSelection?: boolean;
 }
 
 export interface CustomLayer extends BaseLayerType {
