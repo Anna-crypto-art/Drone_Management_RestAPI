@@ -46,7 +46,7 @@
         </b-form-checkbox>
       </b-form-group>
       <b-form-group :label="$t('select-dt-json-file')">
-        <b-form-file v-model="managePlantModel.file" required></b-form-file>
+        <b-form-file v-model="managePlantModel.file" required accept=".json"></b-form-file>
       </b-form-group>
     </app-modal-form>
   </app-content>
