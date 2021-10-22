@@ -1,6 +1,5 @@
 import { LoadingEvent } from "../types/events";
 import { GeoJSONLayer } from "../types/layers";
-import { getBottomLeft, getHeight, getWidth } from "ol/extent";
 import Feature from "ol/Feature";
 import GeoJSON from "ol/format/GeoJSON";
 import Geometry from "ol/geom/Geometry";
@@ -12,6 +11,7 @@ import { State } from "ol/render";
 import VectorSource from "ol/source/Vector";
 import { Style } from "ol/style";
 import LayerLoader from "./layer-loader";
+import * as ExtentFunctions from "ol/extent";
 
 export class GeoJSONLoader extends LayerLoader<VectorLayer<VectorSource<Geometry>> | VectorImageLayer<VectorSource<Geometry>>> {
   constructor(
@@ -84,17 +84,22 @@ export class GeoJSONLoader extends LayerLoader<VectorLayer<VectorSource<Geometry
               const ctx = state.context;
               const geometry = state.geometry.clone() as SimpleGeometry;
               geometry.setCoordinates(pixelCoordinates);
-              geometry.rotate(-state.rotation, [0, 0]);
+              geometry.rotate(
+                -state.rotation - (feature.get("rotation") || 0),
+                [0, 0]
+              );
               const extent = geometry.getExtent();
 
-              const width = getWidth(extent);
-              const height = getHeight(extent);
-              const bottomLeft = getBottomLeft(extent);
+              const width = ExtentFunctions.getWidth(extent);
+              const height = ExtentFunctions.getHeight(extent);
+              const bottomLeft = ExtentFunctions.getBottomLeft(extent);
               const bottom = bottomLeft[1];
               const left = bottomLeft[0];
 
+              const drawRotation = (feature.get("rotation") ?? 0) + state.rotation;
+
               ctx.save();
-              ctx.rotate(state.rotation);
+              ctx.rotate(drawRotation);
               ctx.drawImage(img, left, bottom, width, height);
               ctx.restore();
             }
