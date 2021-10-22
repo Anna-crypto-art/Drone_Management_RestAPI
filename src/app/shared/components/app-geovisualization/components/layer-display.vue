@@ -1,5 +1,5 @@
 <template>
-  <div v-show="visible" :class="'layer-display ' + layer.styleClass">
+  <div v-show="visible" :class="'layer-display ' + (layer.isGroup ? 'layer-display-group ' : '') + layer.styleClass">
     <b-form-checkbox v-if="!layer.isGroup" :checked="layer.selected" @change="onChange">
       <slot :name="layer.name">{{ layer.name }}</slot>
     </b-form-checkbox>
@@ -31,16 +31,17 @@ export default class AppGeovisualLayerDisplay extends Vue {
   @Prop() layer!: LayerStructure;
 
   onChange(e: boolean): void {
-    (function unselectRec(layer: LayerStructure) {
+    const unselectRec = (layer: LayerStructure) => {
       if (layer.parentLayer?.singleSelection) {
-          layer.parentLayer?.getChildLayers().forEach(sibling => {
-          if (sibling.selected) {
+        layer.parentLayer?.getChildLayers().forEach(sibling => {
+          if (sibling.name !== layer.name && (sibling.selected || sibling.isGroup)) {
             sibling.selected = false;
           }
         });
       }
       layer.parentLayer && unselectRec(layer.parentLayer);
-    })(this.layer);
+    };
+    unselectRec(this.layer);
 
     this.layer.selected = e;
   }
@@ -73,6 +74,7 @@ export default class AppGeovisualLayerDisplay extends Vue {
 <style lang="scss">
 .layer-display {
   padding-left: 20px;
+
   &-group-level-1 {
     font-size: 1.5rem;
     margin-top: 20px;
@@ -84,7 +86,7 @@ export default class AppGeovisualLayerDisplay extends Vue {
     margin-bottom: 10px;
   }
   &-group-level-3 {
-    margin-top: 0;
+    margin-top: 15px !important;
     font-size: 1.1rem;
     margin-top: 10px;
   }

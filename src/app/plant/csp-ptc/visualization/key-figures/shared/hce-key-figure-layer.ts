@@ -27,7 +27,7 @@ export class HceKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcHceSch
     }
 
     return {
-      id: this.keyFigureId.toString(),
+      id: this.keyFigureInfo.displayName || this.keyFigureId.toString(),
       entries: [
         {
           color: this.queryColor!.color,

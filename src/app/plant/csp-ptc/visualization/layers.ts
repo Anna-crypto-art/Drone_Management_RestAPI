@@ -14,12 +14,12 @@ import { KeyFigureColors, KeyFigureInfo, QueryColor } from "./key-figures/shared
 export const COMPONENT_LAYERS: (typeof ComponentLayer)[] = [
   AbsorberComponentLayer,
   LoopComponentLayer,
-  MirrorComponentLayer,
+  // MirrorComponentLayer, Too many mirrors (>200k) leads to OutOfMemory
   ScaComponentLayer,
   SceComponentLayer,
 ];
 
-type KeyFigureTypeMap = {
+export type KeyFigureTypeMap = {
   keyFigureId: AnalysisResultKeyFigure,
   layerType: any, // (typeof KeyFigureLayer) leads to: Type "T" is not assignable to type "AnalysisResultCspPtcHceSchema"
   /**
@@ -37,6 +37,24 @@ type KeyFigureTypeMap = {
 };
 
 export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
+  {
+    keyFigureId: AnalysisResultKeyFigure.MISSING_GLASS_TUBE_ID,
+    layerType: BoolUndefinedHceKeyFigureLayer,
+    keyFigureInfo: { templateName: "missingGhr", keyName: "missing-gct" },
+    queryColor: { color: KeyFigureColors.red, query: { missing_glass_tube: 1, undefined: 1 }}
+  },
+  {
+    keyFigureId: AnalysisResultKeyFigure.COATING_DEGRADATION_ID,
+    layerType: BoolUndefinedHceKeyFigureLayer,
+    keyFigureInfo: { templateName: "O2Penetration", keyName: "oxygen-penetration" },
+    queryColor: { color: KeyFigureColors.red, query: { coating_degraded: 1, undefined: 1 }}
+  },
+  {
+    keyFigureId: AnalysisResultKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID,
+    layerType: BoolUndefinedHceKeyFigureLayer,
+    keyFigureInfo: { templateName: "H2Concentration", keyName: "high-hydrogen-concentration" },
+    queryColor: { color: KeyFigureColors.red, query: { h2_concentration: 1, undefined: 1 }}
+  },
   {
     keyFigureId: AnalysisResultKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
     layerType: HceKeyFigureLayer,
@@ -105,24 +123,6 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
         queryColor: { color: KeyFigureColors.grey, query: { undefined: 1 }}
       }
     ]
-  },
-  {
-    keyFigureId: AnalysisResultKeyFigure.COATING_DEGRADATION_ID,
-    layerType: BoolUndefinedHceKeyFigureLayer,
-    keyFigureInfo: { templateName: "O2Penetration", keyName: "oxygen-penetration" },
-    queryColor: { color: KeyFigureColors.red, query: { coating_degraded: 1, undefined: 1 }}
-  },
-  {
-    keyFigureId: AnalysisResultKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID,
-    layerType: BoolUndefinedHceKeyFigureLayer,
-    keyFigureInfo: { templateName: "H2Concentration", keyName: "high-hydrogen-concentration" },
-    queryColor: { color: KeyFigureColors.red, query: { h2_concentration: 1, undefined: 1 }}
-  },
-  {
-    keyFigureId: AnalysisResultKeyFigure.MISSING_GLASS_TUBE_ID,
-    layerType: BoolUndefinedHceKeyFigureLayer,
-    keyFigureInfo: { templateName: "missingGhr", keyName: "missing-gct" },
-    queryColor: { color: KeyFigureColors.red, query: { missing_glass_tube: 1, undefined: 1 }}
   },
   {
     keyFigureId: AnalysisResultKeyFigure.SCE_ANGLE_ID, 

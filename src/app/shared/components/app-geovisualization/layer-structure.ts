@@ -25,18 +25,18 @@ export class LayerStructure extends EventEmitter {
   }
 
   private initializeEvents(): void {
-    this.on("setSelected", async (visible: boolean) => {
+    this.on("setSelected", async (selected: boolean) => {
       // if layer is not loaded and visible is false than no need to load the layer
-      if (visible || this.layerLoader?.loaded) {
-        (await this.layerLoader?.load())?.setVisible(visible);
+      if (selected || this.layerLoader?.loaded) {
+        (await this.layerLoader?.load())?.setVisible(selected);
       }
       
       this.layerLoader?.layerType.onSelected &&
-        this.layerLoader?.layerType.onSelected(visible);
+        this.layerLoader?.layerType.onSelected(selected);
 
-      if (visible || (!visible && this.isGroup)) {
+      if (selected || (!selected && this.isGroup)) {
         for (const childLayer of this.childLayers) {
-          childLayer.selected = visible;
+          childLayer.selected = selected;
         }
       }
     });

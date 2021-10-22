@@ -4,7 +4,7 @@ import { AnalysisResultCspPtcSchemaBase } from "@/app/shared/services/volateq-ap
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 // import { LayerType } from "volateq-geovisualization";
 import { KeyFigureLayer } from "./key-figures/shared/key-figure-layer";
-import { KEY_FIGURE_LAYERS } from "./layers";
+import { KeyFigureTypeMap, KEY_FIGURE_LAYERS } from "./layers";
 import { GroupKPILayer } from "./types";
 
 /**
@@ -57,7 +57,7 @@ export class PILayersHierarchy {
           }
         }
 
-        if (groupKpiLayer.subGroupLayers) {
+        if (groupKpiLayer.subGroupLayers && groupKpiLayer.subGroupLayers.length > 0) {
           groupKpiLayer.groupLayer.visible = setVisibilityRec(groupKpiLayer.subGroupLayers);
         } else {
           groupKpiLayer.groupLayer.visible = !allKeyFiguresInvisible
@@ -78,31 +78,34 @@ export class PILayersHierarchy {
     const parentComponentLayers: Record<number, GroupKPILayer> = {};
 
     for (const analysisResult of this.analysisResults) {
-      for (const keyFigure of analysisResult.key_figures) {
-        if (!(keyFigure.component.id in parentComponentLayers)) {
-          parentComponentLayers[keyFigure.component.id] = {
-            componentId: keyFigure.component.id,
-            groupLayer: {
-              name: this.vueComponent.$t(keyFigure.component.abbrev).toString(),
-              type: "group",
-              childLayers: [],
-              visible: false,
-              singleSelection: true,
-            },
-            keyFigureLayers: [],
-            subGroupLayers: [],
+      for (const keyFigureTypeMap of KEY_FIGURE_LAYERS) {
+        const keyFigure = analysisResult.key_figures.find(keyFigure => keyFigure.id === keyFigureTypeMap.keyFigureId);
+        if (keyFigure) {
+          if (!(keyFigure.component.id in parentComponentLayers)) {
+            parentComponentLayers[keyFigure.component.id] = {
+              componentId: keyFigure.component.id,
+              groupLayer: {
+                name: this.vueComponent.$t(keyFigure.component.abbrev).toString(),
+                type: "group",
+                childLayers: [],
+                visible: false,
+                singleSelection: true,
+              },
+              keyFigureLayers: [],
+              subGroupLayers: [],
+            }
           }
-        }
-
-        const kpiLayer = this.createKPILayers(analysisResult, keyFigure.id);
-        if (kpiLayer) {
-          const groupLayer = parentComponentLayers[keyFigure.component.id];
-          if (kpiLayer instanceof KeyFigureLayer) {
-            groupLayer.groupLayer.childLayers.push(kpiLayer.toGeoLayer())
-            groupLayer.keyFigureLayers.push(kpiLayer)
-          } else {
-            groupLayer.groupLayer.childLayers.push(kpiLayer.groupLayer);
-            groupLayer.subGroupLayers!.push(kpiLayer);
+  
+          const kpiLayer = this.createKPILayers(analysisResult, keyFigureTypeMap);
+          if (kpiLayer) {
+            const groupLayer = parentComponentLayers[keyFigure.component.id];
+            if (kpiLayer instanceof KeyFigureLayer) {
+              groupLayer.groupLayer.childLayers.push(kpiLayer.toGeoLayer())
+              groupLayer.keyFigureLayers.push(kpiLayer)
+            } else {
+              groupLayer.groupLayer.childLayers.push(kpiLayer.groupLayer);
+              groupLayer.subGroupLayers!.push(kpiLayer);
+            }
           }
         }
       }
@@ -113,13 +116,8 @@ export class PILayersHierarchy {
 
   private createKPILayers(
     anaysisResult: AnalysisResultDetailedSchema,
-    keyFigureId: AnalysisResultKeyFigure
+    keyFigureLayer: KeyFigureTypeMap,
   ): KeyFigureLayer<AnalysisResultCspPtcSchemaBase> | GroupKPILayer | undefined {
-    const keyFigureLayer = KEY_FIGURE_LAYERS.find(keyFigureLayer => keyFigureLayer.keyFigureId === keyFigureId);
-    if (!keyFigureLayer) {
-      return undefined;
-    }
-
     if (!keyFigureLayer.subLayers) {
       return new (keyFigureLayer.layerType)(
         this.vueComponent, anaysisResult,
@@ -135,6 +133,7 @@ export class PILayersHierarchy {
         type: "group",
         childLayers: [],
         visible: false,
+        singleSelection: false,
       },
       keyFigureLayers: [],
     };
