@@ -1,6 +1,12 @@
 <template>
   <div class="visual-csp-ptc">
     <app-geovisualization ref="openLayers" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick" @sidebarToggle="onSidebarToggled">
+      <template #topContent v-if="isSuperAdmin">
+        <b-form-checkbox v-show="analysisResultReleased !== null" v-model="analysisResultReleased" switch @change="onReleaseChanged">
+          {{ analysisResultReleased ? $t("lock") : $t("release") }}
+        </b-form-checkbox>
+      </template>
+
       <template #pcs>
         {{ $t("pcs") }} <app-explanation>{{ $t("pcs_expl") }}</app-explanation>
       </template>
@@ -55,24 +61,21 @@
 <script lang="ts">
 import Vue from 'vue'
 import { Component, Prop, Ref } from 'vue-property-decorator';
-// import { GroupLayer, IOpenLayersComponent, LayerType, OpenLayers } from 'volateq-geovisualization';
 import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
-import { AnalysisResultKeyFigure } from '@/app/shared/services/volateq-api/api-analysis-result-key-figures';
 import { AnalysisResultDetailedSchema } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-schema';
-import { KeyFigureLayer } from './key-figures/shared/key-figure-layer';
-import { AnalysisResultCspPtcSchemaBase } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-schema-base';
 import { ComponentLayer } from './components/shared/component-layer';
 import { IAnalysisResultSelection } from '../types';
 import { FeatureInfos, Legend } from './key-figures/shared/types';
 import { FeatureLike } from "ol/Feature";
 import AppExplanation from '@/app/shared/components/app-explanation/app-explanation.vue';
 import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
-import { GroupKPILayer, IPlantVisualization } from "./types";
-import { COMPONENT_LAYERS, KEY_FIGURE_LAYERS } from "./layers";
+import { IPlantVisualization } from "./types";
+import { COMPONENT_LAYERS } from "./layers";
 import { PILayersHierarchy } from "@/app/plant/csp-ptc/visualization/pi-layers-hierarchy";
 import AppGeovisualization from "@/app/shared/components/app-geovisualization/app-geovisualization.vue";
 import { IOpenLayersComponent } from '@/app/shared/components/app-geovisualization/types/components';
 import { LayerType } from '@/app/shared/components/app-geovisualization/types/layers';
+import volateqApi from '@/app/shared/services/volateq-api/volateq-api';
 
 
 @Component({
@@ -95,6 +98,7 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
   showPCS = false;
   legends: Legend[] = [];
   piToastInfo: FeatureInfos = { title: "", records: [{ name: "", descr: "", value: "" }] };
+  analysisResultReleased: boolean | null = null;
 
   async created() {
     this.createLayers();
@@ -103,6 +107,7 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
   selectAnalysisResult(analysisResultId: string | undefined): void {
     this.selectedAnalysisResult = this.analysisResults.find(analysisResult => analysisResult.id === analysisResultId);
     
+    this.analysisResultReleased = this.selectedAnalysisResult ? this.selectedAnalysisResult.released : null;
     this.piLayersHierarchy.setVisibility(this.selectedAnalysisResult?.id);
 
     this.hideToast();
@@ -153,6 +158,12 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
     }
 
     this.hideToast();
+  }
+
+  async onReleaseChanged() {
+    if (this.selectedAnalysisResult) {
+      await volateqApi.updateAnalysisResult(this.selectedAnalysisResult.id, { release: this.analysisResultReleased as boolean });
+    }
   }
 
   private createLayers(): void {

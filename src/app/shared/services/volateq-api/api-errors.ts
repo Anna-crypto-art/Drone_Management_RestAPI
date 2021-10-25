@@ -9,6 +9,7 @@ export enum ApiErrors {
 }
 
 export interface ApiException {
-  error: ApiErrors,
-  message: string
+  error: ApiErrors | string;
+  message?: string;
+  details?: string;
 }

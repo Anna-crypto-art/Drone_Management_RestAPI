@@ -187,6 +187,8 @@
   "recommended-action-class-3": "Fix it",
   "loop": "Loop",
   "not-measured": "Could not be measured",
+  "lock": "Lock",
+  "release": "Release",
 
   "CSP_PTC_Absorber": "Absorber tubes",
   "CSP_PTC_SCA": "SCA",

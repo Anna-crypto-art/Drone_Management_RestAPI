@@ -237,11 +237,15 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public resendUserInvitation(userId: string): Promise<void> {
-    return this.post(`/auth/user/${userId}/resend-invitation`)
+    return this.post(`/auth/user/${userId}/resend-invitation`);
   }
 
   public unLockUser(userId: string, lock: boolean): Promise<void> {
-    return this.post(`/auth/user/${userId}/un-lock`, { lock })
+    return this.post(`/auth/user/${userId}/un-lock`, { lock });
+  }
+
+  public updateAnalysisResult(analysisResultId: string, updates: { release: boolean }): Promise<void> {
+    return this.post(`/auth/analysis-result/${analysisResultId}`, updates);
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {

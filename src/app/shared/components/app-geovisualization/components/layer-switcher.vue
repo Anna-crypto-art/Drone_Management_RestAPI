@@ -1,6 +1,9 @@
 <template>
   <div :class="'layer-switcher' + (open ? ' open' : '')">
     <div class="content">
+      <div class="content-top">
+        <slot name="topContent"></slot>
+      </div>
       <app-geovisual-layer-display :layer="rootLayer">
         <!-- Pass slots through -->
         <template v-for="(_, slot) in $slots">
@@ -160,6 +163,10 @@ $sidebar-width: 400px;
     margin-top: 20px;
     margin-left: -20px;
     width: $sidebar-width;
+
+    .content-top {
+      padding-left: 40px;
+    }
   }
 }
 

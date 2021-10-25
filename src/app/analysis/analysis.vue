@@ -122,6 +122,7 @@ import { IAppModalForm } from "../shared/components/app-modal/types";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import AppModalFormInfoArea from "@/app/shared/components/app-modal/app-modal-form-info-area.vue";
 import { TaskSchema } from "../shared/services/volateq-api/api-schemas/task-schema";
+import { ApiErrors, ApiException } from "../shared/services/volateq-api/api-errors";
 
 @Component({
   name: "app-analysis",
@@ -228,7 +229,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
       
       AppDownloader.download(downloadUrl.url, fileName);
     } catch (e) {
-      appContentEventBus.showError(e);
+      appContentEventBus.showError(e as ApiException);
     }
   }
 
@@ -300,7 +301,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
           if (task.state === 'SUCCESS') {
             successfullyFinished();
           } else if (task.state === 'FAILURE') {
-            this.appManageResultFilesModal.alertError({ error: "SOMETHING_WENT_WRONG", details: task.result });
+            this.appManageResultFilesModal.alertError({ error: ApiErrors.SOMETHING_WENT_WRONG, details: task.result });
           } else {
             this.appManageResultFilesModal.alertError({ error: "UNEXPECTED_TASK_STATE", details: task.state + ". " + task.result });
           }
@@ -309,7 +310,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
         successfullyFinished();
       }
     } catch (e) {
-      this.appManageResultFilesModal.alertError(e)
+      this.appManageResultFilesModal.alertError(e as ApiException)
       appButtonEventBus.stopLoading();
     }
   }
@@ -335,7 +336,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
 
       appContentEventBus.showSuccessAlert(this.$t("update-analysis-state-success").toString());
     } catch (e) {
-      this.appUpdateStateModal.alertError(e.error);
+      this.appUpdateStateModal.alertError((e as ApiException).error);
     } finally {
       appButtonEventBus.stopLoading();
     }
@@ -368,7 +369,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
             userName: ((a.user.first_name || "") + " " + (a.user.last_name || "")).trim(),
             email: a.user.email
           } || '',
-          analysisResultId: a.analysis_result && a.analysis_result.id,
+          analysisResultId: a.analysis_result && (this.isSuperAdmin || a.analysis_result.released) && a.analysis_result.id || undefined,
           state: a.current_state, 
           files: a.files,
           plantId: a.plant.id,
@@ -378,7 +379,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
         return row;
       });
     } catch (e) {
-      appContentEventBus.showError(e);
+      appContentEventBus.showError(e as ApiException);
     }
   }
 }
