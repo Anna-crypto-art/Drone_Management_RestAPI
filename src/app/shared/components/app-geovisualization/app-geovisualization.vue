@@ -11,8 +11,8 @@
       :layers="layers"
       :map="map"
       :title="title"
-      @loading="toggleLoading"
       :layerIdx="intializeToggler"
+      @loading="toggleLoading"
       @sidebarToggle="onSidebarToggle"
     >
       <!-- Pass slots through -->
@@ -38,7 +38,6 @@ import "ol/ol.css";
 import AppGeovisualLayerSwitcher from "./components/layer-switcher.vue";
 import AppGeovisualToggleLayer from "./components/toggle-layer.vue";
 import { LayerType } from "./types/layers";
-
 import { IOpenLayersComponent } from "./types/components";
 
 @Component({
@@ -64,20 +63,20 @@ export default class AppGeovisualization extends Vue
   }
 
   mounted(): void {
-    this.map!.setTarget(this.$el.firstChild as HTMLElement);
+    this.map?.setTarget(this.$el.firstChild as HTMLElement);
   }
 
-  intializeToggler(idx: number) {
+  intializeToggler(idx: number): void {
     new AppGeovisualToggleLayer({
       propsData: { layerIndex: idx, map: this.map },
     }).$mount();
   }
 
-  toggleLoading(e: any) {
+  toggleLoading(e: any): void {
     this.loading = e.loading;
   }
 
-  onSidebarToggle(toggleState) {
+  onSidebarToggle(toggleState: boolean): void {
     this.$emit("sidebarToggle", toggleState);
   }
 
@@ -98,12 +97,14 @@ export default class AppGeovisualization extends Vue
   }
 
   public getMap(): Map {
-    return this.map!;
+    return this.map as Map;
   }
 }
 </script>
 
 <style lang="scss">
+@import "@/scss/_colors.scss";
+
 $open-width: 300px;
 $header-height: 50px;
 
@@ -114,10 +115,9 @@ $header-height: 50px;
   right: -$open-width;
 
   pointer-events: all;
+  transition: right 0.2s ease-in-out;
 
   background-color: white;
-
-  transition: right 0.2s ease-in-out;
 
   &-header {
     height: $header-height;
@@ -153,10 +153,8 @@ $header-height: 50px;
   width: 100%;
   height: 100%;
 
-  box-sizing: border-box;
-
   display: flex;
-
+  box-sizing: border-box;
   overflow: hidden;
 
   &-content {
@@ -182,27 +180,26 @@ $header-height: 50px;
   }
 }
 
-@import "@/scss/_colors.scss";
-
 .ol-control.ol-zoom {
   border-radius: 0;
   padding: 0;
   background-color: transparent;
   top: auto;
   left: auto;
-  bottom: calc(0.5em + 30px);
   right: 0.5em;
+  bottom: calc(0.5em + 30px);
 
   button {
     color: $blue;
     background-color: $white;
-    border: none; //1px solid $blue;
+    border: none; // 1px solid $blue;
     border-radius: 0;
     font-weight: normal;
 
     &:focus {
       outline: none;
     }
+
     &:hover {
       background-color: $background-grey;
     }
