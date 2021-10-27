@@ -6,6 +6,7 @@
         <b-spinner></b-spinner>
       </div>
     </div>
+
     <app-geovisual-layer-switcher
       :layers="layers"
       :map="map"
@@ -25,8 +26,8 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { Component, Prop, } from "vue-property-decorator";
+import Vue from "vue";
+import { Component, Prop } from "vue-property-decorator";
 
 import Map from "ol/Map";
 import View from "ol/View";
@@ -45,9 +46,10 @@ import { IOpenLayersComponent } from "./types/components";
   components: {
     AppGeovisualLayerSwitcher,
     AppGeovisualToggleLayer,
-  }
+  },
 })
-export default class AppGeovisualization extends Vue implements IOpenLayersComponent {
+export default class AppGeovisualization extends Vue
+  implements IOpenLayersComponent {
   @Prop() layers!: LayerType[];
   @Prop() zoom?: number;
   @Prop() center?: [number, number];
@@ -67,7 +69,7 @@ export default class AppGeovisualization extends Vue implements IOpenLayersCompo
 
   intializeToggler(idx: number) {
     new AppGeovisualToggleLayer({
-      propsData: { layerIndex: idx, map: this.map }
+      propsData: { layerIndex: idx, map: this.map },
     }).$mount();
   }
 
@@ -76,7 +78,7 @@ export default class AppGeovisualization extends Vue implements IOpenLayersCompo
   }
 
   onSidebarToggle(toggleState) {
-    this.$emit("sidebarToggle", toggleState); 
+    this.$emit("sidebarToggle", toggleState);
   }
 
   private mapSetup(): void {
@@ -89,12 +91,11 @@ export default class AppGeovisualization extends Vue implements IOpenLayersCompo
       layers: [],
       view: new View({
         center: this.center || [0, 0],
-        zoom: this.zoom || 2
-      })
+        zoom: this.zoom || 2,
+      }),
     });
     this.map.addInteraction(selectClick);
   }
-
 
   public getMap(): Map {
     return this.map!;
@@ -148,4 +149,63 @@ $header-height: 50px;
   }
 }
 
+.openlayers-map {
+  width: 100%;
+  height: 100%;
+
+  box-sizing: border-box;
+
+  display: flex;
+
+  overflow: hidden;
+
+  &-content {
+    flex: 1 100%;
+  }
+
+  &-loading {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    &-icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+
+@import "@/scss/_colors.scss";
+
+.ol-control.ol-zoom {
+  border-radius: 0;
+  padding: 0;
+  background-color: transparent;
+  top: auto;
+  left: auto;
+  bottom: calc(0.5em + 30px);
+  right: 0.5em;
+
+  button {
+    color: $blue;
+    background-color: $white;
+    border: none; //1px solid $blue;
+    border-radius: 0;
+    font-weight: normal;
+
+    &:focus {
+      outline: none;
+    }
+    &:hover {
+      background-color: $background-grey;
+    }
+  }
+}
 </style>
