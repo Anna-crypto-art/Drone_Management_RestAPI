@@ -18,7 +18,7 @@ export class SceComponentLayer extends ComponentLayer {
         color: '#888888',
         width: 1,
       }),
-      text: this.showText(feature),
+      text: this.showText(feature, { rotation: -(Math.PI / 2.8) }),
     });
   }
 }

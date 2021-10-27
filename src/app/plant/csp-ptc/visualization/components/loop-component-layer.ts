@@ -7,13 +7,15 @@ export class LoopComponentLayer extends ComponentLayer {
   protected readonly componentId = AnalysisResultComponent.CSP_PTC_LOOP;
   public readonly name = "loop";
 
+  protected showPcsZoomLevel = 16;
+
   public getStyle(feature: FeatureLike): Style {
     return new Style({
       stroke: new Stroke({
         color: '#888888',
         width: 1,
       }),
-      text: undefined,
+      text: this.showText(feature),
     });
   }
 }

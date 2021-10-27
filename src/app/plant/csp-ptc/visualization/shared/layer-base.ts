@@ -74,11 +74,12 @@ export abstract class LayerBase {
     return new Text({
       text: this._showPCS && this.hasZoomLevelForPcs() && this.getPcs(feature) || '',
       overflow: true,
-      rotation: -(Math.PI / 2.3),
+      rotation: props.rotation as number || -(Math.PI / 2.3),
       stroke: new Stroke({
         color: '#fff',
-        width: 1,
+        width: 2,
       }),
+      font: "bold 14px Arial, Verdana, Helvetica, sans-serif",
 
       ...props
     });
