@@ -50,7 +50,7 @@ export default class AppGeovisualLayerSwitcher extends Vue {
   @Prop({ default: "" }) title = "";
   @Prop() layerIdx?: (idx: number) => void;
 
-  mounted() {
+  mounted(): void {
     this.layerSetup(this.rootLayer, this.layers);
     this.layerIdx && this.layerIdx(this.layerIndex);
   }
