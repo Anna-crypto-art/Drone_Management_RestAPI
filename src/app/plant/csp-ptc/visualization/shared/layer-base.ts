@@ -86,6 +86,6 @@ export abstract class LayerBase {
   }
 
   private hasZoomLevelForPcs(): boolean {
-    return this.vueComponent.openLayers.getMap().getView().getZoom() >= this.showPcsZoomLevel;
+    return (this.vueComponent.openLayers.getMap().getView().getZoom() || 0) >= this.showPcsZoomLevel;
   }
 }
