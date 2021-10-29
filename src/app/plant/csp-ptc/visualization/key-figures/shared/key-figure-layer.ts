@@ -36,7 +36,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
     this.name = (this.keyFigureInfo.templateName || 
       (this.keyFigureInfo.displayName && this.vueComponent.$t(this.keyFigureInfo.displayName).toString()) ||
       (this.keyFigureInfo.keyName && this.vueComponent.$t(this.keyFigureInfo.keyName).toString()))!;
-    this.zIndex = this.keyFigureInfo.zIndex;
+    this.zIndex = this.keyFigureInfo.zIndex || 9; // 9 - to make sure PIs overlay components, always
   }
 
   protected getLegend(): Legend | undefined {

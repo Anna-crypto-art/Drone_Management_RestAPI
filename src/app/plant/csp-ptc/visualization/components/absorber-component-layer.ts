@@ -8,6 +8,7 @@ export class AbsorberComponentLayer extends ComponentLayer {
   public readonly name = "absorber-tubes";
 
   protected showPcsZoomLevel = 19.5;
+  protected zIndex = 5;
 
   public getStyle(feature: FeatureLike): Style {
     return new Style({

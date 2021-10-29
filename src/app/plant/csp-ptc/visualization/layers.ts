@@ -61,19 +61,19 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     keyFigureInfo: { templateName: "glassTubeTemperature", keyName: "glass-tube-temperature-class" },
     subLayers: [
       { 
-        keyFigureInfo: { displayName: "glass-tube-temperature-class-3", zIndex: 3 }, 
+        keyFigureInfo: { displayName: "glass-tube-temperature-class-3", zIndex: 13 }, 
         queryColor: { color: KeyFigureColors.red, query: { glass_tube_temperature_class: 3 }},
       }, 
       { 
-        keyFigureInfo: { displayName: "glass-tube-temperature-class-2", zIndex: 2 }, 
+        keyFigureInfo: { displayName: "glass-tube-temperature-class-2", zIndex: 12 }, 
         queryColor: { color: KeyFigureColors.yellow, query: { glass_tube_temperature_class: 2 }},
       },
       {
-        keyFigureInfo: { displayName: "glass-tube-temperature-class-1", zIndex: 0 }, 
+        keyFigureInfo: { displayName: "glass-tube-temperature-class-1", zIndex: 10 }, 
         queryColor: { color: KeyFigureColors.green, query: { glass_tube_temperature_class: 1 }},
       }, 
       {
-        keyFigureInfo: { displayName: "not-measured", zIndex: 1 },
+        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         queryColor: { color: KeyFigureColors.grey, query: { undefined: 1 }}
       }
     ]
@@ -84,19 +84,19 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     keyFigureInfo: { templateName: "irIntensity", keyName: "ir-intensity-class" },
     subLayers: [
       { 
-        keyFigureInfo: { displayName: "ir-intensity-class-3", zIndex: 3 }, 
+        keyFigureInfo: { displayName: "ir-intensity-class-3", zIndex: 13 }, 
         queryColor: { color: KeyFigureColors.red, query: { ir_intensity_class: 3 }},
       }, 
       { 
-        keyFigureInfo: { displayName: "ir-intensity-class-2", zIndex: 2 }, 
+        keyFigureInfo: { displayName: "ir-intensity-class-2", zIndex: 12 }, 
         queryColor: { color: KeyFigureColors.yellow, query: { ir_intensity_class: 2 }},
       },
       {
-        keyFigureInfo: { displayName: "ir-intensity-class-1", zIndex: 0 }, 
+        keyFigureInfo: { displayName: "ir-intensity-class-1", zIndex: 10 }, 
         queryColor: { color: KeyFigureColors.green, query: { ir_intensity_class: 1 }},
       },
       {
-        keyFigureInfo: { displayName: "not-measured", zIndex: 1 },
+        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         queryColor: { color: KeyFigureColors.grey, query: { undefined: 1 }}
       }
     ]
@@ -107,19 +107,19 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     keyFigureInfo: { templateName: "recommendedAction", keyName: "recommended-action" },
     subLayers: [
       { 
-        keyFigureInfo: { displayName: "recommended-action-class-3", zIndex: 3 }, 
+        keyFigureInfo: { templateName: "recommendedActionClass3", displayName: "recommended-action-class-3", zIndex: 13 }, 
         queryColor: { color: KeyFigureColors.red, query: { recommended_action_class: 3 }},
       }, 
       { 
-        keyFigureInfo: { displayName: "recommended-action-class-2", zIndex: 2 }, 
+        keyFigureInfo: { templateName: "recommendedActionClass2", displayName: "recommended-action-class-2", zIndex: 12 }, 
         queryColor: { color: KeyFigureColors.yellow, query: { recommended_action_class: 2 }},
       },
       {
-        keyFigureInfo: { displayName: "recommended-action-class-1", zIndex: 0 }, 
+        keyFigureInfo: { templateName: "recommendedActionClass1", displayName: "recommended-action-class-1", zIndex: 10 }, 
         queryColor: { color: KeyFigureColors.green, query: { recommended_action_class: 1 }},
       }, 
       {
-        keyFigureInfo: { displayName: "not-measured", zIndex: 1 },
+        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         queryColor: { color: KeyFigureColors.grey, query: { undefined: 1 }}
       }
     ]

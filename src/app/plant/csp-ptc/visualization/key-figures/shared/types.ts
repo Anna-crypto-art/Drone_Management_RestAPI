@@ -46,6 +46,9 @@ export interface KeyFigureInfo {
    * If the displayed name differs from keyName define displayName. If undefined, keyName will be used
    */
   displayName?: string;
+  /**
+   * Overlay order of the layers. KeyFigureLayer start from 9.
+   */
   zIndex?: number;
 }
 

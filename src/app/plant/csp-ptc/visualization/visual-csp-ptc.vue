@@ -31,6 +31,16 @@
       <template #recommendedAction>
         {{ $t("recommended-action") }} <app-explanation><span v-html="$t('recommended-action_expl')"></span></app-explanation>
       </template>
+      <template #recommendedActionClass1>
+        {{ $t("recommended-action-class-1") }} <app-explanation><span v-html="$t('recommended-action-class-1_expl')"></span></app-explanation>
+      </template>
+      <template #recommendedActionClass2>
+        {{ $t("recommended-action-class-2") }} <app-explanation><span v-html="$t('recommended-action-class-2_expl')"></span></app-explanation>
+      </template>
+      <template #recommendedActionClass3>
+        {{ $t("recommended-action-class-3") }} <app-explanation><span v-html="$t('recommended-action-class-3_expl')"></span></app-explanation>
+      </template>
+
 
     </app-geovisualization>
     <div v-if="hasLegend" class="visual-csp-ptc-legend">

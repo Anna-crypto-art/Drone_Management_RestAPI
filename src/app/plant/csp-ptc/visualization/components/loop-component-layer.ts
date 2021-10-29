@@ -8,6 +8,7 @@ export class LoopComponentLayer extends ComponentLayer {
   public readonly name = "loop";
 
   protected showPcsZoomLevel = 16;
+  protected zIndex = 2;
 
   public getStyle(feature: FeatureLike): Style {
     return new Style({

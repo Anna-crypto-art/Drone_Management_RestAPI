@@ -8,6 +8,7 @@ export class SceComponentLayer extends ComponentLayer {
   public readonly name = "single-collector-elements";
 
   protected showPcsZoomLevel = 18;
+  protected zIndex = 4;
 
   public getStyle(feature: FeatureLike): Style {
     return new Style({
