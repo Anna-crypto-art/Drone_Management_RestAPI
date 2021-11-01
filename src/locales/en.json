@@ -190,8 +190,8 @@
   "recommended-action-class-3_expl": "&bull; All HCEs with missing glass tube, regardless of measured temperature.<br>&bull; HCEs with high temperature, intact glass tube, and either indication of oxygen penetration or high hydrogen concentration.",
   "loop": "Loop",
   "not-measured": "Could not be measured",
-  "lock": "Lock",
-  "release": "Release",
+  "invisible-for-customer": "Invisible for customer",
+  "released": "Released",
 
   "CSP_PTC_Absorber": "Absorber tubes",
   "CSP_PTC_SCA": "SCA",

@@ -3,7 +3,7 @@
     <app-geovisualization ref="openLayers" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick" @sidebarToggle="onSidebarToggled">
       <template #topContent v-if="isSuperAdmin">
         <b-form-checkbox v-show="analysisResultReleased !== null" v-model="analysisResultReleased" switch @change="onReleaseChanged">
-          {{ analysisResultReleased ? $t("lock") : $t("release") }}
+          {{ analysisResultReleased ? $t("released") : $t("invisible-for-customer") }}
         </b-form-checkbox>
       </template>
 

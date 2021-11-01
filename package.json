@@ -6,6 +6,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "make-version": "version=$(grep '\"version\":' package.json | sed 's/.*\"version\": \"\\([^\",]*\\)\",/\\1/') && sed -i 's/\"\\/js\\/app\\.js\"/\"\\/js\\/app\\.js?v='\"$version\"'\"/g' dist/index.html",
     "lint": "vue-cli-service lint",
     "vuetype": "vuetype"
   },
