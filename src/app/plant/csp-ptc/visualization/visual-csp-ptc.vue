@@ -190,7 +190,8 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
         name: this.$t('components').toString(),
         type: "group",
         childLayers: this.componentLayers.map(compLayer => compLayer.toGeoLayer()),
-        visible: this.isSuperAdmin
+        // Customer Cubico needs to check the PCS codes of his plant
+        // visible: this.isSuperAdmin 
       },
       {
         name: "pcs",
