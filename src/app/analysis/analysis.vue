@@ -216,7 +216,9 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     if (analysis.files.drone_metadata_files) {
       files = files.concat(analysis.files.drone_metadata_files)
     }
-    analysis.files.plant_metadata_file && files.push(analysis.files.plant_metadata_file)
+    if (analysis.files.other_files) {
+      files = files.concat(analysis.files.other_files)
+    }
 
     files.sort()
 
