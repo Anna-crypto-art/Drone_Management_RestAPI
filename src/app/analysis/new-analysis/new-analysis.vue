@@ -3,9 +3,9 @@
     <div class="app-new-analysis">
       <b-form @submit.prevent="onSubmit" style="margin-bottom: 50px;">
         <b-row style="margin-bottom: 25px;">
-          <b-col sm="4" v-if="isSuperAdmin">
-            <b-form-group label-cols="auto" :label="$t('customer')">
-              <b-form-select required v-model="newAnalysis.customer_id" :options="customerOptions"></b-form-select>
+          <b-col sm="4">
+            <b-form-group label-cols="auto" :label="$t('plant')">
+              <b-form-select required v-model="newAnalysis.plant_id" :options="plantOptions"></b-form-select>
             </b-form-group>
           </b-col>
         </b-row>
@@ -28,7 +28,6 @@
 import { Component, Ref } from "vue-property-decorator";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
-import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { NewAnalysis } from "@/app/shared/services/volateq-api/api-requests/analysis-requests";
@@ -65,10 +64,9 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
   uploadButtonTxt = "";
   showCancelButton = false;
   
-  customers: CustomerSchema[] | undefined;
-  customerOptions: Array<any> = [];
+  plantOptions: Array<any> = [];
 
-  newAnalysis: NewAnalysis = { files: [], customer_id: "" };
+  newAnalysis: NewAnalysis = { files: [], plant_id: "" };
   checkListItems: CheckListItems = {
     videoFiles: false,
     droneMetaFile: false,
@@ -91,9 +89,10 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
     this.uploadButtonTxt = this.$t("upload").toString();
 
     try {
-      if (this.isSuperAdmin) {
-        this.customers = await volateqApi.getCustomers();
-        this.customerOptions = this.customers.map(customer => ({ value: customer.id, text: customer.name }));
+      const plants = await volateqApi.getAllPlants();
+      this.plantOptions = plants.map(plant => ({ value: plant.id, text: plant.name }));
+      if (plants.length === 1) {
+        this.newAnalysis.plant_id = plants[0].id;
       }
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
@@ -195,9 +194,7 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
     return this.analysis && {
       newAnalysis: {
         files: [],
-        customer_id: this.newAnalysis.customer_id,
-        plant_metadata_file: undefined,
-        plant_medatata_file_id: this.newAnalysis.plant_medatata_file_id,
+        plant_id: this.newAnalysis.plant_id,
       },
       analysis: this.analysis,
       fileNames: this.appFileUpload.files.map(file => file.fileName)
@@ -253,10 +250,6 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
       this.onUploading();
 
       if (!this.analysis) {
-        if (!this.newAnalysis.customer_id && 'customer_id' in this.newAnalysis) {
-          delete this.newAnalysis.customer_id;
-        }
-
         this.analysis = await volateqApi.createAnalysis(this.newAnalysis);
       }
             

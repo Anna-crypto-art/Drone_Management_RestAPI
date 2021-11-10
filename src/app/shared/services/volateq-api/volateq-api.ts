@@ -248,6 +248,10 @@ export class VolateqAPI extends HttpClientBase {
     return this.post(`/auth/analysis-result/${analysisResultId}`, updates);
   }
 
+  public getAllPlants(): Promise<PlantSchema[]> {
+    return this.get(`/auth/plants`);
+  }
+
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {
     // Temporary special case for IR_INTENSITY: Replaced by GLASS_TUBE_TEMPERATURE
     for (const analysisResult of analysisResults) {
