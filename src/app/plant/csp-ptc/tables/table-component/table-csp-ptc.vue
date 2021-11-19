@@ -32,6 +32,7 @@ import { AnalysisResultCspPtcSchemaBase } from "@/app/shared/services/volateq-ap
 import { BvTableFieldExtArray } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import apiResultsLoader from "@/app/shared/services/volateq-api/api-results-loader";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
+import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 
 @Component({
   name: "app-table-csp-ptc",
@@ -141,7 +142,7 @@ export default class AppTableCspPtc extends Vue implements ITableComponent {
 
       return slicedItems;
     } catch (e) {
-      appContentEventBus.showError(e)
+      appContentEventBus.showError(e as ApiException)
     } finally {
       this.stopLoading()
     }

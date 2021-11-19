@@ -143,10 +143,10 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
     return this.analysisResult.key_figures.find(keyFigure => keyFigure.id === this.keyFigureId)!;
   }
 
-  protected getLegendEntryCount(featureCount?: number): string {
-    featureCount = featureCount || this.geoJSON!.features.length;
+  protected getLegendEntryCount(featureCount?: number, precision = 10): string {
+    featureCount = featureCount !== undefined ? featureCount : this.geoJSON!.features.length;
     const totalCount = this.geoJSON!.custom.components_total_count;
 
-    return ` (<b>${(Math.round((featureCount / totalCount * 100) * 10) / 10).toString()}%</b> - <small>${featureCount}</small>)`
+    return ` (<b>${(Math.round((featureCount / totalCount * 100) * precision) / precision).toString()}%</b> - <small>${featureCount}</small>)`
   }
 }

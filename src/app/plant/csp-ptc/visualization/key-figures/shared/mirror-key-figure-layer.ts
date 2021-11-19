@@ -1,21 +1,24 @@
-import analysisResultCspPtcMappingHce from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-hce";
-import { AnalysisResultCspPtcHceSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-hce-schema";
+import analysisResultCspPtcMappingMirror from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-mirror";
+import { AnalysisResultCspPtcMirrorSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-mirror-schema";
 import { FeatureLike } from "ol/Feature";
-import { Stroke, Style } from "ol/style";
+import { Fill, Stroke, Style } from "ol/style";
 import { KeyFigureLayer } from "./key-figure-layer";
-import { Legend } from "./types";
+import { KeyFigureColors, Legend } from "./types";
 
-export class HceKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcHceSchema> {
-  protected readonly analysisResultMapping = analysisResultCspPtcMappingHce;
+export class MirrorKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcMirrorSchema> {
+  protected readonly analysisResultMapping = analysisResultCspPtcMappingMirror;
 
-  protected readonly stokeWidth = 5;
-  protected showPcsZoomLevel = 19;
+  protected showPcsZoomLevel = 21;
+  protected readonly strokeWidth = 3;
 
   public getStyle(feature: FeatureLike): Style {
     return new Style({
+      fill: new Fill({
+        color: this.queryColor!.color,
+      }),
       stroke: new Stroke({
         color: this.queryColor!.color,
-        width: this.stokeWidth,
+        width: this.strokeWidth,
       }),
       text: this.showText(feature),
     });
