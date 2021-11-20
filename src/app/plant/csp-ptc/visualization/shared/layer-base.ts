@@ -2,7 +2,9 @@ import Vue from "vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { FeatureLike } from "ol/Feature";
 import { Style, Stroke, Text, Fill } from 'ol/style';
-import { GeoJSONLayer } from "volateq-geovisualization";
+// import { GeoJSONLayer, IOpenLayersComponent } from "volateq-geovisualization";
+import { IPlantVisualization } from "../types";
+import { GeoJSONLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 
 
 const GEO_JSON_OPTIONS = { dataProjection: 'EPSG:4326', featureProjection: 'EPSG:3857' };
@@ -21,10 +23,10 @@ export abstract class LayerBase {
   protected readonly autoZoom: boolean = false;
   protected visible = true;
   protected zIndex?: number;
+  protected showPcsZoomLevel = 15;
 
   constructor(
-    protected readonly plant: PlantSchema,
-    protected readonly vueComponent: Vue
+    protected readonly vueComponent: Vue & IPlantVisualization
   ) {}
 
   protected abstract getPcs(feature: FeatureLike): string | undefined;
@@ -70,15 +72,20 @@ export abstract class LayerBase {
 
   protected showText(feature: FeatureLike, props: Record<string, unknown> = {}): Text | undefined {
     return new Text({
-      text: this._showPCS && this.getPcs(feature) || '',
+      text: this._showPCS && this.hasZoomLevelForPcs() && this.getPcs(feature) || '',
       overflow: true,
-      rotation: -(Math.PI / 2.3),
+      rotation: props.rotation as number || -(Math.PI / 2.3),
       stroke: new Stroke({
         color: '#fff',
-        width: 1,
+        width: 2,
       }),
+      font: "bold 14px Arial, Verdana, Helvetica, sans-serif",
 
       ...props
     });
+  }
+
+  private hasZoomLevelForPcs(): boolean {
+    return (this.vueComponent.openLayers.getMap().getView().getZoom() || 0) >= this.showPcsZoomLevel;
   }
 }

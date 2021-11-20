@@ -36,7 +36,6 @@ const analysisResultCspPtcMappingHce: AnalysisResultCspPtcMappings<AnalysisResul
   {
     getValue: r => r.glass_tube_temperature,
     transName: "glass-tube-temperature",
-    transDescr: "glass-tube-temperature_expl",
     keyFigureId: AnalysisResultKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
   },
   {

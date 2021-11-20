@@ -7,7 +7,7 @@ import { PlantSchema } from "./plant-schema";
 export interface AnalysisFilesSchema {
   video_files: string[];
   drone_metadata_files: string[];
-  plant_metadata_file: string;
+  other_files: string[];
 }
 
 export interface AnalysisSchema {

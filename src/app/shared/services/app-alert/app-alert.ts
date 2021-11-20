@@ -1,5 +1,5 @@
 import Vue from "vue"
-import { ApiErrors } from "../volateq-api/api-errors";
+import { ApiErrors, ApiException } from "../volateq-api/api-errors";
 
 export interface AppAlert {
   variant: "success" | "danger" | "info" | "warning" | undefined;
@@ -34,7 +34,7 @@ export class AppAlertEventBus extends Vue {
   showAlert(appAlert: AppAlert) {
     this.$emit(AppAlertEvents.showAlert, appAlert);
   }
-  showError(error: { error: string, message: string; }) {
+  showError(error: ApiException) {
     console.error(error);
 
     if (error && error.error) {

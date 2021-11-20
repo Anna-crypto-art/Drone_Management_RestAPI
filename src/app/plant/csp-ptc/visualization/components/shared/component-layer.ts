@@ -16,6 +16,6 @@ export abstract class ComponentLayer extends LayerBase {
   }
 
   public load(): Promise<Record<string, unknown>> {
-    return volateqApi.getComponentsGeoVisual(this.plant.id, [this.componentId]);
+    return volateqApi.getComponentsGeoVisual(this.vueComponent.plant.id, [this.componentId]);
   }
 }

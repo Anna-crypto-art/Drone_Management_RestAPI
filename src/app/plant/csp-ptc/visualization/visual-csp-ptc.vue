@@ -1,6 +1,12 @@
 <template>
   <div class="visual-csp-ptc">
-    <open-layers ref="openlayercomp" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick" @sidebarToggle="onSidebarToggled">
+    <app-geovisualization ref="openLayers" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick" @sidebarToggle="onSidebarToggled">
+      <template #topContent v-if="isSuperAdmin">
+        <b-form-checkbox v-show="analysisResultReleased !== null" v-model="analysisResultReleased" switch @change="onReleaseChanged">
+          {{ analysisResultReleased ? $t("released") : $t("invisible-for-customer") }}
+        </b-form-checkbox>
+      </template>
+
       <template #pcs>
         {{ $t("pcs") }} <app-explanation>{{ $t("pcs_expl") }}</app-explanation>
       </template>
@@ -25,8 +31,18 @@
       <template #recommendedAction>
         {{ $t("recommended-action") }} <app-explanation><span v-html="$t('recommended-action_expl')"></span></app-explanation>
       </template>
+      <template #recommendedActionClass1>
+        {{ $t("recommended-action-class-1") }} <app-explanation><span v-html="$t('recommended-action-class-1_expl')"></span></app-explanation>
+      </template>
+      <template #recommendedActionClass2>
+        {{ $t("recommended-action-class-2") }} <app-explanation><span v-html="$t('recommended-action-class-2_expl')"></span></app-explanation>
+      </template>
+      <template #recommendedActionClass3>
+        {{ $t("recommended-action-class-3") }} <app-explanation><span v-html="$t('recommended-action-class-3_expl')"></span></app-explanation>
+      </template>
 
-    </open-layers>
+
+    </app-geovisualization>
     <div v-if="hasLegend" class="visual-csp-ptc-legend">
       <div v-for="entry in legendEntries" :key="entry.color" class="visual-csp-ptc-legend-entry">
         <div class="visual-csp-ptc-legend-entry-color" :style="`background: ${entry.color}`"></div>
@@ -55,54 +71,44 @@
 <script lang="ts">
 import Vue from 'vue'
 import { Component, Prop, Ref } from 'vue-property-decorator';
-import { LayerType, OpenLayers } from 'volateq-geovisualization';
 import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
-import { AnalysisResultKeyFigure } from '@/app/shared/services/volateq-api/api-analysis-result-key-figures';
 import { AnalysisResultDetailedSchema } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-schema';
-import { KeyFigureLayer } from './key-figures/shared/key-figure-layer';
-import { AnalysisResultCspPtcSchemaBase } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-schema-base';
-import { IrIntensityKeyFigureLayer } from './key-figures/ir-intensity-key-figure-layer';
-import { GlassTubeTemperatureKeyFigureLayer } from './key-figures/glass-tube-temperature-key-figure-layer';
-import { RecommendedActionKeyFigureLayer } from './key-figures/recommended-action-key-figure-layer';
-import { SceAngleKeyFigureLayer } from './key-figures/sce-angle-key-figure-layer';
-import { MissingGhrKeyFigureLayer } from './key-figures/missing-ghr-key-figure-layer';
-import { CoatingDegratedKeyFigureLayer } from './key-figures/coating-degrated-key-figure-layer';
-import { H2ConcentrationKeyFigureLayer } from './key-figures/h2-concentration-key-figure-layer';
-import { ScaSdxImageKeyFigureLayer } from './key-figures/sca-sdx-image-key-figure-layer';
 import { ComponentLayer } from './components/shared/component-layer';
-import { ScaComponentLayer } from './components/sca-component-layer';
-import { LoopComponentLayer } from './components/loop-component-layer';
-import { AbsorberComponentLayer } from './components/absorber-component-layer';
-import { SceComponentLayer } from './components/sce-component-layer';
 import { IAnalysisResultSelection } from '../types';
 import { FeatureInfos, Legend } from './key-figures/shared/types';
 import { FeatureLike } from "ol/Feature";
 import AppExplanation from '@/app/shared/components/app-explanation/app-explanation.vue';
 import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
-import { AnalysisResultComponent } from '@/app/shared/services/volateq-api/api-analysis-result-components';
-import { GroupKPILayer } from "./types";
+import { IPlantVisualization } from "./types";
+import { COMPONENT_LAYERS } from "./layers";
+import { PILayersHierarchy } from "@/app/plant/csp-ptc/visualization/pi-layers-hierarchy";
+import AppGeovisualization from "@/app/shared/components/app-geovisualization/app-geovisualization.vue";
+import { IOpenLayersComponent } from '@/app/shared/components/app-geovisualization/types/components';
+import { LayerType } from '@/app/shared/components/app-geovisualization/types/layers';
+import volateqApi from '@/app/shared/services/volateq-api/volateq-api';
 
 
 @Component({
   name: 'app-visual-csp-ptc',
   components: {
-    OpenLayers,
+    AppGeovisualization,
     AppExplanation
   }
 })
-export default class AppVisualCspPtc extends BaseAuthComponent implements IAnalysisResultSelection {
+export default class AppVisualCspPtc extends BaseAuthComponent implements IAnalysisResultSelection, IPlantVisualization {
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
-  @Ref() openlayercomp!: Vue;
+  @Ref() openLayers!: IOpenLayersComponent;
 
   private selectedAnalysisResult?: AnalysisResultDetailedSchema;
-  private parentComponentKpiLayers!: GroupKPILayer[];
   private componentLayers!: ComponentLayer[];
+  private piLayersHierarchy!: PILayersHierarchy;
 
   layers: LayerType[] = [];
   showPCS = false;
   legends: Legend[] = [];
   piToastInfo: FeatureInfos = { title: "", records: [{ name: "", descr: "", value: "" }] };
+  analysisResultReleased: boolean | null = null;
 
   async created(): Promise<void> {
     this.createLayers();
@@ -111,19 +117,8 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
   selectAnalysisResult(analysisResultId: string | undefined): void {
     this.selectedAnalysisResult = this.analysisResults.find(analysisResult => analysisResult.id === analysisResultId);
     
-    for (const parentComponentKpiLayer of this.parentComponentKpiLayers) {
-      let allInvisble = true;
-      for (const kpiLayer of parentComponentKpiLayer.kpiLayers) {
-        const visible = this.selectedAnalysisResult && kpiLayer.analysisResult.id == this.selectedAnalysisResult.id || false;
-        kpiLayer.setVisible(visible);
-
-        if (visible) {
-          allInvisble = false;
-        }
-      }
-
-      parentComponentKpiLayer.groupLayer.visible = !allInvisble
-    }
+    this.analysisResultReleased = this.selectedAnalysisResult ? this.selectedAnalysisResult.released : null;
+    this.piLayersHierarchy.setVisibility(this.selectedAnalysisResult?.id);
 
     this.hideToast();
   }
@@ -145,8 +140,8 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
     return legendEntries;
   }
 
-  onOpenLayersClick(features: FeatureLike[]): void {
-    const piToastInfo = this.getKpiLayers().map(kpiLayer => kpiLayer.onClick(features))
+  onOpenLayersClick(features: FeatureLike[]) {
+    const piToastInfo = this.piLayersHierarchy.getAllChildLayers().map(kpiLayer => kpiLayer.onClick(features))
       .find(featureInfos => featureInfos !== undefined); 
     if (piToastInfo) {
       this.piToastInfo = piToastInfo;
@@ -160,163 +155,10 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
   }
 
   onSidebarToggled(toggleState: boolean) {
-
-    console.log("blub2");
     this.$emit("sidebarToggle", toggleState);
   }
 
-  private createLayers(): void {
-    this.createComponentLayers();
-    this.createKPILayers();
-
-    this.layers.push(
-      {
-        name: this.$t('world-map').toString(),
-        type: "osm",
-        selected: true,
-        styleClass: "to-bottom",
-      },
-      {
-        name: "pcs",
-        type: "custom",
-        customLoader: () => { return; },
-        onSelected: (selected: boolean) => { 
-          this.showPCS = selected;
-
-          this.getKpiLayers().forEach(kpiLayer => kpiLayer.showPCS(selected));
-          this.componentLayers.forEach(compLayer => compLayer.showPCS(selected));
-        },
-        selected: false,
-        styleClass: "to-bottom",
-      },
-      {
-        name: this.$t("performance-indicators").toString(),
-        type: "group",
-        childLayers: this.parentComponentKpiLayers.map(parentComponentKpiLayer => parentComponentKpiLayer.groupLayer),
-      },
-      {
-        name: this.$t('components').toString(),
-        type: "group",
-        childLayers: this.componentLayers.map(compLayer => compLayer.toGeoLayer()),
-        visible: this.isSuperAdmin
-      }
-    );
-  }
-
-  private createKPILayers(): void {
-    const parentComponentLayers: Record<number, GroupKPILayer> = {};
-
-    for (const analysisResult of this.analysisResults) {
-      for (const keyFigure of analysisResult.key_figures) {
-        if (!(keyFigure.component.id in parentComponentLayers)) {
-          parentComponentLayers[keyFigure.component.id] = {
-            componentId: keyFigure.component.id,
-            groupLayer: {
-              name: this.getComponentName(keyFigure.component.id),
-              type: "group",
-              childLayers: [],
-              visible: false,
-            },
-            kpiLayers: [],
-          }
-        }
-
-        const kpiLayer = this.getKPILayer(analysisResult, keyFigure.id);
-        if (kpiLayer) {
-          const groupLayer = parentComponentLayers[keyFigure.component.id];
-          groupLayer.kpiLayers.push(kpiLayer)
-          groupLayer.groupLayer.childLayers.push(kpiLayer.toGeoLayer())
-        }
-      }
-    }
-
-    this.parentComponentKpiLayers = Object.keys(parentComponentLayers).map(componentId => parentComponentLayers[componentId])
-  }
-
-  private getKPILayer(
-    anaysisResult: AnalysisResultDetailedSchema,
-    keyFigureId: AnalysisResultKeyFigure
-  ): KeyFigureLayer<AnalysisResultCspPtcSchemaBase> | undefined {
-    // I get a Vetur(2322) that i do not understand... 
-    // maybe it is a ts bug or (more likley) i am just too stupid to understand
-    // anyhow... to solve this i use the so famous "any" type!
-    // Please feel free to do further investigations and remove the "any" type if you can!
-
-    switch (keyFigureId) {
-      case AnalysisResultKeyFigure.IR_INTENSITY_ID:
-        return new IrIntensityKeyFigureLayer(this.plant, this, anaysisResult, 
-          (selected, legend) => this.onSelected(selected, legend)) as any;
-
-      case AnalysisResultKeyFigure.GLASS_TUBE_TEMPERATURE_ID:
-        return new GlassTubeTemperatureKeyFigureLayer(this.plant, this, anaysisResult, 
-          (selected, legend) => this.onSelected(selected, legend)) as any;
-      
-      case AnalysisResultKeyFigure.SCE_ANGLE_ID:
-        return new SceAngleKeyFigureLayer(this.plant, this, anaysisResult, 
-          (selected, legend) => this.onSelected(selected, legend)) as any;
-
-      case AnalysisResultKeyFigure.MISSING_GLASS_TUBE_ID:
-        return new MissingGhrKeyFigureLayer(this.plant, this, anaysisResult,
-          (selected, legend) => this.onSelected(selected, legend)) as any;
-
-      case AnalysisResultKeyFigure.COATING_DEGRADATION_ID:
-        return new CoatingDegratedKeyFigureLayer(this.plant, this, anaysisResult,
-          (selected, legend) => this.onSelected(selected, legend)) as any;
-
-      case AnalysisResultKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID:
-        return new H2ConcentrationKeyFigureLayer(this.plant, this, anaysisResult,
-          (selected, legend) => this.onSelected(selected, legend)) as any;
-
-      case AnalysisResultKeyFigure.SCA_SDX_IMAGE_ID:
-        return new ScaSdxImageKeyFigureLayer(this.plant, this, anaysisResult,
-          (selected, legend) => this.onSelected(selected, legend)) as any;
-
-      case AnalysisResultKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID:
-        return new RecommendedActionKeyFigureLayer(this.plant, this, anaysisResult,
-          (selected, legend) => this.onSelected(selected, legend)) as any;
-
-    }
-
-    return undefined;
-  }
-
-  private createComponentLayers(): void {
-    this.componentLayers = [
-      new ScaComponentLayer(this.plant, this),
-      new AbsorberComponentLayer(this.plant, this),
-      new SceComponentLayer(this.plant, this),
-      new LoopComponentLayer(this.plant, this),
-    ];
-  }
-
-  private getComponentName(componentId: AnalysisResultComponent): string {
-    switch (componentId) {
-      case AnalysisResultComponent.CSP_PTC_ABSORBER:
-        return this.$t('absorber-tubes').toString();
-      
-      case AnalysisResultComponent.CSP_PTC_SCA:
-        return this.$t('solar-collector-assembly').toString();
-
-      case AnalysisResultComponent.CSP_PTC_SCE:
-        return this.$t('single-collector-elements').toString();
-
-      case AnalysisResultComponent.CSP_PTC_LOOP:
-        return this.$t('loop').toString();
-    }
-
-    throw new Error(`Name for componentId ${componentId} not supported`);
-  }
-
-  private getKpiLayers(): KeyFigureLayer<AnalysisResultCspPtcSchemaBase>[] {
-    let kpiLayers: KeyFigureLayer<AnalysisResultCspPtcSchemaBase>[] = []
-    for (const parentComponentKpiLayer of this.parentComponentKpiLayers) {
-      kpiLayers = kpiLayers.concat(parentComponentKpiLayer.kpiLayers);
-    }
-
-    return kpiLayers;
-  }
-
-  private onSelected(selected: boolean, legend?: Legend) {
+  onLayerSelected(selected: boolean, legend?: Legend) {
     if (legend) {
       if (selected) {
         this.legends.push(legend);
@@ -326,6 +168,56 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
     }
 
     this.hideToast();
+  }
+
+  async onReleaseChanged() {
+    if (this.selectedAnalysisResult) {
+      await volateqApi.updateAnalysisResult(this.selectedAnalysisResult.id, { release: this.analysisResultReleased as boolean });
+    }
+  }
+
+  private createLayers(): void {
+    this.createComponentLayers();
+    this.piLayersHierarchy = new PILayersHierarchy(this, this.analysisResults);
+
+    this.layers.push(
+      {
+        name: this.$t("performance-indicators").toString(),
+        type: "group",
+        childLayers: this.piLayersHierarchy.getGeoJSONLayers(),
+      },
+      {
+        name: this.$t('components').toString(),
+        type: "group",
+        childLayers: this.componentLayers.map(compLayer => compLayer.toGeoLayer()),
+        // Customer Cubico needs to check the PCS codes of his plant
+        // visible: this.isSuperAdmin 
+      },
+      {
+        name: "pcs",
+        type: "custom",
+        customLoader: () => { return; },
+        onSelected: (selected: boolean) => { 
+          this.showPCS = selected;
+
+          this.piLayersHierarchy.getAllChildLayers().forEach(kpiLayer => kpiLayer.showPCS(selected));
+          this.componentLayers.forEach(compLayer => compLayer.showPCS(selected));
+        },
+        selected: false,
+        styleClass: "margin-top",
+      },
+      {
+        name: this.$t('world-map').toString(),
+        type: "osm",
+        selected: true,
+      },
+    );
+
+    console.log(this.layers);
+  }
+
+  private createComponentLayers(): void {
+    this.componentLayers = COMPONENT_LAYERS.map(componentType => new (componentType as any)(this));
   }
 
   private hideToast() {

@@ -16,6 +16,7 @@ import { TableResultSchema } from "./api-schemas/table-result-schema";
 import { AnalysisResultFileSchema } from "./api-schemas/analysis-result-file-schema";
 import { AnalysisResultComponent } from "./api-analysis-result-components";
 import { AnalysisResultKeyFigure } from "./api-analysis-result-key-figures";
+import { GeoVisualQuery } from "./api-requests/geo-visual-query-requests";
 
 export class VolateqAPI extends HttpClientBase {
 
@@ -209,8 +210,8 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/geo-visual/${plantId}/components`, { ids: componentIds });
   }
 
-  public getKeyFiguresGeoVisual(plantId: string, analysisResultId: string, keyFiguresIds: AnalysisResultKeyFigure[]): Promise<any> {
-    return this.get(`/auth/geo-visual/${plantId}/key-figures/${analysisResultId}`, { ids: keyFiguresIds });
+  public getKeyFiguresGeoVisual(plantId: string, analysisResultId: string, keyFiguresId: AnalysisResultKeyFigure, query_params?: GeoVisualQuery): Promise<any> {
+    return this.get(`/auth/geo-visual/${plantId}/${analysisResultId}/key-figure/${keyFiguresId}`, query_params);
   }
 
   public async getAnalysisResults(plantId: string): Promise<AnalysisResultDetailedSchema[]> {
@@ -236,11 +237,19 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public resendUserInvitation(userId: string): Promise<void> {
-    return this.post(`/auth/user/${userId}/resend-invitation`)
+    return this.post(`/auth/user/${userId}/resend-invitation`);
   }
 
   public unLockUser(userId: string, lock: boolean): Promise<void> {
-    return this.post(`/auth/user/${userId}/un-lock`, { lock })
+    return this.post(`/auth/user/${userId}/un-lock`, { lock });
+  }
+
+  public updateAnalysisResult(analysisResultId: string, updates: { release: boolean }): Promise<void> {
+    return this.post(`/auth/analysis-result/${analysisResultId}`, updates);
+  }
+
+  public getAllPlants(): Promise<PlantSchema[]> {
+    return this.get(`/auth/plants`);
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {

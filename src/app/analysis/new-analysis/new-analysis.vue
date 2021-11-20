@@ -3,9 +3,9 @@
     <div class="app-new-analysis">
       <b-form @submit.prevent="onSubmit" style="margin-bottom: 50px;">
         <b-row style="margin-bottom: 25px;">
-          <b-col sm="4" v-if="isSuperAdmin">
-            <b-form-group label-cols="auto" :label="$t('customer')">
-              <b-form-select required v-model="newAnalysis.customer_id" :options="customerOptions"></b-form-select>
+          <b-col sm="4">
+            <b-form-group label-cols="auto" :label="$t('plant')">
+              <b-form-select required v-model="newAnalysis.plant_id" :options="plantOptions"></b-form-select>
             </b-form-group>
           </b-col>
         </b-row>
@@ -28,7 +28,6 @@
 import { Component, Ref } from "vue-property-decorator";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
-import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { NewAnalysis } from "@/app/shared/services/volateq-api/api-requests/analysis-requests";
@@ -45,6 +44,7 @@ import uploadService from "@/app/shared/services/upload-service/upload-service";
 import { IUploadListener, IResumableFile, UploadState, UploadEvent } from "@/app/shared/services/upload-service/types";
 import { NEW_ANALYSIS_STORAGE_KEY } from "@/app/shared/components/fetch-component/storage-keys";
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
+import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 
 
 @Component({
@@ -64,10 +64,9 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
   uploadButtonTxt = "";
   showCancelButton = false;
   
-  customers: CustomerSchema[] | undefined;
-  customerOptions: Array<any> = [];
+  plantOptions: Array<any> = [];
 
-  newAnalysis: NewAnalysis = { files: [], customer_id: "" };
+  newAnalysis: NewAnalysis = { files: [], plant_id: "" };
   checkListItems: CheckListItems = {
     videoFiles: false,
     droneMetaFile: false,
@@ -90,12 +89,13 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
     this.uploadButtonTxt = this.$t("upload").toString();
 
     try {
-      if (this.isSuperAdmin) {
-        this.customers = await volateqApi.getCustomers();
-        this.customerOptions = this.customers.map(customer => ({ value: customer.id, text: customer.name }));
+      const plants = await volateqApi.getAllPlants();
+      this.plantOptions = plants.map(plant => ({ value: plant.id, text: plant.name }));
+      if (plants.length === 1) {
+        this.newAnalysis.plant_id = plants[0].id;
       }
     } catch (e) {
-      appContentEventBus.showError(e);
+      appContentEventBus.showError(e as ApiException);
     }
 
     const data = this.fetchData();
@@ -118,7 +118,7 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
 
         appContentEventBus.showSuccessAlert(this.$t("upload-completed-successfully").toString());
       } catch (e) {
-        appContentEventBus.showError(e);
+        appContentEventBus.showError(e as ApiException);
       }
 
       if (this.isCreated) {
@@ -194,9 +194,7 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
     return this.analysis && {
       newAnalysis: {
         files: [],
-        customer_id: this.newAnalysis.customer_id,
-        plant_metadata_file: undefined,
-        plant_medatata_file_id: this.newAnalysis.plant_medatata_file_id,
+        plant_id: this.newAnalysis.plant_id,
       },
       analysis: this.analysis,
       fileNames: this.appFileUpload.files.map(file => file.fileName)
@@ -217,22 +215,19 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
     this.checkListItems.videoFiles = false;
     this.checkListItems.plantMetaFile = false;
 
-    this.newAnalysis.files = [];
-
     // For some reason this.appFileUpload is undefined, sometimes.. feel free to do further investigation
     if (this.appFileUpload) {
-      for (const file of this.appFileUpload.files) {
-        const ext = (file.fileName.split(".").pop() || "").toLowerCase();
+      this.newAnalysis.files = this.appFileUpload.files.map(file => file.fileName);
+
+      for (const file of this.newAnalysis.files) {
+        const ext = (file.split(".").pop() || "").toLowerCase();
   
         if (ext === "mp4" || ext == "mov") {
           this.checkListItems.videoFiles = true;
-          this.newAnalysis.files.push(file.fileName)
         } else if (ext === "srt") {
           this.checkListItems.droneMetaFile = true;
-          this.newAnalysis.files.push(file.fileName)
         } else if (ext === "xslx" || ext === "mdb") {
           this.checkListItems.plantMetaFile = true;
-          this.newAnalysis.plant_metadata_file = file.fileName;
         }
       }
     }
@@ -255,10 +250,6 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
       this.onUploading();
 
       if (!this.analysis) {
-        if (!this.newAnalysis.customer_id && 'customer_id' in this.newAnalysis) {
-          delete this.newAnalysis.customer_id;
-        }
-
         this.analysis = await volateqApi.createAnalysis(this.newAnalysis);
       }
             
@@ -266,7 +257,7 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
 
       this.appFileUpload.upload<IAnalysisId>(volateqApi.getAnalysisFileUploadUrl(this.analysis.id), { id: this.analysis.id });
     } catch (e) {
-      appContentEventBus.showError(e);
+      appContentEventBus.showError(e as ApiException);
       this.uploadButton.stopLoading();
     } 
   }
