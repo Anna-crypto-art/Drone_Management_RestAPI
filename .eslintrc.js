@@ -1,36 +1,35 @@
 /**
- * @type {import {  } from "eslint";}
+ * @type {import {  } from "eslint"}
  */
 module.exports = {
-  "env": {
-      "browser": true,
-      "es6": true,
-      "node": true
+  env: {
+    browser: true,
+    es6: true,
+    node: true
   },
-  "extends": [
-      "eslint:recommended",
-      "plugin:@typescript-eslint/eslint-recommended",
-      "plugin:@typescript-eslint/recommended",
-      "plugin:vue/essential"
+  extends: [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:vue/essential"
   ],
-  "globals": {
-      "Atomics": "readonly",
-      "SharedArrayBuffer": "readonly"
+  globals: {
+    Atomics: "readonly",
+    SharedArrayBuffer: "readonly"
   },
-  "parserOptions": {
-      "parser": "@typescript-eslint/parser",
-      "ecmaVersion": 6,
-      "sourceType": "module",
-      "ecmaFeatures": {
-          "modules": true,
-          "legacyDecorators": true
-      }
+  parserOptions: {
+    parser: "@typescript-eslint/parser",
+    ecmaVersion: 6,
+    sourceType: "module",
+    ecmaFeatures: {
+      modules: true,
+      legacyDecorators: true
+    }
   },
-  "plugins": [
-      "vue"
-  ],
-  "rules": {
-      "no-console": "off",
-      "@typescript-eslint/indent": "off"
+  plugins: ["vue"],
+  rules: {
+    "no-console": "off",
+    "@typescript-eslint/indent": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off"
   }
 };
