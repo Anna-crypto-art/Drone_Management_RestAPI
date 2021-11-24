@@ -66,6 +66,7 @@ import { IAppModalForm } from "../shared/components/app-modal/types";
 import appContentEventBus from "../shared/components/app-content/app-content-event-bus";
 import { PlantItem } from "./types";
 import appButtonEventBus from "../shared/components/app-button/app-button-event-bus";
+import { ApiException } from "../shared/services/volateq-api/api-errors";
 
 @Component({
   name: "app-analysis",
@@ -84,7 +85,7 @@ export default class AppPlants extends BaseAuthComponent {
   tableLoading = false;
   managePlantModel: { plant: PlantItem | null, clearBefore: boolean, file: File | null } = {
     plant: null,
-    clearBefore: false,
+    clearBefore: true,
     file: null,
   };
 
@@ -127,7 +128,7 @@ export default class AppPlants extends BaseAuthComponent {
         })
       }
     } catch (e) {
-      appContentEventBus.showError(e);
+      appContentEventBus.showError(e as ApiException);
     } finally {
       this.tableLoading = false;
     }
@@ -157,7 +158,7 @@ export default class AppPlants extends BaseAuthComponent {
         }
       });
     } catch (e) {
-      this.managePlantModal.alertError(e);
+      this.managePlantModal.alertError(e  as ApiException);
     }
   }
 

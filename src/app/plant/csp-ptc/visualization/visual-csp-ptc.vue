@@ -140,14 +140,23 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
     return legendEntries;
   }
 
-  onOpenLayersClick(features: FeatureLike[]) {
-    const piToastInfo = this.piLayersHierarchy.getAllChildLayers().map(kpiLayer => kpiLayer.onClick(features))
-      .find(featureInfos => featureInfos !== undefined); 
-    if (piToastInfo) {
-      this.piToastInfo = piToastInfo;
+  async onOpenLayersClick(features: FeatureLike[]) {
+    let featureInfos: FeatureInfos | undefined;
+    for (const kpiLayer of this.piLayersHierarchy.getAllChildLayers()) {
+      featureInfos = await kpiLayer.onClick(features);
+      if (featureInfos) {
+        break;
+      }
     }
 
-    if (piToastInfo) {
+    console.log("featureInfos:");
+    console.log(featureInfos);
+
+    if (featureInfos) {
+      this.piToastInfo = featureInfos;
+    }
+
+    if (featureInfos) {
       this.$bvToast.show("piInfoToast");
     } else {
       this.hideToast();
@@ -185,6 +194,7 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
         name: this.$t("performance-indicators").toString(),
         type: "group",
         childLayers: this.piLayersHierarchy.getGeoJSONLayers(),
+        singleSelection: true
       },
       {
         name: this.$t('components').toString(),

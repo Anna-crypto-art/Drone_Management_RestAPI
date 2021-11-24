@@ -33,6 +33,7 @@ import { BvTableFieldExtArray } from "@/app/shared/services/volateq-api/api-resu
 import apiResultsLoader from "@/app/shared/services/volateq-api/api-results-loader";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
+import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 
 @Component({
   name: "app-table-csp-ptc",
@@ -44,6 +45,7 @@ import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 export default class AppTableCspPtc extends Vue implements ITableComponent {
   @Prop() analysisResult!: AnalysisResultDetailedSchema;
   @Prop() activeComponent!: IActiveComponent;
+  @Prop({ default: false }) loadAllResults!: boolean;
   @Ref() container!: ITableComponentContainer;
   @Ref() table!: any;
 
@@ -112,35 +114,18 @@ export default class AppTableCspPtc extends Vue implements ITableComponent {
     this.last_ctx = ctx;
 
     try {
-      await apiResultsLoader.loadResults(this.analysisResult.id, this.activeComponent.componentId);
-
-      let results = apiResultsLoader.getResults(this.analysisResult.id, this.activeComponent.componentId)!;
-      
-      if (this.searchText) {
-        results = results.filter(item => item.fieldgeometry_component.kks.toUpperCase().startsWith(this.searchText.toUpperCase()));
+      if (this.loadAllResults) {
+        return this.getAllResults(ctx);
       }
 
-      const items = this.mappingHelper.getItems(results);
-      this.pagination.total = items.length;
+      const results = await volateqApi.getSpecificAnalysisResult<AnalysisResultCspPtcSchemaBase>(
+        this.analysisResult.id,
+        this.activeComponent.componentId,
+        this.getTableRequestParam()
+      );
+      this.pagination.total = results.total;
 
-      if (ctx.sortBy) {
-        items.sort((a, b) => {
-          const valA = a[ctx.sortBy!] as string | number;
-          const valB = b[ctx.sortBy!] as string | number;
-
-          if (valA < valB) {
-            return ctx.sortDesc ? 1 : -1;
-          }
-          if (valA > valB) {
-            return ctx.sortDesc ? -1 : 1;
-          }
-          return 0;
-        });
-      }
-
-      const slicedItems = items.slice((ctx.currentPage - 1) * ctx.perPage, (ctx.currentPage - 1) * ctx.perPage + ctx.perPage);
-
-      return slicedItems;
+      return this.mappingHelper.getItems(results.items);
     } catch (e) {
       appContentEventBus.showError(e as ApiException)
     } finally {
@@ -148,6 +133,38 @@ export default class AppTableCspPtc extends Vue implements ITableComponent {
     }
 
     return [];
+  }
+
+  async getAllResults(ctx: BvTableCtxObject): Promise<any[]> {
+    await apiResultsLoader.loadResults(this.analysisResult.id, this.activeComponent.componentId);
+
+    let results = apiResultsLoader.getResults(this.analysisResult.id, this.activeComponent.componentId)!;
+    
+    if (this.searchText) {
+      results = results.filter(item => item.fieldgeometry_component.kks.toUpperCase().startsWith(this.searchText.toUpperCase()));
+    }
+
+    const items = this.mappingHelper.getItems(results);
+    this.pagination.total = items.length;
+
+    if (ctx.sortBy) {
+      items.sort((a, b) => {
+        const valA = a[ctx.sortBy!] as string | number;
+        const valB = b[ctx.sortBy!] as string | number;
+
+        if (valA < valB) {
+          return ctx.sortDesc ? 1 : -1;
+        }
+        if (valA > valB) {
+          return ctx.sortDesc ? -1 : 1;
+        }
+        return 0;
+      });
+    }
+
+    const slicedItems = items.slice((ctx.currentPage - 1) * ctx.perPage, (ctx.currentPage - 1) * ctx.perPage + ctx.perPage);
+
+    return slicedItems;
   }
 }
 </script>

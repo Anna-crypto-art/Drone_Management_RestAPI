@@ -26,7 +26,7 @@ export class MissingMirrorKeyFigureLayer extends MirrorKeyFigureLayer {
     }
 
     const notMeasuredSCEFeaturesCount = this.geoJSON.features.filter(feature => feature.properties.value === null).length;
-    const notMeasuredMirrorFeaturesCount = notMeasuredSCEFeaturesCount * 8;
+    const notMeasuredMirrorFeaturesCount = notMeasuredSCEFeaturesCount * this.geoJSON.custom.mirrors_per_sce!;
     const missingMirrorsFeaturesCount = this.geoJSON.features.length - notMeasuredSCEFeaturesCount;
 
     return {

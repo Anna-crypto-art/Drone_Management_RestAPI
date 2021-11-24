@@ -20,7 +20,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
   protected geoJSON?: { 
     type: string, 
     features: { properties: { name: string, value: string | boolean | number }}[], 
-    custom: { components_total_count: number },
+    custom: { components_total_count: number, mirrors_per_sce?: number },
   };
 
   constructor(
@@ -82,14 +82,17 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
     return feature.getProperties() as FeatureProperties;
   }
 
-  protected getResultDetails(feature: FeatureLike): T | undefined {
-    const results = apiResultsLoader.getResults<T>(this.analysisResult!.id, this.keyFigure.component.id);
-    if (results) {
-      const pcs = this.getPcs(feature);
-      const resultsFiltered = results.filter(result => result.fieldgeometry_component.kks === pcs);
-      if (resultsFiltered.length > 0) {
-        return resultsFiltered[0];
-      }
+  protected async getResultDetails(feature: FeatureLike): Promise<T | undefined> {
+    const pcs = this.getPcs(feature);
+
+    const results = await volateqApi.getSpecificAnalysisResult(
+      this.analysisResult!.id,
+      this.keyFigure.component.id,
+      { filter: pcs, limit: 1 }
+    );
+
+    if (results.items.length > 0) {
+      return results.items[0] as T;
     }
 
     return undefined;
@@ -104,8 +107,6 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
   }
   
   public async load(): Promise<Record<string, unknown>> {
-    apiResultsLoader.loadResults<T>(this.analysisResult.id, this.keyFigure.component.id);
-
     this.geoJSON = await volateqApi.getKeyFiguresGeoVisual(
       this.vueComponent.plant.id, 
       this.analysisResult.id,
@@ -116,10 +117,10 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
     return this.geoJSON as Record<string, unknown>;
   }
 
-  public onClick(features: FeatureLike[]): FeatureInfos | undefined {
+  public async onClick(features: FeatureLike[]): Promise<FeatureInfos | undefined> {
     if (this.selected) {
       for (const feature of features) {
-        const result = this.getResultDetails(feature);
+        const result = await this.getResultDetails(feature);
         if (result) {
           const fieldgeo_component = result.fieldgeometry_component;
           if (fieldgeo_component && fieldgeo_component.component_id === this.keyFigure.component.id) {
