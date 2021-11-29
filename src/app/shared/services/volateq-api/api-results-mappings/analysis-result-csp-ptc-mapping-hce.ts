@@ -22,6 +22,10 @@ const analysisResultCspPtcMappingHce: AnalysisResultCspPtcMappings<AnalysisResul
     transName: "time",
   },
   {
+    getValue: r => r.sca_tracking_angle,
+    transName: "sca-tracking-angle",
+  },
+  {
     getValue: r => r.ir_intensity,
     transName: "ir-intensity",
     transDescr: "ir-intensity_expl",

@@ -164,7 +164,7 @@ export default class AppPlants extends BaseAuthComponent {
 
   onManagePlantClick(plant: PlantItem): void {
     this.managePlantModel.plant = plant;
-    this.managePlantModel.clearBefore = false;
+    this.managePlantModel.clearBefore = true;
     this.managePlantModel.file = null;
 
     this.managePlantModal.show();

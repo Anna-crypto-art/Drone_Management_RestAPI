@@ -13,4 +13,5 @@ export interface AnalysisResultCspPtcHceSchema extends AnalysisResultCspPtcSchem
     h2_concentration: boolean;
     recommended_action_class: number;
     glass_tube_temperature_class: number;
+    sca_tracking_angle: number;
 }

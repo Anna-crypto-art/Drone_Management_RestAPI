@@ -194,6 +194,7 @@
   "released": "Released",
   "is-missing-mirror": "Mirror is missing",
   "missing-mirror": "Missing mirror",
+  "sca-tracking-angle": "Tracking angle of SCA",
 
   "CSP_PTC_Absorber": "Absorber tubes",
   "CSP_PTC_SCA": "SCA",
