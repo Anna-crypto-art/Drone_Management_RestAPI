@@ -24,6 +24,7 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
 import authContainerEventBus from "@/app/auth/shared/components/auth-container-event-bus";
+import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 
 @Component({
   name: "app-auth-login",
@@ -44,7 +45,7 @@ export default class AppAuthLogin extends Vue {
       
       this.$router.push({ name: "ConfirmLogin", params: { confirmKey: confirmationKey } });
     } catch (e) {
-      authContainerEventBus.showErrorAlert(e.message);
+      authContainerEventBus.showErrorAlert((e as ApiException).message!);
       appButtonEventBus.stopLoading();
     }
   }
