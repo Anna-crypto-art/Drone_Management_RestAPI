@@ -172,7 +172,10 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
       if (selected) {
         this.legends.push(legend);
       } else {
-        this.legends.splice(this.legends.findIndex(l => l.id === legend.id), 1);
+        const removeIndex = this.legends.findIndex(l => l.id === legend.id);
+        if (removeIndex != -1) {
+          this.legends.splice(removeIndex, 1);
+        }
       }
     }
 
