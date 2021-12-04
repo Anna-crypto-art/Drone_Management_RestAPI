@@ -91,6 +91,12 @@ export default class AppPlantViewCspPtc extends Vue {
 
   private view: View = 'map';
   sidebarOpen = true;
+  
+  private isMobile!: boolean;
+  private isMobileListener(e: MediaQueryListEvent) {
+    this.isMobile = e.matches
+  }
+  private isMobileQuery!: MediaQueryList;
 
   async created(): Promise<void> {
     this.analysisResults = await volateqApi.getAnalysisResults(this.plant.id);
@@ -124,6 +130,14 @@ export default class AppPlantViewCspPtc extends Vue {
     if (view === 'map' || view === 'table') {
       setTimeout(() => this.changeView(view), 1000); // first load openlayers else openlayers keeps blank... (bug!?)
     }
+
+    this.isMobileQuery = window.matchMedia(""); // Add media query here
+    this.isMobile = this.isMobileQuery.matches;
+    this.isMobileQuery.addEventListener("change", this.isMobileListener);
+  }
+
+  unmounted() {
+    this.isMobileQuery.removeEventListener("change", this.isMobileListener);
   }
 
   get hasResults(): boolean {
