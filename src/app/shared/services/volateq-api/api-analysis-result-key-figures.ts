@@ -10,4 +10,5 @@ export enum AnalysisResultKeyFigure {
     GLASS_TUBE_TEMPERATURE_ID = 9,
     HCE_RECOMMENDED_ACTION_CLASS_ID = 10,
     MISSING_MIRROR_ID = 11,
+    OXYGEN_PENETRATION_ID = 12,
   }

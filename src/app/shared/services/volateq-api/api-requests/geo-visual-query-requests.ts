@@ -4,6 +4,7 @@ export interface GeoVisualQuery {
   glass_tube_temperature_class?: 1 | 2 | 3;
   missing_glass_tube?: 0 | 1;
   coating_degraded?: 0 | 1;
+  oxygen_penetration?: 0 | 1;
   h2_concentration?: 0 | 1;
   recommended_action_class?: 1 | 2 | 3;
 }

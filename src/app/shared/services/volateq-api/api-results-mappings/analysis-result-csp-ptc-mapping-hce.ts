@@ -55,10 +55,10 @@ const analysisResultCspPtcMappingHce: AnalysisResultCspPtcMappings<AnalysisResul
     keyFigureId: AnalysisResultKeyFigure.MISSING_GLASS_TUBE_ID,
   },
   {
-    getValue: r => r.coating_degraded,
+    getValue: r => r.oxygen_penetration,
     transName: "oxygen-penetration",
     transDescr: "oxygen-penetration_expl",
-    keyFigureId: AnalysisResultKeyFigure.COATING_DEGRADATION_ID,
+    keyFigureId: AnalysisResultKeyFigure.OXYGEN_PENETRATION_ID,
   },
   {
     getValue: r => r.h2_concentration,

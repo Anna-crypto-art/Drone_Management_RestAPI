@@ -45,10 +45,10 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     queryColor: { color: KeyFigureColors.red, query: { missing_glass_tube: 1, undefined: 1 }}
   },
   {
-    keyFigureId: AnalysisResultKeyFigure.COATING_DEGRADATION_ID,
+    keyFigureId: AnalysisResultKeyFigure.OXYGEN_PENETRATION_ID,
     layerType: BoolUndefinedHceKeyFigureLayer,
     keyFigureInfo: { templateName: "O2Penetration", keyName: "oxygen-penetration" },
-    queryColor: { color: KeyFigureColors.red, query: { coating_degraded: 1, undefined: 1 }}
+    queryColor: { color: KeyFigureColors.red, query: { oxygen_penetration: 1, undefined: 1 }}
   },
   {
     keyFigureId: AnalysisResultKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID,
