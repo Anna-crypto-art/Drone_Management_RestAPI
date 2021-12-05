@@ -15,4 +15,5 @@ export interface AnalysisResultCspPtcHceSchema extends AnalysisResultCspPtcSchem
     glass_tube_temperature_class: number;
     sca_tracking_angle: number;
     oxygen_penetration: boolean;
+    glass_tube_temperature_class_limits: number[];
 }

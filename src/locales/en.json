@@ -195,6 +195,7 @@
   "is-missing-mirror": "Mirror is missing",
   "missing-mirror": "Missing mirror",
   "sca-tracking-angle": "Tracking angle of SCA",
+  "glass-tube-temperature-class-limits": "Classification limits of glass tube temperature",
 
   "CSP_PTC_Absorber": "Absorber tubes",
   "CSP_PTC_SCA": "SCA",

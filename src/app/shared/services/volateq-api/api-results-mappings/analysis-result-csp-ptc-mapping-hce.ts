@@ -71,6 +71,11 @@ const analysisResultCspPtcMappingHce: AnalysisResultCspPtcMappings<AnalysisResul
     transName: "recommended-action",
     transDescr: "recommended-action_expl",
     keyFigureId: AnalysisResultKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID,
+  },
+  {
+    getValue: r => r.glass_tube_temperature_class_limits,
+    transName: "glass-tube-temperature-class-limits",
+    keyFigureId: AnalysisResultKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
   }
 ];
 
