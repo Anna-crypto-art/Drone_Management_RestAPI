@@ -55,6 +55,9 @@ export interface KeyFigureInfo {
 export enum KeyFigureColors {
   green = "green",
   yellow = "yellow",
-  red = "red",
+  red = "#ff0000",
+  halfRed = "#ff8080",
+  blue = "#0000ff",
+  halfBlue = "#8080ff",
   grey = "grey",
 }

@@ -3,15 +3,14 @@ import { KeyFigureLayer } from "./shared/key-figure-layer";
 import { FeatureLike } from "ol/Feature";
 import { Style, Stroke, Text, Fill } from 'ol/style';
 import { AnalysisResultCspPtcSceSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-sce-schema";
-import { FeatureInfo, FeatureInfos, Legend } from "./shared/types";
+import { FeatureInfo, FeatureInfos, KeyFigureColors, Legend } from "./shared/types";
 import analysisResultCspPtcMappingSce from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-sce";
 
 
-const SCE_ANGLE_OFFSET_COLOR_RANGES = [0.01, 0.15, 0.3];
 const SCE_ANGLE_OFFSET_COLORS = [undefined, 'green', 'yellow', 'red'];
 
 
-export class SceAngleKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcSceSchema> {
+export class SceOrientationKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcSceSchema> {
   protected readonly analysisResultMapping = analysisResultCspPtcMappingSce;
 
   protected showPcsZoomLevel = 18;
@@ -32,42 +31,61 @@ export class SceAngleKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcS
       return undefined;
     }
 
+    const limitAt0 = this.analysisResult.csp_ptc.sce_orientation_offset_class_limits[0];
+    const limitAt1 = this.analysisResult.csp_ptc.sce_orientation_offset_class_limits[1];
+    const colorFilteredCount = (color: KeyFigureColors) => this.getLegendEntryCount(this.geoJSON!.features
+        .filter(feature => this.getOffsetColor(feature.properties.value as number) === color).length);
+    
     return {
       id: this.keyFigureId.toString(),
       entries: [
-        { 
-          color: "green",
-          name: "0° - 0.149°" + this.getLegendEntryCount(this.geoJSON.features
-            .filter(feature => this.getOffsetColor(feature.properties.value as number) == SCE_ANGLE_OFFSET_COLORS[1]).length) 
+        {
+          color: KeyFigureColors.blue,
+          name: `-&infin;° - -${limitAt1}°: ${colorFilteredCount(KeyFigureColors.blue)}`
         },
-        { 
-          color: "yellow", 
-          name: "0.15° - 0.299°" + this.getLegendEntryCount(this.geoJSON.features
-            .filter(feature => this.getOffsetColor(feature.properties.value as number) == SCE_ANGLE_OFFSET_COLORS[2]).length) 
+        {
+          color: KeyFigureColors.halfBlue,
+          name: `-${limitAt1}° - -${limitAt0}°: ${colorFilteredCount(KeyFigureColors.halfBlue)}`
         },
-        { 
-          color: "red",
-          name: "0.3° - &infin;" + this.getLegendEntryCount(this.geoJSON.features
-            .filter(feature => this.getOffsetColor(feature.properties.value as number) == SCE_ANGLE_OFFSET_COLORS[3]).length)
+        {
+          color: KeyFigureColors.green,
+          name: `-${limitAt0}° - ${limitAt0}°: ${colorFilteredCount(KeyFigureColors.green)}`
         },
+        {
+          color: KeyFigureColors.halfRed,
+          name: `${limitAt0}° - ${limitAt1}°: ${colorFilteredCount(KeyFigureColors.halfRed)}`
+        },
+        {
+          color: KeyFigureColors.red,
+          name: `${limitAt1}° - &infin;°: ${colorFilteredCount(KeyFigureColors.red)}`
+        },
+        {
+          color: KeyFigureColors.grey,
+          name: this.vueComponent.$t("not-measured").toString() + colorFilteredCount(KeyFigureColors.grey),
+        }
       ]
     };
   }
 
   private getOffsetColor(offsetValue?: number) {
-    if (!offsetValue) {
-      return undefined;
+    if (offsetValue === null || offsetValue === undefined) {
+      return KeyFigureColors.grey;
     }
-    offsetValue = offsetValue < 0 ? offsetValue * -1 : offsetValue;
 
-    let i = 0;
-    while (i < SCE_ANGLE_OFFSET_COLOR_RANGES.length) {
-      if (offsetValue < SCE_ANGLE_OFFSET_COLOR_RANGES[i]) {
-        return SCE_ANGLE_OFFSET_COLORS[i];
-      }
-      i++;
+    const positiveOffsetValue = offsetValue < 0 ? offsetValue * -1 : offsetValue;
+    if (positiveOffsetValue < this.analysisResult.csp_ptc.sce_orientation_offset_class_limits[0]) {
+      return KeyFigureColors.green;
     }
-    return SCE_ANGLE_OFFSET_COLORS[i];
+
+    if (positiveOffsetValue >= this.analysisResult.csp_ptc.sce_orientation_offset_class_limits[0] &&
+      positiveOffsetValue < this.analysisResult.csp_ptc.sce_orientation_offset_class_limits[1]) 
+    {
+      return offsetValue < 0 ? KeyFigureColors.halfBlue : KeyFigureColors.halfRed;
+    }
+
+    if (positiveOffsetValue >= this.analysisResult.csp_ptc.sce_orientation_offset_class_limits[1]) {
+      return offsetValue < 0 ? KeyFigureColors.blue : KeyFigureColors.red;
+    }
   }
   
 }

@@ -6,38 +6,22 @@ import { AnalysisResultCspPtcMappings } from "./types";
 const analysisResultCspPtcMappingSce: AnalysisResultCspPtcMappings<AnalysisResultCspPtcSceSchema> = [
   ...analysisResultCspPtcMappingBase,
   {
-    getValue: r => r.set_angle,
-    transName: "set-angle",
-  },
-  {
-    getValue: r => r.angle_value,
-    transName: "angle-value",
-    transDescr: "angle-value_expl",
-    keyFigureId: AnalysisResultKeyFigure.SCE_ANGLE_ID
-  },
-  {
-    getValue: r => r.actual_angle,
+    getValue: r => r.absolute_orientation,
     transName: "actual-angle",
     transDescr: "actual-angle_expl",
-    keyFigureId: AnalysisResultKeyFigure.SCE_ANGLE_ID,
+    keyFigureId: AnalysisResultKeyFigure.SCE_ORIENTATION_ID,
   },
   {
-    getValue: r => r.angle_deviation,
+    getValue: r => r.orientation_offset,
     transName: "angle-deviation",
     transDescr: "angle-deviation_expl",
-    keyFigureId: AnalysisResultKeyFigure.SCE_ANGLE_ID,
+    keyFigureId: AnalysisResultKeyFigure.SCE_ORIENTATION_ID,
   },
   {
-    getValue: r => r.uncertainty,
+    getValue: r => r.orientation_uncertainty,
     transName: "uncertainty",
     transDescr: "uncertainty_expl",
-    keyFigureId: AnalysisResultKeyFigure.SCE_ANGLE_ID,
-  },
-  {
-    getValue: r => r.deviation_to_drive,
-    transName: "deviation-to-drive",
-    transDescr: "deviation-to-drive_expl",
-    keyFigureId: AnalysisResultKeyFigure.SCE_ANGLE_ID,
+    keyFigureId: AnalysisResultKeyFigure.SCE_ORIENTATION_ID,
   },
 ];
 

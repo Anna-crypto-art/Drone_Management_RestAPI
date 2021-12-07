@@ -6,14 +6,26 @@ import { AnalysisResultCspPtcMappings } from "./types";
 const analysisResultCspPtcMappingSca: AnalysisResultCspPtcMappings<AnalysisResultCspPtcScaSchema> = [
   ...analysisResultCspPtcMappingBase,
   {
+    getValue: r => r.encoder_value,
+    transName: "angle-value",
+    transDescr: "angle-value_expl",
+    keyFigureId: AnalysisResultKeyFigure.SCA_ORIENTATION_ID,
+  },
+  {
     getValue: r => r.orientation_at_drive,
     transName: "orientation-at-drive",
     keyFigureId: AnalysisResultKeyFigure.SCA_ORIENTATION_ID,
   },
   {
-    getValue: r => r.uncertainty,
+    getValue: r => r.uncertainty_at_drive,
     transName: "uncertainty",
     transDescr: "uncertainty_expl",
+    keyFigureId: AnalysisResultKeyFigure.SCA_ORIENTATION_ID,
+  },
+  {
+    getValue: r => r.orientation_at_drive_offset,
+    transName: "avg-orientation-offset",
+    transDescr: "avg-orientation-offset_expl",
     keyFigureId: AnalysisResultKeyFigure.SCA_ORIENTATION_ID,
   },
   {

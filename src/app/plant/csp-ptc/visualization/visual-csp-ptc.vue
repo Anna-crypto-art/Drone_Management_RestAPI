@@ -25,7 +25,7 @@
       <template #H2Concentration>
         {{ $t("high-hydrogen-concentration") }} <app-explanation><span v-html="$t('high-hydrogen-concentration_expl')"></span></app-explanation>
       </template>
-      <template #sceAngle>
+      <template #sceOrientation>
         {{ $t("sce-alignment-offset") }} <app-explanation>{{ $t("angle-deviation_expl") }}</app-explanation>
       </template>
       <template #recommendedAction>

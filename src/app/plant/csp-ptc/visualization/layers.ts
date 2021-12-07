@@ -7,7 +7,7 @@ import { SceComponentLayer } from "./components/sce-component-layer";
 import { ComponentLayer } from "./components/shared/component-layer";
 import { MissingMirrorKeyFigureLayer } from "./key-figures/missing-mirror-key-figure-layer";
 import { ScaSdxImageKeyFigureLayer } from "./key-figures/sca-sdx-image-key-figure-layer";
-import { SceAngleKeyFigureLayer } from "./key-figures/sce-angle-key-figure-layer";
+import { SceOrientationKeyFigureLayer } from "./key-figures/sce-angle-key-figure-layer";
 import { BoolUndefinedHceKeyFigureLayer } from "./key-figures/shared/bool-hce-key-figure-layer";
 import { HceKeyFigureLayer } from "./key-figures/shared/hce-key-figure-layer";
 import { KeyFigureColors, KeyFigureInfo, QueryColor } from "./key-figures/shared/types";
@@ -126,9 +126,9 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     ]
   },
   {
-    keyFigureId: AnalysisResultKeyFigure.SCE_ANGLE_ID, 
-    layerType: SceAngleKeyFigureLayer,
-    keyFigureInfo: { templateName: "sceAngle", keyName: "angle-deviation" },
+    keyFigureId: AnalysisResultKeyFigure.SCE_ORIENTATION_ID, 
+    layerType: SceOrientationKeyFigureLayer,
+    keyFigureInfo: { templateName: "sceOrientation", keyName: "angle-deviation" },
   },
   {
     keyFigureId: AnalysisResultKeyFigure.SCA_SDX_IMAGE_ID, 
