@@ -6,6 +6,5 @@ export interface AnalysisResultCspPtcScaSchema extends AnalysisResultCspPtcSchem
   uncertainty_at_drive: number;
   orientation_at_drive_offset: number;
   torsion_caused_friction_mean: number;
-  torsion_caused_friction_south: number;
-  torsion_caused_friction_north: number;
+  sdx_rms_value: number;
 }

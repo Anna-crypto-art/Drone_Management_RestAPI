@@ -172,11 +172,11 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
       }
     ]
   },
-  {
-    keyFigureId: AnalysisResultKeyFigure.SCA_SDX_IMAGE_ID, 
-    layerType: ScaSdxImageKeyFigureLayer,
-    keyFigureInfo: { templateName: "SDX-Images", keyName: "sdx-images" },
-  },
+  // {
+  //   keyFigureId: AnalysisResultKeyFigure.SCA_SDX_IMAGE_ID, 
+  //   layerType: ScaSdxImageKeyFigureLayer,
+  //   keyFigureInfo: { templateName: "SDX-Images", keyName: "sdx-images" },
+  // },
   {
     keyFigureId: AnalysisResultKeyFigure.MISSING_MIRROR_ID,
     layerType: MissingMirrorKeyFigureLayer,

@@ -4,4 +4,5 @@ export interface AnalysisResultCspPtcSceSchema extends AnalysisResultCspPtcSchem
   absolute_orientation: number;
   orientation_uncertainty: number;
   orientation_offset: number;
+  sdx_rms_value: number;
 }

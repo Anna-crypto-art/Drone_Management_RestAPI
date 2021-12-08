@@ -35,15 +35,9 @@ const analysisResultCspPtcMappingSca: AnalysisResultCspPtcMappings<AnalysisResul
     keyFigureId: AnalysisResultKeyFigure.SCA_FRICTION_ID,
   },
   {
-    getValue: r => r.torsion_caused_friction_north,
-    transName: "torsion-caused-friction-north",
-    transDescr: "torsion-caused-friction-north_expl",
-    keyFigureId: AnalysisResultKeyFigure.SCA_FRICTION_ID,
-  },
-  {
-    getValue: r => r.torsion_caused_friction_south,
-    transName: "torsion-caused-friction-south",
-    transDescr: "torsion-caused-friction-south_expl",
+    getValue: r => r.torsion_caused_friction_mean,
+    transName: "torsion-caused-friction-mean",
+    transDescr: "torsion-caused-friction-mean_expl",
     keyFigureId: AnalysisResultKeyFigure.SCA_FRICTION_ID,
   },
 ];

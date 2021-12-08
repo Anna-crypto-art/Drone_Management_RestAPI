@@ -23,6 +23,12 @@ const analysisResultCspPtcMappingSce: AnalysisResultCspPtcMappings<AnalysisResul
     transDescr: "uncertainty_expl",
     keyFigureId: AnalysisResultKeyFigure.SCE_ORIENTATION_ID,
   },
+  {
+    getValue: r => r.sdx_rms_value,
+    transName: "sdx-rms",
+    transDescr: "sce-sdx-rms_expl",
+    keyFigureId: AnalysisResultKeyFigure.SCE_SDX_ID,
+  },
 ];
 
 export default analysisResultCspPtcMappingSce;
