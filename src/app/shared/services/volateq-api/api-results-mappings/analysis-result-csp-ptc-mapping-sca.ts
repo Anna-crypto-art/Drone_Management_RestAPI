@@ -24,8 +24,8 @@ const analysisResultCspPtcMappingSca: AnalysisResultCspPtcMappings<AnalysisResul
   },
   {
     getValue: r => r.orientation_at_drive_offset,
-    transName: "avg-orientation-offset",
-    transDescr: "avg-orientation-offset_expl",
+    transName: "alignment-offset",
+    transDescr: "sca-alignment-offset_expl",
     keyFigureId: AnalysisResultKeyFigure.SCA_ORIENTATION_ID,
   },
   {

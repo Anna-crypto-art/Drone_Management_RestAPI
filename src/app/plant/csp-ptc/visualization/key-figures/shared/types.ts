@@ -1,4 +1,3 @@
-import { AnalysisResultKeyFigure } from "@/app/shared/services/volateq-api/api-analysis-result-key-figures";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 
 export interface FeatureProperties {
@@ -28,7 +27,8 @@ export interface Legend {
  */
 export interface QueryColor {
   query?: GeoVisualQuery;
-  color?: string;
+  color?: KeyFigureColors;
+  colors?: KeyFigureColors[];
 }
 
 export interface KeyFigureInfo {

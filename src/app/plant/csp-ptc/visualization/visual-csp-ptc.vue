@@ -25,9 +25,6 @@
       <template #H2Concentration>
         {{ $t("high-hydrogen-concentration") }} <app-explanation><span v-html="$t('high-hydrogen-concentration_expl')"></span></app-explanation>
       </template>
-      <template #sceOrientation>
-        {{ $t("sce-alignment-offset") }} <app-explanation>{{ $t("angle-deviation_expl") }}</app-explanation>
-      </template>
       <template #recommendedAction>
         {{ $t("recommended-action") }} <app-explanation><span v-html="$t('recommended-action_expl')"></span></app-explanation>
       </template>
@@ -39,6 +36,42 @@
       </template>
       <template #recommendedActionClass3>
         {{ $t("recommended-action-class-3") }} <app-explanation><span v-html="$t('recommended-action-class-3_expl')"></span></app-explanation>
+      </template>
+      <template #sceOrientation>
+        {{ $t("alignment-offset") }} <app-explanation><span v-html="$t('sce-alignment-offset_expl')"></span></app-explanation>
+      </template>
+      <template #sceOrientOffsetClass3>
+        <span v-if="selectedAnalysisResult && selectedAnalysisResult.csp_ptc">
+          {{ $t("alignment-offset-class-3", { limit1: selectedAnalysisResult.csp_ptc.sce_orientation_offset_class_limits[1] }) }}
+        </span>
+      </template>
+      <template #sceOrientOffsetClass2>
+        <span v-if="selectedAnalysisResult && selectedAnalysisResult.csp_ptc">
+          {{ $t("alignment-offset-class-2", { limit1: selectedAnalysisResult.csp_ptc.sce_orientation_offset_class_limits[1], limit0: selectedAnalysisResult.csp_ptc.sce_orientation_offset_class_limits[0] }) }}
+        </span>
+      </template>
+      <template #sceOrientOffsetClass1>
+        <span v-if="selectedAnalysisResult && selectedAnalysisResult.csp_ptc">
+          {{ $t("alignment-offset-class-1", { limit0: selectedAnalysisResult.csp_ptc.sce_orientation_offset_class_limits[0] }) }}
+        </span>
+      </template>
+      <template #scaOrientation>
+        {{ $t("alignment-offset") }} <app-explanation><span v-html="$t('sca-alignment-offset_expl')"></span></app-explanation>
+      </template>
+      <template #scaOrientOffsetClass3>
+        <span v-if="selectedAnalysisResult && selectedAnalysisResult.csp_ptc">
+          {{ $t("alignment-offset-class-3", { limit1: selectedAnalysisResult.csp_ptc.sca_orientation_offset_class_limits[1] }) }}
+        </span>
+      </template>
+      <template #scaOrientOffsetClass2>
+        <span v-if="selectedAnalysisResult && selectedAnalysisResult.csp_ptc">
+          {{ $t("alignment-offset-class-2", { limit1: selectedAnalysisResult.csp_ptc.sca_orientation_offset_class_limits[1], limit0: selectedAnalysisResult.csp_ptc.sce_orientation_offset_class_limits[0] }) }}
+        </span>
+      </template>
+      <template #scaOrientOffsetClass1>
+        <span v-if="selectedAnalysisResult && selectedAnalysisResult.csp_ptc">
+          {{ $t("alignment-offset-class-1", { limit0: selectedAnalysisResult.csp_ptc.sca_orientation_offset_class_limits[0] }) }}
+        </span>
       </template>
 
 
@@ -100,7 +133,7 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
   @Ref() openLayers!: IOpenLayersComponent;
 
-  private selectedAnalysisResult?: AnalysisResultDetailedSchema;
+  private selectedAnalysisResult: AnalysisResultDetailedSchema | null | undefined = null;
   private componentLayers!: ComponentLayer[];
   private piLayersHierarchy!: PILayersHierarchy;
 
