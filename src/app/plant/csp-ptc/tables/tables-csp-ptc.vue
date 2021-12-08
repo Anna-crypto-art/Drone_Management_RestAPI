@@ -52,10 +52,12 @@ import dateHelper from "@/app/shared/services/helper/date-helper";
 import analysisResultCspPtcMappingIrIntensity from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-hce";
 import analysisResultCspPtcMappingSceAngle from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-sce";
 import analysisResultCspPtcMappingScaOrientation from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-sca";
+import analysisResultCspPtcMappingMirror from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-mirror";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { IAnalysisResultSelection } from "../types";
 import AppTableCspPtc from "./table-component/table-csp-ptc.vue";
 import { IAppButton } from "@/app/shared/components/app-button/types";
+import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 
 
 const ACTIVE_COMPONENTS: IActiveComponent[] = [
@@ -75,6 +77,11 @@ const ACTIVE_COMPONENTS: IActiveComponent[] = [
     componentId: AnalysisResultComponent.CSP_PTC_SCA,
     mapping: analysisResultCspPtcMappingScaOrientation as any,
     descr: "sca_expl",
+  },
+  {
+    label: "mirrors",
+    componentId: AnalysisResultComponent.CSP_PTC_MIRROR,
+    mapping: analysisResultCspPtcMappingMirror as any
   }
 ];
 
@@ -161,7 +168,7 @@ export default class AppTablesCspPtc extends BaseAuthComponent implements IAnaly
 
         AppDownloader.download(await volateqApi.generateDownloadUrl(authCsvDownloadUrl, csvFileName), csvFileName);
       } catch (e) {
-        appContentEventBus.showError(e);
+        appContentEventBus.showError(e as ApiException);
       } finally {
         this.csvExportBtn.stopLoading();
       }

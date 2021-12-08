@@ -84,6 +84,9 @@ export default class AppGeovisualLayerDisplay extends Vue {
     margin-top: 0;
     font-size: 1.3rem;
     margin-bottom: 10px;
+    &:nth-child(1) {
+      margin-top: 15px;
+    }
   }
   &-group-level-3 {
     margin-top: 15px !important;

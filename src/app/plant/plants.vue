@@ -76,19 +76,20 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import { Component, Ref } from 'vue-property-decorator';
-import AppContent from '@/app/shared/components/app-content/app-content.vue';
-import AppTableContainer from '@/app/shared/components/app-table-container/app-table-container.vue';
-import { BvTableFieldArray } from 'bootstrap-vue';
-import volateqApi from '../shared/services/volateq-api/volateq-api';
-import { BaseAuthComponent } from '../shared/components/base-auth-component/base-auth-component';
-import { PlantSchema } from '../shared/services/volateq-api/api-schemas/plant-schema';
-import AppModalForm from '@/app/shared/components/app-modal/app-modal-form.vue';
-import { IAppModalForm } from '../shared/components/app-modal/types';
-import appContentEventBus from '../shared/components/app-content/app-content-event-bus';
-import { PlantItem } from './types';
-import appButtonEventBus from '../shared/components/app-button/app-button-event-bus';
+import Vue from "vue";
+import { Component, Ref } from "vue-property-decorator";
+import AppContent from "@/app/shared/components/app-content/app-content.vue";
+import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
+import { BvTableFieldArray } from "bootstrap-vue";
+import volateqApi from "../shared/services/volateq-api/volateq-api";
+import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
+import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
+import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
+import { IAppModalForm } from "../shared/components/app-modal/types";
+import appContentEventBus from "../shared/components/app-content/app-content-event-bus";
+import { PlantItem } from "./types";
+import appButtonEventBus from "../shared/components/app-button/app-button-event-bus";
+import { ApiException } from "../shared/services/volateq-api/api-errors";
 
 @Component({
   name: 'app-analysis',
@@ -111,8 +112,8 @@ export default class AppPlants extends BaseAuthComponent {
     file: File | null;
   } = {
     plant: null,
-    clearBefore: false,
-    file: null
+    clearBefore: true,
+    file: null,
   };
 
   async created(): Promise<void> {
@@ -154,7 +155,7 @@ export default class AppPlants extends BaseAuthComponent {
         });
       }
     } catch (e) {
-      appContentEventBus.showError(e);
+      appContentEventBus.showError(e as ApiException);
     } finally {
       this.tableLoading = false;
     }
@@ -192,13 +193,13 @@ export default class AppPlants extends BaseAuthComponent {
         }
       });
     } catch (e) {
-      this.managePlantModal.alertError(e);
+      this.managePlantModal.alertError(e  as ApiException);
     }
   }
 
   onManagePlantClick(plant: PlantItem): void {
     this.managePlantModel.plant = plant;
-    this.managePlantModel.clearBefore = false;
+    this.managePlantModel.clearBefore = true;
     this.managePlantModel.file = null;
 
     this.managePlantModal.show();

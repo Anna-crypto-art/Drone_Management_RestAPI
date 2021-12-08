@@ -27,8 +27,8 @@ export interface Legend {
  * URL query parameters and color for a layer
  */
 export interface QueryColor {
-  query: GeoVisualQuery;
-  color: string;
+  query?: GeoVisualQuery;
+  color?: string;
 }
 
 export interface KeyFigureInfo {

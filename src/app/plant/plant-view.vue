@@ -15,6 +15,7 @@ import volateqApi from '@/app/shared/services/volateq-api/volateq-api';
 import AppPlantViewCspPtc from "@/app/plant/csp-ptc/plant-view-csp-ptc.vue";
 import { PlantSchema } from '../shared/services/volateq-api/api-schemas/plant-schema';
 import appContentEventBus from '../shared/components/app-content/app-content-event-bus';
+import { ApiException } from '../shared/services/volateq-api/api-errors';
 
 
 @Component({
@@ -31,7 +32,7 @@ export default class AppPlantView extends Vue {
     try {
       this.plant = await volateqApi.getPlant(this.$route.params.id);
     } catch (e) {
-      appContentEventBus.showError(e);
+      appContentEventBus.showError(e as ApiException);
     } 
   }
 

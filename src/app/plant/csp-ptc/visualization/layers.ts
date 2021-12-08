@@ -5,6 +5,7 @@ import { MirrorComponentLayer } from "./components/mirror-component-layer";
 import { ScaComponentLayer } from "./components/sca-component-layer";
 import { SceComponentLayer } from "./components/sce-component-layer";
 import { ComponentLayer } from "./components/shared/component-layer";
+import { MissingMirrorKeyFigureLayer } from "./key-figures/missing-mirror-key-figure-layer";
 import { ScaSdxImageKeyFigureLayer } from "./key-figures/sca-sdx-image-key-figure-layer";
 import { SceAngleKeyFigureLayer } from "./key-figures/sce-angle-key-figure-layer";
 import { BoolUndefinedHceKeyFigureLayer } from "./key-figures/shared/bool-hce-key-figure-layer";
@@ -134,4 +135,10 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     layerType: ScaSdxImageKeyFigureLayer,
     keyFigureInfo: { templateName: "SDX-Images", keyName: "sdx-images" },
   },
+  {
+    keyFigureId: AnalysisResultKeyFigure.MISSING_MIRROR_ID,
+    layerType: MissingMirrorKeyFigureLayer,
+    keyFigureInfo: { keyName: "missing-mirror" },
+    queryColor: { color: KeyFigureColors.red }
+  }
 ];
