@@ -41,40 +41,26 @@
         {{ $t("alignment-offset") }} <app-explanation><span v-html="$t('sce-alignment-offset_expl')"></span></app-explanation>
       </template>
       <template #sceOrientOffsetClass3>
-        <span v-if="selectedAnalysisResult && selectedAnalysisResult.csp_ptc">
-          {{ $t("alignment-offset-class-3", { limit1: selectedAnalysisResult.csp_ptc.sce_orientation_offset_class_limits[1] }) }}
-        </span>
+        {{ getTransAlignmentOffsetClassLimit('sce', 3) }}
       </template>
       <template #sceOrientOffsetClass2>
-        <span v-if="selectedAnalysisResult && selectedAnalysisResult.csp_ptc">
-          {{ $t("alignment-offset-class-2", { limit1: selectedAnalysisResult.csp_ptc.sce_orientation_offset_class_limits[1], limit0: selectedAnalysisResult.csp_ptc.sce_orientation_offset_class_limits[0] }) }}
-        </span>
+        {{ getTransAlignmentOffsetClassLimit('sce', 2) }}
       </template>
       <template #sceOrientOffsetClass1>
-        <span v-if="selectedAnalysisResult && selectedAnalysisResult.csp_ptc">
-          {{ $t("alignment-offset-class-1", { limit0: selectedAnalysisResult.csp_ptc.sce_orientation_offset_class_limits[0] }) }}
-        </span>
+        {{ getTransAlignmentOffsetClassLimit('sce', 1) }}
       </template>
-      <template #scaOrientation>
+       <template #scaOrientation>
         {{ $t("alignment-offset") }} <app-explanation><span v-html="$t('sca-alignment-offset_expl')"></span></app-explanation>
       </template>
       <template #scaOrientOffsetClass3>
-        <span v-if="selectedAnalysisResult && selectedAnalysisResult.csp_ptc">
-          {{ $t("alignment-offset-class-3", { limit1: selectedAnalysisResult.csp_ptc.sca_orientation_offset_class_limits[1] }) }}
-        </span>
+        {{ getTransAlignmentOffsetClassLimit('sca', 3) }}
       </template>
       <template #scaOrientOffsetClass2>
-        <span v-if="selectedAnalysisResult && selectedAnalysisResult.csp_ptc">
-          {{ $t("alignment-offset-class-2", { limit1: selectedAnalysisResult.csp_ptc.sca_orientation_offset_class_limits[1], limit0: selectedAnalysisResult.csp_ptc.sce_orientation_offset_class_limits[0] }) }}
-        </span>
+        {{ getTransAlignmentOffsetClassLimit('sca', 2) }}
       </template>
       <template #scaOrientOffsetClass1>
-        <span v-if="selectedAnalysisResult && selectedAnalysisResult.csp_ptc">
-          {{ $t("alignment-offset-class-1", { limit0: selectedAnalysisResult.csp_ptc.sca_orientation_offset_class_limits[0] }) }}
-        </span>
+        {{ getTransAlignmentOffsetClassLimit('sca', 1) }}
       </template>
-
-
     </app-geovisualization>
     <div v-if="hasLegend" class="visual-csp-ptc-legend">
       <div v-for="entry in legendEntries" :key="entry.color" class="visual-csp-ptc-legend-entry">
@@ -171,6 +157,30 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
     }
     
     return legendEntries;
+  }
+
+  getTransAlignmentOffsetClassLimit(component_type: 'sce' | 'sca', class_limit: 1 | 2 | 3): string {
+    if (!this.selectedAnalysisResult) {
+      return "";
+    }
+
+    const offset_class_limits: number[] | null = this.selectedAnalysisResult.csp_ptc[component_type + '_orientation_offset_class_limits'];
+
+    if (offset_class_limits === null) {
+      return "";
+    }
+
+    if (class_limit === 1) {
+      return this.$t("alignment-offset-class-1", { limit0: offset_class_limits[0] }).toString();
+    } 
+    if (class_limit === 2) {
+      return this.$t("alignment-offset-class-2", { limit1: offset_class_limits[1], limit0: offset_class_limits[0] }).toString();
+    }
+    if (class_limit === 3) {
+      return this.$t("alignment-offset-class-3", { limit1: offset_class_limits[1] }).toString();
+    }
+
+    throw new Error("class_limit not allowed");
   }
 
   async onOpenLayersClick(features: FeatureLike[]) {
