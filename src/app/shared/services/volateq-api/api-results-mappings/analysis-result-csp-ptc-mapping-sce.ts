@@ -13,7 +13,7 @@ const analysisResultCspPtcMappingSce: AnalysisResultCspPtcMappings<AnalysisResul
   },
   {
     getValue: r => r.orientation_offset,
-    transName: "alignment-offset",
+    transName: "sce-alignment-offset",
     transDescr: "sce-alignment-offset_expl",
     keyFigureId: AnalysisResultKeyFigure.SCE_ORIENTATION_ID,
   },

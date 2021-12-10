@@ -8,4 +8,6 @@ export interface GeoVisualQuery {
   h2_concentration?: 0 | 1;
   recommended_action_class?: 1 | 2 | 3;
   orientation_offset_class?: 1 | 2 | 3;
+  torsion_class?: 1 | 2 | 3;
+  sdx_class?: 1 | 2 | 3;
 }

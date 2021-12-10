@@ -6,12 +6,15 @@ import { ScaComponentLayer } from "./components/sca-component-layer";
 import { SceComponentLayer } from "./components/sce-component-layer";
 import { ComponentLayer } from "./components/shared/component-layer";
 import { MissingMirrorKeyFigureLayer } from "./key-figures/missing-mirror-key-figure-layer";
+import { ScaFrictionKeyFigureLayer } from "./key-figures/sca-friction-key-figure";
 import { ScaOrientationKeyFigureLayer } from "./key-figures/sca-orientation-key-figure-layer";
-import { ScaSdxImageKeyFigureLayer } from "./key-figures/sca-sdx-image-key-figure-layer";
+import { ScaSdxKeyFigureLayer } from "./key-figures/sca-sdx-key-figure-layer";
 import { SceOrientationKeyFigureLayer } from "./key-figures/sce-orientation-key-figure-layer";
 import { BoolUndefinedHceKeyFigureLayer } from "./key-figures/shared/bool-hce-key-figure-layer";
 import { HceKeyFigureLayer } from "./key-figures/shared/hce-key-figure-layer";
-import { KeyFigureColors, KeyFigureInfo, QueryColor } from "./key-figures/shared/types";
+import { ScaKeyFigureLayer } from "./key-figures/shared/sca-key-figure-layer";
+import { ScaOrthoImageKeyFigureLayer } from "./key-figures/shared/sca-ortho-image-key-figure-layer";
+import { KeyFigureColors, KeyFigureInfo, QueryColor, SubKeyFigureInfo } from "./key-figures/shared/types";
 
 export const COMPONENT_LAYERS: (typeof ComponentLayer)[] = [
   AbsorberComponentLayer,
@@ -35,7 +38,7 @@ export type KeyFigureTypeMap = {
   /**
    * If the layer has subLayers it will be handled as a group layer.
    */
-  subLayers?: { keyFigureInfo?: KeyFigureInfo, queryColor: QueryColor }[],
+  subLayers?: { keyFigureInfo?: SubKeyFigureInfo, queryColor: QueryColor }[],
 };
 
 export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
@@ -75,7 +78,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
         queryColor: { color: KeyFigureColors.green, query: { glass_tube_temperature_class: 1 }},
       }, 
       {
-        keyFigureInfo: { displayName: "not-measured", keyName: "gtt-not-measured", zIndex: 11 },
+        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         queryColor: { color: KeyFigureColors.grey, query: { undefined: 1 }}
       }
     ]
@@ -98,7 +101,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
         queryColor: { color: KeyFigureColors.green, query: { ir_intensity_class: 1 }},
       },
       {
-        keyFigureInfo: { displayName: "not-measured", keyName: "ir-not-measured", zIndex: 11 },
+        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         queryColor: { color: KeyFigureColors.grey, query: { undefined: 1 }}
       }
     ]
@@ -121,7 +124,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
         queryColor: { color: KeyFigureColors.green, query: { recommended_action_class: 1 }},
       }, 
       {
-        keyFigureInfo: { displayName: "not-measured", keyName: "re-not-measured", zIndex: 11 },
+        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         queryColor: { color: KeyFigureColors.grey, query: { undefined: 1 }}
       }
     ]
@@ -129,22 +132,22 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
   {
     keyFigureId: AnalysisResultKeyFigure.SCE_ORIENTATION_ID, 
     layerType: SceOrientationKeyFigureLayer,
-    keyFigureInfo: { templateName: "sceOrientation", keyName: "angle-deviation" },
+    keyFigureInfo: { templateName: "sceOrientation", keyName: "sce-alignment-offset" },
     subLayers: [
       {
-        keyFigureInfo: { templateName: "sceOrientOffsetClass3", keyName: "sce-orient-offset-class-3", zIndex: 13 },
+        keyFigureInfo: { templateName: "sceOrientOffsetClass3", displayName: "sce-orient-offset-class-3", zIndex: 13 },
         queryColor: { colors: [KeyFigureColors.blue, KeyFigureColors.red],  query: { orientation_offset_class: 3 } }
       },
       {
-        keyFigureInfo: { templateName: "sceOrientOffsetClass2", keyName: "sce-orient-offset-class-2", zIndex: 12 },
+        keyFigureInfo: { templateName: "sceOrientOffsetClass2", displayName: "sce-orient-offset-class-2", zIndex: 12 },
         queryColor: { colors: [KeyFigureColors.halfBlue, KeyFigureColors.halfRed], query: { orientation_offset_class: 2 } }
       },
       {
-        keyFigureInfo: { templateName: "sceOrientOffsetClass1", keyName: "sce-orient-offset-class-1", zIndex: 10 },
+        keyFigureInfo: { templateName: "sceOrientOffsetClass1", displayName: "sce-orient-offset-class-1", zIndex: 10 },
         queryColor: { color: KeyFigureColors.green, query: { orientation_offset_class: 1 } }
       },
       {
-        keyFigureInfo: { displayName: "not-measured", keyName: "sce-not-measured", zIndex: 11 },
+        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         queryColor: { color: KeyFigureColors.grey, query: { undefined: 1 }}
       }
     ]
@@ -152,35 +155,91 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
   {
     keyFigureId: AnalysisResultKeyFigure.SCA_ORIENTATION_ID, 
     layerType: ScaOrientationKeyFigureLayer,
-    keyFigureInfo: { templateName: "scaOrientation", keyName: "sca-orientation-offset" },
+    keyFigureInfo: { templateName: "scaOrientation", keyName: "sca-alignment-offset" },
     subLayers: [
       {
-        keyFigureInfo: { templateName: "scaOrientOffsetClass3", keyName: "sca-orient-offset-class-3", zIndex: 13 },
+        keyFigureInfo: { templateName: "scaOrientOffsetClass3", displayName: "sca-orient-offset-class-3", zIndex: 13 },
         queryColor: { colors: [KeyFigureColors.blue, KeyFigureColors.red],  query: { orientation_offset_class: 3 } }
       },
       {
-        keyFigureInfo: { templateName: "scaOrientOffsetClass2", keyName: "sca-orient-offset-class-2", zIndex: 12 },
+        keyFigureInfo: { templateName: "scaOrientOffsetClass2", displayName: "sca-orient-offset-class-2", zIndex: 12 },
         queryColor: { colors: [KeyFigureColors.halfBlue, KeyFigureColors.halfRed], query: { orientation_offset_class: 2 } }
       },
       {
-        keyFigureInfo: { templateName: "scaOrientOffsetClass1", keyName: "sca-orient-offset-class-1", zIndex: 10 },
+        keyFigureInfo: { templateName: "scaOrientOffsetClass1", displayName: "sca-orient-offset-class-1", zIndex: 10 },
         queryColor: { color: KeyFigureColors.green, query: { orientation_offset_class: 1 } }
       },
       {
-        keyFigureInfo: { displayName: "not-measured", keyName: "sca-not-measured", zIndex: 11 },
+        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         queryColor: { color: KeyFigureColors.grey, query: { undefined: 1 }}
       }
     ]
   },
-  // {
-  //   keyFigureId: AnalysisResultKeyFigure.SCA_SDX_IMAGE_ID, 
-  //   layerType: ScaSdxImageKeyFigureLayer,
-  //   keyFigureInfo: { templateName: "SDX-Images", keyName: "sdx-images" },
-  // },
+  {
+    keyFigureId: AnalysisResultKeyFigure.SCA_FRICTION_ID,
+    layerType: ScaFrictionKeyFigureLayer,
+    keyFigureInfo: { templateName: "scaFriction", keyName: "torsion-caused-friction-mean" },
+    subLayers: [
+      {
+        keyFigureInfo: { displayName: "sca-torsion-class-3", zIndex: 13 },
+        queryColor: { color: KeyFigureColors.red, query: { torsion_class: 3 }},
+      },
+      {
+        keyFigureInfo: { displayName: "sca-torsion-class-2", zIndex: 12 },
+        queryColor: { color: KeyFigureColors.yellow, query: { torsion_class: 2 }},
+      },
+      {
+        keyFigureInfo: { displayName: "sca-torsion-class-1", zIndex: 10 },
+        queryColor: { color: KeyFigureColors.green, query: { torsion_class: 1 }},
+      },
+      {
+        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
+        queryColor: { color: KeyFigureColors.grey, query: { undefined: 1 }}
+      }
+    ]
+  },
+  {
+    keyFigureId: AnalysisResultKeyFigure.SCA_SDX_ID,
+    layerType: ScaSdxKeyFigureLayer,
+    keyFigureInfo: { templateName: "scaSdx", keyName: "slope-deviation" },
+    subLayers: [
+      {
+        keyFigureInfo: { displayName: "slope-deviation-class-3", zIndex: 13 },
+        queryColor: { color: KeyFigureColors.red, query: { sdx_class: 3 }},
+      },
+      {
+        keyFigureInfo: { displayName: "slope-deviation-class-2", zIndex: 12 },
+        queryColor: { color: KeyFigureColors.yellow, query: { sdx_class: 2 }},
+      },
+      {
+        keyFigureInfo: { displayName: "slope-deviation-class-1", zIndex: 10 },
+        queryColor: { color: KeyFigureColors.green, query: { sdx_class: 1 }},
+      },
+      {
+        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
+        queryColor: { color: KeyFigureColors.grey, query: { undefined: 1 }}
+      }
+    ]
+  },
   {
     keyFigureId: AnalysisResultKeyFigure.MISSING_MIRROR_ID,
     layerType: MissingMirrorKeyFigureLayer,
     keyFigureInfo: { keyName: "missing-mirror" },
     queryColor: { color: KeyFigureColors.red }
-  }
+  },
+  {
+    keyFigureId: AnalysisResultKeyFigure.SCA_ORTHO_IMAGES_RGB_ID,
+    layerType: ScaOrthoImageKeyFigureLayer,
+    keyFigureInfo: { displayName: "ortho-image-rgb" }
+  },
+  {
+    keyFigureId: AnalysisResultKeyFigure.SCA_ORTHO_IMAGES_IR_ID,
+    layerType: ScaOrthoImageKeyFigureLayer,
+    keyFigureInfo: { displayName: "ortho-image-ir" }
+  },
+  {
+    keyFigureId: AnalysisResultKeyFigure.SCA_ORTHO_IMAGES_SDX_ID,
+    layerType: ScaOrthoImageKeyFigureLayer,
+    keyFigureInfo: { displayName: "ortho-image-sdx" }
+  },
 ];

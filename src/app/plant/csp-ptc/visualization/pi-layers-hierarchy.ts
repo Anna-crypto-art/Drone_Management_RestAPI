@@ -4,6 +4,7 @@ import { AnalysisResultCspPtcSchemaBase } from "@/app/shared/services/volateq-ap
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 // import { LayerType } from "volateq-geovisualization";
 import { KeyFigureLayer } from "./key-figures/shared/key-figure-layer";
+import { KeyFigureInfo } from "./key-figures/shared/types";
 import { KeyFigureTypeMap, KEY_FIGURE_LAYERS } from "./layers";
 import { GroupKPILayer } from "./types";
 
@@ -139,9 +140,9 @@ export class PILayersHierarchy {
     };
 
     for (const childLayer of keyFigureLayer.subLayers) {
-      const childKeyFigureInfo = childLayer.keyFigureInfo || {};
+      const childKeyFigureInfo: KeyFigureInfo = childLayer.keyFigureInfo || {};
       childKeyFigureInfo.displayName = childLayer.keyFigureInfo!.displayName || keyFigureLayer.keyFigureInfo?.displayName;
-      childKeyFigureInfo.keyName = childLayer.keyFigureInfo!.keyName || keyFigureLayer.keyFigureInfo?.keyName;
+      childKeyFigureInfo.keyName = keyFigureLayer.keyFigureInfo?.keyName;
 
       const kpiLayer: KeyFigureLayer<AnalysisResultCspPtcSchemaBase> = new (keyFigureLayer.layerType)(
         this.vueComponent, 

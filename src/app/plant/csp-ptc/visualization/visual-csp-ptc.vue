@@ -61,6 +61,13 @@
       <template #scaOrientOffsetClass1>
         {{ getTransAlignmentOffsetClassLimit('sca', 1) }}
       </template>
+      <template #scaFriction>
+        {{ $t("torsion-caused-friction-mean") }} <app-explanation><span v-html="$t('torsion-caused-friction-mean_expl')"></span></app-explanation>
+      </template>
+      <template #scaSdx>
+        {{ $t("slope-deviation") }} <app-explanation><span v-html="$t('slope-deviation_expl')"></span></app-explanation>
+      </template>
+        
     </app-geovisualization>
     <div v-if="hasLegend" class="visual-csp-ptc-legend">
       <div v-for="entry in legendEntries" :key="entry.color" class="visual-csp-ptc-legend-entry">

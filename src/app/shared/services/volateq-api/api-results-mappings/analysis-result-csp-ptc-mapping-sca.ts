@@ -24,7 +24,7 @@ const analysisResultCspPtcMappingSca: AnalysisResultCspPtcMappings<AnalysisResul
   },
   {
     getValue: r => r.orientation_at_drive_offset,
-    transName: "alignment-offset",
+    transName: "sca-alignment-offset",
     transDescr: "sca-alignment-offset_expl",
     keyFigureId: AnalysisResultKeyFigure.SCA_ORIENTATION_ID,
   },
@@ -39,6 +39,12 @@ const analysisResultCspPtcMappingSca: AnalysisResultCspPtcMappings<AnalysisResul
     transName: "torsion-caused-friction-mean",
     transDescr: "torsion-caused-friction-mean_expl",
     keyFigureId: AnalysisResultKeyFigure.SCA_FRICTION_ID,
+  },
+  {
+    getValue: r => r.sdx_rms_value,
+    transName: "slope-deviation",
+    transDescr: "slope-deviation_expl",
+    keyFigureId: AnalysisResultKeyFigure.SCA_SDX_ID,
   },
 ];
 

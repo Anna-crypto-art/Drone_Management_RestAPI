@@ -67,7 +67,7 @@ export abstract class OrientationKeyFigureLayer<T extends AnalysisResultCspPtcSc
     }
 
     return {
-      id: this.keyFigureInfo.keyName || this.keyFigureInfo.templateName || this.keyFigureId.toString(),
+      id: this.keyFigureInfo.displayName!,
       entries: legendEntries,
     };
   }
