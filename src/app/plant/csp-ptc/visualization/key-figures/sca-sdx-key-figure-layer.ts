@@ -16,7 +16,8 @@ export class ScaSdxKeyFigureLayer extends ScaKeyFigureLayer {
           name: this.getLegendEntryTransName(
             "slope-deviation-class",
             this.analysisResult.csp_ptc.sdx_rms_class_limits,
-            this.queryColor?.query?.sdx_class) + this.getLegendEntryCount(),
+            this.queryColor?.query?.sdx_class,
+            "[mrad]") + this.getLegendEntryCount(),
         }
       ]
     };

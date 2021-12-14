@@ -37,7 +37,7 @@ export class ScaKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcScaSch
     };
   }
 
-  protected getLegendEntryTransName(transClassName: string, classLimits: number[] | null, currentClass: 1 | 2 | 3 | undefined): string {
+  protected getLegendEntryTransName(transClassName: string, classLimits: number[] | null, currentClass: 1 | 2 | 3 | undefined, unit: string): string {
     if (!currentClass) {
       return this.vueComponent.$t(this.keyFigureInfo.displayName!).toString();
     }
@@ -46,13 +46,13 @@ export class ScaKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcScaSch
     let limitRange = "";
     if (classLimits) {
       if (currentClass === 1) {
-        limitRange = `0 - ${classLimits[0]}: `;
+        limitRange = `0${unit} - ${classLimits[0]}${unit}: `;
       }
       else if (currentClass === 2) {
-        limitRange = `${classLimits[0]} - ${classLimits[1]}: `;
+        limitRange = `${classLimits[0]}${unit} - ${classLimits[1]}${unit}: `;
       }
       else if (currentClass === 3) {
-        limitRange = `${classLimits[1]} - &infin;: `;
+        limitRange = `${classLimits[1]}${unit} - &infin;${unit}: `;
       }
     }
 
