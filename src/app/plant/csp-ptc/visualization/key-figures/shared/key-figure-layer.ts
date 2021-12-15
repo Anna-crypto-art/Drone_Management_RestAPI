@@ -88,7 +88,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
     const results = await volateqApi.getSpecificAnalysisResult(
       this.analysisResult!.id,
       this.keyFigure.component.id,
-      { filter: pcs, limit: 1 }
+      { filter: pcs, limit: 1, filter_mode: 'equals' }
     );
 
     if (results.items.length > 0) {

@@ -199,9 +199,6 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
       }
     }
 
-    console.log("featureInfos:");
-    console.log(featureInfos);
-
     if (featureInfos) {
       this.piToastInfo = featureInfos;
     }
