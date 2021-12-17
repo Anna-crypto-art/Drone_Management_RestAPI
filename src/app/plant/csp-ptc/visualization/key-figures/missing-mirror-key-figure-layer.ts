@@ -1,7 +1,8 @@
+import { KeyFigureColors } from "@/app/plant/shared/visualization/layers/types";
+import { Legend } from "@/app/plant/shared/visualization/types";
 import { FeatureLike } from "ol/Feature";
 import { Fill, Style } from "ol/style";
 import { MirrorKeyFigureLayer } from "./shared/mirror-key-figure-layer";
-import { KeyFigureColors, Legend } from "./shared/types";
 
 export class MissingMirrorKeyFigureLayer extends MirrorKeyFigureLayer {
   public getStyle(feature: FeatureLike): Style {

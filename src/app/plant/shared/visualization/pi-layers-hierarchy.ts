@@ -1,12 +1,9 @@
 import { LayerType } from "@/app/shared/components/app-geovisualization/types/layers";
-import { AnalysisResultKeyFigure } from "@/app/shared/services/volateq-api/api-analysis-result-key-figures";
-import { AnalysisResultCspPtcSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-schema-base";
+import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-// import { LayerType } from "volateq-geovisualization";
-import { KeyFigureLayer } from "./key-figures/shared/key-figure-layer";
-import { KeyFigureInfo } from "./key-figures/shared/types";
-import { KeyFigureTypeMap, KEY_FIGURE_LAYERS } from "./layers";
-import { GroupKPILayer } from "./types";
+import { KeyFigureLayer } from "./layers/key-figure-layer";
+import { KeyFigureInfo } from "./layers/types";
+import { GroupKPILayer, KeyFigureTypeMap } from "./types";
 
 /**
  * Component -> PIGroup -> PICheckbox
@@ -17,7 +14,8 @@ export class PILayersHierarchy {
 
   constructor(
     private readonly vueComponent: Vue,
-    private readonly analysisResults: AnalysisResultDetailedSchema[]
+    private readonly analysisResults: AnalysisResultDetailedSchema[],
+    private readonly keyFigureLayers: KeyFigureTypeMap[],
   ) {
     this.createGroupedKPILayers();
   }
@@ -26,8 +24,8 @@ export class PILayersHierarchy {
     return this.parentComponentKpiLayers.map(parentComponentKpiLayer => parentComponentKpiLayer.groupLayer)
   }
 
-  public getAllChildLayers(): KeyFigureLayer<AnalysisResultCspPtcSchemaBase>[] {
-    const allChildLayers: KeyFigureLayer<AnalysisResultCspPtcSchemaBase>[] = [];
+  public getAllChildLayers(): KeyFigureLayer<AnalysisResultSchemaBase>[] {
+    const allChildLayers: KeyFigureLayer<AnalysisResultSchemaBase>[] = [];
 
     function getAllChildLayersRec(groupKpiLayers: GroupKPILayer[]) {
       for (const groupKpiLayer of groupKpiLayers) {
@@ -79,7 +77,7 @@ export class PILayersHierarchy {
     const parentComponentLayers: Record<number, GroupKPILayer> = {};
 
     for (const analysisResult of this.analysisResults) {
-      for (const keyFigureTypeMap of KEY_FIGURE_LAYERS) {
+      for (const keyFigureTypeMap of this.keyFigureLayers) {
         const keyFigure = analysisResult.key_figures.find(keyFigure => keyFigure.id === keyFigureTypeMap.keyFigureId);
         if (keyFigure) {
           if (!(keyFigure.component.id in parentComponentLayers)) {
@@ -118,7 +116,7 @@ export class PILayersHierarchy {
   private createKPILayers(
     anaysisResult: AnalysisResultDetailedSchema,
     keyFigureLayer: KeyFigureTypeMap,
-  ): KeyFigureLayer<AnalysisResultCspPtcSchemaBase> | GroupKPILayer | undefined {
+  ): KeyFigureLayer<AnalysisResultSchemaBase> | GroupKPILayer | undefined {
     if (!keyFigureLayer.subLayers) {
       return new (keyFigureLayer.layerType)(
         this.vueComponent, anaysisResult,
@@ -144,7 +142,7 @@ export class PILayersHierarchy {
       childKeyFigureInfo.displayName = childLayer.keyFigureInfo!.displayName || keyFigureLayer.keyFigureInfo?.displayName;
       childKeyFigureInfo.keyName = keyFigureLayer.keyFigureInfo?.keyName;
 
-      const kpiLayer: KeyFigureLayer<AnalysisResultCspPtcSchemaBase> = new (keyFigureLayer.layerType)(
+      const kpiLayer: KeyFigureLayer<AnalysisResultSchemaBase> = new (keyFigureLayer.layerType)(
         this.vueComponent, 
         anaysisResult,
         keyFigureLayer.keyFigureId,

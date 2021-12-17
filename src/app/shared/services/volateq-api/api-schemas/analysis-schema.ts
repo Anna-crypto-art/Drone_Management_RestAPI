@@ -12,6 +12,7 @@ export interface AnalysisFilesSchema {
 
 export interface AnalysisSchema {
   id: string;
+  name: string;
   in_debug_phase: boolean;
   current_state: AnalysisStateSchema;
   plant: PlantSchema;

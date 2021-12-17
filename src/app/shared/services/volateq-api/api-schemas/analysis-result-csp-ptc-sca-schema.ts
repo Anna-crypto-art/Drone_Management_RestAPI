@@ -1,6 +1,6 @@
-import { AnalysisResultCspPtcSchemaBase } from "./analysis-result-csp-ptc-schema-base";
+import { AnalysisResultSchemaBase } from "./analysis-result-schema-base";
 
-export interface AnalysisResultCspPtcScaSchema extends AnalysisResultCspPtcSchemaBase {
+export interface AnalysisResultCspPtcScaSchema extends AnalysisResultSchemaBase {
   encoder_value: number;
   orientation_at_drive: number;
   uncertainty_at_drive: number;

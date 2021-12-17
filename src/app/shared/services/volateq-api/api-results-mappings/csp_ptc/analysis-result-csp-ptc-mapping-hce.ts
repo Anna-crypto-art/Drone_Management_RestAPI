@@ -1,10 +1,10 @@
-import { AnalysisResultKeyFigure } from "../api-analysis-result-key-figures";
-import { AnalysisResultCspPtcHceSchema } from "../api-schemas/analysis-result-csp-ptc-hce-schema";
-import analysisResultCspPtcMappingBase from "./analysis-result-csp-ptc-mapping-base";
-import { AnalysisResultCspPtcMappings } from "./types";
+import { AnalysisResultKeyFigure } from "../../api-analysis-result-key-figures";
+import { AnalysisResultCspPtcHceSchema } from "../../api-schemas/analysis-result-csp-ptc-hce-schema";
+import analysisResultMappingBase from "../analysis-result-mapping-base";
+import { AnalysisResultMappings } from "../types";
 
-const analysisResultCspPtcMappingHce: AnalysisResultCspPtcMappings<AnalysisResultCspPtcHceSchema> = [
-  ...analysisResultCspPtcMappingBase,
+const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPtcHceSchema> = [
+  ...analysisResultMappingBase,
   {
     getValue: r => r.htf_temperature,
     transName: "absorber-temperature",

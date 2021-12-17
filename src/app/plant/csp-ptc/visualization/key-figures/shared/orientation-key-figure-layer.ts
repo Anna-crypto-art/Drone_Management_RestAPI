@@ -1,11 +1,12 @@
-import { KeyFigureLayer } from "./key-figure-layer";
+import { KeyFigureLayer } from "@/app/plant/shared/visualization/layers/key-figure-layer";
+import { KeyFigureColors } from "@/app/plant/shared/visualization/layers/types";
+import { Legend } from "@/app/plant/shared/visualization/types";
+import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { FeatureLike } from "ol/Feature";
 import { Style, Fill } from 'ol/style';
-import { KeyFigureColors, Legend } from "./types";
-import { AnalysisResultCspPtcSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-schema-base";
 
 
-export abstract class OrientationKeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> extends KeyFigureLayer<T> {
+export abstract class OrientationKeyFigureLayer<T extends AnalysisResultSchemaBase> extends KeyFigureLayer<T> {
 
   protected abstract getOrientationOffsetClassLimits(): number[];
 

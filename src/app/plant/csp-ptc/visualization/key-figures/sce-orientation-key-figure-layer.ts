@@ -1,5 +1,5 @@
 import { AnalysisResultCspPtcSceSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-sce-schema";
-import analysisResultCspPtcMappingSce from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-sce";
+import analysisResultCspPtcMappingSce from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-sce";
 import { OrientationKeyFigureLayer } from "./shared/orientation-key-figure-layer";
 
 

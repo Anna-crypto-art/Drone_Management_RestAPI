@@ -1,10 +1,10 @@
-import { AnalysisResultKeyFigure } from "../api-analysis-result-key-figures";
-import { AnalysisResultCspPtcSceSchema } from "../api-schemas/analysis-result-csp-ptc-sce-schema";
-import analysisResultCspPtcMappingBase from "./analysis-result-csp-ptc-mapping-base";
-import { AnalysisResultCspPtcMappings } from "./types";
+import { AnalysisResultKeyFigure } from "../../api-analysis-result-key-figures";
+import { AnalysisResultCspPtcSceSchema } from "../../api-schemas/analysis-result-csp-ptc-sce-schema";
+import analysisResultMappingBase from "../analysis-result-mapping-base";
+import { AnalysisResultMappings } from "../types";
 
-const analysisResultCspPtcMappingSce: AnalysisResultCspPtcMappings<AnalysisResultCspPtcSceSchema> = [
-  ...analysisResultCspPtcMappingBase,
+const analysisResultCspPtcMappingSce: AnalysisResultMappings<AnalysisResultCspPtcSceSchema> = [
+  ...analysisResultMappingBase,
   {
     getValue: r => r.absolute_orientation,
     transName: "actual-angle",

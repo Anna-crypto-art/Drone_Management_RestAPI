@@ -1,9 +1,9 @@
 import { AnalysisResultCspPtcScaSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-sca-schema";
-import analysisResultCspPtcMappingSca from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-sca";
-import { KeyFigureLayer } from "./key-figure-layer";
+import analysisResultCspPtcMappingSca from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-sca";
 import { FeatureLike } from "ol/Feature";
 import { Fill, Style } from "ol/style";
-import { Legend } from "./types";
+import { KeyFigureLayer } from "@/app/plant/shared/visualization/layers/key-figure-layer";
+import { Legend } from "@/app/plant/shared/visualization/types";
 
 
 export class ScaKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcScaSchema> {

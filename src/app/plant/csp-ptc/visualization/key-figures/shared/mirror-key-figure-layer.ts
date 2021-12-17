@@ -1,9 +1,9 @@
-import analysisResultCspPtcMappingMirror from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-mirror";
+import { KeyFigureLayer } from "@/app/plant/shared/visualization/layers/key-figure-layer";
+import { Legend } from "@/app/plant/shared/visualization/types";
+import analysisResultCspPtcMappingMirror from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-mirror";
 import { AnalysisResultCspPtcMirrorSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-mirror-schema";
 import { FeatureLike } from "ol/Feature";
 import { Fill, Stroke, Style } from "ol/style";
-import { KeyFigureLayer } from "./key-figure-layer";
-import { KeyFigureColors, Legend } from "./types";
 
 export class MirrorKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcMirrorSchema> {
   protected readonly analysisResultMapping = analysisResultCspPtcMappingMirror;

@@ -1,26 +1,6 @@
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 
-export interface FeatureProperties {
-  name: string;
-  value?: number | boolean | string | null;
-}
 
-export interface FeatureInfos {
-  title: string;
-  records: FeatureInfo[];
-}
-
-export interface FeatureInfo {
-  name: string;
-  value: string;
-  descr?: string;
-  bold?: boolean;
-}
-
-export interface Legend {
-  id: string;
-  entries: { color: string, name: string }[];
-}
 
 /**
  * URL query parameters and color for a layer

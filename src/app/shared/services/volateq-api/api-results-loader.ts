@@ -1,10 +1,10 @@
-import { AnalysisResultCspPtcSchemaBase } from "./api-schemas/analysis-result-csp-ptc-schema-base";
+import { AnalysisResultSchemaBase } from "./api-schemas/analysis-result-schema-base";
 import volateqApi from "./volateq-api";
 
 export class ApiResultsLoader {
-  private readonly loadedResults: Record<string, Record<string, AnalysisResultCspPtcSchemaBase[]>> = {};
+  private readonly loadedResults: Record<string, Record<string, AnalysisResultSchemaBase[]>> = {};
 
-  public async loadResults<T extends AnalysisResultCspPtcSchemaBase>(analysisResultId: string, componentId: number): Promise<void>
+  public async loadResults<T extends AnalysisResultSchemaBase>(analysisResultId: string, componentId: number): Promise<void>
   {
     if (!(analysisResultId in this.loadedResults)) {
       this.loadedResults[analysisResultId] = {};
@@ -15,7 +15,7 @@ export class ApiResultsLoader {
     }
   }
 
-  public getResults<T extends AnalysisResultCspPtcSchemaBase>(analysisResultId: string, componentId: number): T[] | undefined {
+  public getResults<T extends AnalysisResultSchemaBase>(analysisResultId: string, componentId: number): T[] | undefined {
     return (analysisResultId in this.loadedResults && componentId in this.loadedResults[analysisResultId] && 
       this.loadedResults[analysisResultId][componentId] as T[]) || undefined
   }

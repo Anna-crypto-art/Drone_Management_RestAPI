@@ -1,5 +1,5 @@
 import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-analysis-result-components";
-import { ComponentLayer } from "./shared/component-layer";
+import { ComponentLayer } from "../../../shared/visualization/layers/component-layer";
 import { Style, Fill, Stroke } from 'ol/style';
 import { FeatureLike } from "ol/Feature";
 

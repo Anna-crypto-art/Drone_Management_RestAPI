@@ -1,8 +1,6 @@
 import Vue from "vue";
-import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { FeatureLike } from "ol/Feature";
 import { Style, Stroke, Text, Fill } from 'ol/style';
-// import { GeoJSONLayer, IOpenLayersComponent } from "volateq-geovisualization";
 import { IPlantVisualization } from "../types";
 import { GeoJSONLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 

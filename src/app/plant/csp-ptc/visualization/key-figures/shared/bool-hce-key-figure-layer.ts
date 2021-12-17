@@ -1,7 +1,8 @@
+import { KeyFigureColors } from "@/app/plant/shared/visualization/layers/types";
+import { Legend } from "@/app/plant/shared/visualization/types";
 import { FeatureLike } from "ol/Feature";
 import { Stroke, Style } from "ol/style";
 import { HceKeyFigureLayer } from "./hce-key-figure-layer";
-import { KeyFigureColors, Legend } from "./types";
 
 export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
   public getStyle(feature: FeatureLike): Style {

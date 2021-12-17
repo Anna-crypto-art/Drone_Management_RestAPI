@@ -1,5 +1,5 @@
 <template>
-  <div class="app-app-table-csp-ptc">
+  <div class="app-table-component">
     <app-table-component-container ref="container" :tableName="tableName" :pagination="pagination" size="sm">
       <b-table :id="tableName" hover :fields="columns" :items="dataProvider" class="bordered" ref="table"
         head-variant="light"
@@ -25,10 +25,11 @@ import appContentEventBus from "@/app/shared/components/app-content/app-content-
 import AppTableComponentContainer from "@/app/plant/csp-ptc/tables/table-component/table-component-container.vue";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import { ITableComponentContainer } from "./types";
-import { IActiveComponent, ITableComponent } from "../types";
+import { IActiveComponent } from "../types";
+import { ITableComponent } from "./types";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-import { AnalysisResultCspPtcMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-helper";
-import { AnalysisResultCspPtcSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-schema-base";
+import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
+import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { BvTableFieldExtArray } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import apiResultsLoader from "@/app/shared/services/volateq-api/api-results-loader";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
@@ -36,13 +37,13 @@ import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 
 @Component({
-  name: "app-table-csp-ptc",
+  name: "app-table-component",
   components: {
     AppTableComponentContainer,
     AppExplanation,
   }
 })
-export default class AppTableCspPtc extends Vue implements ITableComponent {
+export default class AppTableComponent extends Vue implements ITableComponent {
   @Prop() analysisResult!: AnalysisResultDetailedSchema;
   @Prop() activeComponent!: IActiveComponent;
   @Prop({ default: false }) loadAllResults!: boolean;
@@ -57,7 +58,7 @@ export default class AppTableCspPtc extends Vue implements ITableComponent {
   private last_ctx: BvTableCtxObject | undefined;
   private searchText = "";
 
-  private mappingHelper!: AnalysisResultCspPtcMappingHelper<AnalysisResultCspPtcSchemaBase>;
+  private mappingHelper!: AnalysisResultMappingHelper<AnalysisResultSchemaBase>;
   private columnsMapping!: Record<string, string>;
 
   protected startLoading() {
@@ -76,7 +77,7 @@ export default class AppTableCspPtc extends Vue implements ITableComponent {
   created() {
     this.tableName = "table_" + this.analysisResult.id + "_" + this.activeComponent.componentId;
 
-    this.mappingHelper = new AnalysisResultCspPtcMappingHelper(this.activeComponent.mapping, this.analysisResult);
+    this.mappingHelper = new AnalysisResultMappingHelper(this.activeComponent.mapping, this.analysisResult);
     this.columns = this.mappingHelper.getColumns(transName => this.$t(transName));
     this.columnsMapping = this.mappingHelper.getColumnsMapping();
   }
@@ -118,7 +119,7 @@ export default class AppTableCspPtc extends Vue implements ITableComponent {
         return this.getAllResults(ctx);
       }
 
-      const results = await volateqApi.getSpecificAnalysisResult<AnalysisResultCspPtcSchemaBase>(
+      const results = await volateqApi.getSpecificAnalysisResult<AnalysisResultSchemaBase>(
         this.analysisResult.id,
         this.activeComponent.componentId,
         this.getTableRequestParam()

@@ -1,4 +1,4 @@
-import { Legend } from "./shared/types";
+import { Legend } from "@/app/plant/shared/visualization/types";
 import { ScaKeyFigureLayer } from "./shared/sca-key-figure-layer";
 
 

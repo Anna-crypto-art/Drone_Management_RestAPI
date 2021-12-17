@@ -1,9 +1,9 @@
-import analysisResultCspPtcMappingHce from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-hce";
+import { Legend } from "@/app/plant/shared/visualization/types";
+import analysisResultCspPtcMappingHce from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-hce";
 import { AnalysisResultCspPtcHceSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-hce-schema";
 import { FeatureLike } from "ol/Feature";
 import { Stroke, Style } from "ol/style";
-import { KeyFigureLayer } from "./key-figure-layer";
-import { Legend } from "./types";
+import { KeyFigureLayer } from "@/app/plant/shared/visualization/layers/key-figure-layer";
 
 export class HceKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcHceSchema> {
   protected readonly analysisResultMapping = analysisResultCspPtcMappingHce;

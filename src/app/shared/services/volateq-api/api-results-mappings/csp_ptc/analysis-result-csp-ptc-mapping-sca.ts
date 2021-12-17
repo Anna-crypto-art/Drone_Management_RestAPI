@@ -1,10 +1,10 @@
-import { AnalysisResultKeyFigure } from "../api-analysis-result-key-figures";
-import { AnalysisResultCspPtcScaSchema } from "../api-schemas/analysis-result-csp-ptc-sca-schema";
-import analysisResultCspPtcMappingBase from "./analysis-result-csp-ptc-mapping-base";
-import { AnalysisResultCspPtcMappings } from "./types";
+import { AnalysisResultKeyFigure } from "../../api-analysis-result-key-figures";
+import { AnalysisResultCspPtcScaSchema } from "../../api-schemas/analysis-result-csp-ptc-sca-schema";
+import analysisResultMappingBase from "../analysis-result-mapping-base";
+import { AnalysisResultMappings } from "../types";
 
-const analysisResultCspPtcMappingSca: AnalysisResultCspPtcMappings<AnalysisResultCspPtcScaSchema> = [
-  ...analysisResultCspPtcMappingBase,
+const analysisResultCspPtcMappingSca: AnalysisResultMappings<AnalysisResultCspPtcScaSchema> = [
+  ...analysisResultMappingBase,
   {
     getValue: r => r.encoder_value,
     transName: "angle-value",

@@ -4,7 +4,7 @@ import { LoopComponentLayer } from "./components/loop-component-layer";
 import { MirrorComponentLayer } from "./components/mirror-component-layer";
 import { ScaComponentLayer } from "./components/sca-component-layer";
 import { SceComponentLayer } from "./components/sce-component-layer";
-import { ComponentLayer } from "./components/shared/component-layer";
+import { ComponentLayer } from "../../shared/visualization/layers/component-layer";
 import { MissingMirrorKeyFigureLayer } from "./key-figures/missing-mirror-key-figure-layer";
 import { ScaFrictionKeyFigureLayer } from "./key-figures/sca-friction-key-figure";
 import { ScaOrientationKeyFigureLayer } from "./key-figures/sca-orientation-key-figure-layer";
@@ -12,9 +12,9 @@ import { ScaSdxKeyFigureLayer } from "./key-figures/sca-sdx-key-figure-layer";
 import { SceOrientationKeyFigureLayer } from "./key-figures/sce-orientation-key-figure-layer";
 import { BoolUndefinedHceKeyFigureLayer } from "./key-figures/shared/bool-hce-key-figure-layer";
 import { HceKeyFigureLayer } from "./key-figures/shared/hce-key-figure-layer";
-import { ScaKeyFigureLayer } from "./key-figures/shared/sca-key-figure-layer";
 import { ScaOrthoImageKeyFigureLayer } from "./key-figures/shared/sca-ortho-image-key-figure-layer";
-import { KeyFigureColors, KeyFigureInfo, QueryColor, SubKeyFigureInfo } from "./key-figures/shared/types";
+import { KeyFigureTypeMap } from "../../shared/visualization/types";
+import { KeyFigureColors } from "../../shared/visualization/layers/types";
 
 export const COMPONENT_LAYERS: (typeof ComponentLayer)[] = [
   AbsorberComponentLayer,
@@ -23,23 +23,6 @@ export const COMPONENT_LAYERS: (typeof ComponentLayer)[] = [
   ScaComponentLayer,
   SceComponentLayer,
 ];
-
-export type KeyFigureTypeMap = {
-  keyFigureId: AnalysisResultKeyFigure,
-  layerType: any, // (typeof KeyFigureLayer) leads to: Type "T" is not assignable to type "AnalysisResultCspPtcHceSchema"
-  /**
-   * applies to all subLayers if not overwritten
-   */
-  keyFigureInfo?: KeyFigureInfo,
-  /**
-   * URL query parameters and color for the layer
-   */
-  queryColor?: QueryColor,
-  /**
-   * If the layer has subLayers it will be handled as a group layer.
-   */
-  subLayers?: { keyFigureInfo?: SubKeyFigureInfo, queryColor: QueryColor }[],
-};
 
 export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
   {

@@ -1,0 +1,128 @@
+<template>
+  <div class="analysis-selection-sidebar">
+    <app-sidebar :open="sidebarOpen" @toggled="onSidebarToggled">
+      <div class="analysis-selection-sidebar-leftside">
+        <app-table-container size="sm">
+          <b-table ref="analysisResultsTable"
+          :items="analysisResultsTableItems" 
+          :fields="analysisResultsTableColumns"
+          select-mode="single"
+          selectable
+          hover
+          head-variant="light"
+          @row-selected="onAnalysisResultSelected">
+            <template #head(selected)></template>
+            <template #head(kpis)="column">
+              {{ column.label }} <app-explanation>{{ $t('performance-indicators') }}</app-explanation>
+            </template>
+            <template #cell(selected)="{ rowSelected }">
+              <b-checkbox :checked="rowSelected" disabled class="b-table-selectable-checkbox"></b-checkbox>
+            </template>
+            <template #cell(kpis)="row">
+              <div v-for="kpi in row.item.kpis" :key="kpi">
+                <b-badge variant="primary">{{ kpi }}</b-badge>
+              </div>
+            </template>
+          </b-table>
+        </app-table-container>
+      </div>
+    </app-sidebar>
+  </div>
+</template>
+
+<script lang="ts">
+import Vue from 'vue'
+import { Component, Prop, Ref } from 'vue-property-decorator';
+import volateqApi from '@/app/shared/services/volateq-api/volateq-api';
+import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
+import { AnalysisResultDetailedSchema } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-schema';
+import AppVisualCspPtc from '@/app/plant/csp-ptc/visualization/visual-csp-ptc.vue';
+import { BvTableFieldArray } from 'bootstrap-vue';
+import AppTableContainer from '@/app/shared/components/app-table-container/app-table-container.vue';
+import AppExplanation from '@/app/shared/components/app-explanation/app-explanation.vue';
+import AppSidebar from '@/app/shared/components/app-sidebar/app-sidebar.vue';
+import AppTablesCspPtc from '@/app/plant/csp-ptc/tables/tables-csp-ptc.vue';
+
+
+@Component({
+  name: 'app-analysis-selection-sidebar',
+  components: {
+    AppVisualCspPtc,
+    AppTableContainer,
+    AppExplanation,
+    AppTablesCspPtc,
+    AppSidebar,
+  }
+})
+export default class AppAnalysisSelectionSidebar extends Vue {
+  @Prop() plant!: PlantSchema;
+  @Ref() analysisResultsTable!: any; // b-table
+
+  analysisResultsTableColumns: BvTableFieldArray = [
+    { key: 'selected', label: '' },
+    { key: 'id', label: 'ID' },
+    { key: 'createdAt', label: this.$t('created-at').toString() },
+    { key: 'kpis', label: this.$t('pi').toString() },
+  ];
+  analysisResultsTableItems: Record<string, unknown>[] = [];
+
+  analysisResults: AnalysisResultDetailedSchema[] | null = null;
+
+  sidebarOpen = true;
+
+  async created(): Promise<void> {
+    this.analysisResults = await volateqApi.getAnalysisResults(this.plant.id);
+
+    for (const analysisResult of this.analysisResults) {
+      this.analysisResultsTableItems.push({
+        id: analysisResult.id,
+        createdAt: new Date(Date.parse(analysisResult.created_at)).toLocaleDateString(),
+        kpis: analysisResult.key_figures.map(keyFigure => keyFigure.name)
+      })
+    }
+
+    if (this.analysisResults.length > 0) {
+      let tableRowIndex = 0;
+      const analysisResultId = this.$route.query.result;
+      if (analysisResultId && typeof analysisResultId === "string") {
+        tableRowIndex = this.analysisResults.findIndex(analysisResult => analysisResult.id === analysisResultId);
+      }
+
+      setTimeout(() => this.analysisResultsTable.selectRow(tableRowIndex), 1000); // wait for DOM
+    }
+  }
+
+  onAnalysisResultSelected(selectedAnalysisResult: { id: string }[]): void {
+    const selectedAnalysisResultId = selectedAnalysisResult && selectedAnalysisResult.length > 0 && 
+      selectedAnalysisResult[0].id || undefined;
+
+    this.$emit("analysisResultSelected", selectedAnalysisResultId);
+  }
+
+  onSidebarToggled(open: boolean): void {
+    this.sidebarOpen = open;
+
+    this.$emit("sidebarToggled", open)
+  }
+}
+</script>
+
+<style lang="scss">
+@import "@/scss/_colors.scss";
+@import "@/scss/_variables.scss";
+
+$left-width: 400px;
+
+.analysis-selection-sidebar {
+  height: calc(100vh - #{$header-height});
+  width: 100%;
+  display: flex;
+
+  &-leftside {
+    padding: 20px;
+    height: 100%;
+    width: $left-width;
+    border-right: $border-color-grey 1px solid;
+  }
+}
+</style>
