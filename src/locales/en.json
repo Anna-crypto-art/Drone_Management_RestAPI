@@ -201,7 +201,7 @@
   "sca-torsion-class-2": "Moderate torsion",
   "sca-torsion-class-1": "Minimal torsion",
   "slope-deviation": "Slope deviation",
-  "slope-deviation_expl": "...",
+  "slope-deviation_expl": "Effective mirror slope deviations (SDXeff): This quantity comprises all effects including mirror slope deviations (SDX), absorber tube deviation from the focal line (ΔXAbs/ΔZAbs), and relative misalignment of SCEs within a single SCA (Δθ). All these parameters leave characteristic traces in SDXeff –maps, but the individual contributions cannot be measured independently from each other. ",
   "slope-deviation-class-3": "Critical slope deviation",
   "slope-deviation-class-2": "Moderate slope deviation",
   "slope-deviation-class-1": "Minimal slope deviation",
