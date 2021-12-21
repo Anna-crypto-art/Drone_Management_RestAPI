@@ -1,9 +1,9 @@
 <template>
   <div class="app-tables-component">
-    <div class="no-data-placeholder" v-show="!analysisResult">
+    <div class="no-data-placeholder" v-show="!selectedAnalysisResult">
       {{ $t('no-analysis-result-selected') }}
     </div>
-    <div v-show="analysisResult">
+    <div v-show="selectedAnalysisResult">
       <div>
         <div class="pull-left">
           <app-search-input :placeholder="$t('search-pcs')" @search="onSearch"></app-search-input>
@@ -17,7 +17,7 @@
       </div>
       <app-table-container>
         <b-tabs v-model="tabIndex" @activate-tab="onTabChanged">
-          <b-tab v-for="activeTabComponent in activeTabComponents" :key="analysisResult.id + '_' + activeTabComponent.label">
+          <b-tab v-for="activeTabComponent in activeTabComponents" :key="selectedAnalysisResult.id + '_' + activeTabComponent.label">
             <template #title>
               {{ $t(activeTabComponent.label) }}
               <app-explanation v-if="activeTabComponent.descr">
@@ -25,7 +25,7 @@
               </app-explanation>
             </template>
             <app-table-component :ref="generateRefTableName(activeTabComponent)"
-              :analysisResult="analysisResult"
+              :analysisResult="selectedAnalysisResult"
               :activeComponent="activeTabComponent">
             </app-table-component>
           </b-tab>
@@ -50,9 +50,10 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import AppTableComponent from "./table-component/table-component.vue";
+import AppTableComponent from "@/app/plant/shared/table-component/table-component.vue";
 import { IAppButton } from "@/app/shared/components/app-button/types";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
+
 
 
 @Component({
@@ -75,18 +76,18 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
   activeTabLabel = "";
   readonly activeTabComponents: IActiveTabComponent[] = [];
 
-  private analysisResult: AnalysisResultDetailedSchema | null = null;
+  selectedAnalysisResult: AnalysisResultDetailedSchema | null = null;
 
   selectAnalysisResult(analysisResultId: string | undefined) {
-    this.analysisResult = this.analysisResults.find(analysisResult => analysisResult.id === analysisResultId) || null;
+    this.selectedAnalysisResult = this.analysisResults.find(analysisResult => analysisResult.id === analysisResultId) || null;
 
     this.activeTabComponents.length = 0;
 
-    if (this.analysisResult) {
+    if (this.selectedAnalysisResult) {
       let tabIdx = 0;
 
       for (const activeComponent of this.activeComponents) {
-        const keyFigure = this.analysisResult.key_figures
+        const keyFigure = this.selectedAnalysisResult.key_figures
           .find(keyFigure => keyFigure.component.id === activeComponent.componentId);
         if (keyFigure) {
           this.activeTabComponents.push({
@@ -127,14 +128,14 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
         const tableComponent = this.getRefTableComponent(activeComponent);
 
         const authCsvDownloadUrl = volateqApi.getSpecificAnalysisResultCsvUrl(
-          this.analysisResult!.id,
+          this.selectedAnalysisResult!.id,
           activeComponent.componentId,
           tableComponent.getTableRequestParam(),
           tableComponent.getCsvColumnMappingsParam()
         );
 
         const csvFileName = dateHelper.toDateTime(new Date()) + "_" + this.plant.name + "_" + 
-          new Date(Date.parse(this.analysisResult!.csp_ptc.created_at)).toLocaleDateString() + "_" + activeComponent.label + ".csv";
+          new Date(Date.parse(this.selectedAnalysisResult!.csp_ptc.created_at)).toLocaleDateString() + "_" + activeComponent.label + ".csv";
 
         AppDownloader.download(await volateqApi.generateDownloadUrl(authCsvDownloadUrl, csvFileName), csvFileName);
       } catch (e) {
@@ -150,7 +151,7 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
   }
 
   private generateRefTableName(activeTabComponent: IActiveComponent): string {
-    return ["tableComponent", this.analysisResult!.id, activeTabComponent.componentId].join("_");
+    return ["tableComponent", this.selectedAnalysisResult!.id, activeTabComponent.componentId].join("_");
   }
 
   private getSelectedActiveComponent(): IActiveTabComponent | undefined {

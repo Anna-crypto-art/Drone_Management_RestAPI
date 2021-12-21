@@ -22,7 +22,7 @@ export interface GroupKPILayer {
 
 export interface IPlantVisualization {
   plant: PlantSchema;
-  openLayers: IOpenLayersComponent;
+  openLayers: IOpenLayersComponent | undefined;
   onLayerSelected(selected: boolean, legend?: Legend);
 }
 

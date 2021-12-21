@@ -22,7 +22,7 @@ import Vue from "vue";
 import { Component, Prop, Ref } from "vue-property-decorator";
 import { BvTableCtxObject } from "bootstrap-vue";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
-import AppTableComponentContainer from "@/app/plant/csp-ptc/tables/table-component/table-component-container.vue";
+import AppTableComponentContainer from "@/app/plant/shared/table-component/table-component-container.vue";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import { ITableComponentContainer } from "./types";
 import { IActiveComponent } from "../types";

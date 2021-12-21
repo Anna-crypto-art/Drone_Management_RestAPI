@@ -1,21 +1,22 @@
 <template>
   <div class="app-tables-csp-ptc">
-    <app-tables-component :activeComponents="ACTIVE_COMPONENTS">
+    <app-tables-component ref="tablesComponent" :activeComponents="activeComponents" :analysisResults="analysisResults">
     </app-tables-component>
   </div>
 </template>
 
 <script lang="ts">
-import { Component } from "vue-property-decorator";
+import { Component, Prop, Ref } from "vue-property-decorator";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { IActiveComponent } from "./types";
 import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-analysis-result-components";
 import analysisResultCspPtcMappingIrIntensity from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-hce";
 import analysisResultCspPtcMappingSceAngle from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-sce";
 import analysisResultCspPtcMappingScaOrientation from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-sca";
 import analysisResultCspPtcMappingMirror from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-mirror";
 import AppTablesComponent from "@/app/plant/shared/table-component/tables-component.vue";
-import { ITablesComponent } from "../../shared/table-component/types";
+import { ITablesComponent } from "@/app/plant/shared/table-component/types";
+import { IActiveComponent, IAnalysisResultSelection } from "@/app/plant/shared/types";
+import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 
 
 @Component({
@@ -24,7 +25,11 @@ import { ITablesComponent } from "../../shared/table-component/types";
     AppTablesComponent
   }
 })
-export default class AppTablesCspPtc extends BaseAuthComponent implements ITablesComponent {
+export default class AppTablesCspPtc extends BaseAuthComponent implements ITablesComponent, IAnalysisResultSelection {
+  @Prop() analysisResults!: AnalysisResultDetailedSchema[];
+
+  @Ref() tablesComponent!: IAnalysisResultSelection;
+
   activeComponents: IActiveComponent[] = [
     {
       componentId: AnalysisResultComponent.CSP_PTC_ABSORBER,
@@ -49,5 +54,12 @@ export default class AppTablesCspPtc extends BaseAuthComponent implements ITable
       mapping: analysisResultCspPtcMappingMirror as any
     }
   ];
+
+  selectAnalysisResult(analysisResultId: string | undefined): void {
+    this.tablesComponent.selectAnalysisResult(analysisResultId);
+  }
+  get selectedAnalysisResult(): AnalysisResultDetailedSchema | null | undefined {
+    return this.tablesComponent.selectedAnalysisResult;
+  }
 }
 </script>

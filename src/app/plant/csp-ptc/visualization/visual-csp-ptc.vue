@@ -4,7 +4,8 @@
       :plant="plant"
       :analysisResults="analysisResults"
       :componentLayerTypes="componentLayerTypes"
-      :keyFigureLayers="keyFigureLayers">
+      :keyFigureLayers="keyFigureLayers"
+      @sidebarToggle="onSidebarToggled">
 
       <template #pcs>
         {{ $t("pcs") }} <app-explanation>{{ $t("pcs_expl") }}</app-explanation>
@@ -77,7 +78,7 @@ import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant
 import { AnalysisResultDetailedSchema } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-schema';
 import AppExplanation from '@/app/shared/components/app-explanation/app-explanation.vue';
 import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
-import AppGeovisualization from "@/app/shared/components/app-geovisualization/app-geovisualization.vue";
+import AppVisualization from "@/app/plant/shared/visualization/visualization.vue";
 import { IOpenLayersComponent } from '@/app/shared/components/app-geovisualization/types/components';
 import { IAnalysisResultSelection } from '@/app/plant/shared/types';
 import { IPlantVisualization, Legend } from '@/app/plant/shared/visualization/types';
@@ -87,7 +88,7 @@ import { COMPONENT_LAYERS, KEY_FIGURE_LAYERS } from './layers';
 @Component({
   name: 'app-visual-csp-ptc',
   components: {
-    AppGeovisualization,
+    AppVisualization,
     AppExplanation
   }
 })
@@ -97,22 +98,26 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
 
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
-  @Ref() visualization!: IAnalysisResultSelection & IPlantVisualization;
+  @Ref() visualization: IAnalysisResultSelection & IPlantVisualization | undefined;
 
   selectAnalysisResult(analysisResultId: string | undefined): void {
-    this.visualization.selectAnalysisResult(analysisResultId);
+    this.visualization?.selectAnalysisResult(analysisResultId);
   }
 
   get selectedAnalysisResult(): AnalysisResultDetailedSchema | null | undefined {
-    return this.visualization.selectedAnalysisResult;
+    return this.visualization?.selectedAnalysisResult;
   }
 
-  get openLayers(): IOpenLayersComponent {
-    return this.visualization.openLayers;
+  get openLayers(): IOpenLayersComponent | undefined {
+    return this.visualization?.openLayers;
   }
 
   onLayerSelected(selected: boolean, legend?: Legend): void {
-    return this.visualization.onLayerSelected(selected, legend);
+    return this.visualization?.onLayerSelected(selected, legend);
+  }
+
+  onSidebarToggled(toggleState: boolean): void {
+    this.$emit("sidebarToggle", toggleState);
   }
 
   getTransAlignmentOffsetClassLimit(component_type: 'sce' | 'sca', class_limit: 1 | 2 | 3): string {

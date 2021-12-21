@@ -1,12 +1,6 @@
 <template>
   <div class="visualization">
     <app-geovisualization ref="openLayers" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick" @sidebarToggle="onSidebarToggled">
-      <template #topContent v-if="isSuperAdmin">
-        <b-form-checkbox v-show="analysisResultReleased !== null" v-model="analysisResultReleased" switch @change="onReleaseChanged">
-          {{ analysisResultReleased ? $t("released") : $t("invisible-for-customer") }}
-        </b-form-checkbox>
-      </template>
-      
       <!-- Pass slots through -->
       <template v-for="(_, slot) in $slots">
         <template :slot="slot">
@@ -79,23 +73,26 @@ export default class AppVisualization extends BaseAuthComponent implements IAnal
   showPCS = false;
   legends: Legend[] = [];
   piToastInfo: FeatureInfos = { title: "", records: [{ name: "", descr: "", value: "" }] };
-  analysisResultReleased: boolean | null = null;
+
+  private waitForDom = false;
 
   async created() {
     this.createLayers();
+
+    // wait for DOM before render OpenLayers
+    setTimeout(() => { this.waitForDom = true; }, 300);
   }
 
   selectAnalysisResult(analysisResultId: string | undefined): void {
     this.selectedAnalysisResult = this.analysisResults.find(analysisResult => analysisResult.id === analysisResultId);
     
-    this.analysisResultReleased = this.selectedAnalysisResult ? this.selectedAnalysisResult.released : null;
     this.piLayersHierarchy.setVisibility(this.selectedAnalysisResult?.id);
 
     this.hideToast();
   }
-
+  
   get hasLayers(): boolean {
-    return this.layers.length > 0;
+    return this.layers.length > 0 && this.waitForDom;
   }
 
   get hasLegend(): boolean {
@@ -150,12 +147,6 @@ export default class AppVisualization extends BaseAuthComponent implements IAnal
     this.hideToast();
   }
 
-  async onReleaseChanged() {
-    if (this.selectedAnalysisResult) {
-      await volateqApi.updateAnalysisResult(this.selectedAnalysisResult.id, { release: this.analysisResultReleased as boolean });
-    }
-  }
-
   private createLayers(): void {
     this.componentLayers = this.componentLayerTypes.map(componentType => new (componentType as any)(this));
     this.piLayersHierarchy = new PILayersHierarchy(this, this.analysisResults, this.keyFigureLayers);
@@ -203,6 +194,7 @@ export default class AppVisualization extends BaseAuthComponent implements IAnal
 
 <style lang="scss">
 @import '@/scss/_colors.scss';
+@import '@/scss/_variables.scss';
 
 // Fix that toaster overlays popover
 .b-popover {
@@ -214,7 +206,7 @@ export default class AppVisualization extends BaseAuthComponent implements IAnal
 
 .visualization {
   position: relative;
-  height: 100%;
+  height: calc(100vh - $header-height - $tab-height);
   width: 100%;
 
   &-legend {

@@ -1,28 +1,47 @@
 <template>
-  <div class="plant-view-csp-ptc">
+  <div class="plant-view-csp-ptc" v-if="analysisResults">
     <app-analysis-selection-sidebar ref="analysisSelectionSidebar"
       :plant="plant"
+      :analysisResults="analysisResults"
       :open="false"
       @sidebarToggled="onSidebarToggled"
       @analysisResultSelected="onAnalysisResultSelected" />
     <div :class="'plant-view-csp-ptc-rightside ' + (sidebarOpen ? 'open' : '')">
-      <b-tabs>
-        <b-tab>
-          <template #title><b-icon icon="map" />{{ $t("map") }}</template>
-          <app-visual-csp-ptc v-if="hasResults" 
+      <h2 :class="'plant-view-csp-ptc-title ' + (sidebarOpen ? 'open' : '')">{{ plant.name }}</h2>
+      <b-tabs align="center" @activate-tab="onTabChanged">
+        <b-tab v-if="hasResults">
+          <template #title><b-icon icon="map" /></template>
+          <app-visual-csp-ptc 
             ref="visualCspPtc" 
             :analysisResults="analysisResults" 
             :plant="plant" 
-            v-show="mapView" 
             @sidebarToggle="onRightSidebarToggle" />
         </b-tab>
-        <b-tab>
-          <template #title><b-icon icon="table" />{{ $t("table") }}</template>
-          <app-tables-csp-ptc v-if="hasResults" 
+        <b-tab v-if="hasResults" >
+          <template #title><b-icon icon="table" /></template>
+          <app-tables-csp-ptc
             ref="tablesCspPtc" 
-            :analysisResults="analysisResults" 
-            :plant="plant" 
-            v-show="tableView" />
+            :analysisResults="analysisResults"
+            :plant="plant" />
+        </b-tab>
+        <b-tab v-if="isSuperAdmin">
+          <template #title><b-icon icon="braces" /></template>
+          <b-container>
+            <b-row>
+              <b-col>
+                <div class="plant-view-csp-ptc-admin-panel">
+                  <h3>{{ $t("admin-panel") }}</h3>
+                  <hr />
+                  <h4>{{ $t("analysis-visibility") }}</h4>
+                  <b-form-checkbox v-show="analysisResultReleased !== null" v-model="analysisResultReleased" switch @change="onReleaseChanged">
+                    {{ analysisResultReleased ? $t("released") : $t("invisible-for-customer") }}
+                  </b-form-checkbox>
+                  <h4>{{ $t("digital-twin") }}</h4>
+                  coming soon
+                </div>
+              </b-col>
+            </b-row>
+          </b-container>
         </b-tab>
       </b-tabs>  
     </div>
@@ -40,6 +59,10 @@ import AppSidebar from '@/app/shared/components/app-sidebar/app-sidebar.vue';
 import AppTablesCspPtc from '@/app/plant/csp-ptc/tables/tables-csp-ptc.vue';
 import { IAnalysisSelectionSidebar } from "@/app/plant/shared/analysis-selection-sidebar/types";
 import { IAnalysisResultSelection } from '../shared/types';
+import AppAnalysisSelectionSidebar from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-sidebar.vue";
+import { AnalysisResultDetailedSchema } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-schema';
+import volateqApi from '@/app/shared/services/volateq-api/volateq-api';
+import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
 
 
 @Component({
@@ -50,39 +73,57 @@ import { IAnalysisResultSelection } from '../shared/types';
     AppExplanation,
     AppTablesCspPtc,
     AppSidebar,
+    AppAnalysisSelectionSidebar,
   }
 })
-export default class AppPlantViewCspPtc extends Vue {
+export default class AppPlantViewCspPtc extends BaseAuthComponent {
   @Prop() plant!: PlantSchema;
   @Ref() analysisSelectionSidebar!: IAnalysisSelectionSidebar;
   @Ref() visualCspPtc!: IAnalysisResultSelection;
   @Ref() tablesCspPtc!: IAnalysisResultSelection;
 
-  async created(): Promise<void> {
-    
+  private analysisResults: AnalysisResultDetailedSchema[] | null = null;
+  
+  private analysisResultReleased: boolean | null = null;
+
+  private sidebarOpen = false;
+
+  async created() {
+    this.analysisResults = await volateqApi.getAnalysisResults(this.plant.id);
   }
 
   get hasResults(): boolean {
-    return !!this.analysisSelectionSidebar.analysisResults;
+    return this.analysisResults && this.analysisResults.length > 0 || false;
   }
 
-  get sidebarOpen(): boolean {
-    return this.analysisSelectionSidebar.sidebarOpen;
+  async onReleaseChanged() {
+    if (this.visualCspPtc?.selectedAnalysisResult) {
+      await volateqApi.updateAnalysisResult(this.visualCspPtc?.selectedAnalysisResult.id, { release: this.analysisResultReleased as boolean });
+    }
   }
 
   onAnalysisResultSelected(selectedAnalysisResultId: string | undefined): void {
     this.visualCspPtc.selectAnalysisResult(selectedAnalysisResultId);
     this.tablesCspPtc.selectAnalysisResult(selectedAnalysisResultId);
+
+    this.analysisResultReleased = this.visualCspPtc?.selectedAnalysisResult ? 
+      this.visualCspPtc?.selectedAnalysisResult.released : null;
+
+    this.rerenderOLCanvas();
   }
 
   onSidebarToggled(open: boolean): void {
-    if (!open) {
-      this.rerenderOLCanvas(300);
-    }
+    this.sidebarOpen = open;
+
+    this.rerenderOLCanvas(300);
   }
 
   onRightSidebarToggle(toggleState: boolean): void {
     this.rerenderOLCanvas(300);
+  }
+
+  onTabChanged(tabIndex: number): void {
+    this.rerenderOLCanvas();
   }
 
   private rerenderOLCanvas(timeout = 0): void {
@@ -104,10 +145,19 @@ $left-width: 400px;
   height: calc(100vh - #{$header-height});
   width: 100%;
   display: flex;
+  position: relative;
 
   &-title {
-    font-size: 3rem;
-    margin-bottom: 0px;
+    transition: left .3s ease-in-out;
+    font-size: 1.5rem;
+    display: block;
+    position: absolute;
+    top: 0.3em;
+    left: 0.5em;
+
+    &.open {
+      left: calc(0.5em + $left-width);
+    }
   }
 
   &-rightside {
@@ -116,6 +166,19 @@ $left-width: 400px;
 
     &.open {
       width: calc(100% - #{$left-width});
+    }
+  }
+
+  &-admin-panel {
+    padding: 1em;
+    background-color: $grey;
+
+    h4 {
+      margin: 1.5em 0 .5em 0;
+
+      &:first-child {
+        margin-top: 0;
+      }
     }
   }
 }
