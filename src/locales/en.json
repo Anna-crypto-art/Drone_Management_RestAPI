@@ -208,6 +208,10 @@
   "ortho-image-rgb": "RGB ortho image",
   "ortho-image-ir": "IR ortho image",
   "ortho-image-sdx": "SDX ortho image",
+  "history": "history",
+  "admin-panel": "Admin panel",
+  "analysis-visibility": "Visibility of selected analysis",
+  "digital-twin": "Digital twin",
 
   "CSP_PTC_Absorber": "Absorber tubes",
   "CSP_PTC_SCA": "SCA",

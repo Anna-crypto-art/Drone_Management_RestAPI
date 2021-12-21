@@ -9,7 +9,7 @@
     <div :class="'plant-view-csp-ptc-rightside ' + (sidebarOpen ? 'open' : '')">
       <h2 :class="'plant-view-csp-ptc-title ' + (sidebarOpen ? 'open' : '')">{{ plant.name }}</h2>
       <b-tabs align="center" @activate-tab="onTabChanged">
-        <b-tab v-if="hasResults">
+        <b-tab>
           <template #title><b-icon icon="map" /></template>
           <app-visual-csp-ptc 
             ref="visualCspPtc" 
@@ -36,8 +36,8 @@
                   <b-form-checkbox v-show="analysisResultReleased !== null" v-model="analysisResultReleased" switch @change="onReleaseChanged">
                     {{ analysisResultReleased ? $t("released") : $t("invisible-for-customer") }}
                   </b-form-checkbox>
-                  <h4>{{ $t("digital-twin") }}</h4>
-                  coming soon
+                  <!--<h4>{{ $t("digital-twin") }}</h4>
+                  coming soon-->
                 </div>
               </b-col>
             </b-row>
