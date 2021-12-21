@@ -49,7 +49,7 @@
         {{ getTransAlignmentOffsetClassLimit('sce', 1) }}
       </template>
        <template #scaOrientation>
-        {{ $t("alignment-offset") }} <app-explanation><span v-html="$t('sca-alignment-offset_expl')"></span></app-explanation>
+        {{ $t("tracking-offset") }} <app-explanation><span v-html="$t('tracking-offset_expl')"></span></app-explanation>
       </template>
       <template #scaOrientOffsetClass3>
         {{ getTransAlignmentOffsetClassLimit('sca', 3) }}
