@@ -23,10 +23,10 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: AnalysisResultKeyFigure.SCA_ORIENTATION_ID,
   },
   {
-    getValue: r => r.orientation_at_drive_offset,
-    transName: "sca-alignment-offset",
-    transDescr: "sca-alignment-offset_expl",
-    keyFigureId: AnalysisResultKeyFigure.SCA_ORIENTATION_ID,
+    getValue: r => r.tracking_encoder_offset,
+    transName: "tracking-offset",
+    transDescr: "tracking-offset_expl",
+    keyFigureId: AnalysisResultKeyFigure.SCA_TRACKING_DEVIATION_ID,
   },
   {
     getValue: r => r.torsion_caused_friction_mean,

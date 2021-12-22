@@ -15,4 +15,6 @@ export enum AnalysisResultKeyFigure {
     SCA_ORTHO_IMAGES_RGB_ID = 14,
     SCA_ORTHO_IMAGES_IR_ID = 15,
     SCA_ORTHO_IMAGES_SDX_ID = 16,
+    SCE_ALIGNMENT_ID = 17,
+    SCA_TRACKING_DEVIATION_ID = 18,
   }

@@ -7,9 +7,9 @@ import { SceComponentLayer } from "./components/sce-component-layer";
 import { ComponentLayer } from "../../shared/visualization/layers/component-layer";
 import { MissingMirrorKeyFigureLayer } from "./key-figures/missing-mirror-key-figure-layer";
 import { ScaFrictionKeyFigureLayer } from "./key-figures/sca-friction-key-figure";
-import { ScaOrientationKeyFigureLayer } from "./key-figures/sca-orientation-key-figure-layer";
+import { ScaTrackingKeyFigureLayer } from "./key-figures/sca-tracking-key-figure-layer";
 import { ScaSdxKeyFigureLayer } from "./key-figures/sca-sdx-key-figure-layer";
-import { SceOrientationKeyFigureLayer } from "./key-figures/sce-orientation-key-figure-layer";
+import { SceAlignmentKeyFigureLayer } from "./key-figures/sce-alignment-key-figure-layer";
 import { BoolUndefinedHceKeyFigureLayer } from "./key-figures/shared/bool-hce-key-figure-layer";
 import { HceKeyFigureLayer } from "./key-figures/shared/hce-key-figure-layer";
 import { ScaOrthoImageKeyFigureLayer } from "./key-figures/shared/sca-ortho-image-key-figure-layer";
@@ -113,8 +113,8 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     ]
   },
   {
-    keyFigureId: AnalysisResultKeyFigure.SCE_ORIENTATION_ID, 
-    layerType: SceOrientationKeyFigureLayer,
+    keyFigureId: AnalysisResultKeyFigure.SCE_ALIGNMENT_ID, 
+    layerType: SceAlignmentKeyFigureLayer,
     keyFigureInfo: { templateName: "sceOrientation", keyName: "sce-alignment-offset" },
     subLayers: [
       {
@@ -136,8 +136,8 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     ]
   },
   {
-    keyFigureId: AnalysisResultKeyFigure.SCA_ORIENTATION_ID, 
-    layerType: ScaOrientationKeyFigureLayer,
+    keyFigureId: AnalysisResultKeyFigure.SCA_TRACKING_DEVIATION_ID, 
+    layerType: ScaTrackingKeyFigureLayer,
     keyFigureInfo: { templateName: "scaOrientation", keyName: "sca-alignment-offset" },
     subLayers: [
       {

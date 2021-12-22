@@ -125,7 +125,12 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
       return "";
     }
 
-    const offset_class_limits: number[] | null = this.selectedAnalysisResult.csp_ptc[component_type + '_orientation_offset_class_limits'];
+    let offset_class_limits: number[] | null = null;
+    if (component_type === 'sce') {
+      offset_class_limits = this.selectedAnalysisResult.csp_ptc.sce_alignment_deviation_to_drive_class_limits;
+    } else if (component_type === 'sca') {
+      offset_class_limits = this.selectedAnalysisResult.csp_ptc.sca_tracking_encoder_offset_class_limits;
+    }
 
     if (offset_class_limits === null) {
       return "";

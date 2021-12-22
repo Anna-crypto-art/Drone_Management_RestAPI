@@ -3,12 +3,12 @@ import { AnalysisResultCspPtcScaSchema } from "@/app/shared/services/volateq-api
 import analysisResultCspPtcMappingSca from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-sca";
 
 
-export class ScaOrientationKeyFigureLayer extends OrientationKeyFigureLayer<AnalysisResultCspPtcScaSchema> {
+export class ScaTrackingKeyFigureLayer extends OrientationKeyFigureLayer<AnalysisResultCspPtcScaSchema> {
   protected readonly analysisResultMapping = analysisResultCspPtcMappingSca;
 
   protected showPcsZoomLevel = 16;
 
   protected getOrientationOffsetClassLimits() {
-    return this.analysisResult.csp_ptc.sca_orientation_offset_class_limits;
+    return this.analysisResult.csp_ptc.sca_tracking_encoder_offset_class_limits;
   }
 }

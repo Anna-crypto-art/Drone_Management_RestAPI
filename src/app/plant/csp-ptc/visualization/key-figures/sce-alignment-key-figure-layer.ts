@@ -3,12 +3,12 @@ import analysisResultCspPtcMappingSce from "@/app/shared/services/volateq-api/ap
 import { OrientationKeyFigureLayer } from "./shared/orientation-key-figure-layer";
 
 
-export class SceOrientationKeyFigureLayer extends OrientationKeyFigureLayer<AnalysisResultCspPtcSceSchema> {
+export class SceAlignmentKeyFigureLayer extends OrientationKeyFigureLayer<AnalysisResultCspPtcSceSchema> {
   protected readonly analysisResultMapping = analysisResultCspPtcMappingSce;
 
   protected showPcsZoomLevel = 18;
 
   protected getOrientationOffsetClassLimits() {
-    return this.analysisResult.csp_ptc.sce_orientation_offset_class_limits;
+    return this.analysisResult.csp_ptc.sce_alignment_deviation_to_drive_class_limits;
   }
 }

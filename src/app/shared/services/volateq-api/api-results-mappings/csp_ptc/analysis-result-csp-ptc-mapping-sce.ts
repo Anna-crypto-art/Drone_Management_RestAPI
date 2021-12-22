@@ -12,10 +12,10 @@ const analysisResultCspPtcMappingSce: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: AnalysisResultKeyFigure.SCE_ORIENTATION_ID,
   },
   {
-    getValue: r => r.orientation_offset,
+    getValue: r => r.alignment_deviation_to_drive,
     transName: "sce-alignment-offset",
     transDescr: "sce-alignment-offset_expl",
-    keyFigureId: AnalysisResultKeyFigure.SCE_ORIENTATION_ID,
+    keyFigureId: AnalysisResultKeyFigure.SCE_ALIGNMENT_ID,
   },
   {
     getValue: r => r.orientation_uncertainty,
