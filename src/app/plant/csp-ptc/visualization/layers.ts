@@ -210,19 +210,14 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     keyFigureInfo: { keyName: "missing-mirror" },
     queryColor: { color: KeyFigureColors.red }
   },
-  {
-    keyFigureId: AnalysisResultKeyFigure.SCA_ORTHO_IMAGES_RGB_ID,
-    layerType: ScaOrthoImageKeyFigureLayer,
-    keyFigureInfo: { displayName: "ortho-image-rgb" }
-  },
-  {
-    keyFigureId: AnalysisResultKeyFigure.SCA_ORTHO_IMAGES_IR_ID,
-    layerType: ScaOrthoImageKeyFigureLayer,
-    keyFigureInfo: { displayName: "ortho-image-ir" }
-  },
-  {
-    keyFigureId: AnalysisResultKeyFigure.SCA_ORTHO_IMAGES_SDX_ID,
-    layerType: ScaOrthoImageKeyFigureLayer,
-    keyFigureInfo: { displayName: "ortho-image-sdx" }
-  },
+  // {
+  //   keyFigureId: AnalysisResultKeyFigure.SCA_ORTHO_IMAGES_RGB_ID,
+  //   layerType: ScaOrthoImageKeyFigureLayer,
+  //   keyFigureInfo: { displayName: "ortho-image-rgb" }
+  // },
+  // {
+  //   keyFigureId: AnalysisResultKeyFigure.SCA_ORTHO_IMAGES_IR_ID,
+  //   layerType: ScaOrthoImageKeyFigureLayer,
+  //   keyFigureInfo: { displayName: "ortho-image-ir" }
+  // },
 ];

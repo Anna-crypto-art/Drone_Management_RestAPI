@@ -19,6 +19,9 @@
         <h3>{{ piToastInfo.title }}</h3>
       </template>
       <div>
+        <div class="toaster-images" v-if="piToastInfo.images">
+          <img v-for="image in piToastInfo.images" :key="image.title" :title="image.title" :src="image.url" />
+        </div>
         <b-row v-for="featureInfo in piToastInfo.records" :key="featureInfo.name" :class="featureInfo.bold && 'font-weight-bold'">
           <b-col>
             {{ featureInfo.name }} 
@@ -47,7 +50,6 @@ import { PILayersHierarchy } from "@/app/plant/shared/visualization/pi-layers-hi
 import AppGeovisualization from "@/app/shared/components/app-geovisualization/app-geovisualization.vue";
 import { IOpenLayersComponent } from '@/app/shared/components/app-geovisualization/types/components';
 import { LayerType } from '@/app/shared/components/app-geovisualization/types/layers';
-import volateqApi from '@/app/shared/services/volateq-api/volateq-api';
 
 
 @Component({
@@ -252,5 +254,10 @@ export default class AppVisualization extends BaseAuthComponent implements IAnal
   &:hover {
     background-color: $background-grey !important;
   }
+}
+
+.toaster-images {
+  img { max-width: calc(500px - 1.5rem); }
+  margin-bottom: 0.75rem;
 }
 </style>

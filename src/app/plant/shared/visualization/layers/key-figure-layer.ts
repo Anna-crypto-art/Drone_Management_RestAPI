@@ -10,6 +10,7 @@ import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/a
 import Vue from "vue";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { AnalysisResultKeyFigure } from "@/app/shared/services/volateq-api/api-analysis-result-key-figures";
+import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 
 
 export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends LayerBase {
@@ -81,13 +82,17 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     return feature.getProperties() as FeatureProperties;
   }
 
+  protected getMoreSpecificAnalysisResultParams(): TableRequest {
+    return {};
+  }
+
   protected async getResultDetails(feature: FeatureLike): Promise<T | undefined> {
     const pcs = this.getPcs(feature);
 
     const results = await volateqApi.getSpecificAnalysisResult(
       this.analysisResult!.id,
       this.keyFigure.component.id,
-      { filter: pcs, limit: 1, filter_mode: 'equals' }
+      { filter: pcs, limit: 1, filter_mode: 'equals', ...this.getMoreSpecificAnalysisResultParams() }
     );
 
     if (results.items.length > 0) {

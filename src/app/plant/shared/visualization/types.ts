@@ -31,9 +31,15 @@ export interface FeatureProperties {
   value?: number | boolean | string | null;
 }
 
+export interface FeatureImage {
+  title: string;
+  url: string;
+}
+
 export interface FeatureInfos {
   title: string;
   records: FeatureInfo[];
+  images?: FeatureImage[];
 }
 
 export interface FeatureInfo {
