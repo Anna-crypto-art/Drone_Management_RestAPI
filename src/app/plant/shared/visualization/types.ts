@@ -2,10 +2,11 @@ import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualizati
 import { GroupLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-analysis-result-components";
 import { AnalysisResultKeyFigure } from "@/app/shared/services/volateq-api/api-analysis-result-key-figures";
+import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { KeyFigureLayer } from "./layers/key-figure-layer";
-import { KeyFigureInfo, QueryColor, SubKeyFigureInfo } from "./layers/types";
+import { KeyFigureColors, KeyFigureInfo, SubKeyFigureInfo } from "./layers/types";
 
 
 export interface Legend {
@@ -57,11 +58,25 @@ export type KeyFigureTypeMap = {
    */
   keyFigureInfo?: KeyFigureInfo,
   /**
-   * URL query parameters and color for the layer
+   * URL query parameters 
    */
-  queryColor?: QueryColor,
+  query?: GeoVisualQuery,
+  /**
+   * Leave color undefined to take the default color mapped to the key figure.
+   */
+  color?: KeyFigureColors,
   /**
    * If the layer has subLayers it will be handled as a group layer.
    */
-  subLayers?: { keyFigureInfo?: SubKeyFigureInfo, queryColor: QueryColor }[],
+  subLayers?: { 
+    keyFigureInfo?: SubKeyFigureInfo,
+    /**
+     * URL query parameters 
+     */
+    query?: GeoVisualQuery,
+    /**
+     * Leave color undefined to take the default color mapped to the key figure.
+     */
+    color?: KeyFigureColors,
+  }[],
 };

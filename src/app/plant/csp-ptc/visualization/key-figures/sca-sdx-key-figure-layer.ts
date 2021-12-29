@@ -15,11 +15,11 @@ export class ScaSdxKeyFigureLayer extends ScaKeyFigureLayer {
       id: this.keyFigureInfo.displayName || this.keyFigureId.toString(),
       entries: [
         {
-          color: this.queryColor!.color!,
+          color: this.color!,
           name: this.getLegendEntryTransName(
             "slope-deviation-class",
             this.analysisResult.csp_ptc.sdx_rms_class_limits,
-            this.queryColor?.query?.sdx_class,
+            this.query?.sdx_class,
             "[mrad]") + this.getLegendEntryCount(),
         }
       ]
@@ -38,5 +38,9 @@ export class ScaSdxKeyFigureLayer extends ScaKeyFigureLayer {
     }
 
     return featureInfos;
+  }
+
+  protected getColor(): string {
+    return this.getClassColor(this.query?.sdx_class);
   }
 }

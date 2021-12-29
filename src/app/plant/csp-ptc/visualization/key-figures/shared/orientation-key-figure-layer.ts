@@ -1,17 +1,17 @@
-import { KeyFigureLayer } from "@/app/plant/shared/visualization/layers/key-figure-layer";
 import { KeyFigureColors } from "@/app/plant/shared/visualization/layers/types";
 import { Legend } from "@/app/plant/shared/visualization/types";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { FeatureLike } from "ol/Feature";
 import { Style, Fill } from 'ol/style';
+import { CspPtcKeyFigureLayer } from "./csp-ptc-key-figure-layer";
 
 
-export abstract class OrientationKeyFigureLayer<T extends AnalysisResultSchemaBase> extends KeyFigureLayer<T> {
+export abstract class OrientationKeyFigureLayer<T extends AnalysisResultSchemaBase> extends CspPtcKeyFigureLayer<T> {
 
   protected abstract getOrientationOffsetClassLimits(): number[];
 
   public getStyle(feature: FeatureLike): Style {
-    const offsetColor = this.getOffsetColor(this.getProperties(feature).value as number) as string;
+    const offsetColor = this.getOffsetColor();
 
     return new Style({
       fill: new Fill({
@@ -26,59 +26,40 @@ export abstract class OrientationKeyFigureLayer<T extends AnalysisResultSchemaBa
       return undefined;
     }
 
-    const limitAt0 = this.getOrientationOffsetClassLimits()[0];
-    const limitAt1 = this.getOrientationOffsetClassLimits()[1];
-
-    const colorFilteredCount = (color: KeyFigureColors) => this.getLegendEntryCount(this.geoJSON!.features
-        .filter(feature => this.getOffsetColor(feature.properties.value as number) === color).length);
-    
-    let legendEntries: { color: string, name: string }[] = [];
-    if (this.queryColor?.query?.undefined === 1) {
-      legendEntries = [{
-        color: KeyFigureColors.grey,
-        name: this.vueComponent.$t("not-measured").toString() + colorFilteredCount(KeyFigureColors.grey),
-      }];
-    } else if (this.queryColor?.query?.orientation_offset_class === 1) {
-      legendEntries = [{
-        color: KeyFigureColors.green,
-        name: `-${limitAt0}° - ${limitAt0}°: ${colorFilteredCount(KeyFigureColors.green)}`
-      }];
-    } else if (this.queryColor?.query?.orientation_offset_class === 2) {
-      legendEntries = [
-        {
-          color: KeyFigureColors.halfBlue,
-          name: `-${limitAt1}° - -${limitAt0}°: ${colorFilteredCount(KeyFigureColors.halfBlue)}`
-        }, 
-        {
-          color: KeyFigureColors.halfRed,
-          name: `${limitAt0}° - ${limitAt1}°: ${colorFilteredCount(KeyFigureColors.halfRed)}`
-        },
-      ];
-    } else if (this.queryColor?.query?.orientation_offset_class === 3) {
-      legendEntries = [
-        {
-          color: KeyFigureColors.blue,
-          name: `-&infin;° - -${limitAt1}°: ${colorFilteredCount(KeyFigureColors.blue)}`
-        },
-        {
-          color: KeyFigureColors.red,
-          name: `${limitAt1}° - &infin;°: ${colorFilteredCount(KeyFigureColors.red)}`
-        },
-      ];
-    }
-
     return {
       id: this.keyFigureInfo.displayName!,
-      entries: legendEntries,
+      entries: [{
+        color: this.getOffsetColor(),
+        name: this.getLegendName(),
+      }],
     };
   }
 
-  private getOffsetColor(offsetValue?: number) {
-    if (this.queryColor!.color) {
-      return this.queryColor!.color;
+  private getOffsetColor(): string {
+    if (this.query?.undefined === 1) {
+      return KeyFigureColors.grey;
     }
 
-    return offsetValue! < 0 ? this.queryColor!.colors![0] : this.queryColor!.colors![1];
+    return this.getClassColor(this.query?.orientation_offset_class);
   }
-  
+
+  private getLegendName(): string {
+    const limitAt0 = this.getOrientationOffsetClassLimits()[0];
+    const limitAt1 = this.getOrientationOffsetClassLimits()[1];
+
+    if (this.query?.undefined === 1) {
+      return this.vueComponent.$t("not-measured").toString() + this.getLegendEntryCount();
+    }
+    if (this.query?.orientation_offset_class === 1) {
+      return `less than ${limitAt0}°: ${this.getLegendEntryCount()}`;
+    } 
+    if (this.query?.orientation_offset_class === 2) {
+      return `between ${limitAt0}° - ${limitAt1}°: ${this.getLegendEntryCount()}`;
+    }
+    if (this.query?.orientation_offset_class === 3) {
+      return `greater than ${limitAt1}°: ${this.getLegendEntryCount()}`;
+    }
+
+    throw Error("Unsupported query value for orientation offset");
+  }
 }

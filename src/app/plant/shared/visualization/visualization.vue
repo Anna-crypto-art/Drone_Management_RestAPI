@@ -1,6 +1,12 @@
 <template>
   <div class="visualization">
     <app-geovisualization ref="openLayers" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick" @sidebarToggle="onSidebarToggled">
+      <template #topContent>
+        <b-form-checkbox v-model="enableMultiSelection" switch @change="onMultiSelectionChanged">
+          {{ $t("multi-selection") }} <app-explanation>{{ $t("multi-selection-overlapping_expl") }}</app-explanation>
+        </b-form-checkbox>
+      </template>
+
       <!-- Pass slots through -->
       <template v-for="(_, slot) in $slots">
         <template :slot="slot">
@@ -49,7 +55,7 @@ import { IPlantVisualization, Legend, FeatureInfos, KeyFigureTypeMap } from "@/a
 import { PILayersHierarchy } from "@/app/plant/shared/visualization/pi-layers-hierarchy";
 import AppGeovisualization from "@/app/shared/components/app-geovisualization/app-geovisualization.vue";
 import { IOpenLayersComponent } from '@/app/shared/components/app-geovisualization/types/components';
-import { LayerType } from '@/app/shared/components/app-geovisualization/types/layers';
+import { GroupLayer, LayerType } from '@/app/shared/components/app-geovisualization/types/layers';
 
 
 @Component({
@@ -75,6 +81,7 @@ export default class AppVisualization extends BaseAuthComponent implements IAnal
   showPCS = false;
   legends: Legend[] = [];
   piToastInfo: FeatureInfos = { title: "", records: [{ name: "", descr: "", value: "" }] };
+  enableMultiSelection = false;
 
   private waitForDom = false;
 
@@ -102,9 +109,13 @@ export default class AppVisualization extends BaseAuthComponent implements IAnal
   }
 
   get legendEntries(): { color: string, name: string }[] {
-    let legendEntries: { color: string, name: string }[] = [];
+    const legendEntries: { color: string, name: string }[] = [];
     for (const legend of this.legends) {
-      legendEntries = legendEntries.concat(legend.entries)
+      for (const entry of legend.entries) {
+        if (!legendEntries.find(legendEntry => legendEntry.color === entry.color)) {
+          legendEntries.push(entry);
+        }
+      }
     }
     
     return legendEntries;
@@ -136,17 +147,27 @@ export default class AppVisualization extends BaseAuthComponent implements IAnal
 
   onLayerSelected(selected: boolean, legend?: Legend) {
     if (legend) {
+      const legendIndex = this.legends.findIndex(l => l.id === legend.id);
       if (selected) {
-        this.legends.push(legend);
+        if (legendIndex === -1) {
+          this.legends.push(legend);
+        } else {
+          throw Error("Legend id " + legend.id + " already added");
+        }
       } else {
-        const removeIndex = this.legends.findIndex(l => l.id === legend.id);
-        if (removeIndex != -1) {
-          this.legends.splice(removeIndex, 1);
+        if (legendIndex != -1) {
+          this.legends.splice(legendIndex, 1);
         }
       }
     }
 
     this.hideToast();
+  }
+
+  onMultiSelectionChanged() {
+    this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
+    // Group Layer "performance-indicators"
+    (this.layers[0] as GroupLayer).singleSelection = !this.enableMultiSelection;
   }
 
   private createLayers(): void {

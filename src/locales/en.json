@@ -212,6 +212,8 @@
   "admin-panel": "Admin panel",
   "analysis-visibility": "Visibility of selected analysis",
   "digital-twin": "Digital twin",
+  "multi-selection": "Multiple selection",
+  "multi-selection-overlapping_expl": "Keeps all PIs selected. Warning: PIs can overlap each other",
 
   "CSP_PTC_Absorber": "Absorber tubes",
   "CSP_PTC_SCA": "SCA",

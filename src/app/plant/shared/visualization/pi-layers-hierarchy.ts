@@ -73,6 +73,12 @@ export class PILayersHierarchy {
     setVisibilityRec(this.parentComponentKpiLayers);
   }
 
+  public toggleMultiSelection(multiSelection: boolean): void {
+    for (const componentId in this.parentComponentKpiLayers) {
+      this.parentComponentKpiLayers[componentId].groupLayer.singleSelection = !multiSelection;
+    }
+  }
+
   private createGroupedKPILayers() {
     const parentComponentLayers: Record<number, GroupKPILayer> = {};
 
@@ -122,7 +128,8 @@ export class PILayersHierarchy {
         this.vueComponent, anaysisResult,
         keyFigureLayer.keyFigureId,
         keyFigureLayer.keyFigureInfo,
-        keyFigureLayer.queryColor,
+        keyFigureLayer.query,
+        keyFigureLayer.color
       );
     }
 
@@ -147,7 +154,8 @@ export class PILayersHierarchy {
         anaysisResult,
         keyFigureLayer.keyFigureId,
         childKeyFigureInfo,
-        childLayer.queryColor
+        childLayer.query,
+        childLayer.color
       );
       groupKpiLayer.keyFigureLayers.push(kpiLayer);
       groupKpiLayer.groupLayer.childLayers.push(kpiLayer.toGeoLayer());

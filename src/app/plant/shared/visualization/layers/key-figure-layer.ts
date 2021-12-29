@@ -3,7 +3,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { LayerBase } from "./layer-base";
 import { FeatureLike } from "ol/Feature";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
-import { KeyFigureInfo, QueryColor } from "./types";
+import { KeyFigureColors, KeyFigureInfo } from "./types";
 import { FeatureInfo, FeatureInfos, FeatureProperties, Legend, IPlantVisualization } from "../types";
 import { AnalysisResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
@@ -11,6 +11,7 @@ import Vue from "vue";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { AnalysisResultKeyFigure } from "@/app/shared/services/volateq-api/api-analysis-result-key-figures";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
+import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 
 
 export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends LayerBase {
@@ -28,7 +29,8 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     public readonly analysisResult: AnalysisResultDetailedSchema,
     protected readonly keyFigureId: AnalysisResultKeyFigure,
     public readonly keyFigureInfo: KeyFigureInfo,
-    protected readonly queryColor?: QueryColor,
+    protected readonly query?: GeoVisualQuery,
+    protected readonly color?: KeyFigureColors,
   ) {
     super(vueComponent);
 
@@ -115,7 +117,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
       this.vueComponent.plant.id, 
       this.analysisResult.id,
       this.keyFigure.id,
-      this.queryColor?.query
+      this.query
     );
 
     return this.geoJSON as Record<string, unknown>;

@@ -2,11 +2,11 @@ import { AnalysisResultCspPtcScaSchema } from "@/app/shared/services/volateq-api
 import analysisResultCspPtcMappingSca from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-sca";
 import { FeatureLike } from "ol/Feature";
 import { Fill, Style } from "ol/style";
-import { KeyFigureLayer } from "@/app/plant/shared/visualization/layers/key-figure-layer";
 import { Legend } from "@/app/plant/shared/visualization/types";
+import { CspPtcKeyFigureLayer } from "./csp-ptc-key-figure-layer";
 
 
-export class ScaKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcScaSchema> {
+export abstract class ScaKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisResultCspPtcScaSchema> {
   protected readonly analysisResultMapping = analysisResultCspPtcMappingSca;
 
   protected showPcsZoomLevel = 16;
@@ -14,7 +14,7 @@ export class ScaKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcScaSch
   public getStyle(feature: FeatureLike): Style {
     return new Style({
       fill: new Fill({
-        color: this.queryColor!.color!,
+        color: this.getColor(),
       }),
       text: this.showText(feature),
     });
@@ -29,7 +29,7 @@ export class ScaKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcScaSch
       id: this.keyFigureInfo.displayName || this.keyFigureId.toString(),
       entries: [
         {
-          color: this.queryColor!.color!,
+          color: this.getColor(),
           name: this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
             this.getLegendEntryCount(),
         }
@@ -41,7 +41,6 @@ export class ScaKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcScaSch
     if (!currentClass) {
       return this.vueComponent.$t(this.keyFigureInfo.displayName!).toString();
     }
-
 
     let limitRange = "";
     if (classLimits) {
@@ -58,4 +57,6 @@ export class ScaKeyFigureLayer extends KeyFigureLayer<AnalysisResultCspPtcScaSch
 
     return limitRange + this.vueComponent.$t(transClassName + "-" + currentClass).toString();
   }
+
+  protected abstract getColor(): string;
 }

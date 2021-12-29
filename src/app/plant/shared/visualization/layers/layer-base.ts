@@ -1,6 +1,7 @@
 import Vue from "vue";
 import { FeatureLike } from "ol/Feature";
 import { Style, Stroke, Text, Fill } from 'ol/style';
+import { asArray, asString } from 'ol/color';
 import { IPlantVisualization } from "../types";
 import { GeoJSONLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 
@@ -85,5 +86,14 @@ export abstract class LayerBase {
 
   private hasZoomLevelForPcs(): boolean {
     return (this.vueComponent.openLayers!.getMap().getView().getZoom() || 0) >= this.showPcsZoomLevel;
+  }
+
+  protected getComplementColor(color: string): string {
+    return "#" + (0xffffff ^ parseInt(color.replace("#", "0x"))).toString(16);
+  }
+
+  protected getColorWithAlpha(color: string, alpha: number): string {
+    const [r, g, b] = Array.from(asArray(color));
+    return asString([r, g, b, alpha]);
   }
 }

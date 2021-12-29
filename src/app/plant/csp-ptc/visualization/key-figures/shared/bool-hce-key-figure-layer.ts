@@ -33,7 +33,7 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
       id: this.keyFigureId.toString(),
       entries: [
         {
-          color: this.queryColor!.color!,
+          color: this.color!,
           name: this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
             this.getLegendEntryCount(featuresCount),
         }, 

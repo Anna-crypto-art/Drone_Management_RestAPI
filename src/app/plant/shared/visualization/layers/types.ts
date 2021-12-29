@@ -1,16 +1,6 @@
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 
 
-
-/**
- * URL query parameters and color for a layer
- */
-export interface QueryColor {
-  query?: GeoVisualQuery;
-  color?: KeyFigureColors;
-  colors?: KeyFigureColors[];
-}
-
 export interface KeyFigureInfo {
   /**
    * will translated (i18n)
@@ -47,7 +37,41 @@ export interface SubKeyFigureInfo {
   zIndex?: number;
 }
 
+/**
+ * Inspired by https://htmlcolorcodes.com/color-picker/
+ * 
+ * We use TRIADIC color ranges:
+ * RED - #AF0000
+ * GREEN - #00AF00
+ * BLUE - #0000AF
+ * 
+ * Then we take any NEUTRAL color for each color range
+ * 
+ * All names of the colors defined via https://colornames.org/
+ */
 export enum KeyFigureColors {
+  RED_retroBerry = "#af0000",
+  RED_laveniumRed = "#af2c00",
+  RED_coffeeWithChili = "#af5800",
+  RED_solluxCaptor = "#af8300",
+  RED_pizs = "#afaf00",
+  RED_bebel = "#83af00",
+
+  GREEN_theGreenOfLime = "#00af00",
+  GREEN_toxicCoconut = "#00af2c",
+  GREEN_dirtyLuigi = "#00af58",
+  GREEN_frozenKermit = "#00af83",
+  GREEN_minecraftStevesTShirt = "#00afaf",
+  GREEN_boldWater = "#0083af",
+
+  BLUE_jeopardyBlue = "#0000af",
+  BLUE_midnightDarkRoyalBlue = "#2c00af",
+  BLUE_gafaw = "#5800af",
+  BLUE_iurple = "#8300af",
+  BLUE_berryLover = "#af00af",
+  BLUE_liturgicalTemptation = "#af0083",
+
+
   green = "green",
   yellow = "yellow",
   red = "#ff0000",
@@ -55,4 +79,6 @@ export enum KeyFigureColors {
   blue = "#0000ff",
   halfBlue = "#8080ff",
   grey = "grey",
+  black = "#000000",
+  orange = "#ef7700",
 }

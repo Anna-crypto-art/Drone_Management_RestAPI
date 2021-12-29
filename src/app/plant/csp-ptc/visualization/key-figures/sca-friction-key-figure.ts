@@ -14,11 +14,11 @@ export class ScaFrictionKeyFigureLayer extends ScaKeyFigureLayer {
       id: this.keyFigureInfo.displayName || this.keyFigureId.toString(),
       entries: [
         {
-          color: this.queryColor!.color!,
+          color: this.getColor(),
           name: this.getLegendEntryTransName(
             "sca-torsion-class", 
             this.analysisResult.csp_ptc.sca_torsion_class_limits,
-            this.queryColor?.query?.torsion_class,
+            this.query?.torsion_class,
             "°") + this.getLegendEntryCount(),
         }
       ]
@@ -37,5 +37,9 @@ export class ScaFrictionKeyFigureLayer extends ScaKeyFigureLayer {
     }
 
     return featureInfos;
+  }
+
+  protected getColor(): string {
+    return this.getClassColor(this.query?.torsion_class);
   }
 }
