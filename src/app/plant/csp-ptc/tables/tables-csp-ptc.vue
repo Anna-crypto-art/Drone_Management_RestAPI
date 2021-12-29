@@ -1,7 +1,9 @@
 <template>
   <div class="app-tables-csp-ptc">
-    <app-tables-component ref="tablesComponent" :activeComponents="activeComponents" :analysisResults="analysisResults">
-    </app-tables-component>
+    <app-tables-component ref="tablesComponent"
+      :activeComponents="activeComponents"
+      :analysisResults="analysisResults"
+      :plant="plant" />
   </div>
 </template>
 
@@ -17,6 +19,7 @@ import AppTablesComponent from "@/app/plant/shared/table-component/tables-compon
 import { ITablesComponent } from "@/app/plant/shared/table-component/types";
 import { IActiveComponent, IAnalysisResultSelection } from "@/app/plant/shared/types";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
+import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 
 
 @Component({
@@ -26,6 +29,7 @@ import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/
   }
 })
 export default class AppTablesCspPtc extends BaseAuthComponent implements ITablesComponent, IAnalysisResultSelection {
+  @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
 
   @Ref() tablesComponent!: IAnalysisResultSelection;
