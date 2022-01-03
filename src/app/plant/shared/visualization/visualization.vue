@@ -122,19 +122,28 @@ export default class AppVisualization extends BaseAuthComponent implements IAnal
   }
 
   async onOpenLayersClick(features: FeatureLike[]) {
-    let featureInfos: FeatureInfos | undefined;
+    let mergedFeatureInfos: FeatureInfos | undefined;
     for (const kpiLayer of this.piLayersHierarchy.getAllChildLayers()) {
-      featureInfos = await kpiLayer.onClick(features);
+      const featureInfos = await kpiLayer.onClick(features);
+
       if (featureInfos) {
-        break;
+        if (!mergedFeatureInfos) {
+          mergedFeatureInfos = featureInfos;
+        } else if (mergedFeatureInfos.title === featureInfos.title) {
+          mergedFeatureInfos.records.forEach((featureInfo, index) => {
+            if (!featureInfo.bold && featureInfos.records[index].bold) {
+              featureInfo.bold = true;
+            }
+          });
+        }
       }
     }
 
-    if (featureInfos) {
-      this.piToastInfo = featureInfos;
+    if (mergedFeatureInfos) {
+      this.piToastInfo = mergedFeatureInfos;
     }
 
-    if (featureInfos) {
+    if (mergedFeatureInfos) {
       this.$bvToast.show("piInfoToast");
     } else {
       this.hideToast();

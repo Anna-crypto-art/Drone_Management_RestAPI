@@ -3,7 +3,7 @@ import { KeyFigureColors } from "../shared/visualization/layers/types";
 
 export const cspPtcKeyFigureColors: Record<AnalysisResultKeyFigure, KeyFigureColors> = {
   // HCE
-  [AnalysisResultKeyFigure.MISSING_GLASS_TUBE_ID]: KeyFigureColors.RED_pizs,
+  [AnalysisResultKeyFigure.MISSING_GLASS_TUBE_ID]: KeyFigureColors.BLUE_iurple,
   [AnalysisResultKeyFigure.OXYGEN_PENETRATION_ID]: KeyFigureColors.RED_coffeeWithChili,
   [AnalysisResultKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID]: KeyFigureColors.RED_solluxCaptor,
   [AnalysisResultKeyFigure.COATING_DEGRADATION_ID]: KeyFigureColors.RED_solluxCaptor,

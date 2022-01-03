@@ -4,6 +4,7 @@
       :plant="plant"
       :analysisResults="analysisResults"
       :open="false"
+      :getPIColor="getPiColor"
       @sidebarToggled="onSidebarToggled"
       @analysisResultSelected="onAnalysisResultSelected" />
     <div :class="'plant-view-csp-ptc-rightside ' + (sidebarOpen ? 'open' : '')">
@@ -63,6 +64,8 @@ import AppAnalysisSelectionSidebar from "@/app/plant/shared/analysis-selection-s
 import { AnalysisResultDetailedSchema } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-schema';
 import volateqApi from '@/app/shared/services/volateq-api/volateq-api';
 import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
+import { cspPtcKeyFigureColors } from './csp-ptc-key-figure-colors';
+import { KeyFigureSchema } from '@/app/shared/services/volateq-api/api-schemas/key-figure-schema';
 
 
 @Component({
@@ -131,6 +134,10 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
       // triggers openlayers canvas element to rerender
       window.dispatchEvent(new UIEvent("resize"));
     }, timeout)
+  }
+
+  getPiColor(keyFigure: KeyFigureSchema): string {
+    return cspPtcKeyFigureColors[keyFigure.id]
   }
 }
 </script>

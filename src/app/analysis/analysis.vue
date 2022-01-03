@@ -162,6 +162,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     this.createNewAnalysisBtnText = this.$t("new-data-upload").toString();
 
     this.columns = [
+      { key: "name", label: this.$t("name").toString(), sortable: true },
       { key: "plant", label: this.$t("plant").toString(), sortable: true },
       { key: "date", label: this.$t("created-at").toString(), sortable: true },
       { key: "user", label: this.$t("created-by").toString(), sortable: true },
@@ -366,6 +367,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
       this.analysisRows = (await volateqApi.getAllAnalysis()).map((a: AnalysisSchema) => {
         const row = {
           id: a.id,
+          name: a.name,
           date: new Date(Date.parse(a.created_at)).toLocaleString(),
           user: a.user && {
             userName: ((a.user.first_name || "") + " " + (a.user.last_name || "")).trim(),

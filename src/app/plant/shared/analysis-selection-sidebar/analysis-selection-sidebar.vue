@@ -12,16 +12,13 @@
           head-variant="light"
           @row-selected="onAnalysisResultSelected">
             <template #head(selected)></template>
-            <template #head(kpis)="column">
-              {{ column.label }} <app-explanation>{{ $t('performance-indicators') }}</app-explanation>
-            </template>
             <template #cell(selected)="{ rowSelected }">
               <b-checkbox :checked="rowSelected" disabled class="b-table-selectable-checkbox"></b-checkbox>
             </template>
-            <template #cell(kpis)="row">
-              <div v-for="kpi in row.item.kpis" :key="kpi">
-                <b-badge variant="primary">{{ kpi }}</b-badge>
-              </div>
+            <template #row-details="row">
+              <span class="analysis-selection-sidebar-kpi-badge" v-for="kpi in row.item.kpis" :key="kpi.id">
+                <b-badge variant="primary" :style="'background-color: ' + getKpiColor(kpi)">{{ kpi.name }}</b-badge>
+              </span>
             </template>
           </b-table>
         </app-table-container>
@@ -39,6 +36,7 @@ import { BvTableFieldArray } from 'bootstrap-vue';
 import AppTableContainer from '@/app/shared/components/app-table-container/app-table-container.vue';
 import AppExplanation from '@/app/shared/components/app-explanation/app-explanation.vue';
 import AppSidebar from '@/app/shared/components/app-sidebar/app-sidebar.vue';
+import { KeyFigureSchema } from '@/app/shared/services/volateq-api/api-schemas/key-figure-schema';
 
 
 @Component({
@@ -52,13 +50,13 @@ import AppSidebar from '@/app/shared/components/app-sidebar/app-sidebar.vue';
 export default class AppAnalysisSelectionSidebar extends Vue {
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
+  @Prop() getPIColor!: (keyFigure: KeyFigureSchema) => string;
   @Ref() analysisResultsTable!: any; // b-table
 
   analysisResultsTableColumns: BvTableFieldArray = [
     { key: 'selected', label: '' },
-    { key: 'id', label: 'ID' },
+    { key: 'name', label: this.$t("name").toString(), },
     { key: 'createdAt', label: this.$t('created-at').toString() },
-    { key: 'kpis', label: this.$t('pi').toString() },
   ];
   analysisResultsTableItems: Record<string, unknown>[] = [];
 
@@ -66,8 +64,10 @@ export default class AppAnalysisSelectionSidebar extends Vue {
     for (const analysisResult of this.analysisResults) {
       this.analysisResultsTableItems.push({
         id: analysisResult.id,
-        createdAt: new Date(Date.parse(analysisResult.created_at)).toLocaleDateString(),
-        kpis: analysisResult.key_figures.map(keyFigure => keyFigure.name)
+        name: analysisResult.analysis.name,
+        createdAt: new Date(Date.parse(analysisResult.analysis.created_at)).toLocaleDateString(),
+        kpis: analysisResult.key_figures,
+        _showDetails: true,
       })
     }
 
@@ -92,6 +92,10 @@ export default class AppAnalysisSelectionSidebar extends Vue {
   onSidebarToggled(open: boolean): void {
     this.$emit("sidebarToggled", open)
   }
+
+  getKpiColor(keyFigure: KeyFigureSchema): string {
+    return this.getPIColor(keyFigure);
+  }
 }
 </script>
 
@@ -110,6 +114,13 @@ $left-width: 400px;
     height: 100%;
     width: $left-width;
     border-right: $border-color-grey 1px solid;
+  }
+  &-kpi-badge {
+    padding-right: 5px;
+  }
+
+  .b-table-details {
+    cursor: default !important;
   }
 }
 </style>

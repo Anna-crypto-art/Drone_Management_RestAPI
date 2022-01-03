@@ -27,19 +27,19 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
   {
     keyFigureId: AnalysisResultKeyFigure.MISSING_GLASS_TUBE_ID,
     layerType: BoolUndefinedHceKeyFigureLayer,
-    keyFigureInfo: { templateName: "missingGhr", keyName: "missing-gct" },
+    keyFigureInfo: { templateName: "missingGhr", keyName: "missing-gct", zIndex: 11 },
     query: { missing_glass_tube: 1, undefined: 1 }
   },
   {
     keyFigureId: AnalysisResultKeyFigure.OXYGEN_PENETRATION_ID,
     layerType: BoolUndefinedHceKeyFigureLayer,
-    keyFigureInfo: { templateName: "O2Penetration", keyName: "oxygen-penetration" },
+    keyFigureInfo: { templateName: "O2Penetration", keyName: "oxygen-penetration", zIndex: 11 },
     query: { oxygen_penetration: 1, undefined: 1 }
   },
   {
     keyFigureId: AnalysisResultKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID,
     layerType: BoolUndefinedHceKeyFigureLayer,
-    keyFigureInfo: { templateName: "H2Concentration", keyName: "high-hydrogen-concentration" },
+    keyFigureInfo: { templateName: "H2Concentration", keyName: "high-hydrogen-concentration", zIndex: 11 },
     query: { h2_concentration: 1, undefined: 1 },
   },
   {
@@ -56,7 +56,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
         query: { glass_tube_temperature_class: 2 },
       },
       {
-        keyFigureInfo: { displayName: "glass-tube-temperature-class-1", zIndex: 10 }, 
+        keyFigureInfo: { displayName: "glass-tube-temperature-class-1", zIndex: 10 },
         query: { glass_tube_temperature_class: 1 },
       }, 
       {
@@ -141,7 +141,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
   {
     keyFigureId: AnalysisResultKeyFigure.SCA_TRACKING_DEVIATION_ID, 
     layerType: ScaTrackingKeyFigureLayer,
-    keyFigureInfo: { templateName: "scaOrientation", keyName: "sca-alignment-offset" },
+    keyFigureInfo: { templateName: "scaOrientation", keyName: "tracking-offset" },
     subLayers: [
       {
         keyFigureInfo: { templateName: "scaOrientOffsetClass3", displayName: "sca-orient-offset-class-3", zIndex: 13 },
