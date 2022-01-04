@@ -3,14 +3,29 @@
     <b-container>
       <b-row class="justify-content-md-center">
         <b-col cols="12" md="auto">
-          <img src="@/assets/logos/logo_default.jpg" alt="Volateq" class="logo-img">
+          <img
+            src="/logos/logo_default.webp"
+            srcset="/logos/logo_default.webp, /logos/logo_default.png"
+            alt="Volateq"
+            class="logo-img"
+          />
           <div class="app-auth-box">
             <div v-if="title" class="app-auth-box-title">
-              <h1>{{title}}</h1>
-              <div v-if="subtitle" v-html="subtitle" class="app-auth-box-subtitle grayed"></div>
+              <h1>{{ title }}</h1>
+              <div
+                v-if="subtitle"
+                v-html="subtitle"
+                class="app-auth-box-subtitle grayed"
+              ></div>
             </div>
             <slot></slot>
-            <b-alert class="app-auth-container-alert" v-model="showAlert" :variant="alert.variant" v-html="alert.msg" dismissible></b-alert>
+            <b-alert
+              class="app-auth-container-alert"
+              v-model="showAlert"
+              :variant="alert.variant"
+              v-html="alert.msg"
+              dismissible
+            ></b-alert>
           </div>
         </b-col>
       </b-row>
@@ -48,9 +63,9 @@ export default class AppAuthContainer extends Vue {
 
 <style lang="scss">
 @import "@/scss/_colors.scss";
-@import '~bootstrap/scss/_functions';
-@import '~bootstrap/scss/_variables';
-@import '~bootstrap/scss/mixins/_breakpoints';
+@import "~bootstrap/scss/_functions";
+@import "~bootstrap/scss/_variables";
+@import "~bootstrap/scss/mixins/_breakpoints";
 
 .app-auth-container {
   .app-auth-box {
@@ -91,7 +106,4 @@ export default class AppAuthContainer extends Vue {
     }
   }
 }
-
 </style>
-
-

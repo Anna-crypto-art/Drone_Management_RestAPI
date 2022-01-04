@@ -13,6 +13,12 @@ module.exports = {
     // headers: { "Access-Control-Allow-Origin": "*" }
   },
   configureWebpack: {
+    mode: process.env.ENV === "production" ? "production" : "development",
+    optimization: {
+      minimize: true,
+      usedExports: true,
+      concatenateModules: true,
+    },
     output: {
       hashFunction: "sha256",
     },

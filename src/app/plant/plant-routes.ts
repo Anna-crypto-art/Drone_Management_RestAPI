@@ -1,17 +1,17 @@
 import { RouteConfig } from "vue-router";
-import AppPlantView from "@/app/plant/plant-view.vue";
-import AppPlants from "@/app/plant/plants.vue";
+const AppPlantView = () => import("@/app/plant/plant-view.vue");
+const AppPlants = () => import("@/app/plant/plants.vue");
 
 const plantRoutes: RouteConfig[] = [
   {
     name: "Plants",
     path: "/plants",
-    component: AppPlants
+    component: AppPlants,
   },
   {
     name: "Plant",
     path: "/plant/:id",
-    component: AppPlantView
+    component: AppPlantView,
   },
 ];
 

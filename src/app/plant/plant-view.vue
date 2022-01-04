@@ -1,8 +1,7 @@
 <template>
   <div>
-    <app-header fluid></app-header>
-    <app-plant-view-csp-ptc v-if="isCspPtc" :plant="plant">
-    </app-plant-view-csp-ptc>
+    <app-header fluid />
+    <app-plant-view-csp-ptc v-if="isCspPtc" :plant="plant" />
   </div>
 </template>
 
