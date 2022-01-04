@@ -4,8 +4,8 @@
       <b-row class="justify-content-md-center">
         <b-col cols="12" md="auto">
           <img
-            src="/images/logos/logo_default.svg"
-            srcset="/images/logos/logo_default.svg, /images/logos/logo_default.webp, /images/logos/logo_default.png"
+            src="/images/logos/logo_default.png"
+            srcset="/images/logos/logo_default.webp, /images/logos/logo_default.svg, /images/logos/logo_default.png"
             alt="Volateq"
             class="logo-img"
           />
