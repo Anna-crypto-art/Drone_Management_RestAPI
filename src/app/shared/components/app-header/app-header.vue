@@ -4,8 +4,8 @@
       <router-link :to="{ name: 'Home' }">
         <img
           class="app-header-logo float-left"
-          src="/logos/logo_white.webp"
-          srcset="/logos/logo_white.webp, /logos/logo_white.png"
+          src="/images/logos/logo_white.webp"
+          srcset="/images/logos/logo_white.webp, /images/logos/logo_white.png"
           alt="volateq"
         />
       </router-link>

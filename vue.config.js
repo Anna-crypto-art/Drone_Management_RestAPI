@@ -1,3 +1,5 @@
+const inProduction = process.env.ENV === "production";
+
 /**
  * @type {import('@vue/cli-service').ProjectOptions}
  */
@@ -13,12 +15,14 @@ module.exports = {
     // headers: { "Access-Control-Allow-Origin": "*" }
   },
   configureWebpack: {
-    mode: process.env.ENV === "production" ? "production" : "development",
-    optimization: {
-      minimize: true,
-      usedExports: true,
-      concatenateModules: true,
-    },
+    mode: inProduction ? "production" : "development",
+    optimization: inProduction // Only apply when in production
+      ? {
+          minimize: true,
+          usedExports: true,
+          concatenateModules: true,
+        }
+      : undefined,
     output: {
       hashFunction: "sha256",
     },

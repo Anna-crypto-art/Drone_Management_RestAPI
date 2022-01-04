@@ -6,8 +6,8 @@
   >
     <div class="page-not-found">
       <img
-        src="/brdrone.webp"
-        srcset="/brdrone.webp, /brdrone.png"
+        src="/images/brdrone.webp"
+        srcset="/images/brdrone.webp, /images/brdrone.png"
         alt="page not found"
       />
     </div>
