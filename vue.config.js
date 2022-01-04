@@ -4,6 +4,7 @@ const inProduction = process.env.ENV === "production";
  * @type {import('@vue/cli-service').ProjectOptions}
  */
 module.exports = {
+  css: { extract: true },
   devServer: {
     proxy: {
       "^/api": {
