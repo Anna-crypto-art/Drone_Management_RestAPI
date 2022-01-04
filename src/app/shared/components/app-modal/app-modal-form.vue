@@ -6,7 +6,7 @@
         <div v-if="subtitle" v-html="subtitle" class="app-modal-form-title-subtitle grayed"></div>
       </div>
     </template>
-    <b-alert v-model="showAlert" variant="danger" v-html="alertMsg" class="app-modal-form-alert" dismissible></b-alert>
+    <b-alert v-model="showAlert" :variant="alertVariant" v-html="alertMsg" class="app-modal-form-alert" dismissible></b-alert>
     <form @submit="onSubmit">
       <slot></slot>
     </form>
@@ -37,6 +37,7 @@ export default class AppModalForm extends Vue implements IAppModalForm {
   
   showAlert = false;
   alertMsg = "";
+  alertVariant = "default";
 
   show() {
     this.$bvModal.show(this.id || "");
@@ -47,6 +48,7 @@ export default class AppModalForm extends Vue implements IAppModalForm {
   }
 
   alertError(msg: string | any) {
+    this.alertVariant = "danger";
     this.showAlert = true;
 
     console.error(msg)
@@ -59,6 +61,12 @@ export default class AppModalForm extends Vue implements IAppModalForm {
         this.alertMsg += "<br><small>Details: " + msg.details + "</small>";
       }
     }
+  }
+
+  alertInfo(msg: string) {
+    this.alertVariant = "primary";
+    this.showAlert = true;
+    this.alertMsg = msg;
   }
 
   onSubmit(e: Event) {

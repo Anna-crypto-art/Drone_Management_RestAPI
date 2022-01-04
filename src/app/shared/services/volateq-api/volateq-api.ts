@@ -194,8 +194,8 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/analysis-result/${analysisResultId}/files`);
   }
 
-  public deleteAnalysisResultFile(analysisResultId: string, analysisResultFileId: string): Promise<{ results_deleted: number }> {
-    return this.delete(`/auth/analysis-result/${analysisResultId}/file/${analysisResultFileId}`);
+  public deleteAnalysisResult(analysisResultId: string): Promise<{ results_deleted: number }> {
+    return this.delete(`/auth/analysis-result/${analysisResultId}`);
   }
 
   public async resendSecurityCode(confirmationKey: string): Promise<void> {
@@ -226,12 +226,23 @@ export class VolateqAPI extends HttpClientBase {
     return this.postForm(`/auth/fieldgeometry/${customerId}/${plantId}?clear_before=${clearBefore}`, { file });
   }
 
-  public waitForTask(taskId: string, finished: (task: TaskSchema) => void): void {
+  public waitForTask(taskId: string, finished: (task: TaskSchema) => void, info?: (infoMessage: string) => void): void {
     const interval = setInterval(async () => {
       const task = await this.getTask(taskId);
       if (task.state === "SUCCESS" || task.state === "FAILURE") {
         clearInterval(interval);
         finished(task);
+      } else {
+        if (info) {
+          const infoMessage = task.state + (
+            task.info && task.info.infos && task.info.infos.length > 0
+            && "<br>" + task.info.infos.join("<br>") + (
+              task.info.max_steps && `... (${task.info.current_step}/${task.info.max_steps})`
+              || "..."
+            )
+          )
+          info(infoMessage)
+        }
       }
     }, 3000);
   }
