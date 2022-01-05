@@ -1,6 +1,6 @@
-import { AnalysisResultCspPtcSchemaBase } from "./analysis-result-csp-ptc-schema-base";
+import { AnalysisResultSchemaBase } from "./analysis-result-schema-base";
 
-export interface AnalysisResultCspPtcHceSchema extends AnalysisResultCspPtcSchemaBase {
+export interface AnalysisResultCspPtcHceSchema extends AnalysisResultSchemaBase {
     ir_intensity: number;
     htf_temperature: number;
     timestamp: string;
@@ -14,4 +14,6 @@ export interface AnalysisResultCspPtcHceSchema extends AnalysisResultCspPtcSchem
     recommended_action_class: number;
     glass_tube_temperature_class: number;
     sca_tracking_angle: number;
+    oxygen_penetration: boolean;
+    glass_tube_temperature_class_limits: number[];
 }

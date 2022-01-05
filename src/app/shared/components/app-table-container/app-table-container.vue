@@ -1,5 +1,9 @@
 <template>
-  <div :class="'app-table-container ' + (size ? `app-table-container-${size}` : '')">
+  <div
+    :class="
+      'app-table-container ' + (size ? `app-table-container-${size}` : '')
+    "
+  >
     <slot></slot>
   </div>
 </template>
@@ -10,7 +14,7 @@ import { Component, Prop } from "vue-property-decorator";
 
 @Component
 export default class AppTableContainer extends Vue {
-  @Prop({ default: '' }) size!: '' | 'sm';
+  @Prop({ default: "" }) size!: "" | "sm";
 }
 </script>
 
@@ -20,15 +24,13 @@ export default class AppTableContainer extends Vue {
   overflow-x: auto;
 
   &-sm {
-    font-size: .8rem;
-    
+    font-size: 0.8rem;
+
     .b-table {
       td {
-        padding: .5rem;
-      }  
+        padding: 0.5rem;
+      }
     }
   }
-
 }
-
 </style>
