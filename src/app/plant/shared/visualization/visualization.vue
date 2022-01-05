@@ -1,9 +1,22 @@
 <template>
   <div class="visualization">
-    <app-geovisualization ref="openLayers" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick" @sidebarToggle="onSidebarToggled">
+    <app-geovisualization
+      ref="openLayers"
+      v-if="hasLayers"
+      :layers="layers"
+      @click="onOpenLayersClick"
+      @sidebarToggle="onSidebarToggled"
+    >
       <template #topContent>
-        <b-form-checkbox v-model="enableMultiSelection" switch @change="onMultiSelectionChanged">
-          {{ $t("multi-selection") }} <app-explanation>{{ $t("multi-selection-overlapping_expl") }}</app-explanation>
+        <b-form-checkbox
+          v-model="enableMultiSelection"
+          switch
+          @change="onMultiSelectionChanged"
+        >
+          {{ $t("multi-selection") }}
+          <app-explanation>{{
+            $t("multi-selection-overlapping_expl")
+          }}</app-explanation>
         </b-form-checkbox>
       </template>
 
@@ -14,23 +27,45 @@
         </template>
       </template>
     </app-geovisualization>
+
     <div v-if="hasLegend" class="visualization-legend">
-      <div v-for="entry in legendEntries" :key="entry.color" class="visualization-legend-entry">
-        <div class="visualization-legend-entry-color" :style="`background: ${entry.color}`"></div>
+      <div
+        v-for="entry in legendEntries"
+        :key="entry.color"
+        class="visualization-legend-entry"
+      >
+        <div
+          class="visualization-legend-entry-color"
+          :style="`background: ${entry.color}`"
+        ></div>
         <div class="visualization-legend-entry-name" v-html="entry.name"></div>
       </div>
     </div>
-    <b-toast id="piInfoToast" no-auto-hide solid toaster="b-toaster-bottom-center">
+    <b-toast
+      id="piInfoToast"
+      no-auto-hide
+      solid
+      toaster="b-toaster-bottom-center"
+    >
       <template #toast-title>
         <h3>{{ piToastInfo.title }}</h3>
       </template>
       <div>
         <div class="toaster-images" v-if="piToastInfo.images">
-          <img v-for="image in piToastInfo.images" :key="image.title" :title="image.title" :src="image.url" />
+          <img
+            v-for="image in piToastInfo.images"
+            :key="image.title"
+            :title="image.title"
+            :src="image.url"
+          />
         </div>
-        <b-row v-for="featureInfo in piToastInfo.records" :key="featureInfo.name" :class="featureInfo.bold && 'font-weight-bold'">
+        <b-row
+          v-for="featureInfo in piToastInfo.records"
+          :key="featureInfo.name"
+          :class="featureInfo.bold && 'font-weight-bold'"
+        >
           <b-col>
-            {{ featureInfo.name }} 
+            {{ featureInfo.name }}
             <app-explanation v-if="featureInfo.descr">
               <span v-html="$t(featureInfo.descr)"></span>
             </app-explanation>
@@ -43,44 +78,58 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref } from 'vue-property-decorator';
-import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
-import { AnalysisResultDetailedSchema } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-schema';
-import { ComponentLayer } from './layers/component-layer';
-import { IAnalysisResultSelection } from '../types';
+import { Component, Prop, Ref } from "vue-property-decorator";
+import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
+import { ComponentLayer } from "./layers/component-layer";
+import { IAnalysisResultSelection } from "../types";
 import { FeatureLike } from "ol/Feature";
-import AppExplanation from '@/app/shared/components/app-explanation/app-explanation.vue';
-import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
-import { IPlantVisualization, Legend, FeatureInfos, KeyFigureTypeMap } from "@/app/plant/shared/visualization/types";
+import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import {
+  IPlantVisualization,
+  Legend,
+  FeatureInfos,
+  KeyFigureTypeMap
+} from "@/app/plant/shared/visualization/types";
 import { PILayersHierarchy } from "@/app/plant/shared/visualization/pi-layers-hierarchy";
 import AppGeovisualization from "@/app/shared/components/app-geovisualization/app-geovisualization.vue";
-import { IOpenLayersComponent } from '@/app/shared/components/app-geovisualization/types/components';
-import { GroupLayer, LayerType } from '@/app/shared/components/app-geovisualization/types/layers';
-
+import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualization/types/components";
+import {
+  GroupLayer,
+  LayerType
+} from "@/app/shared/components/app-geovisualization/types/layers";
 
 @Component({
-  name: 'app-visualization',
+  name: "app-visualization",
   components: {
     AppGeovisualization,
     AppExplanation
   }
 })
-export default class AppVisualization extends BaseAuthComponent implements IAnalysisResultSelection, IPlantVisualization {
+export default class AppVisualization extends BaseAuthComponent
+  implements IAnalysisResultSelection, IPlantVisualization {
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
-  @Prop() componentLayerTypes!: (typeof ComponentLayer)[];
+  @Prop() componentLayerTypes!: typeof ComponentLayer[];
   @Prop() keyFigureLayers!: KeyFigureTypeMap[];
 
   @Ref() openLayers!: IOpenLayersComponent;
 
-  selectedAnalysisResult: AnalysisResultDetailedSchema | null | undefined = null;
+  selectedAnalysisResult:
+    | AnalysisResultDetailedSchema
+    | null
+    | undefined = null;
 
   piLayersHierarchy!: PILayersHierarchy;
   componentLayers: ComponentLayer[] = [];
   layers: LayerType[] = [];
   showPCS = false;
   legends: Legend[] = [];
-  piToastInfo: FeatureInfos = { title: "", records: [{ name: "", descr: "", value: "" }] };
+  piToastInfo: FeatureInfos = {
+    title: "",
+    records: [{ name: "", descr: "", value: "" }]
+  };
   enableMultiSelection = false;
 
   private waitForDom = false;
@@ -89,17 +138,21 @@ export default class AppVisualization extends BaseAuthComponent implements IAnal
     this.createLayers();
 
     // wait for DOM before render OpenLayers
-    setTimeout(() => { this.waitForDom = true; }, 300);
+    setTimeout(() => {
+      this.waitForDom = true;
+    }, 300);
   }
 
   selectAnalysisResult(analysisResultId: string | undefined): void {
-    this.selectedAnalysisResult = this.analysisResults.find(analysisResult => analysisResult.id === analysisResultId);
-    
+    this.selectedAnalysisResult = this.analysisResults.find(
+      analysisResult => analysisResult.id === analysisResultId
+    );
+
     this.piLayersHierarchy.setVisibility(this.selectedAnalysisResult?.id);
 
     this.hideToast();
   }
-  
+
   get hasLayers(): boolean {
     return this.layers.length > 0 && this.waitForDom;
   }
@@ -108,16 +161,18 @@ export default class AppVisualization extends BaseAuthComponent implements IAnal
     return this.legends.length > 0;
   }
 
-  get legendEntries(): { color: string, name: string }[] {
-    const legendEntries: { color: string, name: string }[] = [];
+  get legendEntries(): { color: string; name: string }[] {
+    const legendEntries: { color: string; name: string }[] = [];
     for (const legend of this.legends) {
       for (const entry of legend.entries) {
-        if (!legendEntries.find(legendEntry => legendEntry.color === entry.color)) {
+        if (
+          !legendEntries.find(legendEntry => legendEntry.color === entry.color)
+        ) {
           legendEntries.push(entry);
         }
       }
     }
-    
+
     return legendEntries;
   }
 
@@ -180,8 +235,14 @@ export default class AppVisualization extends BaseAuthComponent implements IAnal
   }
 
   private createLayers(): void {
-    this.componentLayers = this.componentLayerTypes.map(componentType => new (componentType as any)(this));
-    this.piLayersHierarchy = new PILayersHierarchy(this, this.analysisResults, this.keyFigureLayers);
+    this.componentLayers = this.componentLayerTypes.map(
+      componentType => new (componentType as any)(this)
+    );
+    this.piLayersHierarchy = new PILayersHierarchy(
+      this,
+      this.analysisResults,
+      this.keyFigureLayers
+    );
 
     this.layers.push(
       {
@@ -191,28 +252,36 @@ export default class AppVisualization extends BaseAuthComponent implements IAnal
         singleSelection: true
       },
       {
-        name: this.$t('components').toString(),
+        name: this.$t("components").toString(),
         type: "group",
-        childLayers: this.componentLayers.map(compLayer => compLayer.toGeoLayer()),
+        childLayers: this.componentLayers.map(compLayer =>
+          compLayer.toGeoLayer()
+        )
       },
       {
         name: "pcs",
         type: "custom",
-        customLoader: () => { return; },
-        onSelected: (selected: boolean) => { 
+        customLoader: () => {
+          return;
+        },
+        onSelected: (selected: boolean) => {
           this.showPCS = selected;
 
-          this.piLayersHierarchy.getAllChildLayers().forEach(kpiLayer => kpiLayer.showPCS(selected));
-          this.componentLayers.forEach(compLayer => compLayer.showPCS(selected));
+          this.piLayersHierarchy
+            .getAllChildLayers()
+            .forEach(kpiLayer => kpiLayer.showPCS(selected));
+          this.componentLayers.forEach(compLayer =>
+            compLayer.showPCS(selected)
+          );
         },
         selected: false,
-        styleClass: "margin-top",
+        styleClass: "margin-top"
       },
       {
-        name: this.$t('world-map').toString(),
+        name: this.$t("world-map").toString(),
         type: "osm",
-        selected: true,
-      },
+        selected: true
+      }
     );
   }
 
@@ -223,8 +292,8 @@ export default class AppVisualization extends BaseAuthComponent implements IAnal
 </script>
 
 <style lang="scss">
-@import '@/scss/_colors.scss';
-@import '@/scss/_variables.scss';
+@import "@/scss/_colors.scss";
+@import "@/scss/_variables.scss";
 
 // Fix that toaster overlays popover
 .b-popover {
@@ -285,7 +354,9 @@ export default class AppVisualization extends BaseAuthComponent implements IAnal
 }
 
 .toaster-images {
-  img { max-width: calc(500px - 1.5rem); }
+  img {
+    max-width: calc(500px - 1.5rem);
+  }
   margin-bottom: 0.75rem;
 }
 </style>

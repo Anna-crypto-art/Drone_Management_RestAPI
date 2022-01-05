@@ -90,16 +90,15 @@ export default class AppAnalysisSelectionSidebar extends Vue {
     if (this.analysisResults.length > 0) {
       let tableRowIndex = 0;
       const analysisResultId = this.$route.query.result;
+
       if (analysisResultId && typeof analysisResultId === "string") {
         tableRowIndex = this.analysisResults.findIndex(
           analysisResult => analysisResult.id === analysisResultId
         );
       }
 
-      setTimeout(
-        () => this.analysisResultsTable.selectRow(tableRowIndex),
-        1000
-      ); // wait for DOM
+      await this.$nextTick();
+      this.analysisResultsTable.selectRow(tableRowIndex);
     }
   }
 
@@ -135,10 +134,15 @@ $left-width: 400px;
   display: flex;
 
   &-leftside {
-    padding: 20px;
+    padding: 0.5em;
+    padding-top: 40px;
     height: 100%;
     width: $left-width;
     border-right: $border-color-grey 1px solid;
+
+    .app-table-container {
+      margin-top: 0;
+    }
   }
   &-kpi-badge {
     padding-right: 5px;

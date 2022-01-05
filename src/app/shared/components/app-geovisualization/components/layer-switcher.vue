@@ -1,14 +1,17 @@
 <template>
   <div :class="'layer-switcher' + (open ? ' open' : '')">
+    <app-geovisual-toggle-layer :isOpen="sidebarOpen" :toggle="toggle" />
+
     <div class="content">
       <div class="content-top">
-        <slot name="topContent"></slot>
+        <slot name="topContent" />
       </div>
+
       <app-geovisual-layer-display :layer="rootLayer">
         <!-- Pass slots through -->
         <template v-for="(_, slot) in $slots">
           <template :slot="slot">
-            <slot :name="slot"></slot>
+            <slot :name="slot" />
           </template>
         </template>
       </app-geovisual-layer-display>
@@ -20,18 +23,20 @@
 import { Map } from "ol";
 import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
-import { LoadingEvent } from "../types/events";
 import { LayerStructure } from "../layer-structure";
-import { OSMLoader } from "../loader/osm-loader";
-import { GeoJSONLoader } from "../loader/geojson-loader";
 import { CustomLoader } from "../loader/custom-loader";
-import AppGeovisualLayerDisplay from "./layer-display.vue";
+import { GeoJSONLoader } from "../loader/geojson-loader";
+import { OSMLoader } from "../loader/osm-loader";
+import { LoadingEvent } from "../types/events";
 import { LayerType } from "../types/layers";
+import AppGeovisualLayerDisplay from "./layer-display.vue";
+import AppGeovisualToggleLayer from "./toggle-layer.vue";
 
 @Component({
   name: "app-geovisual-layer-switcher",
   components: {
-    AppGeovisualLayerDisplay
+    AppGeovisualLayerDisplay,
+    AppGeovisualToggleLayer
   }
 })
 export default class AppGeovisualLayerSwitcher extends Vue {
@@ -48,21 +53,21 @@ export default class AppGeovisualLayerSwitcher extends Vue {
   @Prop() map!: Map;
   @Prop() layers!: LayerType[];
   @Prop({ default: "" }) title = "";
-  @Prop() layerIdx?: (idx: number) => void;
+  @Prop() sidebarOpen!: boolean;
+
+  readonly layerIndex: number;
+  readonly rootLayer = new LayerStructure();
+
+  constructor() {
+    super();
+
+    this.layerIndex = AppGeovisualLayerSwitcher.layerUIs.length;
+    AppGeovisualLayerSwitcher.layerUIs[this.layerIndex] = this;
+  }
 
   mounted(): void {
     this.layerSetup(this.rootLayer, this.layers);
-    this.layerIdx && this.layerIdx(this.layerIndex);
   }
-  readonly layerIndex = (() => {
-    const id = AppGeovisualLayerSwitcher.layerUIs.length;
-    AppGeovisualLayerSwitcher.layerUIs[id] = this;
-    return id;
-  })();
-
-  readonly rootLayer = new LayerStructure();
-  open = true;
-
 
   private layerSetup(parentLayer: LayerStructure, layers: LayerType[]) {
     const setLoadigState = (e: LoadingEvent) => {
@@ -70,7 +75,7 @@ export default class AppGeovisualLayerSwitcher extends Vue {
     };
 
     for (const layer of layers) {
-      const name = layer.name
+      const name = layer.name;
 
       switch (layer.type) {
         case "osm": {
@@ -122,52 +127,38 @@ export default class AppGeovisualLayerSwitcher extends Vue {
   }
 
   public toggle(): void {
-    this.open = !this.open;
-    this.$forceUpdate(); // VUE why?, in React this would be: this.setState(state => ({open: !state.open}))
+    this.sidebarOpen = !this.sidebarOpen;
+    this.$forceUpdate(); // Why vue?
 
-    this.$emit("sidebarToggle", this.open);
+    this.$emit("sidebarToggle", this.sidebarOpen);
   }
 
   public isOpen(): boolean {
-    return this.open;
+    return this.sidebarOpen;
   }
 }
 </script>
 
 <style lang="scss">
+@import "@/scss/_colors.scss";
+
 $sidebar-width: 400px;
 
 .layer-switcher {
-  flex: 0 0 0;
-  width: 0;
-
-  box-sizing: content-box;
+  position: absolute;
+  right: -$sidebar-width;
+  top: 0;
+  height: 100%;
+  width: $sidebar-width;
+  padding: 20px;
 
   background: white;
-  overflow-x: hidden;
 
-  box-shadow: 0 0 5px lightgray;
-
-  $animation: 0.2s ease-in-out;
-  transition: flex-basis $animation;
-
-  > * {
-    margin: 10px;
-  }
+  transition: right 0.2s ease-in-out;
+  border-left: $border-color-grey 1px solid;
 
   &.open {
-    flex-basis: $sidebar-width;
-  }
-
-  .content {
-    margin-top: 20px;
-    margin-left: -20px;
-    width: $sidebar-width;
-
-    .content-top {
-      padding-left: 40px;
-    }
+    right: 0;
   }
 }
-
 </style>

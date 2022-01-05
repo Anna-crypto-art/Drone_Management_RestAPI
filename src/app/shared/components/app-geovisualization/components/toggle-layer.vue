@@ -1,54 +1,40 @@
 <template>
-  <div class="layer-switcher-toggle">
-    <b-button class="toggle-button btn-sm" @click="toggleLayerSwitcher()">
-      <b-icon :icon="'arrow-bar-' + (isLayerSwitcherOpen ? 'right' : 'left')"></b-icon>
-    </b-button>
-  </div>
+  <b-button
+    :class="
+      'toggle-button btn-sm layer-sidebar-toggle opens-left ' +
+        (isOpen ? 'show-label' : '')
+    "
+    @click="toggleLayerSwitcher()"
+  >
+    <span class="toggle-button-text">{{ $t("layers") }} &nbsp;</span>
+    <b-icon :icon="isOpen ? 'layers-half' : 'layers'"></b-icon>
+  </b-button>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
-import Map from "ol/Map";
-import { CustomControl } from "../custom-ol-control";
-import AppGeovisualLayerSwitcher from "./layer-switcher.vue";
 
 @Component({
   name: "app-geovisual-toggle-layer"
 })
 export default class AppGeovisualToggleLayer extends Vue {
-  @Prop() layerIndex!: number;
-  @Prop() map!: Map;
-
-  mounted(): void {
-    const layerToggle = new CustomControl(this.$el as HTMLElement);
-    this.map.addControl(layerToggle);
-  }
+  @Prop() isOpen!: number;
+  @Prop() toggle!: () => void;
 
   toggleLayerSwitcher(): void {
-    AppGeovisualLayerSwitcher.toggle(this.layerIndex);
-  }
-
-  get isLayerSwitcherOpen(): boolean {
-    return AppGeovisualLayerSwitcher.isOpen(this.layerIndex)
+    this.toggle();
   }
 }
 </script>
 
 <style lang="scss">
-.layer-switcher-toggle {
-  pointer-events: all;
-  position: absolute;
-  right: 0;
+button.layer-sidebar-toggle {
   top: 0.5em;
-
-  .toggle-button {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-  }
 
   &-content {
     padding: 10px;
+
     .layer-sublayers {
       padding-left: 10px;
     }

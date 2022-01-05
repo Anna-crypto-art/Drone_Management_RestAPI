@@ -13,9 +13,11 @@
       <h2 :class="'plant-view-csp-ptc-title ' + (sidebarOpen ? 'open' : '')">
         {{ plant.name }}
       </h2>
-      <b-tabs align="center" @activate-tab="onTabChanged">
+      <b-tabs align="center">
         <b-tab>
-          <template #title><b-icon icon="map"/></template>
+          <template #title>
+            <b-icon icon="map"/>
+            </template>
           <app-visual-csp-ptc
             ref="visualCspPtc"
             :analysisResults="analysisResults"
@@ -170,10 +172,6 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
     this.rerenderOLCanvas(300);
   }
 
-  onTabChanged(tabIndex: number): void {
-    this.rerenderOLCanvas();
-  }
-
   private rerenderOLCanvas(timeout = 0): void {
     setTimeout(() => {
       // triggers openlayers canvas element to rerender
@@ -202,16 +200,11 @@ $left-width: 400px;
   &-title {
     position: relative;
     z-index: 100;
-    transition: transform 0.3s ease-in-out;
     font-size: 1.5rem;
     display: block;
     position: absolute;
     top: 0.3em;
     left: 0.5em;
-
-    &.open {
-      transform: translateX(0.5em) translateY(0.2em);
-    }
   }
 
   &-rightside {

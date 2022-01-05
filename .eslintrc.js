@@ -28,7 +28,8 @@ module.exports = {
   },
   plugins: ["vue"],
   rules: {
-    "no-console": "off",
+    "no-console": "warn",
+    "no-debugger": "warn",
     "@typescript-eslint/indent": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off"
   }
