@@ -1,5 +1,5 @@
 <template>
-  <div :class="'layer-switcher' + (open ? ' open' : '')">
+  <div :class="'layer-switcher' + (sidebarOpen ? ' open' : '')">
     <app-geovisual-toggle-layer :isOpen="sidebarOpen" :toggle="toggle" />
 
     <div class="content">
