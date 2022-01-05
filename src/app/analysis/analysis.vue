@@ -85,12 +85,10 @@
         :subtitle="$t('manage-result-files_descr')"
         :ok-title="$t('apply')"
         @submit="saveManageResultFiles">
-        <b-form-group v-show="manageImportFiles.analysisResultId" :label="$t('remove-result-files')">
-          <b-form-checkbox-group
-            id="remove-result-files-checkbox-group"
-            v-model="manageImportFiles.selectedResultFilesToRemove"
-            :options="manageImportFiles.existingFilesOptions">
-          </b-form-checkbox-group>
+        <b-form-group v-show="manageImportFiles.analysisResultId">
+          <b-form-checkbox id="removeAllAnalysisResultFiles" v-model="manageImportFiles.removeAllAnalysisResultFiles">
+            {{ $t('remove-result-files') }}
+          </b-form-checkbox>
         </b-form-group>
         <b-form-group :label="$t('select-json-result-file-import')">
           <b-form-file v-model="manageImportFiles.jsonFile" accept=".json"></b-form-file>
@@ -154,11 +152,10 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
   manageImportFiles: {
     analysisId?: string,
     analysisResultId?: string,
-    existingFilesOptions: { text: string, value: string }[],
-    selectedResultFilesToRemove: string[],
+    removeAllAnalysisResultFiles: boolean,
     jsonFile?: File,
     imageFiles?: File[],
-  } = { analysisResultId: "", existingFilesOptions: [], selectedResultFilesToRemove: [] };
+  } = { analysisResultId: "", removeAllAnalysisResultFiles: false };
 
 
   async created() {
@@ -263,15 +260,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     this.manageImportFiles.analysisResultId = analysisRowItem.analysisResultId;
     
     // clear arrays but keep the references
-    this.manageImportFiles.existingFilesOptions.length = 0;
-    this.manageImportFiles.selectedResultFilesToRemove.length = 0;
-
-    if (this.manageImportFiles.analysisResultId) {
-      const analysisResultFiles = await volateqApi.getAnalysisResultFiles(this.manageImportFiles.analysisResultId);
-      for (const analysisResultFile of analysisResultFiles) {
-        this.manageImportFiles.existingFilesOptions.push({ text: analysisResultFile.filename, value: analysisResultFile.id });
-      }
-    }
+    this.manageImportFiles.removeAllAnalysisResultFiles = false;
 
     this.appManageResultFilesModal.show();
   }
@@ -288,10 +277,8 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
         this.updateAnalysisRows()
       }
 
-      if (this.manageImportFiles.analysisResultId && this.manageImportFiles.selectedResultFilesToRemove.length > 0) {
-        for (const analysisResultFileId of this.manageImportFiles.selectedResultFilesToRemove) {
-          await volateqApi.deleteAnalysisResultFile(this.manageImportFiles.analysisResultId, analysisResultFileId);
-        }
+      if (this.manageImportFiles.analysisResultId && this.manageImportFiles.removeAllAnalysisResultFiles) {
+        await volateqApi.deleteAnalysisResult(this.manageImportFiles.analysisResultId);
       }
 
       if (this.manageImportFiles.jsonFile) {
@@ -301,17 +288,21 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
           this.manageImportFiles.imageFiles
         );
 
-        volateqApi.waitForTask(task.id, (task) => {
-          appButtonEventBus.stopLoading();
+        volateqApi.waitForTask(
+          task.id,
+          (task) => {
+            appButtonEventBus.stopLoading();
 
-          if (task.state === 'SUCCESS') {
-            successfullyFinished();
-          } else if (task.state === 'FAILURE') {
-            this.appManageResultFilesModal.alertError({ error: ApiErrors.SOMETHING_WENT_WRONG, details: task.result });
-          } else {
-            this.appManageResultFilesModal.alertError({ error: "UNEXPECTED_TASK_STATE", details: task.state + ". " + task.result });
+            if (task.state === 'SUCCESS') {
+              successfullyFinished();
+            } else if (task.state === 'FAILURE') {
+              this.appManageResultFilesModal.alertError({ error: ApiErrors.SOMETHING_WENT_WRONG, details: task.result });
+            }
+          },
+          (info) => {
+            this.appManageResultFilesModal.alertInfo(info);
           }
-        });
+        );
       } else {
         successfullyFinished();
       }

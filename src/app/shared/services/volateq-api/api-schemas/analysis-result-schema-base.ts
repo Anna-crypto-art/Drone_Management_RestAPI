@@ -1,6 +1,6 @@
 import { FieldgeometryComponentSchema } from "./fieldgeometry-component-schema";
 
-export interface AnalysisResultCspPtcSchemaBase {
+export interface AnalysisResultSchemaBase {
   id: string;
   fieldgeometry_component: FieldgeometryComponentSchema;
 }

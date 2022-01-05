@@ -1,20 +1,21 @@
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { LayerBase } from "../../shared/layer-base";
+import { LayerBase } from "./layer-base";
 import { FeatureLike } from "ol/Feature";
-import { AnalysisResultCspPtcSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-schema-base";
-import { FeatureInfo, FeatureInfos, FeatureProperties, KeyFigureInfo, Legend, QueryColor } from "./types";
-import apiResultsLoader from "@/app/shared/services/volateq-api/api-results-loader";
-import { AnalysisResultCspPtcMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
-import { AnalysisResultCspPtcMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-csp-ptc-mapping-helper";
+import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
+import { KeyFigureColors, KeyFigureInfo } from "./types";
+import { FeatureInfo, FeatureInfos, FeatureProperties, Legend, IPlantVisualization } from "../types";
+import { AnalysisResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
+import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
 import Vue from "vue";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
-import { IPlantVisualization } from "../../types";
 import { AnalysisResultKeyFigure } from "@/app/shared/services/volateq-api/api-analysis-result-key-figures";
+import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
+import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 
 
-export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> extends LayerBase {
-  protected abstract readonly analysisResultMapping: AnalysisResultCspPtcMappings<T>;
+export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends LayerBase {
+  protected abstract readonly analysisResultMapping: AnalysisResultMappings<T>;
   protected readonly name: string;
 
   protected geoJSON?: { 
@@ -28,7 +29,8 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
     public readonly analysisResult: AnalysisResultDetailedSchema,
     protected readonly keyFigureId: AnalysisResultKeyFigure,
     public readonly keyFigureInfo: KeyFigureInfo,
-    protected readonly queryColor?: QueryColor,
+    protected readonly query?: GeoVisualQuery,
+    protected readonly color?: KeyFigureColors,
   ) {
     super(vueComponent);
 
@@ -61,7 +63,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
   }
 
   protected mapResultToFeatureInfos(result: T): FeatureInfos | undefined {
-    const mappingHelper = new AnalysisResultCspPtcMappingHelper(this.analysisResultMapping, this.analysisResult!);
+    const mappingHelper = new AnalysisResultMappingHelper(this.analysisResultMapping, this.analysisResult!);
     const record = mappingHelper.getItem(result)
 
     const featureInfos: FeatureInfos = {
@@ -82,13 +84,17 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
     return feature.getProperties() as FeatureProperties;
   }
 
+  protected getMoreSpecificAnalysisResultParams(): TableRequest {
+    return {};
+  }
+
   protected async getResultDetails(feature: FeatureLike): Promise<T | undefined> {
     const pcs = this.getPcs(feature);
 
     const results = await volateqApi.getSpecificAnalysisResult(
       this.analysisResult!.id,
       this.keyFigure.component.id,
-      { filter: pcs, limit: 1 }
+      { filter: pcs, limit: 1, filter_mode: 'equals', ...this.getMoreSpecificAnalysisResultParams() }
     );
 
     if (results.items.length > 0) {
@@ -111,7 +117,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultCspPtcSchemaBase> e
       this.vueComponent.plant.id, 
       this.analysisResult.id,
       this.keyFigure.id,
-      this.queryColor?.query
+      this.query
     );
 
     return this.geoJSON as Record<string, unknown>;

@@ -1,13 +1,11 @@
-import { BvTableFieldArray } from "bootstrap-vue";
-import { AnalysisResultCspPtcSchemaBase } from "../api-schemas/analysis-result-csp-ptc-schema-base";
+import { AnalysisResultSchemaBase } from "../api-schemas/analysis-result-schema-base";
 import { AnalysisResultDetailedSchema } from "../api-schemas/analysis-result-schema";
-import { AnalysisResultCspPtcMappingEntry, AnalysisResultCspPtcMappings, BvTableFieldExtArray } from "./types";
+import { AnalysisResultMappingEntry, AnalysisResultMappings, BvTableFieldExtArray } from "./types";
 import VueI18n from "vue-i18n";
-import { AnalysisResultKeyFigure } from "../api-analysis-result-key-figures";
 
-export class AnalysisResultCspPtcMappingHelper<T extends AnalysisResultCspPtcSchemaBase> {
+export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
   constructor(
-    private readonly analysisResultMapping: AnalysisResultCspPtcMappings<T>,
+    private readonly analysisResultMapping: AnalysisResultMappings<T>,
     private readonly analysisResult: AnalysisResultDetailedSchema,
   ) {}
 
@@ -60,12 +58,12 @@ export class AnalysisResultCspPtcMappingHelper<T extends AnalysisResultCspPtcSch
     return columnsMapping;
   }
 
-  public hasKeyFigure(mappingEntry: AnalysisResultCspPtcMappingEntry<T>): boolean {
+  public hasKeyFigure(mappingEntry: AnalysisResultMappingEntry<T>): boolean {
     return mappingEntry.keyFigureId === undefined || 
       !!this.analysisResult.key_figures.find(keyFigure => keyFigure.id === mappingEntry.keyFigureId)
   }
 
-  public getPropertyName(mappingEntry: AnalysisResultCspPtcMappingEntry<T>): string {
+  public getPropertyName(mappingEntry: AnalysisResultMappingEntry<T>): string {
     return mappingEntry.getValue.toString().match(/({|=>)[^.]*\.([^;]*)/)![2];
   }
 }

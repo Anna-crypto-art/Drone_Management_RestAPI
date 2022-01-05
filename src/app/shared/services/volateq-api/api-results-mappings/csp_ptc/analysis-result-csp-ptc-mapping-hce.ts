@@ -1,10 +1,10 @@
-import { AnalysisResultKeyFigure } from "../api-analysis-result-key-figures";
-import { AnalysisResultCspPtcHceSchema } from "../api-schemas/analysis-result-csp-ptc-hce-schema";
-import analysisResultCspPtcMappingBase from "./analysis-result-csp-ptc-mapping-base";
-import { AnalysisResultCspPtcMappings } from "./types";
+import { AnalysisResultKeyFigure } from "../../api-analysis-result-key-figures";
+import { AnalysisResultCspPtcHceSchema } from "../../api-schemas/analysis-result-csp-ptc-hce-schema";
+import analysisResultMappingBase from "../analysis-result-mapping-base";
+import { AnalysisResultMappings } from "../types";
 
-const analysisResultCspPtcMappingHce: AnalysisResultCspPtcMappings<AnalysisResultCspPtcHceSchema> = [
-  ...analysisResultCspPtcMappingBase,
+const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPtcHceSchema> = [
+  ...analysisResultMappingBase,
   {
     getValue: r => r.htf_temperature,
     transName: "absorber-temperature",
@@ -55,10 +55,10 @@ const analysisResultCspPtcMappingHce: AnalysisResultCspPtcMappings<AnalysisResul
     keyFigureId: AnalysisResultKeyFigure.MISSING_GLASS_TUBE_ID,
   },
   {
-    getValue: r => r.coating_degraded,
+    getValue: r => r.oxygen_penetration,
     transName: "oxygen-penetration",
     transDescr: "oxygen-penetration_expl",
-    keyFigureId: AnalysisResultKeyFigure.COATING_DEGRADATION_ID,
+    keyFigureId: AnalysisResultKeyFigure.OXYGEN_PENETRATION_ID,
   },
   {
     getValue: r => r.h2_concentration,
@@ -71,6 +71,11 @@ const analysisResultCspPtcMappingHce: AnalysisResultCspPtcMappings<AnalysisResul
     transName: "recommended-action",
     transDescr: "recommended-action_expl",
     keyFigureId: AnalysisResultKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID,
+  },
+  {
+    getValue: r => r.glass_tube_temperature_class_limits,
+    transName: "glass-tube-temperature-class-limits",
+    keyFigureId: AnalysisResultKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
   }
 ];
 

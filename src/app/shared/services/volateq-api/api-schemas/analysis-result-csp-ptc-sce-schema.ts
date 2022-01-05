@@ -1,10 +1,8 @@
-import { AnalysisResultCspPtcSchemaBase } from "./analysis-result-csp-ptc-schema-base";
+import { AnalysisResultSchemaBase } from "./analysis-result-schema-base";
 
-export interface AnalysisResultCspPtcSceSchema extends AnalysisResultCspPtcSchemaBase {
-  set_angle: number;
-  angle_value: number;
-  actual_angle: number;
-  angle_deviation: number;
-  uncertainty: number;
-  deviation_to_drive: number;
+export interface AnalysisResultCspPtcSceSchema extends AnalysisResultSchemaBase {
+  absolute_orientation: number;
+  orientation_uncertainty: number;
+  alignment_deviation_to_drive: number;
+  sdx_rms_value: number;
 }
