@@ -233,14 +233,12 @@ export class VolateqAPI extends HttpClientBase {
         clearInterval(interval);
         finished(task);
       } else {
-        if (info) {
-          const infoMessage = task.state + (
-            task.info && task.info.infos && task.info.infos.length > 0
-            && "<br>" + task.info.infos.join("<br>") + (
-              task.info.max_steps && `... (${task.info.current_step}/${task.info.max_steps})`
-              || "..."
-            )
-          )
+        if (info && task.info && task.info.infos && task.info.infos.length > 0) {
+          const infoMessage = ">" + task.info.infos.join("<br>>") + (
+            task.info.max_steps && `... (${task.info.current_step}/${task.info.max_steps})`
+            || "..."
+          );
+
           info(infoMessage)
         }
       }
