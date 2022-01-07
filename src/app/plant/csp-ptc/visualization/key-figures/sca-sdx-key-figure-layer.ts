@@ -14,7 +14,7 @@ export class ScaSdxKeyFigureLayer extends ScaKeyFigureLayer {
       id: this.keyFigureInfo.displayName || this.keyFigureId.toString(),
       entries: [
         {
-          color: this.color!,
+          color: this.getColor(),
           name:
             this.getLegendEntryTransName(
               "slope-deviation-class",
