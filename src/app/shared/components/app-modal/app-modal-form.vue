@@ -44,6 +44,7 @@ export default class AppModalForm extends Vue implements IAppModalForm {
   }
 
   hide() {
+    this.hideAlert();
     this.$bvModal.hide(this.id || "");
   }
 

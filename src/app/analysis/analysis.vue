@@ -31,6 +31,9 @@
             </div>
             <div v-else>UNKNOWN</div>
           </template>
+          <template #cell(hasResults)="row">
+            <b-icon v-show="row.item.analysisResultId" icon="check" class="font-xl text-success" />
+          </template>
           <template #cell(actions)="row">
             <div class="hover-cell pull-right">
               <b-dropdown right size="sm" variant="secondary" :title="$t('download...')">
@@ -84,7 +87,7 @@
         @submit="saveManageResultFiles">
         <b-form-group v-show="manageImportFiles.analysisResultId">
           <b-form-checkbox id="removeAllAnalysisResultFiles" v-model="manageImportFiles.removeAllAnalysisResultFiles">
-            {{ $t('remove-result-files') }}
+            {{ $t('remove-result-files') }} ({{ manageImportFiles.importedResultFiles }})
           </b-form-checkbox>
         </b-form-group>
         <b-form-group :label="$t('select-json-result-file-import')">
@@ -149,10 +152,11 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
   manageImportFiles: {
     analysisId?: string,
     analysisResultId?: string,
+    importedResultFiles: string,
     removeAllAnalysisResultFiles: boolean,
     jsonFile?: File,
     imageFiles?: File[],
-  } = { analysisResultId: "", removeAllAnalysisResultFiles: false };
+  } = { analysisResultId: "", removeAllAnalysisResultFiles: false, importedResultFiles: "" };
 
 
   async created() {
@@ -164,6 +168,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
       { key: "date", label: this.$t("created-at").toString(), sortable: true },
       { key: "user", label: this.$t("created-by").toString(), sortable: true },
       { key: "state", label: this.$t("state").toString(), sortable: true },
+      { key: "hasResults", label: this.$t("has-results").toString() },
       { key: "actions" }
     ];
 
@@ -258,6 +263,12 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     
     // clear arrays but keep the references
     this.manageImportFiles.removeAllAnalysisResultFiles = false;
+
+    if (this.manageImportFiles.analysisResultId) {
+      this.manageImportFiles.importedResultFiles = (await volateqApi.getAnalysisResultFiles(this.manageImportFiles.analysisResultId))
+        .map(analysisResultFile => analysisResultFile.filename)
+        .join(', ');
+    }
 
     this.appManageResultFilesModal.show();
   }
