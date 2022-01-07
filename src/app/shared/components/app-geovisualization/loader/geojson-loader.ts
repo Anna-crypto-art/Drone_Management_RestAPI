@@ -13,7 +13,9 @@ import { Style } from "ol/style";
 import LayerLoader from "./layer-loader";
 import * as ExtentFunctions from "ol/extent";
 
-export class GeoJSONLoader extends LayerLoader<VectorLayer<VectorSource<Geometry>> | VectorImageLayer<VectorSource<Geometry>>> {
+export class GeoJSONLoader extends LayerLoader<
+  VectorLayer<VectorSource<Geometry>> | VectorImageLayer<VectorSource<Geometry>>
+> {
   constructor(public readonly layerType: GeoJSONLayer, map: Map, loadingEvent: (e: LoadingEvent) => void) {
     super(layerType, map, loadingEvent);
   }

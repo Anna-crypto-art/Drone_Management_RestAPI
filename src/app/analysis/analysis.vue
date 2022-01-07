@@ -5,7 +5,14 @@
         <b-button variant="primary">{{ createNewAnalysisBtnText }}</b-button>
       </router-link>
       <app-table-container>
-        <b-table hover :fields="columns" :items="analysisRows" head-variant="light" show-empty :emptyText="$t('no-data')">
+        <b-table
+          hover
+          :fields="columns"
+          :items="analysisRows"
+          head-variant="light"
+          show-empty
+          :emptyText="$t('no-data')"
+        >
           <template #empty="scope">
             <span class="grayed">{{ scope.emptyText }}</span>
           </template>
@@ -36,9 +43,19 @@
                   {{ file }}
                 </b-dropdown-item>
               </b-dropdown>
-              <b-dropdown v-show="canUpdateState(row.item.state)" right size="sm" variant="secondary" :title="$t('update-analysis-state')">
+              <b-dropdown
+                v-show="canUpdateState(row.item.state)"
+                right
+                size="sm"
+                variant="secondary"
+                :title="$t('update-analysis-state')"
+              >
                 <template #button-content><b-icon icon="flag"></b-icon></template>
-                <b-dropdown-item v-for="state in getPossibleUpdateStates(row.item.state)" :key="state" @click="onUpdateStateClick(row.item, state)">
+                <b-dropdown-item
+                  v-for="state in getPossibleUpdateStates(row.item.state)"
+                  :key="state"
+                  @click="onUpdateStateClick(row.item, state)"
+                >
                   {{ $t(state) }}
                 </b-dropdown-item>
               </b-dropdown>
@@ -54,7 +71,11 @@
               <router-link
                 v-if="row.item.analysisResultId"
                 :title="$t('show-results')"
-                :to="{ name: 'Plant', params: { id: row.item.plantId }, query: { view: 'table', result: row.item.analysisResultId } }"
+                :to="{
+                  name: 'Plant',
+                  params: { id: row.item.plantId },
+                  query: { view: 'table', result: row.item.analysisResultId },
+                }"
               >
                 <b-button variant="primary" size="sm"><b-icon icon="graph-up"></b-icon></b-button>
               </router-link>
@@ -77,7 +98,12 @@
         >
         </app-modal-form-info-area>
         <b-form-group :label="$t('message')" label-for="message">
-          <b-form-textarea id="message" v-model="updateStateData.message" :placeholder="$t('message')" row="5"></b-form-textarea>
+          <b-form-textarea
+            id="message"
+            v-model="updateStateData.message"
+            :placeholder="$t('message')"
+            row="5"
+          ></b-form-textarea>
         </b-form-group>
       </app-modal-form>
       <app-modal-form
@@ -255,7 +281,11 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
   }
 
   onUpdateStateClick(analysis: AnalysisSchema, state: ApiStates) {
-    if (!this.updateStateData.analysisId || this.updateStateData.analysisId !== analysis.id || this.updateStateData.state !== state) {
+    if (
+      !this.updateStateData.analysisId ||
+      this.updateStateData.analysisId !== analysis.id ||
+      this.updateStateData.state !== state
+    ) {
       this.updateStateData.message = "";
     }
     this.updateStateData.analysisId = analysis.id;
@@ -275,7 +305,10 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     if (this.manageImportFiles.analysisResultId) {
       const analysisResultFiles = await volateqApi.getAnalysisResultFiles(this.manageImportFiles.analysisResultId);
       for (const analysisResultFile of analysisResultFiles) {
-        this.manageImportFiles.existingFilesOptions.push({ text: analysisResultFile.filename, value: analysisResultFile.id });
+        this.manageImportFiles.existingFilesOptions.push({
+          text: analysisResultFile.filename,
+          value: analysisResultFile.id,
+        });
       }
     }
 
@@ -315,7 +348,10 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
           } else if (task.state === "FAILURE") {
             this.appManageResultFilesModal.alertError({ error: ApiErrors.SOMETHING_WENT_WRONG, details: task.result });
           } else {
-            this.appManageResultFilesModal.alertError({ error: "UNEXPECTED_TASK_STATE", details: task.state + ". " + task.result });
+            this.appManageResultFilesModal.alertError({
+              error: "UNEXPECTED_TASK_STATE",
+              details: task.state + ". " + task.result,
+            });
           }
         });
       } else {
@@ -383,7 +419,9 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
               email: a.user.email,
             }) ||
             "",
-          analysisResultId: (a.analysis_result && (this.isSuperAdmin || a.analysis_result.released) && a.analysis_result.id) || undefined,
+          analysisResultId:
+            (a.analysis_result && (this.isSuperAdmin || a.analysis_result.released) && a.analysis_result.id) ||
+            undefined,
           state: a.current_state,
           files: a.files,
           plantId: a.plant.id,

@@ -1,7 +1,9 @@
 <template>
   <div class="app-settings-users">
     <div class="app-settings-users-table-toolbar">
-      <b-button variant="primary" class="btn-invite" @click="showInviteUserModal()" v-b-modal.invite-modal>{{ $t("invite") }}</b-button>
+      <b-button variant="primary" class="btn-invite" @click="showInviteUserModal()" v-b-modal.invite-modal>{{
+        $t("invite")
+      }}</b-button>
     </div>
     <div class="clearfix"></div>
     <app-table-container>
@@ -57,17 +59,33 @@
       @submit="inviteUser"
     >
       <b-form-group :label="$t('email')" label-for="email">
-        <b-form-input id="email" v-model="newUser.email" type="email" :placeholder="$t('email')" required></b-form-input>
+        <b-form-input
+          id="email"
+          v-model="newUser.email"
+          type="email"
+          :placeholder="$t('email')"
+          required
+        ></b-form-input>
       </b-form-group>
       <b-row>
         <b-col>
           <b-form-group :label="$t('role')" label-for="role">
-            <b-form-select id="role" v-model="newUser.role" :options="roles" @change="onRoleSelectionChanged"></b-form-select>
+            <b-form-select
+              id="role"
+              v-model="newUser.role"
+              :options="roles"
+              @change="onRoleSelectionChanged"
+            ></b-form-select>
           </b-form-group>
         </b-col>
         <b-col>
           <b-form-group :label="$t('customer')" label-for="customer">
-            <b-form-select id="customer" v-model="newUser.customer_id" :options="customers" :disabled="customerSelectionDisabled"></b-form-select>
+            <b-form-select
+              id="customer"
+              v-model="newUser.customer_id"
+              :options="customers"
+              :disabled="customerSelectionDisabled"
+            ></b-form-select>
           </b-form-group>
         </b-col>
       </b-row>
@@ -135,7 +153,8 @@ export default class AppSettingsUsers extends Vue {
         userState = "locked";
       } else {
         if (user.state === UserStateSchema.REGISTERED) {
-          stateDate = this.$t("registered-at").toString() + " " + new Date(Date.parse(user.registered_at)).toLocaleString();
+          stateDate =
+            this.$t("registered-at").toString() + " " + new Date(Date.parse(user.registered_at)).toLocaleString();
         } else if (user.state === UserStateSchema.PENDING) {
           stateDate = this.$t("invited-at").toString() + " " + new Date(Date.parse(user.invited_at)).toLocaleString();
         }
@@ -232,7 +251,9 @@ export default class AppSettingsUsers extends Vue {
 
       await volateqApi.unLockUser(user.id, lock);
 
-      appContentEventBus.showSuccessAlert(this.$t(lock ? "user-locked-successfully" : "user-unlocked-successfully").toString());
+      appContentEventBus.showSuccessAlert(
+        this.$t(lock ? "user-locked-successfully" : "user-unlocked-successfully").toString()
+      );
 
       await this.updateUserRows();
     } catch (e) {

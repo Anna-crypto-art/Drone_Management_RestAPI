@@ -96,15 +96,27 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     keyFigureInfo: { templateName: "recommendedAction", keyName: "recommended-action" },
     subLayers: [
       {
-        keyFigureInfo: { templateName: "recommendedActionClass3", displayName: "recommended-action-class-3", zIndex: 13 },
+        keyFigureInfo: {
+          templateName: "recommendedActionClass3",
+          displayName: "recommended-action-class-3",
+          zIndex: 13,
+        },
         query: { recommended_action_class: 3 },
       },
       {
-        keyFigureInfo: { templateName: "recommendedActionClass2", displayName: "recommended-action-class-2", zIndex: 12 },
+        keyFigureInfo: {
+          templateName: "recommendedActionClass2",
+          displayName: "recommended-action-class-2",
+          zIndex: 12,
+        },
         query: { recommended_action_class: 2 },
       },
       {
-        keyFigureInfo: { templateName: "recommendedActionClass1", displayName: "recommended-action-class-1", zIndex: 10 },
+        keyFigureInfo: {
+          templateName: "recommendedActionClass1",
+          displayName: "recommended-action-class-1",
+          zIndex: 10,
+        },
         query: { recommended_action_class: 1 },
       },
       {

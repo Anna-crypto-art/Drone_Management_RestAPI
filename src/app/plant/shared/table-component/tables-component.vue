@@ -17,7 +17,10 @@
       </div>
       <app-table-container>
         <b-tabs v-model="tabIndex" @activate-tab="onTabChanged">
-          <b-tab v-for="activeTabComponent in activeTabComponents" :key="selectedAnalysisResult.id + '_' + activeTabComponent.label">
+          <b-tab
+            v-for="activeTabComponent in activeTabComponents"
+            :key="selectedAnalysisResult.id + '_' + activeTabComponent.label"
+          >
             <template #title>
               {{ $t(activeTabComponent.label) }}
               <app-explanation v-if="activeTabComponent.descr">
@@ -79,7 +82,8 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
   selectedAnalysisResult: AnalysisResultDetailedSchema | null = null;
 
   selectAnalysisResult(analysisResultId: string | undefined) {
-    this.selectedAnalysisResult = this.analysisResults.find(analysisResult => analysisResult.id === analysisResultId) || null;
+    this.selectedAnalysisResult =
+      this.analysisResults.find(analysisResult => analysisResult.id === analysisResultId) || null;
 
     this.activeTabComponents.length = 0;
 
@@ -87,7 +91,9 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
       let tabIdx = 0;
 
       for (const activeComponent of this.activeComponents) {
-        const keyFigure = this.selectedAnalysisResult.key_figures.find(keyFigure => keyFigure.component.id === activeComponent.componentId);
+        const keyFigure = this.selectedAnalysisResult.key_figures.find(
+          keyFigure => keyFigure.component.id === activeComponent.componentId
+        );
         if (keyFigure) {
           this.activeTabComponents.push({
             ...activeComponent,

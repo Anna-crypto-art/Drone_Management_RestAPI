@@ -4,7 +4,10 @@ import { AnalysisResultMappingEntry, AnalysisResultMappings, BvTableFieldExtArra
 import VueI18n from "vue-i18n";
 
 export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
-  constructor(private readonly analysisResultMapping: AnalysisResultMappings<T>, private readonly analysisResult: AnalysisResultDetailedSchema) {}
+  constructor(
+    private readonly analysisResultMapping: AnalysisResultMappings<T>,
+    private readonly analysisResult: AnalysisResultDetailedSchema
+  ) {}
 
   public getColumns(transFunc: (transName: string) => VueI18n.TranslateResult): BvTableFieldExtArray {
     const columns: BvTableFieldExtArray = [];
@@ -27,11 +30,17 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
     return results.map(result => this.getItem(result));
   }
 
-  public getItemsTranslated(results: T[], t: (key: VueI18n.Path, values?: VueI18n.Values) => VueI18n.TranslateResult): Record<string, unknown>[] {
+  public getItemsTranslated(
+    results: T[],
+    t: (key: VueI18n.Path, values?: VueI18n.Values) => VueI18n.TranslateResult
+  ): Record<string, unknown>[] {
     return results.map(result => this.getItem(result), t);
   }
 
-  public getItem(result: T, t?: (key: VueI18n.Path, values?: VueI18n.Values) => VueI18n.TranslateResult): Record<string, unknown> {
+  public getItem(
+    result: T,
+    t?: (key: VueI18n.Path, values?: VueI18n.Values) => VueI18n.TranslateResult
+  ): Record<string, unknown> {
     const item: Record<string, unknown> = {};
 
     for (const mappingEntry of this.analysisResultMapping) {
@@ -56,7 +65,10 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
   }
 
   public hasKeyFigure(mappingEntry: AnalysisResultMappingEntry<T>): boolean {
-    return mappingEntry.keyFigureId === undefined || !!this.analysisResult.key_figures.find(keyFigure => keyFigure.id === mappingEntry.keyFigureId);
+    return (
+      mappingEntry.keyFigureId === undefined ||
+      !!this.analysisResult.key_figures.find(keyFigure => keyFigure.id === mappingEntry.keyFigureId)
+    );
   }
 
   public getPropertyName(mappingEntry: AnalysisResultMappingEntry<T>): string {

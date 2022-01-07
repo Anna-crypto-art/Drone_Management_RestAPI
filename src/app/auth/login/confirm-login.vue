@@ -3,14 +3,25 @@
     <app-auth-container :title="$t('mfa')" :subtitle="$t('mfa-email_descr')">
       <b-form @submit.prevent="onSubmit">
         <b-form-group :label="$t('security-code')" label-for="securityCode">
-          <b-form-input id="securityCode" v-model="securityCode" type="text" :placeholder="$t('security-code')" required></b-form-input>
+          <b-form-input
+            id="securityCode"
+            v-model="securityCode"
+            type="text"
+            :placeholder="$t('security-code')"
+            required
+          ></b-form-input>
         </b-form-group>
         <app-button ref="submitButton" type="submit" cls="width-100pc">{{ $t("login") }}</app-button>
       </b-form>
       <hr />
-      <app-button ref="resendSecurityCodeButton" type="button" cls="width-100pc" variant="secondary" @click="resendSecurityCode">{{
-        $t("resend-security-code")
-      }}</app-button>
+      <app-button
+        ref="resendSecurityCodeButton"
+        type="button"
+        cls="width-100pc"
+        variant="secondary"
+        @click="resendSecurityCode"
+        >{{ $t("resend-security-code") }}</app-button
+      >
     </app-auth-container>
   </div>
 </template>

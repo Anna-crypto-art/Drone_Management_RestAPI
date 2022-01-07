@@ -149,7 +149,9 @@ export default class AppTableComponent extends Vue implements ITableComponent {
     let results = apiResultsLoader.getResults(this.analysisResult.id, this.activeComponent.componentId)!;
 
     if (this.searchText) {
-      results = results.filter(item => item.fieldgeometry_component.kks.toUpperCase().startsWith(this.searchText.toUpperCase()));
+      results = results.filter(item =>
+        item.fieldgeometry_component.kks.toUpperCase().startsWith(this.searchText.toUpperCase())
+      );
     }
 
     const items = this.mappingHelper.getItems(results);
@@ -170,7 +172,10 @@ export default class AppTableComponent extends Vue implements ITableComponent {
       });
     }
 
-    const slicedItems = items.slice((ctx.currentPage - 1) * ctx.perPage, (ctx.currentPage - 1) * ctx.perPage + ctx.perPage);
+    const slicedItems = items.slice(
+      (ctx.currentPage - 1) * ctx.perPage,
+      (ctx.currentPage - 1) * ctx.perPage + ctx.perPage
+    );
 
     return slicedItems;
   }

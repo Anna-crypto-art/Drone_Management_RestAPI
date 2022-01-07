@@ -29,13 +29,20 @@ export abstract class ScaKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisRes
       entries: [
         {
           color: this.getColor(),
-          name: this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() + this.getLegendEntryCount(),
+          name:
+            this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
+            this.getLegendEntryCount(),
         },
       ],
     };
   }
 
-  protected getLegendEntryTransName(transClassName: string, classLimits: number[] | null, currentClass: 1 | 2 | 3 | undefined, unit: string): string {
+  protected getLegendEntryTransName(
+    transClassName: string,
+    classLimits: number[] | null,
+    currentClass: 1 | 2 | 3 | undefined,
+    unit: string
+  ): string {
     if (!currentClass) {
       return this.vueComponent.$t(this.keyFigureInfo.displayName!).toString();
     }

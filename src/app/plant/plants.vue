@@ -1,7 +1,15 @@
 <template>
   <app-content :title="$t('plants-overview')" :subtitle="$t('plants-overview_descr')">
     <app-table-container>
-      <b-table hover :fields="columns" :items="plants" head-variant="light" show-empty :emptyText="$t('no-data')" :busy="tableLoading">
+      <b-table
+        hover
+        :fields="columns"
+        :items="plants"
+        head-variant="light"
+        show-empty
+        :emptyText="$t('no-data')"
+        :busy="tableLoading"
+      >
         <template #head(actions)>
           <span class="hidden">{{ $t("actions") }}</span>
         </template>
@@ -16,7 +24,13 @@
         </template>
         <template #cell(actions)="row">
           <div class="hover-cell pull-right">
-            <b-button v-show="isSuperAdmin" @click="onManagePlantClick(row.item)" variant="secondary" size="sm" :title="$t('upload-dt')">
+            <b-button
+              v-show="isSuperAdmin"
+              @click="onManagePlantClick(row.item)"
+              variant="secondary"
+              size="sm"
+              :title="$t('upload-dt')"
+            >
               <b-icon icon="hammer"></b-icon>
             </b-button>
           </div>
@@ -146,7 +160,10 @@ export default class AppPlants extends BaseAuthComponent {
         } else if (task.state === "FAILURE") {
           this.managePlantModal.alertError({ error: "SOMETHING_WENT_WRONG", details: task.result });
         } else {
-          this.managePlantModal.alertError({ error: "UNEXPECTED_TASK_STATE", details: task.state + ". " + task.result });
+          this.managePlantModal.alertError({
+            error: "UNEXPECTED_TASK_STATE",
+            details: task.state + ". " + task.result,
+          });
         }
       });
     } catch (e) {

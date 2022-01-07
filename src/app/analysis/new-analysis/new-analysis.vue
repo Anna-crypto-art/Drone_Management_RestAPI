@@ -12,14 +12,23 @@
         <app-file-upload ref="appFileUpload" :title="$t('upload-your-files')">
           <app-checklist>
             <app-checklist-item :checked="checkListItems.videoFiles">{{ $t("video-files_descr") }}</app-checklist-item>
-            <app-checklist-item :checked="checkListItems.droneMetaFile">{{ $t("drone-metadata-file_descr") }}</app-checklist-item>
-            <app-checklist-item :checked="checkListItems.plantMetaFile">{{ $t("plant-metadata-file_descr") }}</app-checklist-item>
+            <app-checklist-item :checked="checkListItems.droneMetaFile">{{
+              $t("drone-metadata-file_descr")
+            }}</app-checklist-item>
+            <app-checklist-item :checked="checkListItems.plantMetaFile">{{
+              $t("plant-metadata-file_descr")
+            }}</app-checklist-item>
           </app-checklist>
         </app-file-upload>
         <app-button ref="uploadButton" type="submit" cls="pull-right">{{ uploadButtonTxt }}</app-button>
-        <app-button ref="cancelUploadButton" v-show="showCancelButton" variant="secondary" type="button" @click="onCancelUpload">{{
-          $t("cancel")
-        }}</app-button>
+        <app-button
+          ref="cancelUploadButton"
+          v-show="showCancelButton"
+          variant="secondary"
+          type="button"
+          @click="onCancelUpload"
+          >{{ $t("cancel") }}</app-button
+        >
         <div class="clearfix"></div>
       </b-form>
     </div>
@@ -58,7 +67,10 @@ import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
     AppButton,
   },
 })
-export default class AppNewAnalysis extends BaseAuthComponent implements IFetchComponent<IAppNewAnalysisFetched>, IUploadListener {
+export default class AppNewAnalysis
+  extends BaseAuthComponent
+  implements IFetchComponent<IAppNewAnalysisFetched>, IUploadListener
+{
   @Ref() appFileUpload!: IAppFileUpload;
   @Ref() uploadButton!: IAppButton;
   @Ref() cancelUploadButton!: IAppButton;
@@ -136,7 +148,10 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
       console.error(message);
 
       try {
-        await volateqApi.updateAnalysisState(uploadService.getMetadata<IAnalysisId>().id, { state: ApiStates.UPLOAD_FAILED, message: message });
+        await volateqApi.updateAnalysisState(uploadService.getMetadata<IAnalysisId>().id, {
+          state: ApiStates.UPLOAD_FAILED,
+          message: message,
+        });
       } catch (e) {
         // Well, that is not a surprise...
         console.error(e);
@@ -215,7 +230,9 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
 
   checkFileCompleteness() {
     if (this.waitForFiles) {
-      this.waitForFiles = this.waitForFiles.filter(fileName => !this.appFileUpload.files.find(file => file.fileName === fileName));
+      this.waitForFiles = this.waitForFiles.filter(
+        fileName => !this.appFileUpload.files.find(file => file.fileName === fileName)
+      );
       if (this.waitForFiles.length === 0) {
         this.waitForFiles = undefined;
         appContentEventBus.clearAlert();
@@ -252,7 +269,10 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
     }
 
     this.checkFileCompleteness();
-    if (!this.checkListItems.droneMetaFile || !this.checkListItems.videoFiles /* || !this.checkListItems.plantMetaFile*/) {
+    if (
+      !this.checkListItems.droneMetaFile ||
+      !this.checkListItems.videoFiles /* || !this.checkListItems.plantMetaFile*/
+    ) {
       appContentEventBus.showErrorAlert("MISSING_FILES");
       this.uploadButton.stopLoading();
       return;
@@ -267,7 +287,9 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
 
       this.storeData();
 
-      this.appFileUpload.upload<IAnalysisId>(volateqApi.getAnalysisFileUploadUrl(this.analysis.id), { id: this.analysis.id });
+      this.appFileUpload.upload<IAnalysisId>(volateqApi.getAnalysisFileUploadUrl(this.analysis.id), {
+        id: this.analysis.id,
+      });
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
       this.uploadButton.stopLoading();

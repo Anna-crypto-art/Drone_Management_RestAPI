@@ -15,7 +15,13 @@
               <div v-if="subtitle" v-html="subtitle" class="app-auth-box-subtitle grayed"></div>
             </div>
             <slot></slot>
-            <b-alert class="app-auth-container-alert" v-model="showAlert" :variant="alert.variant" v-html="alert.msg" dismissible></b-alert>
+            <b-alert
+              class="app-auth-container-alert"
+              v-model="showAlert"
+              :variant="alert.variant"
+              v-html="alert.msg"
+              dismissible
+            ></b-alert>
           </div>
         </b-col>
       </b-row>

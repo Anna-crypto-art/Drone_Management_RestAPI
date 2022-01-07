@@ -8,8 +8,19 @@
       <div class="app-file-upload-dropzone-browsebutton">
         <b-button variant="primary" id="file-upload-browsebutton-id">{{ $t("browse...") }}</b-button>
       </div>
-      <div class="app-file-upload-dropzone-files" style="margin-top: 30px" :key="keyResumFiles" v-show="keyResumFiles > 0">
-        <app-file-upload-file v-for="file in files" :key="file.uniqueIdentifier" ref="uploadFiles" :uploading="uploading" :file="file">
+      <div
+        class="app-file-upload-dropzone-files"
+        style="margin-top: 30px"
+        :key="keyResumFiles"
+        v-show="keyResumFiles > 0"
+      >
+        <app-file-upload-file
+          v-for="file in files"
+          :key="file.uniqueIdentifier"
+          ref="uploadFiles"
+          :uploading="uploading"
+          :file="file"
+        >
         </app-file-upload-file>
       </div>
     </div>

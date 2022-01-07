@@ -84,7 +84,8 @@ export default class AppAnalysisSelectionSidebar extends Vue {
   }
 
   onAnalysisResultSelected(selectedAnalysisResult: { id: string }[]): void {
-    const selectedAnalysisResultId = (selectedAnalysisResult && selectedAnalysisResult.length > 0 && selectedAnalysisResult[0].id) || undefined;
+    const selectedAnalysisResultId =
+      (selectedAnalysisResult && selectedAnalysisResult.length > 0 && selectedAnalysisResult[0].id) || undefined;
 
     this.$emit("analysisResultSelected", selectedAnalysisResultId);
   }

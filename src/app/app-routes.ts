@@ -50,7 +50,8 @@ router.beforeEach((to, from, next) => {
       !store.getters.auth.isSuperAdmin &&
       to.meta &&
       to.meta.role &&
-      (to.meta.role === ApiRoles.SUPER_ADMIN || (to.meta.role === ApiRoles.CUSTOMER_ADMIN && !store.getters.auth.isCustomerAdmin))
+      (to.meta.role === ApiRoles.SUPER_ADMIN ||
+        (to.meta.role === ApiRoles.CUSTOMER_ADMIN && !store.getters.auth.isCustomerAdmin))
     ) {
       next({ name: "page-not-found" });
       return;

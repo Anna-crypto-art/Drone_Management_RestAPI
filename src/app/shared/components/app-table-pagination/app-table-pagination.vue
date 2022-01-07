@@ -3,11 +3,20 @@
     <div>
       <b-form inline>
         <label class="mr-sm-2">{{ $t("per-page") }}</label>
-        <b-form-select v-model="pagination.perPage" :options="selectPageOptions" class="mb-2 mr-sm-2 mb-sm-0"></b-form-select>
+        <b-form-select
+          v-model="pagination.perPage"
+          :options="selectPageOptions"
+          class="mb-2 mr-sm-2 mb-sm-0"
+        ></b-form-select>
       </b-form>
     </div>
     <div>
-      <b-pagination v-model="pagination.currentPage" :total-rows="pagination.total" :per-page="pagination.perPage" :aria-controls="tableName">
+      <b-pagination
+        v-model="pagination.currentPage"
+        :total-rows="pagination.total"
+        :per-page="pagination.perPage"
+        :aria-controls="tableName"
+      >
       </b-pagination>
     </div>
     <div>

@@ -7,7 +7,11 @@
       <slot :name="layer.name">{{ layer.name }}</slot>
     </h3>
     <div v-if="layer.hasChildrens" class="layer-sublayers">
-      <app-geovisual-layer-display v-for="(childLayer, layerIndex) in layer.getChildLayers()" :layer="childLayer" :key="layerIndex">
+      <app-geovisual-layer-display
+        v-for="(childLayer, layerIndex) in layer.getChildLayers()"
+        :layer="childLayer"
+        :key="layerIndex"
+      >
         <!-- Pass slots through -->
         <template v-for="(_, slot) in $slots">
           <template :slot="slot">

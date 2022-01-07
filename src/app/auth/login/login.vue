@@ -6,8 +6,16 @@
           <b-form-input id="email" v-model="email" type="email" :placeholder="$t('email')" required></b-form-input>
         </b-form-group>
         <b-form-group :label="$t('password')" label-for="password">
-          <b-form-input id="password" v-model="password" type="password" :placeholder="$t('password')" required></b-form-input>
-          <router-link :to="{ name: 'ForgotPassword' }" class="input-info-link">{{ $t("forgot-password") }}</router-link>
+          <b-form-input
+            id="password"
+            v-model="password"
+            type="password"
+            :placeholder="$t('password')"
+            required
+          ></b-form-input>
+          <router-link :to="{ name: 'ForgotPassword' }" class="input-info-link">{{
+            $t("forgot-password")
+          }}</router-link>
         </b-form-group>
         <app-button type="submit" cls="width-100pc">{{ $t("login") }}</app-button>
       </b-form>

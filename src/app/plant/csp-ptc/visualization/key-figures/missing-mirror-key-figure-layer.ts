@@ -26,7 +26,9 @@ export class MissingMirrorKeyFigureLayer extends MirrorKeyFigureLayer {
       return undefined;
     }
 
-    const notMeasuredSCEFeaturesCount = this.geoJSON.features.filter(feature => feature.properties.value === null).length;
+    const notMeasuredSCEFeaturesCount = this.geoJSON.features.filter(
+      feature => feature.properties.value === null
+    ).length;
     const notMeasuredMirrorFeaturesCount = notMeasuredSCEFeaturesCount * this.geoJSON.custom.mirrors_per_sce!;
     const missingMirrorsFeaturesCount = this.geoJSON.features.length - notMeasuredSCEFeaturesCount;
 
@@ -41,7 +43,8 @@ export class MissingMirrorKeyFigureLayer extends MirrorKeyFigureLayer {
         },
         {
           color: KeyFigureColors.grey,
-          name: this.vueComponent.$t("not-measured").toString() + this.getLegendEntryCount(notMeasuredMirrorFeaturesCount),
+          name:
+            this.vueComponent.$t("not-measured").toString() + this.getLegendEntryCount(notMeasuredMirrorFeaturesCount),
         },
       ],
     };

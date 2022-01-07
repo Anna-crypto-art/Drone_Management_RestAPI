@@ -14,7 +14,12 @@
       <b-tabs align="center" @activate-tab="onTabChanged">
         <b-tab>
           <template #title><b-icon icon="map" /></template>
-          <app-visual-csp-ptc ref="visualCspPtc" :analysisResults="analysisResults" :plant="plant" @sidebarToggle="onRightSidebarToggle" />
+          <app-visual-csp-ptc
+            ref="visualCspPtc"
+            :analysisResults="analysisResults"
+            :plant="plant"
+            @sidebarToggle="onRightSidebarToggle"
+          />
         </b-tab>
         <b-tab v-if="hasResults">
           <template #title><b-icon icon="table" /></template>
@@ -29,7 +34,12 @@
                   <h3>{{ $t("admin-panel") }}</h3>
                   <hr />
                   <h4>{{ $t("analysis-visibility") }}</h4>
-                  <b-form-checkbox v-show="analysisResultReleased !== null" v-model="analysisResultReleased" switch @change="onReleaseChanged">
+                  <b-form-checkbox
+                    v-show="analysisResultReleased !== null"
+                    v-model="analysisResultReleased"
+                    switch
+                    @change="onReleaseChanged"
+                  >
                     {{ analysisResultReleased ? $t("released") : $t("invisible-for-customer") }}
                   </b-form-checkbox>
                   <!--<h4>{{ $t("digital-twin") }}</h4>
@@ -95,7 +105,9 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
 
   async onReleaseChanged() {
     if (this.visualCspPtc?.selectedAnalysisResult) {
-      await volateqApi.updateAnalysisResult(this.visualCspPtc?.selectedAnalysisResult.id, { release: this.analysisResultReleased as boolean });
+      await volateqApi.updateAnalysisResult(this.visualCspPtc?.selectedAnalysisResult.id, {
+        release: this.analysisResultReleased as boolean,
+      });
     }
   }
 
@@ -103,7 +115,9 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
     this.visualCspPtc.selectAnalysisResult(selectedAnalysisResultId);
     this.tablesCspPtc.selectAnalysisResult(selectedAnalysisResultId);
 
-    this.analysisResultReleased = this.visualCspPtc?.selectedAnalysisResult ? this.visualCspPtc?.selectedAnalysisResult.released : null;
+    this.analysisResultReleased = this.visualCspPtc?.selectedAnalysisResult
+      ? this.visualCspPtc?.selectedAnalysisResult.released
+      : null;
 
     this.rerenderOLCanvas();
   }

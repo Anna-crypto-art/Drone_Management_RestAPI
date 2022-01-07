@@ -69,7 +69,13 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
       title: result.fieldgeometry_component.kks,
       records: Object.keys(record)
         .filter(k => k !== "pcs")
-        .map(k => this.mapRecordEntryToFeatureInfo(k, record[k]!, this.analysisResultMapping.find(entry => entry.transName === k)?.transDescr))
+        .map(k =>
+          this.mapRecordEntryToFeatureInfo(
+            k,
+            record[k]!,
+            this.analysisResultMapping.find(entry => entry.transName === k)?.transDescr
+          )
+        )
         .filter(featureInfo => featureInfo !== undefined) as any,
     };
 
@@ -110,7 +116,12 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   }
 
   public async load(): Promise<Record<string, unknown>> {
-    this.geoJSON = await volateqApi.getKeyFiguresGeoVisual(this.vueComponent.plant.id, this.analysisResult.id, this.keyFigure.id, this.query);
+    this.geoJSON = await volateqApi.getKeyFiguresGeoVisual(
+      this.vueComponent.plant.id,
+      this.analysisResult.id,
+      this.keyFigure.id,
+      this.query
+    );
 
     return this.geoJSON as Record<string, unknown>;
   }
@@ -146,6 +157,8 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     featureCount = featureCount !== undefined ? featureCount : this.geoJSON!.features.length;
     const totalCount = this.geoJSON!.custom.components_total_count;
 
-    return ` (<b>${(Math.round((featureCount / totalCount) * 100 * precision) / precision).toString()}%</b> - <small>${featureCount}</small>)`;
+    return ` (<b>${(
+      Math.round((featureCount / totalCount) * 100 * precision) / precision
+    ).toString()}%</b> - <small>${featureCount}</small>)`;
   }
 }

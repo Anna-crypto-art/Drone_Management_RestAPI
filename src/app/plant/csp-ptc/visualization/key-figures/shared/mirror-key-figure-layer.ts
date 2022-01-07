@@ -34,7 +34,9 @@ export class MirrorKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisResultCsp
       entries: [
         {
           color: this.color!,
-          name: this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() + this.getLegendEntryCount(),
+          name:
+            this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
+            this.getLegendEntryCount(),
         },
       ],
     };

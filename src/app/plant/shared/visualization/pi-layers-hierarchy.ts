@@ -116,7 +116,9 @@ export class PILayersHierarchy {
       }
     }
 
-    this.parentComponentKpiLayers = Object.keys(parentComponentLayers).map(componentId => parentComponentLayers[componentId]);
+    this.parentComponentKpiLayers = Object.keys(parentComponentLayers).map(
+      componentId => parentComponentLayers[componentId]
+    );
   }
 
   private createKPILayers(
@@ -136,7 +138,9 @@ export class PILayersHierarchy {
 
     const groupKpiLayer: GroupKPILayer = {
       groupLayer: {
-        name: keyFigureLayer.keyFigureInfo?.templateName || this.vueComponent.$t(keyFigureLayer.keyFigureInfo!.keyName!).toString(),
+        name:
+          keyFigureLayer.keyFigureInfo?.templateName ||
+          this.vueComponent.$t(keyFigureLayer.keyFigureInfo!.keyName!).toString(),
         type: "group",
         childLayers: [],
         visible: false,
@@ -147,7 +151,8 @@ export class PILayersHierarchy {
 
     for (const childLayer of keyFigureLayer.subLayers) {
       const childKeyFigureInfo: KeyFigureInfo = childLayer.keyFigureInfo || {};
-      childKeyFigureInfo.displayName = childLayer.keyFigureInfo!.displayName || keyFigureLayer.keyFigureInfo?.displayName;
+      childKeyFigureInfo.displayName =
+        childLayer.keyFigureInfo!.displayName || keyFigureLayer.keyFigureInfo?.displayName;
       childKeyFigureInfo.keyName = keyFigureLayer.keyFigureInfo?.keyName;
 
       const kpiLayer: KeyFigureLayer<AnalysisResultSchemaBase> = new keyFigureLayer.layerType(

@@ -15,8 +15,12 @@ export class ScaFrictionKeyFigureLayer extends ScaKeyFigureLayer {
         {
           color: this.getColor(),
           name:
-            this.getLegendEntryTransName("sca-torsion-class", this.analysisResult.csp_ptc.sca_torsion_class_limits, this.query?.torsion_class, "°") +
-            this.getLegendEntryCount(),
+            this.getLegendEntryTransName(
+              "sca-torsion-class",
+              this.analysisResult.csp_ptc.sca_torsion_class_limits,
+              this.query?.torsion_class,
+              "°"
+            ) + this.getLegendEntryCount(),
         },
       ],
     };

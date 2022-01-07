@@ -1,6 +1,12 @@
 <template>
   <div class="visualization">
-    <app-geovisualization ref="openLayers" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick" @sidebarToggle="onSidebarToggled">
+    <app-geovisualization
+      ref="openLayers"
+      v-if="hasLayers"
+      :layers="layers"
+      @click="onOpenLayersClick"
+      @sidebarToggle="onSidebarToggled"
+    >
       <template #topContent>
         <b-form-checkbox v-model="enableMultiSelection" switch @change="onMultiSelectionChanged">
           {{ $t("multi-selection") }} <app-explanation>{{ $t("multi-selection-overlapping_expl") }}</app-explanation>
@@ -28,7 +34,11 @@
         <div class="toaster-images" v-if="piToastInfo.images">
           <img v-for="image in piToastInfo.images" :key="image.title" :title="image.title" :src="image.url" />
         </div>
-        <b-row v-for="featureInfo in piToastInfo.records" :key="featureInfo.name" :class="featureInfo.bold && 'font-weight-bold'">
+        <b-row
+          v-for="featureInfo in piToastInfo.records"
+          :key="featureInfo.name"
+          :class="featureInfo.bold && 'font-weight-bold'"
+        >
           <b-col>
             {{ featureInfo.name }}
             <app-explanation v-if="featureInfo.descr">
@@ -64,7 +74,10 @@ import { GroupLayer, LayerType } from "@/app/shared/components/app-geovisualizat
     AppExplanation,
   },
 })
-export default class AppVisualization extends BaseAuthComponent implements IAnalysisResultSelection, IPlantVisualization {
+export default class AppVisualization
+  extends BaseAuthComponent
+  implements IAnalysisResultSelection, IPlantVisualization
+{
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
   @Prop() componentLayerTypes!: typeof ComponentLayer[];

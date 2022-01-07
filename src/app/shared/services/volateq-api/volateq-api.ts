@@ -54,9 +54,15 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public async confirmLogin(confirmationKey: string, securityCode: string): Promise<void> {
-    const tokenResult: TokenResult = await this.post(`/confirm-login/${confirmationKey}`, { security_code: securityCode });
+    const tokenResult: TokenResult = await this.post(`/confirm-login/${confirmationKey}`, {
+      security_code: securityCode,
+    });
 
-    await store.dispatch.auth.updateToken({ token: tokenResult.token, role: tokenResult.role, customer_id: tokenResult.customer_id });
+    await store.dispatch.auth.updateToken({
+      token: tokenResult.token,
+      role: tokenResult.role,
+      customer_id: tokenResult.customer_id,
+    });
   }
 
   public async logout(): Promise<void> {
@@ -87,7 +93,9 @@ export class VolateqAPI extends HttpClientBase {
     await this.post(`/confirm/${confirmKey}`, user);
   }
 
-  public async getRoutes(params: { customer_id?: string; plant_id?: string } | undefined = undefined): Promise<RouteSchema[]> {
+  public async getRoutes(
+    params: { customer_id?: string; plant_id?: string } | undefined = undefined
+  ): Promise<RouteSchema[]> {
     return this.get(`/auth/routes`, params);
   }
 
@@ -161,7 +169,11 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/analysis-result/${analysisResultId}/${componentId}`);
   }
 
-  public getSpecificAnalysisResult<T>(analysisResultId: string, componentId: number, params: TableRequest): Promise<TableResultSchema<T>> {
+  public getSpecificAnalysisResult<T>(
+    analysisResultId: string,
+    componentId: number,
+    params: TableRequest
+  ): Promise<TableResultSchema<T>> {
     return this.get(`/auth/analysis-result/${analysisResultId}/${componentId}`, params);
   }
 
@@ -171,16 +183,21 @@ export class VolateqAPI extends HttpClientBase {
     params: TableRequest,
     csvMappings?: { [key: string]: string }
   ): string {
-    const encodedCsvMappings = (csvMappings && `&csv_mappings=${encodeURIComponent(this.getQueryParams(csvMappings).substring(1))}`) || "";
+    const encodedCsvMappings =
+      (csvMappings && `&csv_mappings=${encodeURIComponent(this.getQueryParams(csvMappings).substring(1))}`) || "";
 
-    return `${apiBaseUrl}/auth/analysis-result/${analysisResultId}/${componentId}${this.getQueryParams(params)}&csv=1${encodedCsvMappings}`;
+    return `${apiBaseUrl}/auth/analysis-result/${analysisResultId}/${componentId}${this.getQueryParams(
+      params
+    )}&csv=1${encodedCsvMappings}`;
   }
 
   public async generateDownloadUrl(downloadUrl: string, filename?: string): Promise<string> {
     const encodedUrl = encodeURIComponent(encodeURIComponent(downloadUrl));
     const filenameParam = (filename && `?filename=${encodeURIComponent(filename)}`) || "";
 
-    const urlTokenResponse: { url_token: string } = await this.get(`/auth/user/generate-url-token/${encodedUrl}${filenameParam}`);
+    const urlTokenResponse: { url_token: string } = await this.get(
+      `/auth/user/generate-url-token/${encodedUrl}${filenameParam}`
+    );
 
     return `${apiBaseUrl}/temp-url/${urlTokenResponse.url_token}`;
   }
@@ -193,7 +210,10 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/analysis-result/${analysisResultId}/files`);
   }
 
-  public deleteAnalysisResultFile(analysisResultId: string, analysisResultFileId: string): Promise<{ results_deleted: number }> {
+  public deleteAnalysisResultFile(
+    analysisResultId: string,
+    analysisResultFileId: string
+  ): Promise<{ results_deleted: number }> {
     return this.delete(`/auth/analysis-result/${analysisResultId}/file/${analysisResultFileId}`);
   }
 
@@ -226,7 +246,12 @@ export class VolateqAPI extends HttpClientBase {
     return analysisResults;
   }
 
-  public importFieldgeometry(file: File, customerId: string, plantId: string, clearBefore: boolean): Promise<TaskSchema> {
+  public importFieldgeometry(
+    file: File,
+    customerId: string,
+    plantId: string,
+    clearBefore: boolean
+  ): Promise<TaskSchema> {
     return this.postForm(`/auth/fieldgeometry/${customerId}/${plantId}?clear_before=${clearBefore}`, { file });
   }
 
@@ -259,7 +284,9 @@ export class VolateqAPI extends HttpClientBase {
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {
     // Temporary special case for IR_INTENSITY: Replaced by GLASS_TUBE_TEMPERATURE
     for (const analysisResult of analysisResults) {
-      const ir_intensity_index = analysisResult.key_figures.findIndex(keyFigure => keyFigure.id === AnalysisResultKeyFigure.IR_INTENSITY_ID);
+      const ir_intensity_index = analysisResult.key_figures.findIndex(
+        keyFigure => keyFigure.id === AnalysisResultKeyFigure.IR_INTENSITY_ID
+      );
       if (
         ir_intensity_index != -1 &&
         analysisResult.key_figures.find(keyFigure => keyFigure.id === AnalysisResultKeyFigure.GLASS_TUBE_TEMPERATURE_ID)

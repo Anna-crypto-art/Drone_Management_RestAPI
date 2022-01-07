@@ -18,7 +18,13 @@
             <b-form-input id="last-name" v-model="user.last_name" required></b-form-input>
           </b-form-group>
           <b-form-group :label="$t('password')" label-for="password">
-            <b-form-input id="password" v-model="user.password" type="password" :placeholder="$t('password')" required></b-form-input>
+            <b-form-input
+              id="password"
+              v-model="user.password"
+              type="password"
+              :placeholder="$t('password')"
+              required
+            ></b-form-input>
           </b-form-group>
           <b-form-group :label="$t('repeat-password')" label-for="repeat-password">
             <b-form-input
@@ -34,7 +40,9 @@
               <span v-html="$t('accept-terms-of-service')"></span>
             </b-form-checkbox>
           </div>
-          <app-button type="submit" cls="width-100pc" :disabled="!checkedTermsOfService">{{ $t("register") }}</app-button>
+          <app-button type="submit" cls="width-100pc" :disabled="!checkedTermsOfService">{{
+            $t("register")
+          }}</app-button>
         </b-form>
       </div>
     </app-auth-container>

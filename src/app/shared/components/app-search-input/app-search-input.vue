@@ -1,6 +1,12 @@
 <template>
   <b-input-group class="app-search-input">
-    <b-form-input :placeholder="placeholder" type="search" @keyup="onKeyUp" @keydown="onKeyDown" v-model="searchText"></b-form-input>
+    <b-form-input
+      :placeholder="placeholder"
+      type="search"
+      @keyup="onKeyUp"
+      @keydown="onKeyDown"
+      v-model="searchText"
+    ></b-form-input>
     <b-input-group-append>
       <b-icon @click="search" icon="search"></b-icon>
     </b-input-group-append>

@@ -1,6 +1,11 @@
 <template>
   <div class="app-tables-csp-ptc">
-    <app-tables-component ref="tablesComponent" :activeComponents="activeComponents" :analysisResults="analysisResults" :plant="plant" />
+    <app-tables-component
+      ref="tablesComponent"
+      :activeComponents="activeComponents"
+      :analysisResults="analysisResults"
+      :plant="plant"
+    />
   </div>
 </template>
 

@@ -4,7 +4,9 @@
     <div class="app-content">
       <b-container>
         <div v-if="navback" class="app-content-navback">
-          <router-link class="link" to="/analyses"> <b-icon icon="chevron-left"></b-icon> {{ $t("back-to-overview") }} </router-link>
+          <router-link class="link" to="/analyses">
+            <b-icon icon="chevron-left"></b-icon> {{ $t("back-to-overview") }}
+          </router-link>
         </div>
         <div class="app-content-title">
           <h1 v-html="title"></h1>
