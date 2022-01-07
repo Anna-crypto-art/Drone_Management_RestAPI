@@ -18,7 +18,7 @@ import AppTablePagination from "@/app/shared/components/app-table-pagination/app
   components: {
     AppLoading,
     AppTablePagination,
-  }
+  },
 })
 export default class AppTableComponentContainer extends Vue {
   @Prop({ required: true }) tableName!: string;
@@ -41,7 +41,7 @@ export default class AppTableComponentContainer extends Vue {
   min-height: 250px;
 
   .b-table {
-    font-size: .7rem;
+    font-size: 0.7rem;
   }
 }
 </style>

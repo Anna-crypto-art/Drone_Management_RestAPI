@@ -4,9 +4,7 @@
     <div class="app-content">
       <b-container>
         <div v-if="navback" class="app-content-navback">
-          <router-link class="link" to="/analyses">
-            <b-icon icon="chevron-left"></b-icon> {{ $t("back-to-overview") }}
-          </router-link>
+          <router-link class="link" to="/analyses"> <b-icon icon="chevron-left"></b-icon> {{ $t("back-to-overview") }} </router-link>
         </div>
         <div class="app-content-title">
           <h1 v-html="title"></h1>
@@ -35,8 +33,8 @@ import { AppAlert } from "@/app/shared/services/app-alert/app-alert";
 @Component({
   name: "app-content",
   components: {
-    AppHeader
-  }
+    AppHeader,
+  },
 })
 export default class AppContent extends Vue {
   @Prop({ required: true }) title: string | undefined;

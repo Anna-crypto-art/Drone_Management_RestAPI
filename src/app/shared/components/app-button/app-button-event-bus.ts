@@ -1,8 +1,8 @@
-import Vue from "vue"
+import Vue from "vue";
 
 export enum AppButtonEvents {
   stopLoading = "stop-loading",
-  startLoading = "start-loading"
+  startLoading = "start-loading",
 }
 
 export class AppButtonEventBus extends Vue {

@@ -8,7 +8,7 @@
 import Vue from "vue";
 import { Component } from "vue-property-decorator";
 
-@Component({name: "app-modal-form-info-area"})
+@Component({ name: "app-modal-form-info-area" })
 export default class AppModalFormInfoArea extends Vue {}
 </script>
 

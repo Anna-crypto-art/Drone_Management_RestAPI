@@ -1,4 +1,4 @@
-import Vue from "vue"
+import Vue from "vue";
 import { ApiErrors, ApiException } from "../volateq-api/api-errors";
 
 export interface AppAlert {
@@ -38,7 +38,7 @@ export class AppAlertEventBus extends Vue {
     console.error(error);
 
     if (error && error.error) {
-      this.showErrorAlert(error.error + (error.message && "<br><small>" + error.message + "</small>" || ""));
+      this.showErrorAlert(error.error + ((error.message && "<br><small>" + error.message + "</small>") || ""));
     } else {
       this.showErrorAlert(ApiErrors.SOMETHING_WENT_WRONG);
     }

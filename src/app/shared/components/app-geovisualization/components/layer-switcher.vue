@@ -31,8 +31,8 @@ import { LayerType } from "../types/layers";
 @Component({
   name: "app-geovisual-layer-switcher",
   components: {
-    AppGeovisualLayerDisplay
-  }
+    AppGeovisualLayerDisplay,
+  },
 })
 export default class AppGeovisualLayerSwitcher extends Vue {
   private static layerUIs: AppGeovisualLayerSwitcher[] = [];
@@ -63,32 +63,23 @@ export default class AppGeovisualLayerSwitcher extends Vue {
   readonly rootLayer = new LayerStructure();
   open = true;
 
-
   private layerSetup(parentLayer: LayerStructure, layers: LayerType[]) {
     const setLoadigState = (e: LoadingEvent) => {
       this.$emit("loading", e);
     };
 
     for (const layer of layers) {
-      const name = layer.name
+      const name = layer.name;
 
       switch (layer.type) {
         case "osm": {
-          parentLayer.addChildLayer(
-            new LayerStructure(
-              new OSMLoader(layer, this.map, setLoadigState),
-              name
-            )
-          );
+          parentLayer.addChildLayer(new LayerStructure(new OSMLoader(layer, this.map, setLoadigState), name));
 
           break;
         }
 
         case "geojson": {
-          const geoLayerStruct = new LayerStructure(
-            new GeoJSONLoader(layer, this.map, setLoadigState),
-            name
-          );
+          const geoLayerStruct = new LayerStructure(new GeoJSONLoader(layer, this.map, setLoadigState), name);
 
           parentLayer.addChildLayer(geoLayerStruct);
 
@@ -96,11 +87,7 @@ export default class AppGeovisualLayerSwitcher extends Vue {
         }
 
         case "group": {
-          const groupLayerStruct = new LayerStructure(
-            undefined,
-            name || layer.name,
-            layer
-          );
+          const groupLayerStruct = new LayerStructure(undefined, name || layer.name, layer);
           parentLayer.addChildLayer(groupLayerStruct);
 
           this.layerSetup(groupLayerStruct, layer.childLayers);
@@ -109,10 +96,7 @@ export default class AppGeovisualLayerSwitcher extends Vue {
         }
 
         case "custom": {
-          const customLayerStruct = new LayerStructure(
-            new CustomLoader(layer, this.map, setLoadigState),
-            name
-          );
+          const customLayerStruct = new LayerStructure(new CustomLoader(layer, this.map, setLoadigState), name);
           parentLayer.addChildLayer(customLayerStruct);
 
           break;
@@ -123,7 +107,7 @@ export default class AppGeovisualLayerSwitcher extends Vue {
 
   public toggle(): void {
     this.open = !this.open;
-    this.$forceUpdate(); // VUE why?, in React this would be: this.setState(state => ({open: !state.open}))
+    this.$forceUpdate();
 
     this.$emit("sidebarToggle", this.open);
   }
@@ -169,5 +153,4 @@ $sidebar-width: 400px;
     }
   }
 }
-
 </style>

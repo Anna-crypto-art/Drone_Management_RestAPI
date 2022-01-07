@@ -21,7 +21,13 @@
             <b-form-input id="password" v-model="user.password" type="password" :placeholder="$t('password')" required></b-form-input>
           </b-form-group>
           <b-form-group :label="$t('repeat-password')" label-for="repeat-password">
-            <b-form-input id="repeat-password" v-model="user.repeat_password" type="password" :placeholder="$t('repeat-password')" required></b-form-input>
+            <b-form-input
+              id="repeat-password"
+              v-model="user.repeat_password"
+              type="password"
+              :placeholder="$t('repeat-password')"
+              required
+            ></b-form-input>
           </b-form-group>
           <div>
             <b-form-checkbox id="terms-of-service" v-model="checkedTermsOfService" required>
@@ -52,7 +58,7 @@ import authContainerEventBus from "@/app/auth/shared/components/auth-container-e
   components: {
     AppAuthContainer,
     AppButton,
-  }
+  },
 })
 export default class AppAuthRegister extends Vue {
   hasUser = false;
@@ -69,10 +75,10 @@ export default class AppAuthRegister extends Vue {
         first_name: user.first_name,
         last_name: user.last_name,
         password: "",
-        repeat_password: ""
+        repeat_password: "",
       };
       this.email = user.email;
-      this.company = user.customer && user.customer.name || "";
+      this.company = (user.customer && user.customer.name) || "";
 
       this.hasUser = true;
     } catch (e) {
@@ -113,5 +119,4 @@ export default class AppAuthRegister extends Vue {
 }
 </script>
 
-<style lang="scss">
-</style>
+<style lang="scss"></style>

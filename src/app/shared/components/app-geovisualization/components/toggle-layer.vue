@@ -14,7 +14,7 @@ import { CustomControl } from "../custom-ol-control";
 import AppGeovisualLayerSwitcher from "./layer-switcher.vue";
 
 @Component({
-  name: "app-geovisual-toggle-layer"
+  name: "app-geovisual-toggle-layer",
 })
 export default class AppGeovisualToggleLayer extends Vue {
   @Prop() layerIndex!: number;
@@ -30,7 +30,7 @@ export default class AppGeovisualToggleLayer extends Vue {
   }
 
   get isLayerSwitcherOpen(): boolean {
-    return AppGeovisualLayerSwitcher.isOpen(this.layerIndex)
+    return AppGeovisualLayerSwitcher.isOpen(this.layerIndex);
   }
 }
 </script>

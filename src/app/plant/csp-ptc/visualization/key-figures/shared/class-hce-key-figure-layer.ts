@@ -13,17 +13,14 @@ export class ClassHceKeyFigureLayer extends HceKeyFigureLayer {
       entries: [
         {
           color: this.getColor(),
-          name: this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
-            this.getLegendEntryCount(),
-        }
-      ]
+          name: this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() + this.getLegendEntryCount(),
+        },
+      ],
     };
   }
 
   protected getColor(): string {
-    const classValue = this.query?.glass_tube_temperature_class 
-      || this.query?.ir_intensity_class
-      || this.query?.recommended_action_class;
+    const classValue = this.query?.glass_tube_temperature_class || this.query?.ir_intensity_class || this.query?.recommended_action_class;
 
     return this.getClassColor(classValue);
   }

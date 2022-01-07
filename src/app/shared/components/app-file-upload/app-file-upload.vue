@@ -6,12 +6,10 @@
         <slot></slot>
       </div>
       <div class="app-file-upload-dropzone-browsebutton">
-        <b-button variant="primary" id="file-upload-browsebutton-id">{{ $t('browse...') }}</b-button>
+        <b-button variant="primary" id="file-upload-browsebutton-id">{{ $t("browse...") }}</b-button>
       </div>
-      <div class="app-file-upload-dropzone-files" style="margin-top: 30px;" :key="keyResumFiles" v-show="keyResumFiles > 0">
-        <app-file-upload-file v-for="file in files" :key="file.uniqueIdentifier" ref="uploadFiles"
-          :uploading="uploading"
-          :file="file">
+      <div class="app-file-upload-dropzone-files" style="margin-top: 30px" :key="keyResumFiles" v-show="keyResumFiles > 0">
+        <app-file-upload-file v-for="file in files" :key="file.uniqueIdentifier" ref="uploadFiles" :uploading="uploading" :file="file">
         </app-file-upload-file>
       </div>
     </div>
@@ -29,13 +27,13 @@ import { IResumableFile, IUploadListener, UploadEvent, UploadState } from "../..
 @Component({
   name: "app-file-upload",
   components: {
-    AppFileUploadFile
-  }
+    AppFileUploadFile,
+  },
 })
 export default class AppFileUpload extends Vue implements IAppFileUpload, IUploadListener {
   @Ref() uploadFiles!: IAppFileUploadFile[];
   @Prop() title: string | undefined;
-  
+
   keyResumFiles = 0; // changing the value forces vue to rerender the element with :key="keyResumFiles"
   uploading = false;
 
@@ -85,11 +83,11 @@ export default class AppFileUpload extends Vue implements IAppFileUpload, IUploa
       this.keyResumFiles -= 1;
     });
   }
-  
+
   upload<T>(target: string, metadata?: T): void {
     this.uploading = true;
     this.keyResumFiles += 100;
-    
+
     (uploadService as UploadService).upload<T>(target, metadata);
   }
 

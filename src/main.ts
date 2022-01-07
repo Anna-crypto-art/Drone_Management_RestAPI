@@ -16,21 +16,21 @@ Vue.config.productionTip = false;
 
 Vue.mixin({
   methods: {
-    ...DateHelper
-  }
-})
+    ...DateHelper,
+  },
+});
 
 const i18n = new VueI18n({
   locale: "en",
   fallbackLocale: "en",
   messages: {
-    "en": require("./locales/en.json")
-  }
+    en: require("./locales/en.json"),
+  },
 });
 
 new Vue({
   router,
   store: store.original,
   i18n,
-  render: h => h(App)
+  render: h => h(App),
 }).$mount("#app");

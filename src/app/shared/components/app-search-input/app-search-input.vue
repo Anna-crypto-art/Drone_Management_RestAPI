@@ -13,15 +13,15 @@ import { Prop, Component } from "vue-property-decorator";
 import { debounce } from "@/app/shared/services/helper/debounce-helper";
 
 @Component({
-  name: "app-search-input"
+  name: "app-search-input",
 })
 export default class AppSearchInput extends Vue {
   @Prop({ default: "" }) placeholder!: string;
-  
+
   searchText = "";
-  
-  onKeyUp = debounce(() => this.search())
-  
+
+  onKeyUp = debounce(() => this.search());
+
   onKeyDown(e: KeyboardEvent) {
     if (e.key === "Enter") {
       this.search();
@@ -29,10 +29,9 @@ export default class AppSearchInput extends Vue {
   }
 
   search() {
-    this.$emit('search', this.searchText.trim());
+    this.$emit("search", this.searchText.trim());
   }
 }
-
 </script>
 
 <style lang="scss">

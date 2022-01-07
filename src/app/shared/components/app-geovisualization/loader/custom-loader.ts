@@ -5,11 +5,7 @@ import Map from "ol/Map";
 import LayerLoader from "./layer-loader";
 
 export class CustomLoader extends LayerLoader<undefined> {
-  constructor(
-    public readonly layerType: CustomLayer,
-    map: Map,
-    loadingEvent: (e: LoadingEvent) => void
-  ) {
+  constructor(public readonly layerType: CustomLayer, map: Map, loadingEvent: (e: LoadingEvent) => void) {
     super(layerType, map, loadingEvent);
   }
 

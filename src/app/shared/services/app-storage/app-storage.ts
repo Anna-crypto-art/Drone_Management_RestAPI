@@ -6,7 +6,7 @@
  * Default, this is just using the LocalStorage
  */
 export class AppStorage {
-  storage: Storage
+  storage: Storage;
 
   constructor(storage?: Storage) {
     this.storage = storage || window.localStorage;

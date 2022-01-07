@@ -14,11 +14,7 @@ import LayerLoader from "./layer-loader";
 import * as ExtentFunctions from "ol/extent";
 
 export class GeoJSONLoader extends LayerLoader<VectorLayer<VectorSource<Geometry>> | VectorImageLayer<VectorSource<Geometry>>> {
-  constructor(
-    public readonly layerType: GeoJSONLayer,
-    map: Map,
-    loadingEvent: (e: LoadingEvent) => void
-  ) {
+  constructor(public readonly layerType: GeoJSONLayer, map: Map, loadingEvent: (e: LoadingEvent) => void) {
     super(layerType, map, loadingEvent);
   }
 
@@ -26,26 +22,26 @@ export class GeoJSONLoader extends LayerLoader<VectorLayer<VectorSource<Geometry
     const features = await this.layerType.geoJSONLoader();
     const source = new VectorSource({
       features: new GeoJSON().readFeatures(features, {
-        ...this.layerType.geoJSONOptions
-      })
+        ...this.layerType.geoJSONOptions,
+      }),
     });
     source.getFeatures().forEach(feature => {
       this.setFeatureStyle(feature);
     });
 
     let geoLayer: VectorLayer<VectorSource<Geometry>> | VectorImageLayer<VectorSource<Geometry>>;
-    if (this.layerType.layerType === undefined || this.layerType.layerType === 'VectorLayer') {
+    if (this.layerType.layerType === undefined || this.layerType.layerType === "VectorLayer") {
       geoLayer = new VectorLayer({ source });
-    } else if (this.layerType.layerType === 'VectorImageLayer') {
+    } else if (this.layerType.layerType === "VectorImageLayer") {
       // More perfomant, but less accurate, rendering
-      geoLayer = new VectorImageLayer({ 
+      geoLayer = new VectorImageLayer({
         source,
-        // A larger ratio avoids cut images during panning, but will cause a decrease in performance. 
+        // A larger ratio avoids cut images during panning, but will cause a decrease in performance.
         // See https://openlayers.org/en/latest/apidoc/module-ol_layer_VectorImage-VectorImageLayer.html
         imageRatio: 1,
       });
     } else {
-      throw new Error('Unknown layerType: ' + this.layerType.layerType);
+      throw new Error("Unknown layerType: " + this.layerType.layerType);
     }
 
     if (this.layerType.style) {
@@ -84,10 +80,7 @@ export class GeoJSONLoader extends LayerLoader<VectorLayer<VectorSource<Geometry
               const ctx = state.context;
               const geometry = state.geometry.clone() as SimpleGeometry;
               geometry.setCoordinates(pixelCoordinates);
-              geometry.rotate(
-                -state.rotation - (feature.get("rotation") || 0),
-                [0, 0]
-              );
+              geometry.rotate(-state.rotation - (feature.get("rotation") || 0), [0, 0]);
               const extent = geometry.getExtent();
 
               const width = ExtentFunctions.getWidth(extent);
@@ -102,7 +95,7 @@ export class GeoJSONLoader extends LayerLoader<VectorLayer<VectorSource<Geometry
               ctx.rotate(drawRotation);
               ctx.drawImage(img, left, bottom, width, height);
               ctx.restore();
-            }
+            },
           })
         );
       };

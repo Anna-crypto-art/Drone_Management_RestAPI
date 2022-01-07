@@ -1,15 +1,16 @@
 <template>
   <div class="app-auth-confirm-login">
-    <app-auth-container :title="$t('mfa')"
-    :subtitle="$t('mfa-email_descr')">
+    <app-auth-container :title="$t('mfa')" :subtitle="$t('mfa-email_descr')">
       <b-form @submit.prevent="onSubmit">
         <b-form-group :label="$t('security-code')" label-for="securityCode">
-          <b-form-input id="securityCode" v-model="securityCode" type="text" :placeholder="$t('security-code')" required></b-form-input>          
+          <b-form-input id="securityCode" v-model="securityCode" type="text" :placeholder="$t('security-code')" required></b-form-input>
         </b-form-group>
         <app-button ref="submitButton" type="submit" cls="width-100pc">{{ $t("login") }}</app-button>
       </b-form>
-      <hr>
-      <app-button ref="resendSecurityCodeButton" type="button" cls="width-100pc" variant="secondary" @click="resendSecurityCode">{{ $t('resend-security-code') }}</app-button>
+      <hr />
+      <app-button ref="resendSecurityCodeButton" type="button" cls="width-100pc" variant="secondary" @click="resendSecurityCode">{{
+        $t("resend-security-code")
+      }}</app-button>
     </app-auth-container>
   </div>
 </template>
@@ -30,7 +31,7 @@ import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
   components: {
     AppAuthContainer,
     AppButton,
-  }
+  },
 })
 export default class AppAuthConfirmLogin extends Vue {
   @Ref() resendSecurityCodeButton!: IAppButton;
@@ -61,7 +62,7 @@ export default class AppAuthConfirmLogin extends Vue {
 
       await volateqApi.resendSecurityCode(this.$route.params.confirmKey);
 
-      authContainerEventBus.showSuccessAlert(this.$t('resend-security-code-success').toString());
+      authContainerEventBus.showSuccessAlert(this.$t("resend-security-code-success").toString());
     } catch (e) {
       authContainerEventBus.showError(e);
     } finally {
@@ -71,5 +72,4 @@ export default class AppAuthConfirmLogin extends Vue {
 }
 </script>
 
-<style lang="scss">
-</style>
+<style lang="scss"></style>

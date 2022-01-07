@@ -2,7 +2,6 @@ import { AnalysisResultCspPtcSceSchema } from "@/app/shared/services/volateq-api
 import analysisResultCspPtcMappingSce from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-sce";
 import { OrientationKeyFigureLayer } from "./shared/orientation-key-figure-layer";
 
-
 export class SceAlignmentKeyFigureLayer extends OrientationKeyFigureLayer<AnalysisResultCspPtcSceSchema> {
   protected readonly analysisResultMapping = analysisResultCspPtcMappingSce;
 

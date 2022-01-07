@@ -1,29 +1,24 @@
 <template>
   <div class="plant-view-csp-ptc" v-if="analysisResults">
-    <app-analysis-selection-sidebar ref="analysisSelectionSidebar"
+    <app-analysis-selection-sidebar
+      ref="analysisSelectionSidebar"
       :plant="plant"
       :analysisResults="analysisResults"
       :open="false"
       :getPIColor="getPiColor"
       @sidebarToggled="onSidebarToggled"
-      @analysisResultSelected="onAnalysisResultSelected" />
+      @analysisResultSelected="onAnalysisResultSelected"
+    />
     <div :class="'plant-view-csp-ptc-rightside ' + (sidebarOpen ? 'open' : '')">
       <h2 :class="'plant-view-csp-ptc-title ' + (sidebarOpen ? 'open' : '')">{{ plant.name }}</h2>
       <b-tabs align="center" @activate-tab="onTabChanged">
         <b-tab>
           <template #title><b-icon icon="map" /></template>
-          <app-visual-csp-ptc 
-            ref="visualCspPtc" 
-            :analysisResults="analysisResults" 
-            :plant="plant" 
-            @sidebarToggle="onRightSidebarToggle" />
+          <app-visual-csp-ptc ref="visualCspPtc" :analysisResults="analysisResults" :plant="plant" @sidebarToggle="onRightSidebarToggle" />
         </b-tab>
-        <b-tab v-if="hasResults" >
+        <b-tab v-if="hasResults">
           <template #title><b-icon icon="table" /></template>
-          <app-tables-csp-ptc
-            ref="tablesCspPtc" 
-            :analysisResults="analysisResults"
-            :plant="plant" />
+          <app-tables-csp-ptc ref="tablesCspPtc" :analysisResults="analysisResults" :plant="plant" />
         </b-tab>
         <b-tab v-if="isSuperAdmin">
           <template #title><b-icon icon="braces" /></template>
@@ -44,32 +39,31 @@
             </b-row>
           </b-container>
         </b-tab>
-      </b-tabs>  
+      </b-tabs>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { Component, Prop, Ref } from 'vue-property-decorator';
-import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
-import AppVisualCspPtc from '@/app/plant/csp-ptc/visualization/visual-csp-ptc.vue';
-import AppTableContainer from '@/app/shared/components/app-table-container/app-table-container.vue';
-import AppExplanation from '@/app/shared/components/app-explanation/app-explanation.vue';
-import AppSidebar from '@/app/shared/components/app-sidebar/app-sidebar.vue';
-import AppTablesCspPtc from '@/app/plant/csp-ptc/tables/tables-csp-ptc.vue';
+import Vue from "vue";
+import { Component, Prop, Ref } from "vue-property-decorator";
+import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import AppVisualCspPtc from "@/app/plant/csp-ptc/visualization/visual-csp-ptc.vue";
+import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
+import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
+import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
+import AppTablesCspPtc from "@/app/plant/csp-ptc/tables/tables-csp-ptc.vue";
 import { IAnalysisSelectionSidebar } from "@/app/plant/shared/analysis-selection-sidebar/types";
-import { IAnalysisResultSelection } from '../shared/types';
+import { IAnalysisResultSelection } from "../shared/types";
 import AppAnalysisSelectionSidebar from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-sidebar.vue";
-import { AnalysisResultDetailedSchema } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-schema';
-import volateqApi from '@/app/shared/services/volateq-api/volateq-api';
-import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
-import { cspPtcKeyFigureColors } from './csp-ptc-key-figure-colors';
-import { KeyFigureSchema } from '@/app/shared/services/volateq-api/api-schemas/key-figure-schema';
-
+import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
+import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { cspPtcKeyFigureColors } from "./csp-ptc-key-figure-colors";
+import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 
 @Component({
-  name: 'app-plant-view-csp-ptc',
+  name: "app-plant-view-csp-ptc",
   components: {
     AppVisualCspPtc,
     AppTableContainer,
@@ -77,7 +71,7 @@ import { KeyFigureSchema } from '@/app/shared/services/volateq-api/api-schemas/k
     AppTablesCspPtc,
     AppSidebar,
     AppAnalysisSelectionSidebar,
-  }
+  },
 })
 export default class AppPlantViewCspPtc extends BaseAuthComponent {
   @Prop() plant!: PlantSchema;
@@ -86,7 +80,7 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
   @Ref() tablesCspPtc!: IAnalysisResultSelection;
 
   private analysisResults: AnalysisResultDetailedSchema[] | null = null;
-  
+
   private analysisResultReleased: boolean | null = null;
 
   private sidebarOpen = false;
@@ -96,7 +90,7 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
   }
 
   get hasResults(): boolean {
-    return this.analysisResults && this.analysisResults.length > 0 || false;
+    return (this.analysisResults && this.analysisResults.length > 0) || false;
   }
 
   async onReleaseChanged() {
@@ -109,8 +103,7 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
     this.visualCspPtc.selectAnalysisResult(selectedAnalysisResultId);
     this.tablesCspPtc.selectAnalysisResult(selectedAnalysisResultId);
 
-    this.analysisResultReleased = this.visualCspPtc?.selectedAnalysisResult ? 
-      this.visualCspPtc?.selectedAnalysisResult.released : null;
+    this.analysisResultReleased = this.visualCspPtc?.selectedAnalysisResult ? this.visualCspPtc?.selectedAnalysisResult.released : null;
 
     this.rerenderOLCanvas();
   }
@@ -133,11 +126,11 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
     setTimeout(() => {
       // triggers openlayers canvas element to rerender
       window.dispatchEvent(new UIEvent("resize"));
-    }, timeout)
+    }, timeout);
   }
 
   getPiColor(keyFigure: KeyFigureSchema): string {
-    return cspPtcKeyFigureColors[keyFigure.id]
+    return cspPtcKeyFigureColors[keyFigure.id];
   }
 }
 </script>
@@ -155,7 +148,7 @@ $left-width: 400px;
   position: relative;
 
   &-title {
-    transition: left .3s ease-in-out;
+    transition: left 0.3s ease-in-out;
     font-size: 1.5rem;
     display: block;
     position: absolute;
@@ -181,7 +174,7 @@ $left-width: 400px;
     background-color: $grey;
 
     h4 {
-      margin: 1.5em 0 .5em 0;
+      margin: 1.5em 0 0.5em 0;
 
       &:first-child {
         margin-top: 0;

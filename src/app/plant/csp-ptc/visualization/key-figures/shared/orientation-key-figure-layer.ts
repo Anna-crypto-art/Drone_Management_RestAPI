@@ -2,12 +2,10 @@ import { KeyFigureColors } from "@/app/plant/shared/visualization/layers/types";
 import { Legend } from "@/app/plant/shared/visualization/types";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { FeatureLike } from "ol/Feature";
-import { Style, Fill } from 'ol/style';
+import { Style, Fill } from "ol/style";
 import { CspPtcKeyFigureLayer } from "./csp-ptc-key-figure-layer";
 
-
 export abstract class OrientationKeyFigureLayer<T extends AnalysisResultSchemaBase> extends CspPtcKeyFigureLayer<T> {
-
   protected abstract getOrientationOffsetClassLimits(): number[];
 
   public getStyle(feature: FeatureLike): Style {
@@ -28,10 +26,12 @@ export abstract class OrientationKeyFigureLayer<T extends AnalysisResultSchemaBa
 
     return {
       id: this.keyFigureInfo.displayName!,
-      entries: [{
-        color: this.getOffsetColor(),
-        name: this.getLegendName(),
-      }],
+      entries: [
+        {
+          color: this.getOffsetColor(),
+          name: this.getLegendName(),
+        },
+      ],
     };
   }
 
@@ -52,7 +52,7 @@ export abstract class OrientationKeyFigureLayer<T extends AnalysisResultSchemaBa
     }
     if (this.query?.orientation_offset_class === 1) {
       return `less than ${limitAt0}°: ${this.getLegendEntryCount()}`;
-    } 
+    }
     if (this.query?.orientation_offset_class === 2) {
       return `between ${limitAt0}° - ${limitAt1}°: ${this.getLegendEntryCount()}`;
     }

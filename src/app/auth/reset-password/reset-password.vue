@@ -28,8 +28,8 @@ import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
   name: "app-auth-reset-password",
   components: {
     AppAuthContainer,
-    AppButton
-  }
+    AppButton,
+  },
 })
 export default class AppAuthResetPassword extends Vue {
   password = "";
@@ -62,5 +62,4 @@ export default class AppAuthResetPassword extends Vue {
 }
 </script>
 
-<style lang="scss">
-</style>
+<style lang="scss"></style>

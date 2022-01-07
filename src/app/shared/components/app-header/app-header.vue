@@ -11,18 +11,10 @@
       </router-link>
       <div class="app-header-menu float-left">
         <b-nav pills>
-          <b-nav-item
-            class="link"
-            href="/plants"
-            :active="isActiveRoute(['/plants', '/plant/*'])"
-          >
+          <b-nav-item class="link" href="/plants" :active="isActiveRoute(['/plants', '/plant/*'])">
             <span class="nav-item-text">{{ $t("plants") }}</span>
           </b-nav-item>
-          <b-nav-item
-            class="link"
-            href="/analyses"
-            :active="isActiveRoute(['/analyses', '/analysis/new'])"
-          >
+          <b-nav-item class="link" href="/analyses" :active="isActiveRoute(['/analyses', '/analysis/new'])">
             <span class="nav-item-text">{{ $t("analysis") }}</span>
           </b-nav-item>
         </b-nav>
@@ -30,23 +22,12 @@
       <div class="app-header-settings-menu float-right">
         <b-nav pills>
           <b-nav-item-dropdown toggle-class="app-header-nav-dropdown" right>
-            <template slot="button-content"
-              ><b-icon icon="gear-fill" font-scale="1.5"></b-icon
-            ></template>
-            <b-dropdown-item href="/" class="link">{{
-              $t("profile")
-            }}</b-dropdown-item>
-            <b-dropdown-item
-              href="/settings/users"
-              v-if="isSuperAdmin"
-              class="link"
-              >{{ $t("users") }}</b-dropdown-item
-            >
+            <template slot="button-content"><b-icon icon="gear-fill" font-scale="1.5"></b-icon></template>
+            <b-dropdown-item href="/" class="link">{{ $t("profile") }}</b-dropdown-item>
+            <b-dropdown-item href="/settings/users" v-if="isSuperAdmin" class="link">{{ $t("users") }}</b-dropdown-item>
             <b-dropdown-divider></b-dropdown-divider>
             <b-dropdown-form>
-              <b-button @click="logout" class="width-100pc">{{
-                $t("logout")
-              }}</b-button>
+              <b-button @click="logout" class="width-100pc">{{ $t("logout") }}</b-button>
             </b-dropdown-form>
           </b-nav-item-dropdown>
         </b-nav>
@@ -79,11 +60,9 @@ export default class AppHeader extends BaseAuthComponent {
   }
 
   isActiveRoute(routes: string[]): boolean {
-    return !!routes.find((route) =>
+    return !!routes.find(route =>
       route.indexOf("*") != -1
-        ? this.$router.currentRoute.path
-            .replace(route.replace("*", ""), "")
-            .indexOf("/") == -1
+        ? this.$router.currentRoute.path.replace(route.replace("*", ""), "").indexOf("/") == -1
         : this.$router.currentRoute.path === route
     );
   }

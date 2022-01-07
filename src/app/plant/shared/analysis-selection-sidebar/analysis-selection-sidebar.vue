@@ -3,14 +3,16 @@
     <app-sidebar :open="false" @toggled="onSidebarToggled">
       <div class="analysis-selection-sidebar-leftside">
         <app-table-container size="sm">
-          <b-table ref="analysisResultsTable"
-          :items="analysisResultsTableItems" 
-          :fields="analysisResultsTableColumns"
-          select-mode="single"
-          selectable
-          hover
-          head-variant="light"
-          @row-selected="onAnalysisResultSelected">
+          <b-table
+            ref="analysisResultsTable"
+            :items="analysisResultsTableItems"
+            :fields="analysisResultsTableColumns"
+            select-mode="single"
+            selectable
+            hover
+            head-variant="light"
+            @row-selected="onAnalysisResultSelected"
+          >
             <template #head(selected)></template>
             <template #cell(selected)="{ rowSelected }">
               <b-checkbox :checked="rowSelected" disabled class="b-table-selectable-checkbox"></b-checkbox>
@@ -28,24 +30,23 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { Component, Prop, Ref } from 'vue-property-decorator';
-import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
-import { AnalysisResultDetailedSchema } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-schema';
-import { BvTableFieldArray } from 'bootstrap-vue';
-import AppTableContainer from '@/app/shared/components/app-table-container/app-table-container.vue';
-import AppExplanation from '@/app/shared/components/app-explanation/app-explanation.vue';
-import AppSidebar from '@/app/shared/components/app-sidebar/app-sidebar.vue';
-import { KeyFigureSchema } from '@/app/shared/services/volateq-api/api-schemas/key-figure-schema';
-
+import Vue from "vue";
+import { Component, Prop, Ref } from "vue-property-decorator";
+import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
+import { BvTableFieldArray } from "bootstrap-vue";
+import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
+import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
+import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
+import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 
 @Component({
-  name: 'app-analysis-selection-sidebar',
+  name: "app-analysis-selection-sidebar",
   components: {
     AppTableContainer,
     AppExplanation,
     AppSidebar,
-  }
+  },
 })
 export default class AppAnalysisSelectionSidebar extends Vue {
   @Prop() plant!: PlantSchema;
@@ -54,9 +55,9 @@ export default class AppAnalysisSelectionSidebar extends Vue {
   @Ref() analysisResultsTable!: any; // b-table
 
   analysisResultsTableColumns: BvTableFieldArray = [
-    { key: 'selected', label: '' },
-    { key: 'name', label: this.$t("name").toString(), },
-    { key: 'createdAt', label: this.$t('created-at').toString() },
+    { key: "selected", label: "" },
+    { key: "name", label: this.$t("name").toString() },
+    { key: "createdAt", label: this.$t("created-at").toString() },
   ];
   analysisResultsTableItems: Record<string, unknown>[] = [];
 
@@ -68,7 +69,7 @@ export default class AppAnalysisSelectionSidebar extends Vue {
         createdAt: new Date(Date.parse(analysisResult.analysis.created_at)).toLocaleDateString(),
         kpis: analysisResult.key_figures,
         _showDetails: true,
-      })
+      });
     }
 
     if (this.analysisResults.length > 0) {
@@ -83,14 +84,13 @@ export default class AppAnalysisSelectionSidebar extends Vue {
   }
 
   onAnalysisResultSelected(selectedAnalysisResult: { id: string }[]): void {
-    const selectedAnalysisResultId = selectedAnalysisResult && selectedAnalysisResult.length > 0 && 
-      selectedAnalysisResult[0].id || undefined;
+    const selectedAnalysisResultId = (selectedAnalysisResult && selectedAnalysisResult.length > 0 && selectedAnalysisResult[0].id) || undefined;
 
     this.$emit("analysisResultSelected", selectedAnalysisResultId);
   }
 
   onSidebarToggled(open: boolean): void {
-    this.$emit("sidebarToggled", open)
+    this.$emit("sidebarToggled", open);
   }
 
   getKpiColor(keyFigure: KeyFigureSchema): string {

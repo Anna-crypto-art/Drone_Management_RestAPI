@@ -7,11 +7,7 @@ import { BaseLayerType } from "../types/layers";
 export default abstract class LayerLoader<T extends Layer<Source> | undefined> {
   protected loadedLayer?: T;
 
-  constructor(
-    public readonly layerType: BaseLayerType,
-    protected readonly map: Map,
-    protected loadingCallback?: (e: LoadingEvent) => void
-  ) {
+  constructor(public readonly layerType: BaseLayerType, protected readonly map: Map, protected loadingCallback?: (e: LoadingEvent) => void) {
     if (layerType.selected) {
       this.load();
     }

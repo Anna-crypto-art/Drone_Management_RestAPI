@@ -8,7 +8,8 @@
     "build": "ENV=production vue-cli-service build",
     "make-version": "version=$(grep '\"version\":' package.json | sed 's/.*\"version\": \"\\([^\",]*\\)\",/\\1/') && sed -i 's/\"\\/js\\/app\\.js\"/\"\\/js\\/app\\.js?v='\"$version\"'\"/g' dist/index.html",
     "lint": "vue-cli-service lint",
-    "vuetype": "vuetype"
+    "vuetype": "vuetype",
+    "format": "prettier -w src"
   },
   "repository": {
     "type": "git",
@@ -38,18 +39,18 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "4.0.1",
     "@typescript-eslint/parser": "4.0.1",
+    "@vue/babel-preset-app": "4.5.14",
     "@vue/cli-plugin-babel": "~4.2.0",
     "@vue/cli-plugin-eslint": "~4.2.0",
     "@vue/cli-plugin-router": "~4.2.0",
     "@vue/cli-plugin-typescript": "4.4.6",
     "@vue/cli-service": "~4.2.0",
     "@vue/eslint-config-prettier": "^6.0.0",
-    "@vue/babel-preset-app": "4.5.14",
     "babel-eslint": "^10.0.3",
     "eslint": "^6.7.2",
     "eslint-plugin-prettier": "^3.1.1",
     "eslint-plugin-vue": "^6.1.2",
-    "prettier": "^1.19.1",
+    "prettier": "^2.5.1",
     "sass": "^1.35.2",
     "sass-loader": "9.0.2",
     "typescript": "~4.1.5",

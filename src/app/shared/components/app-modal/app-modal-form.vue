@@ -11,7 +11,7 @@
       <slot></slot>
     </form>
     <template v-slot:modal-footer>
-      <b-button variant="secondary" @click="$bvModal.hide(id)">{{ $t('cancel') }}</b-button>
+      <b-button variant="secondary" @click="$bvModal.hide(id)">{{ $t("cancel") }}</b-button>
       <app-button @click="onSubmit">{{ okTitle }}</app-button>
     </template>
   </b-modal>
@@ -27,14 +27,14 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
   name: "app-modal-form",
   components: {
     AppButton,
-  }
+  },
 })
 export default class AppModalForm extends Vue implements IAppModalForm {
   @Prop({ required: true }) id!: string;
   @Prop({ required: true }) title!: string;
   @Prop() subtitle: string | undefined;
   @Prop({ required: true }) okTitle!: string;
-  
+
   showAlert = false;
   alertMsg = "";
 
@@ -49,7 +49,7 @@ export default class AppModalForm extends Vue implements IAppModalForm {
   alertError(msg: string | any) {
     this.showAlert = true;
 
-    console.error(msg)
+    console.error(msg);
 
     if (typeof msg === "string") {
       this.alertMsg = msg;
@@ -69,7 +69,6 @@ export default class AppModalForm extends Vue implements IAppModalForm {
     this.showAlert = false;
     this.alertMsg = "";
   }
-
 }
 </script>
 
@@ -82,7 +81,7 @@ export default class AppModalForm extends Vue implements IAppModalForm {
       font-size: 2em;
       margin-bottom: 10px;
     }
-    
+
     &-subtitle {
       font-size: 1em;
     }

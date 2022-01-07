@@ -10,7 +10,7 @@ import { Component, Prop } from "vue-property-decorator";
 
 @Component
 export default class AppTableContainer extends Vue {
-  @Prop({ default: '' }) size!: '' | 'sm';
+  @Prop({ default: "" }) size!: "" | "sm";
 }
 </script>
 
@@ -19,15 +19,13 @@ export default class AppTableContainer extends Vue {
   margin-top: 30px;
 
   &-sm {
-    font-size: .8rem;
-    
+    font-size: 0.8rem;
+
     .b-table {
       td {
-        padding: .5rem;
-      }  
+        padding: 0.5rem;
+      }
     }
   }
-
 }
-
 </style>
