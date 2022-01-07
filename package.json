@@ -1,11 +1,11 @@
 {
   "name": "volateq-web-app",
-  "version": "1.4.6",
+  "version": "1.5.0",
   "description": "VueJs Web Application powered by Volateq",
   "main": "main.js",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "ENV=production vue-cli-service build",
     "make-version": "version=$(grep '\"version\":' package.json | sed 's/.*\"version\": \"\\([^\",]*\\)\",/\\1/') && sed -i 's/\"\\/js\\/app\\.js\"/\"\\/js\\/app\\.js?v='\"$version\"'\"/g' dist/index.html",
     "lint": "vue-cli-service lint",
     "vuetype": "vuetype"

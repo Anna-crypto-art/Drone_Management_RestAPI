@@ -1,6 +1,6 @@
 import { RouteConfig } from "vue-router";
-import AppSettingsUsers from "@/app/settings/users/users.vue";
-import AppSettings from "@/app/settings/settings.vue";
+const AppSettingsUsers = () => import("@/app/settings/users/users.vue");
+const AppSettings = () =>  import("@/app/settings/settings.vue");
 import { ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
 
 const settingsRoutes: RouteConfig[] = [
