@@ -1,32 +1,43 @@
 <template>
   <div class="app-tables-component">
     <div class="no-data-placeholder" v-show="!selectedAnalysisResult">
-      {{ $t('no-analysis-result-selected') }}
+      {{ $t("no-analysis-result-selected") }}
     </div>
     <div v-show="selectedAnalysisResult">
-      <div>
-        <div class="pull-left">
-          <app-search-input :placeholder="$t('search-pcs')" @search="onSearch"></app-search-input>
-        </div>
-        <div class="pull-right">
-          <app-button ref="csvExportBtn" variant="secondary" :title="$t('export-csv')" @click="onExportCsv">
-            <b-icon icon="download"></b-icon> {{ $t("export-csv") }}: {{ activeTabLabel }}
-          </app-button>
-        </div>
-        <div class="clearfix"></div>
+      <div class="app-tables-searchbar">
+        <app-search-input
+          :placeholder="$t('search-pcs')"
+          @search="onSearch"
+        ></app-search-input>
+
+        <app-button
+          ref="csvExportBtn"
+          variant="secondary"
+          :title="$t('export-csv')"
+          @click="onExportCsv"
+        >
+          <b-icon icon="download"></b-icon> {{ $t("export-csv") }}:
+          {{ activeTabLabel }}
+        </app-button>
       </div>
+
       <app-table-container>
         <b-tabs v-model="tabIndex" @activate-tab="onTabChanged">
-          <b-tab v-for="activeTabComponent in activeTabComponents" :key="selectedAnalysisResult.id + '_' + activeTabComponent.label">
+          <b-tab
+            v-for="activeTabComponent in activeTabComponents"
+            :key="selectedAnalysisResult.id + '_' + activeTabComponent.label"
+          >
             <template #title>
               {{ $t(activeTabComponent.label) }}
               <app-explanation v-if="activeTabComponent.descr">
                 <span v-html="$t(activeTabComponent.descr)"></span>
               </app-explanation>
             </template>
-            <app-table-component :ref="generateRefTableName(activeTabComponent)"
+            <app-table-component
+              :ref="generateRefTableName(activeTabComponent)"
               :analysisResult="selectedAnalysisResult"
-              :activeComponent="activeTabComponent">
+              :activeComponent="activeTabComponent"
+            >
             </app-table-component>
           </b-tab>
         </b-tabs>
@@ -42,7 +53,11 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import AppSearchInput from "@/app/shared/components/app-search-input/app-search-input.vue";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-import { IActiveComponent, IActiveTabComponent, IAnalysisResultSelection } from "../types";
+import {
+  IActiveComponent,
+  IActiveTabComponent,
+  IAnalysisResultSelection,
+} from "../types";
 import { ITableComponent } from "./types";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
@@ -54,8 +69,6 @@ import AppTableComponent from "@/app/plant/shared/table-component/table-componen
 import { IAppButton } from "@/app/shared/components/app-button/types";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 
-
-
 @Component({
   name: "app-tables-component",
   components: {
@@ -64,9 +77,12 @@ import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
     AppSearchInput,
     AppExplanation,
     AppTableComponent,
-  }
+  },
 })
-export default class AppTablesComponent extends BaseAuthComponent implements IAnalysisResultSelection {
+export default class AppTablesComponent
+  extends BaseAuthComponent
+  implements IAnalysisResultSelection
+{
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
   @Prop() activeComponents!: IActiveComponent[];
@@ -79,7 +95,10 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
   selectedAnalysisResult: AnalysisResultDetailedSchema | null = null;
 
   selectAnalysisResult(analysisResultId: string | undefined) {
-    this.selectedAnalysisResult = this.analysisResults.find(analysisResult => analysisResult.id === analysisResultId) || null;
+    this.selectedAnalysisResult =
+      this.analysisResults.find(
+        (analysisResult) => analysisResult.id === analysisResultId
+      ) || null;
 
     this.activeTabComponents.length = 0;
 
@@ -87,8 +106,9 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
       let tabIdx = 0;
 
       for (const activeComponent of this.activeComponents) {
-        const keyFigure = this.selectedAnalysisResult.key_figures
-          .find(keyFigure => keyFigure.component.id === activeComponent.componentId);
+        const keyFigure = this.selectedAnalysisResult.key_figures.find(
+          (keyFigure) => keyFigure.component.id === activeComponent.componentId
+        );
         if (keyFigure) {
           this.activeTabComponents.push({
             ...activeComponent,
@@ -103,7 +123,7 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
 
   onSearch(searchText: string) {
     for (const activeComponent of this.activeComponents) {
-      const tableComponent = this.getRefTableComponent(activeComponent)
+      const tableComponent = this.getRefTableComponent(activeComponent);
       if (tableComponent) {
         tableComponent.search(searchText);
       }
@@ -134,10 +154,22 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
           tableComponent.getCsvColumnMappingsParam()
         );
 
-        const csvFileName = dateHelper.toDateTime(new Date()) + "_" + this.plant.name + "_" + 
-          new Date(Date.parse(this.selectedAnalysisResult!.csp_ptc.created_at)).toLocaleDateString() + "_" + activeComponent.label + ".csv";
+        const csvFileName =
+          dateHelper.toDateTime(new Date()) +
+          "_" +
+          this.plant.name +
+          "_" +
+          new Date(
+            Date.parse(this.selectedAnalysisResult!.csp_ptc.created_at)
+          ).toLocaleDateString() +
+          "_" +
+          activeComponent.label +
+          ".csv";
 
-        AppDownloader.download(await volateqApi.generateDownloadUrl(authCsvDownloadUrl, csvFileName), csvFileName);
+        AppDownloader.download(
+          await volateqApi.generateDownloadUrl(authCsvDownloadUrl, csvFileName),
+          csvFileName
+        );
       } catch (e) {
         appContentEventBus.showError(e as ApiException);
       } finally {
@@ -146,22 +178,47 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
     }
   }
 
-  private getRefTableComponent(activeTabComponent: IActiveComponent): ITableComponent {
-    return (this.$refs[this.generateRefTableName(activeTabComponent)] as any[])[0];
+  private getRefTableComponent(
+    activeTabComponent: IActiveComponent
+  ): ITableComponent {
+    return (
+      this.$refs[this.generateRefTableName(activeTabComponent)] as any[]
+    )[0];
   }
 
   private generateRefTableName(activeTabComponent: IActiveComponent): string {
-    return ["tableComponent", this.selectedAnalysisResult!.id, activeTabComponent.componentId].join("_");
+    return [
+      "tableComponent",
+      this.selectedAnalysisResult!.id,
+      activeTabComponent.componentId,
+    ].join("_");
   }
 
   private getSelectedActiveComponent(): IActiveTabComponent | undefined {
-    return Object.values(this.activeTabComponents).find(comp => comp.tabIndex === this.tabIndex);
+    return Object.values(this.activeTabComponents).find(
+      (comp) => comp.tabIndex === this.tabIndex
+    );
   }
 }
 </script>
 <style lang="scss">
+
 .app-tables-component {
   padding: 60px 20px;
+
+  .app-tables-searchbar {
+    display: flex;
+    justify-content: space-between;
+    flex-flow: row wrap;
+    gap: 10px;
+
+    @media (max-width: 576px) {
+      > * {
+        flex: 1 0 100%;
+        max-width: 100%;
+      }
+    }
+  }
 
   .no-data-placeholder {
     margin-top: 50px;

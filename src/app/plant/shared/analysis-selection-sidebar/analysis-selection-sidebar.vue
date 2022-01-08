@@ -129,7 +129,6 @@ export default class AppAnalysisSelectionSidebar extends Vue {
 $left-width: 400px;
 
 .analysis-selection-sidebar {
-  position: absolute;
   height: calc(100vh - #{$header-height});
   display: flex;
 

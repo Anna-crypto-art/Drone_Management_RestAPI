@@ -13,11 +13,11 @@
       <h2 :class="'plant-view-csp-ptc-title ' + (sidebarOpen ? 'open' : '')">
         {{ plant.name }}
       </h2>
-      <b-tabs align="center">
+      <b-tabs align="center" @activate-tab="onTabChange">
         <b-tab>
           <template #title>
-            <b-icon icon="map"/>
-            </template>
+            <b-icon icon="map" />
+          </template>
           <app-visual-csp-ptc
             ref="visualCspPtc"
             :analysisResults="analysisResults"
@@ -26,39 +26,37 @@
           />
         </b-tab>
         <b-tab v-if="hasResults">
-          <template #title><b-icon icon="table"/></template>
+          <template #title><b-icon icon="table" /></template>
           <app-tables-csp-ptc
             ref="tablesCspPtc"
             :analysisResults="analysisResults"
             :plant="plant"
           />
         </b-tab>
-        <b-tab v-if="isSuperAdmin">
-          <template #title><b-icon icon="braces"/></template>
-          <b-container>
-            <b-row>
-              <b-col>
-                <div class="plant-view-csp-ptc-admin-panel">
-                  <h3>{{ $t("admin-panel") }}</h3>
-                  <hr />
-                  <h4>{{ $t("analysis-visibility") }}</h4>
-                  <b-form-checkbox
-                    v-show="analysisResultReleased !== null"
-                    v-model="analysisResultReleased"
-                    switch
-                    @change="onReleaseChanged"
-                  >
-                    {{
-                      analysisResultReleased
-                        ? $t("released")
-                        : $t("invisible-for-customer")
-                    }}
-                  </b-form-checkbox>
-                  <!--<h4>{{ $t("digital-twin") }}</h4>
+        <b-tab v-if="isSuperAdmin" class="plant-view-csp-ptc-admin-panel-tab">
+          <template #title>
+            <b-icon icon="braces" />
+          </template>
+          <b-container class="plant-view-csp-ptc-admin-panel-container">
+            <div class="plant-view-csp-ptc-admin-panel">
+              <h3>{{ $t("admin-panel") }}</h3>
+              <hr />
+              <h4>{{ $t("analysis-visibility") }}</h4>
+              <b-form-checkbox
+                v-show="analysisResultReleased !== null"
+                v-model="analysisResultReleased"
+                switch
+                @change="onReleaseChanged"
+              >
+                {{
+                  analysisResultReleased
+                    ? $t("released")
+                    : $t("invisible-for-customer")
+                }}
+              </b-form-checkbox>
+              <!--<h4>{{ $t("digital-twin") }}</h4>
                   coming soon-->
-                </div>
-              </b-col>
-            </b-row>
+            </div>
           </b-container>
         </b-tab>
       </b-tabs>
@@ -67,25 +65,22 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import { Component, Prop, Ref } from "vue-property-decorator";
-import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import AppTablesCspPtc from "@/app/plant/csp-ptc/tables/tables-csp-ptc.vue";
 import AppVisualCspPtc from "@/app/plant/csp-ptc/visualization/visual-csp-ptc.vue";
-import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
+import AppAnalysisSelectionSidebar from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-sidebar.vue";
+import { IAnalysisSelectionSidebar } from "@/app/plant/shared/analysis-selection-sidebar/types";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
-import AppTablesCspPtc from "@/app/plant/csp-ptc/tables/tables-csp-ptc.vue";
-import { IAnalysisSelectionSidebar } from "@/app/plant/shared/analysis-selection-sidebar/types";
-import { IAnalysisResultSelection } from "../shared/types";
-import AppAnalysisSelectionSidebar from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-sidebar.vue";
-import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { cspPtcKeyFigureColors } from "./csp-ptc-key-figure-colors";
+import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
+import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { BvTableFieldArray } from "bootstrap-vue";
-
-type View = "map" | "table";
+import { Component, Prop, Ref } from "vue-property-decorator";
+import { IAnalysisResultSelection } from "../shared/types";
+import { cspPtcKeyFigureColors } from "./csp-ptc-key-figure-colors";
 
 @Component({
   name: "app-plant-view-csp-ptc",
@@ -95,8 +90,8 @@ type View = "map" | "table";
     AppExplanation,
     AppTablesCspPtc,
     AppSidebar,
-    AppAnalysisSelectionSidebar
-  }
+    AppAnalysisSelectionSidebar,
+  },
 })
 export default class AppPlantViewCspPtc extends BaseAuthComponent {
   @Prop() plant!: PlantSchema;
@@ -108,7 +103,7 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
     { key: "selected", label: "" },
     { key: "id", label: "ID" },
     { key: "createdAt", label: this.$t("created-at").toString() },
-    { key: "kpis", label: this.$t("pi").toString() }
+    { key: "kpis", label: this.$t("pi").toString() },
   ];
   analysisResultsTableItems: Record<string, unknown>[] = [];
   private analysisResults: AnalysisResultDetailedSchema[] | null = null;
@@ -116,7 +111,6 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
   private analysisResultReleased: boolean | null = null;
 
   private sidebarOpen = false;
-  private view: View = "map";
 
   private isMobile!: boolean;
   private isMobileQuery!: MediaQueryList;
@@ -172,6 +166,12 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
     this.rerenderOLCanvas(300);
   }
 
+  onTabChange(tab: number) {
+    if (tab === 0) {
+      this.rerenderOLCanvas();
+    }
+  }
+
   private rerenderOLCanvas(timeout = 0): void {
     setTimeout(() => {
       // triggers openlayers canvas element to rerender
@@ -215,6 +215,14 @@ $left-width: 400px;
   &-admin-panel {
     padding: 1em;
     background-color: $grey;
+
+    &-tab {
+      padding: 0 50px;
+    }
+
+    &-container {
+      padding: 0;
+    }
 
     h4 {
       margin: 1.5em 0 0.5em 0;
