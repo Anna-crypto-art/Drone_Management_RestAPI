@@ -13,7 +13,9 @@ import { Style } from "ol/style";
 import LayerLoader from "./layer-loader";
 import * as ExtentFunctions from "ol/extent";
 
-export class GeoJSONLoader extends LayerLoader<VectorLayer<VectorSource<Geometry>> | VectorImageLayer<VectorSource<Geometry>>> {
+export class GeoJSONLoader extends LayerLoader<
+  VectorLayer<VectorSource<Geometry>> | VectorImageLayer<VectorSource<Geometry>>
+> {
   constructor(
     public readonly layerType: GeoJSONLayer,
     map: Map,
@@ -22,30 +24,38 @@ export class GeoJSONLoader extends LayerLoader<VectorLayer<VectorSource<Geometry
     super(layerType, map, loadingEvent);
   }
 
-  async do_load(): Promise<VectorLayer<VectorSource<Geometry>> | VectorImageLayer<VectorSource<Geometry>>> {
+  async do_load(): Promise<
+    | VectorLayer<VectorSource<Geometry>>
+    | VectorImageLayer<VectorSource<Geometry>>
+  > {
     const features = await this.layerType.geoJSONLoader();
     const source = new VectorSource({
       features: new GeoJSON().readFeatures(features, {
-        ...this.layerType.geoJSONOptions
-      })
+        ...this.layerType.geoJSONOptions,
+      }),
     });
-    source.getFeatures().forEach(feature => {
+    source.getFeatures().forEach((feature) => {
       this.setFeatureStyle(feature);
     });
 
-    let geoLayer: VectorLayer<VectorSource<Geometry>> | VectorImageLayer<VectorSource<Geometry>>;
-    if (this.layerType.layerType === undefined || this.layerType.layerType === 'VectorLayer') {
+    let geoLayer:
+      | VectorLayer<VectorSource<Geometry>>
+      | VectorImageLayer<VectorSource<Geometry>>;
+    if (
+      this.layerType.layerType === undefined ||
+      this.layerType.layerType === "VectorLayer"
+    ) {
       geoLayer = new VectorLayer({ source });
-    } else if (this.layerType.layerType === 'VectorImageLayer') {
+    } else if (this.layerType.layerType === "VectorImageLayer") {
       // More perfomant, but less accurate, rendering
-      geoLayer = new VectorImageLayer({ 
+      geoLayer = new VectorImageLayer({
         source,
-        // A larger ratio avoids cut images during panning, but will cause a decrease in performance. 
+        // A larger ratio avoids cut images during panning, but will cause a decrease in performance.
         // See https://openlayers.org/en/latest/apidoc/module-ol_layer_VectorImage-VectorImageLayer.html
         imageRatio: 1,
       });
     } else {
-      throw new Error('Unknown layerType: ' + this.layerType.layerType);
+      throw new Error("Unknown layerType: " + this.layerType.layerType);
     }
 
     if (this.layerType.style) {
@@ -58,16 +68,20 @@ export class GeoJSONLoader extends LayerLoader<VectorLayer<VectorSource<Geometry
 
     this.map.addLayer(geoLayer);
 
+    const zoomToHome = () => {
+      const mapView = this.map.getView();
+      const mapExtent = geoLayer.getSource().getExtent();
+
+      mapView.fit(mapExtent, { duration: 200, padding: [100, 100, 100, 100] });
+    };
+
     // Automatic zoom to features
     if (this.layerType.autoZoom === true) {
-      const mapView = this.map.getView();
-      mapView.fit(geoLayer.getSource().getExtent());
+      zoomToHome();
 
-      // zoom out one level due to sidebar overlay
-      const zoom = mapView.getZoom();
-      if (zoom !== undefined && zoom > 0) {
-        mapView.setZoom(zoom - 1);
-      }
+      window.addEventListener("app-visualization:go-home", (e) => {
+        zoomToHome();
+      });
     }
 
     return geoLayer;
@@ -96,13 +110,14 @@ export class GeoJSONLoader extends LayerLoader<VectorLayer<VectorSource<Geometry
               const bottom = bottomLeft[1];
               const left = bottomLeft[0];
 
-              const drawRotation = (feature.get("rotation") ?? 0) + state.rotation;
+              const drawRotation =
+                (feature.get("rotation") ?? 0) + state.rotation;
 
               ctx.save();
               ctx.rotate(drawRotation);
               ctx.drawImage(img, left, bottom, width, height);
               ctx.restore();
-            }
+            },
           })
         );
       };

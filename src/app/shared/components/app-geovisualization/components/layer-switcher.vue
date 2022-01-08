@@ -2,6 +2,21 @@
   <div :class="'layer-switcher' + (sidebarOpen ? ' open' : '')">
     <app-geovisual-toggle-layer :isOpen="sidebarOpen" :toggle="toggle" />
 
+    <div class="controls">
+      <b-button size="sm" @click="goHome">
+        <b-icon-house />
+      </b-button>
+
+      <b-button-group vertical>
+        <b-button size="sm" @click="() => handleZoom('in')">
+          <b-icon-plus />
+        </b-button>
+        <b-button size="sm" @click="() => handleZoom('out')">
+          <b-icon-dash />
+        </b-button>
+      </b-button-group>
+    </div>
+
     <div class="content">
       <div class="content-top">
         <slot name="topContent" />
@@ -21,6 +36,8 @@
 
 <script lang="ts">
 import { Map } from "ol";
+import { Zoom } from "ol/control";
+import { linear } from "ol/easing";
 import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
 import { LayerStructure } from "../layer-structure";
@@ -36,8 +53,8 @@ import AppGeovisualToggleLayer from "./toggle-layer.vue";
   name: "app-geovisual-layer-switcher",
   components: {
     AppGeovisualLayerDisplay,
-    AppGeovisualToggleLayer
-  }
+    AppGeovisualToggleLayer,
+  },
 })
 export default class AppGeovisualLayerSwitcher extends Vue {
   private static layerUIs: AppGeovisualLayerSwitcher[] = [];
@@ -58,6 +75,9 @@ export default class AppGeovisualLayerSwitcher extends Vue {
   readonly layerIndex: number;
   readonly rootLayer = new LayerStructure();
 
+  public zoomDelta = 1;
+  public animationDuration = 200;
+
   constructor() {
     super();
 
@@ -67,6 +87,12 @@ export default class AppGeovisualLayerSwitcher extends Vue {
 
   mounted(): void {
     this.layerSetup(this.rootLayer, this.layers);
+
+    this.map.getControls().forEach((control) => {
+      if (control instanceof Zoom) {
+        this.map.removeControl(control);
+      }
+    });
   }
 
   private layerSetup(parentLayer: LayerStructure, layers: LayerType[]) {
@@ -126,6 +152,29 @@ export default class AppGeovisualLayerSwitcher extends Vue {
     }
   }
 
+  handleZoom(direction: "out" | "in") {
+    const view = this.map.getView();
+    const zoom = view.getZoom();
+
+    if (zoom !== undefined) {
+      const nextZoom = view.getConstrainedZoom(
+        zoom + (direction === "out" ? -this.zoomDelta : this.zoomDelta)
+      );
+
+      if (view.getAnimating()) view.cancelAnimations();
+
+      view.animate({
+        zoom: nextZoom,
+        duration: this.animationDuration,
+        easing: linear,
+      });
+    }
+  }
+
+  goHome() {
+    window.dispatchEvent(new CustomEvent("app-visualization:go-home"));
+  }
+
   public toggle(): void {
     this.sidebarOpen = !this.sidebarOpen;
     this.$forceUpdate(); // Why vue?
@@ -156,6 +205,17 @@ $sidebar-width: 400px;
 
   transition: right 0.2s ease-in-out;
   border-left: $border-color-grey 1px solid;
+
+  .controls {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 10px;
+    position: absolute;
+    right: 100%;
+    bottom: 0;
+    padding-right: 0.5em;
+    padding-bottom: 2em;
+  }
 
   &.open {
     right: 0;
