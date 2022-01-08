@@ -47,7 +47,7 @@ export class GeoJSONLoader extends LayerLoader<
     ) {
       geoLayer = new VectorLayer({ source });
     } else if (this.layerType.layerType === "VectorImageLayer") {
-      // More perfomant, but less accurate, rendering
+      // More performant, but less accurate, rendering
       geoLayer = new VectorImageLayer({
         source,
         // A larger ratio avoids cut images during panning, but will cause a decrease in performance.
@@ -68,20 +68,17 @@ export class GeoJSONLoader extends LayerLoader<
 
     this.map.addLayer(geoLayer);
 
-    const zoomToHome = () => {
-      const mapView = this.map.getView();
-      const mapExtent = geoLayer.getSource().getExtent();
-
-      mapView.fit(mapExtent, { duration: 200, padding: [100, 100, 100, 100] });
-    };
+    const zoomToHome = () =>
+      this.map.getView().fit(geoLayer.getSource().getExtent(), {
+        duration: 200,
+        padding: [100, 100, 100, 100],
+      });
 
     // Automatic zoom to features
     if (this.layerType.autoZoom === true) {
       zoomToHome();
 
-      window.addEventListener("app-visualization:go-home", (e) => {
-        zoomToHome();
-      });
+      window.addEventListener("app-visualization:go-home", zoomToHome);
     }
 
     return geoLayer;
