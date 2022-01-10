@@ -47,8 +47,13 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     layerType: ClassHceKeyFigureLayer,
     keyFigureInfo: { templateName: "glassTubeTemperature", keyName: "glass-tube-temperature-class" },
     subLayers: [
+      {
+        displayCondition: analysisResult => analysisResult.csp_ptc.glass_tube_temperature_class_count === 4,
+        keyFigureInfo: { displayName: "glass-tube-temperature-class-4", zIndex: 14 }, 
+        query: { glass_tube_temperature_class: 4 },
+      },
       { 
-        keyFigureInfo: { displayName: "glass-tube-temperature-class-3", zIndex: 13 }, 
+        keyFigureInfo: { templateName: "glassTubeTemperatureClass3", displayName: "glass-tube-temperature-class-3", zIndex: 13 }, 
         query: { glass_tube_temperature_class: 3 },
       }, 
       { 

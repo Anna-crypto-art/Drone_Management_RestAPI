@@ -25,6 +25,15 @@
       <template #H2Concentration>
         {{ $t("high-hydrogen-concentration") }} <app-explanation><span v-html="$t('high-hydrogen-concentration_expl')"></span></app-explanation>
       </template>
+      <template #glassTubeTemperatureClass3>
+        {{ 
+          selectedAnalysisResult && (
+            selectedAnalysisResult.csp_ptc.glass_tube_temperature_class_count === 3 ? 
+            $t("glass-tube-temperature-class-4") :
+            $t("glass-tube-temperature-class-3")
+          ) || ""
+        }}
+      </template>
       <template #recommendedAction>
         {{ $t("recommended-action") }} <app-explanation><span v-html="$t('recommended-action_expl')"></span></app-explanation>
       </template>

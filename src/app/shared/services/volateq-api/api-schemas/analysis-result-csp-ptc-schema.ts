@@ -7,5 +7,6 @@ export interface AnalysisResultCspPtcSchema {
     sca_average_tracking_offset_class_limits: number[];
     sca_torsion_class_limits: number[];
     sdx_rms_class_limits: number[];
+    glass_tube_temperature_class_count: 3 | 4;
     created_at: string;
 }

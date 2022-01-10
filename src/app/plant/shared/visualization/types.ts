@@ -3,6 +3,7 @@ import { GroupLayer } from "@/app/shared/components/app-geovisualization/types/l
 import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-analysis-result-components";
 import { AnalysisResultKeyFigure } from "@/app/shared/services/volateq-api/api-analysis-result-key-figures";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
+import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { KeyFigureLayer } from "./layers/key-figure-layer";
@@ -78,5 +79,9 @@ export type KeyFigureTypeMap = {
      * Leave color undefined to take the default color mapped to the key figure.
      */
     color?: KeyFigureColors,
+    /** 
+     * Optional condition, to define whether the PI should be displayed or not
+    */
+    displayCondition?: (anaysisResult: AnalysisResultDetailedSchema) => boolean,
   }[],
 };

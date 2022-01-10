@@ -145,20 +145,22 @@ export class PILayersHierarchy {
     };
 
     for (const childLayer of keyFigureLayer.subLayers) {
-      const childKeyFigureInfo: KeyFigureInfo = childLayer.keyFigureInfo || {};
-      childKeyFigureInfo.displayName = childLayer.keyFigureInfo!.displayName || keyFigureLayer.keyFigureInfo?.displayName;
-      childKeyFigureInfo.keyName = keyFigureLayer.keyFigureInfo?.keyName;
+      if (!childLayer.displayCondition || childLayer.displayCondition(anaysisResult)) {
+        const childKeyFigureInfo: KeyFigureInfo = childLayer.keyFigureInfo || {};
+        childKeyFigureInfo.displayName = childLayer.keyFigureInfo!.displayName || keyFigureLayer.keyFigureInfo?.displayName;
+        childKeyFigureInfo.keyName = keyFigureLayer.keyFigureInfo?.keyName;
 
-      const kpiLayer: KeyFigureLayer<AnalysisResultSchemaBase> = new (keyFigureLayer.layerType)(
-        this.vueComponent, 
-        anaysisResult,
-        keyFigureLayer.keyFigureId,
-        childKeyFigureInfo,
-        childLayer.query,
-        childLayer.color
-      );
-      groupKpiLayer.keyFigureLayers.push(kpiLayer);
-      groupKpiLayer.groupLayer.childLayers.push(kpiLayer.toGeoLayer());
+        const kpiLayer: KeyFigureLayer<AnalysisResultSchemaBase> = new (keyFigureLayer.layerType)(
+          this.vueComponent, 
+          anaysisResult,
+          keyFigureLayer.keyFigureId,
+          childKeyFigureInfo,
+          childLayer.query,
+          childLayer.color
+        );
+        groupKpiLayer.keyFigureLayers.push(kpiLayer);
+        groupKpiLayer.groupLayer.childLayers.push(kpiLayer.toGeoLayer());
+      }
     }
 
     return groupKpiLayer;
