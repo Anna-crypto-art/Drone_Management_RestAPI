@@ -290,10 +290,13 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
       }
 
       if (this.manageImportFiles.jsonFile) {
+        this.appManageResultFilesModal.alertInfo("Uploading...");
+
         const task = await volateqApi.importAnalysisResult(
           this.manageImportFiles.jsonFile,
           this.manageImportFiles.analysisId!,
-          this.manageImportFiles.imageFiles
+          this.manageImportFiles.imageFiles,
+          (progress) => { this.appManageResultFilesModal.alertInfo("Uploading... " + progress + "%") }
         );
 
         volateqApi.waitForTask(

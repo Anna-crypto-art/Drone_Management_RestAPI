@@ -17,6 +17,7 @@ import { AnalysisResultFileSchema } from "./api-schemas/analysis-result-file-sch
 import { AnalysisResultComponent } from "./api-analysis-result-components";
 import { AnalysisResultKeyFigure } from "./api-analysis-result-key-figures";
 import { GeoVisualQuery } from "./api-requests/geo-visual-query-requests";
+import { ApiErrors, ApiException } from "./api-errors";
 
 export class VolateqAPI extends HttpClientBase {
 
@@ -137,13 +138,50 @@ export class VolateqAPI extends HttpClientBase {
     return this.post(`/reset-password/${confirmationKey}`, { new_password, new_password_repeat });
   }
 
-  public importAnalysisResult(jsonFile: File, analysisId: string, imageFiles?: File[]): Promise<TaskSchema> {
+  public async importAnalysisResult(
+    jsonFile: File,
+    analysisId: string,
+    imageFiles?: File[],
+    uploadProgressCallback?: (progress: number) => void,
+  ): Promise<TaskSchema> {
     const fileData = { json_file: jsonFile };
     if (imageFiles) {
-      fileData["image_files"] = imageFiles;
+      fileData["image_filenames"] = imageFiles.map(file => file.name);
     }
 
-    return this.postForm(`/auth/import-analysis-result/${analysisId}`, fileData);
+    const task = await this.postForm(`/auth/import-analysis-result/${analysisId}`, fileData);
+
+    if (imageFiles) {
+      try {
+        await this.uploadImportAnalysisResultImageFiles(analysisId, imageFiles, uploadProgressCallback);
+      } catch (e: unknown) {
+        if (!(e as ApiException).error || (e as ApiException).error !== ApiErrors.BAD_REQUEST) {
+          // Ignore Bad request error (='An import is running for this analysis, already.') 
+          // to avoid overwriting of actual task error
+          throw e;
+        }
+      }
+    }
+
+    return task;
+  }
+
+  private async uploadImportAnalysisResultImageFiles(
+    analysisId: string,
+    imageFiles: File[],
+    uploadProgressCallback?: (progress: number) => void,
+  ): Promise<void> {
+    const imagesFilesToUpload = imageFiles.slice();
+
+    while (imagesFilesToUpload.length > 0) {
+      await this.postForm(`/auth/import-analysis-result/${analysisId}/upload-images`, {
+        // Only upload 50 files simultaneously to avoid 504 (Gateway timout)
+        image_files: imagesFilesToUpload.splice(0, 50),
+      });
+
+      uploadProgressCallback && uploadProgressCallback(Math.round(
+        (imageFiles.length - imagesFilesToUpload.length) / imageFiles.length * 100));
+    }
   }
 
   public async getAnalysisResult(analysisResultId: string): Promise<AnalysisResultDetailedSchema> {
@@ -233,13 +271,17 @@ export class VolateqAPI extends HttpClientBase {
         clearInterval(interval);
         finished(task);
       } else {
-        if (info && task.info && task.info.infos && task.info.infos.length > 0) {
-          const infoMessage = ">" + task.info.infos.join("<br>>") + (
-            task.info.max_steps && `... (${task.info.current_step}/${task.info.max_steps})`
-            || "..."
-          );
-
-          info(infoMessage)
+        if (info) {
+          if (task.info && task.info.infos && task.info.infos.length > 0) {
+            const infoMessage = ">" + task.info.infos.join("<br>>") + (
+              task.info.max_steps && `... (${task.info.current_step}/${task.info.max_steps})`
+              || "..."
+            );
+  
+            info(infoMessage)
+          } else {
+            info("Wait for start...")
+          }
         }
       }
     }, 3000);
