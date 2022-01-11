@@ -64,6 +64,6 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
   }
 
   public getPropertyName(mappingEntry: AnalysisResultMappingEntry<T>): string {
-    return mappingEntry.getValue.toString().match(/({|=>)[^.]*\.([^;]*)/)![2];
+    return mappingEntry.getValue.toString().match(/({|=>)[^.]*\.([^;}]*)/)![2];
   }
 }
