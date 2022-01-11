@@ -1,5 +1,5 @@
 <template>
-  <b-modal class="app-modal-form" :id="id" :ok-title="okTitle">
+  <b-modal class="app-modal-form" :id="id" :ok-title="okTitle" no-close-on-backdrop>
     <template v-slot:modal-title>
       <div class="app-modal-form-title">
         <h2>{{ title }}</h2>
