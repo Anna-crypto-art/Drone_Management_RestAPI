@@ -14,6 +14,7 @@ import { BoolUndefinedHceKeyFigureLayer } from "./key-figures/shared/bool-hce-ke
 import { KeyFigureTypeMap } from "../../shared/visualization/types";
 import { KeyFigureColors } from "../../shared/visualization/layers/types";
 import { ClassHceKeyFigureLayer } from "./key-figures/shared/class-hce-key-figure-layer";
+import { GlassTemperatureKeyFigureLayer } from "./key-figures/glass-temperature-key-figure-layer";
 
 export const COMPONENT_LAYERS: (typeof ComponentLayer)[] = [
   AbsorberComponentLayer,
@@ -44,7 +45,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
   },
   {
     keyFigureId: AnalysisResultKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
-    layerType: ClassHceKeyFigureLayer,
+    layerType: GlassTemperatureKeyFigureLayer,
     keyFigureInfo: { templateName: "glassTubeTemperature", keyName: "glass-tube-temperature-class" },
     subLayers: [
       {

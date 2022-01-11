@@ -3,8 +3,9 @@ import { Layer } from "ol/layer";
 import Map from "ol/Map";
 import { Source } from "ol/source";
 import { BaseLayerType } from "../types/layers";
+import LayerRenderer from "ol/renderer/Layer";
 
-export default abstract class LayerLoader<T extends Layer<Source> | undefined> {
+export default abstract class LayerLoader<T extends Layer<Source, LayerRenderer<any>> | undefined> {
   protected loadedLayer?: T;
 
   constructor(
@@ -17,7 +18,7 @@ export default abstract class LayerLoader<T extends Layer<Source> | undefined> {
     }
   }
 
-  public async load(): Promise<Layer<Source> | undefined> {
+  public async load(): Promise<Layer<Source, LayerRenderer<any>> | undefined> {
     if (this.loadedLayer) {
       return this.loadedLayer;
     }
