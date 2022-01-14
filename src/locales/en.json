@@ -136,7 +136,7 @@
   "sca_expl": "Solar collector assembly",
   "orientation-at-drive": "Orientation at drive",
   "torsion-caused-friction-mean": "Torsion caused by friction",
-  "torsion-caused-friction-mean_expl": "Averaged torsion caused by friction between two operating states",
+  "torsion-caused-friction-mean_expl": "Averaged torsion caused by friction between two operating states (measure of hysteresis when moving collector into zenith from west and east, respectively)",
   "mfa": "Multi-Factor Authentication",
   "mfa-email_descr": "We did send you an E-Mail with the security code to enter.",
   "security-code": "Security code",
