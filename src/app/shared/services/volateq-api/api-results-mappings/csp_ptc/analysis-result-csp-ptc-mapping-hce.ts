@@ -67,6 +67,12 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: AnalysisResultKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID,
   },
   {
+    getValue: r => r.coating_degraded,
+    transName: "coating-degration",
+    transDescr: "coating-degration_expl",
+    keyFigureId: AnalysisResultKeyFigure.COATING_DEGRADATION_ID,
+  },
+  {
     getValue: r => r.recommended_action_class,
     transName: "recommended-action",
     transDescr: "recommended-action_expl",
