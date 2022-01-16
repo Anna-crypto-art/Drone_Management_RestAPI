@@ -28,12 +28,14 @@
       >
         <!-- Pass slots through -->
         <template v-for="(_, slot) in $slots">
-          <template :slot="slot">
+          <template :slot="slot" v-if="slot !== 'default'">
             <slot :name="slot"></slot>
           </template>
         </template>
       </app-geovisual-layer-display>
     </div>
+
+    <slot />
   </div>
 </template>
 

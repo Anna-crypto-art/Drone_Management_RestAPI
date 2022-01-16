@@ -31,10 +31,10 @@ export class GeoJSONLoader extends LayerLoader<
     const features = await this.layerType.geoJSONLoader();
     const source = new VectorSource({
       features: new GeoJSON().readFeatures(features, {
-        ...this.layerType.geoJSONOptions,
-      }),
+        ...this.layerType.geoJSONOptions
+      })
     });
-    source.getFeatures().forEach((feature) => {
+    source.getFeatures().forEach(feature => {
       this.setFeatureStyle(feature);
     });
 
@@ -52,7 +52,7 @@ export class GeoJSONLoader extends LayerLoader<
         source,
         // A larger ratio avoids cut images during panning, but will cause a decrease in performance.
         // See https://openlayers.org/en/latest/apidoc/module-ol_layer_VectorImage-VectorImageLayer.html
-        imageRatio: 1,
+        imageRatio: 1
       });
     } else {
       throw new Error("Unknown layerType: " + this.layerType.layerType);
@@ -68,11 +68,14 @@ export class GeoJSONLoader extends LayerLoader<
 
     this.map.addLayer(geoLayer);
 
-    const zoomToHome = () =>
+    const zoomToHome = () => {
+      const padding = 100;
+
       this.map.getView().fit(geoLayer.getSource().getExtent(), {
         duration: 200,
-        padding: [100, 100, 100, 100],
+        padding: [padding, padding, padding, padding]
       });
+    };
 
     // Automatic zoom to features
     if (this.layerType.autoZoom === true) {
@@ -114,7 +117,7 @@ export class GeoJSONLoader extends LayerLoader<
               ctx.rotate(drawRotation);
               ctx.drawImage(img, left, bottom, width, height);
               ctx.restore();
-            },
+            }
           })
         );
       };

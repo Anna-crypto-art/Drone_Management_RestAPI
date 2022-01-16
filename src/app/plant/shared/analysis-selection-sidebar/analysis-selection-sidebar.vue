@@ -1,5 +1,5 @@
 <template>
-  <div class="analysis-selection-sidebar">
+  <div :class="'analysis-selection-sidebar' + (absolute ? ' absolute' : '')">
     <app-sidebar :open="sidebarOpen" @toggled="onSidebarToggled">
       <div class="analysis-selection-sidebar-leftside">
         <app-table-container size="sm">
@@ -65,6 +65,7 @@ export default class AppAnalysisSelectionSidebar extends Vue {
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
   @Prop() getPIColor!: (keyFigure: KeyFigureSchema) => string;
   @Prop({ default: false }) sidebarOpen!: boolean;
+  @Prop() absolute!: boolean;
   @Ref() analysisResultsTable!: any; // b-table
 
   analysisResultsTableColumns: BvTableFieldArray = [
@@ -131,6 +132,10 @@ $left-width: 400px;
 .analysis-selection-sidebar {
   height: calc(100vh - #{$header-height});
   display: flex;
+
+  &.absolute {
+    position: absolute;
+  }
 
   &-leftside {
     padding: 0.5em;

@@ -6,6 +6,7 @@
       :analysisResults="analysisResults"
       :open="sidebarOpen"
       :getPIColor="getPiColor"
+      :absolute="leftSidebarAbsolute"
       @sidebarToggled="onSidebarToggled"
       @analysisResultSelected="onAnalysisResultSelected"
     />
@@ -22,11 +23,10 @@
             ref="visualCspPtc"
             :analysisResults="analysisResults"
             :plant="plant"
-            @sidebarToggle="onRightSidebarToggle"
           />
         </b-tab>
         <b-tab v-if="hasResults">
-          <template #title><b-icon icon="table" /></template>
+          <template #title><b-icon icon="table"/></template>
           <app-tables-csp-ptc
             ref="tablesCspPtc"
             :analysisResults="analysisResults"
@@ -90,8 +90,8 @@ import { cspPtcKeyFigureColors } from "./csp-ptc-key-figure-colors";
     AppExplanation,
     AppTablesCspPtc,
     AppSidebar,
-    AppAnalysisSelectionSidebar,
-  },
+    AppAnalysisSelectionSidebar
+  }
 })
 export default class AppPlantViewCspPtc extends BaseAuthComponent {
   @Prop() plant!: PlantSchema;
@@ -103,7 +103,7 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
     { key: "selected", label: "" },
     { key: "id", label: "ID" },
     { key: "createdAt", label: this.$t("created-at").toString() },
-    { key: "kpis", label: this.$t("pi").toString() },
+    { key: "kpis", label: this.$t("pi").toString() }
   ];
   analysisResultsTableItems: Record<string, unknown>[] = [];
   private analysisResults: AnalysisResultDetailedSchema[] | null = null;
@@ -111,6 +111,7 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
   private analysisResultReleased: boolean | null = null;
 
   private sidebarOpen = false;
+  leftSidebarAbsolute = true; // TODO: Make it absolute on all tabs?
 
   private isMobile!: boolean;
   private isMobileQuery!: MediaQueryList;
@@ -162,14 +163,12 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
     this.sidebarOpen = open;
   }
 
-  onRightSidebarToggle(toggleState: boolean): void {
-    this.rerenderOLCanvas(300);
-  }
-
   onTabChange(tab: number) {
     if (tab === 0) {
       this.rerenderOLCanvas();
     }
+
+    this.leftSidebarAbsolute = tab === 0;
   }
 
   private rerenderOLCanvas(timeout = 0): void {

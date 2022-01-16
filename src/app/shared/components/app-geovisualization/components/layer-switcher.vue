@@ -1,8 +1,12 @@
 <template>
   <div :class="'layer-switcher' + (sidebarOpen ? ' open' : '')">
-    <app-geovisual-toggle-layer :isOpen="sidebarOpen" :toggle="toggle" />
+    <app-geovisual-toggle-layer />
 
     <div class="controls">
+      <!-- IDEA: Bootstrap thought it was a good idea to use a transparent
+           background for hovered buttons, in this case not, use a white
+           or gray one instead -->
+
       <b-button size="sm" @click="goHome">
         <b-icon-house />
       </b-button>
@@ -29,6 +33,8 @@
             <slot :name="slot" />
           </template>
         </template>
+
+        <b-form-checkbox>{{ $t("world-map") }}</b-form-checkbox>
       </app-geovisual-layer-display>
     </div>
   </div>
@@ -37,7 +43,7 @@
 <script lang="ts">
 import { Map } from "ol";
 import { Zoom } from "ol/control";
-import { linear } from "ol/easing";
+import { easeOut } from "ol/easing";
 import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
 import { LayerStructure } from "../layer-structure";
@@ -48,47 +54,35 @@ import { LoadingEvent } from "../types/events";
 import { LayerType } from "../types/layers";
 import AppGeovisualLayerDisplay from "./layer-display.vue";
 import AppGeovisualToggleLayer from "./toggle-layer.vue";
+import { mapSidebar } from "@/app/shared/stores/sidebar";
 
 @Component({
   name: "app-geovisual-layer-switcher",
   components: {
     AppGeovisualLayerDisplay,
-    AppGeovisualToggleLayer,
-  },
+    AppGeovisualToggleLayer
+  }
 })
 export default class AppGeovisualLayerSwitcher extends Vue {
-  private static layerUIs: AppGeovisualLayerSwitcher[] = [];
-
-  public static toggle(id: number): void {
-    this.layerUIs[id].toggle();
-  }
-
-  public static isOpen(id: number): boolean {
-    return this.layerUIs[id].isOpen();
-  }
-
   @Prop() map!: Map;
   @Prop() layers!: LayerType[];
   @Prop({ default: "" }) title = "";
-  @Prop() sidebarOpen!: boolean;
 
-  readonly layerIndex: number;
   readonly rootLayer = new LayerStructure();
 
   public zoomDelta = 1;
   public animationDuration = 200;
 
+  sidebarOpen = mapSidebar.state.open;
+
   constructor() {
     super();
-
-    this.layerIndex = AppGeovisualLayerSwitcher.layerUIs.length;
-    AppGeovisualLayerSwitcher.layerUIs[this.layerIndex] = this;
   }
 
   mounted(): void {
     this.layerSetup(this.rootLayer, this.layers);
 
-    this.map.getControls().forEach((control) => {
+    this.map.getControls().forEach(control => {
       if (control instanceof Zoom) {
         this.map.removeControl(control);
       }
@@ -166,24 +160,13 @@ export default class AppGeovisualLayerSwitcher extends Vue {
       view.animate({
         zoom: nextZoom,
         duration: this.animationDuration,
-        easing: linear,
+        easing: easeOut
       });
     }
   }
 
   goHome() {
     window.dispatchEvent(new CustomEvent("app-visualization:go-home"));
-  }
-
-  public toggle(): void {
-    this.sidebarOpen = !this.sidebarOpen;
-    this.$forceUpdate(); // Why vue?
-
-    this.$emit("sidebarToggle", this.sidebarOpen);
-  }
-
-  public isOpen(): boolean {
-    return this.sidebarOpen;
   }
 }
 </script>
@@ -199,7 +182,6 @@ $sidebar-width: 400px;
   top: 0;
   height: 100%;
   width: $sidebar-width;
-  padding: 20px;
 
   background: white;
 
@@ -215,6 +197,12 @@ $sidebar-width: 400px;
     bottom: 0;
     padding-right: 0.5em;
     padding-bottom: 2em;
+  }
+
+  .content {
+    padding: 20px;
+    overflow: auto;
+    height: 100%;
   }
 
   &.open {
