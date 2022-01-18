@@ -4,6 +4,17 @@
       <router-link :to="{ name: 'AnalysisNew' }">
         <b-button variant="primary">{{ createNewAnalysisBtnText }}</b-button>
       </router-link>
+      <div class="app-analysis-plants-filter pull-right" v-show="plants">
+        <b-form-select
+          id="plants"
+          class="app-analysis-plants-filter-select"
+          v-model="selectedPlantId"
+          :options="plants"
+          @change="onPlantSelectionChanged">
+        </b-form-select>
+        <label class="app-analysis-plants-filter-label" for="plants">{{ $t("plant") }}</label>
+      </div>
+      <div class="clear"></div>
       <app-table-container>
         <b-table
           hover
@@ -12,7 +23,13 @@
           head-variant="light"
           show-empty
           :emptyText="$t('no-data')"
+          :busy="isLoading"
         >
+          <template #table-busy>
+            <div class="text-center">
+              <b-spinner class="align-middle"></b-spinner>
+            </div>
+        </template>
           <template #empty="scope">
             <span class="grayed">{{ scope.emptyText }}</span>
           </template>
@@ -154,8 +171,8 @@ import { AnalysisStateSchema } from "../shared/services/volateq-api/api-schemas/
 import { IAppModalForm } from "../shared/components/app-modal/types";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import AppModalFormInfoArea from "@/app/shared/components/app-modal/app-modal-form-info-area.vue";
-import { TaskSchema } from "../shared/services/volateq-api/api-schemas/task-schema";
 import { ApiErrors, ApiException } from "../shared/services/volateq-api/api-errors";
+import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
 
 @Component({
   name: "app-analysis",
@@ -168,7 +185,10 @@ import { ApiErrors, ApiException } from "../shared/services/volateq-api/api-erro
 })
 export default class AppAnalysis extends BaseAuthComponent implements IUploadListener {
   columns: BvTableFieldArray = [];
+  plants: Array<any> | null = null;
+  selectedPlantId: string | null = null;
   analysisRows: Array<any> = [];
+  isLoading = true;
 
   createNewAnalysisBtnText = "";
   uploadStateProcess = "";
@@ -202,6 +222,8 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
       { key: "hasResults", label: this.$t("has-results").toString() },
       { key: "actions" }
     ];
+
+    await this.getPlants();
 
     await this.updateAnalysisRows();
 
@@ -311,6 +333,10 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     this.appManageResultFilesModal.show();
   }
 
+  async onPlantSelectionChanged() {
+    await this.updateAnalysisRows();
+  }
+
   async saveManageResultFiles() {
     try {
       appButtonEventBus.startLoading();
@@ -389,7 +415,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
       appButtonEventBus.stopLoading();
     }
   }
-
+ 
   private updateToUploadState() {
     if (this.updateTableRowState(Math.round(uploadService.progress() * 100) + "%")) {
       this.createNewAnalysisBtnText = this.$t("return-to-upload").toString();
@@ -408,8 +434,11 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
   }
 
   private async updateAnalysisRows() {
+    this.isLoading = true;
+
     try {
-      this.analysisRows = (await volateqApi.getAllAnalysis()).map((a: AnalysisSchema) => {
+      const plant_id_filter = this.selectedPlantId && { plant_id: this.selectedPlantId } || undefined;
+      this.analysisRows = (await volateqApi.getAllAnalysis(plant_id_filter)).map((a: AnalysisSchema) => {
         const row = {
           id: a.id,
           name: a.name,
@@ -433,9 +462,35 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
       });
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  private async getPlants() {
+    const plants: PlantSchema[] = await volateqApi.getAllPlants();
+    if (plants.length > 0) {
+      this.plants = plants.map(plant => ({ value: plant.id, text: plant.name }));
+      this.plants.unshift({ value: null, text: "" });
     }
   }
 }
 </script>
 
-<style></style>
+<style lang="scss">
+.app-analysis {
+  &-plants-filter {
+    width: 300px;
+  }
+}
+
+.app-analysis-plants-filter-select {
+  width: 200px !important;
+  float: right;
+}
+.app-analysis-plants-filter-label {
+  float: right;
+  margin-top: 5px;
+  padding-right: 1em;
+}
+</style>

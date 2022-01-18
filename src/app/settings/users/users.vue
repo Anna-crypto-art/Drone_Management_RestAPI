@@ -106,6 +106,7 @@ import { InviteUser } from "@/app/shared/services/volateq-api/api-requests/user-
 import { ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
 import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
 import { BvTableFieldArray } from "bootstrap-vue";
+import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 
 @Component({
   name: "app-settings-users",
@@ -143,7 +144,7 @@ export default class AppSettingsUsers extends Vue {
     try {
       users = await volateqApi.getUsers();
     } catch (e) {
-      appContentEventBus.showError(e);
+      appContentEventBus.showError(e as ApiException);
     }
 
     this.rows = users.map((user: UserSchema) => {
@@ -189,7 +190,7 @@ export default class AppSettingsUsers extends Vue {
         text: customer.name,
       }));
     } catch (e) {
-      this.appInviteModal.alertError(e.error);
+      this.appInviteModal.alertError((e as ApiException).error);
     }
   }
 
@@ -213,7 +214,7 @@ export default class AppSettingsUsers extends Vue {
 
       await this.updateUserRows();
     } catch (e) {
-      this.appInviteModal.alertError(e.error);
+      this.appInviteModal.alertError((e as ApiException).error);
     } finally {
       appButtonEventBus.stopLoading();
     }
@@ -241,7 +242,7 @@ export default class AppSettingsUsers extends Vue {
 
       appContentEventBus.showSuccessAlert(this.$t("user-invitation-sent-successfully").toString());
     } catch (e) {
-      appContentEventBus.showError(e);
+      appContentEventBus.showError(e as ApiException);
     }
   }
 
@@ -257,7 +258,7 @@ export default class AppSettingsUsers extends Vue {
 
       await this.updateUserRows();
     } catch (e) {
-      appContentEventBus.showError(e);
+      appContentEventBus.showError(e as ApiException);
     }
   }
 

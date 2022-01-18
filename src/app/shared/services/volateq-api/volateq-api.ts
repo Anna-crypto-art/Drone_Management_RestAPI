@@ -104,8 +104,8 @@ export class VolateqAPI extends HttpClientBase {
     return this.post(`/auth/analysis`, newAnalyis);
   }
 
-  public async getAllAnalysis(customer_id?: string): Promise<AnalysisSchema[]> {
-    return this.get(`/auth/analysis`, (customer_id && { customer_id }) || undefined);
+  public async getAllAnalysis(queryParams?: { plant_id?: string }): Promise<AnalysisSchema[]> {
+    return this.get(`/auth/analysis`, queryParams);
   }
 
   public getAnalysis(analysisId?: string): Promise<AnalysisSchema> {
