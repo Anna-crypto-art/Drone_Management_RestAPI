@@ -469,7 +469,8 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
 
   private async getPlants() {
     const plants: PlantSchema[] = await volateqApi.getAllPlants();
-    if (plants.length > 0) {
+    // Hide the filter if one plant is available
+    if (plants.length > 1) {
       this.plants = plants.map(plant => ({ value: plant.id, text: plant.name }));
       this.plants.unshift({ value: null, text: "" });
     }
