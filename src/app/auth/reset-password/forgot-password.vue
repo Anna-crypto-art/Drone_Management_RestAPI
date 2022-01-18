@@ -24,8 +24,8 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
   name: "app-auth-forgot-password",
   components: {
     AppAuthContainer,
-    AppButton
-  }
+    AppButton,
+  },
 })
 export default class AppAuthForgotPassword extends Vue {
   email = "";
@@ -36,7 +36,7 @@ export default class AppAuthForgotPassword extends Vue {
 
       await volateqApi.forgotPassword(this.email);
 
-      authContainerEventBus.showSuccessAlert(this.$t('request-sent').toString())
+      authContainerEventBus.showSuccessAlert(this.$t("request-sent").toString());
     } catch (e) {
       authContainerEventBus.showErrorAlert(e.message);
     } finally {
@@ -46,5 +46,4 @@ export default class AppAuthForgotPassword extends Vue {
 }
 </script>
 
-<style lang="scss">
-</style>
+<style lang="scss"></style>

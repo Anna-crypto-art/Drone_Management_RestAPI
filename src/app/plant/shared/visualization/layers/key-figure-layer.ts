@@ -13,15 +13,14 @@ import { AnalysisResultKeyFigure } from "@/app/shared/services/volateq-api/api-a
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 
-
 export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends LayerBase {
   protected abstract readonly analysisResultMapping: AnalysisResultMappings<T>;
   protected readonly name: string;
 
-  protected geoJSON?: { 
-    type: string, 
-    features: { properties: { name: string, value: string | boolean | number }}[], 
-    custom: { components_total_count: number, mirrors_per_sce?: number },
+  protected geoJSON?: {
+    type: string;
+    features: { properties: { name: string; value: string | boolean | number } }[];
+    custom: { components_total_count: number; mirrors_per_sce?: number };
   };
 
   constructor(
@@ -30,12 +29,12 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     protected readonly keyFigureId: AnalysisResultKeyFigure,
     public readonly keyFigureInfo: KeyFigureInfo,
     protected readonly query?: GeoVisualQuery,
-    protected readonly color?: KeyFigureColors,
+    protected readonly color?: KeyFigureColors
   ) {
     super(vueComponent);
 
     this.visible = false;
-    this.name = (this.keyFigureInfo.templateName || 
+    this.name = (this.keyFigureInfo.templateName ||
       (this.keyFigureInfo.displayName && this.vueComponent.$t(this.keyFigureInfo.displayName).toString()) ||
       (this.keyFigureInfo.keyName && this.vueComponent.$t(this.keyFigureInfo.keyName).toString()))!;
     this.zIndex = this.keyFigureInfo.zIndex || 9; // 9 - to make sure PIs overlay components, always
@@ -64,20 +63,23 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
 
   protected mapResultToFeatureInfos(result: T): FeatureInfos | undefined {
     const mappingHelper = new AnalysisResultMappingHelper(this.analysisResultMapping, this.analysisResult!);
-    const record = mappingHelper.getItem(result)
+    const record = mappingHelper.getItem(result);
 
     const featureInfos: FeatureInfos = {
       title: result.fieldgeometry_component.kks,
-      records: Object.keys(record).filter(k => k !== 'pcs')
-        .map(k => this.mapRecordEntryToFeatureInfo(
-            k, 
+      records: Object.keys(record)
+        .filter(k => k !== "pcs")
+        .map(k =>
+          this.mapRecordEntryToFeatureInfo(
+            k,
             record[k]!,
             this.analysisResultMapping.find(entry => entry.transName === k)?.transDescr
           )
-        ).filter(featureInfo => featureInfo !== undefined) as any
-    }
+        )
+        .filter(featureInfo => featureInfo !== undefined) as any,
+    };
 
-    return featureInfos
+    return featureInfos;
   }
 
   protected getProperties(feature: FeatureLike): FeatureProperties {
@@ -91,11 +93,12 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   protected async getResultDetails(feature: FeatureLike): Promise<T | undefined> {
     const pcs = this.getPcs(feature);
 
-    const results = await volateqApi.getSpecificAnalysisResult(
-      this.analysisResult!.id,
-      this.keyFigure.component.id,
-      { filter: pcs, limit: 1, filter_mode: 'equals', ...this.getMoreSpecificAnalysisResultParams() }
-    );
+    const results = await volateqApi.getSpecificAnalysisResult(this.analysisResult!.id, this.keyFigure.component.id, {
+      filter: pcs,
+      limit: 1,
+      filter_mode: "equals",
+      ...this.getMoreSpecificAnalysisResultParams(),
+    });
 
     if (results.items.length > 0) {
       return results.items[0] as T;
@@ -109,12 +112,12 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   }
 
   protected getPropertyValue<T>(feature: FeatureLike): T | undefined {
-    return (this.getProperties(feature)?.value as unknown) as T;
+    return this.getProperties(feature)?.value as unknown as T;
   }
-  
+
   public async load(): Promise<Record<string, unknown>> {
     this.geoJSON = await volateqApi.getKeyFiguresGeoVisual(
-      this.vueComponent.plant.id, 
+      this.vueComponent.plant.id,
       this.analysisResult.id,
       this.keyFigure.id,
       this.query
@@ -154,6 +157,8 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     featureCount = featureCount !== undefined ? featureCount : this.geoJSON!.features.length;
     const totalCount = this.geoJSON!.custom.components_total_count;
 
-    return ` (<b>${(Math.round((featureCount / totalCount * 100) * precision) / precision).toString()}%</b> - <small>${featureCount}</small>)`
+    return ` (<b>${(
+      Math.round((featureCount / totalCount) * 100 * precision) / precision
+    ).toString()}%</b> - <small>${featureCount}</small>)`;
   }
 }

@@ -1,12 +1,12 @@
-@import './scss/custom-bootstrap.scss';
-@import './scss/_colors.scss';
+@import "./scss/custom-bootstrap.scss";
+@import "./scss/_colors.scss";
 
 @import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro);
 
 * {
   margin: 0;
   padding: 0;
-  font-family: 'Source Sans Pro';
+  font-family: "Source Sans Pro";
 }
 
 body {
@@ -39,7 +39,7 @@ form [type="submit"] {
 }
 
 .input-info-link {
-  font-size: .9rem;
+  font-size: 0.9rem;
   text-align: right;
   display: block;
   text-decoration: underline;
@@ -82,7 +82,8 @@ form [type="submit"] {
   .custom-control-input:disabled:checked ~ .custom-control-label::before {
     background-color: $blue;
   }
-  .custom-control-input[disabled] ~ .custom-control-label::before, .custom-control-input:disabled ~ .custom-control-label::before {
+  .custom-control-input[disabled] ~ .custom-control-label::before,
+  .custom-control-input:disabled ~ .custom-control-label::before {
     background-color: #fff;
   }
 }

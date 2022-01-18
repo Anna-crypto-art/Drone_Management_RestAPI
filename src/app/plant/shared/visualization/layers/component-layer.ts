@@ -7,7 +7,7 @@ export abstract class ComponentLayer extends LayerBase {
   protected abstract readonly componentId: AnalysisResultComponent;
 
   protected getPcs(feature: FeatureLike): string {
-    return feature.get('name');
+    return feature.get("name");
   }
 
   protected getName(): string {

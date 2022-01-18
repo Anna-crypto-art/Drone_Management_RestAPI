@@ -10,6 +10,11 @@ Install using npm with Node version > 10.0.0
 npm ci
 ```
 
+## Recommended extensions
+
+Prettier - Code formatter: https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode
+Vetur: https://marketplace.visualstudio.com/items?itemName=octref.vetur
+
 ### Note for Node v17:
 
 [`webpack`](https://github.com/webpack/webpack/issues/14532) and [the dev proxy](https://github.com/vitejs/vite/issues/4794) are currently having some issues with Node 17.  

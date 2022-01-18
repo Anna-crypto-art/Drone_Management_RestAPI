@@ -1,10 +1,8 @@
 import { RouteConfig } from "vue-router";
 const AppAuthLogin = () => import("@/app/auth/login/login.vue");
 const AppAuthRegister = () => import("@/app/auth/register/register.vue");
-const AppAuthForgotPassword = () =>
-  import("@/app/auth/reset-password/forgot-password.vue");
-const AppAuthResetPassword = () =>
-  import("@/app/auth/reset-password/reset-password.vue");
+const AppAuthForgotPassword = () => import("@/app/auth/reset-password/forgot-password.vue");
+const AppAuthResetPassword = () => import("@/app/auth/reset-password/reset-password.vue");
 const AppAuthConfirmLogin = () => import("@/app/auth/login/confirm-login.vue");
 
 const authRoutes: RouteConfig[] = [

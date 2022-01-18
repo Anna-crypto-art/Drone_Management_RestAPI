@@ -7,11 +7,7 @@ import TileSource from "ol/source/Tile";
 import LayerLoader from "./layer-loader";
 
 export class OSMLoader extends LayerLoader<TileLayer<TileSource>> {
-  constructor(
-    public readonly layerType: OSMLayer,
-    map: Map,
-    loadingEvent: (e: LoadingEvent) => void
-  ) {
+  constructor(public readonly layerType: OSMLayer, map: Map, loadingEvent: (e: LoadingEvent) => void) {
     super(layerType, map, loadingEvent);
   }
 

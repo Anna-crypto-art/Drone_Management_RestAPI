@@ -82,7 +82,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     getValue: r => r.glass_tube_temperature_class_limits,
     transName: "glass-tube-temperature-class-limits",
     keyFigureId: AnalysisResultKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
-  }
+  },
 ];
 
 export default analysisResultCspPtcMappingHce;

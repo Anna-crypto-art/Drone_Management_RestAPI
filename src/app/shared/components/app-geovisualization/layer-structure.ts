@@ -31,9 +31,8 @@ export class LayerStructure extends EventEmitter {
       if (selected || this.layerLoader?.loaded) {
         (await this.layerLoader?.load())?.setVisible(selected);
       }
-      
-      this.layerLoader?.layerType.onSelected &&
-        this.layerLoader?.layerType.onSelected(selected);
+
+      this.layerLoader?.layerType.onSelected && this.layerLoader?.layerType.onSelected(selected);
 
       if (selected || (!selected && this.isGroup)) {
         for (const childLayer of this.childLayers) {

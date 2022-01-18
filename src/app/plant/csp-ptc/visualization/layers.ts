@@ -16,7 +16,7 @@ import { KeyFigureColors } from "../../shared/visualization/layers/types";
 import { ClassHceKeyFigureLayer } from "./key-figures/shared/class-hce-key-figure-layer";
 import { GlassTemperatureKeyFigureLayer } from "./key-figures/glass-temperature-key-figure-layer";
 
-export const COMPONENT_LAYERS: (typeof ComponentLayer)[] = [
+export const COMPONENT_LAYERS: typeof ComponentLayer[] = [
   AbsorberComponentLayer,
   LoopComponentLayer,
   // MirrorComponentLayer, Too many mirrors (>200k) leads to OutOfMemory
@@ -29,13 +29,13 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     keyFigureId: AnalysisResultKeyFigure.MISSING_GLASS_TUBE_ID,
     layerType: BoolUndefinedHceKeyFigureLayer,
     keyFigureInfo: { templateName: "missingGhr", keyName: "missing-gct", zIndex: 11 },
-    query: { missing_glass_tube: 1, undefined: 1 }
+    query: { missing_glass_tube: 1, undefined: 1 },
   },
   {
     keyFigureId: AnalysisResultKeyFigure.OXYGEN_PENETRATION_ID,
     layerType: BoolUndefinedHceKeyFigureLayer,
     keyFigureInfo: { templateName: "O2Penetration", keyName: "oxygen-penetration", zIndex: 11 },
-    query: { oxygen_penetration: 1, undefined: 1 }
+    query: { oxygen_penetration: 1, undefined: 1 },
   },
   {
     keyFigureId: AnalysisResultKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID,
@@ -56,72 +56,84 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
       { 
         keyFigureInfo: { templateName: "glassTubeTemperatureClass3", displayName: "glass-tube-temperature-class-3", zIndex: 13 }, 
         query: { glass_tube_temperature_class: 3 },
-      }, 
-      { 
-        keyFigureInfo: { displayName: "glass-tube-temperature-class-2", zIndex: 12 }, 
+      },
+      {
+        keyFigureInfo: { displayName: "glass-tube-temperature-class-2", zIndex: 12 },
         query: { glass_tube_temperature_class: 2 },
       },
       {
         keyFigureInfo: { displayName: "glass-tube-temperature-class-1", zIndex: 10 },
         query: { glass_tube_temperature_class: 1 },
-      }, 
+      },
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
         color: KeyFigureColors.grey,
-      }
-    ]
+      },
+    ],
   },
   {
     keyFigureId: AnalysisResultKeyFigure.IR_INTENSITY_ID,
     layerType: ClassHceKeyFigureLayer,
     keyFigureInfo: { templateName: "irIntensity", keyName: "ir-intensity-class" },
     subLayers: [
-      { 
-        keyFigureInfo: { displayName: "ir-intensity-class-3", zIndex: 13 }, 
+      {
+        keyFigureInfo: { displayName: "ir-intensity-class-3", zIndex: 13 },
         query: { ir_intensity_class: 3 },
-      }, 
-      { 
-        keyFigureInfo: { displayName: "ir-intensity-class-2", zIndex: 12 }, 
+      },
+      {
+        keyFigureInfo: { displayName: "ir-intensity-class-2", zIndex: 12 },
         query: { ir_intensity_class: 2 },
       },
       {
-        keyFigureInfo: { displayName: "ir-intensity-class-1", zIndex: 10 }, 
+        keyFigureInfo: { displayName: "ir-intensity-class-1", zIndex: 10 },
         query: { ir_intensity_class: 1 },
       },
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         color: KeyFigureColors.grey,
-        query: { undefined: 1 }
-      }
-    ]
+        query: { undefined: 1 },
+      },
+    ],
   },
   {
     keyFigureId: AnalysisResultKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID,
     layerType: ClassHceKeyFigureLayer,
     keyFigureInfo: { templateName: "recommendedAction", keyName: "recommended-action" },
     subLayers: [
-      { 
-        keyFigureInfo: { templateName: "recommendedActionClass3", displayName: "recommended-action-class-3", zIndex: 13 }, 
+      {
+        keyFigureInfo: {
+          templateName: "recommendedActionClass3",
+          displayName: "recommended-action-class-3",
+          zIndex: 13,
+        },
         query: { recommended_action_class: 3 },
-      }, 
-      { 
-        keyFigureInfo: { templateName: "recommendedActionClass2", displayName: "recommended-action-class-2", zIndex: 12 }, 
+      },
+      {
+        keyFigureInfo: {
+          templateName: "recommendedActionClass2",
+          displayName: "recommended-action-class-2",
+          zIndex: 12,
+        },
         query: { recommended_action_class: 2 },
       },
       {
-        keyFigureInfo: { templateName: "recommendedActionClass1", displayName: "recommended-action-class-1", zIndex: 10 }, 
+        keyFigureInfo: {
+          templateName: "recommendedActionClass1",
+          displayName: "recommended-action-class-1",
+          zIndex: 10,
+        },
         query: { recommended_action_class: 1 },
-      }, 
+      },
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
-        color: KeyFigureColors.grey
-      }
-    ]
+        color: KeyFigureColors.grey,
+      },
+    ],
   },
   {
-    keyFigureId: AnalysisResultKeyFigure.SCE_ALIGNMENT_ID, 
+    keyFigureId: AnalysisResultKeyFigure.SCE_ALIGNMENT_ID,
     layerType: SceAlignmentKeyFigureLayer,
     keyFigureInfo: { templateName: "sceOrientation", keyName: "sce-alignment-offset" },
     subLayers: [
@@ -141,11 +153,11 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
         color: KeyFigureColors.grey,
-      }
-    ]
+      },
+    ],
   },
   {
-    keyFigureId: AnalysisResultKeyFigure.SCA_TRACKING_DEVIATION_ID, 
+    keyFigureId: AnalysisResultKeyFigure.SCA_TRACKING_DEVIATION_ID,
     layerType: ScaTrackingKeyFigureLayer,
     keyFigureInfo: { templateName: "scaOrientation", keyName: "tracking-offset" },
     subLayers: [
@@ -165,8 +177,8 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
         color: KeyFigureColors.grey,
-      }
-    ]
+      },
+    ],
   },
   {
     keyFigureId: AnalysisResultKeyFigure.SCA_FRICTION_ID,
@@ -188,9 +200,9 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
-        color: KeyFigureColors.grey
-      }
-    ]
+        color: KeyFigureColors.grey,
+      },
+    ],
   },
   {
     keyFigureId: AnalysisResultKeyFigure.SCA_SDX_ID,
@@ -213,8 +225,8 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
         color: KeyFigureColors.grey,
-      }
-    ]
+      },
+    ],
   },
   {
     keyFigureId: AnalysisResultKeyFigure.MISSING_MIRROR_ID,

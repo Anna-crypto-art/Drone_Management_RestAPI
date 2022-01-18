@@ -4,7 +4,6 @@ import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/com
 import { AnalysisResultCspPtcScaSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-sca-schema";
 import { ScaKeyFigureLayer } from "./shared/sca-key-figure-layer";
 
-
 export class ScaSdxKeyFigureLayer extends ScaKeyFigureLayer {
   protected getLegend(): Legend | undefined {
     if (!this.geoJSON) {
@@ -16,13 +15,15 @@ export class ScaSdxKeyFigureLayer extends ScaKeyFigureLayer {
       entries: [
         {
           color: this.getColor(),
-          name: this.getLegendEntryTransName(
-            "slope-deviation-class",
-            this.analysisResult.csp_ptc.sdx_rms_class_limits,
-            this.query?.sdx_class,
-            "[mrad]") + this.getLegendEntryCount(),
-        }
-      ]
+          name:
+            this.getLegendEntryTransName(
+              "slope-deviation-class",
+              this.analysisResult.csp_ptc.sdx_rms_class_limits,
+              this.query?.sdx_class,
+              "[mrad]"
+            ) + this.getLegendEntryCount(),
+        },
+      ],
     };
   }
 

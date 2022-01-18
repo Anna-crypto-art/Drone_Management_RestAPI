@@ -16,24 +16,18 @@ const appRoutes: RouteConfig[] = [
   {
     path: "*",
     name: "page-not-found",
-    component: AppPageNotFound
+    component: AppPageNotFound,
   },
   {
     path: "/",
     name: "Home",
-    component: AppHome
-  }
+    component: AppHome,
+  },
 ];
 
 const router = new Router({
   mode: "history",
-  routes: [
-    ...appRoutes, 
-    ...authRoutes,
-    ...analysisRoutes,
-    ...settingsRoutes,
-    ...plantRoutes
-  ]
+  routes: [...appRoutes, ...authRoutes, ...analysisRoutes, ...settingsRoutes, ...plantRoutes],
 });
 
 // well... I admit this naming is confusing!
@@ -52,10 +46,13 @@ router.beforeEach((to, from, next) => {
       return;
     }
 
-    if (!store.getters.auth.isSuperAdmin && to.meta && to.meta.role && 
-      (to.meta.role === ApiRoles.SUPER_ADMIN || 
-        (to.meta.role === ApiRoles.CUSTOMER_ADMIN && !store.getters.auth.isCustomerAdmin))) 
-    {
+    if (
+      !store.getters.auth.isSuperAdmin &&
+      to.meta &&
+      to.meta.role &&
+      (to.meta.role === ApiRoles.SUPER_ADMIN ||
+        (to.meta.role === ApiRoles.CUSTOMER_ADMIN && !store.getters.auth.isCustomerAdmin))
+    ) {
       next({ name: "page-not-found" });
       return;
     }

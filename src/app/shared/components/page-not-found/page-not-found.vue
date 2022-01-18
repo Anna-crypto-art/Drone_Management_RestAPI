@@ -1,15 +1,7 @@
 <template>
-  <app-content
-    title="Page not found"
-    subtitle="Where am I?"
-    :showHeader="isAuthenticated"
-  >
+  <app-content title="Page not found" subtitle="Where am I?" :showHeader="isAuthenticated">
     <div class="page-not-found">
-      <img
-        src="/images/brdrone.png"
-        srcset="/images/brdrone.webp, /images/brdrone.png"
-        alt="page not found"
-      />
+      <img src="/images/brdrone.png" srcset="/images/brdrone.webp, /images/brdrone.png" alt="page not found" />
     </div>
   </app-content>
 </template>

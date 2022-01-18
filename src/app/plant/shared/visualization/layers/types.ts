@@ -1,10 +1,9 @@
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 
-
 export interface KeyFigureInfo {
   /**
    * will translated (i18n)
-   * unique name used as a (logical) id for a KeyFigureLayer and used for mapping to the value property 
+   * unique name used as a (logical) id for a KeyFigureLayer and used for mapping to the value property
    */
   keyName?: string;
   /**
@@ -27,7 +26,7 @@ export interface SubKeyFigureInfo {
    * Define this name as a reference within template of visual-csp-tpc -> app-geovisualization
    */
   templateName?: string;
-   /**
+  /**
    * will translated (i18n) in legend and should be unique within the sublayers
    */
   displayName?: string;
@@ -39,14 +38,14 @@ export interface SubKeyFigureInfo {
 
 /**
  * Inspired by https://htmlcolorcodes.com/color-picker/
- * 
+ *
  * We use TRIADIC color ranges:
  * RED - #AF0000
  * GREEN - #00AF00
  * BLUE - #0000AF
- * 
+ *
  * Then we take any NEUTRAL color for each color range
- * 
+ *
  * All names of the colors defined via https://colornames.org/
  */
 export enum KeyFigureColors {
@@ -70,7 +69,6 @@ export enum KeyFigureColors {
   BLUE_iurple = "#8300af",
   BLUE_berryLover = "#af00af",
   BLUE_liturgicalTemptation = "#af0083",
-
 
   green = "green",
   yellow = "yellow",

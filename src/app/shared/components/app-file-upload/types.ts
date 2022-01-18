@@ -2,7 +2,7 @@ import { IResumableFile } from "@/app/shared/services/upload-service/types";
 
 export interface IAppFileUpload {
   files: IResumableFile[];
-  
+
   cancel(): void;
   upload<T>(target: string, metadata?: T): void;
 }

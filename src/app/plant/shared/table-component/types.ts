@@ -1,7 +1,6 @@
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { IActiveComponent } from "../types";
 
-
 export interface ITableComponentContainer {
   startLoading(): void;
   stopLoading(): void;

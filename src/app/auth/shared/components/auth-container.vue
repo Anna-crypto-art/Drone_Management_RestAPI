@@ -12,11 +12,7 @@
           <div class="app-auth-box">
             <div v-if="title" class="app-auth-box-title">
               <h1>{{ title }}</h1>
-              <div
-                v-if="subtitle"
-                v-html="subtitle"
-                class="app-auth-box-subtitle grayed"
-              ></div>
+              <div v-if="subtitle" v-html="subtitle" class="app-auth-box-subtitle grayed"></div>
             </div>
             <slot></slot>
             <b-alert

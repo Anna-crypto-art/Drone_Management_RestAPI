@@ -5,10 +5,14 @@
         <b-button variant="primary">{{ createNewAnalysisBtnText }}</b-button>
       </router-link>
       <app-table-container>
-        <b-table hover :fields="columns" :items="analysisRows"
+        <b-table
+          hover
+          :fields="columns"
+          :items="analysisRows"
           head-variant="light"
-          show-empty 
-          :emptyText="$t('no-data')">
+          show-empty
+          :emptyText="$t('no-data')"
+        >
           <template #empty="scope">
             <span class="grayed">{{ scope.emptyText }}</span>
           </template>
@@ -17,7 +21,7 @@
           </template>
           <template #cell(user)="row">
             <span v-if="row.item.user.userName">
-              {{ row.item.user.userName }}<br>
+              {{ row.item.user.userName }}<br />
               <small class="grayed">{{ row.item.user.email }}</small>
             </span>
             <span v-else>{{ row.item.user.email }}</span>
@@ -26,7 +30,7 @@
             <div v-if="row.item.state">
               {{ $t(row.item.state.state.name) }}
               <span v-if="row.item.state.state.name === 'UPLOADING'"> {{ uploadStateProcess }}</span>
-              <br>
+              <br />
               <small class="grayed">{{ trans(getTimeDiff(row.item.state.started_at)) }}</small>
             </div>
             <div v-else>UNKNOWN</div>
@@ -42,22 +46,40 @@
                   {{ file }}
                 </b-dropdown-item>
               </b-dropdown>
-              <b-dropdown v-show="canUpdateState(row.item.state)" right size="sm" variant="secondary" :title="$t('update-analysis-state')">
+              <b-dropdown
+                v-show="canUpdateState(row.item.state)"
+                right
+                size="sm"
+                variant="secondary"
+                :title="$t('update-analysis-state')"
+              >
                 <template #button-content><b-icon icon="flag"></b-icon></template>
-                <b-dropdown-item v-for="state in getPossibleUpdateStates(row.item.state)" :key="state" @click="onUpdateStateClick(row.item, state)">
+                <b-dropdown-item
+                  v-for="state in getPossibleUpdateStates(row.item.state)"
+                  :key="state"
+                  @click="onUpdateStateClick(row.item, state)"
+                >
                   {{ $t(state) }}
                 </b-dropdown-item>
               </b-dropdown>
-              <b-button 
-                v-show="isSuperAdmin" 
-                @click="onManageResultFilesClick(row.item)" 
+              <b-button
+                v-show="isSuperAdmin"
+                @click="onManageResultFilesClick(row.item)"
                 variant="secondary"
                 size="sm"
-                :title="$t('manage-result-files')">
+                :title="$t('manage-result-files')"
+              >
                 <b-icon icon="hammer"></b-icon>
               </b-button>
-              <router-link v-if="row.item.analysisResultId" :title="$t('show-results')"
-              :to="{ name: 'Plant', params: { id: row.item.plantId }, query: { view: 'table', result: row.item.analysisResultId }}">
+              <router-link
+                v-if="row.item.analysisResultId"
+                :title="$t('show-results')"
+                :to="{
+                  name: 'Plant',
+                  params: { id: row.item.plantId },
+                  query: { view: 'table', result: row.item.analysisResultId },
+                }"
+              >
                 <b-button variant="primary" size="sm"><b-icon icon="graph-up"></b-icon></b-button>
               </router-link>
             </div>
@@ -65,26 +87,36 @@
           </template>
         </b-table>
       </app-table-container>
-      <app-modal-form 
-        id="update-state-modal" 
-        ref="appUpdateStateModal" 
-        :title="$t('update-analysis-state')" 
-        :subtitle="$t('update-analysis-state_descr')" 
+      <app-modal-form
+        id="update-state-modal"
+        ref="appUpdateStateModal"
+        :title="$t('update-analysis-state')"
+        :subtitle="$t('update-analysis-state_descr')"
         :ok-title="$t('update')"
-        @submit="changeAnalysisState">
-        <app-modal-form-info-area v-if="updateStateData.state" v-html="$t('update-analysis-state-to', { state: $t(updateStateData.state).toString() })">
+        @submit="changeAnalysisState"
+      >
+        <app-modal-form-info-area
+          v-if="updateStateData.state"
+          v-html="$t('update-analysis-state-to', { state: $t(updateStateData.state).toString() })"
+        >
         </app-modal-form-info-area>
         <b-form-group :label="$t('message')" label-for="message">
-          <b-form-textarea id="message" v-model="updateStateData.message" :placeholder="$t('message')" row="5"></b-form-textarea>
+          <b-form-textarea
+            id="message"
+            v-model="updateStateData.message"
+            :placeholder="$t('message')"
+            row="5"
+          ></b-form-textarea>
         </b-form-group>
       </app-modal-form>
-      <app-modal-form 
+      <app-modal-form
         id="manage-result-files-modal"
         ref="appManageResultFilesModal"
         :title="$t('manage-result-files')"
         :subtitle="$t('manage-result-files_descr')"
         :ok-title="$t('apply')"
-        @submit="saveManageResultFiles">
+        @submit="saveManageResultFiles"
+      >
         <b-form-group v-show="manageImportFiles.analysisResultId">
           <b-form-checkbox id="removeAllAnalysisResultFiles" v-model="manageImportFiles.removeAllAnalysisResultFiles">
             {{ $t('remove-result-files') }} ({{ manageImportFiles.importedResultFiles }})
@@ -94,7 +126,7 @@
           <b-form-file v-model="manageImportFiles.jsonFile" accept=".json"></b-form-file>
         </b-form-group>
         <b-form-group :label="$t('select-result-image-files')">
-          <b-form-file v-model="manageImportFiles.imageFiles" accept="image/png, image/jpeg" multiple ></b-form-file>
+          <b-form-file v-model="manageImportFiles.imageFiles" accept="image/png, image/jpeg" multiple></b-form-file>
         </b-form-group>
       </app-modal-form>
     </div>
@@ -131,8 +163,8 @@ import { ApiErrors, ApiException } from "../shared/services/volateq-api/api-erro
     AppContent,
     AppTableContainer,
     AppModalForm,
-    AppModalFormInfoArea
-  }
+    AppModalFormInfoArea,
+  },
 })
 export default class AppAnalysis extends BaseAuthComponent implements IUploadListener {
   columns: BvTableFieldArray = [];
@@ -142,10 +174,10 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
   uploadStateProcess = "";
 
   @Ref() appUpdateStateModal!: IAppModalForm;
-  updateStateData: { 
-    analysisId?: string,
-    state?: ApiStates,
-    message?: string,
+  updateStateData: {
+    analysisId?: string;
+    state?: ApiStates;
+    message?: string;
   } = { message: "", state: undefined, analysisId: undefined };
 
   @Ref() appManageResultFilesModal!: IAppModalForm;
@@ -157,7 +189,6 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     jsonFile?: File,
     imageFiles?: File[],
   } = { analysisResultId: "", removeAllAnalysisResultFiles: false, importedResultFiles: "" };
-
 
   async created() {
     this.createNewAnalysisBtnText = this.$t("new-data-upload").toString();
@@ -217,13 +248,13 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
       files = files.concat(analysis.files.video_files);
     }
     if (analysis.files.drone_metadata_files) {
-      files = files.concat(analysis.files.drone_metadata_files)
+      files = files.concat(analysis.files.drone_metadata_files);
     }
     if (analysis.files.other_files) {
-      files = files.concat(analysis.files.other_files)
+      files = files.concat(analysis.files.other_files);
     }
 
-    files.sort()
+    files.sort();
 
     return files;
   }
@@ -231,7 +262,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
   async onFileClick(analysis: AnalysisSchema, fileName: string) {
     try {
       const downloadUrl = await volateqApi.getAnalysisFileDownloadUrl(analysis.id, fileName);
-      
+
       AppDownloader.download(downloadUrl.url, fileName);
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
@@ -239,28 +270,35 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
   }
 
   canUpdateState(analysisState: AnalysisStateSchema): boolean {
-    return this.isSuperAdmin && analysisState && 
-      [ApiStates.PICK_ME_UP, ApiStates.PROCESSING, ApiStates.PROCESS_FAILED].indexOf(analysisState.state.name) !== -1;
+    return (
+      this.isSuperAdmin &&
+      analysisState &&
+      [ApiStates.PICK_ME_UP, ApiStates.PROCESSING, ApiStates.PROCESS_FAILED].indexOf(analysisState.state.name) !== -1
+    );
   }
 
   getPossibleUpdateStates(analysisState: AnalysisStateSchema): ApiStates[] {
-    return analysisState && ApiStateStruct[analysisState.state.name] || [];
+    return (analysisState && ApiStateStruct[analysisState.state.name]) || [];
   }
 
   onUpdateStateClick(analysis: AnalysisSchema, state: ApiStates) {
-    if (!this.updateStateData.analysisId || this.updateStateData.analysisId !== analysis.id || this.updateStateData.state !== state) {
+    if (
+      !this.updateStateData.analysisId ||
+      this.updateStateData.analysisId !== analysis.id ||
+      this.updateStateData.state !== state
+    ) {
       this.updateStateData.message = "";
     }
     this.updateStateData.analysisId = analysis.id;
     this.updateStateData.state = state;
-    
+
     this.appUpdateStateModal.show();
   }
 
   async onManageResultFilesClick(analysisRowItem: any) {
     this.manageImportFiles.analysisId = analysisRowItem.id;
     this.manageImportFiles.analysisResultId = analysisRowItem.analysisResultId;
-    
+
     // clear arrays but keep the references
     this.manageImportFiles.removeAllAnalysisResultFiles = false;
 
@@ -275,15 +313,15 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
 
   async saveManageResultFiles() {
     try {
-      appButtonEventBus.startLoading()
+      appButtonEventBus.startLoading();
 
       const successfullyFinished = () => {
         this.appManageResultFilesModal.hide();
         appContentEventBus.showSuccessAlert(this.$t("success-managing-result-files").toString());
         appButtonEventBus.stopLoading();
 
-        this.updateAnalysisRows()
-      }
+        this.updateAnalysisRows();
+      };
 
       if (this.manageImportFiles.analysisResultId && this.manageImportFiles.removeAllAnalysisResultFiles) {
         await volateqApi.deleteAnalysisResult(this.manageImportFiles.analysisResultId);
@@ -301,16 +339,19 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
 
         volateqApi.waitForTask(
           task.id,
-          (task) => {
+          task => {
             appButtonEventBus.stopLoading();
 
-            if (task.state === 'SUCCESS') {
+            if (task.state === "SUCCESS") {
               successfullyFinished();
-            } else if (task.state === 'FAILURE') {
-              this.appManageResultFilesModal.alertError({ error: ApiErrors.SOMETHING_WENT_WRONG, details: task.result });
+            } else if (task.state === "FAILURE") {
+              this.appManageResultFilesModal.alertError({
+                error: ApiErrors.SOMETHING_WENT_WRONG,
+                details: task.result,
+              });
             }
           },
-          (info) => {
+          info => {
             this.appManageResultFilesModal.alertInfo(info);
           }
         );
@@ -318,7 +359,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
         successfullyFinished();
       }
     } catch (e) {
-      this.appManageResultFilesModal.alertError(e as ApiException)
+      this.appManageResultFilesModal.alertError(e as ApiException);
       appButtonEventBus.stopLoading();
     }
   }
@@ -326,16 +367,15 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
   async changeAnalysisState() {
     this.appUpdateStateModal.hideAlert();
     appButtonEventBus.startLoading();
-    
 
     this.updateAnalysisState();
   }
 
   async updateAnalysisState() {
     try {
-      await volateqApi.updateAnalysisState(this.updateStateData.analysisId!, { 
-        state: this.updateStateData.state!, 
-        message: this.updateStateData.message 
+      await volateqApi.updateAnalysisState(this.updateStateData.analysisId!, {
+        state: this.updateStateData.state!,
+        message: this.updateStateData.message,
       });
 
       await this.updateAnalysisRows();
@@ -374,15 +414,19 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
           id: a.id,
           name: a.name,
           date: new Date(Date.parse(a.created_at)).toLocaleString(),
-          user: a.user && {
-            userName: ((a.user.first_name || "") + " " + (a.user.last_name || "")).trim(),
-            email: a.user.email
-          } || '',
-          analysisResultId: a.analysis_result && (this.isSuperAdmin || a.analysis_result.released) && a.analysis_result.id || undefined,
-          state: a.current_state, 
+          user:
+            (a.user && {
+              userName: ((a.user.first_name || "") + " " + (a.user.last_name || "")).trim(),
+              email: a.user.email,
+            }) ||
+            "",
+          analysisResultId:
+            (a.analysis_result && (this.isSuperAdmin || a.analysis_result.released) && a.analysis_result.id) ||
+            undefined,
+          state: a.current_state,
           files: a.files,
           plantId: a.plant.id,
-          plant: a.plant.name
+          plant: a.plant.name,
         };
 
         return row;
@@ -394,6 +438,4 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
 }
 </script>
 
-<style>
-
-</style>
+<style></style>

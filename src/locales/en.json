@@ -11,7 +11,7 @@
   "users_descr": "Manage your users.",
   "name": "Name",
   "state": "State",
-  "role": "Role", 
+  "role": "Role",
   "registered": "Registered",
   "unknown": "Unknown",
   "pending": "Pending",

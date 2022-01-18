@@ -1,5 +1,4 @@
-import Vue from "vue"
-
+import Vue from "vue";
 
 export abstract class BaseAuthComponent extends Vue {
   isCreated = false;

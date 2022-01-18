@@ -1,12 +1,12 @@
 <template>
-  <div :class="'app-sidebar ' + (open && 'open' || '')">
+  <div :class="'app-sidebar ' + ((open && 'open') || '')">
     <div class="app-sidebar-container">
       <div class="app-sidebar-inner">
         <slot></slot>
       </div>
     </div>
     <b-button variant="secondary" size="sm" class="toggle-button" @click="onToggle()">
-      <b-icon :icon="open && 'book-fill' || 'book'"></b-icon>
+      <b-icon :icon="(open && 'book-fill') || 'book'"></b-icon>
       <span class="toggle-button-text">&nbsp; {{ $t("history") }}</span>
     </b-button>
   </div>
@@ -17,7 +17,7 @@ import Vue from "vue";
 import { Prop, Component } from "vue-property-decorator";
 
 @Component({
-  name: "app-sidebar"
+  name: "app-sidebar",
 })
 export default class AppSidebar extends Vue {
   @Prop({ default: true }) open!: boolean;
@@ -28,7 +28,6 @@ export default class AppSidebar extends Vue {
     this.$emit("toggled", this.open);
   }
 }
-
 </script>
 
 <style lang="scss">

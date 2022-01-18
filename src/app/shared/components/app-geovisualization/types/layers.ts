@@ -19,7 +19,7 @@ export interface GeoJSONLayer extends BaseLayerType {
   style?: StyleFunction;
   autoZoom?: boolean;
   zIndex?: number;
-  layerType?: 'VectorLayer' | 'VectorImageLayer';
+  layerType?: "VectorLayer" | "VectorImageLayer";
 }
 
 export interface OSMLayer extends BaseLayerType {

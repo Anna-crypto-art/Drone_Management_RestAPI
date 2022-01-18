@@ -9,13 +9,12 @@ import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant
 import { KeyFigureLayer } from "./layers/key-figure-layer";
 import { KeyFigureColors, KeyFigureInfo, SubKeyFigureInfo } from "./layers/types";
 
-
 export interface Legend {
   id: string;
-  entries: { color: string, name: string }[];
+  entries: { color: string; name: string }[];
 }
 
-export interface GroupKPILayer { 
+export interface GroupKPILayer {
   componentId?: AnalysisResultComponent;
   groupLayer: GroupLayer;
   subGroupLayers?: GroupKPILayer[];
@@ -52,36 +51,36 @@ export interface FeatureInfo {
 }
 
 export type KeyFigureTypeMap = {
-  keyFigureId: AnalysisResultKeyFigure,
-  layerType: any, // (typeof KeyFigureLayer) leads to: Type "T" is not assignable to type "AnalysisResultCspPtcHceSchema"
+  keyFigureId: AnalysisResultKeyFigure;
+  layerType: any; // (typeof KeyFigureLayer) leads to: Type "T" is not assignable to type "AnalysisResultCspPtcHceSchema"
   /**
    * applies to all subLayers if not overwritten
    */
-  keyFigureInfo?: KeyFigureInfo,
+  keyFigureInfo?: KeyFigureInfo;
   /**
-   * URL query parameters 
+   * URL query parameters
    */
-  query?: GeoVisualQuery,
+  query?: GeoVisualQuery;
   /**
    * Leave color undefined to take the default color mapped to the key figure.
    */
-  color?: KeyFigureColors,
+  color?: KeyFigureColors;
   /**
    * If the layer has subLayers it will be handled as a group layer.
    */
-  subLayers?: { 
-    keyFigureInfo?: SubKeyFigureInfo,
+  subLayers?: {
+    keyFigureInfo?: SubKeyFigureInfo;
     /**
-     * URL query parameters 
+     * URL query parameters
      */
-    query?: GeoVisualQuery,
+    query?: GeoVisualQuery;
     /**
      * Leave color undefined to take the default color mapped to the key figure.
      */
-    color?: KeyFigureColors,
-    /** 
+    color?: KeyFigureColors;
+    /**
      * Optional condition, to define whether the PI should be displayed or not
-    */
-    displayCondition?: (anaysisResult: AnalysisResultDetailedSchema) => boolean,
-  }[],
+     */
+    displayCondition?: (anaysisResult: AnalysisResultDetailedSchema) => boolean;
+  }[];
 };
