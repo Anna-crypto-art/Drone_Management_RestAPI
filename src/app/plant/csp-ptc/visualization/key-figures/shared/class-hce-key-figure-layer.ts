@@ -13,7 +13,7 @@ export class ClassHceKeyFigureLayer extends HceKeyFigureLayer {
       entries: [
         {
           color: this.getColor(),
-          name: this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
+          name: this.vueComponent.$t(this.getLegendName()).toString() +
             this.getLegendEntryCount(),
         }
       ]
@@ -26,5 +26,9 @@ export class ClassHceKeyFigureLayer extends HceKeyFigureLayer {
       || this.query?.recommended_action_class;
 
     return this.getClassColor(classValue);
+  }
+
+  protected getLegendName(): string {
+    return (this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!;
   }
 }
