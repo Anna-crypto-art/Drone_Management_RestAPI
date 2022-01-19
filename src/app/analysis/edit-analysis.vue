@@ -58,6 +58,23 @@
               <app-button type="submit">{{ $t("update") }}</app-button>
             </b-form>
           </div>
+          <div class="admin-box">
+            <h4>{{ $t("manage-result-files") }}</h4>
+            <b-form @submit.prevent="saveManageResultFiles">
+              <b-form-group v-show="manageImportFiles.analysisResultId">
+                <b-form-checkbox id="removeAllAnalysisResultFiles" v-model="manageImportFiles.removeAllAnalysisResultFiles">
+                  {{ $t('remove-result-files') }} ({{ manageImportFiles.importedResultFiles }})
+                </b-form-checkbox>
+              </b-form-group>
+              <b-form-group :label="$t('select-json-result-file-import')">
+                <b-form-file v-model="manageImportFiles.jsonFile" accept=".json"></b-form-file>
+              </b-form-group>
+              <b-form-group :label="$t('select-result-image-files')">
+                <b-form-file v-model="manageImportFiles.imageFiles" accept="image/png, image/jpeg" multiple></b-form-file>
+              </b-form-group>
+              <app-button type="submit">{{ $t('apply') }}</app-button>
+            </b-form>
+          </div>
         </b-tab>
       </b-tabs>
     </div>
@@ -68,7 +85,7 @@
 import { Component, Ref } from "vue-property-decorator";
 import appContentEventBus from "../shared/components/app-content/app-content-event-bus";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
-import { ApiException } from "../shared/services/volateq-api/api-errors";
+import { ApiErrors, ApiException } from "../shared/services/volateq-api/api-errors";
 import { AnalysisSchema } from "../shared/services/volateq-api/api-schemas/analysis-schema";
 import volateqApi from "../shared/services/volateq-api/volateq-api";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
@@ -106,6 +123,15 @@ export default class AppEditAnalysis extends BaseAuthComponent {
   selectedUpdateState: ApiStates | null = null;
   updateStateOptions: { value: string, text: string }[] | null = null;
   selectedUpdateStateMessage = "";
+
+  manageImportFiles: {
+    analysisId?: string,
+    analysisResultId?: string,
+    importedResultFiles: string,
+    removeAllAnalysisResultFiles: boolean,
+    jsonFile?: File,
+    imageFiles?: File[],
+  } = { analysisResultId: "", removeAllAnalysisResultFiles: false, importedResultFiles: "" };
 
   async created() {
     await this.updateAnalysis(this.$route.params.id)
@@ -209,8 +235,74 @@ export default class AppEditAnalysis extends BaseAuthComponent {
 
       this.setDownloadFilesTableItems();
       this.setUpdateStateOptions();
+      await this.setManageImportFiles();
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
+    }
+  }
+
+  private async setManageImportFiles() {
+    this.manageImportFiles.analysisResultId = this.analysis!.analysis_result?.id;
+
+    // clear arrays but keep the references
+    this.manageImportFiles.removeAllAnalysisResultFiles = false;
+
+    if (this.manageImportFiles.analysisResultId) {
+      this.manageImportFiles.importedResultFiles = (await volateqApi.getAnalysisResultFiles(this.manageImportFiles.analysisResultId))
+        .map(analysisResultFile => analysisResultFile.filename)
+        .join(', ');
+    }
+  }
+
+  async saveManageResultFiles() {
+    try {
+      appButtonEventBus.startLoading();
+
+      const successfullyFinished = () => {
+        appContentEventBus.showSuccessAlert(this.$t("success-managing-result-files").toString());
+        appButtonEventBus.stopLoading();
+
+        this.updateAnalysis(this.analysis!.id);
+      };
+
+      if (this.manageImportFiles.analysisResultId && this.manageImportFiles.removeAllAnalysisResultFiles) {
+        await volateqApi.deleteAnalysisResult(this.manageImportFiles.analysisResultId);
+      }
+
+      if (this.manageImportFiles.jsonFile) {
+        appContentEventBus.showInfoAlert("Uploading...");
+
+        const task = await volateqApi.importAnalysisResult(
+          this.manageImportFiles.jsonFile,
+          this.manageImportFiles.analysisId!,
+          this.manageImportFiles.imageFiles,
+          (progress) => { appContentEventBus.showInfoAlert("Uploading... " + progress + "%") }
+        );
+
+        volateqApi.waitForTask(
+          task.id,
+          task => {
+            appButtonEventBus.stopLoading();
+
+            if (task.state === "SUCCESS") {
+              successfullyFinished();
+            } else if (task.state === "FAILURE") {
+              appContentEventBus.showError({
+                error: ApiErrors.SOMETHING_WENT_WRONG,
+                message: task.result,
+              });
+            }
+          },
+          info => {
+            appContentEventBus.showInfoAlert(info);
+          }
+        );
+      } else {
+        successfullyFinished();
+      }
+    } catch (e) {
+      appContentEventBus.showError(e as ApiException);
+      appButtonEventBus.stopLoading();
     }
   }
 }
