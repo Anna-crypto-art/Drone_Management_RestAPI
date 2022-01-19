@@ -20,7 +20,7 @@ export class UploadService implements IUploadService {
 
   constructor() {
     this.resumable = new ResumableJs({
-      chunkSize: 1*1024*1024*10, // 10MB
+      chunkSize: 1 * 1024 * 1024 * 10, // 10MB
       chunkRetryInterval: this.chunkRetryInterval,
       simultaneousUploads: 1,
       maxChunkRetries: this.maxRetries,
@@ -37,7 +37,7 @@ export class UploadService implements IUploadService {
       throw new Error(`No HTML-Element found with id='${dropzoneId}'`);
     }
     this.resumable.assignDrop(el);
-    
+
     if (browseButtonId) {
       const browseBtnEl = document.getElementById(browseButtonId);
       if (!browseBtnEl) {
@@ -51,7 +51,7 @@ export class UploadService implements IUploadService {
 
   public reset() {
     this.checkState([UploadState.FINISHED]);
-    this.initValues();    
+    this.initValues();
     this.state = UploadState.INITIALIZED;
   }
 
@@ -64,7 +64,7 @@ export class UploadService implements IUploadService {
   }
 
   public cancel() {
-    this.checkState([UploadState.FAILED, UploadState.UPLOADING, UploadState.INITIALIZED])
+    this.checkState([UploadState.FAILED, UploadState.UPLOADING, UploadState.INITIALIZED]);
 
     this.resumable.cancel();
 
@@ -108,8 +108,8 @@ export class UploadService implements IUploadService {
   }
 
   private initValues() {
-    this.resumable.opts.headers = { "Authorization": `Bearer ${store.state.auth.token}`};
-    this.metadata = undefined
+    this.resumable.opts.headers = { Authorization: `Bearer ${store.state.auth.token}` };
+    this.metadata = undefined;
     this.currentProgress = 0;
   }
 
@@ -153,7 +153,7 @@ export class UploadService implements IUploadService {
       this.resumable.cancel();
       this.emit(UploadEvent.COMPLETED, this.metadata);
 
-      this.reset();  
+      this.reset();
     }
   }
   private onFileSuccess(file: any) {
@@ -168,7 +168,7 @@ export class UploadService implements IUploadService {
 
     this.failedTimeout = setTimeout(() => {
       this.onFailed(msg);
-    }, this.failedTimeoutInterval) // wait for "fileRetry"-Event before fire
+    }, this.failedTimeoutInterval); // wait for "fileRetry"-Event before fire
 
     this.emit(UploadEvent.FILE_ERROR, file, msg);
   }
@@ -188,7 +188,7 @@ export class UploadService implements IUploadService {
       this.onFileProgress(file);
     });
     this.resumable.on("fileError", (file: any, msg: string) => {
-      this.onFileError(file, msg)
+      this.onFileError(file, msg);
     });
     this.resumable.on("fileRetry", (file: any) => {
       this.onRetry(file);

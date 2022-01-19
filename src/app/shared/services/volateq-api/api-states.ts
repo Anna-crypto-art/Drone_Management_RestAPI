@@ -15,5 +15,5 @@ export const ApiStateStruct = {
   PROCESSING: [ApiStates.FINISHED, ApiStates.ABANDONED, ApiStates.PROCESS_FAILED],
   PROCESS_FAILED: [ApiStates.PROCESSING, ApiStates.ABANDONED],
   ABANDONED: [],
-  FINISHED: []
-}
+  FINISHED: [],
+};

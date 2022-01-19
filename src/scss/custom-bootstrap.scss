@@ -1,10 +1,10 @@
-@import '~bootstrap';
-@import '~bootstrap-vue';
+@import "~bootstrap";
+@import "~bootstrap-vue";
 
-@import './_colors.scss';
+@import "./_colors.scss";
 
 $theme-colors: (
-  "primary": $blue
+  "primary": $blue,
 );
 
 .btn {
@@ -40,17 +40,17 @@ $theme-colors: (
     font-size: 0.875rem;
     line-height: 1.5;
   }
-  
+
   &.btn-secondary.dropdown-toggle {
     color: $blue;
     background-color: $blue-05pc;
     border-color: $blue;
   }
 }
-.btn-sm, .btn-group-sm > .btn {
+.btn-sm,
+.btn-group-sm > .btn {
   border-radius: 0 !important;
 }
-
 
 .form-control {
   border-radius: 0;
@@ -60,10 +60,10 @@ $theme-colors: (
     color: $blue-60pc;
   }
   &::-ms-input-placeholder {
-    color: $blue-60pc
+    color: $blue-60pc;
   }
   &:-ms-input-placeholder {
-    color: $blue-60pc
+    color: $blue-60pc;
   }
 }
 .form-group {
@@ -118,7 +118,7 @@ $theme-colors: (
 
 .table.b-table > thead > tr > [aria-sort="none"] {
   background-size: 0 0;
-  
+
   &:hover {
     background-size: 0.65em 1em;
   }
@@ -130,7 +130,7 @@ $theme-colors: (
 }
 .table-hover tbody tr:hover {
   background-color: $background-grey-60pc;
-  td .hover-cell {    
+  td .hover-cell {
     opacity: 1;
   }
 }
@@ -161,10 +161,11 @@ $theme-colors: (
   color: $dark-60pc;
   border-radius: 0;
 
-  &.active, &:hover {
+  &.active,
+  &:hover {
     border-color: transparent;
     border-bottom-color: $blue-60pc;
-    color: $dark
+    color: $dark;
   }
 }
 
@@ -217,6 +218,19 @@ $theme-colors: (
   border-radius: 0 !important;
 }
 
-.b-toast, .toast {
+.b-toast,
+.toast {
   border-radius: 0 !important;
+  max-width: 500px;
+}
+
+.b-toaster.b-toaster-top-right .b-toaster-slot,
+.b-toaster.b-toaster-top-left .b-toaster-slot,
+.b-toaster.b-toaster-top-center .b-toaster-slot,
+.b-toaster.b-toaster-top-full .b-toaster-slot,
+.b-toaster.b-toaster-bottom-right .b-toaster-slot,
+.b-toaster.b-toaster-bottom-left .b-toaster-slot,
+.b-toaster.b-toaster-bottom-center .b-toaster-slot,
+.b-toaster.b-toaster-bottom-full .b-toaster-slot {
+  max-width: 500px;
 }

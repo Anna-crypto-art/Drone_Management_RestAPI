@@ -3,10 +3,22 @@
     <app-auth-container :title="$t('reset-password')">
       <b-form @submit.prevent="onSubmit">
         <b-form-group :label="$t('password')" label-for="password">
-          <b-form-input id="password" v-model="password" type="password" required :placeholder="$t('password')"></b-form-input>
+          <b-form-input
+            id="password"
+            v-model="password"
+            type="password"
+            required
+            :placeholder="$t('password')"
+          ></b-form-input>
         </b-form-group>
         <b-form-group :label="$t('repeat-password')" label-for="repeat-password">
-          <b-form-input id="repeat-password" v-model="repeatPassword" type="password" required :placeholder="$t('repeat-password')"></b-form-input>
+          <b-form-input
+            id="repeat-password"
+            v-model="repeatPassword"
+            type="password"
+            required
+            :placeholder="$t('repeat-password')"
+          ></b-form-input>
         </b-form-group>
         <app-button type="submit" cls="width-100pc">{{ $t("apply") }}</app-button>
       </b-form>
@@ -28,8 +40,8 @@ import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
   name: "app-auth-reset-password",
   components: {
     AppAuthContainer,
-    AppButton
-  }
+    AppButton,
+  },
 })
 export default class AppAuthResetPassword extends Vue {
   password = "";
@@ -62,5 +74,4 @@ export default class AppAuthResetPassword extends Vue {
 }
 </script>
 
-<style lang="scss">
-</style>
+<style lang="scss"></style>

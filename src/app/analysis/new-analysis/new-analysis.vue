@@ -1,8 +1,8 @@
 <template>
   <app-content :title="$t('new-data-upload')" :navback="true" :subtitle="$t('create-new-analysis_descr')">
     <div class="app-new-analysis">
-      <b-form @submit.prevent="onSubmit" style="margin-bottom: 50px;">
-        <b-row style="margin-bottom: 25px;">
+      <b-form @submit.prevent="onSubmit" style="margin-bottom: 50px">
+        <b-row style="margin-bottom: 25px">
           <b-col sm="4">
             <b-form-group label-cols="auto" :label="$t('plant')">
               <b-form-select required v-model="newAnalysis.plant_id" :options="plantOptions"></b-form-select>
@@ -12,12 +12,23 @@
         <app-file-upload ref="appFileUpload" :title="$t('upload-your-files')">
           <app-checklist>
             <app-checklist-item :checked="checkListItems.videoFiles">{{ $t("video-files_descr") }}</app-checklist-item>
-            <app-checklist-item :checked="checkListItems.droneMetaFile">{{ $t("drone-metadata-file_descr") }}</app-checklist-item>
-            <app-checklist-item :checked="checkListItems.plantMetaFile">{{ $t("plant-metadata-file_descr") }}</app-checklist-item>
+            <app-checklist-item :checked="checkListItems.droneMetaFile">{{
+              $t("drone-metadata-file_descr")
+            }}</app-checklist-item>
+            <app-checklist-item :checked="checkListItems.plantMetaFile">{{
+              $t("plant-metadata-file_descr")
+            }}</app-checklist-item>
           </app-checklist>
         </app-file-upload>
         <app-button ref="uploadButton" type="submit" cls="pull-right">{{ uploadButtonTxt }}</app-button>
-        <app-button ref="cancelUploadButton" v-show="showCancelButton" variant="secondary" type="button" @click="onCancelUpload">{{ $t("cancel") }}</app-button>
+        <app-button
+          ref="cancelUploadButton"
+          v-show="showCancelButton"
+          variant="secondary"
+          type="button"
+          @click="onCancelUpload"
+          >{{ $t("cancel") }}</app-button
+        >
         <div class="clearfix"></div>
       </b-form>
     </div>
@@ -33,8 +44,8 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { NewAnalysis } from "@/app/shared/services/volateq-api/api-requests/analysis-requests";
 import AppFileUpload from "@/app/shared/components/app-file-upload/app-file-upload.vue";
 import { IAppFileUpload } from "@/app/shared/components/app-file-upload/types";
-import AppChecklist from "@/app/shared/components/app-checklist/app-checklist.vue"
-import AppChecklistItem from "@/app/shared/components/app-checklist/app-checklist-item.vue"
+import AppChecklist from "@/app/shared/components/app-checklist/app-checklist.vue";
+import AppChecklistItem from "@/app/shared/components/app-checklist/app-checklist-item.vue";
 import { CheckListItems, IAnalysisId, IAppNewAnalysisFetched } from "@/app/analysis/new-analysis/types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { IAppButton } from "@/app/shared/components/app-button/types";
@@ -46,7 +57,6 @@ import { NEW_ANALYSIS_STORAGE_KEY } from "@/app/shared/components/fetch-componen
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 
-
 @Component({
   name: "app-new-analysis",
   components: {
@@ -54,24 +64,27 @@ import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
     AppFileUpload,
     AppChecklist,
     AppChecklistItem,
-    AppButton
-  }
+    AppButton,
+  },
 })
-export default class AppNewAnalysis extends BaseAuthComponent implements IFetchComponent<IAppNewAnalysisFetched>, IUploadListener {
+export default class AppNewAnalysis
+  extends BaseAuthComponent
+  implements IFetchComponent<IAppNewAnalysisFetched>, IUploadListener
+{
   @Ref() appFileUpload!: IAppFileUpload;
   @Ref() uploadButton!: IAppButton;
   @Ref() cancelUploadButton!: IAppButton;
   uploadButtonTxt = "";
   showCancelButton = false;
-  
+
   plantOptions: Array<any> = [];
 
   newAnalysis: NewAnalysis = { files: [], plant_id: "" };
   checkListItems: CheckListItems = {
     videoFiles: false,
     droneMetaFile: false,
-    plantMetaFile: false
-  }
+    plantMetaFile: false,
+  };
 
   protected waitForFiles: string[] | undefined;
 
@@ -113,7 +126,7 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
   registerUploadEvents() {
     uploadService.on(UploadEvent.COMPLETED, async (metadata: IAnalysisId) => {
       try {
-        await volateqApi.updateAnalysisState(metadata.id, { state: ApiStates.PICK_ME_UP })
+        await volateqApi.updateAnalysisState(metadata.id, { state: ApiStates.PICK_ME_UP });
         appLocalStorage.removeItem(NEW_ANALYSIS_STORAGE_KEY);
 
         appContentEventBus.showSuccessAlert(this.$t("upload-completed-successfully").toString());
@@ -135,7 +148,10 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
       console.error(message);
 
       try {
-        await volateqApi.updateAnalysisState(uploadService.getMetadata<IAnalysisId>().id, { state: ApiStates.UPLOAD_FAILED, message: message })
+        await volateqApi.updateAnalysisState(uploadService.getMetadata<IAnalysisId>().id, {
+          state: ApiStates.UPLOAD_FAILED,
+          message: message,
+        });
       } catch (e) {
         // Well, that is not a surprise...
         console.error(e);
@@ -146,7 +162,10 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
       }
     });
     uploadService.on(UploadEvent.FILE_RETRY, (file: IResumableFile, retries: number) => {
-      appContentEventBus.showWarningAlert(`${this.$t("upload-error-retry").toString()} ${retries}/${uploadService.getMaxRetries()}`, "resumable-upload-error-retry");
+      appContentEventBus.showWarningAlert(
+        `${this.$t("upload-error-retry").toString()} ${retries}/${uploadService.getMaxRetries()}`,
+        "resumable-upload-error-retry"
+      );
     });
     uploadService.on(UploadEvent.FILE_ADDED, (file: IResumableFile) => {
       if (this.isCreated) {
@@ -165,12 +184,17 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
       this.uploadButton.startLoading();
     } else if (uploadService.hasState(UploadState.FAILED)) {
       this.onFailed();
-    } else if (this.analysis && this.waitForFiles) { // Upload has been interrupted
+    } else if (this.analysis && this.waitForFiles) {
+      // Upload has been interrupted
       this.checkFileCompleteness();
       if (this.waitForFiles.length > 0) {
-        appContentEventBus.showInfoAlert(this.$t("need-files-to-upload_descr").toString() + 
-          "<ul style=\"margin: 5px 0 0 40px;\"><li>" + this.waitForFiles.join("</li><li>") + "</li></ul>");
-        
+        appContentEventBus.showInfoAlert(
+          this.$t("need-files-to-upload_descr").toString() +
+            '<ul style="margin: 5px 0 0 40px;"><li>' +
+            this.waitForFiles.join("</li><li>") +
+            "</li></ul>"
+        );
+
         this.uploadButtonTxt = this.$t("resume-upload").toString();
         this.uploadButton.disable();
 
@@ -183,7 +207,7 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
     return appLocalStorage.getItem(this.storageKey);
   }
   storeData() {
-    const data = this.getStorageData()
+    const data = this.getStorageData();
     if (data) {
       appLocalStorage.setItem(this.storageKey, data);
     } else {
@@ -191,19 +215,24 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
     }
   }
   getStorageData(): IAppNewAnalysisFetched | undefined {
-    return this.analysis && {
-      newAnalysis: {
-        files: [],
-        plant_id: this.newAnalysis.plant_id,
-      },
-      analysis: this.analysis,
-      fileNames: this.appFileUpload.files.map(file => file.fileName)
-    } || undefined;
+    return (
+      (this.analysis && {
+        newAnalysis: {
+          files: [],
+          plant_id: this.newAnalysis.plant_id,
+        },
+        analysis: this.analysis,
+        fileNames: this.appFileUpload.files.map(file => file.fileName),
+      }) ||
+      undefined
+    );
   }
 
   checkFileCompleteness() {
     if (this.waitForFiles) {
-      this.waitForFiles = this.waitForFiles.filter(fileName => !this.appFileUpload.files.find(file => file.fileName === fileName))      
+      this.waitForFiles = this.waitForFiles.filter(
+        fileName => !this.appFileUpload.files.find(file => file.fileName === fileName)
+      );
       if (this.waitForFiles.length === 0) {
         this.waitForFiles = undefined;
         appContentEventBus.clearAlert();
@@ -221,7 +250,7 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
 
       for (const file of this.newAnalysis.files) {
         const ext = (file.split(".").pop() || "").toLowerCase();
-  
+
         if (ext === "mp4" || ext == "mov") {
           this.checkListItems.videoFiles = true;
         } else if (ext === "srt") {
@@ -240,7 +269,10 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
     }
 
     this.checkFileCompleteness();
-    if (!this.checkListItems.droneMetaFile || !this.checkListItems.videoFiles/* || !this.checkListItems.plantMetaFile*/) {
+    if (
+      !this.checkListItems.droneMetaFile ||
+      !this.checkListItems.videoFiles /* || !this.checkListItems.plantMetaFile*/
+    ) {
       appContentEventBus.showErrorAlert("MISSING_FILES");
       this.uploadButton.stopLoading();
       return;
@@ -252,20 +284,22 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
       if (!this.analysis) {
         this.analysis = await volateqApi.createAnalysis(this.newAnalysis);
       }
-            
+
       this.storeData();
 
-      this.appFileUpload.upload<IAnalysisId>(volateqApi.getAnalysisFileUploadUrl(this.analysis.id), { id: this.analysis.id });
+      this.appFileUpload.upload<IAnalysisId>(volateqApi.getAnalysisFileUploadUrl(this.analysis.id), {
+        id: this.analysis.id,
+      });
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
       this.uploadButton.stopLoading();
-    } 
+    }
   }
 
   onFailed() {
     this.uploadButton.stopLoading();
     this.uploadButtonTxt = this.$t("retry-upload").toString();
-  
+
     this.showCancelButton = true;
   }
   onUploading() {
@@ -285,11 +319,11 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
     this.uploadButton.stopLoading();
     this.uploadButton.enable();
     this.uploadButtonTxt = this.$t("upload").toString();
-    
+
     appContentEventBus.clearAlert();
 
     try {
-      await volateqApi.cancelAnalysisUpload(this.analysis.id)
+      await volateqApi.cancelAnalysisUpload(this.analysis.id);
     } catch (e) {
       // and that is neither a surprise...
       console.error(e);
@@ -307,6 +341,4 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IFetchC
 }
 </script>
 
-<style lang="scss">
-
-</style>
+<style lang="scss"></style>

@@ -3,7 +3,11 @@
     <div>
       <b-form inline>
         <label class="mr-sm-2">{{ $t("per-page") }}</label>
-        <b-form-select v-model="pagination.perPage" :options="selectPageOptions" class="mb-2 mr-sm-2 mb-sm-0"></b-form-select>
+        <b-form-select
+          v-model="pagination.perPage"
+          :options="selectPageOptions"
+          class="mb-2 mr-sm-2 mb-sm-0"
+        ></b-form-select>
       </b-form>
     </div>
     <div>
@@ -11,11 +15,14 @@
         v-model="pagination.currentPage"
         :total-rows="pagination.total"
         :per-page="pagination.perPage"
-        :aria-controls="tableName">
+        :aria-controls="tableName"
+      >
       </b-pagination>
     </div>
     <div>
-      <span>{{ $t("total")}}: <b>{{ pagination.total }}</b></span>
+      <span
+        >{{ $t("total") }}: <b>{{ pagination.total }}</b></span
+      >
     </div>
   </div>
 </template>
@@ -32,7 +39,7 @@ export default class AppTablePagination extends Vue {
   @Prop({ required: true }) tableName!: string;
   @Prop({ required: true }) pagination!: ITablePagination;
 
-  selectPageOptions = [10, 25, 50, 100]
+  selectPageOptions = [10, 25, 50, 100];
 }
 </script>
 

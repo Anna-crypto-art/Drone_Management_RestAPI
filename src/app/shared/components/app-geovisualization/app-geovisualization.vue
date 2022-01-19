@@ -47,8 +47,7 @@ import { IOpenLayersComponent } from "./types/components";
     AppGeovisualToggleLayer,
   },
 })
-export default class AppGeovisualization extends Vue
-  implements IOpenLayersComponent {
+export default class AppGeovisualization extends Vue implements IOpenLayersComponent {
   @Prop() layers!: LayerType[];
   @Prop() zoom?: number;
   @Prop() center?: [number, number];

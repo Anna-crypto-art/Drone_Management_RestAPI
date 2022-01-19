@@ -4,11 +4,32 @@
       <router-link :to="{ name: 'AnalysisNew' }">
         <b-button variant="primary">{{ createNewAnalysisBtnText }}</b-button>
       </router-link>
+      <div class="app-analysis-plants-filter pull-right" v-show="plants">
+        <b-form-select
+          id="plants"
+          class="app-analysis-plants-filter-select"
+          v-model="selectedPlantId"
+          :options="plants"
+          @change="onPlantSelectionChanged">
+        </b-form-select>
+        <label class="app-analysis-plants-filter-label" for="plants">{{ $t("plant") }}</label>
+      </div>
+      <div class="clear"></div>
       <app-table-container>
-        <b-table hover :fields="columns" :items="analysisRows"
+        <b-table
+          hover
+          :fields="columns"
+          :items="analysisRows"
           head-variant="light"
-          show-empty 
-          :emptyText="$t('no-data')">
+          show-empty
+          :emptyText="$t('no-data')"
+          :busy="isLoading"
+        >
+          <template #table-busy>
+            <div class="text-center">
+              <b-spinner class="align-middle"></b-spinner>
+            </div>
+        </template>
           <template #empty="scope">
             <span class="grayed">{{ scope.emptyText }}</span>
           </template>
@@ -20,7 +41,7 @@
           </template>
           <template #cell(user)="row">
             <span v-if="row.item.user.userName">
-              {{ row.item.user.userName }}<br>
+              {{ row.item.user.userName }}<br />
               <small class="grayed">{{ row.item.user.email }}</small>
             </span>
             <span v-else>{{ row.item.user.email }}</span>
@@ -29,10 +50,13 @@
             <div v-if="row.item.state">
               {{ $t(row.item.state.state.name) }}
               <span v-if="row.item.state.state.name === 'UPLOADING'"> {{ uploadStateProcess }}</span>
-              <br>
+              <br />
               <small class="grayed">{{ trans(getTimeDiff(row.item.state.started_at)) }}</small>
             </div>
             <div v-else>UNKNOWN</div>
+          </template>
+          <template #cell(hasResults)="row">
+            <b-icon v-show="row.item.analysisResultId" icon="check" class="font-xl text-success" />
           </template>
           <template #cell(actions)="row">
             <div class="hover-cell pull-right">
@@ -42,22 +66,40 @@
                   {{ file }}
                 </b-dropdown-item>
               </b-dropdown>
-              <b-dropdown v-show="canUpdateState(row.item.state)" right size="sm" variant="secondary" :title="$t('update-analysis-state')">
+              <b-dropdown
+                v-show="canUpdateState(row.item.state)"
+                right
+                size="sm"
+                variant="secondary"
+                :title="$t('update-analysis-state')"
+              >
                 <template #button-content><b-icon icon="flag"></b-icon></template>
-                <b-dropdown-item v-for="state in getPossibleUpdateStates(row.item.state)" :key="state" @click="onUpdateStateClick(row.item, state)">
+                <b-dropdown-item
+                  v-for="state in getPossibleUpdateStates(row.item.state)"
+                  :key="state"
+                  @click="onUpdateStateClick(row.item, state)"
+                >
                   {{ $t(state) }}
                 </b-dropdown-item>
               </b-dropdown>
-              <b-button 
-                v-show="isSuperAdmin" 
-                @click="onManageResultFilesClick(row.item)" 
+              <b-button
+                v-show="isSuperAdmin"
+                @click="onManageResultFilesClick(row.item)"
                 variant="secondary"
                 size="sm"
-                :title="$t('manage-result-files')">
+                :title="$t('manage-result-files')"
+              >
                 <b-icon icon="hammer"></b-icon>
               </b-button>
-              <router-link v-if="row.item.analysisResultId" :title="$t('show-results')"
-              :to="{ name: 'Plant', params: { id: row.item.plantId }, query: { view: 'table', result: row.item.analysisResultId }}">
+              <router-link
+                v-if="row.item.analysisResultId"
+                :title="$t('show-results')"
+                :to="{
+                  name: 'Plant',
+                  params: { id: row.item.plantId },
+                  query: { view: 'table', result: row.item.analysisResultId },
+                }"
+              >
                 <b-button variant="primary" size="sm"><b-icon icon="graph-up"></b-icon></b-button>
               </router-link>
             </div>
@@ -65,38 +107,46 @@
           </template>
         </b-table>
       </app-table-container>
-      <app-modal-form 
-        id="update-state-modal" 
-        ref="appUpdateStateModal" 
-        :title="$t('update-analysis-state')" 
-        :subtitle="$t('update-analysis-state_descr')" 
+      <app-modal-form
+        id="update-state-modal"
+        ref="appUpdateStateModal"
+        :title="$t('update-analysis-state')"
+        :subtitle="$t('update-analysis-state_descr')"
         :ok-title="$t('update')"
-        @submit="changeAnalysisState">
-        <app-modal-form-info-area v-if="updateStateData.state" v-html="$t('update-analysis-state-to', { state: $t(updateStateData.state).toString() })">
+        @submit="changeAnalysisState"
+      >
+        <app-modal-form-info-area
+          v-if="updateStateData.state"
+          v-html="$t('update-analysis-state-to', { state: $t(updateStateData.state).toString() })"
+        >
         </app-modal-form-info-area>
         <b-form-group :label="$t('message')" label-for="message">
-          <b-form-textarea id="message" v-model="updateStateData.message" :placeholder="$t('message')" row="5"></b-form-textarea>
+          <b-form-textarea
+            id="message"
+            v-model="updateStateData.message"
+            :placeholder="$t('message')"
+            row="5"
+          ></b-form-textarea>
         </b-form-group>
       </app-modal-form>
-      <app-modal-form 
+      <app-modal-form
         id="manage-result-files-modal"
         ref="appManageResultFilesModal"
         :title="$t('manage-result-files')"
         :subtitle="$t('manage-result-files_descr')"
         :ok-title="$t('apply')"
-        @submit="saveManageResultFiles">
-        <b-form-group v-show="manageImportFiles.analysisResultId" :label="$t('remove-result-files')">
-          <b-form-checkbox-group
-            id="remove-result-files-checkbox-group"
-            v-model="manageImportFiles.selectedResultFilesToRemove"
-            :options="manageImportFiles.existingFilesOptions">
-          </b-form-checkbox-group>
+        @submit="saveManageResultFiles"
+      >
+        <b-form-group v-show="manageImportFiles.analysisResultId">
+          <b-form-checkbox id="removeAllAnalysisResultFiles" v-model="manageImportFiles.removeAllAnalysisResultFiles">
+            {{ $t('remove-result-files') }} ({{ manageImportFiles.importedResultFiles }})
+          </b-form-checkbox>
         </b-form-group>
         <b-form-group :label="$t('select-json-result-file-import')">
           <b-form-file v-model="manageImportFiles.jsonFile" accept=".json"></b-form-file>
         </b-form-group>
         <b-form-group :label="$t('select-result-image-files')">
-          <b-form-file v-model="manageImportFiles.imageFiles" accept="image/png, image/jpeg" multiple ></b-form-file>
+          <b-form-file v-model="manageImportFiles.imageFiles" accept="image/png, image/jpeg" multiple></b-form-file>
         </b-form-group>
       </app-modal-form>
     </div>
@@ -124,8 +174,8 @@ import { AnalysisStateSchema } from "../shared/services/volateq-api/api-schemas/
 import { IAppModalForm } from "../shared/components/app-modal/types";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import AppModalFormInfoArea from "@/app/shared/components/app-modal/app-modal-form-info-area.vue";
-import { TaskSchema } from "../shared/services/volateq-api/api-schemas/task-schema";
 import { ApiErrors, ApiException } from "../shared/services/volateq-api/api-errors";
+import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
 
 @Component({
   name: "app-analysis",
@@ -133,33 +183,35 @@ import { ApiErrors, ApiException } from "../shared/services/volateq-api/api-erro
     AppContent,
     AppTableContainer,
     AppModalForm,
-    AppModalFormInfoArea
-  }
+    AppModalFormInfoArea,
+  },
 })
 export default class AppAnalysis extends BaseAuthComponent implements IUploadListener {
   columns: BvTableFieldArray = [];
+  plants: Array<any> | null = null;
+  selectedPlantId: string | null = null;
   analysisRows: Array<any> = [];
+  isLoading = true;
 
   createNewAnalysisBtnText = "";
   uploadStateProcess = "";
 
   @Ref() appUpdateStateModal!: IAppModalForm;
-  updateStateData: { 
-    analysisId?: string,
-    state?: ApiStates,
-    message?: string,
+  updateStateData: {
+    analysisId?: string;
+    state?: ApiStates;
+    message?: string;
   } = { message: "", state: undefined, analysisId: undefined };
 
   @Ref() appManageResultFilesModal!: IAppModalForm;
   manageImportFiles: {
     analysisId?: string,
     analysisResultId?: string,
-    existingFilesOptions: { text: string, value: string }[],
-    selectedResultFilesToRemove: string[],
+    importedResultFiles: string,
+    removeAllAnalysisResultFiles: boolean,
     jsonFile?: File,
     imageFiles?: File[],
-  } = { analysisResultId: "", existingFilesOptions: [], selectedResultFilesToRemove: [] };
-
+  } = { analysisResultId: "", removeAllAnalysisResultFiles: false, importedResultFiles: "" };
 
   async created() {
     this.createNewAnalysisBtnText = this.$t("new-data-upload").toString();
@@ -170,8 +222,11 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
       { key: "date", label: this.$t("created-at").toString(), sortable: true },
       { key: "user", label: this.$t("created-by").toString(), sortable: true },
       { key: "state", label: this.$t("state").toString(), sortable: true },
+      { key: "hasResults", label: this.$t("has-results").toString() },
       { key: "actions" }
     ];
+
+    await this.getPlants();
 
     await this.updateAnalysisRows();
 
@@ -218,13 +273,13 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
       files = files.concat(analysis.files.video_files);
     }
     if (analysis.files.drone_metadata_files) {
-      files = files.concat(analysis.files.drone_metadata_files)
+      files = files.concat(analysis.files.drone_metadata_files);
     }
     if (analysis.files.other_files) {
-      files = files.concat(analysis.files.other_files)
+      files = files.concat(analysis.files.other_files);
     }
 
-    files.sort()
+    files.sort();
 
     return files;
   }
@@ -232,7 +287,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
   async onFileClick(analysis: AnalysisSchema, fileName: string) {
     try {
       const downloadUrl = await volateqApi.getAnalysisFileDownloadUrl(analysis.id, fileName);
-      
+
       AppDownloader.download(downloadUrl.url, fileName);
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
@@ -240,83 +295,100 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
   }
 
   canUpdateState(analysisState: AnalysisStateSchema): boolean {
-    return this.isSuperAdmin && analysisState && 
-      [ApiStates.PICK_ME_UP, ApiStates.PROCESSING, ApiStates.PROCESS_FAILED].indexOf(analysisState.state.name) !== -1;
+    return (
+      this.isSuperAdmin &&
+      analysisState &&
+      [ApiStates.PICK_ME_UP, ApiStates.PROCESSING, ApiStates.PROCESS_FAILED].indexOf(analysisState.state.name) !== -1
+    );
   }
 
   getPossibleUpdateStates(analysisState: AnalysisStateSchema): ApiStates[] {
-    return analysisState && ApiStateStruct[analysisState.state.name] || [];
+    return (analysisState && ApiStateStruct[analysisState.state.name]) || [];
   }
 
   onUpdateStateClick(analysis: AnalysisSchema, state: ApiStates) {
-    if (!this.updateStateData.analysisId || this.updateStateData.analysisId !== analysis.id || this.updateStateData.state !== state) {
+    if (
+      !this.updateStateData.analysisId ||
+      this.updateStateData.analysisId !== analysis.id ||
+      this.updateStateData.state !== state
+    ) {
       this.updateStateData.message = "";
     }
     this.updateStateData.analysisId = analysis.id;
     this.updateStateData.state = state;
-    
+
     this.appUpdateStateModal.show();
   }
 
   async onManageResultFilesClick(analysisRowItem: any) {
     this.manageImportFiles.analysisId = analysisRowItem.id;
     this.manageImportFiles.analysisResultId = analysisRowItem.analysisResultId;
-    
+
     // clear arrays but keep the references
-    this.manageImportFiles.existingFilesOptions.length = 0;
-    this.manageImportFiles.selectedResultFilesToRemove.length = 0;
+    this.manageImportFiles.removeAllAnalysisResultFiles = false;
 
     if (this.manageImportFiles.analysisResultId) {
-      const analysisResultFiles = await volateqApi.getAnalysisResultFiles(this.manageImportFiles.analysisResultId);
-      for (const analysisResultFile of analysisResultFiles) {
-        this.manageImportFiles.existingFilesOptions.push({ text: analysisResultFile.filename, value: analysisResultFile.id });
-      }
+      this.manageImportFiles.importedResultFiles = (await volateqApi.getAnalysisResultFiles(this.manageImportFiles.analysisResultId))
+        .map(analysisResultFile => analysisResultFile.filename)
+        .join(', ');
     }
 
     this.appManageResultFilesModal.show();
   }
 
+  async onPlantSelectionChanged() {
+    await this.updateAnalysisRows();
+  }
+
   async saveManageResultFiles() {
     try {
-      appButtonEventBus.startLoading()
+      appButtonEventBus.startLoading();
 
       const successfullyFinished = () => {
         this.appManageResultFilesModal.hide();
         appContentEventBus.showSuccessAlert(this.$t("success-managing-result-files").toString());
         appButtonEventBus.stopLoading();
 
-        this.updateAnalysisRows()
-      }
+        this.updateAnalysisRows();
+      };
 
-      if (this.manageImportFiles.analysisResultId && this.manageImportFiles.selectedResultFilesToRemove.length > 0) {
-        for (const analysisResultFileId of this.manageImportFiles.selectedResultFilesToRemove) {
-          await volateqApi.deleteAnalysisResultFile(this.manageImportFiles.analysisResultId, analysisResultFileId);
-        }
+      if (this.manageImportFiles.analysisResultId && this.manageImportFiles.removeAllAnalysisResultFiles) {
+        await volateqApi.deleteAnalysisResult(this.manageImportFiles.analysisResultId);
       }
 
       if (this.manageImportFiles.jsonFile) {
+        this.appManageResultFilesModal.alertInfo("Uploading...");
+
         const task = await volateqApi.importAnalysisResult(
           this.manageImportFiles.jsonFile,
           this.manageImportFiles.analysisId!,
-          this.manageImportFiles.imageFiles
+          this.manageImportFiles.imageFiles,
+          (progress) => { this.appManageResultFilesModal.alertInfo("Uploading... " + progress + "%") }
         );
 
-        volateqApi.waitForTask(task.id, (task) => {
-          appButtonEventBus.stopLoading();
+        volateqApi.waitForTask(
+          task.id,
+          task => {
+            appButtonEventBus.stopLoading();
 
-          if (task.state === 'SUCCESS') {
-            successfullyFinished();
-          } else if (task.state === 'FAILURE') {
-            this.appManageResultFilesModal.alertError({ error: ApiErrors.SOMETHING_WENT_WRONG, details: task.result });
-          } else {
-            this.appManageResultFilesModal.alertError({ error: "UNEXPECTED_TASK_STATE", details: task.state + ". " + task.result });
+            if (task.state === "SUCCESS") {
+              successfullyFinished();
+            } else if (task.state === "FAILURE") {
+              this.appManageResultFilesModal.alertError({
+                error: ApiErrors.SOMETHING_WENT_WRONG,
+                details: task.result,
+              });
+            }
+          },
+          info => {
+            this.appManageResultFilesModal.alertInfo(info);
           }
-        });
+        );
       } else {
         successfullyFinished();
       }
     } catch (e) {
-      this.appManageResultFilesModal.alertError(e as ApiException)
+      this.appManageResultFilesModal.alertError(e as ApiException);
       appButtonEventBus.stopLoading();
     }
   }
@@ -324,16 +396,15 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
   async changeAnalysisState() {
     this.appUpdateStateModal.hideAlert();
     appButtonEventBus.startLoading();
-    
 
     this.updateAnalysisState();
   }
 
   async updateAnalysisState() {
     try {
-      await volateqApi.updateAnalysisState(this.updateStateData.analysisId!, { 
-        state: this.updateStateData.state!, 
-        message: this.updateStateData.message 
+      await volateqApi.updateAnalysisState(this.updateStateData.analysisId!, {
+        state: this.updateStateData.state!,
+        message: this.updateStateData.message,
       });
 
       await this.updateAnalysisRows();
@@ -347,7 +418,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
       appButtonEventBus.stopLoading();
     }
   }
-
+ 
   private updateToUploadState() {
     if (this.updateTableRowState(Math.round(uploadService.progress() * 100) + "%")) {
       this.createNewAnalysisBtnText = this.$t("return-to-upload").toString();
@@ -366,32 +437,64 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
   }
 
   private async updateAnalysisRows() {
+    this.isLoading = true;
+
     try {
-      this.analysisRows = (await volateqApi.getAllAnalysis()).map((a: AnalysisSchema) => {
+      const plant_id_filter = this.selectedPlantId && { plant_id: this.selectedPlantId } || undefined;
+      this.analysisRows = (await volateqApi.getAllAnalysis(plant_id_filter)).map((a: AnalysisSchema) => {
         const row = {
           id: a.id,
           name: a.name,
           date: new Date(Date.parse(a.created_at)).toLocaleString(),
-          user: a.user && {
-            userName: ((a.user.first_name || "") + " " + (a.user.last_name || "")).trim(),
-            email: a.user.email
-          } || '',
-          analysisResultId: a.analysis_result && (this.isSuperAdmin || a.analysis_result.released) && a.analysis_result.id || undefined,
-          state: a.current_state, 
+          user:
+            (a.user && {
+              userName: ((a.user.first_name || "") + " " + (a.user.last_name || "")).trim(),
+              email: a.user.email,
+            }) ||
+            "",
+          analysisResultId:
+            (a.analysis_result && (this.isSuperAdmin || a.analysis_result.released) && a.analysis_result.id) ||
+            undefined,
+          state: a.current_state,
           files: a.files,
           plantId: a.plant.id,
-          plant: a.plant.name
+          plant: a.plant.name,
         };
 
         return row;
       });
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  private async getPlants() {
+    const plants: PlantSchema[] = await volateqApi.getAllPlants();
+    // Hide the filter if one plant is available
+    if (plants.length > 1) {
+      this.plants = plants.map(plant => ({ value: plant.id, text: plant.name }));
+      this.plants.unshift({ value: null, text: "" });
     }
   }
 }
 </script>
 
-<style>
+<style lang="scss">
+.app-analysis {
+  &-plants-filter {
+    width: 300px;
+  }
+}
 
+.app-analysis-plants-filter-select {
+  width: 200px !important;
+  float: right;
+}
+.app-analysis-plants-filter-label {
+  float: right;
+  margin-top: 5px;
+  padding-right: 1em;
+}
 </style>

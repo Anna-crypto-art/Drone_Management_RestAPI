@@ -9,10 +9,7 @@ import Vue from "vue";
 import { Component } from "vue-property-decorator";
 
 @Component({ name: "app-checklist" })
-export default class AppChecklist extends Vue {
-
-}
-
+export default class AppChecklist extends Vue {}
 </script>
 
 <style lang="scss">

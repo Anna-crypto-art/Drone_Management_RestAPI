@@ -11,7 +11,7 @@ import { IAppButton } from "@/app/shared/components/app-button/types";
 import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
 
 @Component({
-  name: "app-button"
+  name: "app-button",
 })
 export default class AppButton extends Vue implements IAppButton {
   @Prop({ default: "button" }) type!: string;
@@ -47,7 +47,7 @@ export default class AppButton extends Vue implements IAppButton {
     this.disabled = false;
   }
 
-  onClick(e: Event) {    
+  onClick(e: Event) {
     this.$emit("click", e);
   }
 }
@@ -59,5 +59,4 @@ export default class AppButton extends Vue implements IAppButton {
 .app-button-loading {
   margin-right: 5px;
 }
-
 </style>

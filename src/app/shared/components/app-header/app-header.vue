@@ -1,8 +1,13 @@
 <template>
   <div class="app-header">
     <b-container :fluid="fluid">
-      <router-link :to="{name: 'Home'}">
-        <img class="app-header-logo float-left" src="@/assets/logos/logo_white.png" alt="volateq">
+      <router-link :to="{ name: 'Home' }">
+        <img
+          class="app-header-logo float-left"
+          src="/images/logos/logo_white.png"
+          srcset="/images/logos/logo_white.webp, /images/logos/logo_white.png"
+          alt="volateq"
+        />
       </router-link>
       <div class="app-header-menu float-left">
         <b-nav pills>
@@ -46,7 +51,7 @@ export default class AppHeader extends BaseAuthComponent {
   async logout() {
     try {
       await volateqApi.logout();
-      
+
       this.$router.push({ name: "Login" });
       this.$router.go(0); // Reload the page to refresh the js cache
     } catch (e) {
@@ -55,9 +60,11 @@ export default class AppHeader extends BaseAuthComponent {
   }
 
   isActiveRoute(routes: string[]): boolean {
-    return !!routes.find(route => route.indexOf("*") != -1 ? 
-      this.$router.currentRoute.path.replace(route.replace("*", ""), "").indexOf("/") == -1 :
-      this.$router.currentRoute.path === route);
+    return !!routes.find(route =>
+      route.indexOf("*") != -1
+        ? this.$router.currentRoute.path.replace(route.replace("*", ""), "").indexOf("/") == -1
+        : this.$router.currentRoute.path === route
+    );
   }
 }
 </script>
@@ -65,7 +72,6 @@ export default class AppHeader extends BaseAuthComponent {
 <style lang="scss">
 @import "@/scss/_colors.scss";
 @import "@/scss/_variables.scss";
-
 
 .app-header {
   height: $header-height;
@@ -80,7 +86,7 @@ export default class AppHeader extends BaseAuthComponent {
       padding: 0 30px;
       color: $white;
       transition: all 0.2s ease-in-out;
-      
+
       &:hover {
         background-color: $hover-light-blue !important;
         color: $blue;
@@ -144,5 +150,3 @@ export default class AppHeader extends BaseAuthComponent {
   }
 }
 </style>
-
-

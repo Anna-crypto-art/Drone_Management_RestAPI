@@ -1,12 +1,13 @@
 <template>
-  <div :class="'app-sidebar ' + (isOpen && 'open' || '')">
+  <div :class="'app-sidebar ' + ((open && 'open') || '')">
     <div class="app-sidebar-container">
       <div class="app-sidebar-inner">
         <slot></slot>
       </div>
     </div>
-    <b-button variant="secondary" size="sm" class="toggle-button"  @click="onToggle()">
-      <b-icon :icon="isOpen && 'arrow-bar-left' || 'arrow-bar-right'"></b-icon>
+    <b-button variant="secondary" size="sm" class="toggle-button" @click="onToggle()">
+      <b-icon :icon="(open && 'book-fill') || 'book'"></b-icon>
+      <span class="toggle-button-text">&nbsp; {{ $t("history") }}</span>
     </b-button>
   </div>
 </template>
@@ -16,20 +17,17 @@ import Vue from "vue";
 import { Prop, Component } from "vue-property-decorator";
 
 @Component({
-  name: "app-sidebar"
+  name: "app-sidebar",
 })
 export default class AppSidebar extends Vue {
   @Prop({ default: true }) open!: boolean;
 
-  isOpen = this.open;
-
   onToggle(): void {
-    this.isOpen = !this.isOpen;
+    this.open = !this.open;
 
-    this.$emit("toggled", this.isOpen);
+    this.$emit("toggled", this.open);
   }
 }
-
 </script>
 
 <style lang="scss">
@@ -70,19 +68,39 @@ $sidebar-width: 400px;
     .app-sidebar-container .app-sidebar-inner {
       left: 0;
     }
+
+    .toggle-button-text {
+      max-width: 150px;
+      padding-left: 0.5em;
+    }
   }
 
   .toggle-button {
     position: absolute;
-    top: 0.5em;
+    top: 3.5em;
     border: none;
     left: calc(100% - 1px);
     color: $blue;
     border: 1px solid $border-color-grey;
     border-left-color: $white;
+    white-space: nowrap;
+
+    &-text {
+      transition: all 0.3s ease-in-out;
+      max-width: 0;
+      display: inline-block;
+      overflow: hidden;
+      vertical-align: text-bottom;
+      line-height: 1.3em;
+    }
 
     &:hover {
       background-color: $background-grey;
+
+      .toggle-button-text {
+        max-width: 150px;
+        padding-left: 0.5em;
+      }
     }
   }
 }

@@ -7,7 +7,11 @@
       <slot :name="layer.name">{{ layer.name }}</slot>
     </h3>
     <div v-if="layer.hasChildrens" class="layer-sublayers">
-      <app-geovisual-layer-display v-for="(childLayer, layerIndex) in layer.getChildLayers()" :layer="childLayer" :key="layerIndex">
+      <app-geovisual-layer-display
+        v-for="(childLayer, layerIndex) in layer.getChildLayers()"
+        :layer="childLayer"
+        :key="layerIndex"
+      >
         <!-- Pass slots through -->
         <template v-for="(_, slot) in $slots">
           <template :slot="slot">
@@ -20,7 +24,7 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue"
+import Vue from "vue";
 import { Component, Prop, Watch } from "vue-property-decorator";
 import { LayerStructure } from "../layer-structure";
 
@@ -50,7 +54,7 @@ export default class AppGeovisualLayerDisplay extends Vue {
     return this.layer.visible;
   }
 
-  @Watch('visible')
+  @Watch("visible")
   onVisibleChanged(): void {
     if (!this.visible) {
       this.onChange(false);
@@ -67,7 +71,6 @@ export default class AppGeovisualLayerDisplay extends Vue {
 
     return level;
   }
-
 }
 </script>
 
@@ -80,6 +83,7 @@ export default class AppGeovisualLayerDisplay extends Vue {
     margin-top: 20px;
     margin-bottom: 15px;
   }
+
   &-group-level-2 {
     margin-top: 0;
     font-size: 1.3rem;
@@ -88,11 +92,13 @@ export default class AppGeovisualLayerDisplay extends Vue {
       margin-top: 15px;
     }
   }
+
   &-group-level-3 {
     margin-top: 15px !important;
     font-size: 1.1rem;
     margin-top: 10px;
   }
+
   &.margin-top {
     margin-top: 30px;
   }

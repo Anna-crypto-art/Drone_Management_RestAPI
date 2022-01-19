@@ -1,16 +1,20 @@
 <template>
   <app-content :title="$t('plants-overview')" :subtitle="$t('plants-overview_descr')">
     <app-table-container>
-      <b-table hover :fields="columns" :items="plants"
+      <b-table
+        hover
+        :fields="columns"
+        :items="plants"
         head-variant="light"
-        show-empty 
+        show-empty
         :emptyText="$t('no-data')"
-        :busy="tableLoading">
+        :busy="tableLoading"
+      >
         <template #head(actions)>
           <span class="hidden">{{ $t("actions") }}</span>
         </template>
         <template #cell(name)="row">
-          <router-link v-show="row.item.digitized" :to="{ name: 'Plant', params: { id: row.item.id }}">
+          <router-link v-show="row.item.digitized" :to="{ name: 'Plant', params: { id: row.item.id } }">
             {{ row.item.name }}
           </router-link>
           <span v-if="!row.item.digitized">{{ row.item.name }}</span>
@@ -20,12 +24,13 @@
         </template>
         <template #cell(actions)="row">
           <div class="hover-cell pull-right">
-            <b-button 
-            v-show="isSuperAdmin" 
-            @click="onManagePlantClick(row.item)" 
-            variant="secondary"
-            size="sm"
-            :title="$t('upload-dt')">
+            <b-button
+              v-show="isSuperAdmin"
+              @click="onManagePlantClick(row.item)"
+              variant="secondary"
+              size="sm"
+              :title="$t('upload-dt')"
+            >
               <b-icon icon="hammer"></b-icon>
             </b-button>
           </div>
@@ -33,13 +38,14 @@
         </template>
       </b-table>
     </app-table-container>
-    <app-modal-form 
-    id="manage-plant-modal"
-    ref="managePlantModal"
-    :title="$t('upload-dt')"
-    :subtitle="$t('upload-dt_descr')"
-    :ok-title="$t('apply')"
-    @submit="saveManagePlant">
+    <app-modal-form
+      id="manage-plant-modal"
+      ref="managePlantModal"
+      :title="$t('upload-dt')"
+      :subtitle="$t('upload-dt_descr')"
+      :ok-title="$t('apply')"
+      @submit="saveManagePlant"
+    >
       <b-form-group>
         <b-form-checkbox id="clear-before-checkbox" v-model="managePlantModel.clearBefore">
           {{ $t("clear-before") }}
@@ -74,7 +80,7 @@ import { ApiException } from "../shared/services/volateq-api/api-errors";
     AppContent,
     AppTableContainer,
     AppModalForm,
-  }
+  },
 })
 export default class AppPlants extends BaseAuthComponent {
   @Ref() managePlantModal!: IAppModalForm;
@@ -83,7 +89,7 @@ export default class AppPlants extends BaseAuthComponent {
   plants: PlantItem[] | null = null;
 
   tableLoading = false;
-  managePlantModel: { plant: PlantItem | null, clearBefore: boolean, file: File | null } = {
+  managePlantModel: { plant: PlantItem | null; clearBefore: boolean; file: File | null } = {
     plant: null,
     clearBefore: true,
     file: null,
@@ -100,14 +106,14 @@ export default class AppPlants extends BaseAuthComponent {
       this.columns.push({ key: "actions" });
     }
 
-    await this.updatePlants(); 
+    await this.updatePlants();
   }
 
   async updatePlants() {
     try {
       this.tableLoading = true;
       let plants: PlantSchema[] = [];
-    
+
       if (this.isSuperAdmin) {
         const customers = await volateqApi.getCustomers();
         for (const customer of customers) {
@@ -125,7 +131,7 @@ export default class AppPlants extends BaseAuthComponent {
           name: plant.name,
           digitized: !!plant.fieldgeometry,
           analysesCount: (await volateqApi.getAnalysisResults(plant.id)).length,
-        })
+        });
       }
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
@@ -144,21 +150,25 @@ export default class AppPlants extends BaseAuthComponent {
         this.managePlantModel.plant!.id,
         this.managePlantModel.clearBefore
       );
-      volateqApi.waitForTask(task.id, async (task) => {
-        appButtonEventBus.stopLoading();
+      volateqApi.waitForTask(
+        task.id,
+        async task => {
+          appButtonEventBus.stopLoading();
 
-        if (task.state === 'SUCCESS') {
-          this.managePlantModal.hide();
-          appContentEventBus.showSuccessAlert(this.$t('dt-imported-successfully').toString());
-          await this.updatePlants();
-        } else if (task.state === 'FAILURE') {
-          this.managePlantModal.alertError({ error: "SOMETHING_WENT_WRONG", details: task.result });
-        } else {
-          this.managePlantModal.alertError({ error: "UNEXPECTED_TASK_STATE", details: task.state + ". " + task.result });
+          if (task.state === "SUCCESS") {
+            this.managePlantModal.hide();
+            appContentEventBus.showSuccessAlert(this.$t("dt-imported-successfully").toString());
+            await this.updatePlants();
+          } else if (task.state === "FAILURE") {
+            this.managePlantModal.alertError({ error: "SOMETHING_WENT_WRONG", details: task.result });
+          }
+        },
+        info => {
+          this.managePlantModal.alertInfo(info);
         }
-      });
+      );
     } catch (e) {
-      this.managePlantModal.alertError(e  as ApiException);
+      this.managePlantModal.alertError(e as ApiException);
     }
   }
 

@@ -1,5 +1,5 @@
-import { AnalysisResultCspPtcSchemaBase } from "./analysis-result-csp-ptc-schema-base";
+import { AnalysisResultSchemaBase } from "./analysis-result-schema-base";
 
-export interface AnalysisResultCspPtcMirrorSchema extends AnalysisResultCspPtcSchemaBase {
-    is_missing: boolean;
+export interface AnalysisResultCspPtcMirrorSchema extends AnalysisResultSchemaBase {
+  is_missing: boolean;
 }

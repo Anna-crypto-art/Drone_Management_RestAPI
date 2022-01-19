@@ -1,7 +1,8 @@
+import { KeyFigureColors } from "@/app/plant/shared/visualization/layers/types";
+import { Legend } from "@/app/plant/shared/visualization/types";
 import { FeatureLike } from "ol/Feature";
 import { Stroke, Style } from "ol/style";
 import { HceKeyFigureLayer } from "./hce-key-figure-layer";
-import { KeyFigureColors, Legend } from "./types";
 
 export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
   public getStyle(feature: FeatureLike): Style {
@@ -16,7 +17,7 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
         text: this.showText(feature),
       });
     }
-    
+
     return super.getStyle(feature);
   }
 
@@ -32,15 +33,16 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
       id: this.keyFigureId.toString(),
       entries: [
         {
-          color: this.queryColor!.color!,
-          name: this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
+          color: this.color!,
+          name:
+            this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
             this.getLegendEntryCount(featuresCount),
-        }, 
+        },
         {
           color: KeyFigureColors.grey,
           name: this.vueComponent.$t("not-measured").toString() + this.getLegendEntryCount(notMeasuredFeaturesCount),
-        }
-      ]
+        },
+      ],
     };
   }
 }

@@ -10,7 +10,7 @@ import Vue from "vue";
 import { Component } from "vue-property-decorator";
 
 @Component({
-  name: 'app-loading'
+  name: "app-loading",
 })
 export default class AppLoading extends Vue {}
 </script>

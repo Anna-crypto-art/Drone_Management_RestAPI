@@ -38,8 +38,8 @@ import { AppAlert } from "@/app/shared/services/app-alert/app-alert";
 @Component({
   name: "app-content",
   components: {
-    AppHeader
-  }
+    AppHeader,
+  },
 })
 export default class AppContent extends Vue {
   @Prop({ required: true }) title: string | undefined;
