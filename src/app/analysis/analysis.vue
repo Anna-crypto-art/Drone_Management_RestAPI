@@ -29,7 +29,7 @@
             <div class="text-center">
               <b-spinner class="align-middle"></b-spinner>
             </div>
-        </template>
+          </template>
           <template #empty="scope">
             <span class="grayed">{{ scope.emptyText }}</span>
           </template>
@@ -85,26 +85,6 @@
           </template>
         </b-table>
       </app-table-container>
-      <app-modal-form
-        id="manage-result-files-modal"
-        ref="appManageResultFilesModal"
-        :title="$t('manage-result-files')"
-        :subtitle="$t('manage-result-files_descr')"
-        :ok-title="$t('apply')"
-        @submit="saveManageResultFiles"
-      >
-        <b-form-group v-show="manageImportFiles.analysisResultId">
-          <b-form-checkbox id="removeAllAnalysisResultFiles" v-model="manageImportFiles.removeAllAnalysisResultFiles">
-            {{ $t('remove-result-files') }} ({{ manageImportFiles.importedResultFiles }})
-          </b-form-checkbox>
-        </b-form-group>
-        <b-form-group :label="$t('select-json-result-file-import')">
-          <b-form-file v-model="manageImportFiles.jsonFile" accept=".json"></b-form-file>
-        </b-form-group>
-        <b-form-group :label="$t('select-result-image-files')">
-          <b-form-file v-model="manageImportFiles.imageFiles" accept="image/png, image/jpeg" multiple></b-form-file>
-        </b-form-group>
-      </app-modal-form>
     </div>
   </app-content>
 </template>
@@ -151,16 +131,6 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
 
   createNewAnalysisBtnText = "";
   uploadStateProcess = "";
-
-  @Ref() appManageResultFilesModal!: IAppModalForm;
-  manageImportFiles: {
-    analysisId?: string,
-    analysisResultId?: string,
-    importedResultFiles: string,
-    removeAllAnalysisResultFiles: boolean,
-    jsonFile?: File,
-    imageFiles?: File[],
-  } = { analysisResultId: "", removeAllAnalysisResultFiles: false, importedResultFiles: "" };
 
   async created() {
     this.createNewAnalysisBtnText = this.$t("new-data-upload").toString();
@@ -210,77 +180,8 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     return this.$t(...args).toString();
   }
 
-  async onManageResultFilesClick(analysisRowItem: any) {
-    this.manageImportFiles.analysisId = analysisRowItem.id;
-    this.manageImportFiles.analysisResultId = analysisRowItem.analysisResultId;
-
-    // clear arrays but keep the references
-    this.manageImportFiles.removeAllAnalysisResultFiles = false;
-
-    if (this.manageImportFiles.analysisResultId) {
-      this.manageImportFiles.importedResultFiles = (await volateqApi.getAnalysisResultFiles(this.manageImportFiles.analysisResultId))
-        .map(analysisResultFile => analysisResultFile.filename)
-        .join(', ');
-    }
-
-    this.appManageResultFilesModal.show();
-  }
-
   async onPlantSelectionChanged() {
     await this.updateAnalysisRows();
-  }
-
-  async saveManageResultFiles() {
-    try {
-      appButtonEventBus.startLoading();
-
-      const successfullyFinished = () => {
-        this.appManageResultFilesModal.hide();
-        appContentEventBus.showSuccessAlert(this.$t("success-managing-result-files").toString());
-        appButtonEventBus.stopLoading();
-
-        this.updateAnalysisRows();
-      };
-
-      if (this.manageImportFiles.analysisResultId && this.manageImportFiles.removeAllAnalysisResultFiles) {
-        await volateqApi.deleteAnalysisResult(this.manageImportFiles.analysisResultId);
-      }
-
-      if (this.manageImportFiles.jsonFile) {
-        this.appManageResultFilesModal.alertInfo("Uploading...");
-
-        const task = await volateqApi.importAnalysisResult(
-          this.manageImportFiles.jsonFile,
-          this.manageImportFiles.analysisId!,
-          this.manageImportFiles.imageFiles,
-          (progress) => { this.appManageResultFilesModal.alertInfo("Uploading... " + progress + "%") }
-        );
-
-        volateqApi.waitForTask(
-          task.id,
-          task => {
-            appButtonEventBus.stopLoading();
-
-            if (task.state === "SUCCESS") {
-              successfullyFinished();
-            } else if (task.state === "FAILURE") {
-              this.appManageResultFilesModal.alertError({
-                error: ApiErrors.SOMETHING_WENT_WRONG,
-                details: task.result,
-              });
-            }
-          },
-          info => {
-            this.appManageResultFilesModal.alertInfo(info);
-          }
-        );
-      } else {
-        successfullyFinished();
-      }
-    } catch (e) {
-      this.appManageResultFilesModal.alertError(e as ApiException);
-      appButtonEventBus.stopLoading();
-    }
   }
 
   private updateToUploadState() {

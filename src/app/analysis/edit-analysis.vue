@@ -61,9 +61,14 @@
           <div class="admin-box">
             <h4>{{ $t("manage-result-files") }}</h4>
             <b-form @submit.prevent="saveManageResultFiles">
+              <b-form-group v-show="manageImportFiles.analysisResultId" :label="$t('download-existing-result-files')">
+                <a href="#" v-for="resultFile in manageImportFiles.importedResultFiles" :key="resultFile.id" @click="onResultFileClick(resultFile)">
+                  {{ resultFile.filename }}
+                </a>
+              </b-form-group>
               <b-form-group v-show="manageImportFiles.analysisResultId">
                 <b-form-checkbox id="removeAllAnalysisResultFiles" v-model="manageImportFiles.removeAllAnalysisResultFiles">
-                  {{ $t('remove-result-files') }} ({{ manageImportFiles.importedResultFiles }})
+                  {{ $t('remove-result-files') }}
                 </b-form-checkbox>
               </b-form-group>
               <b-form-group :label="$t('select-json-result-file-import')">
@@ -96,6 +101,7 @@ import { BvTableFieldArray } from "bootstrap-vue";
 import { AppDownloader } from "../shared/services/app-downloader/app-downloader";
 import { ApiStates, ApiStateStruct } from "../shared/services/volateq-api/api-states";
 import appButtonEventBus from "../shared/components/app-button/app-button-event-bus";
+import { AnalysisResultFileSchema } from "../shared/services/volateq-api/api-schemas/analysis-result-file-schema";
 
 @Component({
   name: "app-edit-analysis",
@@ -125,13 +131,12 @@ export default class AppEditAnalysis extends BaseAuthComponent {
   selectedUpdateStateMessage = "";
 
   manageImportFiles: {
-    analysisId?: string,
     analysisResultId?: string,
-    importedResultFiles: string,
+    importedResultFiles: AnalysisResultFileSchema[],
     removeAllAnalysisResultFiles: boolean,
     jsonFile?: File,
     imageFiles?: File[],
-  } = { analysisResultId: "", removeAllAnalysisResultFiles: false, importedResultFiles: "" };
+  } = { analysisResultId: "", removeAllAnalysisResultFiles: false, importedResultFiles: [] };
 
   async created() {
     await this.updateAnalysis(this.$route.params.id)
@@ -196,6 +201,17 @@ export default class AppEditAnalysis extends BaseAuthComponent {
     }
   }
 
+  async onResultFileClick(analysisResultFile: AnalysisResultFileSchema) {
+    try {
+      const downloadUrl = await volateqApi.getAnalysisResultFileUrl(analysisResultFile.id);
+
+      AppDownloader.download(downloadUrl.url, analysisResultFile.filename);
+    } catch (e) {
+      appContentEventBus.showError(e as ApiException);
+    }
+    
+  }
+
   private setDownloadFilesTableItems() {
     let files: string[] = [];
     if (this.analysis!.files.video_files) {
@@ -249,8 +265,6 @@ export default class AppEditAnalysis extends BaseAuthComponent {
 
     if (this.manageImportFiles.analysisResultId) {
       this.manageImportFiles.importedResultFiles = (await volateqApi.getAnalysisResultFiles(this.manageImportFiles.analysisResultId))
-        .map(analysisResultFile => analysisResultFile.filename)
-        .join(', ');
     }
   }
 
@@ -274,7 +288,7 @@ export default class AppEditAnalysis extends BaseAuthComponent {
 
         const task = await volateqApi.importAnalysisResult(
           this.manageImportFiles.jsonFile,
-          this.manageImportFiles.analysisId!,
+          this.analysis!.id,
           this.manageImportFiles.imageFiles,
           (progress) => { appContentEventBus.showInfoAlert("Uploading... " + progress + "%") }
         );
