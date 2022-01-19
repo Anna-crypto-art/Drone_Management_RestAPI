@@ -31,17 +31,18 @@
             <b-row>
               <b-col>
                 <div class="plant-view-csp-ptc-admin-panel">
-                  <h3>{{ $t("admin-panel") }}</h3>
-                  <hr />
-                  <h4>{{ $t("analysis-visibility") }}</h4>
-                  <b-form-checkbox
-                    v-show="analysisResultReleased !== null"
-                    v-model="analysisResultReleased"
-                    switch
-                    @change="onReleaseChanged"
-                  >
-                    {{ analysisResultReleased ? $t("released") : $t("invisible-for-customer") }}
-                  </b-form-checkbox>
+                  <h2>{{ $t("admin-panel") }}</h2>
+                  <div class="admin-box">
+                    <h4>{{ $t("analysis-visibility") }}</h4>
+                    <b-form-checkbox
+                      v-show="analysisResultReleased !== null"
+                      v-model="analysisResultReleased"
+                      switch
+                      @change="onReleaseChanged"
+                    >
+                      {{ analysisResultReleased ? $t("released") : $t("invisible-for-customer") }}
+                    </b-form-checkbox>
+                  </div>
                   <!--<h4>{{ $t("digital-twin") }}</h4>
                   coming soon-->
                 </div>
@@ -183,17 +184,8 @@ $left-width: 400px;
     }
   }
 
-  &-admin-panel {
-    padding: 1em;
-    background-color: $grey;
-
-    h4 {
-      margin: 1.5em 0 0.5em 0;
-
-      &:first-child {
-        margin-top: 0;
-      }
-    }
+  &-admin-panel h2 {
+    margin-top: 30px;
   }
 }
 </style>

@@ -17,9 +17,9 @@ export default class AppButton extends Vue implements IAppButton {
   @Prop({ default: "button" }) type!: string;
   @Prop({ default: "" }) cls!: string;
   @Prop({ default: "primary" }) variant!: string;
+  @Prop({ default: false }) disabled!: boolean;
 
   loading = false;
-  disabled = false;
 
   created() {
     appButtonEventBus.onStopLoading(() => {
