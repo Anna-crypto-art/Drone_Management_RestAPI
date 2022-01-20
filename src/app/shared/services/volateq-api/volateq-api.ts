@@ -335,6 +335,14 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/analysis-result/result-file/${analysisResultFileId}`)
   }
 
+  public downloadMultipleAnalysisFilesUrl(analysisId: string, filenames: string[]) {
+    return this.getUrl(`${apiBaseUrl}/auth/analysis/${analysisId}/files-download`, { filenames: filenames })
+  }
+
+  public getAnalysisFilesInfo(analysisId: string, filenames: string[]): Promise<Record<string, number | null>> {
+    return this.get(`/auth/analysis/${analysisId}/files-info`, { filenames })
+  }
+
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {
     // Temporary special case for IR_INTENSITY: Replaced by GLASS_TUBE_TEMPERATURE
     for (const analysisResult of analysisResults) {

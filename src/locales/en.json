@@ -221,6 +221,8 @@
   "download-selected-files": "Download selected files",
   "select-new-analysis-state": "Select new analysis state",
   "download-existing-result-files": "Download existing result files",
+  "size": "Size",
+  "missing": "Missing",
 
   "CSP_PTC_Absorber": "Absorber tubes",
   "CSP_PTC_SCA": "SCA",

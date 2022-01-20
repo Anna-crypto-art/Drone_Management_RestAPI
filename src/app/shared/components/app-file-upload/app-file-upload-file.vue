@@ -27,6 +27,7 @@ import { IAppFileUploadFile } from "@/app/shared/components/app-file-upload/type
 import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
 import { IResumableFile } from "@/app/shared/services/upload-service/types";
 import uploadService, { UploadService } from "@/app/shared/services/upload-service/upload-service";
+import { getReadableFileSize } from "@/app/shared/services/helper/file-helper";
 
 @Component({
   name: "app-file-upload-file",
@@ -56,14 +57,7 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
   }
 
   getFileSize(size: number): string {
-    const sizes = ["KB", "MB", "GB", "TB"];
-
-    let i = 0;
-    do {
-      size = size / 1024;
-    } while (size > 1024 && ++i < sizes.length);
-
-    return `${Math.round(size)} ${sizes[i]}`;
+    return getReadableFileSize(size);
   }
 
   onFileRemove(): void {

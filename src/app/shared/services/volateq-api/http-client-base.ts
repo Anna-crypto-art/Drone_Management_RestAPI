@@ -76,11 +76,15 @@ export class HttpClientBase {
   }
 
   protected async get(url: string, params?: any, config?: AxiosRequestConfig | undefined): Promise<any> {
-    return this.httpClient.get(url + ((params && this.getQueryParams(params)) || ""), config);
+    return this.httpClient.get(this.getUrl(url, params), config);
   }
 
   protected async delete(url: string, config?: AxiosRequestConfig | undefined): Promise<any> {
     return this.httpClient.delete(url, config);
+  }
+
+  protected getUrl(url: string, params?: any) {
+    return url + ((params && this.getQueryParams(params)) || "");
   }
 
   protected getQueryParams(params: any): string {

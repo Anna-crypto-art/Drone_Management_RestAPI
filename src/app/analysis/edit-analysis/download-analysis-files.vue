@@ -17,7 +17,13 @@
         hover
         head-variant="light"
         @row-selected="onDownloadFilesSelected"
+        :busy="isFilesLoading"
       >
+        <template #table-busy>
+          <div class="text-center">
+            <b-spinner class="align-middle"></b-spinner>
+          </div>
+        </template>
         <template #head(selected)
           ><b-checkbox :checked="allDownloadFilesSelected" @change="onSelectAllDownloadFiles"></b-checkbox>
         </template>
@@ -48,6 +54,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { IUpdateEditAnalysis } from "@/app/analysis/edit-analysis/types";
 import { waitFor } from "@/app/shared/services/helper/debounce-helper";
 import { IAppButton } from "@/app/shared/components/app-button/types";
+import { getReadableFileSize } from "@/app/shared/services/helper/file-helper";
 
 @Component({
   name: "app-download-analysis-files",
@@ -66,19 +73,22 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent implemen
   downloadFilesTableColumns: BvTableFieldArray = [
     { key: "selected", label: "" },
     { key: "name", label: this.$t("name").toString() },
+    { key: "size", label: this.$t("size").toString() },
   ];
   downloadFilesTableItems: { name: string }[] = [];
 
   allDownloadFilesSelected = false;
   private selectedDonwloadFiles: { name: string }[] = [];
 
+  isFilesLoading = true;
+
   async created() {
-    this.updateAnalysis(this.analysis);
+    await this.updateAnalysis(this.analysis);
   }
 
-  updateAnalysis(analysis: AnalysisSchema) {
+  async updateAnalysis(analysis: AnalysisSchema) {
     this.analysis = analysis;
-    this.setDownloadFilesTableItems();
+    await this.setDownloadFilesTableItems();
   }
 
   onDownloadFilesSelected(selectedDownloadFiles: { name: string }[]) {
@@ -91,13 +101,24 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent implemen
     try {
       this.downloadSelectedFilesButton.startLoading();
 
-      for (const downloadFile of this.selectedDonwloadFiles) {
-        const downloadUrl = await volateqApi.getAnalysisFileDownloadUrl(this.analysis!.id, downloadFile.name);
+      if (this.selectedDonwloadFiles.length === 1) {
+        const downloadUrl = await volateqApi.getAnalysisFileDownloadUrl(
+          this.analysis!.id,
+          this.selectedDonwloadFiles[0].name
+        );
 
-        AppDownloader.download(downloadUrl.url, downloadFile.name);
+        AppDownloader.download(downloadUrl.url, this.selectedDonwloadFiles[0].name);
+      } else {
+        const archiveName = `analysis-${this.analysis.name}-selected-files.zip`;
+        const downloadUrl = await volateqApi.generateDownloadUrl(
+          volateqApi.downloadMultipleAnalysisFilesUrl(
+            this.analysis.id,
+            this.selectedDonwloadFiles.map(downloadFile => downloadFile.name)
+          ),
+          archiveName
+        );
 
-        // Browsers do not like download spam. So let's take a break after each download.
-        await waitFor(3000);
+        AppDownloader.download(downloadUrl, archiveName);
       }
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
@@ -109,11 +130,6 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent implemen
   onSelectAllDownloadFiles(selected: boolean) {
     if (selected) {
       this.downloadFilesTable.selectAllRows();
-      // // Bug: this.downloadFilesTable.selectAllRows() does not call event "onDownloadFilesSelected" in correct order
-      // // so lets work around...
-      // for (let i = 0; i < this.downloadFilesTableItems.length; i++) {
-      //   this.downloadFilesTable.selectRow(i);
-      // }
     } else {
       // this.downloadFilesTable.clearSelection(); leads to "clearSelection is not a function"
       // so lets work around... again!
@@ -123,21 +139,33 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent implemen
     }
   }
 
-  private setDownloadFilesTableItems() {
-    let files: string[] = [];
-    if (this.analysis!.files.video_files) {
-      files = files.concat(this.analysis!.files.video_files);
-    }
-    if (this.analysis!.files.drone_metadata_files) {
-      files = files.concat(this.analysis!.files.drone_metadata_files);
-    }
-    if (this.analysis!.files.other_files) {
-      files = files.concat(this.analysis!.files.other_files);
-    }
+  private async setDownloadFilesTableItems() {
+    this.isFilesLoading = true;
 
-    files.sort();
+    try {
+      let files: string[] = [];
+      if (this.analysis!.files.video_files) {
+        files = files.concat(this.analysis!.files.video_files);
+      }
+      if (this.analysis!.files.drone_metadata_files) {
+        files = files.concat(this.analysis!.files.drone_metadata_files);
+      }
+      if (this.analysis!.files.other_files) {
+        files = files.concat(this.analysis!.files.other_files);
+      }
 
-    this.downloadFilesTableItems = files.map(file => ({ name: file }));
+      files.sort();
+
+      const fileInfos = await volateqApi.getAnalysisFilesInfo(this.analysis.id, files);
+      this.downloadFilesTableItems = Object.keys(fileInfos).map(filename => ({
+        name: filename,
+        size: fileInfos[filename] !== null ? getReadableFileSize(fileInfos[filename]!) : this.$t("missing").toString(),
+      }));
+    } catch (e) {
+      appContentEventBus.showError(e as ApiException);
+    } finally {
+      this.isFilesLoading = false;
+    }
   }
 }
 </script>
