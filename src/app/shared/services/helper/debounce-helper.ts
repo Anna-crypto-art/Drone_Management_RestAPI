@@ -7,3 +7,7 @@ export function debounce(func, timeout = 300) {
     }, timeout);
   };
 }
+
+export async function waitFor(ms: number) {
+  await new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
+}

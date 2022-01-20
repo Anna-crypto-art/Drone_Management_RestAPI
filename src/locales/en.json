@@ -126,7 +126,7 @@
   "import": "Import",
   "success-managing-result-files": "Result files successfully managed",
   "accept-terms-of-service": "I agree to the <a href='https://www.volateq.de/privacy-policy/' target='_blank'>terms of service</a>",
-  "remove-result-files": "Remove imported results by file",
+  "remove-result-files": "Remove all imported results",
   "select-json-result-file-import": "Select JSON result file to import",
   "uncertainty": "Measurment uncertainty",
   "deviation-to-drive": "Alignment error",
@@ -219,7 +219,8 @@
   "has-results": "Has results",
   "download": "Download",
   "download-selected-files": "Download selected files",
-  "select-new-analysis-state": "Selecte new analysis state",
+  "select-new-analysis-state": "Select new analysis state",
+  "download-existing-result-files": "Download existing result files",
 
   "CSP_PTC_Absorber": "Absorber tubes",
   "CSP_PTC_SCA": "SCA",
