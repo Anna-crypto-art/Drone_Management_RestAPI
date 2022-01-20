@@ -60,15 +60,6 @@
           </template>
           <template #cell(actions)="row">
             <div class="hover-cell pull-right">
-              <b-button
-                v-show="isSuperAdmin"
-                @click="onManageResultFilesClick(row.item)"
-                variant="secondary"
-                size="sm"
-                :title="$t('manage-result-files')"
-              >
-                <b-icon icon="hammer"></b-icon>
-              </b-button>
               <router-link
                 v-if="row.item.analysisResultId"
                 :title="$t('show-results')"
@@ -90,7 +81,6 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
 import { Component, Ref } from "vue-property-decorator";
 
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
@@ -98,19 +88,14 @@ import AppTableContainer from "@/app/shared/components/app-table-container/app-t
 import volateqApi from "../shared/services/volateq-api/volateq-api";
 import { AnalysisSchema } from "../shared/services/volateq-api/api-schemas/analysis-schema";
 import appContentEventBus from "../shared/components/app-content/app-content-event-bus";
-import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
 import uploadService from "@/app/shared/services/upload-service/upload-service";
 import { IAnalysisId } from "./new-analysis/types";
-import { ApiStates, ApiStateStruct } from "../shared/services/volateq-api/api-states";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
 import { BvTableFieldArray } from "bootstrap-vue";
-import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
 import { IUploadListener, UploadEvent, UploadState } from "../shared/services/upload-service/types";
-import { AnalysisStateSchema } from "../shared/services/volateq-api/api-schemas/analysis-state-schema";
-import { IAppModalForm } from "../shared/components/app-modal/types";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import AppModalFormInfoArea from "@/app/shared/components/app-modal/app-modal-form-info-area.vue";
-import { ApiErrors, ApiException } from "../shared/services/volateq-api/api-errors";
+import { ApiException } from "../shared/services/volateq-api/api-errors";
 import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
 
 @Component({

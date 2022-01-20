@@ -36,7 +36,7 @@ import { IUploadListener, IResumableFile, UploadState, UploadEvent } from "@/app
 import { NEW_ANALYSIS_STORAGE_KEY } from "@/app/shared/components/fetch-component/storage-keys";
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
-import { AnalysisSchema } from "../shared/services/volateq-api/api-schemas/analysis-schema";
+import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 
 
 @Component({

@@ -1,6 +1,6 @@
 const AppAnalysis = () => import("@/app/analysis/analysis.vue");
 const AppNewAnalysis = () => import("@/app/analysis/new-analysis/new-analysis.vue");
-const AppEditAnalysis = () => import("@/app/analysis/edit-analysis.vue");
+const AppEditAnalysis = () => import("@/app/analysis/edit-analysis/edit-analysis.vue");
 import { RouteConfig } from "vue-router";
 
 const anaylsisRoutes: RouteConfig[] = [
