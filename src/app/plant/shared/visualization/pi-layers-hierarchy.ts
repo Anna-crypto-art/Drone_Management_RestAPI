@@ -15,13 +15,13 @@ export class PILayersHierarchy {
   constructor(
     private readonly vueComponent: Vue,
     private readonly analysisResults: AnalysisResultDetailedSchema[],
-    private readonly keyFigureLayers: KeyFigureTypeMap[],
+    private readonly keyFigureLayers: KeyFigureTypeMap[]
   ) {
     this.createGroupedKPILayers();
   }
 
   public getGeoJSONLayers(): LayerType[] {
-    return this.parentComponentKpiLayers.map(parentComponentKpiLayer => parentComponentKpiLayer.groupLayer)
+    return this.parentComponentKpiLayers.map(parentComponentKpiLayer => parentComponentKpiLayer.groupLayer);
   }
 
   public getAllChildLayers(): KeyFigureLayer<AnalysisResultSchemaBase>[] {
@@ -48,7 +48,7 @@ export class PILayersHierarchy {
       for (const groupKpiLayer of groupKpiLayers) {
         let allKeyFiguresInvisible = true;
         for (const keyFigureLayer of groupKpiLayer.keyFigureLayers) {
-          const visible = analysisResultId && keyFigureLayer.analysisResult.id == analysisResultId || false;
+          const visible = (analysisResultId && keyFigureLayer.analysisResult.id == analysisResultId) || false;
           keyFigureLayer.setVisible(visible);
 
           if (visible) {
@@ -59,7 +59,7 @@ export class PILayersHierarchy {
         if (groupKpiLayer.subGroupLayers && groupKpiLayer.subGroupLayers.length > 0) {
           groupKpiLayer.groupLayer.visible = setVisibilityRec(groupKpiLayer.subGroupLayers);
         } else {
-          groupKpiLayer.groupLayer.visible = !allKeyFiguresInvisible
+          groupKpiLayer.groupLayer.visible = !allKeyFiguresInvisible;
         }
 
         if (!allKeyFiguresInvisible) {
@@ -98,15 +98,15 @@ export class PILayersHierarchy {
               },
               keyFigureLayers: [],
               subGroupLayers: [],
-            }
+            };
           }
-  
+
           const kpiLayer = this.createKPILayers(analysisResult, keyFigureTypeMap);
           if (kpiLayer) {
             const groupLayer = parentComponentLayers[keyFigure.component.id];
             if (kpiLayer instanceof KeyFigureLayer) {
-              groupLayer.groupLayer.childLayers.push(kpiLayer.toGeoLayer())
-              groupLayer.keyFigureLayers.push(kpiLayer)
+              groupLayer.groupLayer.childLayers.push(kpiLayer.toGeoLayer());
+              groupLayer.keyFigureLayers.push(kpiLayer);
             } else {
               groupLayer.groupLayer.childLayers.push(kpiLayer.groupLayer);
               groupLayer.subGroupLayers!.push(kpiLayer);
@@ -116,16 +116,19 @@ export class PILayersHierarchy {
       }
     }
 
-    this.parentComponentKpiLayers = Object.keys(parentComponentLayers).map(componentId => parentComponentLayers[componentId]);
+    this.parentComponentKpiLayers = Object.keys(parentComponentLayers).map(
+      componentId => parentComponentLayers[componentId]
+    );
   }
 
   private createKPILayers(
     anaysisResult: AnalysisResultDetailedSchema,
-    keyFigureLayer: KeyFigureTypeMap,
+    keyFigureLayer: KeyFigureTypeMap
   ): KeyFigureLayer<AnalysisResultSchemaBase> | GroupKPILayer | undefined {
     if (!keyFigureLayer.subLayers) {
-      return new (keyFigureLayer.layerType)(
-        this.vueComponent, anaysisResult,
+      return new keyFigureLayer.layerType(
+        this.vueComponent,
+        anaysisResult,
         keyFigureLayer.keyFigureId,
         keyFigureLayer.keyFigureInfo,
         keyFigureLayer.query,
@@ -135,7 +138,9 @@ export class PILayersHierarchy {
 
     const groupKpiLayer: GroupKPILayer = {
       groupLayer: {
-        name: keyFigureLayer.keyFigureInfo?.templateName || this.vueComponent.$t(keyFigureLayer.keyFigureInfo!.keyName!).toString(),
+        name:
+          keyFigureLayer.keyFigureInfo?.templateName ||
+          this.vueComponent.$t(keyFigureLayer.keyFigureInfo!.keyName!).toString(),
         type: "group",
         childLayers: [],
         visible: false,
@@ -145,20 +150,23 @@ export class PILayersHierarchy {
     };
 
     for (const childLayer of keyFigureLayer.subLayers) {
-      const childKeyFigureInfo: KeyFigureInfo = childLayer.keyFigureInfo || {};
-      childKeyFigureInfo.displayName = childLayer.keyFigureInfo!.displayName || keyFigureLayer.keyFigureInfo?.displayName;
-      childKeyFigureInfo.keyName = keyFigureLayer.keyFigureInfo?.keyName;
+      if (!childLayer.displayCondition || childLayer.displayCondition(anaysisResult)) {
+        const childKeyFigureInfo: KeyFigureInfo = childLayer.keyFigureInfo || {};
+        childKeyFigureInfo.displayName =
+          childLayer.keyFigureInfo!.displayName || keyFigureLayer.keyFigureInfo?.displayName;
+        childKeyFigureInfo.keyName = keyFigureLayer.keyFigureInfo?.keyName;
 
-      const kpiLayer: KeyFigureLayer<AnalysisResultSchemaBase> = new (keyFigureLayer.layerType)(
-        this.vueComponent, 
-        anaysisResult,
-        keyFigureLayer.keyFigureId,
-        childKeyFigureInfo,
-        childLayer.query,
-        childLayer.color
-      );
-      groupKpiLayer.keyFigureLayers.push(kpiLayer);
-      groupKpiLayer.groupLayer.childLayers.push(kpiLayer.toGeoLayer());
+        const kpiLayer: KeyFigureLayer<AnalysisResultSchemaBase> = new keyFigureLayer.layerType(
+          this.vueComponent,
+          anaysisResult,
+          keyFigureLayer.keyFigureId,
+          childKeyFigureInfo,
+          childLayer.query,
+          childLayer.color
+        );
+        groupKpiLayer.keyFigureLayers.push(kpiLayer);
+        groupKpiLayer.groupLayer.childLayers.push(kpiLayer.toGeoLayer());
+      }
     }
 
     return groupKpiLayer;

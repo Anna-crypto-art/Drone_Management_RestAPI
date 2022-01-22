@@ -17,7 +17,7 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
         text: this.showText(feature),
       });
     }
-    
+
     return super.getStyle(feature);
   }
 
@@ -34,14 +34,15 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
       entries: [
         {
           color: this.color!,
-          name: this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
+          name:
+            this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
             this.getLegendEntryCount(featuresCount),
-        }, 
+        },
         {
           color: KeyFigureColors.grey,
           name: this.vueComponent.$t("not-measured").toString() + this.getLegendEntryCount(notMeasuredFeaturesCount),
-        }
-      ]
+        },
+      ],
     };
   }
 }

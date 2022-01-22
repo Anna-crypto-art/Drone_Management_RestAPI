@@ -17,43 +17,53 @@ import { AnalysisResultFileSchema } from "./api-schemas/analysis-result-file-sch
 import { AnalysisResultComponent } from "./api-analysis-result-components";
 import { AnalysisResultKeyFigure } from "./api-analysis-result-key-figures";
 import { GeoVisualQuery } from "./api-requests/geo-visual-query-requests";
+import { ApiErrors, ApiException } from "./api-errors";
 
 export class VolateqAPI extends HttpClientBase {
-
   /**
    * @returns confirmation_key if user logs in with an unkown host, else undefined.
    */
   public async login(email: string, password: string): Promise<string> {
-    const confirmLoginResult: ConfirmLoginResult = await this.post("/auth/login", {}, {
-      auth: {
-        username: email,
-        password: password
+    const confirmLoginResult: ConfirmLoginResult = await this.post(
+      "/auth/login",
+      {},
+      {
+        auth: {
+          username: email,
+          password: password,
+        },
       }
-    });
+    );
 
-    return confirmLoginResult.confirmation_key
+    return confirmLoginResult.confirmation_key;
   }
 
   public async isLoggedIn(): Promise<boolean> {
     if (store.getters.auth.isAuthenticated) {
       try {
-        const pong: { pong: true; } = await this.get("/auth/ping");
+        const pong: { pong: true } = await this.get("/auth/ping");
 
         if (pong.pong) {
           return true;
         }
       } catch {
         return false;
-      } 
+      }
     }
 
     return false;
   }
 
   public async confirmLogin(confirmationKey: string, securityCode: string): Promise<void> {
-    const tokenResult: TokenResult = await this.post(`/confirm-login/${confirmationKey}`, { security_code: securityCode });
+    const tokenResult: TokenResult = await this.post(`/confirm-login/${confirmationKey}`, {
+      security_code: securityCode,
+    });
 
-    await store.dispatch.auth.updateToken({ token: tokenResult.token, role: tokenResult.role, customer_id: tokenResult.customer_id });
+    await store.dispatch.auth.updateToken({
+      token: tokenResult.token,
+      role: tokenResult.role,
+      customer_id: tokenResult.customer_id,
+    });
   }
 
   public async logout(): Promise<void> {
@@ -84,7 +94,9 @@ export class VolateqAPI extends HttpClientBase {
     await this.post(`/confirm/${confirmKey}`, user);
   }
 
-  public async getRoutes(params: { customer_id?: string, plant_id?: string } | undefined = undefined): Promise<RouteSchema[]> {
+  public async getRoutes(
+    params: { customer_id?: string; plant_id?: string } | undefined = undefined
+  ): Promise<RouteSchema[]> {
     return this.get(`/auth/routes`, params);
   }
 
@@ -92,8 +104,8 @@ export class VolateqAPI extends HttpClientBase {
     return this.post(`/auth/analysis`, newAnalyis);
   }
 
-  public async getAllAnalysis(customer_id?: string): Promise<AnalysisSchema[]> {
-    return this.get(`/auth/analysis`, customer_id && { customer_id } || undefined);
+  public async getAllAnalysis(queryParams?: { plant_id?: string }): Promise<AnalysisSchema[]> {
+    return this.get(`/auth/analysis`, queryParams);
   }
 
   public getAnalysis(analysisId?: string): Promise<AnalysisSchema> {
@@ -112,14 +124,14 @@ export class VolateqAPI extends HttpClientBase {
     await this.delete(`/auth/analysis/${analysisId}`);
   }
 
-  public getAnalysisFileDownloadUrl(analysisId: string, fileName: string): Promise<{url: string}> {
+  public getAnalysisFileDownloadUrl(analysisId: string, fileName: string): Promise<{ url: string }> {
     return this.get(`/auth/analysis/${analysisId}/file/${fileName}`);
   }
 
   public getPlants(customerId?: string): Promise<PlantSchema[]> {
     customerId = customerId || store.state.auth.customer_id;
     if (!customerId) {
-      throw Error('Missing customer_id');
+      throw Error("Missing customer_id");
     }
 
     return this.get(`/auth/customer/${customerId}/plants`);
@@ -137,18 +149,57 @@ export class VolateqAPI extends HttpClientBase {
     return this.post(`/reset-password/${confirmationKey}`, { new_password, new_password_repeat });
   }
 
-  public importAnalysisResult(jsonFile: File, analysisId: string, imageFiles?: File[]): Promise<TaskSchema> {
+  public async importAnalysisResult(
+    jsonFile: File,
+    analysisId: string,
+    imageFiles?: File[],
+    uploadProgressCallback?: (progress: number) => void
+  ): Promise<TaskSchema> {
     const fileData = { json_file: jsonFile };
     if (imageFiles) {
-      fileData["image_files"] = imageFiles;
+      fileData["image_filenames"] = imageFiles.map(file => file.name);
     }
 
-    return this.postForm(`/auth/import-analysis-result/${analysisId}`, fileData);
+    const task = await this.postForm(`/auth/import-analysis-result/${analysisId}`, fileData);
+
+    if (imageFiles) {
+      try {
+        await this.uploadImportAnalysisResultImageFiles(analysisId, imageFiles, uploadProgressCallback);
+      } catch (e) {
+        if (!(e as ApiException).error || (e as ApiException).error !== ApiErrors.BAD_REQUEST) {
+          // Ignore Bad request error (='An import is running for this analysis, already.')
+          // to avoid overwriting of actual task error
+          throw e;
+        }
+      }
+    }
+
+    return task;
+  }
+
+  private async uploadImportAnalysisResultImageFiles(
+    analysisId: string,
+    imageFiles: File[],
+    uploadProgressCallback?: (progress: number) => void
+  ): Promise<void> {
+    const imagesFilesToUpload = imageFiles.slice();
+
+    while (imagesFilesToUpload.length > 0) {
+      await this.postForm(`/auth/import-analysis-result/${analysisId}/upload-images`, {
+        // Only upload 50 files simultaneously to avoid 504 (Gateway timout)
+        image_files: imagesFilesToUpload.splice(0, 50),
+      });
+
+      uploadProgressCallback &&
+        uploadProgressCallback(
+          Math.round(((imageFiles.length - imagesFilesToUpload.length) / imageFiles.length) * 100)
+        );
+    }
   }
 
   public async getAnalysisResult(analysisResultId: string): Promise<AnalysisResultDetailedSchema> {
     const analysisResults = [await this.get(`/auth/analysis-result/${analysisResultId}`)];
-    
+
     this.filterKeyFigures(analysisResults);
 
     return analysisResults[0];
@@ -161,28 +212,33 @@ export class VolateqAPI extends HttpClientBase {
   public getSpecificAnalysisResult<T>(
     analysisResultId: string,
     componentId: number,
-    params: TableRequest): 
-    Promise<TableResultSchema<T>>
-  {
+    params: TableRequest
+  ): Promise<TableResultSchema<T>> {
     return this.get(`/auth/analysis-result/${analysisResultId}/${componentId}`, params);
   }
 
   public getSpecificAnalysisResultCsvUrl(
-    analysisResultId: string, 
+    analysisResultId: string,
     componentId: number,
     params: TableRequest,
-    csvMappings?: { [key: string]: string }): string {
-    const encodedCsvMappings = csvMappings && `&csv_mappings=${encodeURIComponent(this.getQueryParams(csvMappings).substring(1))}` || '';
+    csvMappings?: { [key: string]: string }
+  ): string {
+    const encodedCsvMappings =
+      (csvMappings && `&csv_mappings=${encodeURIComponent(this.getQueryParams(csvMappings).substring(1))}`) || "";
 
-    return `${apiBaseUrl}/auth/analysis-result/${analysisResultId}/${componentId}${this.getQueryParams(params)}&csv=1${encodedCsvMappings}`;
+    return `${apiBaseUrl}/auth/analysis-result/${analysisResultId}/${componentId}${this.getQueryParams(
+      params
+    )}&csv=1${encodedCsvMappings}`;
   }
 
   public async generateDownloadUrl(downloadUrl: string, filename?: string): Promise<string> {
-    const encodedUrl= encodeURIComponent(encodeURIComponent(downloadUrl));
-    const filenameParam = filename && `?filename=${encodeURIComponent(filename)}` || '';
+    const encodedUrl = encodeURIComponent(encodeURIComponent(downloadUrl));
+    const filenameParam = (filename && `?filename=${encodeURIComponent(filename)}`) || "";
 
-    const urlTokenResponse: { url_token: string } = await this.get(`/auth/user/generate-url-token/${encodedUrl}${filenameParam}`);
-    
+    const urlTokenResponse: { url_token: string } = await this.get(
+      `/auth/user/generate-url-token/${encodedUrl}${filenameParam}`
+    );
+
     return `${apiBaseUrl}/temp-url/${urlTokenResponse.url_token}`;
   }
 
@@ -194,8 +250,8 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/analysis-result/${analysisResultId}/files`);
   }
 
-  public deleteAnalysisResultFile(analysisResultId: string, analysisResultFileId: string): Promise<{ results_deleted: number }> {
-    return this.delete(`/auth/analysis-result/${analysisResultId}/file/${analysisResultFileId}`);
+  public deleteAnalysisResult(analysisResultId: string): Promise<{ results_deleted: number }> {
+    return this.delete(`/auth/analysis-result/${analysisResultId}`);
   }
 
   public async resendSecurityCode(confirmationKey: string): Promise<void> {
@@ -210,28 +266,51 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/geo-visual/${plantId}/components`, { ids: componentIds });
   }
 
-  public getKeyFiguresGeoVisual(plantId: string, analysisResultId: string, keyFiguresId: AnalysisResultKeyFigure, query_params?: GeoVisualQuery): Promise<any> {
+  public getKeyFiguresGeoVisual(
+    plantId: string,
+    analysisResultId: string,
+    keyFiguresId: AnalysisResultKeyFigure,
+    query_params?: GeoVisualQuery
+  ): Promise<any> {
     return this.get(`/auth/geo-visual/${plantId}/${analysisResultId}/key-figure/${keyFiguresId}`, query_params);
   }
 
   public async getAnalysisResults(plantId: string): Promise<AnalysisResultDetailedSchema[]> {
     const analysisResults = await this.get(`/auth/plant/${plantId}/analysis-results`);
-    
+
     this.filterKeyFigures(analysisResults);
 
     return analysisResults;
   }
 
-  public importFieldgeometry(file: File, customerId: string, plantId: string, clearBefore: boolean): Promise<TaskSchema> {
+  public importFieldgeometry(
+    file: File,
+    customerId: string,
+    plantId: string,
+    clearBefore: boolean
+  ): Promise<TaskSchema> {
     return this.postForm(`/auth/fieldgeometry/${customerId}/${plantId}?clear_before=${clearBefore}`, { file });
   }
 
-  public waitForTask(taskId: string, finished: (task: TaskSchema) => void): void {
+  public waitForTask(taskId: string, finished: (task: TaskSchema) => void, info?: (infoMessage: string) => void): void {
     const interval = setInterval(async () => {
       const task = await this.getTask(taskId);
       if (task.state === "SUCCESS" || task.state === "FAILURE") {
         clearInterval(interval);
         finished(task);
+      } else {
+        if (info) {
+          if (task.info && task.info.infos && task.info.infos.length > 0) {
+            const infoMessage =
+              ">" +
+              task.info.infos.join("<br>>") +
+              ((task.info.max_steps && `... (${task.info.current_step}/${task.info.max_steps})`) || "...");
+
+            info(infoMessage);
+          } else {
+            info("Wait for start...");
+          }
+        }
       }
     }, 3000);
   }
@@ -252,12 +331,26 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/plants`);
   }
 
+  public getAnalysisResultFileUrl(analysisResultFileId: string): Promise<{ url: string }> {
+    return this.get(`/auth/analysis-result/result-file/${analysisResultFileId}`);
+  }
+
+  public downloadMultipleAnalysisFilesUrl(analysisId: string, filenames: string[]) {
+    return this.getUrl(`${apiBaseUrl}/auth/analysis/${analysisId}/files-download`, { filenames: filenames });
+  }
+
+  public getAnalysisFilesInfo(analysisId: string, filenames: string[]): Promise<Record<string, number | null>> {
+    return this.get(`/auth/analysis/${analysisId}/files-info`, { filenames });
+  }
+
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {
     // Temporary special case for IR_INTENSITY: Replaced by GLASS_TUBE_TEMPERATURE
     for (const analysisResult of analysisResults) {
       const ir_intensity_index = analysisResult.key_figures.findIndex(
-        keyFigure => keyFigure.id === AnalysisResultKeyFigure.IR_INTENSITY_ID);
-      if (ir_intensity_index != -1 && 
+        keyFigure => keyFigure.id === AnalysisResultKeyFigure.IR_INTENSITY_ID
+      );
+      if (
+        ir_intensity_index != -1 &&
         analysisResult.key_figures.find(keyFigure => keyFigure.id === AnalysisResultKeyFigure.GLASS_TUBE_TEMPERATURE_ID)
       ) {
         analysisResult.key_figures.splice(ir_intensity_index, 1);

@@ -1,11 +1,18 @@
 <template>
   <div class="app-table-component">
     <app-table-component-container ref="container" :tableName="tableName" :pagination="pagination" size="sm">
-      <b-table :id="tableName" hover :fields="columns" :items="dataProvider" class="bordered" ref="table"
+      <b-table
+        :id="tableName"
+        hover
+        :fields="columns"
+        :items="dataProvider"
+        class="bordered"
+        ref="table"
         head-variant="light"
         :emptyText="$t('no-data')"
         :per-page="pagination.perPage"
-        :current-page="pagination.currentPage">
+        :current-page="pagination.currentPage"
+      >
         <template #head()="column">
           {{ column.label }}
           <app-explanation v-if="column.field.labelExpl">
@@ -41,7 +48,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
   components: {
     AppTableComponentContainer,
     AppExplanation,
-  }
+  },
 })
 export default class AppTableComponent extends Vue implements ITableComponent {
   @Prop() analysisResult!: AnalysisResultDetailedSchema;
@@ -62,16 +69,16 @@ export default class AppTableComponent extends Vue implements ITableComponent {
   private columnsMapping!: Record<string, string>;
 
   protected startLoading() {
-    this.container.startLoading()
+    this.container.startLoading();
   }
   protected stopLoading() {
-    this.container.stopLoading()
+    this.container.stopLoading();
   }
 
   public search(searchText: string) {
     this.searchText = searchText.trim();
 
-    this.table.refresh()
+    this.table.refresh();
   }
 
   created() {
@@ -84,16 +91,16 @@ export default class AppTableComponent extends Vue implements ITableComponent {
 
   getTableRequestParam(): TableRequest {
     if (!this.last_ctx) {
-      throw Error('Missing last_ctx');
+      throw Error("Missing last_ctx");
     }
 
     return {
       limit: this.last_ctx.perPage,
       page: this.last_ctx.currentPage,
       order_by: this.last_ctx.sortBy && this.columnsMapping[this.last_ctx.sortBy],
-      order_direction: this.last_ctx.sortDesc ? 'desc' : 'asc',
-      filter: this.searchText
-    }
+      order_direction: this.last_ctx.sortDesc ? "desc" : "asc",
+      filter: this.searchText,
+    };
   }
 
   getCsvColumnMappingsParam(): { [column_name: string]: string } {
@@ -111,7 +118,7 @@ export default class AppTableComponent extends Vue implements ITableComponent {
   }
 
   async dataProvider(ctx: BvTableCtxObject) {
-    this.startLoading()
+    this.startLoading();
     this.last_ctx = ctx;
 
     try {
@@ -128,9 +135,9 @@ export default class AppTableComponent extends Vue implements ITableComponent {
 
       return this.mappingHelper.getItems(results.items);
     } catch (e) {
-      appContentEventBus.showError(e as ApiException)
+      appContentEventBus.showError(e as ApiException);
     } finally {
-      this.stopLoading()
+      this.stopLoading();
     }
 
     return [];
@@ -140,9 +147,11 @@ export default class AppTableComponent extends Vue implements ITableComponent {
     await apiResultsLoader.loadResults(this.analysisResult.id, this.activeComponent.componentId);
 
     let results = apiResultsLoader.getResults(this.analysisResult.id, this.activeComponent.componentId)!;
-    
+
     if (this.searchText) {
-      results = results.filter(item => item.fieldgeometry_component.kks.toUpperCase().startsWith(this.searchText.toUpperCase()));
+      results = results.filter(item =>
+        item.fieldgeometry_component.kks.toUpperCase().startsWith(this.searchText.toUpperCase())
+      );
     }
 
     const items = this.mappingHelper.getItems(results);
@@ -163,7 +172,10 @@ export default class AppTableComponent extends Vue implements ITableComponent {
       });
     }
 
-    const slicedItems = items.slice((ctx.currentPage - 1) * ctx.perPage, (ctx.currentPage - 1) * ctx.perPage + ctx.perPage);
+    const slicedItems = items.slice(
+      (ctx.currentPage - 1) * ctx.perPage,
+      (ctx.currentPage - 1) * ctx.perPage + ctx.perPage
+    );
 
     return slicedItems;
   }

@@ -5,17 +5,9 @@
     </div>
     <div v-show="selectedAnalysisResult">
       <div class="app-tables-searchbar">
-        <app-search-input
-          :placeholder="$t('search-pcs')"
-          @search="onSearch"
-        ></app-search-input>
+        <app-search-input :placeholder="$t('search-pcs')" @search="onSearch"></app-search-input>
 
-        <app-button
-          ref="csvExportBtn"
-          variant="secondary"
-          :title="$t('export-csv')"
-          @click="onExportCsv"
-        >
+        <app-button ref="csvExportBtn" variant="secondary" :title="$t('export-csv')" @click="onExportCsv">
           <b-icon icon="download"></b-icon> {{ $t("export-csv") }}:
           {{ activeTabLabel }}
         </app-button>
@@ -47,27 +39,23 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref } from "vue-property-decorator";
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import AppButton from "@/app/shared/components/app-button/app-button.vue";
-import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
-import AppSearchInput from "@/app/shared/components/app-search-input/app-search-input.vue";
-import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-import {
-  IActiveComponent,
-  IActiveTabComponent,
-  IAnalysisResultSelection,
-} from "../types";
-import { ITableComponent } from "./types";
-import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
-import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
-import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
-import dateHelper from "@/app/shared/services/helper/date-helper";
-import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import AppTableComponent from "@/app/plant/shared/table-component/table-component.vue";
+import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { IAppButton } from "@/app/shared/components/app-button/types";
+import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
+import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
+import AppSearchInput from "@/app/shared/components/app-search-input/app-search-input.vue";
+import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
+import dateHelper from "@/app/shared/services/helper/date-helper";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
+import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
+import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import { Component, Prop, Ref } from "vue-property-decorator";
+import { IActiveComponent, IActiveTabComponent, IAnalysisResultSelection } from "../types";
+import { ITableComponent } from "./types";
 
 @Component({
   name: "app-tables-component",
@@ -79,10 +67,7 @@ import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
     AppTableComponent,
   },
 })
-export default class AppTablesComponent
-  extends BaseAuthComponent
-  implements IAnalysisResultSelection
-{
+export default class AppTablesComponent extends BaseAuthComponent implements IAnalysisResultSelection {
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
   @Prop() activeComponents!: IActiveComponent[];
@@ -96,9 +81,7 @@ export default class AppTablesComponent
 
   selectAnalysisResult(analysisResultId: string | undefined) {
     this.selectedAnalysisResult =
-      this.analysisResults.find(
-        (analysisResult) => analysisResult.id === analysisResultId
-      ) || null;
+      this.analysisResults.find(analysisResult => analysisResult.id === analysisResultId) || null;
 
     this.activeTabComponents.length = 0;
 
@@ -107,7 +90,7 @@ export default class AppTablesComponent
 
       for (const activeComponent of this.activeComponents) {
         const keyFigure = this.selectedAnalysisResult.key_figures.find(
-          (keyFigure) => keyFigure.component.id === activeComponent.componentId
+          keyFigure => keyFigure.component.id === activeComponent.componentId
         );
         if (keyFigure) {
           this.activeTabComponents.push({
@@ -159,17 +142,12 @@ export default class AppTablesComponent
           "_" +
           this.plant.name +
           "_" +
-          new Date(
-            Date.parse(this.selectedAnalysisResult!.csp_ptc.created_at)
-          ).toLocaleDateString() +
+          new Date(Date.parse(this.selectedAnalysisResult!.csp_ptc.created_at)).toLocaleDateString() +
           "_" +
           activeComponent.label +
           ".csv";
 
-        AppDownloader.download(
-          await volateqApi.generateDownloadUrl(authCsvDownloadUrl, csvFileName),
-          csvFileName
-        );
+        AppDownloader.download(await volateqApi.generateDownloadUrl(authCsvDownloadUrl, csvFileName), csvFileName);
       } catch (e) {
         appContentEventBus.showError(e as ApiException);
       } finally {
@@ -178,31 +156,20 @@ export default class AppTablesComponent
     }
   }
 
-  private getRefTableComponent(
-    activeTabComponent: IActiveComponent
-  ): ITableComponent {
-    return (
-      this.$refs[this.generateRefTableName(activeTabComponent)] as any[]
-    )[0];
+  private getRefTableComponent(activeTabComponent: IActiveComponent): ITableComponent {
+    return (this.$refs[this.generateRefTableName(activeTabComponent)] as any[])[0];
   }
 
   private generateRefTableName(activeTabComponent: IActiveComponent): string {
-    return [
-      "tableComponent",
-      this.selectedAnalysisResult!.id,
-      activeTabComponent.componentId,
-    ].join("_");
+    return ["tableComponent", this.selectedAnalysisResult!.id, activeTabComponent.componentId].join("_");
   }
 
   private getSelectedActiveComponent(): IActiveTabComponent | undefined {
-    return Object.values(this.activeTabComponents).find(
-      (comp) => comp.tabIndex === this.tabIndex
-    );
+    return Object.values(this.activeTabComponents).find(comp => comp.tabIndex === this.tabIndex);
   }
 }
 </script>
 <style lang="scss">
-
 .app-tables-component {
   padding: 60px 20px;
 

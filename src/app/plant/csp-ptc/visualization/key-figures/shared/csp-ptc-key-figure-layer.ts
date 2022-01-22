@@ -18,16 +18,9 @@ export abstract class CspPtcKeyFigureLayer<T extends AnalysisResultSchemaBase> e
     protected readonly keyFigureId: AnalysisResultKeyFigure,
     public readonly keyFigureInfo: KeyFigureInfo,
     protected readonly query?: GeoVisualQuery,
-    protected readonly color?: KeyFigureColors,
+    protected readonly color?: KeyFigureColors
   ) {
-    super(
-      vueComponent,
-      analysisResult,
-      keyFigureId,
-      keyFigureInfo,
-      query,
-      color,
-    );
+    super(vueComponent, analysisResult, keyFigureId, keyFigureInfo, query, color);
 
     if (!this.color) {
       this.color = cspPtcKeyFigureColors[this.keyFigureId];

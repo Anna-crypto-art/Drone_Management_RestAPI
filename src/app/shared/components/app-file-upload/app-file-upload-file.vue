@@ -5,7 +5,7 @@
         <small class="app-file-upload-file-name-size grayed">{{ getFileSize(file.size) }}</small>
         {{ file.fileName }}
         <span v-show="error" class="app-file-upload-file-name-error" v-bind:class="{ 'text-danger': !retry }">
-          {{ retry && $t("retrying...") || error }}
+          {{ (retry && $t("retrying...")) || error }}
         </span>
       </div>
       <div v-show="!uploading" class="app-file-upload-file-remove" @click="onFileRemove">
@@ -15,7 +15,6 @@
         <span v-show="!success">{{ progress }}%</span>
         <b-icon v-show="success" icon="check2" class="text-success"></b-icon>
       </div>
-      
     </div>
     <div ref="uploadProgressBar" v-show="uploading" class="app-file-upload-file-progressbar"></div>
   </div>
@@ -28,6 +27,7 @@ import { IAppFileUploadFile } from "@/app/shared/components/app-file-upload/type
 import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
 import { IResumableFile } from "@/app/shared/services/upload-service/types";
 import uploadService, { UploadService } from "@/app/shared/services/upload-service/upload-service";
+import { getReadableFileSize } from "@/app/shared/services/helper/file-helper";
 
 @Component({
   name: "app-file-upload-file",
@@ -57,14 +57,7 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
   }
 
   getFileSize(size: number): string {
-    const sizes = ["KB", "MB", "GB", "TB"];
-
-    let i = 0;
-    do {
-      size = size / 1024;
-    } while (size > 1024 && ++i < sizes.length)
-
-    return `${Math.round(size)} ${sizes[i]}`;
+    return getReadableFileSize(size);
   }
 
   onFileRemove(): void {
@@ -96,7 +89,7 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
   emitProgress(): void {
     const newProgress = Math.round(this.file.progress(false) * 100);
     if (newProgress !== this.progress) {
-      this.progress = newProgress
+      this.progress = newProgress;
       this.error = "";
       this.retry = false;
 
@@ -185,5 +178,4 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
     margin-bottom: 0;
   }
 }
-
 </style>

@@ -13,12 +13,10 @@ import AppContent from "@/app/shared/components/app-content/app-content.vue";
 @Component({
   name: "app-settings",
   components: {
-    AppContent
-  }
+    AppContent,
+  },
 })
 export default class AppSettings extends Vue {}
 </script>
 
-<style>
-
-</style>
+<style></style>

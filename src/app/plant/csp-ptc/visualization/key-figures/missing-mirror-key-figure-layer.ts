@@ -17,7 +17,7 @@ export class MissingMirrorKeyFigureLayer extends MirrorKeyFigureLayer {
         text: this.showText(feature),
       });
     }
-    
+
     return super.getStyle(feature);
   }
 
@@ -26,7 +26,9 @@ export class MissingMirrorKeyFigureLayer extends MirrorKeyFigureLayer {
       return undefined;
     }
 
-    const notMeasuredSCEFeaturesCount = this.geoJSON.features.filter(feature => feature.properties.value === null).length;
+    const notMeasuredSCEFeaturesCount = this.geoJSON.features.filter(
+      feature => feature.properties.value === null
+    ).length;
     const notMeasuredMirrorFeaturesCount = notMeasuredSCEFeaturesCount * this.geoJSON.custom.mirrors_per_sce!;
     const missingMirrorsFeaturesCount = this.geoJSON.features.length - notMeasuredSCEFeaturesCount;
 
@@ -35,14 +37,16 @@ export class MissingMirrorKeyFigureLayer extends MirrorKeyFigureLayer {
       entries: [
         {
           color: this.color!,
-          name: this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
+          name:
+            this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
             this.getLegendEntryCount(missingMirrorsFeaturesCount, 100),
-        }, 
+        },
         {
           color: KeyFigureColors.grey,
-          name: this.vueComponent.$t("not-measured").toString() + this.getLegendEntryCount(notMeasuredMirrorFeaturesCount),
-        }
-      ]
+          name:
+            this.vueComponent.$t("not-measured").toString() + this.getLegendEntryCount(notMeasuredMirrorFeaturesCount),
+        },
+      ],
     };
   }
 }

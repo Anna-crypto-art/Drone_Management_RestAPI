@@ -12,23 +12,28 @@ export class HttpClientBase {
     const httpClient = Axios.create({ baseURL });
     httpClient.interceptors.request.use((config: AxiosRequestConfig): AxiosRequestConfig => {
       if (store.getters.auth.isAuthenticated) {
-        config.headers = { "Authorization": `Bearer ${store.state.auth.token}`};
+        config.headers = { Authorization: `Bearer ${store.state.auth.token}` };
       }
-      
+
       return config;
     });
 
-    return httpClient
+    return httpClient;
   }
 
   constructor() {
     this.baseURL = apiBaseUrl;
     this.httpClient = HttpClientBase.createAuthHttpClient(this.baseURL!);
-    this.httpClient.interceptors.response.use((response: AxiosResponse) => {
+    this.httpClient.interceptors.response.use(
+      (response: AxiosResponse) => {
         return response.data;
-      }, (error: AxiosError) => {
+      },
+      (error: AxiosError) => {
         if (error.response && error.response.data && error.response.data.error) {
-          if (error.response.data.error === ApiErrors.INVALID_TOKEN || error.response.data.error === ApiErrors.TOKEN_EXPIRED) {
+          if (
+            error.response.data.error === ApiErrors.INVALID_TOKEN ||
+            error.response.data.error === ApiErrors.TOKEN_EXPIRED
+          ) {
             store.dispatch.auth.updateToken({ token: "", role: "", customer_id: undefined });
 
             location.reload();
@@ -36,13 +41,13 @@ export class HttpClientBase {
 
           return Promise.reject(error.response.data);
         }
-    
+
         console.error("FATAL");
         console.error(error);
-        
+
         return Promise.reject({
           error: ApiErrors.SOMETHING_WENT_WRONG,
-          message: "Ooops! Something went horribly wrong!"
+          message: "Ooops! Something went horribly wrong!",
         });
       }
     );
@@ -63,7 +68,7 @@ export class HttpClientBase {
       }
     }
 
-    return this.httpClient.post(url, formData, { headers: { 'Content-Type': 'multipart/form-data' }});
+    return this.httpClient.post(url, formData, { headers: { "Content-Type": "multipart/form-data" } });
   }
 
   protected async post(url: string, data?: any, config?: AxiosRequestConfig | undefined): Promise<any> {
@@ -71,14 +76,23 @@ export class HttpClientBase {
   }
 
   protected async get(url: string, params?: any, config?: AxiosRequestConfig | undefined): Promise<any> {
-    return this.httpClient.get(url + (params && this.getQueryParams(params) || ""), config);
+    return this.httpClient.get(this.getUrl(url, params), config);
   }
 
   protected async delete(url: string, config?: AxiosRequestConfig | undefined): Promise<any> {
     return this.httpClient.delete(url, config);
   }
 
+  protected getUrl(url: string, params?: any) {
+    return url + ((params && this.getQueryParams(params)) || "");
+  }
+
   protected getQueryParams(params: any): string {
-    return "?" + Object.keys(params).map(key => key + "=" + encodeURIComponent(params[key])).join("&");
+    return (
+      "?" +
+      Object.keys(params)
+        .map(key => key + "=" + encodeURIComponent(params[key]))
+        .join("&")
+    );
   }
 }

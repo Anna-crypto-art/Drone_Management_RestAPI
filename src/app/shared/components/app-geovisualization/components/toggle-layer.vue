@@ -1,10 +1,7 @@
 <template>
   <b-button
-    :class="
-      'toggle-button btn-sm layer-sidebar-toggle opens-left ' +
-        (open ? 'show-label' : '')
-    "
-    @click="toggle()"
+    :class="'toggle-button btn-sm layer-sidebar-toggle opens-left ' + (open ? 'show-label' : '')"
+    @click="toggle"
   >
     <span class="toggle-button-text">{{ $t("layers") }} &nbsp;</span>
     <b-icon :icon="open ? 'layers-half' : 'layers'"></b-icon>
@@ -12,20 +9,17 @@
 </template>
 
 <script lang="ts">
-import { mapSidebar } from "@/app/shared/stores/sidebar";
 import Vue from "vue";
-import {State} from "vuex-class"
 import { Component } from "vue-property-decorator";
 
 @Component({
-  name: "app-geovisual-toggle-layer"
+  name: "app-geovisual-toggle-layer",
 })
 export default class AppGeovisualToggleLayer extends Vue {
-  // Fuck VUE!! I might need to use a freaking third party library to get this crap to work (more dependencies 🎉🎉🎉)
-  open = mapSidebar.state.open;
+  open = this.$store.direct.getters.sidebar["layer-switcher"];
 
   toggle() {
-    mapSidebar.commit("toggle");
+    this.$store.direct.commit.sidebar.toggle({ name: "layer-switcher" });
   }
 }
 </script>

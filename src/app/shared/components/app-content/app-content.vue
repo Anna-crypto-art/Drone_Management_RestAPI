@@ -11,6 +11,9 @@
         <div class="app-content-title">
           <h1 v-html="title"></h1>
           <div v-if="subtitle" v-html="subtitle" class="app-content-subtitle grayed"></div>
+          <div v-if="!subtitle" class="app-content-subtitle grayed">
+            <slot name="subtitle"></slot>
+          </div>
         </div>
         <div class="app-content-content">
           <div class="app-content-content-alert">
@@ -35,8 +38,8 @@ import { AppAlert } from "@/app/shared/services/app-alert/app-alert";
 @Component({
   name: "app-content",
   components: {
-    AppHeader
-  }
+    AppHeader,
+  },
 })
 export default class AppContent extends Vue {
   @Prop({ required: true }) title: string | undefined;

@@ -1,9 +1,5 @@
 <template>
-  <div
-    :class="
-      'app-table-container ' + (size ? `app-table-container-${size}` : '')
-    "
-  >
+  <div :class="'app-table-container ' + (size ? `app-table-container-${size}` : '')">
     <slot></slot>
   </div>
 </template>

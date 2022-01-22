@@ -23,7 +23,7 @@ import Vue from "vue";
 import { Prop, Component } from "vue-property-decorator";
 
 @Component({
-  name: "app-sidebar"
+  name: "app-sidebar",
 })
 export default class AppSidebar extends Vue {
   @Prop({ default: true }) open!: boolean;

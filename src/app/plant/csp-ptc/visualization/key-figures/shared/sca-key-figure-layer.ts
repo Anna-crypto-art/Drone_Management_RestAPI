@@ -5,7 +5,6 @@ import { Fill, Style } from "ol/style";
 import { Legend } from "@/app/plant/shared/visualization/types";
 import { CspPtcKeyFigureLayer } from "./csp-ptc-key-figure-layer";
 
-
 export abstract class ScaKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisResultCspPtcScaSchema> {
   protected readonly analysisResultMapping = analysisResultCspPtcMappingSca;
 
@@ -30,14 +29,20 @@ export abstract class ScaKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisRes
       entries: [
         {
           color: this.getColor(),
-          name: this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
+          name:
+            this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
             this.getLegendEntryCount(),
-        }
-      ]
+        },
+      ],
     };
   }
 
-  protected getLegendEntryTransName(transClassName: string, classLimits: number[] | null, currentClass: 1 | 2 | 3 | undefined, unit: string): string {
+  protected getLegendEntryTransName(
+    transClassName: string,
+    classLimits: number[] | null,
+    currentClass: 1 | 2 | 3 | undefined,
+    unit: string
+  ): string {
     if (!currentClass) {
       return this.vueComponent.$t(this.keyFigureInfo.displayName!).toString();
     }
@@ -46,11 +51,9 @@ export abstract class ScaKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisRes
     if (classLimits) {
       if (currentClass === 1) {
         limitRange = `0${unit} - ${classLimits[0]}${unit}: `;
-      }
-      else if (currentClass === 2) {
+      } else if (currentClass === 2) {
         limitRange = `${classLimits[0]}${unit} - ${classLimits[1]}${unit}: `;
-      }
-      else if (currentClass === 3) {
+      } else if (currentClass === 3) {
         limitRange = `${classLimits[1]}${unit} - &infin;${unit}: `;
       }
     }

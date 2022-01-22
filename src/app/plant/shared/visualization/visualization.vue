@@ -8,15 +8,9 @@
       @sidebarToggle="onSidebarToggled"
     >
       <template #topContent>
-        <b-form-checkbox
-          v-model="enableMultiSelection"
-          switch
-          @change="onMultiSelectionChanged"
-        >
+        <b-form-checkbox v-model="enableMultiSelection" switch @change="onMultiSelectionChanged">
           {{ $t("multi-selection") }}
-          <app-explanation>{{
-            $t("multi-selection-overlapping_expl")
-          }}</app-explanation>
+          <app-explanation>{{ $t("multi-selection-overlapping_expl") }}</app-explanation>
         </b-form-checkbox>
       </template>
 
@@ -29,35 +23,18 @@
     </app-geovisualization>
 
     <div v-if="hasLegend" class="visualization-legend">
-      <div
-        v-for="entry in legendEntries"
-        :key="entry.color"
-        class="visualization-legend-entry"
-      >
-        <div
-          class="visualization-legend-entry-color"
-          :style="`background: ${entry.color}`"
-        ></div>
+      <div v-for="entry in legendEntries" :key="entry.color" class="visualization-legend-entry">
+        <div class="visualization-legend-entry-color" :style="`background: ${entry.color}`"></div>
         <div class="visualization-legend-entry-name" v-html="entry.name"></div>
       </div>
     </div>
-    <b-toast
-      id="piInfoToast"
-      no-auto-hide
-      solid
-      toaster="b-toaster-bottom-center"
-    >
+    <b-toast id="piInfoToast" no-auto-hide solid toaster="b-toaster-bottom-center">
       <template #toast-title>
         <h3>{{ piToastInfo.title }}</h3>
       </template>
       <div>
         <div class="toaster-images" v-if="piToastInfo.images">
-          <img
-            v-for="image in piToastInfo.images"
-            :key="image.title"
-            :title="image.title"
-            :src="image.url"
-          />
+          <img v-for="image in piToastInfo.images" :key="image.title" :title="image.title" :src="image.url" />
         </div>
         <b-row
           v-for="featureInfo in piToastInfo.records"
@@ -78,37 +55,31 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref } from "vue-property-decorator";
-import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-import { ComponentLayer } from "./layers/component-layer";
-import { IAnalysisResultSelection } from "../types";
-import { FeatureLike } from "ol/Feature";
-import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import {
-  IPlantVisualization,
-  Legend,
-  FeatureInfos,
-  KeyFigureTypeMap
-} from "@/app/plant/shared/visualization/types";
 import { PILayersHierarchy } from "@/app/plant/shared/visualization/pi-layers-hierarchy";
+import { FeatureInfos, IPlantVisualization, KeyFigureTypeMap, Legend } from "@/app/plant/shared/visualization/types";
+import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppGeovisualization from "@/app/shared/components/app-geovisualization/app-geovisualization.vue";
 import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualization/types/components";
-import {
-  GroupLayer,
-  LayerType
-} from "@/app/shared/components/app-geovisualization/types/layers";
+import { GroupLayer, LayerType } from "@/app/shared/components/app-geovisualization/types/layers";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
+import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import { FeatureLike } from "ol/Feature";
+import { Component, Prop, Ref } from "vue-property-decorator";
+import { IAnalysisResultSelection } from "../types";
+import { ComponentLayer } from "./layers/component-layer";
 
 @Component({
   name: "app-visualization",
   components: {
     AppGeovisualization,
-    AppExplanation
-  }
+    AppExplanation,
+  },
 })
-export default class AppVisualization extends BaseAuthComponent
-  implements IAnalysisResultSelection, IPlantVisualization {
+export default class AppVisualization
+  extends BaseAuthComponent
+  implements IAnalysisResultSelection, IPlantVisualization
+{
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
   @Prop() componentLayerTypes!: typeof ComponentLayer[];
@@ -116,10 +87,7 @@ export default class AppVisualization extends BaseAuthComponent
 
   @Ref() openLayers!: IOpenLayersComponent;
 
-  selectedAnalysisResult:
-    | AnalysisResultDetailedSchema
-    | null
-    | undefined = null;
+  selectedAnalysisResult: AnalysisResultDetailedSchema | null | undefined = null;
 
   piLayersHierarchy!: PILayersHierarchy;
   componentLayers: ComponentLayer[] = [];
@@ -128,7 +96,7 @@ export default class AppVisualization extends BaseAuthComponent
   legends: Legend[] = [];
   piToastInfo: FeatureInfos = {
     title: "",
-    records: [{ name: "", descr: "", value: "" }]
+    records: [{ name: "", descr: "", value: "" }],
   };
   enableMultiSelection = false;
 
@@ -144,9 +112,7 @@ export default class AppVisualization extends BaseAuthComponent
   }
 
   selectAnalysisResult(analysisResultId: string | undefined): void {
-    this.selectedAnalysisResult = this.analysisResults.find(
-      analysisResult => analysisResult.id === analysisResultId
-    );
+    this.selectedAnalysisResult = this.analysisResults.find(analysisResult => analysisResult.id === analysisResultId);
 
     this.piLayersHierarchy.setVisibility(this.selectedAnalysisResult?.id);
 
@@ -165,9 +131,7 @@ export default class AppVisualization extends BaseAuthComponent
     const legendEntries: { color: string; name: string }[] = [];
     for (const legend of this.legends) {
       for (const entry of legend.entries) {
-        if (
-          !legendEntries.find(legendEntry => legendEntry.color === entry.color)
-        ) {
+        if (!legendEntries.find(legendEntry => legendEntry.color === entry.color)) {
           legendEntries.push(entry);
         }
       }
@@ -235,28 +199,20 @@ export default class AppVisualization extends BaseAuthComponent
   }
 
   private createLayers(): void {
-    this.componentLayers = this.componentLayerTypes.map(
-      componentType => new (componentType as any)(this)
-    );
-    this.piLayersHierarchy = new PILayersHierarchy(
-      this,
-      this.analysisResults,
-      this.keyFigureLayers
-    );
+    this.componentLayers = this.componentLayerTypes.map(componentType => new (componentType as any)(this));
+    this.piLayersHierarchy = new PILayersHierarchy(this, this.analysisResults, this.keyFigureLayers);
 
     this.layers.push(
       {
         name: this.$t("performance-indicators").toString(),
         type: "group",
         childLayers: this.piLayersHierarchy.getGeoJSONLayers(),
-        singleSelection: true
+        singleSelection: true,
       },
       {
         name: this.$t("components").toString(),
         type: "group",
-        childLayers: this.componentLayers.map(compLayer =>
-          compLayer.toGeoLayer()
-        )
+        childLayers: this.componentLayers.map(compLayer => compLayer.toGeoLayer()),
       },
       {
         name: "pcs",
@@ -267,20 +223,16 @@ export default class AppVisualization extends BaseAuthComponent
         onSelected: (selected: boolean) => {
           this.showPCS = selected;
 
-          this.piLayersHierarchy
-            .getAllChildLayers()
-            .forEach(kpiLayer => kpiLayer.showPCS(selected));
-          this.componentLayers.forEach(compLayer =>
-            compLayer.showPCS(selected)
-          );
+          this.piLayersHierarchy.getAllChildLayers().forEach(kpiLayer => kpiLayer.showPCS(selected));
+          this.componentLayers.forEach(compLayer => compLayer.showPCS(selected));
         },
         selected: false,
-        styleClass: "margin-top"
+        styleClass: "margin-top",
       },
       {
         name: this.$t("world-map").toString(),
         type: "osm",
-        selected: true
+        selected: true,
       }
     );
   }

@@ -3,11 +3,11 @@
 </template>
 
 <script lang="ts">
-import { Component } from "vue-property-decorator";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { BaseAuthComponent } from "./shared/components/base-auth-component/base-auth-component";
+import { Component } from "vue-property-decorator";
 import appContentEventBus from "./shared/components/app-content/app-content-event-bus";
+import { BaseAuthComponent } from "./shared/components/base-auth-component/base-auth-component";
 
 @Component({
   name: "app-home",

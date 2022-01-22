@@ -1,23 +1,9 @@
 <template>
-  <div
-    v-show="visible"
-    :class="
-      'layer-display ' +
-        (layer.isGroup ? 'layer-display-group ' : '') +
-        layer.styleClass
-    "
-  >
-    <b-form-checkbox
-      v-if="!layer.isGroup"
-      :checked="layer.selected"
-      @change="onChange"
-    >
+  <div v-show="visible" :class="'layer-display ' + (layer.isGroup ? 'layer-display-group ' : '') + layer.styleClass">
+    <b-form-checkbox v-if="!layer.isGroup" :checked="layer.selected" @change="onChange">
       <slot :name="layer.name">{{ layer.name }}</slot>
     </b-form-checkbox>
-    <h3
-      v-if="layer.isGroup && layer.name"
-      :class="'layer-display-group-level-' + layerGroupLevel"
-    >
+    <h3 v-if="layer.isGroup && layer.name" :class="'layer-display-group-level-' + layerGroupLevel">
       <slot :name="layer.name">{{ layer.name }}</slot>
     </h3>
     <div v-if="layer.hasChildrens" class="layer-sublayers">
@@ -45,7 +31,7 @@ import { Component, Prop, Watch } from "vue-property-decorator";
 import { LayerStructure } from "../layer-structure";
 
 @Component({
-  name: "app-geovisual-layer-display"
+  name: "app-geovisual-layer-display",
 })
 export default class AppGeovisualLayerDisplay extends Vue {
   @Prop() layer!: LayerStructure;
@@ -54,10 +40,7 @@ export default class AppGeovisualLayerDisplay extends Vue {
     const unselectRec = (layer: LayerStructure) => {
       if (layer.parentLayer?.singleSelection) {
         layer.parentLayer?.getChildLayers().forEach(sibling => {
-          if (
-            sibling.name !== layer.name &&
-            (sibling.selected || sibling.isGroup)
-          ) {
+          if (sibling.name !== layer.name && (sibling.selected || sibling.isGroup)) {
             sibling.selected = false;
           }
         });

@@ -2,8 +2,9 @@
   <b-navbar class="app-header" toggleable="lg" type="dark" sticky>
     <b-navbar-brand href="#">
       <img
-        class="app-header-logo"
-        src="@/assets/logos/logo_white.png"
+        class="app-header-logo float-left"
+        src="/images/logos/logo_white.png"
+        srcset="/images/logos/logo_white.webp, /images/logos/logo_white.png"
         alt="volateq"
       />
     </b-navbar-brand>
@@ -12,20 +13,12 @@
 
     <b-collapse class="app-header-menu" id="nav-collapse" is-nav>
       <b-navbar-nav>
-        <b-nav-item
-          class="link"
-          href="/plants"
-          :active="isActiveRoute(['/plants', '/plant/*'])"
-        >
-          <span class="nav-item-text">{{ $t('plants') }}</span>
+        <b-nav-item class="link" href="/plants" :active="isActiveRoute(['/plants', '/plant/*'])">
+          <span class="nav-item-text">{{ $t("plants") }}</span>
         </b-nav-item>
 
-        <b-nav-item
-          class="link"
-          href="/analyses"
-          :active="isActiveRoute(['/analyses', '/analysis/new'])"
-        >
-          <span class="nav-item-text">{{ $t('analysis') }}</span>
+        <b-nav-item class="link" href="/analyses" :active="isActiveRoute(['/analyses', '/analysis/new'])">
+          <span class="nav-item-text">{{ $t("analysis") }}</span>
         </b-nav-item>
       </b-navbar-nav>
 
@@ -35,23 +28,14 @@
             <b-icon icon="gear-fill" font-scale="1.5" />
           </template>
 
-          <b-dropdown-item href="/" class="link">{{
-            $t('profile')
-          }}</b-dropdown-item>
+          <b-dropdown-item href="/" class="link">{{ $t("profile") }}</b-dropdown-item>
 
-          <b-dropdown-item
-            href="/settings/users"
-            v-if="isSuperAdmin"
-            class="link"
-            >{{ $t('users') }}</b-dropdown-item
-          >
+          <b-dropdown-item href="/settings/users" v-if="isSuperAdmin" class="link">{{ $t("users") }}</b-dropdown-item>
 
           <b-dropdown-divider />
 
           <b-dropdown-form>
-            <b-button @click="logout" class="width-100pc">{{
-              $t('logout')
-            }}</b-button>
+            <b-button @click="logout" class="width-100pc">{{ $t("logout") }}</b-button>
           </b-dropdown-form>
         </b-nav-item-dropdown>
       </b-navbar-nav>
@@ -60,13 +44,13 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop } from 'vue-property-decorator';
+import { Component, Prop } from "vue-property-decorator";
 
-import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
-import volateqApi from '@/app/shared/services/volateq-api/volateq-api';
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 
 @Component({
-  name: 'app-header'
+  name: "app-header",
 })
 export default class AppHeader extends BaseAuthComponent {
   @Prop({ default: true }) fluid!: boolean;
@@ -75,7 +59,7 @@ export default class AppHeader extends BaseAuthComponent {
     try {
       await volateqApi.logout();
 
-      this.$router.push({ name: 'Login' });
+      this.$router.push({ name: "Login" });
       this.$router.go(0); // Reload the page to refresh the js cache
     } catch (e) {
       console.error(e);
@@ -84,10 +68,8 @@ export default class AppHeader extends BaseAuthComponent {
 
   isActiveRoute(routes: string[]): boolean {
     return !!routes.find(route =>
-      route.indexOf('*') != -1
-        ? this.$router.currentRoute.path
-            .replace(route.replace('*', ''), '')
-            .indexOf('/') == -1
+      route.indexOf("*") != -1
+        ? this.$router.currentRoute.path.replace(route.replace("*", ""), "").indexOf("/") == -1
         : this.$router.currentRoute.path === route
     );
   }
@@ -95,11 +77,11 @@ export default class AppHeader extends BaseAuthComponent {
 </script>
 
 <style lang="scss">
-@import '@/scss/_colors.scss';
-@import '@/scss/_variables.scss';
-@import '~bootstrap/scss/_functions';
-@import '~bootstrap/scss/_variables';
-@import '~bootstrap/scss/mixins/_breakpoints';
+@import "@/scss/_colors.scss";
+@import "@/scss/_variables.scss";
+@import "~bootstrap/scss/_functions";
+@import "~bootstrap/scss/_variables";
+@import "~bootstrap/scss/mixins/_breakpoints";
 
 %padtopbot-0 {
   padding-top: 0;

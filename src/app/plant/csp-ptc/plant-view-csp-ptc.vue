@@ -26,36 +26,25 @@
           />
         </b-tab>
         <b-tab v-if="hasResults">
-          <template #title><b-icon icon="table"/></template>
-          <app-tables-csp-ptc
-            ref="tablesCspPtc"
-            :analysisResults="analysisResults"
-            :plant="plant"
-          />
+          <template #title><b-icon icon="table" /></template>
+          <app-tables-csp-ptc ref="tablesCspPtc" :analysisResults="analysisResults" :plant="plant" />
         </b-tab>
-        <b-tab v-if="isSuperAdmin" class="plant-view-csp-ptc-admin-panel-tab">
-          <template #title>
-            <b-icon icon="braces" />
-          </template>
-          <b-container class="plant-view-csp-ptc-admin-panel-container">
+        <b-tab v-if="isSuperAdmin">
+          <template #title><b-icon icon="braces" /></template>
+          <b-container>
             <div class="plant-view-csp-ptc-admin-panel">
-              <h3>{{ $t("admin-panel") }}</h3>
-              <hr />
-              <h4>{{ $t("analysis-visibility") }}</h4>
-              <b-form-checkbox
-                v-show="analysisResultReleased !== null"
-                v-model="analysisResultReleased"
-                switch
-                @change="onReleaseChanged"
-              >
-                {{
-                  analysisResultReleased
-                    ? $t("released")
-                    : $t("invisible-for-customer")
-                }}
-              </b-form-checkbox>
-              <!--<h4>{{ $t("digital-twin") }}</h4>
-                  coming soon-->
+              <h2>{{ $t("admin-panel") }}</h2>
+              <div class="admin-box">
+                <h4>{{ $t("analysis-visibility") }}</h4>
+                <b-form-checkbox
+                  v-show="analysisResultReleased !== null"
+                  v-model="analysisResultReleased"
+                  switch
+                  @change="onReleaseChanged"
+                >
+                  {{ analysisResultReleased ? $t("released") : $t("invisible-for-customer") }}
+                </b-form-checkbox>
+              </div>
             </div>
           </b-container>
         </b-tab>
@@ -90,8 +79,8 @@ import { cspPtcKeyFigureColors } from "./csp-ptc-key-figure-colors";
     AppExplanation,
     AppTablesCspPtc,
     AppSidebar,
-    AppAnalysisSelectionSidebar
-  }
+    AppAnalysisSelectionSidebar,
+  },
 })
 export default class AppPlantViewCspPtc extends BaseAuthComponent {
   @Prop() plant!: PlantSchema;
@@ -103,7 +92,7 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
     { key: "selected", label: "" },
     { key: "id", label: "ID" },
     { key: "createdAt", label: this.$t("created-at").toString() },
-    { key: "kpis", label: this.$t("pi").toString() }
+    { key: "kpis", label: this.$t("pi").toString() },
   ];
   analysisResultsTableItems: Record<string, unknown>[] = [];
   private analysisResults: AnalysisResultDetailedSchema[] | null = null;
@@ -141,10 +130,9 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
 
   async onReleaseChanged() {
     if (this.visualCspPtc?.selectedAnalysisResult) {
-      await volateqApi.updateAnalysisResult(
-        this.visualCspPtc?.selectedAnalysisResult.id,
-        { release: this.analysisResultReleased as boolean }
-      );
+      await volateqApi.updateAnalysisResult(this.visualCspPtc?.selectedAnalysisResult.id, {
+        release: this.analysisResultReleased as boolean,
+      });
     }
   }
 

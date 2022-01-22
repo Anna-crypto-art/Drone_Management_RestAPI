@@ -15,23 +15,11 @@
           >
             <template #head(selected)></template>
             <template #cell(selected)="{ rowSelected }">
-              <b-checkbox
-                :checked="rowSelected"
-                disabled
-                class="b-table-selectable-checkbox"
-              ></b-checkbox>
+              <b-checkbox :checked="rowSelected" disabled class="b-table-selectable-checkbox"></b-checkbox>
             </template>
             <template #row-details="row">
-              <span
-                class="analysis-selection-sidebar-kpi-badge"
-                v-for="kpi in row.item.kpis"
-                :key="kpi.id"
-              >
-                <b-badge
-                  variant="primary"
-                  :style="'background-color: ' + getKpiColor(kpi)"
-                  >{{ kpi.name }}</b-badge
-                >
+              <span class="analysis-selection-sidebar-kpi-badge" v-for="kpi in row.item.kpis" :key="kpi.id">
+                <b-badge variant="primary" :style="'background-color: ' + getKpiColor(kpi)">{{ kpi.name }}</b-badge>
               </span>
             </template>
           </b-table>
@@ -57,8 +45,8 @@ import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/k
   components: {
     AppTableContainer,
     AppExplanation,
-    AppSidebar
-  }
+    AppSidebar,
+  },
 })
 export default class AppAnalysisSelectionSidebar extends Vue {
   @Prop() plant!: PlantSchema;
@@ -71,7 +59,7 @@ export default class AppAnalysisSelectionSidebar extends Vue {
   analysisResultsTableColumns: BvTableFieldArray = [
     { key: "selected", label: "" },
     { key: "name", label: this.$t("name").toString() },
-    { key: "createdAt", label: this.$t("created-at").toString() }
+    { key: "createdAt", label: this.$t("created-at").toString() },
   ];
   analysisResultsTableItems: Record<string, unknown>[] = [];
 
@@ -80,11 +68,9 @@ export default class AppAnalysisSelectionSidebar extends Vue {
       this.analysisResultsTableItems.push({
         id: analysisResult.id,
         name: analysisResult.analysis.name,
-        createdAt: new Date(
-          Date.parse(analysisResult.analysis.created_at)
-        ).toLocaleDateString(),
+        createdAt: new Date(Date.parse(analysisResult.analysis.created_at)).toLocaleDateString(),
         kpis: analysisResult.key_figures,
-        _showDetails: true
+        _showDetails: true,
       });
     }
 
@@ -93,9 +79,7 @@ export default class AppAnalysisSelectionSidebar extends Vue {
       const analysisResultId = this.$route.query.result;
 
       if (analysisResultId && typeof analysisResultId === "string") {
-        tableRowIndex = this.analysisResults.findIndex(
-          analysisResult => analysisResult.id === analysisResultId
-        );
+        tableRowIndex = this.analysisResults.findIndex(analysisResult => analysisResult.id === analysisResultId);
       }
 
       await this.$nextTick();
@@ -105,10 +89,7 @@ export default class AppAnalysisSelectionSidebar extends Vue {
 
   onAnalysisResultSelected(selectedAnalysisResult: { id: string }[]): void {
     const selectedAnalysisResultId =
-      (selectedAnalysisResult &&
-        selectedAnalysisResult.length > 0 &&
-        selectedAnalysisResult[0].id) ||
-      undefined;
+      (selectedAnalysisResult && selectedAnalysisResult.length > 0 && selectedAnalysisResult[0].id) || undefined;
 
     this.$emit("analysisResultSelected", selectedAnalysisResultId);
   }

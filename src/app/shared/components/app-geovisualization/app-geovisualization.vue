@@ -42,11 +42,10 @@ import { IOpenLayersComponent } from "./types/components";
 @Component({
   name: "app-geovisualization",
   components: {
-    AppGeovisualLayerSwitcher
-  }
+    AppGeovisualLayerSwitcher,
+  },
 })
-export default class AppGeovisualization extends Vue
-  implements IOpenLayersComponent {
+export default class AppGeovisualization extends Vue implements IOpenLayersComponent {
   @Prop() layers!: LayerType[];
   @Prop() zoom?: number;
   @Prop() center?: [number, number];
@@ -82,8 +81,8 @@ export default class AppGeovisualization extends Vue
       layers: [],
       view: new View({
         center: this.center || [0, 0],
-        zoom: this.zoom || 2
-      })
+        zoom: this.zoom || 2,
+      }),
     });
     this.map.addInteraction(selectClick);
   }

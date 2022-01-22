@@ -14,7 +14,6 @@ import { Component, Prop } from "vue-property-decorator";
 export default class AppChecklistItem extends Vue {
   @Prop({ default: false }) checked!: boolean;
 }
-
 </script>
 
 <style lang="scss">

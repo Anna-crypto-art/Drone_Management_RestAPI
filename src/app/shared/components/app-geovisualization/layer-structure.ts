@@ -4,6 +4,7 @@ import { Layer } from "ol/layer";
 import Source from "ol/source/Source";
 import { VNode } from "vue/types/umd";
 import LayerLoader from "./loader/layer-loader";
+import LayerRenderer from "ol/renderer/Layer";
 
 export class LayerStructure extends EventEmitter {
   private _selected: boolean;
@@ -12,7 +13,7 @@ export class LayerStructure extends EventEmitter {
   public parentLayer?: LayerStructure;
 
   constructor(
-    private readonly layerLoader?: LayerLoader<Layer<Source> | undefined>,
+    private readonly layerLoader?: LayerLoader<Layer<Source, LayerRenderer<any>> | undefined>,
     private readonly _name: string | (() => VNode[]) = "",
     private readonly layerType?: BaseLayerType
   ) {
@@ -30,9 +31,8 @@ export class LayerStructure extends EventEmitter {
       if (selected || this.layerLoader?.loaded) {
         (await this.layerLoader?.load())?.setVisible(selected);
       }
-      
-      this.layerLoader?.layerType.onSelected &&
-        this.layerLoader?.layerType.onSelected(selected);
+
+      this.layerLoader?.layerType.onSelected && this.layerLoader?.layerType.onSelected(selected);
 
       if (selected || (!selected && this.isGroup)) {
         for (const childLayer of this.childLayers) {
