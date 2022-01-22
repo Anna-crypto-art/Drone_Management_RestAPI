@@ -114,8 +114,7 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent implemen
           volateqApi.downloadMultipleAnalysisFilesUrl(
             this.analysis.id,
             this.selectedDonwloadFiles.map(downloadFile => downloadFile.name)
-          ),
-          archiveName
+          )
         );
 
         AppDownloader.download(downloadUrl, archiveName);
