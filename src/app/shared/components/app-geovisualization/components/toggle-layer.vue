@@ -19,6 +19,7 @@ export default class AppGeovisualToggleLayer extends Vue {
   open = this.$store.direct.getters.sidebar["layer-switcher"];
 
   toggle() {
+    // this.$store.
     this.$store.direct.commit.sidebar.toggle({ name: "layer-switcher" });
   }
 }

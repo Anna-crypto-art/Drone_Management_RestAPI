@@ -1,12 +1,14 @@
 <template>
   <b-navbar class="app-header" toggleable="lg" type="dark" sticky>
     <b-navbar-brand href="#">
-      <img
-        class="app-header-logo float-left"
-        src="/images/logos/logo_white.png"
-        srcset="/images/logos/logo_white.webp, /images/logos/logo_white.png"
-        alt="volateq"
-      />
+      <b-link to="/">
+        <img
+          class="app-header-logo float-left"
+          src="/images/logos/logo_white.png"
+          srcset="/images/logos/logo_white.webp, /images/logos/logo_white.png"
+          alt="volateq"
+        />
+      </b-link>
     </b-navbar-brand>
 
     <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
