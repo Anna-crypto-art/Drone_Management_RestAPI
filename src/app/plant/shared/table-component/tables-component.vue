@@ -147,7 +147,7 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
           activeComponent.label +
           ".csv";
 
-        AppDownloader.download(await volateqApi.generateDownloadUrl(authCsvDownloadUrl, csvFileName), csvFileName);
+        AppDownloader.download(await volateqApi.generateDownloadUrl(authCsvDownloadUrl), csvFileName);
       } catch (e) {
         appContentEventBus.showError(e as ApiException);
       } finally {

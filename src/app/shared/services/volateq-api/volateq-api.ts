@@ -231,15 +231,14 @@ export class VolateqAPI extends HttpClientBase {
     )}&csv=1${encodedCsvMappings}`;
   }
 
-  public async generateDownloadUrl(downloadUrl: string, filename?: string): Promise<string> {
+  public async generateDownloadUrl(downloadUrl: string): Promise<string> {
     const encodedUrl = encodeURIComponent(encodeURIComponent(downloadUrl));
-    const filenameParam = (filename && `?filename=${encodeURIComponent(filename)}`) || "";
 
     const urlTokenResponse: { url_token: string } = await this.get(
-      `/auth/user/generate-url-token/${encodedUrl}${filenameParam}`
+      `/auth/user/generate-url-token/${encodedUrl}`
     );
 
-    return `${apiBaseUrl}/temp-url/${urlTokenResponse.url_token}`;
+    return `${downloadUrl}&url_token=${encodeURIComponent(urlTokenResponse.url_token)}`;
   }
 
   public getTask(taskId: string): Promise<TaskSchema> {
