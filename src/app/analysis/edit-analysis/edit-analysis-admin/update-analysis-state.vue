@@ -2,6 +2,11 @@
   <div class="admin-box">
     <h4>{{ $t("update-analysis-state") }}</h4>
     <b-form @submit.prevent="onSubmitUpdateState">
+      <b-form-group>
+        <b-form-checkbox v-model="sendMail">
+          {{ $t("send-mail") }}
+        </b-form-checkbox>
+      </b-form-group>
       <b-form-group :label="$t('select-new-analysis-state')">
         <b-form-select required v-model="selectedUpdateState" :options="updateStateOptions"></b-form-select>
       </b-form-group>
@@ -19,7 +24,7 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import { IUpdateEditAnalysis } from "@/app/analysis/edit-analysis/types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
-import { ApiStates, ApiStateStruct } from "@/app/shared/services/volateq-api/api-states";
+import { apiStateNames, ApiStates } from "@/app/shared/services/volateq-api/api-states";
 import { IAppButton } from "@/app/shared/components/app-button/types";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
@@ -37,17 +42,28 @@ export default class AppUpdateAnalysisState extends BaseAuthComponent implements
   @Ref() submitUpdateStateButton!: IAppButton;
 
   selectedUpdateState: ApiStates | null = null;
-  updateStateOptions: { value: string, text: string }[] | null = null;
+  updateStateOptions: { value: number, text: string }[] | null = null;
   selectedUpdateStateMessage = "";
+  sendMail = false;
+
+  private analysisStates: Record<ApiStates, ApiStates[]> | null = null;
 
   async created() {
-    this.updateAnalysis(this.analysis);
+    await this.updateAnalysis(this.analysis);
   }
 
-  updateAnalysis(analysis: AnalysisSchema) {
+  async updateAnalysis(analysis: AnalysisSchema) {
     this.analysis = analysis;
 
-    this.setUpdateStateOptions();
+    try {
+      if (this.analysisStates === null) {
+        this.analysisStates = await volateqApi.getStates();
+      }
+
+      this.setUpdateStateOptions();
+    } catch (e) {
+      appContentEventBus.showError(e as ApiException);
+    }
   }
 
   async onSubmitUpdateState() {
@@ -59,8 +75,9 @@ export default class AppUpdateAnalysisState extends BaseAuthComponent implements
       }
 
       await volateqApi.updateAnalysisState(this.analysis!.id, {
-        state: this.selectedUpdateState!,
+        state_id: this.selectedUpdateState!,
         message: this.selectedUpdateStateMessage,
+        do_send_mail: this.sendMail,
       });
 
       this.$emit("updateAnalysis");
@@ -75,17 +92,19 @@ export default class AppUpdateAnalysisState extends BaseAuthComponent implements
 
   private setUpdateStateOptions() {
     if (!this.analysis!.current_state) {
-      return null;
+      this.updateStateOptions = [];
+      return;
     }
 
-    const apiStates: ApiStates[] = ApiStateStruct[this.analysis!.current_state.state.name];
+    const apiStates: ApiStates[] = this.analysisStates![this.analysis!.current_state.state.id];
     if (apiStates.length === 0) {
-      return null;
+      this.updateStateOptions = [];
+      return;
     }
 
-    this.updateStateOptions = apiStates.map(apiState => ({
-      value: apiState,
-      text: this.$t(apiState).toString(),
+    this.updateStateOptions = apiStates.map(state_id => ({
+      value: state_id,
+      text: this.$t(apiStateNames[state_id]).toString(),
     }));
   }
 }

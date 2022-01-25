@@ -18,6 +18,7 @@ import { AnalysisResultComponent } from "./api-analysis-result-components";
 import { AnalysisResultKeyFigure } from "./api-analysis-result-key-figures";
 import { GeoVisualQuery } from "./api-requests/geo-visual-query-requests";
 import { ApiErrors, ApiException } from "./api-errors";
+import { ApiStates } from "./api-states";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -340,6 +341,10 @@ export class VolateqAPI extends HttpClientBase {
 
   public getAnalysisFilesInfo(analysisId: string, filenames: string[]): Promise<Record<string, number | null>> {
     return this.get(`/auth/analysis/${analysisId}/files-info`, { filenames })
+  }
+
+  public getStates(): Promise<Record<ApiStates, ApiStates[]>> {
+    return this.get(`/auth/states`)
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {

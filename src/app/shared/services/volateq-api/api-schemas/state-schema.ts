@@ -1,5 +1,4 @@
-import { ApiStates } from "../api-states";
-
 export interface StateSchema {
-  name: ApiStates;
+  id: number;
+  name: string;
 }

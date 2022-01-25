@@ -11,7 +11,11 @@
       <app-file-upload ref="appFileUpload" :title="$t('select-files')">
       </app-file-upload>
       <app-button ref="uploadButton" type="submit" cls="pull-right">{{ uploadButtonTxt }}</app-button>
-      <app-button ref="cancelUploadButton" v-show="showCancelButton" variant="secondary" type="button" @click="onCancelUpload">{{ $t("cancel") }}</app-button>
+      <app-button ref="cancelUploadButton" v-show="showCancelButton" variant="secondary" type="button" @click="onCancelUpload">
+        <slot name="cancelButton">
+          {{ $t("cancel") }}
+        </slot>
+      </app-button>
       <div class="clearfix"></div>
     </b-form>
   </div>

@@ -6,6 +6,7 @@ export interface NewAnalysis {
 }
 
 export interface UpdateAnalysisState {
-  state: ApiStates;
+  state_id: ApiStates;
   message?: string;
+  do_send_mail?: boolean;
 }
