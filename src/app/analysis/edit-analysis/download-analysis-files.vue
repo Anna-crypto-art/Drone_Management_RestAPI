@@ -52,7 +52,6 @@ import appContentEventBus from "@/app/shared/components/app-content/app-content-
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { IUpdateEditAnalysis } from "@/app/analysis/edit-analysis/types";
-import { waitFor } from "@/app/shared/services/helper/debounce-helper";
 import { IAppButton } from "@/app/shared/components/app-button/types";
 import { getReadableFileSize } from "@/app/shared/services/helper/file-helper";
 
@@ -131,7 +130,7 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent implemen
       this.downloadFilesTable.selectAllRows();
     } else {
       // this.downloadFilesTable.clearSelection(); leads to "clearSelection is not a function"
-      // so lets work around... again!
+      // so lets work around...
       for (let i = 0; i < this.downloadFilesTableItems.length; i++) {
         this.downloadFilesTable.unselectRow(i);
       }

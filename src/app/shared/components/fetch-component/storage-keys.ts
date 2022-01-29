@@ -1,1 +1,1 @@
-export const NEW_ANALYSIS_STORAGE_KEY = "new-analysis-storage-key";
+export const UPLOAD_ANALYSIS_STORAGE_KEY = "upload-analysis-storage-key";

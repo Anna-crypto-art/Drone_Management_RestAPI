@@ -14,4 +14,16 @@ export abstract class BaseAuthComponent extends Vue {
   get isCustomerAdmin(): boolean {
     return this.$store.getters["auth/isCustomerAdmin"];
   }
+
+  /**
+   * Emits and waits for the response
+   * @param eventName 
+   * @param value 
+   */
+  protected async emit(eventName: string, ...args: any[]) {
+    return new Promise<void>(resolve => {
+      this.$emit(eventName, ...args);
+      this.$nextTick(resolve);
+    })
+  }
 }

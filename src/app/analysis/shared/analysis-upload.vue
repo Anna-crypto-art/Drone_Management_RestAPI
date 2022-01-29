@@ -1,15 +1,8 @@
 <template>
   <div class="app-analysis-upload">
-    <b-form @submit.prevent="onSubmit" style="margin-bottom: 50px;">
-      <b-row style="margin-bottom: 25px;" v-show="!analysis">
-        <b-col sm="4">
-          <b-form-group label-cols="auto" :label="$t('plant')">
-            <b-form-select required v-model="newAnalysis.plant_id" :options="plantOptions"></b-form-select>
-          </b-form-group>
-        </b-col>
-      </b-row>
-      <app-file-upload ref="appFileUpload" :title="$t('select-files')">
-      </app-file-upload>
+    <b-form @submit.prevent="onSubmit" style="margin-bottom: 50px;" v-if="uploadService">
+      <slot name="uploadForm" />
+      <app-file-upload ref="appFileUpload" :uploadService="uploadService" :title="$t('select-files')" />
       <app-button ref="uploadButton" type="submit" cls="pull-right">{{ uploadButtonTxt }}</app-button>
       <app-button ref="cancelUploadButton" v-show="showCancelButton" variant="secondary" type="button" @click="onCancelUpload">
         <slot name="cancelButton">
@@ -22,25 +15,25 @@
 </template>
 
 <script lang="ts">
-import { Component, Ref, Prop } from "vue-property-decorator";
+import { Component, Ref, Prop, Watch } from "vue-property-decorator";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { NewAnalysis } from "@/app/shared/services/volateq-api/api-requests/analysis-requests";
 import AppFileUpload from "@/app/shared/components/app-file-upload/app-file-upload.vue";
 import { IAppFileUpload } from "@/app/shared/components/app-file-upload/types";
 import { IAnalysisId, IAppNewAnalysisFetched } from "@/app/analysis/new-analysis/types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { IAppButton } from "@/app/shared/components/app-button/types";
-import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
+import { apiStateNames, ApiStates } from "@/app/shared/services/volateq-api/api-states";
 import { IFetchComponent } from "@/app/shared/components/fetch-component/fetch-component";
-import uploadService from "@/app/shared/services/upload-service/upload-service";
+import { UploadService } from "@/app/shared/services/upload-service/upload-service";
 import { IUploadListener, IResumableFile, UploadState, UploadEvent } from "@/app/shared/services/upload-service/types";
-import { NEW_ANALYSIS_STORAGE_KEY } from "@/app/shared/components/fetch-component/storage-keys";
+import { UPLOAD_ANALYSIS_STORAGE_KEY } from "@/app/shared/components/fetch-component/storage-keys";
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import { IAppAnalysisUpload } from "./types";
 
 
 @Component({
@@ -51,27 +44,24 @@ import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/an
     AppButton
   }
 })
-export default class AppAnalysisUpload extends BaseAuthComponent implements IFetchComponent<IAppNewAnalysisFetched>, IUploadListener {
+export default class AppAnalysisUpload extends BaseAuthComponent implements IFetchComponent<IAppNewAnalysisFetched>, IUploadListener, IAppAnalysisUpload {
   @Ref() appFileUpload!: IAppFileUpload;
   @Ref() uploadButton!: IAppButton;
   @Ref() cancelUploadButton!: IAppButton;
 
-  @Prop({ default: null }) analysis_id!: string | null;
+  getAnalysisCallback: () => AnalysisSchema | null = () => null;
+
+  storageKey = UPLOAD_ANALYSIS_STORAGE_KEY;
+
+  uploadService: UploadService | null = null;
 
   uploadButtonTxt = "";
   showCancelButton = false;
-  
-  plantOptions: Array<any> = [];
+  waitForFiles: string[] | null = null;
 
-  newAnalysis: NewAnalysis = { files: [], plant_id: "" };
+  async mounted() {
+    this.uploadService = UploadService.findOrCreate((await this.getAnalysis())?.id);
 
-  protected waitForFiles: string[] | undefined;
-
-  analysis: { id: string } | undefined;
-
-  storageKey = NEW_ANALYSIS_STORAGE_KEY;
-
-  mounted() {
     this.registerUploadEvents();
   }
 
@@ -80,23 +70,9 @@ export default class AppAnalysisUpload extends BaseAuthComponent implements IFet
 
     this.uploadButtonTxt = this.$t("upload").toString();
 
-    try {
-      const plants = await volateqApi.getAllPlants();
-      this.plantOptions = plants.map(plant => ({ value: plant.id, text: plant.name }));
-      if (plants.length === 1) {
-        this.newAnalysis.plant_id = plants[0].id;
-      }
-    } catch (e) {
-      appContentEventBus.showError(e as ApiException);
-    }
-
     const data = this.fetchData();
     if (data) {
-      this.analysis = data.analysis;
-      this.newAnalysis = data.newAnalysis;
       this.waitForFiles = data.fileNames;
-    } else if (this.analysis_id) {
-      this.analysis = { id: this.analysis_id };
     }
   }
 
@@ -105,10 +81,18 @@ export default class AppAnalysisUpload extends BaseAuthComponent implements IFet
   }
 
   registerUploadEvents() {
-    uploadService.on(UploadEvent.COMPLETED, async (metadata: IAnalysisId) => {
+    this.uploadService!.on(UploadEvent.COMPLETED, async (metadata: IAnalysisId) => {
       try {
-        await volateqApi.updateAnalysisState(metadata.id, { state: ApiStates.PICK_ME_UP })
-        appLocalStorage.removeItem(NEW_ANALYSIS_STORAGE_KEY);
+        const analysis = await this.getAnalysis();
+        const dataComplete = analysis ? analysis.data_complete : true;
+
+        this.waitForFiles = null;
+
+        await volateqApi.updateAnalysisState(
+          metadata.id, 
+          { state_id: (dataComplete ? ApiStates.DATA_COMPLETE : ApiStates.DATA_INCOMPLETE) }
+        );
+        appLocalStorage.removeItem(UPLOAD_ANALYSIS_STORAGE_KEY);
 
         appContentEventBus.showSuccessAlert(this.$t("upload-completed-successfully").toString());
       } catch (e) {
@@ -119,17 +103,18 @@ export default class AppAnalysisUpload extends BaseAuthComponent implements IFet
         this.uploadButton.stopLoading();
         this.uploadButton.disable();
 
-        this.analysis = undefined;
-
         this.showCancelButton = false;
       }
     });
-    uploadService.on(UploadEvent.FAILED, async (message: string) => {
-      appContentEventBus.showErrorAlert(this.$t(ApiStates.UPLOAD_FAILED).toString());
+    this.uploadService!.on(UploadEvent.FAILED, async (message: string) => {
+      appContentEventBus.showErrorAlert(this.$t(apiStateNames[ApiStates.UPLOAD_FAILED]).toString());
       console.error(message);
 
       try {
-        await volateqApi.updateAnalysisState(uploadService.getMetadata<IAnalysisId>().id, { state: ApiStates.UPLOAD_FAILED, message: message })
+        await volateqApi.updateAnalysisState(
+          this.uploadService!.getMetadata<IAnalysisId>().id,
+          { state_id: ApiStates.UPLOAD_FAILED, message: message }
+        );
       } catch (e) {
         // Well, that is not a surprise...
         console.error(e);
@@ -139,27 +124,62 @@ export default class AppAnalysisUpload extends BaseAuthComponent implements IFet
         this.onFailed();
       }
     });
-    uploadService.on(UploadEvent.FILE_RETRY, (file: IResumableFile, retries: number) => {
-      appContentEventBus.showWarningAlert(`${this.$t("upload-error-retry").toString()} ${retries}/${uploadService.getMaxRetries()}`, "resumable-upload-error-retry");
+    this.uploadService!.on(UploadEvent.FILE_RETRY, (file: IResumableFile, retries: number) => {
+      appContentEventBus.showWarningAlert(`${this.$t("upload-error-retry").toString()} ${retries}/${this.uploadService!.getMaxRetries()}`, "resumable-upload-error-retry");
+    });
+    this.uploadService!.on(UploadEvent.FILE_ADDED, (file: IResumableFile) => {
+      if (this.isCreated) {
+        this.checkFileCompleteness();
+      }
+    });
+    this.uploadService!.on(UploadEvent.FILE_REMOVED, (file: IResumableFile) => {
+      if (this.isCreated) {
+        this.checkFileCompleteness();
+      }
     });
   }
 
   checkUploadState() {
-    if (uploadService.hasState(UploadState.UPLOADING)) {
+    if (this.uploadService!.hasState(UploadState.UPLOADING)) {
       this.uploadButton.startLoading();
-    } else if (uploadService.hasState(UploadState.FAILED)) {
+    } else if (this.uploadService!.hasState(UploadState.FAILED)) {
       this.onFailed();
-    } else if (this.analysis && this.waitForFiles) { // Upload has been interrupted
-      if (this.waitForFiles.length > 0) {
-        appContentEventBus.showInfoAlert(this.$t("need-files-to-upload_descr").toString() + 
-          "<ul style=\"margin: 5px 0 0 40px;\"><li>" + this.waitForFiles.join("</li><li>") + "</li></ul>");
-        
-        this.uploadButtonTxt = this.$t("resume-upload").toString();
-        this.uploadButton.disable();
+    } else if (this.waitForFiles && this.waitForFiles.length > 0) { // Upload has been interrupted
+      appContentEventBus.showInfoAlert(this.$t("need-files-to-upload_descr").toString() + 
+        "<ul style=\"margin: 5px 0 0 40px;\"><li>" + this.waitForFiles.join("</li><li>") + "</li></ul>");
+      
+      this.uploadButtonTxt = this.$t("resume-upload").toString();
+      this.uploadButton.disable();
 
-        this.showCancelButton = true;
+      this.showCancelButton = true;
+    }
+  }
+
+  checkFileCompleteness() {
+    if (this.waitForFiles) {
+      this.waitForFiles = this.waitForFiles.filter(
+        fileName => !this.appFileUpload.files.find(file => file.fileName === fileName)
+      );
+      if (this.waitForFiles.length === 0) {
+        this.waitForFiles = null;
+        appContentEventBus.clearAlert();
+        this.uploadButton.enable();
       }
     }
+  }
+
+  setAnalysisCallback(getAnalysis: () => AnalysisSchema | null) {
+    this.getAnalysisCallback = getAnalysis;
+  }
+
+  async getAnalysis() {
+    const analysis: AnalysisSchema | null = await this.getAnalysisCallback();
+
+    if (analysis !== null) {
+      this.storageKey = UPLOAD_ANALYSIS_STORAGE_KEY + "-" + analysis.id;
+    }
+
+    return analysis;
   }
 
   fetchData(): IAppNewAnalysisFetched | undefined {
@@ -174,18 +194,11 @@ export default class AppAnalysisUpload extends BaseAuthComponent implements IFet
     }
   }
   getStorageData(): IAppNewAnalysisFetched | undefined {
-    return this.analysis && {
-      newAnalysis: {
-        files: [],
-        plant_id: this.newAnalysis.plant_id,
-      },
-      analysis: this.analysis,
-      fileNames: this.appFileUpload.files.map(file => file.fileName)
-    } || undefined;
+    return { fileNames: this.appFileUpload.files.map(file => file.fileName) };
   }
 
   async onSubmit() {
-    if (uploadService.hasState(UploadState.FAILED)) {
+    if (this.uploadService!.hasState(UploadState.FAILED)) {
       this.$router.go(0);
       return;
     }
@@ -193,17 +206,21 @@ export default class AppAnalysisUpload extends BaseAuthComponent implements IFet
     try {
       this.onUploading();
 
-      if (!this.analysis) {
-        this.analysis = await volateqApi.createAnalysis(this.newAnalysis);
+      await this.emit("startUpload", this.appFileUpload.files.map(file => file.fileName));
+
+      const analysis = await this.getAnalysis();
+      if (!analysis) {
+        return;
       }
-            
+      
       this.storeData();
 
-      this.appFileUpload.upload<IAnalysisId>(volateqApi.getAnalysisFileUploadUrl(this.analysis.id), { id: this.analysis.id });
+      this.appFileUpload.upload<IAnalysisId>(volateqApi.getAnalysisFileUploadUrl(analysis.id), { id: analysis.id });
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
+    } finally {
       this.uploadButton.stopLoading();
-    } 
+    }
   }
 
   onFailed() {
@@ -218,10 +235,6 @@ export default class AppAnalysisUpload extends BaseAuthComponent implements IFet
   }
 
   async onCancelUpload() {
-    if (!this.analysis) {
-      return;
-    }
-
     this.cancelUploadButton.startLoading();
 
     this.appFileUpload.cancel();
@@ -233,18 +246,10 @@ export default class AppAnalysisUpload extends BaseAuthComponent implements IFet
     appContentEventBus.clearAlert();
 
     try {
-      await volateqApi.cancelAnalysisUpload(this.analysis.id)
-    } catch (e) {
-      // and that is neither a surprise...
-      console.error(e);
+      await this.emit("cancelUpload");
     } finally {
-      this.analysis = undefined;
-
       this.cancelUploadButton.stopLoading();
       this.showCancelButton = false;
-
-      // Reload page
-      this.$router.go(0);
     }
   }
 }

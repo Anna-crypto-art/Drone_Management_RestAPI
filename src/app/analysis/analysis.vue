@@ -49,7 +49,6 @@
           <template #cell(state)="row">
             <div v-if="row.item.state">
               {{ $t(row.item.state.state.name) }}
-              <span v-if="row.item.state.state.name === 'UPLOADING'"> {{ uploadStateProcess }}</span>
               <br />
               <small class="grayed">{{ trans(getTimeDiff(row.item.state.started_at)) }}</small>
             </div>
@@ -81,18 +80,15 @@
 </template>
 
 <script lang="ts">
-import { Component, Ref } from "vue-property-decorator";
+import { Component } from "vue-property-decorator";
 
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import volateqApi from "../shared/services/volateq-api/volateq-api";
 import { AnalysisSchema } from "../shared/services/volateq-api/api-schemas/analysis-schema";
 import appContentEventBus from "../shared/components/app-content/app-content-event-bus";
-import uploadService from "@/app/shared/services/upload-service/upload-service";
-import { IAnalysisId } from "./new-analysis/types";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
 import { BvTableFieldArray } from "bootstrap-vue";
-import { IUploadListener, UploadEvent, UploadState } from "../shared/services/upload-service/types";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import AppModalFormInfoArea from "@/app/shared/components/app-modal/app-modal-form-info-area.vue";
 import { ApiException } from "../shared/services/volateq-api/api-errors";
@@ -107,7 +103,7 @@ import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-sc
     AppModalFormInfoArea,
   },
 })
-export default class AppAnalysis extends BaseAuthComponent implements IUploadListener {
+export default class AppAnalysis extends BaseAuthComponent {
   columns: BvTableFieldArray = [];
   plants: Array<any> | null = null;
   selectedPlantId: string | null = null;
@@ -133,31 +129,6 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     await this.getPlants();
 
     await this.updateAnalysisRows();
-
-    this.checkUploadState();
-  }
-
-  mounted() {
-    this.registerUploadEvents();
-  }
-
-  registerUploadEvents() {
-    uploadService.on(UploadEvent.PROGRESS, () => {
-      this.updateToUploadState();
-    });
-    uploadService.on(UploadEvent.COMPLETED, () => {
-      this.createNewAnalysisBtnText = this.$t("new-data-upload").toString();
-      this.updateTableRowState(this.$t("PICK_ME_UP").toString());
-    });
-    uploadService.on(UploadEvent.FAILED, () => {
-      this.updateTableRowState(this.$t("UPLOAD_FAILED").toString());
-    });
-  }
-
-  checkUploadState() {
-    if (uploadService.hasState(UploadState.UPLOADING)) {
-      this.updateToUploadState();
-    }
   }
 
   // "this" is undefined in html component... so (")this(") is a workaround...
@@ -167,23 +138,6 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
 
   async onPlantSelectionChanged() {
     await this.updateAnalysisRows();
-  }
-
-  private updateToUploadState() {
-    if (this.updateTableRowState(Math.round(uploadService.progress() * 100) + "%")) {
-      this.createNewAnalysisBtnText = this.$t("return-to-upload").toString();
-    }
-  }
-
-  private updateTableRowState(value: string): boolean {
-    const analysisId = uploadService.getMetadata<IAnalysisId>();
-    if (this.analysisRows && analysisId) {
-      this.uploadStateProcess = value;
-
-      return true;
-    }
-
-    return false;
   }
 
   private async updateAnalysisRows() {

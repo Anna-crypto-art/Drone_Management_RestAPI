@@ -3,8 +3,8 @@
     <h4>{{ $t("update-analysis-state") }}</h4>
     <b-form @submit.prevent="onSubmitUpdateState">
       <b-form-group>
-        <b-form-checkbox v-model="sendMail">
-          {{ $t("send-mail") }}
+        <b-form-checkbox v-model="sendNotification">
+          {{ $t("send-notification") }}
         </b-form-checkbox>
       </b-form-group>
       <b-form-group :label="$t('select-new-analysis-state')">
@@ -44,7 +44,7 @@ export default class AppUpdateAnalysisState extends BaseAuthComponent implements
   selectedUpdateState: ApiStates | null = null;
   updateStateOptions: { value: number, text: string }[] | null = null;
   selectedUpdateStateMessage = "";
-  sendMail = false;
+  sendNotification = false;
 
   private analysisStates: Record<ApiStates, ApiStates[]> | null = null;
 
@@ -77,7 +77,7 @@ export default class AppUpdateAnalysisState extends BaseAuthComponent implements
       await volateqApi.updateAnalysisState(this.analysis!.id, {
         state_id: this.selectedUpdateState!,
         message: this.selectedUpdateStateMessage,
-        do_send_mail: this.sendMail,
+        do_send_mail: this.sendNotification,
       });
 
       this.$emit("updateAnalysis");

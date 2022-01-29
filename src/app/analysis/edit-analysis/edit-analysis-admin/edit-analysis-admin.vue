@@ -12,6 +12,11 @@
         />
       </b-col>
     </b-row>
+    <b-row>
+      <b-col>
+        <app-delete-analysis :analysis="analysis" />
+      </b-col>
+    </b-row>
   </div>
 </template>
 <script lang="ts">
@@ -21,12 +26,14 @@ import { IUpdateEditAnalysis } from "@/app/analysis/edit-analysis/types";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import AppUpdateAnalysisState from "@/app/analysis/edit-analysis/edit-analysis-admin/update-analysis-state.vue";
 import AppImportAnalysisResult from "@/app/analysis/edit-analysis/edit-analysis-admin/import-analysis-result.vue";
+import AppDeleteAnalysis from "@/app/analysis/edit-analysis/edit-analysis-admin/delete-analysis.vue";
 
 @Component({
   name: "app-edit-analysis-result-admin",
   components: {
     AppUpdateAnalysisState,
     AppImportAnalysisResult,
+    AppDeleteAnalysis,
   },
 })
 export default class AppEditAnalysisAdmin extends BaseAuthComponent implements IUpdateEditAnalysis {

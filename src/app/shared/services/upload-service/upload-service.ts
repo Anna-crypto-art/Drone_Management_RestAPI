@@ -18,6 +18,20 @@ export class UploadService implements IUploadService {
   private metadata: any | undefined;
   private eventsRegistered = false;
 
+  private static instances: Record<string, UploadService> = {};
+
+  public static findOrCreate(id?: string) {
+    if (id === undefined) {
+      return new UploadService();
+    }
+
+    if (!(id in UploadService.instances)) {
+      this.instances[id] = new UploadService();
+    }
+
+    return this.instances[id];
+  }
+
   constructor() {
     this.resumable = new ResumableJs({
       chunkSize: 1 * 1024 * 1024 * 10, // 10MB

@@ -121,7 +121,7 @@ export class VolateqAPI extends HttpClientBase {
     await this.post(`/auth/analysis/${analysisId}/state`, analysisState);
   }
 
-  public async cancelAnalysisUpload(analysisId: string): Promise<void> {
+  public async deleteAnalysis(analysisId: string): Promise<void> {
     await this.delete(`/auth/analysis/${analysisId}`);
   }
 
@@ -176,6 +176,18 @@ export class VolateqAPI extends HttpClientBase {
     }
 
     return task;
+  }
+
+  public async prepareAnalysisUpload(analysisId: string, fileNames: string[]): Promise<void> {
+    await this.post(`/auth/analysis/${analysisId}/prepare-upload`, { files: fileNames });
+  }
+
+  public async cancelAnalysisUpload(analysisId: string): Promise<void> {
+    await this.post(`/auth/analysis/${analysisId}/cancel-upload`);
+  }
+
+  public async updateAnalysis(analysisId: string, updateData: { data_complete?: boolean, flown_at?: Date }): Promise<void> {
+    await this.post(`/auth/analysis/${analysisId}`, updateData);
   }
 
   private async uploadImportAnalysisResultImageFiles(

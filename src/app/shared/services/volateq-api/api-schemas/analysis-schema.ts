@@ -23,5 +23,6 @@ export interface AnalysisSchema extends SimpleAnalysisSchema {
   customer: CustomerSchema;
   files: AnalysisFilesSchema;
   user: UserInfoSchema;
+  data_complete: boolean;
   analysis_result: AnalysisResultSchema;
 }
