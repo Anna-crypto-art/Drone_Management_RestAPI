@@ -1,7 +1,9 @@
 <template>
   <div class="admin-box">
     <h4>{{ $t("delete-analysis") }}</h4>
-    <app-button ref="deleteAnalysisButton" type="button" @click="onDeleteAnalysisClick">{{ $t("delete") }}</app-button>
+    <app-button ref="deleteAnalysisButton" type="button" variant="danger" @click="onDeleteAnalysisClick">
+      {{ $t("delete") }}
+    </app-button>
   </div>
 </template>
 
@@ -18,8 +20,8 @@ import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 @Component({
   name: "app-delete-analysis",
   components: {
-    AppButton
-  }
+    AppButton,
+  },
 })
 export default class AppDeleteAnalysis extends BaseAuthComponent {
   @Prop({ required: true }) analysis!: AnalysisSchema;
@@ -30,8 +32,8 @@ export default class AppDeleteAnalysis extends BaseAuthComponent {
     try {
       if (confirm("Delete analysis and all according files? This cannot be undone.")) {
         await volateqApi.deleteAnalysis(this.analysis.id);
-  
-        this.$router.push({ name: "Analyses" })
+
+        this.$router.push({ name: "Analyses" });
       }
     } catch (e) {
       appContentEventBus.showError(e as ApiException);

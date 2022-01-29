@@ -3,7 +3,7 @@
     <b-form-checkbox v-model="dataComplete" @change="onChangeDataComplete">
       {{ $t("data-complete") }} <app-explanation>{{ $t("data-complete_expl") }}</app-explanation>
     </b-form-checkbox>
-    <app-analysis-upload ref="analysisUpload" @startUpload="onStartUpload" @cancelUpload="onCancelUpload" />
+    <app-analysis-upload :analysis="analysis" @startUpload="onStartUpload" @cancelUpload="onCancelUpload" />
   </div>
 </template>
 
@@ -27,22 +27,18 @@ import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 })
 export default class AppUploadAnalysisFiles extends BaseAuthComponent implements IUpdateEditAnalysis {
   @Prop({ required: true }) analysis!: AnalysisSchema;
-  
-  @Ref() analysisUpload!: AppAnalysisUpload;
 
   dataComplete = true;
-
-  async created() {
-    this.analysisUpload.setAnalysisCallback(() => this.analysis);
-  }
 
   async updateAnalysis(analysis: AnalysisSchema) {
     this.analysis = analysis;
   }
 
-  async onStartUpload(files: string[]) {
+  async onStartUpload(files: string[], done: (analysis: AnalysisSchema) => void) {
     try {
       await volateqApi.prepareAnalysisUpload(this.analysis.id, files);
+
+      done(this.analysis);
   
       this.$emit("updateAnalysis");
     } catch (e) {
@@ -50,9 +46,11 @@ export default class AppUploadAnalysisFiles extends BaseAuthComponent implements
     }
   }
 
-  async onCancelUpload() {
+  async onCancelUpload(done: () => void) {
     try {
       await volateqApi.cancelAnalysisUpload(this.analysis.id);
+
+      done();
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
     }

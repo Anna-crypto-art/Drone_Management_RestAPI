@@ -44,14 +44,14 @@ import { IAppAnalysisUpload } from "./types";
     AppButton
   }
 })
-export default class AppAnalysisUpload extends BaseAuthComponent implements IFetchComponent<IAppNewAnalysisFetched>, IUploadListener, IAppAnalysisUpload {
+export default class AppAnalysisUpload extends BaseAuthComponent implements IFetchComponent<IAppNewAnalysisFetched>, IUploadListener {
   @Ref() appFileUpload!: IAppFileUpload;
   @Ref() uploadButton!: IAppButton;
   @Ref() cancelUploadButton!: IAppButton;
 
-  getAnalysisCallback: () => AnalysisSchema | null = () => null;
+  @Prop({ default: null }) analysis!: AnalysisSchema | null;
 
-  storageKey = UPLOAD_ANALYSIS_STORAGE_KEY;
+  storageKey = "";
 
   uploadService: UploadService | null = null;
 
@@ -60,7 +60,9 @@ export default class AppAnalysisUpload extends BaseAuthComponent implements IFet
   waitForFiles: string[] | null = null;
 
   async mounted() {
-    this.uploadService = UploadService.findOrCreate((await this.getAnalysis())?.id);
+    this.uploadService = UploadService.findOrCreate(this.analysis?.id);
+
+    this.setStorageKey(this.analysis);
 
     this.registerUploadEvents();
   }
@@ -83,8 +85,7 @@ export default class AppAnalysisUpload extends BaseAuthComponent implements IFet
   registerUploadEvents() {
     this.uploadService!.on(UploadEvent.COMPLETED, async (metadata: IAnalysisId) => {
       try {
-        const analysis = await this.getAnalysis();
-        const dataComplete = analysis ? analysis.data_complete : true;
+        const dataComplete = this.analysis ? this.analysis.data_complete : true;
 
         this.waitForFiles = null;
 
@@ -168,20 +169,6 @@ export default class AppAnalysisUpload extends BaseAuthComponent implements IFet
     }
   }
 
-  setAnalysisCallback(getAnalysis: () => AnalysisSchema | null) {
-    this.getAnalysisCallback = getAnalysis;
-  }
-
-  async getAnalysis() {
-    const analysis: AnalysisSchema | null = await this.getAnalysisCallback();
-
-    if (analysis !== null) {
-      this.storageKey = UPLOAD_ANALYSIS_STORAGE_KEY + "-" + analysis.id;
-    }
-
-    return analysis;
-  }
-
   fetchData(): IAppNewAnalysisFetched | undefined {
     return appLocalStorage.getItem(this.storageKey);
   }
@@ -206,13 +193,20 @@ export default class AppAnalysisUpload extends BaseAuthComponent implements IFet
     try {
       this.onUploading();
 
-      await this.emit("startUpload", this.appFileUpload.files.map(file => file.fileName));
-
-      const analysis = await this.getAnalysis();
+      const analysis = await new Promise<AnalysisSchema>(resolve => {
+        this.$emit(
+          "startUpload",
+          this.appFileUpload.files.map(file => file.fileName),
+          (analysis: AnalysisSchema) => {
+            resolve(analysis);
+          }
+        );
+      });
       if (!analysis) {
         return;
       }
       
+      this.setStorageKey(analysis);
       this.storeData();
 
       this.appFileUpload.upload<IAnalysisId>(volateqApi.getAnalysisFileUploadUrl(analysis.id), { id: analysis.id });
@@ -246,11 +240,17 @@ export default class AppAnalysisUpload extends BaseAuthComponent implements IFet
     appContentEventBus.clearAlert();
 
     try {
-      await this.emit("cancelUpload");
+      await new Promise<void>(resolve => {
+        this.$emit("cancelUpload", () => resolve);
+      });
     } finally {
       this.cancelUploadButton.stopLoading();
       this.showCancelButton = false;
     }
+  }
+
+  private setStorageKey(analysis: AnalysisSchema | null) {
+    this.storageKey = UPLOAD_ANALYSIS_STORAGE_KEY + (analysis && ("-" + analysis.id) || "");
   }
 }
 </script>

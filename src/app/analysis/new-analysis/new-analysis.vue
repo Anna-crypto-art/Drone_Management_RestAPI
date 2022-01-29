@@ -1,7 +1,7 @@
 <template>
   <app-content :title="$t('new-data-upload')" :navback="true" :subtitle="$t('create-new-analysis_descr')">
     <div class="app-new-analysis">
-      <app-analysis-upload ref="analysisUpload" @startUpload="onStartUpload" @cancelUpload="onCancelUpload">
+      <app-analysis-upload @startUpload="onStartUpload" @cancelUpload="onCancelUpload">
         <template #uploadForm>
           <b-row style="margin-bottom: 25px" v-if="plantOptions.length > 1">
             <b-col sm="4">
@@ -40,8 +40,6 @@ import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/an
   },
 })
 export default class AppNewAnalysis extends BaseAuthComponent {
-  @Ref() analysisUpload!: IAppAnalysisUpload;
-
   selected_plant_id: string | null = null;
   plantOptions: Array<any> = [];
 
@@ -59,11 +57,7 @@ export default class AppNewAnalysis extends BaseAuthComponent {
     }
   }
 
-  mounted() {
-    this.analysisUpload.setAnalysisCallback(() => this.analysis);
-  }
-
-  async onStartUpload(files: string[]) {
+  async onStartUpload(files: string[], done: (analysis: AnalysisSchema) => void) {
     try {
       const analysisIdObj = await volateqApi.createAnalysis({
         plant_id: this.selected_plant_id!,
@@ -71,12 +65,14 @@ export default class AppNewAnalysis extends BaseAuthComponent {
       });
   
       this.analysis = await volateqApi.getAnalysis(analysisIdObj.id);
+
+      done(this.analysis);
     } catch (e) {
       appContentEventBus.showError(e as ApiException)
     }
   }
 
-  async onCancelUpload() {
+  async onCancelUpload(done: () => void) {
     if (!this.analysis) {
       return;
     }
@@ -84,6 +80,8 @@ export default class AppNewAnalysis extends BaseAuthComponent {
     try {
       await volateqApi.cancelAnalysisUpload(this.analysis.id);
       await volateqApi.deleteAnalysis(this.analysis.id);
+
+      done();
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
     }

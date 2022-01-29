@@ -16,6 +16,7 @@
       <b-col>
         <app-delete-analysis :analysis="analysis" />
       </b-col>
+      <b-col></b-col>
     </b-row>
   </div>
 </template>
