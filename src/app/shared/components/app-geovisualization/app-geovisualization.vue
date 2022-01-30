@@ -11,9 +11,7 @@
       :layers="layers"
       :map="map"
       :title="title"
-      :sidebarOpen="sidebarOpen"
       @loading="toggleLoading"
-      @sidebarToggle="onSidebarToggle"
     >
       <!-- Pass slots through -->
       <template v-for="(_, slot) in $slots">
@@ -50,7 +48,6 @@ export default class AppGeovisualization extends Vue implements IOpenLayersCompo
   @Prop() zoom?: number;
   @Prop() center?: [number, number];
   @Prop({ default: "" }) title!: string;
-  @Prop({ default: false }) sidebarOpen!: boolean;
 
   map: Map | null = null;
   loading = false;
@@ -65,10 +62,6 @@ export default class AppGeovisualization extends Vue implements IOpenLayersCompo
 
   toggleLoading<Evt extends { loading: boolean }>(e: Evt): void {
     this.loading = e.loading;
-  }
-
-  onSidebarToggle(toggleState: boolean): void {
-    this.$emit("sidebarToggle", toggleState);
   }
 
   private mapSetup(): void {

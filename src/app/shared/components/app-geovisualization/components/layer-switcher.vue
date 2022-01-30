@@ -46,6 +46,7 @@ import { Zoom } from "ol/control";
 import { easeOut } from "ol/easing";
 import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
+import { State } from "vuex-class";
 import { LayerStructure } from "../layer-structure";
 import { CustomLoader } from "../loader/custom-loader";
 import { GeoJSONLoader } from "../loader/geojson-loader";
@@ -72,11 +73,7 @@ export default class AppGeovisualLayerSwitcher extends Vue {
   public zoomDelta = 1;
   public animationDuration = 200;
 
-  sidebarOpen = this.$store.state.sidebar["layer-switcher"];
-
-  constructor() {
-    super();
-  }
+  @State(state => state.sidebar["layer-switcher"]) sidebarOpen!: boolean;
 
   mounted(): void {
     this.layerSetup(this.rootLayer, this.layers);
@@ -156,18 +153,19 @@ export default class AppGeovisualLayerSwitcher extends Vue {
 <style lang="scss">
 @import "@/scss/_colors.scss";
 
-$sidebar-width: 400px;
+$sidebar-width: min(400px, 70vw);
 
 .layer-switcher {
   position: absolute;
-  right: -$sidebar-width;
+  right: 0;
   top: 0;
   height: 100%;
-  width: $sidebar-width;
+  width: min(400px, calc(100vw - 50px));
 
   background: white;
+  transform: translateX(100%);
 
-  transition: right 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out;
   border-left: $border-color-grey 1px solid;
 
   .controls {
@@ -188,7 +186,7 @@ $sidebar-width: 400px;
   }
 
   &.open {
-    right: 0;
+    transform: translateX(0);
   }
 }
 </style>

@@ -11,15 +11,15 @@
 <script lang="ts">
 import Vue from "vue";
 import { Component } from "vue-property-decorator";
+import { State } from "vuex-class";
 
 @Component({
   name: "app-geovisual-toggle-layer",
 })
 export default class AppGeovisualToggleLayer extends Vue {
-  open = this.$store.direct.getters.sidebar["layer-switcher"];
+  @State(state => state.sidebar["layer-switcher"]) open!: boolean;
 
   toggle() {
-    // this.$store.
     this.$store.direct.commit.sidebar.toggle({ name: "layer-switcher" });
   }
 }

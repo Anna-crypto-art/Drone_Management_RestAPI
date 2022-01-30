@@ -6,7 +6,6 @@
       :analysisResults="analysisResults"
       :componentLayerTypes="componentLayerTypes"
       :keyFigureLayers="keyFigureLayers"
-      @sidebarToggle="onSidebarToggled"
     >
       <template #pcs>
         {{ $t("pcs") }} <app-explanation>{{ $t("pcs_expl") }}</app-explanation>
@@ -137,10 +136,6 @@ export default class AppVisualCspPtc
 
   onLayerSelected(selected: boolean, legend?: Legend): void {
     return this.visualization?.onLayerSelected(selected, legend);
-  }
-
-  onSidebarToggled(toggleState: boolean): void {
-    this.$emit("sidebarToggle", toggleState);
   }
 
   getTransAlignmentOffsetClassLimit(component_type: "sce" | "sca", class_limit: 1 | 2 | 3): string {

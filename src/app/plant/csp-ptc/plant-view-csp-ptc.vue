@@ -1,17 +1,15 @@
 <template>
-  <div class="plant-view-csp-ptc" v-if="analysisResults">
+  <div :class="'plant-view-csp-ptc' + (isMobile ? ' mobile' : '')" v-if="analysisResults">
     <app-analysis-selection-sidebar
       ref="analysisSelectionSidebar"
       :plant="plant"
       :analysisResults="analysisResults"
-      :open="sidebarOpen"
       :getPIColor="getPiColor"
       :absolute="leftSidebarAbsolute"
-      @sidebarToggled="onSidebarToggled"
       @analysisResultSelected="onAnalysisResultSelected"
     />
     <div class="plant-view-csp-ptc-rightside">
-      <h2 :class="'plant-view-csp-ptc-title ' + (sidebarOpen ? 'open' : '')">
+      <h2 :class="'plant-view-csp-ptc-title ' + (sidebarStates['analysis'] ? 'open' : '')">
         {{ plant.name }}
       </h2>
       <b-tabs align="center" @activate-tab="onTabChange">
@@ -19,11 +17,7 @@
           <template #title>
             <b-icon icon="map" />
           </template>
-          <app-visual-csp-ptc
-            ref="visualCspPtc"
-            :analysisResults="analysisResults"
-            :plant="plant"
-          />
+          <app-visual-csp-ptc ref="visualCspPtc" :analysisResults="analysisResults" :plant="plant" />
         </b-tab>
         <b-tab v-if="hasResults">
           <template #title><b-icon icon="table" /></template>
@@ -66,8 +60,10 @@ import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import { ISidebarModule } from "@/app/shared/stores/sidebar";
 import { BvTableFieldArray } from "bootstrap-vue";
 import { Component, Prop, Ref } from "vue-property-decorator";
+import { State } from "vuex-class";
 import { IAnalysisResultSelection } from "../shared/types";
 import { cspPtcKeyFigureColors } from "./csp-ptc-key-figure-colors";
 
@@ -99,7 +95,9 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
 
   private analysisResultReleased: boolean | null = null;
 
-  private sidebarOpen = false;
+  @State(state => state.sidebar) sidebarStates!: ISidebarModule;
+  preMobileSidebarState: ISidebarModule | null = null;
+
   leftSidebarAbsolute = true; // TODO: Make it absolute on all tabs?
 
   private isMobile!: boolean;
@@ -107,9 +105,7 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
   private isMobileListener<Evt extends { matches: boolean }>(e: Evt) {
     this.isMobile = e.matches;
 
-    if (this.isMobile) {
-      this.sidebarOpen = false;
-    }
+    this.$store.direct.commit.sidebar.setAll(!this.isMobile);
   }
 
   async created(): Promise<void> {
@@ -145,10 +141,6 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
       : null;
 
     this.rerenderOLCanvas();
-  }
-
-  onSidebarToggled(open: boolean): void {
-    this.sidebarOpen = open;
   }
 
   onTabChange(tab: number) {

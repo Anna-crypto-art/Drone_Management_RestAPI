@@ -29,9 +29,7 @@ export default class AppSidebar extends Vue {
   @Prop({ default: true }) open!: boolean;
 
   onToggle(): void {
-    this.open = !this.open;
-
-    this.$emit("toggled", !this.open);
+    this.$emit("toggled");
   }
 }
 </script>
@@ -91,10 +89,12 @@ $sidebar-width: 400px;
     left: calc(100% - 1px);
     border-left-color: $white;
 
-    &:hover,
-    &.show-label {
-      .toggle-button-text {
-        padding-left: 0.5em;
+    > :not(.mobile) & {
+      &:hover,
+      &.show-label {
+        .toggle-button-text {
+          padding-left: 0.5em;
+        }
       }
     }
   }
@@ -103,10 +103,12 @@ $sidebar-width: 400px;
     right: calc(100% - 1px);
     border-right-color: $white;
 
-    &:hover,
-    &.show-label {
-      .toggle-button-text {
-        padding-right: 0.5em;
+    > :not(.mobile) & {
+      &:hover,
+      &.show-label {
+        .toggle-button-text {
+          padding-right: 0.5em;
+        }
       }
     }
   }
@@ -120,7 +122,7 @@ $sidebar-width: 400px;
     line-height: 1.3em;
   }
 
-  &.show-label {
+  > :not(.mobile) &.show-label {
     .toggle-button-text {
       max-width: 150px;
     }

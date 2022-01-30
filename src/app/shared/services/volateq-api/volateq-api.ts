@@ -234,9 +234,7 @@ export class VolateqAPI extends HttpClientBase {
   public async generateDownloadUrl(downloadUrl: string): Promise<string> {
     const encodedUrl = encodeURIComponent(encodeURIComponent(downloadUrl));
 
-    const urlTokenResponse: { url_token: string } = await this.get(
-      `/auth/user/generate-url-token/${encodedUrl}`
-    );
+    const urlTokenResponse: { url_token: string } = await this.get(`/auth/user/generate-url-token/${encodedUrl}`);
 
     return `${downloadUrl}&url_token=${encodeURIComponent(urlTokenResponse.url_token)}`;
   }

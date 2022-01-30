@@ -30,15 +30,16 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import { Component, Prop, Ref } from "vue-property-decorator";
-import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-import { BvTableFieldArray } from "bootstrap-vue";
-import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
+import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
+import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
+import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import { BvTableFieldArray } from "bootstrap-vue";
+import Vue from "vue";
+import { Component, Prop, Ref } from "vue-property-decorator";
+import { State } from "vuex-class";
 
 @Component({
   name: "app-analysis-selection-sidebar",
@@ -52,9 +53,9 @@ export default class AppAnalysisSelectionSidebar extends Vue {
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
   @Prop() getPIColor!: (keyFigure: KeyFigureSchema) => string;
-  @Prop({ default: false }) sidebarOpen!: boolean;
   @Prop() absolute!: boolean;
   @Ref() analysisResultsTable!: any; // b-table
+  @State(state => state.sidebar["analysis"]) sidebarOpen!: boolean;
 
   analysisResultsTableColumns: BvTableFieldArray = [
     { key: "selected", label: "" },
@@ -94,8 +95,8 @@ export default class AppAnalysisSelectionSidebar extends Vue {
     this.$emit("analysisResultSelected", selectedAnalysisResultId);
   }
 
-  onSidebarToggled(open: boolean): void {
-    this.$emit("sidebarToggled", open);
+  onSidebarToggled(): void {
+    this.$store.direct.commit.sidebar.toggle({ name: "analysis" });
   }
 
   getKpiColor(keyFigure: KeyFigureSchema): string {

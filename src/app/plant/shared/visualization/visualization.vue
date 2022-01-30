@@ -5,7 +5,6 @@
       v-if="hasLayers"
       :layers="layers"
       @click="onOpenLayersClick"
-      @sidebarToggle="onSidebarToggled"
     >
       <template #topContent>
         <b-form-checkbox v-model="enableMultiSelection" switch @change="onMultiSelectionChanged">
@@ -169,9 +168,6 @@ export default class AppVisualization
     }
   }
 
-  onSidebarToggled(toggleState: boolean) {
-    this.$emit("sidebarToggle", toggleState);
-  }
 
   onLayerSelected(selected: boolean, legend?: Legend) {
     if (legend) {
