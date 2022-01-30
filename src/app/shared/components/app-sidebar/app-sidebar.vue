@@ -89,7 +89,7 @@ $sidebar-width: 400px;
     left: calc(100% - 1px);
     border-left-color: $white;
 
-    > :not(.mobile) & {
+    .plant-view-csp-ptc:not(.mobile) & {
       &:hover,
       &.show-label {
         .toggle-button-text {
@@ -103,7 +103,7 @@ $sidebar-width: 400px;
     right: calc(100% - 1px);
     border-right-color: $white;
 
-    > :not(.mobile) & {
+    .plant-view-csp-ptc:not(.mobile) & {
       &:hover,
       &.show-label {
         .toggle-button-text {
@@ -122,7 +122,7 @@ $sidebar-width: 400px;
     line-height: 1.3em;
   }
 
-  > :not(.mobile) &.show-label {
+  .plant-view-csp-ptc:not(.mobile) &.show-label {
     .toggle-button-text {
       max-width: 150px;
     }
