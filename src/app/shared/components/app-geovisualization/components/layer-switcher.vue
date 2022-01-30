@@ -177,6 +177,10 @@ $sidebar-width: min(400px, 70vw);
     bottom: 0;
     padding-right: 0.5em;
     padding-bottom: 2em;
+
+    button {
+      backdrop-filter: blur(2.5px);
+    }
   }
 
   .content {
