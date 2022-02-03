@@ -218,10 +218,11 @@
   "missing": "Missing",
   "send-notification": "Send notification",
   "data-complete": "Uploaded data complete",
-  "data-complete_expl": "If you are uploading all data needed for the analysis, keep it selected",
+  "data-complete_expl": "Select me, if you are uploading all data needed for the analysis",
   "cancel-and-delete-all-files": "Cancel & Delete all files",
   "delete-analysis": "Delete analysis",
   "delete": "Delete",
+  "no-new-upload-allowed": "Please complete the upload of analysis {name}",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",

@@ -9,6 +9,3 @@ export class UploadEventBus extends Vue {
     this.$on(event, callbackFn);
   }
 }
-
-const uploadEventBus = new UploadEventBus();
-export default uploadEventBus;

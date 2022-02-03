@@ -1,7 +1,12 @@
 <template>
   <app-content :title="$t('new-data-upload')" :navback="true" :subtitle="$t('create-new-analysis_descr')">
     <div class="app-new-analysis">
-      <app-analysis-upload @startUpload="onStartUpload" @cancelUpload="onCancelUpload">
+      <app-analysis-upload
+      ref="analysisUpload"
+      :analysis="analysis"
+      @startUpload="onStartUpload"
+      @cancelUpload="onCancelUpload"
+      @updateAnalysis="onUpdateAnalysis">
         <template #uploadForm>
           <b-row style="margin-bottom: 25px" v-if="plantOptions.length > 1">
             <b-col sm="4">
@@ -28,8 +33,8 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import AppAnalysisUpload from "@/app/analysis/shared/analysis-upload.vue";
-import { IAppAnalysisUpload } from "@/app/analysis/shared/types";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import { IUpdateEditAnalysis } from "@/app/analysis/edit-analysis/types";
 
 @Component({
   name: "app-new-analysis",
@@ -39,7 +44,9 @@ import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/an
     AppAnalysisUpload,
   },
 })
-export default class AppNewAnalysis extends BaseAuthComponent {
+export default class AppNewAnalysis extends BaseAuthComponent implements IUpdateEditAnalysis {
+  @Ref() analysisUpload!: IUpdateEditAnalysis;
+
   selected_plant_id: string | null = null;
   plantOptions: Array<any> = [];
 
@@ -85,6 +92,18 @@ export default class AppNewAnalysis extends BaseAuthComponent {
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
     }
+  }
+
+  updateAnalysis(analysis: AnalysisSchema) {
+    this.analysis = analysis;
+
+    if (this.analysisUpload) {
+      this.analysisUpload.updateAnalysis(analysis);
+    }
+  }
+
+  onUpdateAnalysis() {
+    this.$emit("updateAnalysis");
   }
 }
 </script>

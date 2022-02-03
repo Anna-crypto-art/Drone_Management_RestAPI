@@ -1,6 +1,9 @@
 <template>
   <div class="app-analysis-upload">
-    <b-form @submit.prevent="onSubmit" style="margin-bottom: 50px;" v-if="uploadService">
+    <b-form-checkbox v-show="analysis" v-model="dataComplete" @change="onChangeDataComplete">
+      {{ $t("data-complete") }} <app-explanation>{{ $t("data-complete_expl") }}</app-explanation>
+    </b-form-checkbox>
+    <b-form @submit.prevent="onSubmit" style="margin: 30px 0;" v-if="uploadService">
       <slot name="uploadForm" />
       <app-file-upload ref="appFileUpload" :uploadService="uploadService" :title="$t('select-files')" />
       <app-button ref="uploadButton" type="submit" cls="pull-right">{{ uploadButtonTxt }}</app-button>
@@ -33,7 +36,8 @@ import { UPLOAD_ANALYSIS_STORAGE_KEY } from "@/app/shared/components/fetch-compo
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
-import { IAppAnalysisUpload } from "./types";
+import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
+import { IUpdateEditAnalysis } from "@/app/analysis/edit-analysis/types";
 
 
 @Component({
@@ -41,10 +45,11 @@ import { IAppAnalysisUpload } from "./types";
   components: {
     AppContent,
     AppFileUpload,
-    AppButton
+    AppButton,
+    AppExplanation,
   }
 })
-export default class AppAnalysisUpload extends BaseAuthComponent implements IFetchComponent<IAppNewAnalysisFetched>, IUploadListener {
+export default class AppAnalysisUpload extends BaseAuthComponent implements IFetchComponent<IAppNewAnalysisFetched>, IUploadListener, IUpdateEditAnalysis {
   @Ref() appFileUpload!: IAppFileUpload;
   @Ref() uploadButton!: IAppButton;
   @Ref() cancelUploadButton!: IAppButton;
@@ -52,6 +57,7 @@ export default class AppAnalysisUpload extends BaseAuthComponent implements IFet
   @Prop({ default: null }) analysis!: AnalysisSchema | null;
 
   storageKey = "";
+  dataComplete = false;
 
   uploadService: UploadService | null = null;
 
@@ -85,7 +91,8 @@ export default class AppAnalysisUpload extends BaseAuthComponent implements IFet
   registerUploadEvents() {
     this.uploadService!.on(UploadEvent.COMPLETED, async (metadata: IAnalysisId) => {
       try {
-        const dataComplete = this.analysis ? this.analysis.data_complete : true;
+        const analysis = await volateqApi.getAnalysis(this.analysis!.id);
+        const dataComplete = analysis.data_complete;
 
         this.waitForFiles = null;
 
@@ -93,7 +100,9 @@ export default class AppAnalysisUpload extends BaseAuthComponent implements IFet
           metadata.id, 
           { state_id: (dataComplete ? ApiStates.DATA_COMPLETE : ApiStates.DATA_INCOMPLETE) }
         );
-        appLocalStorage.removeItem(UPLOAD_ANALYSIS_STORAGE_KEY);
+        this.$emit("updateAnalysis");
+
+        appLocalStorage.removeItem(this.storageKey);
 
         appContentEventBus.showSuccessAlert(this.$t("upload-completed-successfully").toString());
       } catch (e) {
@@ -184,6 +193,10 @@ export default class AppAnalysisUpload extends BaseAuthComponent implements IFet
     return { fileNames: this.appFileUpload.files.map(file => file.fileName) };
   }
 
+  updateAnalysis(analysis: AnalysisSchema): void {
+    this.analysis = analysis;
+  }
+
   async onSubmit() {
     if (this.uploadService!.hasState(UploadState.FAILED)) {
       this.$router.go(0);
@@ -246,6 +259,16 @@ export default class AppAnalysisUpload extends BaseAuthComponent implements IFet
     } finally {
       this.cancelUploadButton.stopLoading();
       this.showCancelButton = false;
+    }
+  }
+
+  async onChangeDataComplete() {
+    try {
+      await volateqApi.updateAnalysis(this.analysis!.id, { data_complete: this.dataComplete });
+
+      this.$emit("updateAnalysis");
+    } catch (e) {
+      appContentEventBus.showError(e as ApiException);
     }
   }
 

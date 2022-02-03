@@ -2,7 +2,12 @@
   <app-content :title="$t('analysis-overview')" :subtitle="$t('analysis-overview_descr')">
     <div class="app-analysis">
       <router-link :to="{ name: 'AnalysisNew' }">
-        <b-button variant="primary">{{ createNewAnalysisBtnText }}</b-button>
+        <b-button
+        variant="primary" 
+        :disabled="!!incompleteAnalysisName" 
+        :title="incompleteAnalysisName && $t('no-new-upload-allowed', { name: incompleteAnalysisName }) || ''">
+          {{ createNewAnalysisBtnText }}
+        </b-button>
       </router-link>
       <div class="app-analysis-plants-filter pull-right" v-show="plants">
         <b-form-select
@@ -93,6 +98,7 @@ import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import AppModalFormInfoArea from "@/app/shared/components/app-modal/app-modal-form-info-area.vue";
 import { ApiException } from "../shared/services/volateq-api/api-errors";
 import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
+import { ApiStates } from "../shared/services/volateq-api/api-states";
 
 @Component({
   name: "app-analysis",
@@ -107,7 +113,7 @@ export default class AppAnalysis extends BaseAuthComponent {
   columns: BvTableFieldArray = [];
   plants: Array<any> | null = null;
   selectedPlantId: string | null = null;
-  analysisRows: Array<any> = [];
+  analysisRows: Array<any> | null = null;
   isLoading = true;
 
   createNewAnalysisBtnText = "";
@@ -138,6 +144,14 @@ export default class AppAnalysis extends BaseAuthComponent {
 
   async onPlantSelectionChanged() {
     await this.updateAnalysisRows();
+  }
+
+  get incompleteAnalysisName(): string | null {
+    const analysisName = this.analysisRows?.find(analysis => 
+      analysis.state && analysis.state.state.id <= ApiStates.DATA_INCOMPLETE
+    )?.name;
+
+    return analysisName || null;
   }
 
   private async updateAnalysisRows() {
