@@ -40,7 +40,7 @@
               <span v-html="$t('accept-terms-of-service')"></span>
             </b-form-checkbox>
           </div>
-          <app-button type="submit" cls="width-100pc" :disabled="!checkedTermsOfService">{{
+          <app-button type="submit" cls="width-100pc" :disabled="!checkedTermsOfService" :loading="loading">{{
             $t("register")
           }}</app-button>
         </b-form>
@@ -51,14 +51,13 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Component, Ref } from "vue-property-decorator";
+import { Component } from "vue-property-decorator";
 
 import AppAuthContainer from "@/app/auth/shared/components/auth-container.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
-import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
-import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
+import { ApiErrors, ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import authContainerEventBus from "@/app/auth/shared/components/auth-container-event-bus";
 
 @Component({
@@ -74,6 +73,7 @@ export default class AppAuthRegister extends Vue {
   company = "";
   checkedTermsOfService = false;
   user!: RegisterUser;
+  loading = false;
 
   async created() {
     try {
@@ -90,11 +90,11 @@ export default class AppAuthRegister extends Vue {
 
       this.hasUser = true;
     } catch (e) {
-      if (e.error === ApiErrors.RESOURCE_NOT_FOUND) {
+      if ((e as ApiException).error === ApiErrors.RESOURCE_NOT_FOUND) {
         this.$router.push({ name: "Login" });
       }
 
-      this.showAlert(e.error);
+      this.showAlert((e as ApiException).error);
     }
   }
 
@@ -110,19 +110,19 @@ export default class AppAuthRegister extends Vue {
     }
 
     try {
-      appButtonEventBus.startLoading();
+      this.loading = true;
 
       await volateqApi.registerUser(this.$route.params.confirmKey, this.user);
 
       this.$router.push({ name: "Login" });
     } catch (e) {
-      this.showAlert(e.error);
+      this.showAlert((e as ApiException).error);
     }
   }
 
   showAlert(msg: string) {
     authContainerEventBus.showErrorAlert(msg);
-    appButtonEventBus.stopLoading();
+    this.loading = false;
   }
 }
 </script>

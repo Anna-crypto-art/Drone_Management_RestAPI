@@ -23,23 +23,23 @@
       <b-form-group :label="$t('select-result-image-files')">
         <b-form-file v-model="imageFiles" accept="image/png, image/jpeg" multiple></b-form-file>
       </b-form-group>
-      <app-button ref="manageResultFilesSubmitButton" type="submit">{{ $t("apply") }}</app-button>
+      <app-button type="submit" :loading="loading" >{{ $t("apply") }}</app-button>
     </b-form>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Ref, Prop } from "vue-property-decorator";
+import { Component, Prop, Watch } from "vue-property-decorator";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { IUpdateEditAnalysis } from "@/app/analysis/edit-analysis/types";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
-import { IAppButton } from "@/app/shared/components/app-button/types";
 import { AnalysisResultFileSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-file-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import { ApiErrors, ApiException } from "@/app/shared/services/volateq-api/api-errors";
+import { AnalysisEventService } from "../../shared/analysis-event-service";
+import { AnalysisEvent } from "../../shared/types";
 
 @Component({
   name: "app-import-analysis-result",
@@ -47,22 +47,20 @@ import { ApiErrors, ApiException } from "@/app/shared/services/volateq-api/api-e
     AppButton,
   },
 })
-export default class AppImportAnalysisResult extends BaseAuthComponent implements IUpdateEditAnalysis {
+export default class AppImportAnalysisResult extends BaseAuthComponent {
   @Prop({ required: true }) analysis!: AnalysisSchema;
 
-  @Ref() manageResultFilesSubmitButton!: IAppButton;
-    
+  loading = false;
   importedResultFiles: AnalysisResultFileSchema[] = [];
   removeAllAnalysisResultFiles = false;
   jsonFile: File | null = null;
   imageFiles: File[] | null = null;
 
   async created() {
-    this.updateAnalysis(this.analysis);
+    await this.setManageImportFiles();
   }
 
-  async updateAnalysis(analysis: AnalysisSchema) {
-    this.analysis = analysis;
+  @Watch('analysis') async onUpdateAnalysis() {
     await this.setManageImportFiles();
   }
 
@@ -85,13 +83,13 @@ export default class AppImportAnalysisResult extends BaseAuthComponent implement
 
   async saveManageResultFiles() {
     try {
-      this.manageResultFilesSubmitButton.startLoading();
+      this.loading = true;
 
       const successfullyFinished = () => {
         appContentEventBus.showSuccessAlert(this.$t("success-managing-result-files").toString());
-        this.manageResultFilesSubmitButton.stopLoading();
+        this.loading = false;
 
-        this.$emit("updateAnalysis");
+        AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
       };
 
       if (this.analysis.analysis_result && this.removeAllAnalysisResultFiles) {
@@ -111,7 +109,7 @@ export default class AppImportAnalysisResult extends BaseAuthComponent implement
         volateqApi.waitForTask(
           task.id,
           task => {
-            this.manageResultFilesSubmitButton.stopLoading();
+            this.loading = false;
 
             if (task.state === "SUCCESS") {
               successfullyFinished();
@@ -131,7 +129,7 @@ export default class AppImportAnalysisResult extends BaseAuthComponent implement
       }
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
-      this.manageResultFilesSubmitButton.stopLoading();
+      this.loading = false;
     }
   }
 }

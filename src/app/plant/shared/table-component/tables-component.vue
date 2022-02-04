@@ -9,7 +9,7 @@
           <app-search-input :placeholder="$t('search-pcs')" @search="onSearch"></app-search-input>
         </div>
         <div class="pull-right">
-          <app-button ref="csvExportBtn" variant="secondary" :title="$t('export-csv')" @click="onExportCsv">
+          <app-button variant="secondary" :title="$t('export-csv')" :loading="csvExportLoading" @click="onExportCsv">
             <b-icon icon="download"></b-icon> {{ $t("export-csv") }}: {{ activeTabLabel }}
           </app-button>
         </div>
@@ -56,7 +56,6 @@ import appContentEventBus from "@/app/shared/components/app-content/app-content-
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import AppTableComponent from "@/app/plant/shared/table-component/table-component.vue";
-import { IAppButton } from "@/app/shared/components/app-button/types";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 
 @Component({
@@ -73,8 +72,8 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
   @Prop() activeComponents!: IActiveComponent[];
-  @Ref() csvExportBtn!: IAppButton;
 
+  csvExportLoading = false;
   tabIndex = 0;
   activeTabLabel = "";
   readonly activeTabComponents: IActiveTabComponent[] = [];
@@ -128,7 +127,7 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
     const activeComponent = this.getSelectedActiveComponent();
     if (activeComponent) {
       try {
-        this.csvExportBtn.startLoading();
+        this.csvExportLoading = true;
 
         const tableComponent = this.getRefTableComponent(activeComponent);
 
@@ -153,7 +152,7 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
       } catch (e) {
         appContentEventBus.showError(e as ApiException);
       } finally {
-        this.csvExportBtn.stopLoading();
+        this.csvExportLoading = false;
       }
     }
   }

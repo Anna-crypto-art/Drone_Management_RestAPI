@@ -24,6 +24,10 @@ $theme-colors: (
     }
   }
 
+  &-danger {
+    border-color: $red;
+  }
+
   &.btn-secondary {
     background-color: $white;
     color: $blue;

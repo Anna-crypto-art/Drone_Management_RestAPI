@@ -44,6 +44,7 @@
       :title="$t('upload-dt')"
       :subtitle="$t('upload-dt_descr')"
       :ok-title="$t('apply')"
+      :modalLoading="plantModalLoading"
       @submit="saveManagePlant"
     >
       <b-form-group>
@@ -71,7 +72,6 @@ import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import { IAppModalForm } from "../shared/components/app-modal/types";
 import appContentEventBus from "../shared/components/app-content/app-content-event-bus";
 import { PlantItem } from "./types";
-import appButtonEventBus from "../shared/components/app-button/app-button-event-bus";
 import { ApiException } from "../shared/services/volateq-api/api-errors";
 
 @Component({
@@ -84,6 +84,7 @@ import { ApiException } from "../shared/services/volateq-api/api-errors";
 })
 export default class AppPlants extends BaseAuthComponent {
   @Ref() managePlantModal!: IAppModalForm;
+  plantModalLoading = false;
 
   columns: BvTableFieldArray | null = null;
   plants: PlantItem[] | null = null;
@@ -142,7 +143,7 @@ export default class AppPlants extends BaseAuthComponent {
 
   async saveManagePlant() {
     try {
-      appButtonEventBus.startLoading();
+      this.plantModalLoading = true;
 
       const task = await volateqApi.importFieldgeometry(
         this.managePlantModel.file!,
@@ -153,7 +154,7 @@ export default class AppPlants extends BaseAuthComponent {
       volateqApi.waitForTask(
         task.id,
         async task => {
-          appButtonEventBus.stopLoading();
+          this.plantModalLoading = false;
 
           if (task.state === "SUCCESS") {
             this.managePlantModal.hide();

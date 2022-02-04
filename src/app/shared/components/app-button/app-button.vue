@@ -7,44 +7,19 @@
 <script lang="ts">
 import Vue from "vue";
 import { Prop, Component } from "vue-property-decorator";
-import { IAppButton } from "@/app/shared/components/app-button/types";
-import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
 
 @Component({
   name: "app-button",
 })
-export default class AppButton extends Vue implements IAppButton {
+export default class AppButton extends Vue {
   @Prop({ default: "button" }) type!: string;
   @Prop({ default: "" }) cls!: string;
   @Prop({ default: "primary" }) variant!: string;
   @Prop({ default: false }) disabled!: boolean;
-
-  loading = false;
-
-  created() {
-    appButtonEventBus.onStopLoading(() => {
-      this.stopLoading();
-    });
-    appButtonEventBus.onStartLoading(() => {
-      this.startLoading();
-    });
-  }
+  @Prop({ default: false }) loading!: boolean;
 
   get isDisabled() {
     return this.loading || this.disabled;
-  }
-
-  stopLoading() {
-    this.loading = false;
-  }
-  startLoading() {
-    this.loading = true;
-  }
-  disable() {
-    this.disabled = true;
-  }
-  enable() {
-    this.disabled = false;
   }
 
   onClick(e: Event) {

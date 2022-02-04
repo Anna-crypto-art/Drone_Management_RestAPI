@@ -13,22 +13,22 @@
       <b-form-group :label="$t('message')">
         <b-form-textarea v-model="selectedUpdateStateMessage" :placeholder="$t('message')" row="5" />
       </b-form-group>
-      <app-button ref="submitUpdateStateButton" type="submit">{{ $t("update") }}</app-button>
+      <app-button type="submit" :loading="loading">{{ $t("update") }}</app-button>
     </b-form>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Ref, Prop } from "vue-property-decorator";
+import { Component, Prop, Watch } from "vue-property-decorator";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { IUpdateEditAnalysis } from "@/app/analysis/edit-analysis/types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { apiStateNames, ApiStates } from "@/app/shared/services/volateq-api/api-states";
-import { IAppButton } from "@/app/shared/components/app-button/types";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
+import { AnalysisEventService } from "../../shared/analysis-event-service";
+import { AnalysisEvent } from "../../shared/types";
 
 @Component({
   name: "app-update-analysis-state",
@@ -36,11 +36,10 @@ import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
     AppButton
   }
 })
-export default class AppUpdateAnalysisState extends BaseAuthComponent implements IUpdateEditAnalysis {
+export default class AppUpdateAnalysisState extends BaseAuthComponent {
   @Prop({ required: true }) analysis!: AnalysisSchema;
 
-  @Ref() submitUpdateStateButton!: IAppButton;
-
+  loading = false;
   selectedUpdateState: ApiStates | null = null;
   updateStateOptions: { value: number, text: string }[] | null = null;
   selectedUpdateStateMessage = "";
@@ -49,11 +48,14 @@ export default class AppUpdateAnalysisState extends BaseAuthComponent implements
   private analysisStates: Record<ApiStates, ApiStates[]> | null = null;
 
   async created() {
-    await this.updateAnalysis(this.analysis);
+    await this.updateAnalysisStates();
   }
 
-  async updateAnalysis(analysis: AnalysisSchema) {
-    this.analysis = analysis;
+  @Watch('analysis') async onUpdateAnalysis() {
+    await this.updateAnalysisStates();
+  }
+
+  async updateAnalysisStates() {
 
     try {
       if (this.analysisStates === null) {
@@ -68,7 +70,7 @@ export default class AppUpdateAnalysisState extends BaseAuthComponent implements
 
   async onSubmitUpdateState() {
     try {
-      this.submitUpdateStateButton.startLoading();
+      this.loading = true;
 
       if (!this.selectedUpdateState) {
         throw { error: "NO_STATE_SELECTED", message: "Please, selecte a state" };
@@ -80,13 +82,13 @@ export default class AppUpdateAnalysisState extends BaseAuthComponent implements
         do_send_mail: this.sendNotification,
       });
 
-      this.$emit("updateAnalysis");
+      AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
 
       appContentEventBus.showSuccessAlert(this.$t("update-analysis-state-success").toString());
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
     } finally {
-      this.submitUpdateStateButton.stopLoading();
+      this.loading = false;
     }
   }
 

@@ -2,11 +2,10 @@
   <app-content :title="$t('new-data-upload')" :navback="true" :subtitle="$t('create-new-analysis_descr')">
     <div class="app-new-analysis">
       <app-analysis-upload
-      ref="analysisUpload"
       :analysis="analysis"
       @startUpload="onStartUpload"
       @cancelUpload="onCancelUpload"
-      @updateAnalysis="onUpdateAnalysis">
+      @retryUpload="onRetryUpload">
         <template #uploadForm>
           <b-row style="margin-bottom: 25px" v-if="plantOptions.length > 1">
             <b-col sm="4">
@@ -25,7 +24,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Ref } from "vue-property-decorator";
+import { Component } from "vue-property-decorator";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
@@ -34,7 +33,6 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import AppAnalysisUpload from "@/app/analysis/shared/analysis-upload.vue";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
-import { IUpdateEditAnalysis } from "@/app/analysis/edit-analysis/types";
 
 @Component({
   name: "app-new-analysis",
@@ -44,9 +42,7 @@ import { IUpdateEditAnalysis } from "@/app/analysis/edit-analysis/types";
     AppAnalysisUpload,
   },
 })
-export default class AppNewAnalysis extends BaseAuthComponent implements IUpdateEditAnalysis {
-  @Ref() analysisUpload!: IUpdateEditAnalysis;
-
+export default class AppNewAnalysis extends BaseAuthComponent {
   selected_plant_id: string | null = null;
   plantOptions: Array<any> = [];
 
@@ -64,8 +60,13 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IUpdate
     }
   }
 
-  async onStartUpload(files: string[], done: (analysis: AnalysisSchema) => void) {
+  async onStartUpload(files: string[], resume: boolean, done: (analysis: AnalysisSchema) => void) {
     try {
+      if (resume) {
+        done(this.analysis!);
+        return;
+      }
+
       const analysisIdObj = await volateqApi.createAnalysis({
         plant_id: this.selected_plant_id!,
         files: files,
@@ -79,7 +80,7 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IUpdate
     }
   }
 
-  async onCancelUpload(done: () => void) {
+  async onCancelUpload(done: (failed: boolean) => void) {
     if (!this.analysis) {
       return;
     }
@@ -88,22 +89,17 @@ export default class AppNewAnalysis extends BaseAuthComponent implements IUpdate
       await volateqApi.cancelAnalysisUpload(this.analysis.id);
       await volateqApi.deleteAnalysis(this.analysis.id);
 
-      done();
+      done(false);
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
+
+      done(true);
     }
   }
 
-  updateAnalysis(analysis: AnalysisSchema) {
-    this.analysis = analysis;
-
-    if (this.analysisUpload) {
-      this.analysisUpload.updateAnalysis(analysis);
-    }
-  }
-
-  onUpdateAnalysis() {
-    this.$emit("updateAnalysis");
+  onRetryUpload() {
+    // Forward to existing analysis
+    this.$router.push({ name: "EditAnalysis", params: { id: this.analysis!.id } });
   }
 }
 </script>
