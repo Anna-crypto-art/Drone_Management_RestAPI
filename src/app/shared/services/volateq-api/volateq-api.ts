@@ -186,7 +186,7 @@ export class VolateqAPI extends HttpClientBase {
     await this.post(`/auth/analysis/${analysisId}/cancel-upload`);
   }
 
-  public async updateAnalysis(analysisId: string, updateData: { data_complete?: boolean, flown_at?: Date }): Promise<void> {
+  public async updateAnalysis(analysisId: string, updateData: { data_complete?: boolean, flown_at?: string }): Promise<void> {
     await this.post(`/auth/analysis/${analysisId}`, updateData);
   }
 

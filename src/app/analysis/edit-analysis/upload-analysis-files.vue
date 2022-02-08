@@ -16,8 +16,8 @@ import AppAnalysisUpload from "@/app/analysis/shared/analysis-upload.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
-import { AnalysisEventService } from "../shared/analysis-event-service";
-import { AnalysisEvent } from "../shared/types";
+import { AnalysisEventService } from "@/app/analysis/shared/analysis-event-service";
+import { AnalysisEvent } from "@/app/analysis/shared/types";
 import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 
 @Component({

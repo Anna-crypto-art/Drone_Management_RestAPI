@@ -223,6 +223,10 @@
   "delete-analysis": "Delete analysis",
   "delete": "Delete",
   "no-new-upload-allowed": "Please complete the upload of analysis {name}",
+  "edit": "Edit",
+  "flown-at": "Flown at",
+  "analysis-updated-successfully": "Analysis updated successfully",
+  "edit-analysis": "Edit analysis",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",

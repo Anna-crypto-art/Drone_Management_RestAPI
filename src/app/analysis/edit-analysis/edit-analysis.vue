@@ -19,6 +19,24 @@
           </template>
           <app-upload-analysis-files :analysis="analysis" />
         </b-tab>
+        <b-tab class="app-edit-analysis-edit-tab">
+          <template #title>
+            <b-icon icon="pencil-square" /><span class="pad-left">{{ $t("edit") }}</span>
+          </template>
+          <b-row>
+            <b-col sm>
+              <div class="admin-box">
+                <h4>{{ $t("edit-analysis") }}</h4>
+                <b-form @submit.prevent="onSubmitEditAnalysis">
+                  <b-form-group :label="$t('flown-at')" label-cols-sm="4" label-cols-lg="2">
+                    <b-datepicker v-model="flownAt" required /> 
+                  </b-form-group>
+                  <app-button type="submit" :loading="loading">{{ $t("apply") }}</app-button>
+                </b-form>
+              </div>
+            </b-col>
+          </b-row>
+        </b-tab>
         <b-tab v-if="isSuperAdmin" class="app-edit-analysis-admin-tab">
           <template #title>
             <b-icon icon="braces" /><span class="pad-left">{{ $t("admin-panel") }}</span>
@@ -31,13 +49,14 @@
 </template>
 
 <script lang="ts">
-import { Component, Ref } from "vue-property-decorator";
+import { Component } from "vue-property-decorator";
 import appContentEventBus from "../../shared/components/app-content/app-content-event-bus";
 import { BaseAuthComponent } from "../../shared/components/base-auth-component/base-auth-component";
 import { ApiException } from "../../shared/services/volateq-api/api-errors";
 import { AnalysisSchema } from "../../shared/services/volateq-api/api-schemas/analysis-schema";
 import volateqApi from "../../shared/services/volateq-api/volateq-api";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
+import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppAnalysisUpload from "@/app/analysis/shared/analysis-upload.vue";
 import AppDownloadAnalysisFiles from "@/app/analysis/edit-analysis/download-analysis-files.vue";
 import AppEditAnalysisAdmin from "@/app/analysis/edit-analysis/edit-analysis-admin/edit-analysis-admin.vue";
@@ -49,6 +68,7 @@ import { AnalysisEvent } from "../shared/types";
   name: "app-edit-analysis",
   components: {
     AppContent,
+    AppButton,
     AppAnalysisUpload,
     AppDownloadAnalysisFiles,
     AppEditAnalysisAdmin,
@@ -57,6 +77,9 @@ import { AnalysisEvent } from "../shared/types";
 })
 export default class AppEditAnalysis extends BaseAuthComponent {
   analysis: AnalysisSchema | null = null;
+
+  flownAt = "";
+  loading = false;
 
   async created() {
     await this.updateAnalysis(this.$route.params.id);
@@ -69,8 +92,26 @@ export default class AppEditAnalysis extends BaseAuthComponent {
   private async updateAnalysis(analysisId: string) {
     try {
       this.analysis = await volateqApi.getAnalysis(analysisId);
+
+      this.flownAt = this.analysis.flown_at;
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
+    }
+  }
+
+  async onSubmitEditAnalysis() {
+    try {
+      this.loading = true;
+
+      await volateqApi.updateAnalysis(this.analysis!.id, { flown_at: this.flownAt })
+
+      appContentEventBus.showSuccessAlert(this.$t("analysis-updated-successfully").toString())
+
+      AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS);
+    } catch (e) {
+      appContentEventBus.showError(e as ApiException);
+    } finally {
+      this.loading = false;
     }
   }
 }
