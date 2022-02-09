@@ -28,7 +28,7 @@
               <div class="admin-box">
                 <h4>{{ $t("edit-analysis") }}</h4>
                 <b-form @submit.prevent="onSubmitEditAnalysis">
-                  <b-form-group :label="$t('flown-at')" label-cols-sm="4" label-cols-lg="2">
+                  <b-form-group :label="$t('acquisition-date')" label-cols-sm="4" label-cols-lg="2">
                     <b-datepicker v-model="flownAt" required /> 
                   </b-form-group>
                   <app-button type="submit" :loading="loading">{{ $t("apply") }}</app-button>

@@ -224,7 +224,7 @@
   "delete": "Delete",
   "no-new-upload-allowed": "Please complete the upload of analysis {name}",
   "edit": "Edit",
-  "flown-at": "Flown at",
+  "acquisition-date": "Acquisition date",
   "analysis-updated-successfully": "Analysis updated successfully",
   "edit-analysis": "Edit analysis",
 
