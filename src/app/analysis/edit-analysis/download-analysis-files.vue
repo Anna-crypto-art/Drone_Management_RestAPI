@@ -139,16 +139,9 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
 
     try {
       let files: string[] = [];
-      if (this.analysis!.files.video_files) {
-        files = files.concat(this.analysis!.files.video_files);
+      for (const key of Object.keys(this.analysis.files)) {
+        files = files.concat(this.analysis!.files[key]);
       }
-      if (this.analysis!.files.drone_metadata_files) {
-        files = files.concat(this.analysis!.files.drone_metadata_files);
-      }
-      if (this.analysis!.files.other_files) {
-        files = files.concat(this.analysis!.files.other_files);
-      }
-
       files.sort();
 
       const fileInfos = await volateqApi.getAnalysisFilesInfo(this.analysis.id, files);

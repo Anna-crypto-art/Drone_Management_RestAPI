@@ -1,7 +1,12 @@
 <template>
   <div class="app-analysis-upload">
-    <b-form-checkbox v-show="analysis" v-model="dataComplete" @change="onChangeDataComplete">
-      {{ $t("data-complete") }} <app-explanation>{{ $t("data-complete_expl") }}</app-explanation>
+    <b-form-checkbox 
+      v-show="analysis"
+      v-model="dataComplete"
+      @change="onChangeDataComplete"
+      :disabled="!hasPlantMetadata"
+    >
+      {{ $t("data-complete") }} <app-explanation>{{ dataCompleteMetadataExpl }}</app-explanation>
     </b-form-checkbox>
     <b-form @submit.prevent="onSubmit" style="margin: 30px 0" v-if="uploadService">
       <slot name="uploadForm" />
@@ -217,6 +222,14 @@ export default class AppAnalysisUpload
   }
   getStorageData(): IAppNewAnalysisFetched | undefined {
     return { fileNames: this.appFileUpload.files.map(file => file.fileName) };
+  }
+
+  get hasPlantMetadata(): boolean {
+    return this.analysis && this.analysis.has_plant_metadata || false;
+  }
+
+  get dataCompleteMetadataExpl(): string {
+    return !this.hasPlantMetadata && this.$t("missing-plant-metadata").toString() || this.$t("data-complete_expl").toString();
   }
 
   async onSubmit() {

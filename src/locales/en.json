@@ -227,6 +227,7 @@
   "acquisition-date": "Acquisition date",
   "analysis-updated-successfully": "Analysis updated successfully",
   "edit-analysis": "Edit analysis",
+  "missing-plant-metadata": "Missing plant metadata (.csv, .mdb, .xls, .xlsx)",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",

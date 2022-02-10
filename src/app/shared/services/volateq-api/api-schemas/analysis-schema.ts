@@ -27,4 +27,5 @@ export interface AnalysisSchema extends SimpleAnalysisSchema {
   data_complete: boolean;
   flown_at: string;
   analysis_result: AnalysisResultSchema;
+  has_plant_metadata: boolean;
 }
