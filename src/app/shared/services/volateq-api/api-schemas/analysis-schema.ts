@@ -14,6 +14,7 @@ export interface SimpleAnalysisSchema {
   id: string;
   name: string;
   created_at: string;
+  flown_at: string;
 }
 
 export interface AnalysisSchema extends SimpleAnalysisSchema {

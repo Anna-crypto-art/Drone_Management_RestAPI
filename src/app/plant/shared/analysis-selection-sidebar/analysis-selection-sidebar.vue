@@ -57,7 +57,7 @@ export default class AppAnalysisSelectionSidebar extends Vue {
   analysisResultsTableColumns: BvTableFieldArray = [
     { key: "selected", label: "" },
     { key: "name", label: this.$t("name").toString() },
-    { key: "createdAt", label: this.$t("created-at").toString() },
+    { key: "date", label: this.$t("acquisition-date").toString() },
   ];
   analysisResultsTableItems: Record<string, unknown>[] = [];
 
@@ -66,7 +66,7 @@ export default class AppAnalysisSelectionSidebar extends Vue {
       this.analysisResultsTableItems.push({
         id: analysisResult.id,
         name: analysisResult.analysis.name,
-        createdAt: new Date(Date.parse(analysisResult.analysis.created_at)).toLocaleDateString(),
+        date: new Date(Date.parse(analysisResult.analysis.flown_at)).toLocaleDateString(),
         kpis: analysisResult.key_figures,
         _showDetails: true,
       });

@@ -7,10 +7,15 @@
       @cancelUpload="onCancelUpload"
       @retryUpload="onRetryUpload">
         <template #uploadForm>
-          <b-row style="margin-bottom: 25px" v-if="plantOptions.length > 1">
-            <b-col sm="4">
+          <b-row style="margin-bottom: 25px">
+            <b-col sm="4" v-if="plantOptions.length > 1">
               <b-form-group label-cols="auto" :label="$t('plant')">
                 <b-form-select required v-model="selected_plant_id" :options="plantOptions"></b-form-select>
+              </b-form-group>
+            </b-col>
+            <b-col sm="4">
+              <b-form-group label-cols="auto" :label="$t('acquisition-date')">
+                <b-datepicker v-model="flownAt" required /> 
               </b-form-group>
             </b-col>
           </b-row>
@@ -46,6 +51,8 @@ export default class AppNewAnalysis extends BaseAuthComponent {
   selected_plant_id: string | null = null;
   plantOptions: Array<any> = [];
 
+  flownAt: string | null = null;
+
   analysis: AnalysisSchema | null = null;
 
   async created() {
@@ -60,7 +67,7 @@ export default class AppNewAnalysis extends BaseAuthComponent {
     }
   }
 
-  async onStartUpload(files: string[], resume: boolean, done: (analysis: AnalysisSchema) => void) {
+  async onStartUpload(files: string[], resume: boolean, done: (analysis: AnalysisSchema | null) => void) {
     try {
       if (resume) {
         done(this.analysis!);
@@ -70,6 +77,7 @@ export default class AppNewAnalysis extends BaseAuthComponent {
       const analysisIdObj = await volateqApi.createAnalysis({
         plant_id: this.selected_plant_id!,
         files: files,
+        flown_at: this.flownAt!,
       });
   
       this.analysis = await volateqApi.getAnalysis(analysisIdObj.id);
@@ -77,6 +85,7 @@ export default class AppNewAnalysis extends BaseAuthComponent {
       done(this.analysis);
     } catch (e) {
       appContentEventBus.showError(e as ApiException)
+      done(null);
     }
   }
 

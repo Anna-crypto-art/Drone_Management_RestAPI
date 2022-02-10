@@ -248,6 +248,7 @@ export default class AppAnalysisUpload
         );
       });
       if (!analysis) {
+        this.uploadButtonLoading = false;
         return;
       }
 

@@ -125,7 +125,14 @@ export default class AppAnalysis extends BaseAuthComponent {
     this.columns = [
       { key: "name", label: this.$t("name").toString(), sortable: true },
       { key: "plant", label: this.$t("plant").toString(), sortable: true },
-      { key: "date", label: this.$t("created-at").toString(), sortable: true },
+      { 
+        key: "date",
+        label: this.$t("acquisition-date").toString(),
+        sortable: true,
+        formatter: (flownAt: string) => {
+          return new Date(Date.parse(flownAt)).toLocaleDateString()
+        }
+      },
       { key: "user", label: this.$t("created-by").toString(), sortable: true },
       { key: "state", label: this.$t("state").toString(), sortable: true },
       { key: "hasResults", label: this.$t("has-results").toString() },
@@ -163,7 +170,7 @@ export default class AppAnalysis extends BaseAuthComponent {
         const row = {
           id: a.id,
           name: a.name,
-          date: new Date(Date.parse(a.created_at)).toLocaleString(),
+          date: a.flown_at,
           user:
             (a.user && {
               userName: ((a.user.first_name || "") + " " + (a.user.last_name || "")).trim(),
