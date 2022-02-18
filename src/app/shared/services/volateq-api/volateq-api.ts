@@ -19,6 +19,7 @@ import { AnalysisResultKeyFigure } from "./api-analysis-result-key-figures";
 import { GeoVisualQuery } from "./api-requests/geo-visual-query-requests";
 import { ApiErrors, ApiException } from "./api-errors";
 import { ApiStates } from "./api-states";
+import { UpdatePlantRequest } from "./api-requests/plant-requests";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -357,6 +358,10 @@ export class VolateqAPI extends HttpClientBase {
 
   public getStates(): Promise<Record<ApiStates, ApiStates[]>> {
     return this.get(`/auth/states`)
+  }
+
+  public updatePlant(plantId: string, updatePlantRequest: UpdatePlantRequest): Promise<void> {
+    return this.post(`/auth/plant/${plantId}`, updatePlantRequest);
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {

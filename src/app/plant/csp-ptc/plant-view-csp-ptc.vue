@@ -27,28 +27,7 @@
         </b-tab>
         <b-tab v-if="isSuperAdmin">
           <template #title><b-icon icon="braces" /></template>
-          <b-container>
-            <b-row>
-              <b-col>
-                <div class="plant-view-csp-ptc-admin-panel">
-                  <h2>{{ $t("admin-panel") }}</h2>
-                  <div class="admin-box">
-                    <h4>{{ $t("analysis-visibility") }}</h4>
-                    <b-form-checkbox
-                      v-show="analysisResultReleased !== null"
-                      v-model="analysisResultReleased"
-                      switch
-                      @change="onReleaseChanged"
-                    >
-                      {{ analysisResultReleased ? $t("released") : $t("invisible-for-customer") }}
-                    </b-form-checkbox>
-                  </div>
-                  <!--<h4>{{ $t("digital-twin") }}</h4>
-                  coming soon-->
-                </div>
-              </b-col>
-            </b-row>
-          </b-container>
+          <app-plant-admin-view-csp-ptc :selectedAnalysisResult="selectedAnalysisResult" :plant="plant" />
         </b-tab>
       </b-tabs>
     </div>
@@ -72,6 +51,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { cspPtcKeyFigureColors } from "./csp-ptc-key-figure-colors";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
+import AppPlantAdminViewCspPtc from "@/app/plant/csp-ptc/plant-admin-view-csp-ptc.vue";
 
 @Component({
   name: "app-plant-view-csp-ptc",
@@ -82,6 +62,7 @@ import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/k
     AppTablesCspPtc,
     AppSidebar,
     AppAnalysisSelectionSidebar,
+    AppPlantAdminViewCspPtc,
   },
 })
 export default class AppPlantViewCspPtc extends BaseAuthComponent {
@@ -90,9 +71,9 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
   @Ref() visualCspPtc!: IAnalysisResultSelection;
   @Ref() tablesCspPtc!: IAnalysisResultSelection;
 
-  private analysisResults: AnalysisResultDetailedSchema[] | null = null;
+  selectedAnalysisResult: AnalysisResultDetailedSchema | null = null; 
 
-  private analysisResultReleased: boolean | null = null;
+  private analysisResults: AnalysisResultDetailedSchema[] | null = null;
 
   private sidebarOpen = false;
 
@@ -104,21 +85,11 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
     return (this.analysisResults && this.analysisResults.length > 0) || false;
   }
 
-  async onReleaseChanged() {
-    if (this.visualCspPtc?.selectedAnalysisResult) {
-      await volateqApi.updateAnalysisResult(this.visualCspPtc?.selectedAnalysisResult.id, {
-        release: this.analysisResultReleased as boolean,
-      });
-    }
-  }
-
   onAnalysisResultSelected(selectedAnalysisResultId: string | undefined): void {
     this.visualCspPtc.selectAnalysisResult(selectedAnalysisResultId);
     this.tablesCspPtc.selectAnalysisResult(selectedAnalysisResultId);
 
-    this.analysisResultReleased = this.visualCspPtc?.selectedAnalysisResult
-      ? this.visualCspPtc?.selectedAnalysisResult.released
-      : null;
+    this.selectedAnalysisResult = this.visualCspPtc?.selectedAnalysisResult || null;
 
     this.rerenderOLCanvas();
   }
