@@ -1,5 +1,5 @@
 <template>
-  <app-content v-if="analysis" :title="analysis.name || ''" :navback="true">
+  <app-content v-if="analysis" :title="analysis.name || ''" :navback="true" :eventId="analysis.id">
     <template #subtitle>
       <div v-if="analysis.current_state">
         <b>{{ $t(analysis.current_state.state.name) }}</b>
@@ -52,7 +52,7 @@
 import { Component } from "vue-property-decorator";
 import appContentEventBus from "../../shared/components/app-content/app-content-event-bus";
 import { BaseAuthComponent } from "../../shared/components/base-auth-component/base-auth-component";
-import { ApiException } from "../../shared/services/volateq-api/api-errors";
+import { ApiErrors, ApiException } from "../../shared/services/volateq-api/api-errors";
 import { AnalysisSchema } from "../../shared/services/volateq-api/api-schemas/analysis-schema";
 import volateqApi from "../../shared/services/volateq-api/volateq-api";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
@@ -63,6 +63,9 @@ import AppEditAnalysisAdmin from "@/app/analysis/edit-analysis/edit-analysis-adm
 import AppUploadAnalysisFiles from "@/app/analysis/edit-analysis/upload-analysis-files.vue";
 import { AnalysisEventService } from "@/app/analysis/shared/analysis-event-service";
 import { AnalysisEvent } from "../shared/types";
+import { TaskSchema } from "@/app/shared/services/volateq-api/api-schemas/task-schema";
+import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
+import { AppAlertEvents } from "@/app/shared/services/app-alert/app-alert";
 
 @Component({
   name: "app-edit-analysis",
@@ -94,8 +97,33 @@ export default class AppEditAnalysis extends BaseAuthComponent {
       this.analysis = await volateqApi.getAnalysis(analysisId);
 
       this.flownAt = this.analysis.flown_at;
+
+      this.watchAnalysisTask();
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
+    }
+  }
+
+  private watchAnalysisTask() {
+    if (this.analysis!.task_id) {
+      volateqApi.waitForTask(
+        this.analysis!.task_id,
+        (task: TaskSchema) => {
+          if (task.state === "FAILURE") {
+            AppContentEventService.showError(this.analysis!.id, {
+              error: ApiErrors.SOMETHING_WENT_WRONG,
+              message: task.result,
+            });
+          }
+
+          AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.FINISHED_ANALYSIS_TASK, task);
+        },
+        (infoMessage: string, task: TaskSchema) => {
+          AppContentEventService.showInfo(this.analysis!.id, infoMessage);
+
+          AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.RUN_ANALYSIS_TASK, task)
+        }
+      )
     }
   }
 
@@ -105,11 +133,11 @@ export default class AppEditAnalysis extends BaseAuthComponent {
 
       await volateqApi.updateAnalysis(this.analysis!.id, { flown_at: this.flownAt })
 
-      appContentEventBus.showSuccessAlert(this.$t("analysis-updated-successfully").toString())
+      AppContentEventService.showSuccess(this.analysis!.id, this.$t("analysis-updated-successfully").toString());
 
       AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS);
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      AppContentEventService.showError(this.analysis!.id, e as ApiException);
     } finally {
       this.loading = false;
     }

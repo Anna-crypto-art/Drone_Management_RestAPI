@@ -18,7 +18,6 @@ export interface SimpleAnalysisSchema {
 }
 
 export interface AnalysisSchema extends SimpleAnalysisSchema {
-  in_debug_phase: boolean;
   current_state: AnalysisStateSchema;
   plant: PlantSchema;
   customer: CustomerSchema;
@@ -28,4 +27,5 @@ export interface AnalysisSchema extends SimpleAnalysisSchema {
   flown_at: string;
   analysis_result: AnalysisResultSchema;
   has_plant_metadata: boolean;
+  task_id: string;
 }

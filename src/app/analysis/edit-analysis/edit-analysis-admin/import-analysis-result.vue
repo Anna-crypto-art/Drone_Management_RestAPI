@@ -37,9 +37,11 @@ import { AnalysisResultFileSchema } from "@/app/shared/services/volateq-api/api-
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
-import { ApiErrors, ApiException } from "@/app/shared/services/volateq-api/api-errors";
+import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import { AnalysisEventService } from "../../shared/analysis-event-service";
 import { AnalysisEvent } from "../../shared/types";
+import { TaskSchema } from "@/app/shared/services/volateq-api/api-schemas/task-schema";
+import { ApiTasks } from "@/app/shared/services/volateq-api/api-tasks";
 
 @Component({
   name: "app-import-analysis-result",
@@ -58,6 +60,21 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
 
   async created() {
     await this.setManageImportFiles();
+
+    AnalysisEventService.on(this.analysis.id, AnalysisEvent.RUN_ANALYSIS_TASK, (task: TaskSchema) => {
+      if (task.name === ApiTasks.importAnalysisResult) {
+        this.loading = true;
+      }
+    });
+    AnalysisEventService.on(this.analysis.id, AnalysisEvent.FINISHED_ANALYSIS_TASK, (task: TaskSchema) => {
+      if (task.name === ApiTasks.importAnalysisResult) {
+        this.loading = false;
+
+        if (task.state === "SUCCESS") {
+          this.successfullyFinished();
+        }
+      }
+    })
   }
 
   @Watch('analysis') async onUpdateAnalysis() {
@@ -85,13 +102,6 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
     try {
       this.loading = true;
 
-      const successfullyFinished = () => {
-        appContentEventBus.showSuccessAlert(this.$t("success-managing-result-files").toString());
-        this.loading = false;
-
-        AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
-      };
-
       if (this.analysis.analysis_result && this.removeAllAnalysisResultFiles) {
         await volateqApi.deleteAnalysisResult(this.analysis.analysis_result.id);
       }
@@ -99,38 +109,28 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
       if (this.jsonFile) {
         appContentEventBus.showInfoAlert("Uploading...");
 
-        const task = await volateqApi.importAnalysisResult(
+        await volateqApi.importAnalysisResult(
           this.jsonFile,
           this.analysis!.id,
           this.imageFiles || undefined,
           (progress) => { appContentEventBus.showInfoAlert("Uploading... " + progress + "%") }
         );
 
-        volateqApi.waitForTask(
-          task.id,
-          task => {
-            this.loading = false;
-
-            if (task.state === "SUCCESS") {
-              successfullyFinished();
-            } else if (task.state === "FAILURE") {
-              appContentEventBus.showError({
-                error: ApiErrors.SOMETHING_WENT_WRONG,
-                message: task.result,
-              });
-            }
-          },
-          info => {
-            appContentEventBus.showInfoAlert(info);
-          }
-        );
+        AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS);
       } else {
-        successfullyFinished();
+        this.successfullyFinished();
       }
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
       this.loading = false;
     }
+  }
+
+  private successfullyFinished() {
+    appContentEventBus.showSuccessAlert(this.$t("success-managing-result-files").toString());
+    this.loading = false;
+
+    AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
   }
 }
 </script>

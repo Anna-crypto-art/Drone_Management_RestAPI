@@ -29,6 +29,7 @@ import appContentEventBus from "@/app/shared/components/app-content/app-content-
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import { AnalysisEventService } from "../../shared/analysis-event-service";
 import { AnalysisEvent } from "../../shared/types";
+import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
 
 @Component({
   name: "app-update-analysis-state",
@@ -64,7 +65,7 @@ export default class AppUpdateAnalysisState extends BaseAuthComponent {
 
       this.setUpdateStateOptions();
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      AppContentEventService.showError(this.analysis.id, e as ApiException);
     }
   }
 
@@ -84,9 +85,9 @@ export default class AppUpdateAnalysisState extends BaseAuthComponent {
 
       AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
 
-      appContentEventBus.showSuccessAlert(this.$t("update-analysis-state-success").toString());
+      AppContentEventService.showSuccess(this.analysis.id, this.$t("update-analysis-state-success").toString());
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      AppContentEventService.showError(this.analysis.id, e as ApiException);
     } finally {
       this.loading = false;
     }

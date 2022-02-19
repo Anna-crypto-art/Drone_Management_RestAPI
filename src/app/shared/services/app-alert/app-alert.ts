@@ -13,6 +13,12 @@ export enum AppAlertEvents {
 }
 
 export class AppAlertEventBus extends Vue {
+  on(alertEvent: AppAlertEvents, callbackFn: any) {
+    this.$on(alertEvent, callbackFn);
+  }
+  emit(alertEvent: AppAlertEvents, ...args: any[]) {
+    this.$emit(alertEvent, ...args);
+  }
   onShowAlert(callbackFn: (alert: AppAlert) => void) {
     this.$on(AppAlertEvents.showAlert, callbackFn);
   }

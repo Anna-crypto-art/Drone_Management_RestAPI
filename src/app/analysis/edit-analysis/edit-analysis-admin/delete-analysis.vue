@@ -13,10 +13,10 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
 import { UPLOAD_ANALYSIS_STORAGE_KEY } from "@/app/shared/components/fetch-component/storage-keys";
+import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
 
 @Component({
   name: "app-delete-analysis",
@@ -41,7 +41,7 @@ export default class AppDeleteAnalysis extends BaseAuthComponent {
         this.$router.push({ name: "Analyses" });
       }
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      AppContentEventService.showError(this.analysis.id, e as ApiException);
     }
   }
 }

@@ -305,7 +305,11 @@ export class VolateqAPI extends HttpClientBase {
     return this.postForm(`/auth/fieldgeometry/${customerId}/${plantId}?clear_before=${clearBefore}`, { file });
   }
 
-  public waitForTask(taskId: string, finished: (task: TaskSchema) => void, info?: (infoMessage: string) => void): void {
+  public waitForTask(
+    taskId: string, 
+    finished: (task: TaskSchema) => void,
+    info?: (infoMessage: string, task: TaskSchema) => void
+  ): void {
     const interval = setInterval(async () => {
       const task = await this.getTask(taskId);
       if (task.state === "SUCCESS" || task.state === "FAILURE") {
@@ -319,9 +323,9 @@ export class VolateqAPI extends HttpClientBase {
               task.info.infos.join("<br>>") +
               ((task.info.max_steps && `... (${task.info.current_step}/${task.info.max_steps})`) || "...");
 
-            info(infoMessage);
+            info(infoMessage, task);
           } else {
-            info("Wait for start...");
+            info("Wait for start...", task);
           }
         }
       }
