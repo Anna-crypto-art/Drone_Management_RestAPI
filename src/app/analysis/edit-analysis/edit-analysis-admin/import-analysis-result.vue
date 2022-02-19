@@ -42,6 +42,7 @@ import { AnalysisEventService } from "../../shared/analysis-event-service";
 import { AnalysisEvent } from "../../shared/types";
 import { TaskSchema } from "@/app/shared/services/volateq-api/api-schemas/task-schema";
 import { ApiTasks } from "@/app/shared/services/volateq-api/api-tasks";
+import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
 
 @Component({
   name: "app-import-analysis-result",
@@ -107,7 +108,7 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
       }
 
       if (this.jsonFile) {
-        appContentEventBus.showInfoAlert("Uploading...");
+        AppContentEventService.showInfo(this.analysis.id, "Uploading...");
 
         await volateqApi.importAnalysisResult(
           this.jsonFile,
@@ -121,13 +122,13 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
         this.successfullyFinished();
       }
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      AppContentEventService.showError(this.analysis.id, e as ApiException);
       this.loading = false;
     }
   }
 
   private successfullyFinished() {
-    appContentEventBus.showSuccessAlert(this.$t("success-managing-result-files").toString());
+    AppContentEventService.showSuccess(this.analysis.id, this.$t("success-managing-result-files").toString());
     this.loading = false;
 
     AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);

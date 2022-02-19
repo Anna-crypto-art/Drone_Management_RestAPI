@@ -368,6 +368,14 @@ export class VolateqAPI extends HttpClientBase {
     return this.post(`/auth/plant/${plantId}`, updatePlantRequest);
   }
 
+  public validatePlantMetadata(analysisId: string): Promise<TaskSchema> {
+    return this.get(`/auth/analysis/${analysisId}/validate-plant-metadata`);
+  }
+
+  public runQFlyWizard(analysisId: string): Promise<TaskSchema> {
+    return this.get(`/auth/analysis/${analysisId}/run-qfly-wizard`);
+  }
+
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {
     // Temporary special case for IR_INTENSITY: Replaced by GLASS_TUBE_TEMPERATURE
     for (const analysisResult of analysisResults) {

@@ -52,7 +52,7 @@ export default class AppContent extends Vue {
   @Prop() subtitle: string | undefined;
   @Prop({ default: false }) navback: boolean | undefined;
   @Prop({ default: true }) showHeader!: boolean;
-  @Prop({ default: null }) eventId: string | null = null;
+  @Prop({ default: null }) eventId!: string | null;
 
   alert: AppAlert = { msg: "", variant: "info" };
   alertId: AppAlert = { msg: "", variant: "info" };

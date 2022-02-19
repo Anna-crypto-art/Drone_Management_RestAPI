@@ -233,6 +233,11 @@
   "edit-plant": "Edit plant",
   "plant-updated-successfully": "Plant updated successfully",
   "in-setup-phase": "In setup phase",
+  "uploaded-data-complete-success": "Success! Uploaded data is complete!",
+  "evaluation-finished-success": "Evaluation successfully finished",
+  "run-qfly-server": "Run QFly server",
+  "validate-file-completeness": "Validate file completeness",
+  "run-qfly-wizard": "Run QFly wizard",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",

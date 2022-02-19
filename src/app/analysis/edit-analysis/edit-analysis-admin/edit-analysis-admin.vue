@@ -12,7 +12,9 @@
       <b-col sm>
         <app-delete-analysis :analysis="analysis" />
       </b-col>
-      <b-col sm></b-col>
+      <b-col sm>
+        <app-run-q-fly-for-analysis :analysis="analysis" />
+      </b-col>
     </b-row>
   </div>
 </template>
@@ -23,6 +25,7 @@ import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/an
 import AppUpdateAnalysisState from "@/app/analysis/edit-analysis/edit-analysis-admin/update-analysis-state.vue";
 import AppImportAnalysisResult from "@/app/analysis/edit-analysis/edit-analysis-admin/import-analysis-result.vue";
 import AppDeleteAnalysis from "@/app/analysis/edit-analysis/edit-analysis-admin/delete-analysis.vue";
+import AppRunQFlyForAnalysis from "@/app/analysis/edit-analysis/edit-analysis-admin/run-qfly-for-analysis.vue";
 
 @Component({
   name: "app-edit-analysis-result-admin",
@@ -30,6 +33,7 @@ import AppDeleteAnalysis from "@/app/analysis/edit-analysis/edit-analysis-admin/
     AppUpdateAnalysisState,
     AppImportAnalysisResult,
     AppDeleteAnalysis,
+    AppRunQFlyForAnalysis,
   },
 })
 export default class AppEditAnalysisAdmin extends BaseAuthComponent {
