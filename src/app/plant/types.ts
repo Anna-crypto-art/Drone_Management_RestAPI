@@ -4,4 +4,5 @@ export interface PlantItem {
   name: string;
   digitized: boolean;
   analysesCount: number;
+  established: boolean,
 }

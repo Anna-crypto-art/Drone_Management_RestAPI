@@ -1,6 +1,11 @@
 <template>
   <div class="admin-box">
-    <h4>{{ $t("update-analysis-state") }}</h4>
+    <h4>
+      {{ $t("update-analysis-state") }}
+      <br>
+      <small v-if="!analysis.plant.in_setup_phase" class="grayed" v-html="$t('attention-state-update-starts-evaulation_expl')">
+      </small>
+    </h4>
     <b-form @submit.prevent="onSubmitUpdateState">
       <b-form-group>
         <b-form-checkbox v-model="sendNotification">

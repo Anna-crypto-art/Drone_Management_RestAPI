@@ -368,12 +368,12 @@ export class VolateqAPI extends HttpClientBase {
     return this.post(`/auth/plant/${plantId}`, updatePlantRequest);
   }
 
-  public validatePlantMetadata(analysisId: string): Promise<TaskSchema> {
-    return this.get(`/auth/analysis/${analysisId}/validate-plant-metadata`);
+  public validatePlantMetadata(analysisId: string, startServer = true): Promise<TaskSchema> {
+    return this.get(`/auth/analysis/${analysisId}/validate-plant-metadata`, { start_server: startServer });
   }
 
-  public runQFlyWizard(analysisId: string): Promise<TaskSchema> {
-    return this.get(`/auth/analysis/${analysisId}/run-qfly-wizard`);
+  public runQFlyWizard(analysisId: string, startServer = true): Promise<TaskSchema> {
+    return this.get(`/auth/analysis/${analysisId}/run-qfly-wizard`, { start_server: startServer });
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {

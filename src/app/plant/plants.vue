@@ -22,6 +22,9 @@
         <template #cell(digitized)="row">
           <b-icon :class="row.item.digitized ? 'green' : 'red'" :icon="row.item.digitized ? 'check2' : 'x'"></b-icon>
         </template>
+        <template #cell(established)="row">
+          <b-icon :class="row.item.established ? 'green' : 'red'" :icon="row.item.established ? 'check2' : 'x'"></b-icon>
+        </template>
         <template #cell(actions)="row">
           <div class="hover-cell pull-right">
             <b-button
@@ -100,6 +103,7 @@ export default class AppPlants extends BaseAuthComponent {
     this.columns = [
       { key: "name", label: this.$t("name").toString() },
       { key: "digitized", label: this.$t("digitized").toString() },
+      { key: "established", label: this.$t("established").toString() },
       { key: "analysesCount", label: this.$t("number-of-analyses").toString() },
     ];
 
@@ -132,6 +136,7 @@ export default class AppPlants extends BaseAuthComponent {
           name: plant.name,
           digitized: !!plant.fieldgeometry,
           analysesCount: (await volateqApi.getAnalysisResults(plant.id)).length,
+          established: !plant.in_setup_phase,
         });
       }
     } catch (e) {

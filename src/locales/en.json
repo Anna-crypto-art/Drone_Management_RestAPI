@@ -238,6 +238,12 @@
   "run-qfly-server": "Run QFly server",
   "validate-file-completeness": "Validate file completeness",
   "run-qfly-wizard": "Run QFly wizard",
+  "attention-state-update-starts-evaulation_expl": "The plant of this analysis is not in setup phase anymore. If you change the state to <b>DATA_COMPLETE</b> or <b>DATA_COMPLETE_VERIFIED</b>, the according QFly server will start and run!",
+  "data-complete-sure-quest": "This will start the data evaluation. Are you sure that the uploaded data is complete?",
+  "established": "Established",
+  "enabled-if-data-complete-only": "Enabled only if state of analysis is DATA_COMPLETE",
+  "enabled-if-data-complete-verfified-only": "Enabled only if state of analysis is DATA_COMPLETE_VERIFIED",
+  "start-qlfy-server": "Start QFly server",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",

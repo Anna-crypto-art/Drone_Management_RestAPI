@@ -1,11 +1,16 @@
 <template>
   <div class="admin-box">
     <h4>{{ $t("run-qfly-server") }}</h4>
+    <b-form-checkbox v-model="startServer">
+      {{ $t("start-qlfy-server") }}
+    </b-form-checkbox>
+    <br>
     <app-button 
       type="button"
       :loading="loadingValidateFiles"
       :disabled="validateFilesDisabled"
       @click="onValidateFilesClick"
+      :title="$t('enabled-if-data-complete-only')"
     >
       {{ $t("validate-file-completeness") }}
     </app-button>
@@ -16,6 +21,7 @@
       :loading="loadingRunQFlyWizard"
       :disabled="runQFlyWizardDisabled"
       @click="onRunQFlyWizardClick"
+      :title="$t('enabled-if-data-complete-verfified-only')"
     >
       {{ $t("run-qfly-wizard") }}
     </app-button>
@@ -44,6 +50,8 @@ import { ApiTasks } from "@/app/shared/services/volateq-api/api-tasks";
 })
 export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
   @Prop({ required: true }) analysis!: AnalysisSchema;
+
+  startServer = true;
 
   loadingValidateFiles = false;
   loadingRunQFlyWizard = false;
@@ -86,7 +94,7 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
       if (confirm("Are you sure?")) {
         this.loadingValidateFiles = true;
 
-        await volateqApi.validatePlantMetadata(this.analysis.id);
+        await volateqApi.validatePlantMetadata(this.analysis.id, this.startServer);
 
         AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
       }
@@ -100,7 +108,7 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
       if (confirm("Are you sure?")) {
         this.loadingRunQFlyWizard = true;
 
-        await volateqApi.runQFlyWizard(this.analysis.id);
+        await volateqApi.runQFlyWizard(this.analysis.id, this.startServer);
 
         AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
       }

@@ -311,6 +311,13 @@ export default class AppAnalysisUpload
 
   async onChangeDataComplete() {
     try {
+      if (!this.analysis!.plant.in_setup_phase && this.dataComplete) {
+        if (!confirm(this.$t("data-complete-sure-quest").toString())) {
+          this.dataComplete = false;
+          return;
+        }
+      }
+
       await volateqApi.updateAnalysis(this.analysis!.id, { data_complete: this.dataComplete });
 
       AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS);
