@@ -118,7 +118,7 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
     } catch (e) {
       AppContentEventService.showError(this.analysis.id, e as ApiException);
     } finally {
-      this.downloadButtonLoading = true;
+      this.downloadButtonLoading = false;
     }
   }
 
