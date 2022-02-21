@@ -50,6 +50,14 @@
       :modalLoading="plantModalLoading"
       @submit="saveManagePlant"
     >
+      <b-form-group v-if="managePlantModel.plant" v-show="managePlantModel.plant.fieldgeometry">
+        <a
+          href="#"
+          @click="onFileClick(managePlantModel.plant.fieldgeometry)"
+        >
+          {{ managePlantModel.plant.fieldgeometry && managePlantModel.plant.fieldgeometry.file_name }}
+        </a>
+      </b-form-group>
       <b-form-group>
         <b-form-checkbox id="clear-before-checkbox" v-model="managePlantModel.clearBefore">
           {{ $t("clear-before") }}
@@ -76,6 +84,8 @@ import { IAppModalForm } from "../shared/components/app-modal/types";
 import appContentEventBus from "../shared/components/app-content/app-content-event-bus";
 import { PlantItem } from "./types";
 import { ApiException } from "../shared/services/volateq-api/api-errors";
+import { FieldgeometrySchema } from "../shared/services/volateq-api/api-schemas/fieldgeometry-schema";
+import { AppDownloader } from "../shared/services/app-downloader/app-downloader";
 
 @Component({
   name: "app-analysis",
@@ -137,6 +147,7 @@ export default class AppPlants extends BaseAuthComponent {
           digitized: !!plant.fieldgeometry,
           analysesCount: (await volateqApi.getAnalysisResults(plant.id)).length,
           established: !plant.in_setup_phase,
+          fieldgeometry: plant.fieldgeometry,
         });
       }
     } catch (e) {
@@ -184,6 +195,17 @@ export default class AppPlants extends BaseAuthComponent {
     this.managePlantModel.file = null;
 
     this.managePlantModal.show();
+  }
+
+  async onFileClick(fieldgeometry: FieldgeometrySchema) {
+    try {
+      const downloadUrl = await volateqApi.getFieldgeometryFileUrl(fieldgeometry.id);
+
+      AppDownloader.download(downloadUrl.url, fieldgeometry.file_name);
+    } catch (e) {
+      appContentEventBus.showError(e as ApiException);
+    }
+    
   }
 }
 </script>

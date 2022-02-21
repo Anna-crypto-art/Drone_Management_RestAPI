@@ -349,7 +349,11 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public getAnalysisResultFileUrl(analysisResultFileId: string): Promise<{ url: string }> {
-    return this.get(`/auth/analysis-result/result-file/${analysisResultFileId}`)
+    return this.get(`/auth/analysis-result/result-file/${analysisResultFileId}`);
+  }
+
+  public getFieldgeometryFileUrl(fieldgeometryId: string): Promise<{ url: string }> {
+    return this.get(`/auth/fieldgeometry/${fieldgeometryId}/file-url`);
   }
 
   public downloadMultipleAnalysisFilesUrl(analysisId: string, filenames: string[]) {

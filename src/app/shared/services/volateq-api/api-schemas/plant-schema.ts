@@ -1,4 +1,4 @@
-import { Fieldgeometry } from "./fieldgeometry";
+import { FieldgeometrySchema } from "./fieldgeometry-schema";
 
 export interface PlantSchema {
   id: string;
@@ -6,5 +6,5 @@ export interface PlantSchema {
   in_setup_phase: boolean;
   customer_id: string;
   technology_id: number;
-  fieldgeometry?: Fieldgeometry;
+  fieldgeometry?: FieldgeometrySchema;
 }

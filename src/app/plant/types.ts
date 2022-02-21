@@ -1,3 +1,5 @@
+import { FieldgeometrySchema } from "../shared/services/volateq-api/api-schemas/fieldgeometry-schema";
+
 export interface PlantItem {
   id: string;
   customerId: string;
@@ -5,4 +7,5 @@ export interface PlantItem {
   digitized: boolean;
   analysesCount: number;
   established: boolean,
+  fieldgeometry?: FieldgeometrySchema;
 }

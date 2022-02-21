@@ -246,6 +246,7 @@
   "start-qlfy-server": "Start QFly server",
   "average-tracking-offset": "Average tracking offset",
   "average-tracking-offset_expl": "PI tracking deviation: Average deviation of entire SCA (average Deviation of all SCEs of an SCA) to encoder / inclinometer",
+  "position-in-loop": "Position in loop",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",
