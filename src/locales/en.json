@@ -244,6 +244,8 @@
   "enabled-if-data-complete-only": "Enabled only if state of analysis is DATA_COMPLETE",
   "enabled-if-data-complete-verfified-only": "Enabled only if state of analysis is DATA_COMPLETE_VERIFIED",
   "start-qlfy-server": "Start QFly server",
+  "average-tracking-offset": "Average tracking offset",
+  "average-tracking-offset_expl": "PI tracking deviation: Average deviation of entire SCA (average Deviation of all SCEs of an SCA) to encoder / inclinometer",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",

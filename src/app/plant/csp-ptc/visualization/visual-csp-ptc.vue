@@ -80,6 +80,18 @@
       <template #scaOrientOffsetClass1>
         {{ getTransAlignmentOffsetClassLimit("sca", 1) }}
       </template>
+      <template #scaAvgOrientation>
+        {{ $t("average-tracking-offset") }} <app-explanation><span v-html="$t('average-tracking-offset_expl')"></span></app-explanation>
+      </template>
+      <template #scaAvgOrientOffsetClass3>
+        {{ getTransAlignmentOffsetClassLimit("sca", 3) }}
+      </template>
+      <template #scaAvgOrientOffsetClass2>
+        {{ getTransAlignmentOffsetClassLimit("sca", 2) }}
+      </template>
+      <template #scaAvgOrientOffsetClass1>
+        {{ getTransAlignmentOffsetClassLimit("sca", 1) }}
+      </template>
       <template #scaFriction>
         {{ $t("torsion-caused-friction-mean") }}
         <app-explanation><span v-html="$t('torsion-caused-friction-mean_expl')"></span></app-explanation>
