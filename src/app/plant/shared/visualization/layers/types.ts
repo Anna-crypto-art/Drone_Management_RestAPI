@@ -76,7 +76,7 @@ export enum KeyFigureColors {
   halfRed = "#ff8080",
   blue = "#0000ff",
   halfBlue = "#8080ff",
-  grey = "grey",
+  grey = "#666666",
   black = "#000000",
   orange = "#ef7700",
 }
