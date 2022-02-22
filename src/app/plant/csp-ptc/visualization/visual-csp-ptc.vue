@@ -39,6 +39,10 @@
           ) || ""
         }}
       </template>
+      <template #glassTubeTemperatureNotMeasured>
+        {{ $t("not-measured") }}
+        <app-explanation><span v-html="$t('not-measured-glass-tube-temp')"></span></app-explanation>
+      </template>
       <template #recommendedAction>
         {{ $t("recommended-action") }}
         <app-explanation><span v-html="$t('recommended-action_expl')"></span></app-explanation>

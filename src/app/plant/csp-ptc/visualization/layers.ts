@@ -68,7 +68,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
         query: { glass_tube_temperature_class: 1 },
       },
       {
-        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
+        keyFigureInfo: { templateName: "glassTubeTemperatureNotMeasured", displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
         color: KeyFigureColors.grey,
       },
