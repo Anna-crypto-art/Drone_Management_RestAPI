@@ -1,5 +1,5 @@
 export interface GeoVisualQuery {
-  undefined?: 1;
+  undefined?: 1 | 0;
   ir_intensity_class?: 1 | 2 | 3;
   glass_tube_temperature_class?: 1 | 2 | 3 | 4;
   missing_glass_tube?: 0 | 1;

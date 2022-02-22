@@ -79,6 +79,14 @@ export class PILayersHierarchy {
     }
   }
 
+  public toggleShowUndefined(showUndefined: boolean): void {
+    for (const childLayer of this.getAllChildLayers()) {
+      if (childLayer.query?.undefined !== undefined) {
+        childLayer.query.undefined = showUndefined && 1 || 0;
+      }
+    }
+  }
+
   private createGroupedKPILayers() {
     const parentComponentLayers: Record<number, GroupKPILayer> = {};
 

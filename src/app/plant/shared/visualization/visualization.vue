@@ -8,9 +8,26 @@
       @sidebarToggle="onSidebarToggled"
     >
       <template #topContent>
-        <b-form-checkbox v-model="enableMultiSelection" switch @change="onMultiSelectionChanged">
-          {{ $t("multi-selection") }} <app-explanation>{{ $t("multi-selection-overlapping_expl") }}</app-explanation>
-        </b-form-checkbox>
+        <b-button 
+          size="sm"
+          v-b-toggle.display-settings-collapse
+          :variant="displaySettingsCollapsed ? 'primary' : 'secondary'"
+        >
+          <b-icon icon="gear-fill" class="pad-right" /> {{ $t("display-settings") }}
+        </b-button>
+        <b-collapse v-model="displaySettingsCollapsed" id="display-settings-collapse">
+          <b-card class="mar-top">
+            <b-form-checkbox v-model="enableMultiSelection" switch @change="onMultiSelectionChanged">
+              {{ $t("multi-selection") }} <app-explanation>{{ $t("multi-selection-overlapping_expl") }}</app-explanation>
+            </b-form-checkbox>
+            <b-form-checkbox v-model="showCouldNotBeMeasured" switch @change="onShowCouldNotBeMeasuredChanged">
+              {{ $t("show-could-not-be-measured") }}
+            </b-form-checkbox>
+            <b-form-checkbox v-model="satelliteView" switch @change="onSatelliteViewChanged">
+              {{ $t("satellite-view") }}
+            </b-form-checkbox>
+          </b-card>
+        </b-collapse>
       </template>
 
       <!-- Pass slots through -->
@@ -66,6 +83,11 @@ import { PILayersHierarchy } from "@/app/plant/shared/visualization/pi-layers-hi
 import AppGeovisualization from "@/app/shared/components/app-geovisualization/app-geovisualization.vue";
 import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualization/types/components";
 import { GroupLayer, LayerType } from "@/app/shared/components/app-geovisualization/types/layers";
+import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
+
+const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
+const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
+const STORAGE_KEY_SATELLITEVIEW = "storage-key-satelliteview";
 
 @Component({
   name: "app-visualization",
@@ -94,11 +116,20 @@ export default class AppVisualization
   legends: Legend[] = [];
   piToastInfo: FeatureInfos = { title: "", records: [{ name: "", descr: "", value: "" }] };
   enableMultiSelection = false;
+  displaySettingsCollapsed = false;
+  showCouldNotBeMeasured = true;
+  satelliteView = false;
 
   private waitForDom = false;
 
   async created() {
+    this.enableMultiSelection = appLocalStorage.getItem(STORAGE_KEY_MULTISELECTION) || false;
+    this.showCouldNotBeMeasured = !!appLocalStorage.getItem(STORAGE_KEY_SHOWUNDEFINED);
+    this.satelliteView = appLocalStorage.getItem(STORAGE_KEY_SATELLITEVIEW) || false;
+
     this.createLayers();
+
+    this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
 
     // wait for DOM before render OpenLayers
     setTimeout(() => {
@@ -188,9 +219,21 @@ export default class AppVisualization
   }
 
   onMultiSelectionChanged() {
+    appLocalStorage.setItem(STORAGE_KEY_MULTISELECTION, this.enableMultiSelection);
+
     this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
     // Group Layer "performance-indicators"
     (this.layers[0] as GroupLayer).singleSelection = !this.enableMultiSelection;
+  }
+
+  onShowCouldNotBeMeasuredChanged() {
+    appLocalStorage.setItem(STORAGE_KEY_SHOWUNDEFINED, this.showCouldNotBeMeasured);
+    
+    this.$router.go(0); // reload page
+  }
+
+  onSatelliteViewChanged() {
+    // do something
   }
 
   private createLayers(): void {
