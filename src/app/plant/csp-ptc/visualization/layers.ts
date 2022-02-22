@@ -257,5 +257,6 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     keyFigureId: AnalysisResultKeyFigure.MISSING_MIRROR_ID,
     layerType: MissingMirrorKeyFigureLayer,
     keyFigureInfo: { keyName: "missing-mirror" },
+    query: { undefined: 1 },
   },
 ];

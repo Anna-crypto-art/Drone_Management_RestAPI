@@ -83,6 +83,7 @@ export class PILayersHierarchy {
     for (const childLayer of this.getAllChildLayers()) {
       if (childLayer.query?.undefined !== undefined) {
         childLayer.query.undefined = showUndefined && 1 || 0;
+        childLayer.reloadLayer();
       }
     }
   }

@@ -82,7 +82,7 @@ import { IPlantVisualization, Legend, FeatureInfos, KeyFigureTypeMap } from "@/a
 import { PILayersHierarchy } from "@/app/plant/shared/visualization/pi-layers-hierarchy";
 import AppGeovisualization from "@/app/shared/components/app-geovisualization/app-geovisualization.vue";
 import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualization/types/components";
-import { GroupLayer, LayerType } from "@/app/shared/components/app-geovisualization/types/layers";
+import { GroupLayer, LayerType, OSMLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
@@ -115,10 +115,13 @@ export default class AppVisualization
   showPCS = false;
   legends: Legend[] = [];
   piToastInfo: FeatureInfos = { title: "", records: [{ name: "", descr: "", value: "" }] };
+  
   enableMultiSelection = false;
   displaySettingsCollapsed = false;
   showCouldNotBeMeasured = true;
   satelliteView = false;
+  
+  private worldMapLayer!: OSMLayer;
 
   private waitForDom = false;
 
@@ -229,16 +232,26 @@ export default class AppVisualization
   onShowCouldNotBeMeasuredChanged() {
     appLocalStorage.setItem(STORAGE_KEY_SHOWUNDEFINED, this.showCouldNotBeMeasured);
     
-    this.$router.go(0); // reload page
+    this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
   }
 
   onSatelliteViewChanged() {
-    // do something
+    appLocalStorage.setItem(STORAGE_KEY_SATELLITEVIEW, this.satelliteView);
+
+    this.worldMapLayer.satellite = this.satelliteView;
+    this.worldMapLayer.reloadLayer = true;
   }
 
   private createLayers(): void {
     this.componentLayers = this.componentLayerTypes.map(componentType => new (componentType as any)(this));
     this.piLayersHierarchy = new PILayersHierarchy(this, this.analysisResults, this.keyFigureLayers);
+
+    this.worldMapLayer = {
+      name: this.$t("world-map").toString(),
+      type: "osm",
+      selected: true,
+      satellite: this.satelliteView,
+    }
 
     this.layers.push(
       {
@@ -267,11 +280,7 @@ export default class AppVisualization
         selected: false,
         styleClass: "margin-top",
       },
-      {
-        name: this.$t("world-map").toString(),
-        type: "osm",
-        selected: true,
-      }
+      this.worldMapLayer,
     );
 
     console.log(this.layers);
