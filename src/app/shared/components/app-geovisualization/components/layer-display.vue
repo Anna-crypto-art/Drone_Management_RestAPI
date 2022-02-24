@@ -88,7 +88,7 @@ export default class AppGeovisualLayerDisplay extends Vue {
 .layer-display {
   .layer-display {
     padding-left: 20px;
-    
+
     &-subroot {
       padding-left: 0;
     }
