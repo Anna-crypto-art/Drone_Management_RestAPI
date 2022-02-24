@@ -1,5 +1,13 @@
 <template>
-  <div v-show="visible" :class="'layer-display ' + (layer.isGroup ? 'layer-display-group ' : '') + layer.styleClass">
+  <div
+    v-show="visible"
+    :class="
+      'layer-display' +
+      (layer.isGroup ? ' layer-display-group' : '') +
+      (level === 'subroot' ? ' layer-display-subroot ' : '') +
+      layer.styleClass
+    "
+  >
     <b-form-checkbox v-if="!layer.isGroup" :checked="layer.selected" @change="onChange">
       <slot :name="layer.name">{{ layer.name }}</slot>
     </b-form-checkbox>
@@ -9,6 +17,7 @@
     <div v-if="layer.hasChildrens" class="layer-sublayers">
       <app-geovisual-layer-display
         v-for="(childLayer, layerIndex) in layer.getChildLayers()"
+        :level="level === 'root' ? 'subroot' : 'other'"
         :layer="childLayer"
         :key="layerIndex"
       >
@@ -33,6 +42,7 @@ import { LayerStructure } from "../layer-structure";
 })
 export default class AppGeovisualLayerDisplay extends Vue {
   @Prop() layer!: LayerStructure;
+  @Prop({ default: "root" }) level!: "root" | "subroot" | "other";
 
   onChange(e: boolean): void {
     const unselectRec = (layer: LayerStructure) => {
@@ -78,6 +88,10 @@ export default class AppGeovisualLayerDisplay extends Vue {
 .layer-display {
   .layer-display {
     padding-left: 20px;
+    
+    &-subroot {
+      padding-left: 0;
+    }
   }
 
   &-group-level-1 {
