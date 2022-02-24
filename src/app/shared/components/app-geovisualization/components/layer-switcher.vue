@@ -153,14 +153,14 @@ export default class AppGeovisualLayerSwitcher extends Vue {
 <style lang="scss">
 @import "@/scss/_colors.scss";
 
-$sidebar-width: min(400px, 70vw);
+$sidebar-width: min(400px, min(70vw, calc(100vw - 50px)));
 
 .layer-switcher {
   position: absolute;
   right: 0;
   top: 0;
   height: 100%;
-  width: min(400px, calc(100vw - 50px));
+  width: $sidebar-width;
 
   background: white;
   transform: translateX(100%);
@@ -178,8 +178,8 @@ $sidebar-width: min(400px, 70vw);
     padding-right: 0.5em;
     padding-bottom: 2em;
 
-    button {
-      backdrop-filter: blur(2.5px);
+    button:hover {
+      background: $hover-light-blue;
     }
   }
 

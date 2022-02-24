@@ -39,6 +39,10 @@
           ""
         }}
       </template>
+      <template #glassTubeTemperatureNotMeasured>
+        {{ $t("not-measured") }}
+        <app-explanation><span v-html="$t('not-measured-glass-tube-temp')"></span></app-explanation>
+      </template>
       <template #recommendedAction>
         {{ $t("recommended-action") }}
         <app-explanation><span v-html="$t('recommended-action_expl')"></span></app-explanation>
@@ -78,6 +82,18 @@
         {{ getTransAlignmentOffsetClassLimit("sca", 2) }}
       </template>
       <template #scaOrientOffsetClass1>
+        {{ getTransAlignmentOffsetClassLimit("sca", 1) }}
+      </template>
+      <template #scaAvgOrientation>
+        {{ $t("average-tracking-offset") }} <app-explanation><span v-html="$t('average-tracking-offset_expl')"></span></app-explanation>
+      </template>
+      <template #scaAvgOrientOffsetClass3>
+        {{ getTransAlignmentOffsetClassLimit("sca", 3) }}
+      </template>
+      <template #scaAvgOrientOffsetClass2>
+        {{ getTransAlignmentOffsetClassLimit("sca", 2) }}
+      </template>
+      <template #scaAvgOrientOffsetClass1>
         {{ getTransAlignmentOffsetClassLimit("sca", 1) }}
       </template>
       <template #scaFriction>

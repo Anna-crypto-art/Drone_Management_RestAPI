@@ -22,6 +22,10 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     transName: "time",
   },
   {
+    getValue: r => r.position_in_loop,
+    transName: "position-in-loop",
+  },
+  {
     getValue: r => r.sca_tracking_angle,
     transName: "sca-tracking-angle",
   },

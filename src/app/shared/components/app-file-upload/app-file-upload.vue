@@ -18,6 +18,7 @@
           v-for="file in files"
           :key="file.uniqueIdentifier"
           ref="uploadFiles"
+          :uploadService="uploadService"
           :uploading="uploading"
           :file="file"
         >
@@ -32,7 +33,7 @@ import Vue from "vue";
 import { Component, Prop, Ref } from "vue-property-decorator";
 import AppFileUploadFile from "@/app/shared/components/app-file-upload/app-file-upload-file.vue";
 import { IAppFileUpload, IAppFileUploadFile } from "@/app/shared/components/app-file-upload/types";
-import uploadService, { UploadService } from "@/app/shared/services/upload-service/upload-service";
+import { UploadService } from "@/app/shared/services/upload-service/upload-service";
 import { IResumableFile, IUploadListener, UploadEvent, UploadState } from "../../services/upload-service/types";
 
 @Component({
@@ -43,6 +44,8 @@ import { IResumableFile, IUploadListener, UploadEvent, UploadState } from "../..
 })
 export default class AppFileUpload extends Vue implements IAppFileUpload, IUploadListener {
   @Ref() uploadFiles!: IAppFileUploadFile[];
+
+  @Prop({ required: true }) uploadService!: UploadService;
   @Prop() title: string | undefined;
 
   keyResumFiles = 0; // changing the value forces vue to rerender the element with :key="keyResumFiles"
@@ -54,43 +57,43 @@ export default class AppFileUpload extends Vue implements IAppFileUpload, IUploa
   }
 
   checkUploadState() {
-    if (uploadService.hasState(UploadState.UPLOADING)) {
+    if (this.uploadService.hasState(UploadState.UPLOADING)) {
       this.uploading = true;
-      this.keyResumFiles = (uploadService as UploadService).files.length;
+      this.keyResumFiles = this.uploadService.files.length;
     } else {
-      (uploadService as UploadService).init("file-upload-dropzone-id", "file-upload-browsebutton-id");
+      this.uploadService.init("file-upload-dropzone-id", "file-upload-browsebutton-id");
     }
   }
 
   registerUploadEvents() {
-    uploadService.on(UploadEvent.FILE_SUCCESS, (file: IResumableFile) => {
+    this.uploadService.on(UploadEvent.FILE_SUCCESS, (file: IResumableFile) => {
       const uploadFile = this.getFileUploadFile(file);
       if (uploadFile) {
         uploadFile.emitSuccess();
       }
     });
-    uploadService.on(UploadEvent.FILE_ERROR, (file: IResumableFile, msg: string) => {
+    this.uploadService.on(UploadEvent.FILE_ERROR, (file: IResumableFile, msg: string) => {
       const uploadFile = this.getFileUploadFile(file);
       if (uploadFile) {
         uploadFile.emitError(msg);
       }
     });
-    uploadService.on(UploadEvent.FILE_PROGRESS, (file: IResumableFile) => {
+    this.uploadService.on(UploadEvent.FILE_PROGRESS, (file: IResumableFile) => {
       const uploadFile = this.getFileUploadFile(file);
       if (uploadFile) {
         uploadFile.emitProgress();
       }
     });
-    uploadService.on(UploadEvent.FILE_RETRY, (file: IResumableFile, retries: number) => {
+    this.uploadService.on(UploadEvent.FILE_RETRY, (file: IResumableFile, retries: number) => {
       const uploadFile = this.getFileUploadFile(file);
       if (uploadFile) {
         uploadFile.emitRetry();
       }
     });
-    uploadService.on(UploadEvent.FILE_ADDED, (file: IResumableFile) => {
+    this.uploadService.on(UploadEvent.FILE_ADDED, (file: IResumableFile) => {
       this.keyResumFiles += 1;
     });
-    uploadService.on(UploadEvent.FILE_REMOVED, (file: IResumableFile) => {
+    this.uploadService.on(UploadEvent.FILE_REMOVED, (file: IResumableFile) => {
       this.keyResumFiles -= 1;
     });
   }
@@ -99,15 +102,15 @@ export default class AppFileUpload extends Vue implements IAppFileUpload, IUploa
     this.uploading = true;
     this.keyResumFiles += 100;
 
-    (uploadService as UploadService).upload<T>(target, metadata);
+    this.uploadService.upload<T>(target, metadata);
   }
 
   get files(): IResumableFile[] {
-    return (uploadService as UploadService).files;
+    return this.uploadService.files;
   }
 
   cancel(): void {
-    (uploadService as UploadService).cancel();
+    this.uploadService.cancel();
 
     this.uploading = false;
     this.keyResumFiles -= 100;

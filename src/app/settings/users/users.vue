@@ -56,6 +56,7 @@
       :title="$t('invite-new-user')"
       :subtitle="$t('invite-new-user_descr')"
       :ok-title="$t('invite')"
+      :modalLoading="inviteLoading"
       @submit="inviteUser"
     >
       <b-form-group :label="$t('email')" label-for="email">
@@ -104,7 +105,6 @@ import appContentEventBus from "@/app/shared/components/app-content/app-content-
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import { InviteUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
-import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
 import { BvTableFieldArray } from "bootstrap-vue";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 
@@ -120,6 +120,7 @@ export default class AppSettingsUsers extends Vue {
   rows: Array<any> = [];
 
   @Ref() appInviteModal!: IAppModalForm;
+  inviteLoading = false;
   customers: any[] = [];
   roles = [
     { value: ApiRoles.SUPER_ADMIN, text: ApiRoles.SUPER_ADMIN },
@@ -198,7 +199,7 @@ export default class AppSettingsUsers extends Vue {
     const errMsg = this.getErrorInviteUserForm();
     if (errMsg) {
       this.appInviteModal.alertError(errMsg);
-      appButtonEventBus.stopLoading();
+      this.inviteLoading = false;
 
       return;
     }
@@ -206,7 +207,7 @@ export default class AppSettingsUsers extends Vue {
     this.appInviteModal.hideAlert();
 
     try {
-      appButtonEventBus.startLoading();
+      this.inviteLoading = true;
       await volateqApi.inviteUser(this.newUser);
 
       this.appInviteModal.hide();
@@ -216,7 +217,7 @@ export default class AppSettingsUsers extends Vue {
     } catch (e) {
       this.appInviteModal.alertError((e as ApiException).error);
     } finally {
-      appButtonEventBus.stopLoading();
+      this.inviteLoading = false;
     }
   }
 

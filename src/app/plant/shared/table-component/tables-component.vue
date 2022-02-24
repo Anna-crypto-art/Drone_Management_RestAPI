@@ -3,13 +3,13 @@
     <div class="no-data-placeholder" v-show="!selectedAnalysisResult">
       {{ $t("no-analysis-result-selected") }}
     </div>
-    <div v-show="selectedAnalysisResult">
-      <div class="app-tables-searchbar">
+    <div v-show="selectedAnalysisResult" class="app-table-root-container">
+      <div class="pull-left">
         <app-search-input :placeholder="$t('search-pcs')" @search="onSearch"></app-search-input>
-
-        <app-button ref="csvExportBtn" variant="secondary" :title="$t('export-csv')" @click="onExportCsv">
-          <b-icon icon="download"></b-icon> {{ $t("export-csv") }}:
-          {{ activeTabLabel }}
+      </div>
+      <div class="pull-right">
+        <app-button variant="secondary" :title="$t('export-csv')" :loading="csvExportLoading" @click="onExportCsv">
+          <b-icon icon="download"></b-icon> {{ $t("export-csv") }}: {{ activeTabLabel }}
         </app-button>
       </div>
 
@@ -41,7 +41,6 @@
 <script lang="ts">
 import AppTableComponent from "@/app/plant/shared/table-component/table-component.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
-import { IAppButton } from "@/app/shared/components/app-button/types";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppSearchInput from "@/app/shared/components/app-search-input/app-search-input.vue";
@@ -53,7 +52,7 @@ import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { Component, Prop, Ref } from "vue-property-decorator";
+import { Component, Prop } from "vue-property-decorator";
 import { IActiveComponent, IActiveTabComponent, IAnalysisResultSelection } from "../types";
 import { ITableComponent } from "./types";
 
@@ -71,8 +70,8 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
   @Prop() activeComponents!: IActiveComponent[];
-  @Ref() csvExportBtn!: IAppButton;
 
+  csvExportLoading = false;
   tabIndex = 0;
   activeTabLabel = "";
   readonly activeTabComponents: IActiveTabComponent[] = [];
@@ -126,7 +125,7 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
     const activeComponent = this.getSelectedActiveComponent();
     if (activeComponent) {
       try {
-        this.csvExportBtn.startLoading();
+        this.csvExportLoading = true;
 
         const tableComponent = this.getRefTableComponent(activeComponent);
 
@@ -151,7 +150,7 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
       } catch (e) {
         appContentEventBus.showError(e as ApiException);
       } finally {
-        this.csvExportBtn.stopLoading();
+        this.csvExportLoading = false;
       }
     }
   }
@@ -173,16 +172,42 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
 .app-tables-component {
   padding: 60px 20px;
 
-  .app-tables-searchbar {
-    display: flex;
-    justify-content: space-between;
-    flex-flow: row wrap;
+  .app-table-root-container {
+    display: grid;
+    grid-template-rows: max-content auto;
     gap: 10px;
 
+    grid-template-areas:
+      "pull-left pull-right"
+      "table table";
+
+    .pull-left {
+      grid-area: pull-left;
+    }
+
+    .pull-right {
+      grid-area: pull-right;
+      justify-self: end;
+    }
+
+    .app-table-container {
+      grid-area: table;
+    }
+
     @media (max-width: 576px) {
-      > * {
-        flex: 1 0 100%;
-        max-width: 100%;
+      grid-template-areas:
+        "pull-left"
+        "pull-right"
+        "table";
+
+      .pull-left,
+      .pull-right {
+        justify-self: stretch;
+
+        > :first-child:last-child {
+          width: 100%;
+          max-width: 100%;
+        }
       }
     }
   }

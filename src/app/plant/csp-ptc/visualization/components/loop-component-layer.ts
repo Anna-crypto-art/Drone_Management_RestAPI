@@ -11,11 +11,22 @@ export class LoopComponentLayer extends ComponentLayer {
   protected zIndex = 2;
 
   public getStyle(feature: FeatureLike): Style {
+    const props = feature.getProperties();
+    
+    let width = 1;
+    let color = "#888888";
+
+    if ("value" in props) {
+      width = 2;
+      if (props["value"] === "inlet") {
+        color = "#0000FF";
+      } else if (props["value"] === "outlet") {
+        color = "#FF0000";
+      }
+    }
+
     return new Style({
-      stroke: new Stroke({
-        color: "#888888",
-        width: 1,
-      }),
+      stroke: new Stroke({ color, width }),
       text: this.showText(feature),
     });
   }

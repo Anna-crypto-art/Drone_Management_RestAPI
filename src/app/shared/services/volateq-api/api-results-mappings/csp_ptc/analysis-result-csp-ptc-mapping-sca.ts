@@ -29,6 +29,12 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: AnalysisResultKeyFigure.SCA_TRACKING_DEVIATION_ID,
   },
   {
+    getValue: r => r.average_tracking_offset,
+    transName: "average-tracking-offset",
+    transDescr: "average-tracking-offset_expl",
+    keyFigureId: AnalysisResultKeyFigure.SCA_TRACKING_DEVIATION_ID,
+  },
+  {
     getValue: r => r.torsion_caused_friction_mean,
     transName: "torsion-caused-friction-mean",
     transDescr: "torsion-caused-friction-mean_expl",

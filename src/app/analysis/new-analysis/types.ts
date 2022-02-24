@@ -7,8 +7,6 @@ export interface CheckListItems {
 }
 
 export interface IAppNewAnalysisFetched {
-  newAnalysis: NewAnalysis;
-  analysis: { id: string } | undefined;
   fileNames: string[];
 }
 

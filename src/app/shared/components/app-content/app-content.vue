@@ -21,6 +21,11 @@
               <div v-html="alert.msg"></div>
             </b-alert>
           </div>
+          <div class="app-content-content-alert">
+            <b-alert v-model="showAlertId" :variant="alertId.variant" dismissible fade>
+              <div v-html="alertId.msg"></div>
+            </b-alert>
+          </div>
           <slot></slot>
         </div>
       </b-container>
@@ -33,7 +38,8 @@ import Vue from "vue";
 import { Prop, Component } from "vue-property-decorator";
 import AppHeader from "@/app/shared/components/app-header/app-header.vue";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
-import { AppAlert } from "@/app/shared/services/app-alert/app-alert";
+import { AppAlert, AppAlertEvents } from "@/app/shared/services/app-alert/app-alert";
+import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
 
 @Component({
   name: "app-content",
@@ -46,11 +52,24 @@ export default class AppContent extends Vue {
   @Prop() subtitle: string | undefined;
   @Prop({ default: false }) navback: boolean | undefined;
   @Prop({ default: true }) showHeader!: boolean;
+  @Prop({ default: null }) eventId!: string | null;
 
   alert: AppAlert = { msg: "", variant: "info" };
+  alertId: AppAlert = { msg: "", variant: "info" };
   showAlert = false;
+  showAlertId = false;
 
-  created(): void {
+  created() {
+    if (this.eventId) {
+      AppContentEventService.on(this.eventId, AppAlertEvents.showAlert, (alert: AppAlert) => {
+        this.alertId = alert;
+        this.showAlertId = true;
+      });
+      AppContentEventService.on(this.eventId, AppAlertEvents.clearAlert, () => {
+        this.showAlertId = false;
+      });
+    }
+
     appContentEventBus.onShowAlert((newAlert: AppAlert) => {
       this.alert = newAlert;
       this.showAlert = true;

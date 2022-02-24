@@ -45,11 +45,11 @@ export default class AppSearchInput extends Vue {
 
 .app-search-input {
   max-width: 300px;
-  margin-right: 10px;
 
   input {
     border-right: none;
   }
+
   .input-group-append {
     margin-left: 0;
     border: 1px solid $blue-60pc;

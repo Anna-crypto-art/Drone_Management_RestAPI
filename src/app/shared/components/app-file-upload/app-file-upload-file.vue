@@ -26,7 +26,7 @@ import { Component, Prop, Ref } from "vue-property-decorator";
 import { IAppFileUploadFile } from "@/app/shared/components/app-file-upload/types";
 import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
 import { IResumableFile } from "@/app/shared/services/upload-service/types";
-import uploadService, { UploadService } from "@/app/shared/services/upload-service/upload-service";
+import { UploadService } from "@/app/shared/services/upload-service/upload-service";
 import { getReadableFileSize } from "@/app/shared/services/helper/file-helper";
 
 @Component({
@@ -35,6 +35,7 @@ import { getReadableFileSize } from "@/app/shared/services/helper/file-helper";
 export default class AppFileUploadFile extends Vue implements IAppFileUploadFile {
   @Prop({ required: true }) file!: IResumableFile;
   @Prop({ required: true }) uploading!: boolean;
+  @Prop({ required: true }) uploadService!: UploadService;
   @Ref() uploadProgressBar: HTMLElement | undefined;
 
   progress = 0;
@@ -63,7 +64,7 @@ export default class AppFileUploadFile extends Vue implements IAppFileUploadFile
   onFileRemove(): void {
     this.file.cancel();
 
-    (uploadService as UploadService).emitFileRemoved(this.file);
+    this.uploadService.emitFileRemoved(this.file);
   }
 
   emitError(msg: string): void {

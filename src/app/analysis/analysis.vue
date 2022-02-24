@@ -2,7 +2,13 @@
   <app-content :title="$t('analysis-overview')" :subtitle="$t('analysis-overview_descr')">
     <div class="app-analysis">
       <router-link :to="{ name: 'AnalysisNew' }">
-        <b-button variant="primary">{{ createNewAnalysisBtnText }}</b-button>
+        <b-button
+          variant="primary"
+          :disabled="!!incompleteAnalysisName"
+          :title="(incompleteAnalysisName && $t('no-new-upload-allowed', { name: incompleteAnalysisName })) || ''"
+        >
+          {{ createNewAnalysisBtnText }}
+        </b-button>
       </router-link>
       <div class="app-analysis-plants-filter pull-right" v-show="plants">
         <b-form-select
@@ -52,7 +58,6 @@
           <template #cell(state)="row">
             <div v-if="row.item.state">
               {{ $t(row.item.state.state.name) }}
-              <span v-if="row.item.state.state.name === 'UPLOADING'"> {{ uploadStateProcess }}</span>
               <br />
               <small class="grayed">{{ trans(getTimeDiff(row.item.state.started_at)) }}</small>
             </div>
@@ -88,17 +93,15 @@ import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import AppModalFormInfoArea from "@/app/shared/components/app-modal/app-modal-form-info-area.vue";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
-import uploadService from "@/app/shared/services/upload-service/upload-service";
 import { BvTableFieldArray } from "bootstrap-vue";
 import { Component } from "vue-property-decorator";
 import appContentEventBus from "../shared/components/app-content/app-content-event-bus";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
-import { IUploadListener, UploadEvent, UploadState } from "../shared/services/upload-service/types";
 import { ApiException } from "../shared/services/volateq-api/api-errors";
 import { AnalysisSchema } from "../shared/services/volateq-api/api-schemas/analysis-schema";
 import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
+import { ApiStates } from "../shared/services/volateq-api/api-states";
 import volateqApi from "../shared/services/volateq-api/volateq-api";
-import { IAnalysisId } from "./new-analysis/types";
 
 @Component({
   name: "app-analysis",
@@ -109,11 +112,11 @@ import { IAnalysisId } from "./new-analysis/types";
     AppModalFormInfoArea,
   },
 })
-export default class AppAnalysis extends BaseAuthComponent implements IUploadListener {
+export default class AppAnalysis extends BaseAuthComponent {
   columns: BvTableFieldArray = [];
   plants: Array<any> | null = null;
   selectedPlantId: string | null = null;
-  analysisRows: Array<any> = [];
+  analysisRows: Array<any> | null = null;
   isLoading = true;
 
   createNewAnalysisBtnText = "";
@@ -125,7 +128,14 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     this.columns = [
       { key: "name", label: this.$t("name").toString(), sortable: true },
       { key: "plant", label: this.$t("plant").toString(), sortable: true },
-      { key: "date", label: this.$t("created-at").toString(), sortable: true },
+      {
+        key: "date",
+        label: this.$t("acquisition-date").toString(),
+        sortable: true,
+        formatter: (flownAt: string) => {
+          return new Date(Date.parse(flownAt)).toLocaleDateString();
+        },
+      },
       { key: "user", label: this.$t("created-by").toString(), sortable: true },
       { key: "state", label: this.$t("state").toString(), sortable: true },
       { key: "hasResults", label: this.$t("has-results").toString() },
@@ -135,31 +145,6 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     await this.getPlants();
 
     await this.updateAnalysisRows();
-
-    this.checkUploadState();
-  }
-
-  mounted() {
-    this.registerUploadEvents();
-  }
-
-  registerUploadEvents() {
-    uploadService.on(UploadEvent.PROGRESS, () => {
-      this.updateToUploadState();
-    });
-    uploadService.on(UploadEvent.COMPLETED, () => {
-      this.createNewAnalysisBtnText = this.$t("new-data-upload").toString();
-      this.updateTableRowState(this.$t("PICK_ME_UP").toString());
-    });
-    uploadService.on(UploadEvent.FAILED, () => {
-      this.updateTableRowState(this.$t("UPLOAD_FAILED").toString());
-    });
-  }
-
-  checkUploadState(): void {
-    if (uploadService.hasState(UploadState.UPLOADING)) {
-      this.updateToUploadState();
-    }
   }
 
   // "this" is undefined in html component... so (")this(") is a workaround...
@@ -171,21 +156,12 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
     await this.updateAnalysisRows();
   }
 
-  private updateToUploadState() {
-    if (this.updateTableRowState(Math.round(uploadService.progress() * 100) + "%")) {
-      this.createNewAnalysisBtnText = this.$t("return-to-upload").toString();
-    }
-  }
+  get incompleteAnalysisName(): string | null {
+    const analysisName = this.analysisRows?.find(
+      analysis => analysis.state && analysis.state.state.id <= ApiStates.DATA_INCOMPLETE
+    )?.name;
 
-  private updateTableRowState(value: string): boolean {
-    const analysisId = uploadService.getMetadata<IAnalysisId>();
-    if (this.analysisRows && analysisId) {
-      this.uploadStateProcess = value;
-
-      return true;
-    }
-
-    return false;
+    return analysisName || null;
   }
 
   private async updateAnalysisRows() {
@@ -197,7 +173,7 @@ export default class AppAnalysis extends BaseAuthComponent implements IUploadLis
         const row = {
           id: a.id,
           name: a.name,
-          date: new Date(Date.parse(a.created_at)).toLocaleString(),
+          date: a.flown_at,
           user:
             (a.user && {
               userName: ((a.user.first_name || "") + " " + (a.user.last_name || "")).trim(),

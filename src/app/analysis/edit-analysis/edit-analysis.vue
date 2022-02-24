@@ -1,5 +1,5 @@
 <template>
-  <app-content v-if="analysis" :title="analysis.name || ''" :navback="true">
+  <app-content v-if="analysis" :title="analysis.name || ''" :navback="true" :eventId="analysis.id">
     <template #subtitle>
       <div v-if="analysis.current_state">
         <b>{{ $t(analysis.current_state.state.name) }}</b>
@@ -7,21 +7,41 @@
     </template>
     <div class="app-edit-analysis">
       <b-tabs>
-        <b-tab v-if="false" :title="$t('upload')">
-          <!-- will be available in future DV-1076 -->
-          <app-analysis-upload :analysis_id="analysis.id"></app-analysis-upload>
-        </b-tab>
         <b-tab class="app-edit-analysis-download-tab">
           <template #title>
             <b-icon icon="download" /><span class="pad-left">{{ $t("download") }}</span>
           </template>
-          <app-download-analysis-files ref="downloadAnalysisFiles" :analysis="analysis" />
+          <app-download-analysis-files :analysis="analysis" />
+        </b-tab>
+        <b-tab class="app-edit-analysis-upload-tab">
+          <template #title>
+            <b-icon icon="upload" /><span class="pad-left">{{ $t("upload") }}</span>
+          </template>
+          <app-upload-analysis-files :analysis="analysis" />
+        </b-tab>
+        <b-tab class="app-edit-analysis-edit-tab">
+          <template #title>
+            <b-icon icon="pencil-square" /><span class="pad-left">{{ $t("edit") }}</span>
+          </template>
+          <b-row>
+            <b-col sm>
+              <div class="admin-box">
+                <h4>{{ $t("edit-analysis") }}</h4>
+                <b-form @submit.prevent="onSubmitEditAnalysis">
+                  <b-form-group :label="$t('acquisition-date')" label-cols-sm="4" label-cols-lg="2">
+                    <b-datepicker v-model="flownAt" required /> 
+                  </b-form-group>
+                  <app-button type="submit" :loading="loading">{{ $t("apply") }}</app-button>
+                </b-form>
+              </div>
+            </b-col>
+          </b-row>
         </b-tab>
         <b-tab v-if="isSuperAdmin" class="app-edit-analysis-admin-tab">
           <template #title>
             <b-icon icon="braces" /><span class="pad-left">{{ $t("admin-panel") }}</span>
           </template>
-          <app-edit-analysis-admin ref="editAnalysisAdmin" :analysis="analysis" @updateAnalysis="onUpdateAnalysis" />
+          <app-edit-analysis-admin :analysis="analysis" />
         </b-tab>
       </b-tabs>
     </div>
@@ -29,51 +49,97 @@
 </template>
 
 <script lang="ts">
-import { Component, Ref } from "vue-property-decorator";
+import { Component } from "vue-property-decorator";
 import appContentEventBus from "../../shared/components/app-content/app-content-event-bus";
 import { BaseAuthComponent } from "../../shared/components/base-auth-component/base-auth-component";
-import { ApiException } from "../../shared/services/volateq-api/api-errors";
+import { ApiErrors, ApiException } from "../../shared/services/volateq-api/api-errors";
 import { AnalysisSchema } from "../../shared/services/volateq-api/api-schemas/analysis-schema";
 import volateqApi from "../../shared/services/volateq-api/volateq-api";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
+import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppAnalysisUpload from "@/app/analysis/shared/analysis-upload.vue";
 import AppDownloadAnalysisFiles from "@/app/analysis/edit-analysis/download-analysis-files.vue";
 import AppEditAnalysisAdmin from "@/app/analysis/edit-analysis/edit-analysis-admin/edit-analysis-admin.vue";
-import { IUpdateEditAnalysis } from "./types";
+import AppUploadAnalysisFiles from "@/app/analysis/edit-analysis/upload-analysis-files.vue";
+import { AnalysisEventService } from "@/app/analysis/shared/analysis-event-service";
+import { AnalysisEvent } from "../shared/types";
+import { TaskSchema } from "@/app/shared/services/volateq-api/api-schemas/task-schema";
+import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
+import { AppAlertEvents } from "@/app/shared/services/app-alert/app-alert";
 
 @Component({
   name: "app-edit-analysis",
   components: {
     AppContent,
+    AppButton,
     AppAnalysisUpload,
     AppDownloadAnalysisFiles,
     AppEditAnalysisAdmin,
+    AppUploadAnalysisFiles,
   },
 })
 export default class AppEditAnalysis extends BaseAuthComponent {
   analysis: AnalysisSchema | null = null;
 
-  @Ref() downloadAnalysisFiles!: IUpdateEditAnalysis;
-  @Ref() editAnalysisAdmin!: IUpdateEditAnalysis;
+  flownAt = "";
+  loading = false;
 
   async created() {
     await this.updateAnalysis(this.$route.params.id);
-  }
 
-  async onUpdateAnalysis() {
-    await this.updateAnalysis(this.analysis!.id);
+    AnalysisEventService.on(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS, () => {
+      this.updateAnalysis(this.analysis!.id)
+    });
   }
 
   private async updateAnalysis(analysisId: string) {
     try {
       this.analysis = await volateqApi.getAnalysis(analysisId);
 
-      if (this.downloadAnalysisFiles && this.editAnalysisAdmin) {
-        await this.downloadAnalysisFiles.updateAnalysis(this.analysis);
-        await this.editAnalysisAdmin.updateAnalysis(this.analysis);
-      }
+      this.flownAt = this.analysis.flown_at;
+
+      this.watchAnalysisTask();
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
+    }
+  }
+
+  private watchAnalysisTask() {
+    if (this.analysis!.task_id) {
+      volateqApi.waitForTask(
+        this.analysis!.task_id,
+        (task: TaskSchema) => {
+          if (task.state === "FAILURE") {
+            AppContentEventService.showError(this.analysis!.id, {
+              error: ApiErrors.SOMETHING_WENT_WRONG,
+              message: task.result,
+            });
+          }
+
+          AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.FINISHED_ANALYSIS_TASK, task);
+        },
+        (infoMessage: string, task: TaskSchema) => {
+          AppContentEventService.showInfo(this.analysis!.id, infoMessage);
+
+          AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.RUN_ANALYSIS_TASK, task)
+        }
+      )
+    }
+  }
+
+  async onSubmitEditAnalysis() {
+    try {
+      this.loading = true;
+
+      await volateqApi.updateAnalysis(this.analysis!.id, { flown_at: this.flownAt })
+
+      AppContentEventService.showSuccess(this.analysis!.id, this.$t("analysis-updated-successfully").toString());
+
+      AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS);
+    } catch (e) {
+      AppContentEventService.showError(this.analysis!.id, e as ApiException);
+    } finally {
+      this.loading = false;
     }
   }
 }
@@ -82,6 +148,9 @@ export default class AppEditAnalysis extends BaseAuthComponent {
 <style lang="scss">
 .app-edit-analysis {
   &-download-tab {
+    margin-top: 30px;
+  }
+  &-upload-tab {
     margin-top: 30px;
   }
 }

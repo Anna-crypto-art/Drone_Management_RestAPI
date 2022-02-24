@@ -1,29 +1,43 @@
 <template>
   <div class="admin-box">
-    <h4>{{ $t("update-analysis-state") }}</h4>
+    <h4>
+      {{ $t("update-analysis-state") }}
+      <br />
+      <small
+        v-if="!analysis.plant.in_setup_phase"
+        class="grayed"
+        v-html="$t('attention-state-update-starts-evaulation_expl')"
+      >
+      </small>
+    </h4>
     <b-form @submit.prevent="onSubmitUpdateState">
+      <b-form-group>
+        <b-form-checkbox v-model="sendNotification">
+          {{ $t("send-notification") }}
+        </b-form-checkbox>
+      </b-form-group>
       <b-form-group :label="$t('select-new-analysis-state')">
         <b-form-select required v-model="selectedUpdateState" :options="updateStateOptions"></b-form-select>
       </b-form-group>
       <b-form-group :label="$t('message')">
         <b-form-textarea v-model="selectedUpdateStateMessage" :placeholder="$t('message')" row="5" />
       </b-form-group>
-      <app-button ref="submitUpdateStateButton" type="submit">{{ $t("update") }}</app-button>
+      <app-button type="submit" :loading="loading">{{ $t("update") }}</app-button>
     </b-form>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Ref, Prop } from "vue-property-decorator";
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { IUpdateEditAnalysis } from "@/app/analysis/edit-analysis/types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
-import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
-import { ApiStates, ApiStateStruct } from "@/app/shared/services/volateq-api/api-states";
-import { IAppButton } from "@/app/shared/components/app-button/types";
-import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
+import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
+import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import { apiStateNames, ApiStates } from "@/app/shared/services/volateq-api/api-states";
+import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import { Component, Prop, Watch } from "vue-property-decorator";
+import { AnalysisEventService } from "../../shared/analysis-event-service";
+import { AnalysisEvent } from "../../shared/types";
 
 @Component({
   name: "app-update-analysis-state",
@@ -31,61 +45,76 @@ import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
     AppButton,
   },
 })
-export default class AppUpdateAnalysisState extends BaseAuthComponent implements IUpdateEditAnalysis {
+export default class AppUpdateAnalysisState extends BaseAuthComponent {
   @Prop({ required: true }) analysis!: AnalysisSchema;
 
-  @Ref() submitUpdateStateButton!: IAppButton;
-
+  loading = false;
   selectedUpdateState: ApiStates | null = null;
-  updateStateOptions: { value: string; text: string }[] | null = null;
+  updateStateOptions: { value: number; text: string }[] | null = null;
   selectedUpdateStateMessage = "";
+  sendNotification = false;
+
+  private analysisStates: Record<ApiStates, ApiStates[]> | null = null;
 
   async created() {
-    this.updateAnalysis(this.analysis);
+    await this.updateAnalysisStates();
   }
 
-  updateAnalysis(analysis: AnalysisSchema) {
-    this.analysis = analysis;
+  @Watch("analysis") async onUpdateAnalysis() {
+    await this.updateAnalysisStates();
+  }
 
-    this.setUpdateStateOptions();
+  async updateAnalysisStates() {
+    try {
+      if (this.analysisStates === null) {
+        this.analysisStates = await volateqApi.getStates();
+      }
+
+      this.setUpdateStateOptions();
+    } catch (e) {
+      AppContentEventService.showError(this.analysis.id, e as ApiException);
+    }
   }
 
   async onSubmitUpdateState() {
     try {
-      this.submitUpdateStateButton.startLoading();
+      this.loading = true;
 
       if (!this.selectedUpdateState) {
         throw { error: "NO_STATE_SELECTED", message: "Please, selecte a state" };
       }
 
       await volateqApi.updateAnalysisState(this.analysis!.id, {
-        state: this.selectedUpdateState!,
+        state_id: this.selectedUpdateState!,
         message: this.selectedUpdateStateMessage,
+        do_send_mail: this.sendNotification,
       });
 
-      this.$emit("updateAnalysis");
+      AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
 
-      appContentEventBus.showSuccessAlert(this.$t("update-analysis-state-success").toString());
+      AppContentEventService.showSuccess(this.analysis.id, this.$t("update-analysis-state-success").toString());
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      AppContentEventService.showError(this.analysis.id, e as ApiException);
     } finally {
-      this.submitUpdateStateButton.stopLoading();
+      this.loading = false;
     }
   }
 
   private setUpdateStateOptions() {
     if (!this.analysis!.current_state) {
-      return null;
+      this.updateStateOptions = [];
+      return;
     }
 
-    const apiStates: ApiStates[] = ApiStateStruct[this.analysis!.current_state.state.name];
+    const apiStates: ApiStates[] = this.analysisStates![this.analysis!.current_state.state.id];
     if (apiStates.length === 0) {
-      return null;
+      this.updateStateOptions = [];
+      return;
     }
 
-    this.updateStateOptions = apiStates.map(apiState => ({
-      value: apiState,
-      text: this.$t(apiState).toString(),
+    this.updateStateOptions = apiStates.map(state_id => ({
+      value: state_id,
+      text: this.$t(apiStateNames[state_id]).toString(),
     }));
   }
 }

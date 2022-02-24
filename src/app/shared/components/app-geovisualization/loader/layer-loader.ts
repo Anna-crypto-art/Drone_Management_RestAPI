@@ -2,7 +2,7 @@ import { LoadingEvent } from "../types/events";
 import { Layer } from "ol/layer";
 import Map from "ol/Map";
 import { Source } from "ol/source";
-import { BaseLayerType } from "../types/layers";
+import { BaseLayerType, GeoJSONLayer } from "../types/layers";
 import LayerRenderer from "ol/renderer/Layer";
 
 export default abstract class LayerLoader<T extends Layer<Source, LayerRenderer<any>> | undefined> {
@@ -19,6 +19,11 @@ export default abstract class LayerLoader<T extends Layer<Source, LayerRenderer<
   }
 
   public async load(): Promise<Layer<Source, LayerRenderer<any>> | undefined> {
+    if (this.layerType.reloadLayer) {
+      this.loadedLayer = undefined;
+      this.layerType.reloadLayer = false;
+    }
+
     if (this.loadedLayer) {
       return this.loadedLayer;
     }
@@ -34,6 +39,20 @@ export default abstract class LayerLoader<T extends Layer<Source, LayerRenderer<
 
   public get loaded(): boolean {
     return !!this.loadedLayer;
+  }
+
+  public async setVisible(visible: boolean) {
+    if (visible) {
+      (await this.load())?.setVisible(true);
+    } else {
+      if (this.loaded) {
+        this.loadedLayer!.setVisible(false);
+
+        if (this.layerType.reloadLayer) {
+          this.map.removeLayer(this.loadedLayer!);
+        }
+      }
+    }
   }
 
   abstract do_load(): Promise<T>;

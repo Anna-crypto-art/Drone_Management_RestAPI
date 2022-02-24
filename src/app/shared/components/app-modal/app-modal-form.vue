@@ -18,7 +18,7 @@
     </form>
     <template v-slot:modal-footer>
       <b-button variant="secondary" @click="$bvModal.hide(id)">{{ $t("cancel") }}</b-button>
-      <app-button @click="onSubmit">{{ okTitle }}</app-button>
+      <app-button @click="onSubmit" :loading="modalLoading">{{ okTitle }}</app-button>
     </template>
   </b-modal>
 </template>
@@ -40,6 +40,7 @@ export default class AppModalForm extends Vue implements IAppModalForm {
   @Prop({ required: true }) title!: string;
   @Prop() subtitle: string | undefined;
   @Prop({ required: true }) okTitle!: string;
+  @Prop({ default: false }) modalLoading!: boolean;
 
   showAlert = false;
   alertMsg = "";

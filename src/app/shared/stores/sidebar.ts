@@ -1,3 +1,4 @@
+import store from "@/app/app-state";
 import { defineModule } from "direct-vuex";
 import Vue from "vue";
 
@@ -14,10 +15,15 @@ const SidebarModule = defineModule({
   state: sidebars.reduce((acc, name) => ({ ...acc, [name]: true }), {}) as ISidebarModule,
   mutations: {
     toggle(state, { name }: { name: SidebarNames }) {
-      state[name] = !state[name];
-      emit(name, state[name]);
+      SidebarModule.mutations.set(state, { name, state: !state[name] });
     },
     set(state, { name, state: sidebarState }: { name: SidebarNames; state: boolean }) {
+      if (store.state.mobile.mobile) {
+        const otherName = sidebars[Math.abs(sidebars.indexOf(name) - 1)];
+        state[otherName] = false;
+        emit(otherName, false);
+      }
+
       state[name] = sidebarState;
       emit(name, sidebarState);
     },

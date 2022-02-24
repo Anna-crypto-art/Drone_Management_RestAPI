@@ -17,7 +17,7 @@
             $t("forgot-password")
           }}</router-link>
         </b-form-group>
-        <app-button type="submit" cls="width-100pc">{{ $t("login") }}</app-button>
+        <app-button type="submit" cls="width-100pc" :loading="loading">{{ $t("login") }}</app-button>
       </b-form>
     </app-auth-container>
   </div>
@@ -26,7 +26,6 @@
 <script lang="ts">
 import authContainerEventBus from "@/app/auth/shared/components/auth-container-event-bus";
 import AppAuthContainer from "@/app/auth/shared/components/auth-container.vue";
-import appButtonEventBus from "@/app/shared/components/app-button/app-button-event-bus";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
@@ -44,9 +43,11 @@ export default class AppAuthLogin extends Vue {
   email = "";
   password = "";
 
+  loading = false;
+
   async onSubmit() {
     try {
-      appButtonEventBus.startLoading();
+      this.loading = true;
 
       const confirmationKey = await volateqApi.login(this.email, this.password);
 
@@ -56,7 +57,8 @@ export default class AppAuthLogin extends Vue {
       });
     } catch (e) {
       authContainerEventBus.showErrorAlert((e as ApiException).message!);
-      appButtonEventBus.stopLoading();
+
+      this.loading = false;
     }
   }
 }

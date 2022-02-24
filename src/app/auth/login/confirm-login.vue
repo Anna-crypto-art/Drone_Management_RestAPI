@@ -11,14 +11,14 @@
             required
           ></b-form-input>
         </b-form-group>
-        <app-button ref="submitButton" type="submit" cls="width-100pc">{{ $t("login") }}</app-button>
+        <app-button ref="submitButton" type="submit" cls="width-100pc" :loading="loading">{{ $t("login") }}</app-button>
       </b-form>
       <hr />
       <app-button
-        ref="resendSecurityCodeButton"
         type="button"
         cls="width-100pc"
         variant="secondary"
+        :loading="resendCodeLoading"
         @click="resendSecurityCode"
         >{{ $t("resend-security-code") }}</app-button
       >
@@ -28,14 +28,13 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Component, Ref } from "vue-property-decorator";
+import { Component } from "vue-property-decorator";
 
 import AppAuthContainer from "@/app/auth/shared/components/auth-container.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import authContainerEventBus from "@/app/auth/shared/components/auth-container-event-bus";
-import { IAppButton } from "@/app/shared/components/app-button/types";
-import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
+import { ApiErrors, ApiException } from "@/app/shared/services/volateq-api/api-errors";
 
 @Component({
   name: "app-auth-confirm-login",
@@ -45,39 +44,38 @@ import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
   },
 })
 export default class AppAuthConfirmLogin extends Vue {
-  @Ref() resendSecurityCodeButton!: IAppButton;
-  @Ref() submitButton!: IAppButton;
-
+  loading = false;
+  resendCodeLoading = false;
   securityCode = "";
 
   async onSubmit(e: Event): Promise<void> {
     try {
-      this.submitButton.startLoading();
+      this.loading = true;
 
       await volateqApi.confirmLogin(this.$route.params.confirmKey, this.securityCode);
 
       this.$router.push({ name: "Home" });
     } catch (e) {
-      if (e.error && e.error === ApiErrors.RESOURCE_NOT_FOUND) {
+      if ((e as any).error && (e as any).error === ApiErrors.RESOURCE_NOT_FOUND) {
         this.$router.push({ name: "Login" });
       }
 
-      authContainerEventBus.showError(e);
-      this.submitButton.stopLoading();
+      authContainerEventBus.showError(e as ApiException);
+      this.loading = false;
     }
   }
 
   async resendSecurityCode(e: Event): Promise<void> {
     try {
-      this.resendSecurityCodeButton.startLoading();
+      this.resendCodeLoading = true;
 
       await volateqApi.resendSecurityCode(this.$route.params.confirmKey);
 
       authContainerEventBus.showSuccessAlert(this.$t("resend-security-code-success").toString());
     } catch (e) {
-      authContainerEventBus.showError(e);
+      authContainerEventBus.showError(e as ApiException);
     } finally {
-      this.resendSecurityCodeButton.stopLoading();
+      this.resendCodeLoading = false;
     }
   }
 }

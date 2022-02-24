@@ -24,6 +24,10 @@ $theme-colors: (
     }
   }
 
+  &-danger {
+    border-color: $red;
+  }
+
   &.btn-secondary {
     background-color: $white;
     color: $blue;
@@ -233,4 +237,8 @@ $theme-colors: (
 .b-toaster.b-toaster-bottom-center .b-toaster-slot,
 .b-toaster.b-toaster-bottom-full .b-toaster-slot {
   max-width: 500px;
+}
+
+.card {
+  border-radius: 0 !important;
 }

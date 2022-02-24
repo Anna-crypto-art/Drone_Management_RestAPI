@@ -37,7 +37,7 @@ export default class AppSidebar extends Vue {
 <style lang="scss">
 @import "@/scss/_colors.scss";
 
-$sidebar-width: 400px;
+$sidebar-width: min(400px, min(70vw, calc(100vw - 50px)));
 
 .app-sidebar {
   position: relative;
@@ -59,10 +59,12 @@ $sidebar-width: 400px;
     .app-sidebar-inner {
       position: absolute;
       top: 0;
-      left: -$sidebar-width;
+      left: calc($sidebar-width * -1);
       width: $sidebar-width;
       height: 100%;
       transition: all 0.3s ease-in-out;
+
+      --sidebar-width: $sidebar-width;
     }
   }
 
@@ -84,6 +86,10 @@ $sidebar-width: 400px;
   color: $blue;
   border: 1px solid $border-color-grey;
   white-space: nowrap;
+
+  &:active:hover {
+    color: $hover-blue !important;
+  }
 
   &.opens-right {
     left: calc(100% - 1px);

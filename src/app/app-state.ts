@@ -4,6 +4,7 @@ import { createDirectStore } from "direct-vuex";
 
 import authState from "@/app/auth/auth-state";
 import SidebarModule from "./shared/stores/sidebar";
+import MobileModule from "./shared/stores/mobile";
 
 Vue.use(Vuex);
 
@@ -11,6 +12,7 @@ const { store, rootActionContext, moduleActionContext, rootGetterContext, module
   modules: {
     auth: authState,
     sidebar: SidebarModule,
+    mobile: MobileModule,
   },
 });
 

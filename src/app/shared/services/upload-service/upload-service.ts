@@ -1,10 +1,12 @@
 import ResumableJs from "resumablejs";
 import { IResumableFile, IUploadService, UploadEvent, UploadState } from "@/app/shared/services/upload-service/types";
 import store from "@/app/app-state";
-import UploadEventBus from "./upload-event-bus";
+import { UploadEventBus } from "./upload-event-bus";
 
 export class UploadService implements IUploadService {
   private readonly resumable: ResumableJs;
+  private readonly id: string;
+  private readonly uploadEventBus: UploadEventBus;
 
   private readonly maxRetries = 5;
   private readonly chunkRetryInterval = 3000; // 3 seconds
@@ -18,13 +20,32 @@ export class UploadService implements IUploadService {
   private metadata: any | undefined;
   private eventsRegistered = false;
 
-  constructor() {
+  private static instances: Record<string, UploadService> = {};
+
+  public static findOrCreate(id?: string) {
+    // id is most likely an analysis id. But for a new analysis we set it to "0"
+    if (id === undefined) {
+      id = "0" // new data upload
+    }
+
+    if (!(id in UploadService.instances)) {
+      this.instances[id] = new UploadService(id);
+    }
+
+    return this.instances[id];
+  }
+
+  constructor(id: string) {
     this.resumable = new ResumableJs({
       chunkSize: 1 * 1024 * 1024 * 10, // 10MB
       chunkRetryInterval: this.chunkRetryInterval,
       simultaneousUploads: 1,
       maxChunkRetries: this.maxRetries,
     });
+
+    this.id = id;
+
+    this.uploadEventBus = new UploadEventBus();
   }
 
   public init(dropzoneId: string, browseButtonId?: string) {
@@ -92,7 +113,7 @@ export class UploadService implements IUploadService {
   }
 
   public on(event: UploadEvent, callbackFn: any) {
-    UploadEventBus.on(event, callbackFn);
+    this.uploadEventBus.on(event, callbackFn);
   }
 
   public emitFileRemoved(file: IResumableFile) {
@@ -104,7 +125,7 @@ export class UploadService implements IUploadService {
   }
 
   private emit(event: UploadEvent, ...args: any[]) {
-    UploadEventBus.emit(event, args);
+    this.uploadEventBus.emit(event, args);
   }
 
   private initValues() {
@@ -209,6 +230,3 @@ export class UploadService implements IUploadService {
     this.eventsRegistered = true;
   }
 }
-
-const uploadService: IUploadService = new UploadService();
-export default uploadService;

@@ -24,7 +24,12 @@
         <template #cell(digitized)="row">
           <b-icon :class="row.item.digitized ? 'green' : 'red'" :icon="row.item.digitized ? 'check2' : 'x'"></b-icon>
         </template>
-
+        <template #cell(established)="row">
+          <b-icon
+            :class="row.item.established ? 'green' : 'red'"
+            :icon="row.item.established ? 'check2' : 'x'"
+          ></b-icon>
+        </template>
         <template #cell(actions)="row">
           <div class="hover-cell pull-right">
             <b-button
@@ -48,8 +53,14 @@
       :title="$t('upload-dt')"
       :subtitle="$t('upload-dt_descr')"
       :ok-title="$t('apply')"
+      :modalLoading="plantModalLoading"
       @submit="saveManagePlant"
     >
+      <b-form-group v-if="managePlantModel.plant" v-show="managePlantModel.plant.fieldgeometry">
+        <a href="#" @click="onFileClick(managePlantModel.plant.fieldgeometry)">
+          {{ managePlantModel.plant.fieldgeometry && managePlantModel.plant.fieldgeometry.file_name }}
+        </a>
+      </b-form-group>
       <b-form-group>
         <b-form-checkbox id="clear-before-checkbox" v-model="managePlantModel.clearBefore">
           {{ $t("clear-before") }}
@@ -69,11 +80,12 @@ import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import { BvTableFieldArray } from "bootstrap-vue";
 import { Component, Ref } from "vue-property-decorator";
-import appButtonEventBus from "../shared/components/app-button/app-button-event-bus";
 import appContentEventBus from "../shared/components/app-content/app-content-event-bus";
 import { IAppModalForm } from "../shared/components/app-modal/types";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
+import { AppDownloader } from "../shared/services/app-downloader/app-downloader";
 import { ApiException } from "../shared/services/volateq-api/api-errors";
+import { FieldgeometrySchema } from "../shared/services/volateq-api/api-schemas/fieldgeometry-schema";
 import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "../shared/services/volateq-api/volateq-api";
 import { PlantItem } from "./types";
@@ -88,6 +100,7 @@ import { PlantItem } from "./types";
 })
 export default class AppPlants extends BaseAuthComponent {
   @Ref() managePlantModal!: IAppModalForm;
+  plantModalLoading = false;
 
   columns: BvTableFieldArray | null = null;
   plants: PlantItem[] | null = null;
@@ -103,6 +116,7 @@ export default class AppPlants extends BaseAuthComponent {
     this.columns = [
       { key: "name", label: this.$t("name").toString() },
       { key: "digitized", label: this.$t("digitized").toString() },
+      { key: "established", label: this.$t("established").toString() },
       { key: "analysesCount", label: this.$t("number-of-analyses").toString() },
     ];
 
@@ -135,6 +149,8 @@ export default class AppPlants extends BaseAuthComponent {
           name: plant.name,
           digitized: !!plant.fieldgeometry,
           analysesCount: (await volateqApi.getAnalysisResults(plant.id)).length,
+          established: !plant.in_setup_phase,
+          fieldgeometry: plant.fieldgeometry,
         });
       }
     } catch (e) {
@@ -146,7 +162,7 @@ export default class AppPlants extends BaseAuthComponent {
 
   async saveManagePlant(): Promise<void> {
     try {
-      appButtonEventBus.startLoading();
+      this.plantModalLoading = true;
 
       const task = await volateqApi.importFieldgeometry(
         this.managePlantModel.file!,
@@ -157,7 +173,7 @@ export default class AppPlants extends BaseAuthComponent {
       volateqApi.waitForTask(
         task.id,
         async task => {
-          appButtonEventBus.stopLoading();
+          this.plantModalLoading = false;
 
           if (task.state === "SUCCESS") {
             this.managePlantModal.hide();
@@ -182,6 +198,16 @@ export default class AppPlants extends BaseAuthComponent {
     this.managePlantModel.file = null;
 
     this.managePlantModal.show();
+  }
+
+  async onFileClick(fieldgeometry: FieldgeometrySchema) {
+    try {
+      const downloadUrl = await volateqApi.getFieldgeometryFileUrl(fieldgeometry.id);
+
+      AppDownloader.download(downloadUrl.url, fieldgeometry.file_name);
+    } catch (e) {
+      appContentEventBus.showError(e as ApiException);
+    }
   }
 }
 </script>

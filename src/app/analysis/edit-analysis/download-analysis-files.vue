@@ -1,8 +1,8 @@
 <template>
   <div>
     <app-button
-      ref="downloadSelectedFilesButton"
       :disabled="isDownloadButtonDisabled"
+      :loading="downloadButtonLoading"
       @click="onDownloadSelectedFilesClick"
     >
       {{ $t("download-selected-files") }}
@@ -42,19 +42,16 @@
 
 <script lang="ts">
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { Component, Ref, Prop } from "vue-property-decorator";
+import { Component, Ref, Prop, Watch } from "vue-property-decorator";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { BvTableFieldArray } from "bootstrap-vue";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
-import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { IUpdateEditAnalysis } from "@/app/analysis/edit-analysis/types";
-import { waitFor } from "@/app/shared/services/helper/debounce-helper";
-import { IAppButton } from "@/app/shared/components/app-button/types";
 import { getReadableFileSize } from "@/app/shared/services/helper/file-helper";
+import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
 
 @Component({
   name: "app-download-analysis-files",
@@ -63,12 +60,12 @@ import { getReadableFileSize } from "@/app/shared/services/helper/file-helper";
     AppButton,
   },
 })
-export default class AppDownloadAnalysisFiles extends BaseAuthComponent implements IUpdateEditAnalysis {
+export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
   @Prop({ required: true }) analysis!: AnalysisSchema;
 
-  @Ref() downloadSelectedFilesButton!: IAppButton;
   @Ref() downloadFilesTable!: any; // b-table
   isDownloadButtonDisabled = true;
+  downloadButtonLoading = false;
 
   downloadFilesTableColumns: BvTableFieldArray = [
     { key: "selected", label: "" },
@@ -83,11 +80,10 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent implemen
   isFilesLoading = true;
 
   async created() {
-    await this.updateAnalysis(this.analysis);
+    await this.setDownloadFilesTableItems();
   }
 
-  async updateAnalysis(analysis: AnalysisSchema) {
-    this.analysis = analysis;
+  @Watch('analysis') async onAnalysisChanged() {
     await this.setDownloadFilesTableItems();
   }
 
@@ -99,7 +95,7 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent implemen
 
   async onDownloadSelectedFilesClick() {
     try {
-      this.downloadSelectedFilesButton.startLoading();
+      this.downloadButtonLoading = true;
 
       if (this.selectedDonwloadFiles.length === 1) {
         const downloadUrl = await volateqApi.getAnalysisFileDownloadUrl(
@@ -120,9 +116,9 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent implemen
         AppDownloader.download(downloadUrl, archiveName);
       }
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      AppContentEventService.showError(this.analysis.id, e as ApiException);
     } finally {
-      this.downloadSelectedFilesButton.stopLoading();
+      this.downloadButtonLoading = false;
     }
   }
 
@@ -131,7 +127,7 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent implemen
       this.downloadFilesTable.selectAllRows();
     } else {
       // this.downloadFilesTable.clearSelection(); leads to "clearSelection is not a function"
-      // so lets work around... again!
+      // so lets work around...
       for (let i = 0; i < this.downloadFilesTableItems.length; i++) {
         this.downloadFilesTable.unselectRow(i);
       }
@@ -143,16 +139,9 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent implemen
 
     try {
       let files: string[] = [];
-      if (this.analysis!.files.video_files) {
-        files = files.concat(this.analysis!.files.video_files);
+      for (const key of Object.keys(this.analysis.files)) {
+        files = files.concat(this.analysis!.files[key]);
       }
-      if (this.analysis!.files.drone_metadata_files) {
-        files = files.concat(this.analysis!.files.drone_metadata_files);
-      }
-      if (this.analysis!.files.other_files) {
-        files = files.concat(this.analysis!.files.other_files);
-      }
-
       files.sort();
 
       const fileInfos = await volateqApi.getAnalysisFilesInfo(this.analysis.id, files);
@@ -161,7 +150,7 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent implemen
         size: fileInfos[filename] !== null ? getReadableFileSize(fileInfos[filename]!) : this.$t("missing").toString(),
       }));
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      AppContentEventService.showError(this.analysis.id, e as ApiException);
     } finally {
       this.isFilesLoading = false;
     }

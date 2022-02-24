@@ -1,23 +1,25 @@
 import store from "@/app/app-state";
+import { InviteUser, RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { ConfirmLoginResult, TokenResult } from "@/app/shared/services/volateq-api/api-schemas/auth-schema";
+import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
 import { UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 import { HttpClientBase } from "@/app/shared/services/volateq-api/http-client-base";
-import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
-import { InviteUser, RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
-import { baseUrl, apiBaseUrl, environment } from "@/environment/environment";
-import { RouteSchema } from "./api-schemas/route-schema";
-import { NewAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
-import { AnalysisSchema } from "./api-schemas/analysis-schema";
-import { PlantSchema } from "./api-schemas/plant-schema";
-import { TaskSchema } from "./api-schemas/task-schema";
-import { AnalysisResultDetailedSchema } from "./api-schemas/analysis-result-schema";
-import { TableRequest } from "./api-requests/common/table-requests";
-import { TableResultSchema } from "./api-schemas/table-result-schema";
-import { AnalysisResultFileSchema } from "./api-schemas/analysis-result-file-schema";
+import { apiBaseUrl, baseUrl } from "@/environment/environment";
 import { AnalysisResultComponent } from "./api-analysis-result-components";
 import { AnalysisResultKeyFigure } from "./api-analysis-result-key-figures";
-import { GeoVisualQuery } from "./api-requests/geo-visual-query-requests";
 import { ApiErrors, ApiException } from "./api-errors";
+import { NewAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
+import { TableRequest } from "./api-requests/common/table-requests";
+import { GeoVisualQuery } from "./api-requests/geo-visual-query-requests";
+import { UpdatePlantRequest } from "./api-requests/plant-requests";
+import { AnalysisResultFileSchema } from "./api-schemas/analysis-result-file-schema";
+import { AnalysisResultDetailedSchema } from "./api-schemas/analysis-result-schema";
+import { AnalysisSchema } from "./api-schemas/analysis-schema";
+import { PlantSchema } from "./api-schemas/plant-schema";
+import { RouteSchema } from "./api-schemas/route-schema";
+import { TableResultSchema } from "./api-schemas/table-result-schema";
+import { TaskSchema } from "./api-schemas/task-schema";
+import { ApiStates } from "./api-states";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -120,7 +122,7 @@ export class VolateqAPI extends HttpClientBase {
     await this.post(`/auth/analysis/${analysisId}/state`, analysisState);
   }
 
-  public async cancelAnalysisUpload(analysisId: string): Promise<void> {
+  public async deleteAnalysis(analysisId: string): Promise<void> {
     await this.delete(`/auth/analysis/${analysisId}`);
   }
 
@@ -175,6 +177,21 @@ export class VolateqAPI extends HttpClientBase {
     }
 
     return task;
+  }
+
+  public async prepareAnalysisUpload(analysisId: string, fileNames: string[]): Promise<void> {
+    await this.post(`/auth/analysis/${analysisId}/prepare-upload`, { files: fileNames });
+  }
+
+  public async cancelAnalysisUpload(analysisId: string): Promise<void> {
+    await this.post(`/auth/analysis/${analysisId}/cancel-upload`);
+  }
+
+  public async updateAnalysis(
+    analysisId: string,
+    updateData: { data_complete?: boolean; flown_at?: string }
+  ): Promise<void> {
+    await this.post(`/auth/analysis/${analysisId}`, updateData);
   }
 
   private async uploadImportAnalysisResultImageFiles(
@@ -289,7 +306,11 @@ export class VolateqAPI extends HttpClientBase {
     return this.postForm(`/auth/fieldgeometry/${customerId}/${plantId}?clear_before=${clearBefore}`, { file });
   }
 
-  public waitForTask(taskId: string, finished: (task: TaskSchema) => void, info?: (infoMessage: string) => void): void {
+  public waitForTask(
+    taskId: string,
+    finished: (task: TaskSchema) => void,
+    info?: (infoMessage: string, task: TaskSchema) => void
+  ): void {
     const interval = setInterval(async () => {
       const task = await this.getTask(taskId);
       if (task.state === "SUCCESS" || task.state === "FAILURE") {
@@ -303,9 +324,9 @@ export class VolateqAPI extends HttpClientBase {
               task.info.infos.join("<br>>") +
               ((task.info.max_steps && `... (${task.info.current_step}/${task.info.max_steps})`) || "...");
 
-            info(infoMessage);
+            info(infoMessage, task);
           } else {
-            info("Wait for start...");
+            info("Wait for start...", task);
           }
         }
       }
@@ -332,12 +353,32 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/analysis-result/result-file/${analysisResultFileId}`);
   }
 
+  public getFieldgeometryFileUrl(fieldgeometryId: string): Promise<{ url: string }> {
+    return this.get(`/auth/fieldgeometry/${fieldgeometryId}/file-url`);
+  }
+
   public downloadMultipleAnalysisFilesUrl(analysisId: string, filenames: string[]) {
     return this.getUrl(`${apiBaseUrl}/auth/analysis/${analysisId}/files-download`, { filenames: filenames });
   }
 
   public getAnalysisFilesInfo(analysisId: string, filenames: string[]): Promise<Record<string, number | null>> {
     return this.get(`/auth/analysis/${analysisId}/files-info`, { filenames });
+  }
+
+  public getStates(): Promise<Record<ApiStates, ApiStates[]>> {
+    return this.get(`/auth/states`);
+  }
+
+  public updatePlant(plantId: string, updatePlantRequest: UpdatePlantRequest): Promise<void> {
+    return this.post(`/auth/plant/${plantId}`, updatePlantRequest);
+  }
+
+  public validatePlantMetadata(analysisId: string, startServer = true): Promise<TaskSchema> {
+    return this.get(`/auth/analysis/${analysisId}/validate-plant-metadata`, { start_server: startServer });
+  }
+
+  public runQFlyWizard(analysisId: string, startServer = true): Promise<TaskSchema> {
+    return this.get(`/auth/analysis/${analysisId}/run-qfly-wizard`, { start_server: startServer });
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {
