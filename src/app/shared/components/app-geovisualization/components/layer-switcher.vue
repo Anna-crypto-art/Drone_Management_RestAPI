@@ -178,6 +178,12 @@ $sidebar-width: min(400px, min(70vw, calc(100vw - 50px)));
     padding-right: 0.5em;
     padding-bottom: 2em;
 
+    button {
+      height: 35px;
+      width: 35px;
+      padding: 0;
+    }
+
     button:hover {
       background: $hover-light-blue;
     }
