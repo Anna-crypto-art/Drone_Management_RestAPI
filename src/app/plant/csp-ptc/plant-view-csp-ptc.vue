@@ -80,7 +80,7 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
   leftSidebarAbsolute = true; // TODO: Make it absolute on all tabs?
   currentTab = 0;
 
-  private isMobile!: boolean;
+  private isMobile!: boolean; // TODO: Replace this with the new mobile store
   private isMobileQuery!: MediaQueryList;
   private isMobileListener<Evt extends { matches: boolean }>(e: Evt) {
     this.isMobile = e.matches;
