@@ -21,6 +21,7 @@ export abstract class LayerBase {
   protected visible = true;
   protected zIndex?: number;
   protected showPcsZoomLevel = 15;
+  protected refreshLayer = false;
 
   constructor(protected readonly vueComponent: Vue & IPlantVisualization) {}
 
@@ -45,6 +46,13 @@ export abstract class LayerBase {
     this._showPCS = show;
   }
 
+  public reloadLayer(): void {
+    this.refreshLayer = true;
+    if (this.geoLayerObject) {
+      this.geoLayerObject.reloadLayer = this.refreshLayer;
+    }
+  }
+
   public toGeoLayer(): GeoJSONLayer {
     if (!this.geoLayerObject) {
       this.geoLayerObject = {
@@ -59,6 +67,7 @@ export abstract class LayerBase {
         visible: this.visible,
         zIndex: this.zIndex,
         layerType: "VectorImageLayer",
+        reloadLayer: this.refreshLayer,
       };
     }
 

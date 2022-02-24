@@ -29,7 +29,7 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
     const notMeasuredFeaturesCount = this.geoJSON.features.filter(feature => feature.properties.value === null).length;
     const featuresCount = this.geoJSON.features.length - notMeasuredFeaturesCount;
 
-    return {
+    const legend = {
       id: this.keyFigureId.toString(),
       entries: [
         {
@@ -38,11 +38,16 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
             this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
             this.getLegendEntryCount(featuresCount),
         },
-        {
-          color: KeyFigureColors.grey,
-          name: this.vueComponent.$t("not-measured").toString() + this.getLegendEntryCount(notMeasuredFeaturesCount),
-        },
       ],
     };
+
+    if (this.query?.undefined) {
+      legend.entries.push({
+        color: KeyFigureColors.grey,
+        name: this.vueComponent.$t("not-measured").toString() + this.getLegendEntryCount(notMeasuredFeaturesCount),
+      });
+    }
+
+    return legend;
   }
 }

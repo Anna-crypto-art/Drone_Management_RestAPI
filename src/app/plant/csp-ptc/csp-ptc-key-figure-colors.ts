@@ -21,8 +21,8 @@ export const cspPtcKeyFigureColors: Record<AnalysisResultKeyFigure, KeyFigureCol
   [AnalysisResultKeyFigure.SCA_ORTHO_IMAGES_IR_ID]: KeyFigureColors.black,
 
   // SCE
-  [AnalysisResultKeyFigure.SCE_ALIGNMENT_ID]: KeyFigureColors.GREEN_dirtyLuigi,
-  [AnalysisResultKeyFigure.SCE_ORIENTATION_ID]: KeyFigureColors.GREEN_dirtyLuigi,
+  [AnalysisResultKeyFigure.SCE_ALIGNMENT_ID]: KeyFigureColors.GREEN_toxicCoconut,
+  [AnalysisResultKeyFigure.SCE_ORIENTATION_ID]: KeyFigureColors.GREEN_toxicCoconut,
   [AnalysisResultKeyFigure.SCE_SDX_ID]: KeyFigureColors.black,
 
   // MIRROR

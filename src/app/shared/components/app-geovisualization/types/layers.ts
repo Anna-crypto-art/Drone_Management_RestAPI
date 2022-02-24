@@ -7,6 +7,7 @@ export interface BaseLayerType {
   onSelected?: (selected: boolean) => void;
   visible?: boolean;
   styleClass?: string;
+  reloadLayer?: boolean;
 }
 
 export interface GeoJSONLayer extends BaseLayerType {
@@ -24,6 +25,7 @@ export interface GeoJSONLayer extends BaseLayerType {
 
 export interface OSMLayer extends BaseLayerType {
   type: "osm";
+  satellite?: boolean;
 }
 
 export interface GroupLayer extends BaseLayerType {

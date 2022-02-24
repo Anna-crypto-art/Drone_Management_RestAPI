@@ -8,9 +8,26 @@
       @sidebarToggle="onSidebarToggled"
     >
       <template #topContent>
-        <b-form-checkbox v-model="enableMultiSelection" switch @change="onMultiSelectionChanged">
-          {{ $t("multi-selection") }} <app-explanation>{{ $t("multi-selection-overlapping_expl") }}</app-explanation>
-        </b-form-checkbox>
+        <b-button 
+          size="sm"
+          v-b-toggle.display-settings-collapse
+          :variant="displaySettingsCollapsed ? 'primary' : 'secondary'"
+        >
+          <b-icon icon="gear-fill" class="pad-right" /> {{ $t("display-settings") }}
+        </b-button>
+        <b-collapse v-model="displaySettingsCollapsed" id="display-settings-collapse">
+          <b-card class="mar-top">
+            <b-form-checkbox v-model="enableMultiSelection" switch @change="onMultiSelectionChanged">
+              {{ $t("multi-selection") }} <app-explanation>{{ $t("multi-selection-overlapping_expl") }}</app-explanation>
+            </b-form-checkbox>
+            <b-form-checkbox v-model="showCouldNotBeMeasured" switch @change="onShowCouldNotBeMeasuredChanged">
+              {{ $t("show-could-not-be-measured") }}
+            </b-form-checkbox>
+            <b-form-checkbox v-model="satelliteView" switch @change="onSatelliteViewChanged">
+              {{ $t("satellite-view") }}
+            </b-form-checkbox>
+          </b-card>
+        </b-collapse>
       </template>
 
       <!-- Pass slots through -->
@@ -65,7 +82,12 @@ import { IPlantVisualization, Legend, FeatureInfos, KeyFigureTypeMap } from "@/a
 import { PILayersHierarchy } from "@/app/plant/shared/visualization/pi-layers-hierarchy";
 import AppGeovisualization from "@/app/shared/components/app-geovisualization/app-geovisualization.vue";
 import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualization/types/components";
-import { GroupLayer, LayerType } from "@/app/shared/components/app-geovisualization/types/layers";
+import { GroupLayer, LayerType, OSMLayer } from "@/app/shared/components/app-geovisualization/types/layers";
+import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
+
+const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
+const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
+const STORAGE_KEY_SATELLITEVIEW = "storage-key-satelliteview";
 
 @Component({
   name: "app-visualization",
@@ -93,12 +115,24 @@ export default class AppVisualization
   showPCS = false;
   legends: Legend[] = [];
   piToastInfo: FeatureInfos = { title: "", records: [{ name: "", descr: "", value: "" }] };
+  
   enableMultiSelection = false;
+  displaySettingsCollapsed = false;
+  showCouldNotBeMeasured = true;
+  satelliteView = false;
+  
+  private worldMapLayer!: OSMLayer;
 
   private waitForDom = false;
 
   async created() {
+    this.enableMultiSelection = appLocalStorage.getItem(STORAGE_KEY_MULTISELECTION) || false;
+    this.showCouldNotBeMeasured = !!appLocalStorage.getItem(STORAGE_KEY_SHOWUNDEFINED);
+    this.satelliteView = appLocalStorage.getItem(STORAGE_KEY_SATELLITEVIEW) || false;
+
     this.createLayers();
+
+    this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
 
     // wait for DOM before render OpenLayers
     setTimeout(() => {
@@ -188,14 +222,36 @@ export default class AppVisualization
   }
 
   onMultiSelectionChanged() {
+    appLocalStorage.setItem(STORAGE_KEY_MULTISELECTION, this.enableMultiSelection);
+
     this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
     // Group Layer "performance-indicators"
     (this.layers[0] as GroupLayer).singleSelection = !this.enableMultiSelection;
   }
 
+  onShowCouldNotBeMeasuredChanged() {
+    appLocalStorage.setItem(STORAGE_KEY_SHOWUNDEFINED, this.showCouldNotBeMeasured);
+    
+    this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
+  }
+
+  onSatelliteViewChanged() {
+    appLocalStorage.setItem(STORAGE_KEY_SATELLITEVIEW, this.satelliteView);
+
+    this.worldMapLayer.satellite = this.satelliteView;
+    this.worldMapLayer.reloadLayer = true;
+  }
+
   private createLayers(): void {
     this.componentLayers = this.componentLayerTypes.map(componentType => new (componentType as any)(this));
     this.piLayersHierarchy = new PILayersHierarchy(this, this.analysisResults, this.keyFigureLayers);
+
+    this.worldMapLayer = {
+      name: this.$t("world-map").toString(),
+      type: "osm",
+      selected: true,
+      satellite: this.satelliteView,
+    }
 
     this.layers.push(
       {
@@ -224,11 +280,7 @@ export default class AppVisualization
         selected: false,
         styleClass: "margin-top",
       },
-      {
-        name: this.$t("world-map").toString(),
-        type: "osm",
-        selected: true,
-      }
+      this.worldMapLayer,
     );
 
     console.log(this.layers);

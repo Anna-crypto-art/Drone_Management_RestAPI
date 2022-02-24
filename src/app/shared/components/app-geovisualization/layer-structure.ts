@@ -27,10 +27,7 @@ export class LayerStructure extends EventEmitter {
 
   private initializeEvents(): void {
     this.on("setSelected", async (selected: boolean) => {
-      // if layer is not loaded and visible is false than no need to load the layer
-      if (selected || this.layerLoader?.loaded) {
-        (await this.layerLoader?.load())?.setVisible(selected);
-      }
+      await this.layerLoader?.setVisible(selected);
 
       this.layerLoader?.layerType.onSelected && this.layerLoader?.layerType.onSelected(selected);
 

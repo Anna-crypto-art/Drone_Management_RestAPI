@@ -238,3 +238,7 @@ $theme-colors: (
 .b-toaster.b-toaster-bottom-full .b-toaster-slot {
   max-width: 500px;
 }
+
+.card {
+  border-radius: 0 !important;
+}

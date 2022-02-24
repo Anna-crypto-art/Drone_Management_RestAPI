@@ -16,6 +16,7 @@ import { KeyFigureColors } from "../../shared/visualization/layers/types";
 import { ClassHceKeyFigureLayer } from "./key-figures/shared/class-hce-key-figure-layer";
 import { GlassTemperatureKeyFigureLayer } from "./key-figures/glass-temperature-key-figure-layer";
 import { ScaAverageTrackingKeyFigureLayer } from "./key-figures/sca-average-tracking-key-figure-layer";
+import { RecommendedActionKeyFigureLayer } from "./key-figures/recommended-action-key-figure-layer";
 
 export const COMPONENT_LAYERS: typeof ComponentLayer[] = [
   AbsorberComponentLayer,
@@ -67,7 +68,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
         query: { glass_tube_temperature_class: 1 },
       },
       {
-        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
+        keyFigureInfo: { templateName: "glassTubeTemperatureNotMeasured", displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
         color: KeyFigureColors.grey,
       },
@@ -99,7 +100,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
   },
   {
     keyFigureId: AnalysisResultKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID,
-    layerType: ClassHceKeyFigureLayer,
+    layerType: RecommendedActionKeyFigureLayer,
     keyFigureInfo: { templateName: "recommendedAction", keyName: "recommended-action" },
     subLayers: [
       {
@@ -257,5 +258,6 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     keyFigureId: AnalysisResultKeyFigure.MISSING_MIRROR_ID,
     layerType: MissingMirrorKeyFigureLayer,
     keyFigureInfo: { keyName: "missing-mirror" },
+    query: { undefined: 1 },
   },
 ];

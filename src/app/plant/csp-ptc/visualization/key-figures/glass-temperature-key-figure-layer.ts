@@ -6,6 +6,10 @@ export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer {
       return this.getColorWithAlpha(this.color!, 0.7);
     }
 
+    if (classValue === 2) {
+      return this.getColorWithAlpha(this.color!, 0.3);
+    }
+
     return super.getClassColor(classValue);
   }
 
