@@ -8,26 +8,20 @@
       @sidebarToggle="onSidebarToggled"
     >
       <template #topContent>
-        <b-button 
-          size="sm"
-          v-b-toggle.display-settings-collapse
-          :variant="displaySettingsCollapsed ? 'primary' : 'secondary'"
-        >
-          <b-icon icon="gear-fill" class="pad-right" /> {{ $t("display-settings") }}
-        </b-button>
-        <b-collapse v-model="displaySettingsCollapsed" id="display-settings-collapse">
-          <b-card class="mar-top">
-            <b-form-checkbox v-model="enableMultiSelection" switch @change="onMultiSelectionChanged">
-              {{ $t("multi-selection") }} <app-explanation>{{ $t("multi-selection-overlapping_expl") }}</app-explanation>
-            </b-form-checkbox>
-            <b-form-checkbox v-model="showCouldNotBeMeasured" switch @change="onShowCouldNotBeMeasuredChanged">
-              {{ $t("show-could-not-be-measured") }}
-            </b-form-checkbox>
-            <b-form-checkbox v-model="satelliteView" switch @change="onSatelliteViewChanged">
-              {{ $t("satellite-view") }}
-            </b-form-checkbox>
-          </b-card>
-        </b-collapse>
+        <app-collapse name="displaySettings">
+          <template #button>
+            <b-icon icon="gear-fill" class="pad-right" /> {{ $t("display-settings") }}
+          </template>
+          <b-form-checkbox v-model="enableMultiSelection" switch @change="onMultiSelectionChanged">
+            {{ $t("multi-selection") }} <app-explanation>{{ $t("multi-selection-overlapping_expl") }}</app-explanation>
+          </b-form-checkbox>
+          <b-form-checkbox v-model="showCouldNotBeMeasured" switch @change="onShowCouldNotBeMeasuredChanged">
+            {{ $t("show-could-not-be-measured") }}
+          </b-form-checkbox>
+          <b-form-checkbox v-model="satelliteView" switch @change="onSatelliteViewChanged">
+            {{ $t("satellite-view") }}
+          </b-form-checkbox>
+        </app-collapse>
       </template>
 
       <!-- Pass slots through -->
@@ -84,6 +78,7 @@ import AppGeovisualization from "@/app/shared/components/app-geovisualization/ap
 import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualization/types/components";
 import { GroupLayer, LayerType, OSMLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
+import AppCollapse from "@/app/shared/components/app-collapse/app-collapse.vue";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -94,6 +89,7 @@ const STORAGE_KEY_SATELLITEVIEW = "storage-key-satelliteview";
   components: {
     AppGeovisualization,
     AppExplanation,
+    AppCollapse,
   },
 })
 export default class AppVisualization
@@ -117,7 +113,6 @@ export default class AppVisualization
   piToastInfo: FeatureInfos = { title: "", records: [{ name: "", descr: "", value: "" }] };
   
   enableMultiSelection = false;
-  displaySettingsCollapsed = false;
   showCouldNotBeMeasured = true;
   satelliteView = false;
   

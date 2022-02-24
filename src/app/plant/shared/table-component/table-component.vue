@@ -1,6 +1,7 @@
 <template>
   <div class="app-table-component">
     <app-table-component-container ref="container" :tableName="tableName" :pagination="pagination" size="sm">
+      <app-table-filter :analysisResult="analysisResult" :activeComponent="activeComponent" />
       <b-table
         :id="tableName"
         hover
@@ -42,12 +43,14 @@ import apiResultsLoader from "@/app/shared/services/volateq-api/api-results-load
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import AppTableFilter from "@/app/plant/shared/table-component/table-filter.vue";
 
 @Component({
   name: "app-table-component",
   components: {
     AppTableComponentContainer,
     AppExplanation,
+    AppTableFilter,
   },
 })
 export default class AppTableComponent extends Vue implements ITableComponent {

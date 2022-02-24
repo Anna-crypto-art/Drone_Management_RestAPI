@@ -2,6 +2,7 @@ import { AnalysisResultSchemaBase } from "../api-schemas/analysis-result-schema-
 import { AnalysisResultDetailedSchema } from "../api-schemas/analysis-result-schema";
 import { AnalysisResultMappingEntry, AnalysisResultMappings, BvTableFieldExtArray } from "./types";
 import VueI18n from "vue-i18n";
+import { FilterFieldType } from "@/app/plant/shared/filter-fields/types";
 
 export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
   constructor(
@@ -9,21 +10,24 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
     private readonly analysisResult: AnalysisResultDetailedSchema
   ) {}
 
+  private getEntries(): AnalysisResultMappings<T> {
+    return this.analysisResultMapping.filter(entry => this.hasKeyFigure(entry));
+  }
+
+  public getFields(): { key: string, filterType?: FilterFieldType }[] {
+    return this.getEntries().map(entry => ({
+      key: entry.transName,
+      filterType: entry.filterType
+    }));
+  }
+
   public getColumns(transFunc: (transName: string) => VueI18n.TranslateResult): BvTableFieldExtArray {
-    const columns: BvTableFieldExtArray = [];
-
-    for (const mappingEntry of this.analysisResultMapping) {
-      if (this.hasKeyFigure(mappingEntry)) {
-        columns.push({
-          key: mappingEntry.transName,
-          label: transFunc(mappingEntry.transName).toString(),
-          sortable: true,
-          labelExpl: mappingEntry.transDescr,
-        });
-      }
-    }
-
-    return columns;
+    return this.getEntries().map(mappingEntry => ({
+      key: mappingEntry.transName,
+      label: transFunc(mappingEntry.transName).toString(),
+      sortable: true,
+      labelExpl: mappingEntry.transDescr,
+    }));
   }
 
   public getItems(results: T[]): Record<string, unknown>[] {
@@ -43,10 +47,8 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
   ): Record<string, unknown> {
     const item: Record<string, unknown> = {};
 
-    for (const mappingEntry of this.analysisResultMapping) {
-      if (this.hasKeyFigure(mappingEntry)) {
-        item[mappingEntry.transName] = mappingEntry.getValue(result);
-      }
+    for (const mappingEntry of this.getEntries()) {
+      item[mappingEntry.transName] = mappingEntry.getValue(result);
     }
 
     return item;
@@ -55,10 +57,8 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
   public getColumnsMapping(): Record<string, string> {
     const columnsMapping: Record<string, string> = {};
 
-    for (const mappingEntry of this.analysisResultMapping) {
-      if (this.hasKeyFigure(mappingEntry)) {
-        columnsMapping[mappingEntry.transName] = this.getPropertyName(mappingEntry);
-      }
+    for (const mappingEntry of this.getEntries()) {
+      columnsMapping[mappingEntry.transName] = this.getPropertyName(mappingEntry);
     }
 
     return columnsMapping;

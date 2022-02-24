@@ -251,6 +251,10 @@
   "show-could-not-be-measured": "Show \"Could not be measured\"",
   "satellite-view": "Satellite view",
   "not-measured-glass-tube-temp": "Temperature of all tubes with missing glass cannot be measured",
+  "filter": "Filter",
+  "filter-by-component": "Filter by component",
+  "filter-by-pi": "Filter by PIs",
+  "reset": "Reset",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",

@@ -1,3 +1,4 @@
+import { FilterFieldType } from "@/app/plant/shared/filter-fields/types";
 import { BvTableField } from "bootstrap-vue";
 import { AnalysisResultKeyFigure } from "../api-analysis-result-key-figures";
 import { AnalysisResultSchemaBase } from "../api-schemas/analysis-result-schema-base";
@@ -7,6 +8,7 @@ export interface AnalysisResultMappingEntry<T extends AnalysisResultSchemaBase> 
   transName: string;
   transDescr?: string;
   keyFigureId?: AnalysisResultKeyFigure;
+  filterType?: FilterFieldType;
 }
 
 export type AnalysisResultMappings<T extends AnalysisResultSchemaBase> = AnalysisResultMappingEntry<T>[];
