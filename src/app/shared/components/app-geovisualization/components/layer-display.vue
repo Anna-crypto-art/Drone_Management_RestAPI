@@ -20,8 +20,6 @@
         </template>
       </app-geovisual-layer-display>
     </div>
-
-    <slot />
   </div>
 </template>
 
