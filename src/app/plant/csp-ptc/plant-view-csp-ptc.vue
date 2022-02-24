@@ -164,9 +164,6 @@ $left-width: 400px;
   }
 
   &-admin-panel {
-    padding: 1em;
-    background-color: $grey;
-
     &-tab {
       padding: 0 50px;
     }
