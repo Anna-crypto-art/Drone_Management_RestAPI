@@ -24,7 +24,7 @@
       </b-row>
       <b-row class="mar-top">
         <b-col>
-          <app-button :loading="loading" class="pull-left mar-right" @click="onApplyFilter">
+          <app-button class="pull-left mar-right" @click="onApplyFilter">
             {{ $t("apply") }}
           </app-button>
           <b-button variant="outline-danger" class="pull-left" @click="onReset">{{ $t("reset") }}</b-button>
@@ -45,11 +45,12 @@ import { IActiveComponent } from "../types";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppFilterFields from "@/app/plant/shared/filter-fields/filter-fields.vue";
-import { FilterField, FilterFieldType, FilterFieldValue } from "../filter-fields/types";
+import { FilterField, FilterFieldType, FilterFieldValue, FilterFieldValueType } from "../filter-fields/types";
 import { apiComponentsFilter } from "@/app/shared/services/volateq-api/api-components/api-components-filter";
 import { apiComponentNames } from "@/app/shared/services/volateq-api/api-components/api-components-name";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import { TableFilterRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 
 @Component({
   name: "app-table-filter",
@@ -96,15 +97,39 @@ export default class AppTableFilter extends Vue {
     }));
   }
 
-  async onApplyFilter() {
-    console.log(this.piFilterFieldValues);
-    console.log(this.compFilterFieldValues);
-    // do somehting
+  onApplyFilter() {
+    this.$emit("filter", this.getTableFilterRequest());
   }
 
   onReset() {
     this.piFilterFieldValues = [];
     this.compFilterFieldValues = [];
+
+    this.$emit("filter", this.getTableFilterRequest());
+  }
+
+  private getTableFilterRequest(): TableFilterRequest | undefined {
+    const columnsMapping = this.mappingHelper.getColumnsMapping();
+
+    const filters: Record<string, FilterFieldValueType> = {};
+    for (const piFilterFieldValue of this.piFilterFieldValues) {
+      filters[columnsMapping[piFilterFieldValue.filterField!.key]] = piFilterFieldValue.value;
+    }
+
+    const tableFilterRequest: TableFilterRequest = {};
+
+    if (Object.keys(filters).length > 0) {
+      tableFilterRequest.filters = filters;
+    }
+
+    if (this.compFilterFieldValues.length > 0) {
+      tableFilterRequest.component_filter = {
+        component_id: this.compFilterFieldValues[0].filterField?.key as number,
+        codes: [this.compFilterFieldValues[0].value as string],
+      }
+    }
+
+    return Object.keys(tableFilterRequest).length > 0 ? tableFilterRequest : undefined;
   }
 }
 </script>

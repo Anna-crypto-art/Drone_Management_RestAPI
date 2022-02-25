@@ -71,8 +71,8 @@ export class HttpClientBase {
     return this.httpClient.post(url, formData, { headers: { "Content-Type": "multipart/form-data" } });
   }
 
-  protected async post(url: string, data?: any, config?: AxiosRequestConfig | undefined): Promise<any> {
-    return this.httpClient.post(url, data, config);
+  protected async post(url: string, data?: any, config?: AxiosRequestConfig | undefined, params?: any): Promise<any> {
+    return this.httpClient.post(this.getUrl(url, params), data, config);
   }
 
   protected async get(url: string, params?: any, config?: AxiosRequestConfig | undefined): Promise<any> {

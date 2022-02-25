@@ -94,9 +94,9 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     const pcs = this.getPcs(feature);
 
     const results = await volateqApi.getSpecificAnalysisResult(this.analysisResult!.id, this.keyFigure.component.id, {
-      filter: pcs,
+      search_text: pcs,
       limit: 1,
-      filter_mode: "equals",
+      search_mode: "equals",
       ...this.getMoreSpecificAnalysisResultParams(),
     });
 

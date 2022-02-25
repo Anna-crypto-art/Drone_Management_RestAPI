@@ -11,7 +11,7 @@ import { AnalysisSchema } from "./api-schemas/analysis-schema";
 import { PlantSchema } from "./api-schemas/plant-schema";
 import { TaskSchema } from "./api-schemas/task-schema";
 import { AnalysisResultDetailedSchema } from "./api-schemas/analysis-result-schema";
-import { TableRequest } from "./api-requests/common/table-requests";
+import { TableFilterRequest, TableRequest } from "./api-requests/common/table-requests";
 import { TableResultSchema } from "./api-schemas/table-result-schema";
 import { AnalysisResultFileSchema } from "./api-schemas/analysis-result-file-schema";
 import { ApiComponent } from "./api-components/api-components";
@@ -226,8 +226,13 @@ export class VolateqAPI extends HttpClientBase {
   public getSpecificAnalysisResult<T>(
     analysisResultId: string,
     componentId: number,
-    params: TableRequest
+    params: TableRequest,
+    filterParams?: TableFilterRequest,
   ): Promise<TableResultSchema<T>> {
+    if (filterParams) {
+      return this.post(`/auth/analysis-result/${analysisResultId}/${componentId}`, filterParams, undefined, params);
+    }
+      
     return this.get(`/auth/analysis-result/${analysisResultId}/${componentId}`, params);
   }
 

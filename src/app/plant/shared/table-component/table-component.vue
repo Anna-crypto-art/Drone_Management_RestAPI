@@ -1,7 +1,12 @@
 <template>
   <div class="app-table-component">
     <app-table-component-container ref="container" :tableName="tableName" :pagination="pagination" size="sm">
-      <app-table-filter :analysisResult="analysisResult" :activeComponent="activeComponent" :plant="plant" />
+      <app-table-filter 
+        :analysisResult="analysisResult"
+        :activeComponent="activeComponent"
+        :plant="plant"
+        @filter="onFilter"
+      />
       <b-table
         :id="tableName"
         hover
@@ -40,7 +45,7 @@ import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/a
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { BvTableFieldExtArray } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import apiResultsLoader from "@/app/shared/services/volateq-api/api-results-loader";
-import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
+import { TableFilterRequest, TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import AppTableFilter from "@/app/plant/shared/table-component/table-filter.vue";
@@ -69,6 +74,7 @@ export default class AppTableComponent extends Vue implements ITableComponent {
 
   private last_ctx: BvTableCtxObject | undefined;
   private searchText = "";
+  private tableFilterRequest?: TableFilterRequest
 
   private mappingHelper!: AnalysisResultMappingHelper<AnalysisResultSchemaBase>;
   private columnsMapping!: Record<string, string>;
@@ -94,6 +100,12 @@ export default class AppTableComponent extends Vue implements ITableComponent {
     this.columnsMapping = this.mappingHelper.getColumnsMapping();
   }
 
+  onFilter(tableFilterRequest?: TableFilterRequest) {
+    this.tableFilterRequest = tableFilterRequest;
+
+    this.table.refresh();
+  }
+
   getTableRequestParam(): TableRequest {
     if (!this.last_ctx) {
       throw Error("Missing last_ctx");
@@ -104,7 +116,7 @@ export default class AppTableComponent extends Vue implements ITableComponent {
       page: this.last_ctx.currentPage,
       order_by: this.last_ctx.sortBy && this.columnsMapping[this.last_ctx.sortBy],
       order_direction: this.last_ctx.sortDesc ? "desc" : "asc",
-      filter: this.searchText,
+      search_text: this.searchText,
     };
   }
 
@@ -134,7 +146,8 @@ export default class AppTableComponent extends Vue implements ITableComponent {
       const results = await volateqApi.getSpecificAnalysisResult<AnalysisResultSchemaBase>(
         this.analysisResult.id,
         this.activeComponent.componentId,
-        this.getTableRequestParam()
+        this.getTableRequestParam(),
+        this.tableFilterRequest,
       );
       this.pagination.total = results.total;
 
