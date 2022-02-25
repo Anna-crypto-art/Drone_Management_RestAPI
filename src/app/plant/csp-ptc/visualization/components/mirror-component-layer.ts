@@ -1,10 +1,10 @@
-import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-analysis-result-components";
+import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 import { ComponentLayer } from "../../../shared/visualization/layers/component-layer";
 import { Style, Fill, Stroke } from "ol/style";
 import { FeatureLike } from "ol/Feature";
 
 export class MirrorComponentLayer extends ComponentLayer {
-  protected readonly componentId = AnalysisResultComponent.CSP_PTC_MIRROR;
+  protected readonly componentId = ApiComponent.CSP_PTC_MIRROR;
   public readonly name = "mirrors";
 
   protected showPcsZoomLevel = 22;

@@ -1,4 +1,7 @@
-export enum AnalysisResultKeyFigure {
+/**
+ * All Perfomance indicators
+ */
+export enum ApiKeyFigure {
   IR_INTENSITY_ID = 1,
   SCE_ORIENTATION_ID = 2,
   SCA_ORIENTATION_ID = 3,

@@ -24,7 +24,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Watch } from "vue-property-decorator";
 import { FilterField, FilterFieldType, FilterFieldValueType } from "./types";
 
 @Component({
@@ -37,12 +37,20 @@ export default class AppFilterFieldValue extends Vue {
 
   filterFieldValue: FilterFieldValueType = null;
 
-  filterFieldOptions?: { value: unknown, text: string }[] = undefined;
+  filterFieldOptions: { value: unknown, text?: string }[] = [];
+
+  @Watch('filterField') async filterFieldChanged() {
+    this.filterFieldOptions = await this.getfilterFieldOptions();
+  }
+
+  @Watch("value") onValueChanged() {
+    this.filterFieldValue = this.value;
+  }
 
   async created() {
     this.filterFieldValue = this.value;
 
-    this.filterFieldOptions = this.filterField.getValues && (await this.filterField.getValues());
+    this.filterFieldOptions = await this.getfilterFieldOptions();
   }
 
   get isNumericSimple(): boolean {
@@ -59,6 +67,10 @@ export default class AppFilterFieldValue extends Vue {
 
   get isArray(): boolean {
     return this.filterField.type === FilterFieldType.ARRAY;
+  }
+
+  private async getfilterFieldOptions(): Promise<{ value: unknown, text?: string }[]> {
+    return this.filterField.getValues && (await this.filterField.getValues()) || [];
   }
 
   onChange() {

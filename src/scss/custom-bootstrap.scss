@@ -27,6 +27,9 @@ $theme-colors: (
   &-danger {
     border-color: $red;
   }
+  &-outline-danger {
+    border-color: $red;
+  }
 
   &.btn-secondary {
     background-color: $white;

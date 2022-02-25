@@ -6,11 +6,20 @@
       </template>
       <b-row>
         <b-col sm="6">
-          <h4>{{ $t("filter-by-pi") }}</h4>
-          <app-filter-fields v-model="piFilterFieldValues" :filterFields="piFilterFields" />
+          <h5 class="mar-bottom">{{ $t("filter-by-pi") }}</h5>
+          <app-filter-fields v-model="piFilterFieldValues" :filterFields="piFilterFields">
+            <template #addButton>
+              {{ $t("add-pi-filter") }}
+            </template>
+          </app-filter-fields>
         </b-col>
         <b-col sm="6">
-          <h4>{{ $t("filter-by-component") }}</h4>
+          <h5 class="mar-bottom">{{ $t("filter-by-component") }}</h5>
+          <app-filter-fields 
+            v-model="compFilterFieldValues"
+            :filterFields="compFilterFields" 
+            :extendable="false"
+          />
         </b-col>
       </b-row>
       <b-row class="mar-top">
@@ -18,7 +27,7 @@
           <app-button :loading="loading" class="pull-left mar-right" @click="onApplyFilter">
             {{ $t("apply") }}
           </app-button>
-          <b-button variant="secondary" class="pull-left">{{ $t("reset") }}</b-button>
+          <b-button variant="outline-danger" class="pull-left" @click="onReset">{{ $t("reset") }}</b-button>
           <div class="clear"></div>
         </b-col>
       </b-row>
@@ -36,7 +45,11 @@ import { IActiveComponent } from "../types";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppFilterFields from "@/app/plant/shared/filter-fields/filter-fields.vue";
-import { FilterField, FilterFieldValue } from "../filter-fields/types";
+import { FilterField, FilterFieldType, FilterFieldValue } from "../filter-fields/types";
+import { apiComponentsFilter } from "@/app/shared/services/volateq-api/api-components/api-components-filter";
+import { apiComponentNames } from "@/app/shared/services/volateq-api/api-components/api-components-name";
+import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 
 @Component({
   name: "app-table-filter",
@@ -47,6 +60,7 @@ import { FilterField, FilterFieldValue } from "../filter-fields/types";
   },
 })
 export default class AppTableFilter extends Vue {
+  @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) analysisResult!: AnalysisResultDetailedSchema;
   @Prop({ required: true }) activeComponent!: IActiveComponent;
 
@@ -54,6 +68,8 @@ export default class AppTableFilter extends Vue {
 
   piFilterFieldValues: FilterFieldValue[] = [];
   piFilterFields: FilterField[] = [];
+  compFilterFieldValues: FilterFieldValue[] = [];
+  compFilterFields: FilterField[] = [];
 
   private mappingHelper!: AnalysisResultMappingHelper<AnalysisResultSchemaBase>;
 
@@ -67,11 +83,28 @@ export default class AppTableFilter extends Vue {
         name: this.$t(field.key).toString(),
         type: field.filterType!
       }));
+
+    this.compFilterFields = apiComponentsFilter[this.activeComponent.componentId]!.map(compId => ({
+      key: compId,
+      name: this.$t(apiComponentNames[compId]).toString(),
+      type: FilterFieldType.ARRAY,
+      getValues: async () => {
+        return (await volateqApi.getFieldgeometryComponentCodes(this.plant.fieldgeometry!.id, compId))
+          .sort()
+          .map(code => ({ value: code, text: code }));
+      }
+    }));
   }
 
   async onApplyFilter() {
     console.log(this.piFilterFieldValues);
+    console.log(this.compFilterFieldValues);
     // do somehting
+  }
+
+  onReset() {
+    this.piFilterFieldValues = [];
+    this.compFilterFieldValues = [];
   }
 }
 </script>

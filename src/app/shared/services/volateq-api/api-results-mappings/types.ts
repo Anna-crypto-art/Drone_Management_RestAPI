@@ -1,13 +1,13 @@
 import { FilterFieldType } from "@/app/plant/shared/filter-fields/types";
 import { BvTableField } from "bootstrap-vue";
-import { AnalysisResultKeyFigure } from "../api-analysis-result-key-figures";
+import { ApiKeyFigure } from "../api-key-figures";
 import { AnalysisResultSchemaBase } from "../api-schemas/analysis-result-schema-base";
 
 export interface AnalysisResultMappingEntry<T extends AnalysisResultSchemaBase> {
   getValue: (result: T) => unknown;
   transName: string;
   transDescr?: string;
-  keyFigureId?: AnalysisResultKeyFigure;
+  keyFigureId?: ApiKeyFigure;
   filterType?: FilterFieldType;
 }
 

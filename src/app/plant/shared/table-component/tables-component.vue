@@ -31,6 +31,7 @@
               :ref="generateRefTableName(activeTabComponent)"
               :analysisResult="selectedAnalysisResult"
               :activeComponent="activeTabComponent"
+              :plant="plant"
             >
             </app-table-component>
           </b-tab>

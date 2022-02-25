@@ -1,10 +1,10 @@
-import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-analysis-result-components";
+import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 import { ComponentLayer } from "../../../shared/visualization/layers/component-layer";
 import { Style, Fill, Stroke } from "ol/style";
 import { FeatureLike } from "ol/Feature";
 
 export class SceComponentLayer extends ComponentLayer {
-  protected readonly componentId = AnalysisResultComponent.CSP_PTC_SCE;
+  protected readonly componentId = ApiComponent.CSP_PTC_SCE;
   public readonly name = "single-collector-elements";
 
   protected showPcsZoomLevel = 18;

@@ -8,13 +8,16 @@
           @input="onInput"
         />
       </b-col>
-      <b-col cols="2" v-if="extendable">
-        <b-button variant="secondary" size="sm" @click="onRemove(filterField)"><b-icon icon="x" /></b-button>
+      <b-col cols="2">
+        <b-button variant="outline-danger" size="sm" @click="onRemove(filterField)"><b-icon icon="x" /></b-button>
       </b-col>
     </b-row>
     <b-row class="mar-bottom">
-      <b-col v-if="extendable">
-        <b-button variant="secondary" size="sm" @click="onAdd"><b-icon icon="plus" /></b-button>
+      <b-col v-show="addable">
+        <b-button variant="secondary" size="sm" @click="onAdd">
+          <b-icon icon="plus" />
+          <slot name="addButton" />
+        </b-button>
       </b-col>
     </b-row>
   </div>
@@ -22,7 +25,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Watch } from "vue-property-decorator";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { FilterField, FilterFieldValue } from "./types";
 import AppFilterField from "@/app/plant/shared/filter-fields/filter-field.vue";
@@ -41,10 +44,16 @@ export default class AppFilterFields extends Vue {
 
   filterFieldValues: { value: FilterFieldValue, id: number, }[] = [];
 
+  @Watch('value') onValueChanged() {
+    this.setFilterFieldValues();
+  }
+
   created() {
-    this.filterFieldValues = this.value.length > 0 ? 
-      this.value.map(value => ({ value, id: 1 })) : 
-      [{ value: { filterField: null, value: null }, id: 1 }];
+    this.setFilterFieldValues();
+  }
+
+  get addable(): boolean {
+    return this.extendable || this.filterFieldValues.length === 0;
   }
 
   onInput() {
@@ -65,6 +74,12 @@ export default class AppFilterFields extends Vue {
       this.filterFieldValues.findIndex(filterFieldValue => filterFieldValue.id === filterField.id),
       1
     );
+  }
+
+  private setFilterFieldValues() {
+    this.filterFieldValues = this.value.length > 0 ? 
+      this.value.map((value, index) => ({ value, id: index + 1 })) : 
+      [{ value: { filterField: null, value: null }, id: 1 }];
   }
 }
 </script>

@@ -1,4 +1,4 @@
-import { AnalysisResultKeyFigure } from "@/app/shared/services/volateq-api/api-analysis-result-key-figures";
+import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { AbsorberComponentLayer } from "./components/absorber-component-layer";
 import { LoopComponentLayer } from "./components/loop-component-layer";
 import { MirrorComponentLayer } from "./components/mirror-component-layer";
@@ -28,25 +28,25 @@ export const COMPONENT_LAYERS: typeof ComponentLayer[] = [
 
 export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
   {
-    keyFigureId: AnalysisResultKeyFigure.MISSING_GLASS_TUBE_ID,
+    keyFigureId: ApiKeyFigure.MISSING_GLASS_TUBE_ID,
     layerType: BoolUndefinedHceKeyFigureLayer,
     keyFigureInfo: { templateName: "missingGhr", keyName: "missing-gct", zIndex: 11 },
     query: { missing_glass_tube: 1, undefined: 1 },
   },
   {
-    keyFigureId: AnalysisResultKeyFigure.OXYGEN_PENETRATION_ID,
+    keyFigureId: ApiKeyFigure.OXYGEN_PENETRATION_ID,
     layerType: BoolUndefinedHceKeyFigureLayer,
     keyFigureInfo: { templateName: "O2Penetration", keyName: "oxygen-penetration", zIndex: 11 },
     query: { oxygen_penetration: 1, undefined: 1 },
   },
   {
-    keyFigureId: AnalysisResultKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID,
+    keyFigureId: ApiKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID,
     layerType: BoolUndefinedHceKeyFigureLayer,
     keyFigureInfo: { templateName: "H2Concentration", keyName: "high-hydrogen-concentration", zIndex: 11 },
     query: { h2_concentration: 1, undefined: 1 },
   },
   {
-    keyFigureId: AnalysisResultKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
+    keyFigureId: ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
     layerType: GlassTemperatureKeyFigureLayer,
     keyFigureInfo: { templateName: "glassTubeTemperature", keyName: "glass-tube-temperature-class" },
     subLayers: [
@@ -75,7 +75,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     ],
   },
   {
-    keyFigureId: AnalysisResultKeyFigure.IR_INTENSITY_ID,
+    keyFigureId: ApiKeyFigure.IR_INTENSITY_ID,
     layerType: ClassHceKeyFigureLayer,
     keyFigureInfo: { templateName: "irIntensity", keyName: "ir-intensity-class" },
     subLayers: [
@@ -99,7 +99,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     ],
   },
   {
-    keyFigureId: AnalysisResultKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID,
+    keyFigureId: ApiKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID,
     layerType: RecommendedActionKeyFigureLayer,
     keyFigureInfo: { templateName: "recommendedAction", keyName: "recommended-action" },
     subLayers: [
@@ -135,7 +135,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     ],
   },
   {
-    keyFigureId: AnalysisResultKeyFigure.SCE_ALIGNMENT_ID,
+    keyFigureId: ApiKeyFigure.SCE_ALIGNMENT_ID,
     layerType: SceAlignmentKeyFigureLayer,
     keyFigureInfo: { templateName: "sceOrientation", keyName: "sce-alignment-offset" },
     subLayers: [
@@ -159,7 +159,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     ],
   },
   {
-    keyFigureId: AnalysisResultKeyFigure.SCA_TRACKING_DEVIATION_ID,
+    keyFigureId: ApiKeyFigure.SCA_TRACKING_DEVIATION_ID,
     layerType: ScaTrackingKeyFigureLayer,
     keyFigureInfo: { templateName: "scaOrientation", keyName: "tracking-offset" },
     subLayers: [
@@ -183,7 +183,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     ],
   },
   {
-    keyFigureId: AnalysisResultKeyFigure.SCA_TRACKING_DEVIATION_ID,
+    keyFigureId: ApiKeyFigure.SCA_TRACKING_DEVIATION_ID,
     layerType: ScaAverageTrackingKeyFigureLayer,
     keyFigureInfo: { templateName: "scaAvgOrientation", keyName: "average-tracking-offset" },
     subLayers: [
@@ -207,7 +207,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     ],
   },
   {
-    keyFigureId: AnalysisResultKeyFigure.SCA_FRICTION_ID,
+    keyFigureId: ApiKeyFigure.SCA_FRICTION_ID,
     layerType: ScaFrictionKeyFigureLayer,
     keyFigureInfo: { templateName: "scaFriction", keyName: "torsion-caused-friction-mean" },
     subLayers: [
@@ -231,7 +231,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     ],
   },
   {
-    keyFigureId: AnalysisResultKeyFigure.SCA_SDX_ID,
+    keyFigureId: ApiKeyFigure.SCA_SDX_ID,
     layerType: ScaSdxKeyFigureLayer,
     keyFigureInfo: { templateName: "scaSdx", keyName: "slope-deviation" },
     subLayers: [
@@ -255,7 +255,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     ],
   },
   {
-    keyFigureId: AnalysisResultKeyFigure.MISSING_MIRROR_ID,
+    keyFigureId: ApiKeyFigure.MISSING_MIRROR_ID,
     layerType: MissingMirrorKeyFigureLayer,
     keyFigureInfo: { keyName: "missing-mirror" },
     query: { undefined: 1 },

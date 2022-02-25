@@ -1,5 +1,5 @@
 import { FilterFieldType } from "@/app/plant/shared/filter-fields/types";
-import { AnalysisResultKeyFigure } from "../../api-analysis-result-key-figures";
+import { ApiKeyFigure } from "../../api-key-figures";
 import { AnalysisResultCspPtcMirrorSchema } from "../../api-schemas/analysis-result-csp-ptc-mirror-schema";
 import analysisResultMappingBase from "../analysis-result-mapping-base";
 import { AnalysisResultMappings } from "../types";
@@ -9,7 +9,7 @@ const analysisResultCspPtcMappingMirror: AnalysisResultMappings<AnalysisResultCs
   {
     getValue: r => r.is_missing,
     transName: "is-missing-mirror",
-    keyFigureId: AnalysisResultKeyFigure.MISSING_MIRROR_ID,
+    keyFigureId: ApiKeyFigure.MISSING_MIRROR_ID,
     filterType: FilterFieldType.BOOLEAN,
   },
 ];

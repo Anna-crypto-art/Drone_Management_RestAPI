@@ -1,10 +1,10 @@
-import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-analysis-result-components";
+import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { LayerBase } from "./layer-base";
 import { FeatureLike } from "ol/Feature";
 
 export abstract class ComponentLayer extends LayerBase {
-  protected abstract readonly componentId: AnalysisResultComponent;
+  protected abstract readonly componentId: ApiComponent;
 
   protected getPcs(feature: FeatureLike): string {
     return feature.get("name");

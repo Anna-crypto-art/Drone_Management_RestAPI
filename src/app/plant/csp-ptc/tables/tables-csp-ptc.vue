@@ -12,7 +12,7 @@
 <script lang="ts">
 import { Component, Prop, Ref } from "vue-property-decorator";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-analysis-result-components";
+import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 import analysisResultCspPtcMappingIrIntensity from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-hce";
 import analysisResultCspPtcMappingSceAngle from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-sce";
 import analysisResultCspPtcMappingScaOrientation from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-sca";
@@ -22,6 +22,7 @@ import { ITablesComponent } from "@/app/plant/shared/table-component/types";
 import { IActiveComponent, IAnalysisResultSelection } from "@/app/plant/shared/types";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import { apiComponentNames } from "@/app/shared/services/volateq-api/api-components/api-components-name";
 
 @Component({
   name: "app-tables-csp-ptc",
@@ -37,25 +38,25 @@ export default class AppTablesCspPtc extends BaseAuthComponent implements ITable
 
   activeComponents: IActiveComponent[] = [
     {
-      componentId: AnalysisResultComponent.CSP_PTC_ABSORBER,
+      label: apiComponentNames[ApiComponent.CSP_PTC_ABSORBER],
+      componentId: ApiComponent.CSP_PTC_ABSORBER,
       mapping: analysisResultCspPtcMappingIrIntensity as any,
-      label: "absorber-tubes",
     },
     {
-      label: "single-collector-elements",
-      componentId: AnalysisResultComponent.CSP_PTC_SCE,
+      label: apiComponentNames[ApiComponent.CSP_PTC_SCE],
+      componentId: ApiComponent.CSP_PTC_SCE,
       mapping: analysisResultCspPtcMappingSceAngle as any,
       descr: "sce_expl",
     },
     {
-      label: "solar-collector-assembly",
-      componentId: AnalysisResultComponent.CSP_PTC_SCA,
+      label: apiComponentNames[ApiComponent.CSP_PTC_SCA],
+      componentId: ApiComponent.CSP_PTC_SCA,
       mapping: analysisResultCspPtcMappingScaOrientation as any,
       descr: "sca_expl",
     },
     {
-      label: "mirrors",
-      componentId: AnalysisResultComponent.CSP_PTC_MIRROR,
+      label: apiComponentNames[ApiComponent.CSP_PTC_MIRROR],
+      componentId: ApiComponent.CSP_PTC_MIRROR,
       mapping: analysisResultCspPtcMappingMirror as any,
     },
   ];

@@ -86,7 +86,7 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
   }
 
   get runQFlyWizardDisabled(): boolean {
-    return !(this.analysis.current_state.state.id in [ApiStates.DATA_COMPLETE_VERIFIED, ApiStates.PROCESSING]);
+    return !([ApiStates.DATA_COMPLETE_VERIFIED, ApiStates.PROCESSING].includes(this.analysis.current_state.state.id));
   }
 
   async onValidateFilesClick() {

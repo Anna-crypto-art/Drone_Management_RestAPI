@@ -14,8 +14,8 @@ import { AnalysisResultDetailedSchema } from "./api-schemas/analysis-result-sche
 import { TableRequest } from "./api-requests/common/table-requests";
 import { TableResultSchema } from "./api-schemas/table-result-schema";
 import { AnalysisResultFileSchema } from "./api-schemas/analysis-result-file-schema";
-import { AnalysisResultComponent } from "./api-analysis-result-components";
-import { AnalysisResultKeyFigure } from "./api-analysis-result-key-figures";
+import { ApiComponent } from "./api-components/api-components";
+import { ApiKeyFigure } from "./api-key-figures";
 import { GeoVisualQuery } from "./api-requests/geo-visual-query-requests";
 import { ApiErrors, ApiException } from "./api-errors";
 import { ApiStates } from "./api-states";
@@ -219,7 +219,7 @@ export class VolateqAPI extends HttpClientBase {
     return analysisResults[0];
   }
 
-  public getAllSpecificAnalysisResult<T>(analysisResultId: string, componentId: AnalysisResultComponent): Promise<T[]> {
+  public getAllSpecificAnalysisResult<T>(analysisResultId: string, componentId: ApiComponent): Promise<T[]> {
     return this.get(`/auth/analysis-result/${analysisResultId}/${componentId}`);
   }
 
@@ -275,14 +275,14 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/plant/${plantId}`);
   }
 
-  public getComponentsGeoVisual(plantId: string, componentIds: AnalysisResultComponent[]): Promise<any> {
+  public getComponentsGeoVisual(plantId: string, componentIds: ApiComponent[]): Promise<any> {
     return this.get(`/auth/geo-visual/${plantId}/components`, { ids: componentIds });
   }
 
   public getKeyFiguresGeoVisual(
     plantId: string,
     analysisResultId: string,
-    keyFiguresId: AnalysisResultKeyFigure,
+    keyFiguresId: ApiKeyFigure,
     query_params?: GeoVisualQuery
   ): Promise<any> {
     return this.get(`/auth/geo-visual/${plantId}/${analysisResultId}/key-figure/${keyFiguresId}`, query_params);
@@ -380,15 +380,22 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/analysis/${analysisId}/run-qfly-wizard`, { start_server: startServer });
   }
 
+  public getFieldgeometryComponentCodes(
+    fieldgeometryId: string,
+    componentId: ApiComponent
+  ): Promise<string[]> {
+    return this.get(`/auth/fieldgeometry/${fieldgeometryId}/${componentId}/component-codes`);
+  }
+
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {
     // Temporary special case for IR_INTENSITY: Replaced by GLASS_TUBE_TEMPERATURE
     for (const analysisResult of analysisResults) {
       const ir_intensity_index = analysisResult.key_figures.findIndex(
-        keyFigure => keyFigure.id === AnalysisResultKeyFigure.IR_INTENSITY_ID
+        keyFigure => keyFigure.id === ApiKeyFigure.IR_INTENSITY_ID
       );
       if (
         ir_intensity_index != -1 &&
-        analysisResult.key_figures.find(keyFigure => keyFigure.id === AnalysisResultKeyFigure.GLASS_TUBE_TEMPERATURE_ID)
+        analysisResult.key_figures.find(keyFigure => keyFigure.id === ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID)
       ) {
         analysisResult.key_figures.splice(ir_intensity_index, 1);
       }

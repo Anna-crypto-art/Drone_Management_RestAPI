@@ -13,7 +13,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Watch } from "vue-property-decorator";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { FilterField, FilterFieldValue, FilterFieldValueType } from "./types";
 import AppFilterFieldValue from "@/app/plant/shared/filter-fields/filter-field-value.vue";
@@ -30,10 +30,18 @@ export default class AppFilterField extends Vue {
   @Prop({ default: null }) value!: FilterFieldValue | null;
 
   innerValue: FilterFieldValueType | null = null;
-  selectedKey = "";
+  selectedKey: string | number = "";
   filterFieldValue: FilterFieldValue | null = null;
 
-  get selectOptions(): { value: string, text: string }[] {
+  @Watch("value") onValueChanged() {
+    this.setFilterFieldValue();
+  }
+
+  created() {
+    this.setFilterFieldValue();
+  }
+
+  get selectOptions(): { value: string | number, text: string }[] {
     return this.filterFields.map(filterField => ({
       value: filterField.key,
       text: filterField.name
@@ -51,6 +59,16 @@ export default class AppFilterField extends Vue {
     }
 
     this.$emit("input",  this.filterFieldValue);
+  }
+
+  private setFilterFieldValue() {
+    this.selectedKey = this.value?.filterField?.key || "";
+    this.innerValue = this.value?.value || null;
+    
+    this.filterFieldValue = { 
+      filterField: this.filterField || null,
+      value: this.innerValue,
+    }
   }
 }
 </script>

@@ -1,7 +1,7 @@
 import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualization/types/components";
 import { GroupLayer } from "@/app/shared/components/app-geovisualization/types/layers";
-import { AnalysisResultComponent } from "@/app/shared/services/volateq-api/api-analysis-result-components";
-import { AnalysisResultKeyFigure } from "@/app/shared/services/volateq-api/api-analysis-result-key-figures";
+import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
+import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
@@ -15,7 +15,7 @@ export interface Legend {
 }
 
 export interface GroupKPILayer {
-  componentId?: AnalysisResultComponent;
+  componentId?: ApiComponent;
   groupLayer: GroupLayer;
   subGroupLayers?: GroupKPILayer[];
   keyFigureLayers: KeyFigureLayer<AnalysisResultSchemaBase>[];
@@ -51,7 +51,7 @@ export interface FeatureInfo {
 }
 
 export type KeyFigureTypeMap = {
-  keyFigureId: AnalysisResultKeyFigure;
+  keyFigureId: ApiKeyFigure;
   layerType: any; // (typeof KeyFigureLayer) leads to: Type "T" is not assignable to type "AnalysisResultCspPtcHceSchema"
   /**
    * applies to all subLayers if not overwritten

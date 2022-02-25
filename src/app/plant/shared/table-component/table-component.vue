@@ -1,7 +1,7 @@
 <template>
   <div class="app-table-component">
     <app-table-component-container ref="container" :tableName="tableName" :pagination="pagination" size="sm">
-      <app-table-filter :analysisResult="analysisResult" :activeComponent="activeComponent" />
+      <app-table-filter :analysisResult="analysisResult" :activeComponent="activeComponent" :plant="plant" />
       <b-table
         :id="tableName"
         hover
@@ -44,6 +44,7 @@ import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/com
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import AppTableFilter from "@/app/plant/shared/table-component/table-filter.vue";
+import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 
 @Component({
   name: "app-table-component",
@@ -54,8 +55,9 @@ import AppTableFilter from "@/app/plant/shared/table-component/table-filter.vue"
   },
 })
 export default class AppTableComponent extends Vue implements ITableComponent {
-  @Prop() analysisResult!: AnalysisResultDetailedSchema;
-  @Prop() activeComponent!: IActiveComponent;
+  @Prop({ required: true }) plant!: PlantSchema;
+  @Prop({ required: true }) analysisResult!: AnalysisResultDetailedSchema;
+  @Prop({ required: true }) activeComponent!: IActiveComponent;
   @Prop({ default: false }) loadAllResults!: boolean;
   @Ref() container!: ITableComponentContainer;
   @Ref() table!: any;

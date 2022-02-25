@@ -6,10 +6,10 @@ export enum FilterFieldType {
 }
 
 export interface FilterField {
-  key: string;
+  key: string | number;
   name: string;
   type: FilterFieldType;
-  getValues?: () => { value: unknown, text: string }[];
+  getValues?: () => { value: unknown, text?: string }[] | Promise<{ value: unknown, text?: string }[]>;
 }
 
 export type FilterFieldValueType = string | number | boolean | null;

@@ -9,7 +9,7 @@ import { AnalysisResultMappings } from "@/app/shared/services/volateq-api/api-re
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
 import Vue from "vue";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
-import { AnalysisResultKeyFigure } from "@/app/shared/services/volateq-api/api-analysis-result-key-figures";
+import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 
@@ -26,7 +26,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   constructor(
     vueComponent: Vue & IPlantVisualization,
     public readonly analysisResult: AnalysisResultDetailedSchema,
-    protected readonly keyFigureId: AnalysisResultKeyFigure,
+    protected readonly keyFigureId: ApiKeyFigure,
     public readonly keyFigureInfo: KeyFigureInfo,
     public readonly query?: GeoVisualQuery,
     protected readonly color?: KeyFigureColors

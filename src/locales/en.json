@@ -255,6 +255,8 @@
   "filter-by-component": "Filter by component",
   "filter-by-pi": "Filter by PIs",
   "reset": "Reset",
+  "subfield": "Subfield",
+  "add-pi-filter": "Add PI filter",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",
