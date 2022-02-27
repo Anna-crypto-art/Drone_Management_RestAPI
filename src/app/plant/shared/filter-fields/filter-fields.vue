@@ -74,6 +74,8 @@ export default class AppFilterFields extends Vue {
       this.filterFieldValues.findIndex(filterFieldValue => filterFieldValue.id === filterField.id),
       1
     );
+
+    this.onInput();
   }
 
   private setFilterFieldValues() {

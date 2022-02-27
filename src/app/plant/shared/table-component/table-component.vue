@@ -1,6 +1,9 @@
 <template>
   <div class="app-table-component">
     <app-table-component-container ref="container" :tableName="tableName" :pagination="pagination" size="sm">
+      <b-form-checkbox switch v-model="showSumAvg" class="mar-top mar-bottom" @change="onShowSumAvgChange">
+        {{ $t("show-sum-avg") }}
+      </b-form-checkbox>
       <app-table-filter 
         :analysisResult="analysisResult"
         :activeComponent="activeComponent"
@@ -50,6 +53,7 @@ import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import AppTableFilter from "@/app/plant/shared/table-component/table-filter.vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import { MathHelper } from "@/app/shared/services/helper/math-helper";
 
 @Component({
   name: "app-table-component",
@@ -71,6 +75,7 @@ export default class AppTableComponent extends Vue implements ITableComponent {
   tableName!: string;
 
   pagination = { currentPage: 1, perPage: 10, total: 0 };
+  showSumAvg = true;
 
   private last_ctx: BvTableCtxObject | undefined;
   private searchText = "";
@@ -106,6 +111,10 @@ export default class AppTableComponent extends Vue implements ITableComponent {
     this.table.refresh();
   }
 
+  onShowSumAvgChange() {
+    this.table.refresh();
+  }
+
   getTableRequestParam(): TableRequest {
     if (!this.last_ctx) {
       throw Error("Missing last_ctx");
@@ -117,6 +126,7 @@ export default class AppTableComponent extends Vue implements ITableComponent {
       order_by: this.last_ctx.sortBy && this.columnsMapping[this.last_ctx.sortBy],
       order_direction: this.last_ctx.sortDesc ? "desc" : "asc",
       search_text: this.searchText,
+      sums: this.showSumAvg ? 1 : 0,
     };
   }
 
@@ -151,7 +161,24 @@ export default class AppTableComponent extends Vue implements ITableComponent {
       );
       this.pagination.total = results.total;
 
-      return this.mappingHelper.getItems(results.items);
+      const tableItems = this.mappingHelper.getItems(results.items);
+
+      if (results.sums) {
+        const sumItem = this.mappingHelper.getItem(results.sums);
+        for (const key in sumItem) {
+          const val = sumItem[key];
+          if (MathHelper.isFloat(val as any)) {
+            sumItem[key] = MathHelper.roundTo(val as any, 2);
+          }
+        }
+
+        tableItems.unshift({
+          ...sumItem,
+         _rowVariant: "primary",
+        });
+      }
+
+      return tableItems;
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
     } finally {
@@ -199,3 +226,10 @@ export default class AppTableComponent extends Vue implements ITableComponent {
   }
 }
 </script>
+<style lang="scss">
+.app-table-component {
+  tr.table-primary > td {
+    font-weight: bold !important;
+  }
+}
+</style>

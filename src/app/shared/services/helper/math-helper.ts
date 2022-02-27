@@ -5,4 +5,8 @@ export class MathHelper {
 
     return rounded_num.toFixed(precision);
   }
+
+  public static isFloat(num: any): boolean {
+    return typeof num === "number" && !Number.isInteger(num);
+  }
 }

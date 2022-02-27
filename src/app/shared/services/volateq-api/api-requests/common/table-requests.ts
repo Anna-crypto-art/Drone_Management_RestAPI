@@ -10,6 +10,7 @@ export interface TableRequest {
   search_text?: string;
   search_mode?: "contains" | "equals";
   key_figure_image_url?: ApiKeyFigure;
+  sums?: 0 | 1;
 }
 
 export interface TableFilterRequest {

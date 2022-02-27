@@ -72,6 +72,11 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
   }
 
   public getPropertyName(mappingEntry: AnalysisResultMappingEntry<T>): string {
+    if (mappingEntry.transName === "pcs") {
+      // special case.. regex is not working for this case...
+      return "fieldgeometry_component.kks";
+    }
+
     return mappingEntry.getValue.toString().match(/({|=>)[^.]*\.([^;}]*)/)![2];
   }
 }
