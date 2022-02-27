@@ -1,6 +1,6 @@
 <template>
   <div class="app-analysis-upload">
-    <b-form-checkbox 
+    <b-form-checkbox
       v-show="analysis"
       v-model="dataComplete"
       @change="onChangeDataComplete"
@@ -31,24 +31,24 @@
 </template>
 
 <script lang="ts">
-import { Component, Ref, Prop, Watch } from "vue-property-decorator";
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import AppContent from "@/app/shared/components/app-content/app-content.vue";
-import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
-import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import AppFileUpload from "@/app/shared/components/app-file-upload/app-file-upload.vue";
-import { IAppFileUpload } from "@/app/shared/components/app-file-upload/types";
 import { IAnalysisId, IAppNewAnalysisFetched } from "@/app/analysis/new-analysis/types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
-import { apiStateNames, ApiStates } from "@/app/shared/services/volateq-api/api-states";
+import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
+import AppContent from "@/app/shared/components/app-content/app-content.vue";
+import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
+import AppFileUpload from "@/app/shared/components/app-file-upload/app-file-upload.vue";
+import { IAppFileUpload } from "@/app/shared/components/app-file-upload/types";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { IFetchComponent } from "@/app/shared/components/fetch-component/fetch-component";
-import { UploadService } from "@/app/shared/services/upload-service/upload-service";
-import { IUploadListener, IResumableFile, UploadState, UploadEvent } from "@/app/shared/services/upload-service/types";
 import { UPLOAD_ANALYSIS_STORAGE_KEY } from "@/app/shared/components/fetch-component/storage-keys";
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
+import { IResumableFile, IUploadListener, UploadEvent, UploadState } from "@/app/shared/services/upload-service/types";
+import { UploadService } from "@/app/shared/services/upload-service/upload-service";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
-import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
+import { apiStateNames, ApiStates } from "@/app/shared/services/volateq-api/api-states";
+import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import { Component, Prop, Ref, Watch } from "vue-property-decorator";
 import { AnalysisEventService } from "./analysis-event-service";
 import { AnalysisEvent } from "./types";
 
@@ -225,11 +225,14 @@ export default class AppAnalysisUpload
   }
 
   get hasPlantMetadata(): boolean {
-    return this.analysis && this.analysis.has_plant_metadata || false;
+    return (this.analysis && this.analysis.has_plant_metadata) || false;
   }
 
   get dataCompleteMetadataExpl(): string {
-    return !this.hasPlantMetadata && this.$t("missing-plant-metadata").toString() || this.$t("data-complete_expl").toString();
+    return (
+      (!this.hasPlantMetadata && this.$t("missing-plant-metadata").toString()) ||
+      this.$t("data-complete_expl").toString()
+    );
   }
 
   async onSubmit() {
@@ -237,7 +240,7 @@ export default class AppAnalysisUpload
       // Retry upload...
 
       // Pings to the server. If the server is not responding, do nothing
-      if (!(await volateqApi.isLoggedIn())) { 
+      if (!(await volateqApi.isLoggedIn())) {
         return;
       }
 

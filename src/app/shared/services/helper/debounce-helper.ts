@@ -9,5 +9,5 @@ export function debounce(func, timeout = 300) {
 }
 
 export async function waitFor(ms: number) {
-  await new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
+  await new Promise<void>(resolve => setTimeout(() => resolve(), ms));
 }

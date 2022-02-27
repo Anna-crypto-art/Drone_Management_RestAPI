@@ -6,7 +6,6 @@
       :analysisResults="analysisResults"
       :componentLayerTypes="componentLayerTypes"
       :keyFigureLayers="keyFigureLayers"
-      @sidebarToggle="onSidebarToggled"
     >
       <template #pcs>
         {{ $t("pcs") }} <app-explanation>{{ $t("pcs_expl") }}</app-explanation>
@@ -20,7 +19,8 @@
         <app-explanation><span v-html="$t('glass-tube-temperature-class_expl')"></span></app-explanation>
       </template>
       <template #missingGhr>
-        {{ $t("missing-gct") }} <app-explanation><span v-html="$t('missing-gct_expl')"></span></app-explanation>
+        {{ $t("missing-gct") }}
+        <app-explanation><span v-html="$t('missing-gct_expl')"></span></app-explanation>
       </template>
       <template #O2Penetration>
         {{ $t("oxygen-penetration") }}
@@ -31,12 +31,12 @@
         <app-explanation><span v-html="$t('high-hydrogen-concentration_expl')"></span></app-explanation>
       </template>
       <template #glassTubeTemperatureClass3>
-        {{ 
-          selectedAnalysisResult && (
-            selectedAnalysisResult.csp_ptc.glass_tube_temperature_class_count === 3 ? 
-            $t("glass-tube-temperature-class-4") :
-            $t("glass-tube-temperature-class-3")
-          ) || ""
+        {{
+          (selectedAnalysisResult &&
+            (selectedAnalysisResult.csp_ptc.glass_tube_temperature_class_count === 3
+              ? $t("glass-tube-temperature-class-4")
+              : $t("glass-tube-temperature-class-3"))) ||
+          ""
         }}
       </template>
       <template #glassTubeTemperatureNotMeasured>
@@ -101,22 +101,23 @@
         <app-explanation><span v-html="$t('torsion-caused-friction-mean_expl')"></span></app-explanation>
       </template>
       <template #scaSdx>
-        {{ $t("slope-deviation") }} <app-explanation><span v-html="$t('slope-deviation_expl')"></span></app-explanation>
+        {{ $t("slope-deviation") }}
+        <app-explanation><span v-html="$t('slope-deviation_expl')"></span></app-explanation>
       </template>
     </app-visualization>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref } from "vue-property-decorator";
-import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import AppVisualization from "@/app/plant/shared/visualization/visualization.vue";
-import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualization/types/components";
 import { IAnalysisResultSelection } from "@/app/plant/shared/types";
 import { IPlantVisualization, Legend } from "@/app/plant/shared/visualization/types";
+import AppVisualization from "@/app/plant/shared/visualization/visualization.vue";
+import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
+import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualization/types/components";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
+import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import { Component, Prop, Ref } from "vue-property-decorator";
 import { COMPONENT_LAYERS, KEY_FIGURE_LAYERS } from "./layers";
 
 @Component({
@@ -153,10 +154,6 @@ export default class AppVisualCspPtc
     return this.visualization?.onLayerSelected(selected, legend);
   }
 
-  onSidebarToggled(toggleState: boolean): void {
-    this.$emit("sidebarToggle", toggleState);
-  }
-
   getTransAlignmentOffsetClassLimit(component_type: "sce" | "sca", class_limit: 1 | 2 | 3): string {
     if (!this.selectedAnalysisResult) {
       return "";
@@ -183,7 +180,9 @@ export default class AppVisualCspPtc
       }).toString();
     }
     if (class_limit === 3) {
-      return this.$t("alignment-offset-class-3", { limit1: offset_class_limits[1] }).toString();
+      return this.$t("alignment-offset-class-3", {
+        limit1: offset_class_limits[1],
+      }).toString();
     }
 
     throw new Error("class_limit not allowed");

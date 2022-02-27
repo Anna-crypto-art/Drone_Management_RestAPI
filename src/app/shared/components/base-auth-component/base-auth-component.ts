@@ -3,7 +3,7 @@ import Vue from "vue";
 export abstract class BaseAuthComponent extends Vue {
   isCreated = false;
 
-  async created() {
+  async created(): Promise<void> {
     this.isCreated = true;
   }
 

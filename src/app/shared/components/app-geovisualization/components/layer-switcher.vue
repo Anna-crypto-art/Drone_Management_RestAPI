@@ -1,16 +1,40 @@
 <template>
-  <div :class="'layer-switcher' + (open ? ' open' : '')">
+  <div :class="'layer-switcher' + (sidebarOpen ? ' open' : '')">
+    <app-geovisual-toggle-layer />
+
+    <div class="controls">
+      <!-- IDEA: Bootstrap thought it was a good idea to use a transparent
+           background for hovered buttons, in this case not, use a white
+           or gray one instead -->
+
+      <b-button size="sm" @click="goHome">
+        <b-icon-house />
+      </b-button>
+
+      <b-button-group vertical>
+        <b-button size="sm" @click="() => handleZoom('in')">
+          <b-icon-plus />
+        </b-button>
+        <b-button size="sm" @click="() => handleZoom('out')">
+          <b-icon-dash />
+        </b-button>
+      </b-button-group>
+    </div>
+
     <div class="content">
       <div class="content-top">
-        <slot name="topContent"></slot>
+        <slot name="topContent" />
       </div>
+
       <app-geovisual-layer-display :layer="rootLayer">
         <!-- Pass slots through -->
         <template v-for="(_, slot) in $slots">
           <template :slot="slot">
-            <slot :name="slot"></slot>
+            <slot :name="slot" />
           </template>
         </template>
+
+        <b-form-checkbox>{{ $t("world-map") }}</b-form-checkbox>
       </app-geovisual-layer-display>
     </div>
   </div>
@@ -18,50 +42,48 @@
 
 <script lang="ts">
 import { Map } from "ol";
+import { Zoom } from "ol/control";
+import { easeOut } from "ol/easing";
 import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
-import { LoadingEvent } from "../types/events";
+import { State } from "vuex-class";
 import { LayerStructure } from "../layer-structure";
-import { OSMLoader } from "../loader/osm-loader";
-import { GeoJSONLoader } from "../loader/geojson-loader";
 import { CustomLoader } from "../loader/custom-loader";
-import AppGeovisualLayerDisplay from "./layer-display.vue";
+import { GeoJSONLoader } from "../loader/geojson-loader";
+import { OSMLoader } from "../loader/osm-loader";
+import { LoadingEvent } from "../types/events";
 import { LayerType } from "../types/layers";
+import AppGeovisualLayerDisplay from "./layer-display.vue";
+import AppGeovisualToggleLayer from "./toggle-layer.vue";
 
 @Component({
   name: "app-geovisual-layer-switcher",
   components: {
     AppGeovisualLayerDisplay,
+    AppGeovisualToggleLayer,
   },
 })
 export default class AppGeovisualLayerSwitcher extends Vue {
-  private static layerUIs: AppGeovisualLayerSwitcher[] = [];
-
-  public static toggle(id: number): void {
-    this.layerUIs[id].toggle();
-  }
-
-  public static isOpen(id: number): boolean {
-    return this.layerUIs[id].isOpen();
-  }
-
   @Prop() map!: Map;
   @Prop() layers!: LayerType[];
   @Prop({ default: "" }) title = "";
-  @Prop() layerIdx?: (idx: number) => void;
+
+  readonly rootLayer = new LayerStructure();
+
+  public zoomDelta = 1;
+  public animationDuration = 200;
+
+  @State(state => state.sidebar["layer-switcher"]) sidebarOpen!: boolean;
 
   mounted(): void {
     this.layerSetup(this.rootLayer, this.layers);
-    this.layerIdx && this.layerIdx(this.layerIndex);
-  }
-  readonly layerIndex = (() => {
-    const id = AppGeovisualLayerSwitcher.layerUIs.length;
-    AppGeovisualLayerSwitcher.layerUIs[id] = this;
-    return id;
-  })();
 
-  readonly rootLayer = new LayerStructure();
-  open = true;
+    this.map.getControls().forEach(control => {
+      if (control instanceof Zoom) {
+        this.map.removeControl(control);
+      }
+    });
+  }
 
   private layerSetup(parentLayer: LayerStructure, layers: LayerType[]) {
     const setLoadigState = (e: LoadingEvent) => {
@@ -105,52 +127,76 @@ export default class AppGeovisualLayerSwitcher extends Vue {
     }
   }
 
-  public toggle(): void {
-    this.open = !this.open;
-    this.$forceUpdate();
+  handleZoom(direction: "out" | "in") {
+    const view = this.map.getView();
+    const zoom = view.getZoom();
 
-    this.$emit("sidebarToggle", this.open);
+    if (zoom !== undefined) {
+      const nextZoom = view.getConstrainedZoom(zoom + (direction === "out" ? -this.zoomDelta : this.zoomDelta));
+
+      if (view.getAnimating()) view.cancelAnimations();
+
+      view.animate({
+        zoom: nextZoom,
+        duration: this.animationDuration,
+        easing: easeOut,
+      });
+    }
   }
 
-  public isOpen(): boolean {
-    return this.open;
+  goHome() {
+    window.dispatchEvent(new CustomEvent("app-visualization:go-home"));
   }
 }
 </script>
 
 <style lang="scss">
-$sidebar-width: 400px;
+@import "@/scss/_colors.scss";
+
+$sidebar-width: min(400px, min(70vw, calc(100vw - 50px)));
 
 .layer-switcher {
-  flex: 0 0 0;
-  width: 0;
-
-  box-sizing: content-box;
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: $sidebar-width;
 
   background: white;
-  overflow-x: hidden;
+  transform: translateX(100%);
 
-  box-shadow: 0 0 5px lightgray;
+  transition: transform 0.2s ease-in-out;
+  border-left: $border-color-grey 1px solid;
 
-  $animation: 0.2s ease-in-out;
-  transition: flex-basis $animation;
+  .controls {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 10px;
+    position: absolute;
+    right: 100%;
+    bottom: 0;
+    padding-right: 0.5em;
+    padding-bottom: 2em;
 
-  > * {
-    margin: 10px;
-  }
+    button {
+      height: 35px;
+      width: 35px;
+      padding: 0;
+    }
 
-  &.open {
-    flex-basis: $sidebar-width;
+    button:hover {
+      background: $hover-light-blue;
+    }
   }
 
   .content {
-    margin-top: 20px;
-    margin-left: -20px;
-    width: $sidebar-width;
+    padding: 20px;
+    overflow: auto;
+    height: 100%;
+  }
 
-    .content-top {
-      padding-left: 40px;
-    }
+  &.open {
+    transform: translateX(0);
   }
 }
 </style>

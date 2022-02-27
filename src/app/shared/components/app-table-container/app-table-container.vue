@@ -17,6 +17,7 @@ export default class AppTableContainer extends Vue {
 <style lang="scss">
 .app-table-container {
   margin-top: 30px;
+  overflow-x: auto;
 
   &-sm {
     font-size: 0.8rem;

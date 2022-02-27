@@ -17,8 +17,8 @@ const anaylsisRoutes: RouteConfig[] = [
   {
     name: "EditAnalysis",
     path: "/analysis/:id",
-    component: AppEditAnalysis
-  }
+    component: AppEditAnalysis,
+  },
 ];
 
 export default anaylsisRoutes;

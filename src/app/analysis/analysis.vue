@@ -3,9 +3,10 @@
     <div class="app-analysis">
       <router-link :to="{ name: 'AnalysisNew' }">
         <b-button
-        variant="primary" 
-        :disabled="!!incompleteAnalysisName" 
-        :title="incompleteAnalysisName && $t('no-new-upload-allowed', { name: incompleteAnalysisName }) || ''">
+          variant="primary"
+          :disabled="!!incompleteAnalysisName"
+          :title="(incompleteAnalysisName && $t('no-new-upload-allowed', { name: incompleteAnalysisName })) || ''"
+        >
           {{ createNewAnalysisBtnText }}
         </b-button>
       </router-link>
@@ -15,7 +16,8 @@
           class="app-analysis-plants-filter-select"
           v-model="selectedPlantId"
           :options="plants"
-          @change="onPlantSelectionChanged">
+          @change="onPlantSelectionChanged"
+        >
         </b-form-select>
         <label class="app-analysis-plants-filter-label" for="plants">{{ $t("plant") }}</label>
       </div>
@@ -38,11 +40,12 @@
           <template #empty="scope">
             <span class="grayed">{{ scope.emptyText }}</span>
           </template>
+
           <template #head(actions)>
             <span class="hidden">{{ $t("actions") }}</span>
           </template>
           <template #cell(name)="row">
-            <router-link :to="{ name: 'EditAnalysis', params: { id: row.item.id }}">{{ row.item.name }}</router-link>
+            <router-link :to="{ name: 'EditAnalysis', params: { id: row.item.id } }">{{ row.item.name }}</router-link>
           </template>
           <template #cell(user)="row">
             <span v-if="row.item.user.userName">
@@ -51,6 +54,7 @@
             </span>
             <span v-else>{{ row.item.user.email }}</span>
           </template>
+
           <template #cell(state)="row">
             <div v-if="row.item.state">
               {{ $t(row.item.state.state.name) }}
@@ -85,20 +89,19 @@
 </template>
 
 <script lang="ts">
-import { Component } from "vue-property-decorator";
-
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
+import AppModalFormInfoArea from "@/app/shared/components/app-modal/app-modal-form-info-area.vue";
+import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
-import volateqApi from "../shared/services/volateq-api/volateq-api";
-import { AnalysisSchema } from "../shared/services/volateq-api/api-schemas/analysis-schema";
+import { BvTableFieldArray } from "bootstrap-vue";
+import { Component } from "vue-property-decorator";
 import appContentEventBus from "../shared/components/app-content/app-content-event-bus";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
-import { BvTableFieldArray } from "bootstrap-vue";
-import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
-import AppModalFormInfoArea from "@/app/shared/components/app-modal/app-modal-form-info-area.vue";
 import { ApiException } from "../shared/services/volateq-api/api-errors";
+import { AnalysisSchema } from "../shared/services/volateq-api/api-schemas/analysis-schema";
 import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
 import { ApiStates } from "../shared/services/volateq-api/api-states";
+import volateqApi from "../shared/services/volateq-api/volateq-api";
 
 @Component({
   name: "app-analysis",
@@ -125,18 +128,18 @@ export default class AppAnalysis extends BaseAuthComponent {
     this.columns = [
       { key: "name", label: this.$t("name").toString(), sortable: true },
       { key: "plant", label: this.$t("plant").toString(), sortable: true },
-      { 
+      {
         key: "date",
         label: this.$t("acquisition-date").toString(),
         sortable: true,
         formatter: (flownAt: string) => {
-          return new Date(Date.parse(flownAt)).toLocaleDateString()
-        }
+          return new Date(Date.parse(flownAt)).toLocaleDateString();
+        },
       },
       { key: "user", label: this.$t("created-by").toString(), sortable: true },
       { key: "state", label: this.$t("state").toString(), sortable: true },
       { key: "hasResults", label: this.$t("has-results").toString() },
-      { key: "actions" }
+      { key: "actions" },
     ];
 
     await this.getPlants();
@@ -154,8 +157,8 @@ export default class AppAnalysis extends BaseAuthComponent {
   }
 
   get incompleteAnalysisName(): string | null {
-    const analysisName = this.analysisRows?.find(analysis => 
-      analysis.state && analysis.state.state.id <= ApiStates.DATA_INCOMPLETE
+    const analysisName = this.analysisRows?.find(
+      analysis => analysis.state && analysis.state.state.id <= ApiStates.DATA_INCOMPLETE
     )?.name;
 
     return analysisName || null;
@@ -165,7 +168,7 @@ export default class AppAnalysis extends BaseAuthComponent {
     this.isLoading = true;
 
     try {
-      const plant_id_filter = this.selectedPlantId && { plant_id: this.selectedPlantId } || undefined;
+      const plant_id_filter = (this.selectedPlantId && { plant_id: this.selectedPlantId }) || undefined;
       this.analysisRows = (await volateqApi.getAllAnalysis(plant_id_filter)).map((a: AnalysisSchema) => {
         const row = {
           id: a.id,

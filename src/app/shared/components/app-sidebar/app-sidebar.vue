@@ -1,12 +1,18 @@
 <template>
-  <div :class="'app-sidebar ' + ((open && 'open') || '')">
+  <div :class="'app-sidebar ' + (open ? 'open' : '')">
     <div class="app-sidebar-container">
       <div class="app-sidebar-inner">
         <slot></slot>
       </div>
     </div>
-    <b-button variant="secondary" size="sm" class="toggle-button" @click="onToggle()">
-      <b-icon :icon="(open && 'book-fill') || 'book'"></b-icon>
+
+    <b-button
+      variant="secondary"
+      size="sm"
+      :class="'toggle-button opens-right ' + (open ? 'show-label' : '')"
+      @click="onToggle()"
+    >
+      <b-icon :icon="(open && 'book-half') || 'book'"></b-icon>
       <span class="toggle-button-text">&nbsp; {{ $t("history") }}</span>
     </b-button>
   </div>
@@ -23,9 +29,7 @@ export default class AppSidebar extends Vue {
   @Prop({ default: true }) open!: boolean;
 
   onToggle(): void {
-    this.open = !this.open;
-
-    this.$emit("toggled", this.open);
+    this.$emit("toggled");
   }
 }
 </script>
@@ -33,7 +37,7 @@ export default class AppSidebar extends Vue {
 <style lang="scss">
 @import "@/scss/_colors.scss";
 
-$sidebar-width: 400px;
+$sidebar-width: min(400px, min(70vw, calc(100vw - 50px)));
 
 .app-sidebar {
   position: relative;
@@ -55,10 +59,12 @@ $sidebar-width: 400px;
     .app-sidebar-inner {
       position: absolute;
       top: 0;
-      left: -$sidebar-width;
+      left: calc($sidebar-width * -1);
       width: $sidebar-width;
       height: 100%;
       transition: all 0.3s ease-in-out;
+
+      --sidebar-width: $sidebar-width;
     }
   }
 
@@ -68,40 +74,70 @@ $sidebar-width: 400px;
     .app-sidebar-container .app-sidebar-inner {
       left: 0;
     }
-
-    .toggle-button-text {
-      max-width: 150px;
-      padding-left: 0.5em;
-    }
   }
 
   .toggle-button {
-    position: absolute;
     top: 3.5em;
-    border: none;
+  }
+}
+
+.toggle-button {
+  position: absolute;
+  color: $blue;
+  border: 1px solid $border-color-grey;
+  white-space: nowrap;
+
+  &:active:hover {
+    color: $hover-blue !important;
+  }
+
+  &.opens-right {
     left: calc(100% - 1px);
-    color: $blue;
-    border: 1px solid $border-color-grey;
     border-left-color: $white;
-    white-space: nowrap;
 
-    &-text {
-      transition: all 0.3s ease-in-out;
-      max-width: 0;
-      display: inline-block;
-      overflow: hidden;
-      vertical-align: text-bottom;
-      line-height: 1.3em;
-    }
-
-    &:hover {
-      background-color: $background-grey;
-
-      .toggle-button-text {
-        max-width: 150px;
-        padding-left: 0.5em;
+    .plant-view-csp-ptc:not(.mobile) & {
+      &:hover,
+      &.show-label {
+        .toggle-button-text {
+          padding-left: 0.5em;
+        }
       }
     }
+  }
+
+  &.opens-left {
+    right: calc(100% - 1px);
+    border-right-color: $white;
+
+    .plant-view-csp-ptc:not(.mobile) & {
+      &:hover,
+      &.show-label {
+        .toggle-button-text {
+          padding-right: 0.5em;
+        }
+      }
+    }
+  }
+
+  &-text {
+    transition: all 0.3s ease-in-out;
+    max-width: 0;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: text-bottom;
+    line-height: 1.3em;
+  }
+
+  .plant-view-csp-ptc:not(.mobile) &.show-label {
+    .toggle-button-text {
+      max-width: 150px;
+    }
+  }
+
+  &:hover {
+    background-color: $background-grey;
+
+    @extend .show-label;
   }
 }
 </style>

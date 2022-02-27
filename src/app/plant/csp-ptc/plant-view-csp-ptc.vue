@@ -1,25 +1,23 @@
 <template>
-  <div class="plant-view-csp-ptc" v-if="analysisResults">
+  <div :class="'plant-view-csp-ptc' + (isMobile ? ' mobile' : '')" v-if="analysisResults">
     <app-analysis-selection-sidebar
       ref="analysisSelectionSidebar"
       :plant="plant"
       :analysisResults="analysisResults"
-      :open="false"
       :getPIColor="getPiColor"
-      @sidebarToggled="onSidebarToggled"
+      :absolute="leftSidebarAbsolute"
       @analysisResultSelected="onAnalysisResultSelected"
     />
-    <div :class="'plant-view-csp-ptc-rightside ' + (sidebarOpen ? 'open' : '')">
-      <h2 :class="'plant-view-csp-ptc-title ' + (sidebarOpen ? 'open' : '')">{{ plant.name }}</h2>
-      <b-tabs align="center" @activate-tab="onTabChanged">
+    <div class="plant-view-csp-ptc-rightside">
+      <h2 :class="'plant-view-csp-ptc-title ' + (sidebarStates['analysis'] ? 'open' : '')">
+        {{ plant.name }}
+      </h2>
+      <b-tabs align="center" @activate-tab="onTabChange">
         <b-tab>
-          <template #title><b-icon icon="map" /></template>
-          <app-visual-csp-ptc
-            ref="visualCspPtc"
-            :analysisResults="analysisResults"
-            :plant="plant"
-            @sidebarToggle="onRightSidebarToggle"
-          />
+          <template #title>
+            <b-icon icon="map" />
+          </template>
+          <app-visual-csp-ptc ref="visualCspPtc" :analysisResults="analysisResults" :plant="plant" />
         </b-tab>
         <b-tab v-if="hasResults">
           <template #title><b-icon icon="table" /></template>
@@ -35,23 +33,24 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import { Component, Prop, Ref } from "vue-property-decorator";
-import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import AppPlantAdminViewCspPtc from "@/app/plant/csp-ptc/plant-admin-view-csp-ptc.vue";
+import AppTablesCspPtc from "@/app/plant/csp-ptc/tables/tables-csp-ptc.vue";
 import AppVisualCspPtc from "@/app/plant/csp-ptc/visualization/visual-csp-ptc.vue";
-import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
+import AppAnalysisSelectionSidebar from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-sidebar.vue";
+import { IAnalysisSelectionSidebar } from "@/app/plant/shared/analysis-selection-sidebar/types";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
-import AppTablesCspPtc from "@/app/plant/csp-ptc/tables/tables-csp-ptc.vue";
-import { IAnalysisSelectionSidebar } from "@/app/plant/shared/analysis-selection-sidebar/types";
-import { IAnalysisResultSelection } from "../shared/types";
-import AppAnalysisSelectionSidebar from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-sidebar.vue";
-import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { cspPtcKeyFigureColors } from "./csp-ptc-key-figure-colors";
+import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
-import AppPlantAdminViewCspPtc from "@/app/plant/csp-ptc/plant-admin-view-csp-ptc.vue";
+import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import { ISidebarModule } from "@/app/shared/stores/sidebar";
+import { Component, Prop, Ref } from "vue-property-decorator";
+import { State } from "vuex-class";
+import { IAnalysisResultSelection } from "../shared/types";
+import { cspPtcKeyFigureColors } from "./csp-ptc-key-figure-colors";
 
 @Component({
   name: "app-plant-view-csp-ptc",
@@ -71,18 +70,39 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
   @Ref() visualCspPtc!: IAnalysisResultSelection;
   @Ref() tablesCspPtc!: IAnalysisResultSelection;
 
-  selectedAnalysisResult: AnalysisResultDetailedSchema | null = null; 
+  selectedAnalysisResult: AnalysisResultDetailedSchema | null = null;
 
   private analysisResults: AnalysisResultDetailedSchema[] | null = null;
 
-  private sidebarOpen = false;
+  @State(state => state.sidebar) sidebarStates!: ISidebarModule;
+  preMobileSidebarState: ISidebarModule | null = null;
 
-  async created() {
+  leftSidebarAbsolute = true; // TODO: Make it absolute on all tabs?
+  currentTab = 0;
+
+  private isMobile!: boolean; // TODO: Replace this with the new mobile store
+  private isMobileQuery!: MediaQueryList;
+  private isMobileListener<Evt extends { matches: boolean }>(e: Evt) {
+    this.isMobile = e.matches;
+
+    this.$store.direct.commit.sidebar.setAll(!this.isMobile);
+    this.updateLeftSidebarAbsolute();
+  }
+
+  async created(): Promise<void> {
     this.analysisResults = await volateqApi.getAnalysisResults(this.plant.id);
+
+    this.isMobileQuery = window.matchMedia("screen and (max-width: 1000px)");
+    this.isMobileQuery.addEventListener("change", this.isMobileListener);
+    this.isMobileListener(this.isMobileQuery);
+  }
+
+  unmounted() {
+    this.isMobileQuery.removeEventListener("change", this.isMobileListener);
   }
 
   get hasResults(): boolean {
-    return (this.analysisResults && this.analysisResults.length > 0) || false;
+    return this.analysisResults ? this.analysisResults?.length > 0 : false;
   }
 
   onAnalysisResultSelected(selectedAnalysisResultId: string | undefined): void {
@@ -94,18 +114,9 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
     this.rerenderOLCanvas();
   }
 
-  onSidebarToggled(open: boolean): void {
-    this.sidebarOpen = open;
-
-    this.rerenderOLCanvas(300);
-  }
-
-  onRightSidebarToggle(toggleState: boolean): void {
-    this.rerenderOLCanvas(300);
-  }
-
-  onTabChanged(tabIndex: number): void {
-    this.rerenderOLCanvas();
+  onTabChange(tab: number) {
+    this.currentTab = tab;
+    this.updateLeftSidebarAbsolute();
   }
 
   private rerenderOLCanvas(timeout = 0): void {
@@ -117,6 +128,10 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
 
   getPiColor(keyFigure: KeyFigureSchema): string {
     return cspPtcKeyFigureColors[keyFigure.id];
+  }
+
+  updateLeftSidebarAbsolute() {
+    this.leftSidebarAbsolute = this.isMobile || this.currentTab === 0;
   }
 }
 </script>
@@ -134,29 +149,36 @@ $left-width: 400px;
   position: relative;
 
   &-title {
-    transition: left 0.3s ease-in-out;
+    position: relative;
+    z-index: 100;
     font-size: 1.5rem;
     display: block;
     position: absolute;
     top: 0.3em;
     left: 0.5em;
-
-    &.open {
-      left: calc(0.5em + $left-width);
-    }
   }
 
   &-rightside {
     height: 100%;
     width: 100%;
-
-    &.open {
-      width: calc(100% - #{$left-width});
-    }
   }
 
-  &-admin-panel h2 {
-    margin-top: 30px;
+  &-admin-panel {
+    &-tab {
+      padding: 0 50px;
+    }
+
+    &-container {
+      padding: 0;
+    }
+
+    h4 {
+      margin: 1.5em 0 0.5em 0;
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
   }
 }
 </style>

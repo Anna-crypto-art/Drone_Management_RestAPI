@@ -1,39 +1,48 @@
 <template>
-  <div class="app-header">
-    <b-container :fluid="fluid">
-      <router-link :to="{ name: 'Home' }">
+  <b-navbar class="app-header" toggleable="lg" type="dark" sticky>
+    <b-navbar-brand href="#">
+      <b-link to="/">
         <img
           class="app-header-logo float-left"
           src="/images/logos/logo_white.png"
           srcset="/images/logos/logo_white.webp, /images/logos/logo_white.png"
           alt="volateq"
         />
-      </router-link>
-      <div class="app-header-menu float-left">
-        <b-nav pills>
-          <b-nav-item class="link" href="/plants" :active="isActiveRoute(['/plants', '/plant/*'])">
-            <span class="nav-item-text">{{ $t("plants") }}</span>
-          </b-nav-item>
-          <b-nav-item class="link" href="/analyses" :active="isActiveRoute(['/analyses', '/analysis/new'])">
-            <span class="nav-item-text">{{ $t("analysis") }}</span>
-          </b-nav-item>
-        </b-nav>
-      </div>
-      <div class="app-header-settings-menu float-right">
-        <b-nav pills>
-          <b-nav-item-dropdown toggle-class="app-header-nav-dropdown" right>
-            <template slot="button-content"><b-icon icon="gear-fill" font-scale="1.5"></b-icon></template>
-            <b-dropdown-item href="/" class="link">{{ $t("profile") }}</b-dropdown-item>
-            <b-dropdown-item href="/settings/users" v-if="isSuperAdmin" class="link">{{ $t("users") }}</b-dropdown-item>
-            <b-dropdown-divider></b-dropdown-divider>
-            <b-dropdown-form>
-              <b-button @click="logout" class="width-100pc">{{ $t("logout") }}</b-button>
-            </b-dropdown-form>
-          </b-nav-item-dropdown>
-        </b-nav>
-      </div>
-    </b-container>
-  </div>
+      </b-link>
+    </b-navbar-brand>
+
+    <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
+
+    <b-collapse class="app-header-menu" id="nav-collapse" is-nav>
+      <b-navbar-nav>
+        <b-nav-item class="link" href="/plants" :active="isActiveRoute(['/plants', '/plant/*'])">
+          <span class="nav-item-text">{{ $t("plants") }}</span>
+        </b-nav-item>
+
+        <b-nav-item class="link" href="/analyses" :active="isActiveRoute(['/analyses', '/analysis/new'])">
+          <span class="nav-item-text">{{ $t("analysis") }}</span>
+        </b-nav-item>
+      </b-navbar-nav>
+
+      <b-navbar-nav class="ml-auto">
+        <b-nav-item-dropdown toggle-class="app-header-nav-dropdown" right>
+          <template #button-content>
+            <b-icon icon="gear-fill" font-scale="1.5" />
+          </template>
+
+          <b-dropdown-item href="/" class="link">{{ $t("profile") }}</b-dropdown-item>
+
+          <b-dropdown-item href="/settings/users" v-if="isSuperAdmin" class="link">{{ $t("users") }}</b-dropdown-item>
+
+          <b-dropdown-divider />
+
+          <b-dropdown-form>
+            <b-button @click="logout" class="width-100pc">{{ $t("logout") }}</b-button>
+          </b-dropdown-form>
+        </b-nav-item-dropdown>
+      </b-navbar-nav>
+    </b-collapse>
+  </b-navbar>
 </template>
 
 <script lang="ts">
@@ -48,7 +57,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 export default class AppHeader extends BaseAuthComponent {
   @Prop({ default: true }) fluid!: boolean;
 
-  async logout() {
+  async logout(): Promise<void> {
     try {
       await volateqApi.logout();
 
@@ -72,81 +81,114 @@ export default class AppHeader extends BaseAuthComponent {
 <style lang="scss">
 @import "@/scss/_colors.scss";
 @import "@/scss/_variables.scss";
+@import "~bootstrap/scss/_functions";
+@import "~bootstrap/scss/_variables";
+@import "~bootstrap/scss/mixins/_breakpoints";
+
+%padtopbot-0 {
+  padding-top: 0;
+  padding-bottom: 0;
+}
 
 .app-header {
   height: $header-height;
   line-height: $header-height;
-  align-items: center;
   background-color: $blue;
   color: $white;
 
+  @extend %padtopbot-0;
+
+  .navbar-toggler {
+    border-radius: 0;
+  }
+
+  @include media-breakpoint-down(sm) {
+    .navbar-collapse {
+      margin-right: -1rem;
+      margin-left: -1rem;
+    }
+  }
+
   &-menu {
-    margin-left: 15px;
     .nav-link {
-      padding: 0 30px;
-      color: $white;
-      transition: all 0.2s ease-in-out;
+      background: $blue;
 
-      &:hover {
-        background-color: $hover-light-blue !important;
-        color: $blue;
-      }
-      &.active {
-        background-color: $hover-blue;
-      }
+      &:not(.dropdown .nav-link) {
+        $transition: 0.2s ease-in-out;
+        padding: 0 30px !important;
+        color: $white !important;
+        transition: background $transition, color $transition;
 
-      span {
-        position: relative;
-        top: 4px;
+        &:hover {
+          background-color: $hover-light-blue !important;
+          color: $blue !important;
+        }
+
+        &.active {
+          background-color: $hover-blue;
+        }
       }
     }
   }
 
   &-settings-menu {
-    .nav-pills {
-      height: $header-height;
-    }
     .dropdown-item {
       color: $blue;
     }
+  }
+
+  .navbar-brand {
+    height: $header-height;
+    @extend %padtopbot-0;
   }
 
   &-logo {
-    max-height: $header-height;
+    height: $header-height;
     margin-left: -15px;
+    @extend %padtopbot-0;
   }
 
-  &-nav-dropdown {
-    &::after {
-      content: none;
+  .dropdown {
+    &.show > .app-header-nav-dropdown {
+      background-color: $white;
+
+      .bi-gear-fill {
+        color: $blue;
+        transform: rotate(225deg);
+      }
     }
-    height: calc(100% - 1rem);
+
+    &-menu {
+      line-height: 20px;
+
+      .dropdown-item {
+        text-align: right;
+        padding: 0.75rem 1.5rem;
+      }
+
+      .b-dropdown-form {
+        padding: 0.75rem 1.5rem;
+      }
+    }
+
+    &-toggle {
+      height: $header-height;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.15s linear;
+
+      &::after {
+        content: none;
+      }
+    }
   }
 
-  .dropdown.show > .app-header-nav-dropdown {
-    background-color: $white;
-    .bi-gear-fill {
-      color: $blue;
-      transform: rotate(225deg);
-    }
-  }
   .bi-gear-fill {
     color: $white;
     transform-origin: center;
-    transition: 300ms linear all;
-  }
-
-  .dropdown-menu {
-    line-height: 20px;
-    width: 200px;
-
-    .dropdown-item {
-      text-align: right;
-      padding: 0.75rem 1.5rem;
-    }
-    .b-dropdown-form {
-      padding: 0.75rem 1.5rem;
-    }
+    transition: all 0.3s linear;
   }
 }
 </style>

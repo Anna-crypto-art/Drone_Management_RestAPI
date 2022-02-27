@@ -2,8 +2,12 @@
   <div class="admin-box">
     <h4>
       {{ $t("update-analysis-state") }}
-      <br>
-      <small v-if="!analysis.plant.in_setup_phase" class="grayed" v-html="$t('attention-state-update-starts-evaulation_expl')">
+      <br />
+      <small
+        v-if="!analysis.plant.in_setup_phase"
+        class="grayed"
+        v-html="$t('attention-state-update-starts-evaulation_expl')"
+      >
       </small>
     </h4>
     <b-form @submit.prevent="onSubmitUpdateState">
@@ -24,30 +28,29 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Watch } from "vue-property-decorator";
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
+import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { apiStateNames, ApiStates } from "@/app/shared/services/volateq-api/api-states";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
-import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
+import { Component, Prop, Watch } from "vue-property-decorator";
 import { AnalysisEventService } from "../../shared/analysis-event-service";
 import { AnalysisEvent } from "../../shared/types";
-import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
 
 @Component({
   name: "app-update-analysis-state",
   components: {
-    AppButton
-  }
+    AppButton,
+  },
 })
 export default class AppUpdateAnalysisState extends BaseAuthComponent {
   @Prop({ required: true }) analysis!: AnalysisSchema;
 
   loading = false;
   selectedUpdateState: ApiStates | null = null;
-  updateStateOptions: { value: number, text: string }[] | null = null;
+  updateStateOptions: { value: number; text: string }[] | null = null;
   selectedUpdateStateMessage = "";
   sendNotification = false;
 
@@ -57,12 +60,11 @@ export default class AppUpdateAnalysisState extends BaseAuthComponent {
     await this.updateAnalysisStates();
   }
 
-  @Watch('analysis') async onUpdateAnalysis() {
+  @Watch("analysis") async onUpdateAnalysis() {
     await this.updateAnalysisStates();
   }
 
   async updateAnalysisStates() {
-
     try {
       if (this.analysisStates === null) {
         this.analysisStates = await volateqApi.getStates();

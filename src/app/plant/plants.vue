@@ -13,17 +13,22 @@
         <template #head(actions)>
           <span class="hidden">{{ $t("actions") }}</span>
         </template>
+
         <template #cell(name)="row">
           <router-link v-show="row.item.digitized" :to="{ name: 'Plant', params: { id: row.item.id } }">
             {{ row.item.name }}
           </router-link>
           <span v-if="!row.item.digitized">{{ row.item.name }}</span>
         </template>
+
         <template #cell(digitized)="row">
           <b-icon :class="row.item.digitized ? 'green' : 'red'" :icon="row.item.digitized ? 'check2' : 'x'"></b-icon>
         </template>
         <template #cell(established)="row">
-          <b-icon :class="row.item.established ? 'green' : 'red'" :icon="row.item.established ? 'check2' : 'x'"></b-icon>
+          <b-icon
+            :class="row.item.established ? 'green' : 'red'"
+            :icon="row.item.established ? 'check2' : 'x'"
+          ></b-icon>
         </template>
         <template #cell(actions)="row">
           <div class="hover-cell pull-right">
@@ -41,6 +46,7 @@
         </template>
       </b-table>
     </app-table-container>
+
     <app-modal-form
       id="manage-plant-modal"
       ref="managePlantModal"
@@ -51,10 +57,7 @@
       @submit="saveManagePlant"
     >
       <b-form-group v-if="managePlantModel.plant" v-show="managePlantModel.plant.fieldgeometry">
-        <a
-          href="#"
-          @click="onFileClick(managePlantModel.plant.fieldgeometry)"
-        >
+        <a href="#" @click="onFileClick(managePlantModel.plant.fieldgeometry)">
           {{ managePlantModel.plant.fieldgeometry && managePlantModel.plant.fieldgeometry.file_name }}
         </a>
       </b-form-group>
@@ -63,6 +66,7 @@
           {{ $t("clear-before") }}
         </b-form-checkbox>
       </b-form-group>
+
       <b-form-group :label="$t('select-dt-json-file')">
         <b-form-file v-model="managePlantModel.file" required accept=".json"></b-form-file>
       </b-form-group>
@@ -71,21 +75,20 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import { Component, Ref } from "vue-property-decorator";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
+import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import { BvTableFieldArray } from "bootstrap-vue";
-import volateqApi from "../shared/services/volateq-api/volateq-api";
-import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
-import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
-import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
-import { IAppModalForm } from "../shared/components/app-modal/types";
+import { Component, Ref } from "vue-property-decorator";
 import appContentEventBus from "../shared/components/app-content/app-content-event-bus";
-import { PlantItem } from "./types";
+import { IAppModalForm } from "../shared/components/app-modal/types";
+import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
+import { AppDownloader } from "../shared/services/app-downloader/app-downloader";
 import { ApiException } from "../shared/services/volateq-api/api-errors";
 import { FieldgeometrySchema } from "../shared/services/volateq-api/api-schemas/fieldgeometry-schema";
-import { AppDownloader } from "../shared/services/app-downloader/app-downloader";
+import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
+import volateqApi from "../shared/services/volateq-api/volateq-api";
+import { PlantItem } from "./types";
 
 @Component({
   name: "app-analysis",
@@ -109,7 +112,7 @@ export default class AppPlants extends BaseAuthComponent {
     file: null,
   };
 
-  async created() {
+  async created(): Promise<void> {
     this.columns = [
       { key: "name", label: this.$t("name").toString() },
       { key: "digitized", label: this.$t("digitized").toString() },
@@ -124,7 +127,7 @@ export default class AppPlants extends BaseAuthComponent {
     await this.updatePlants();
   }
 
-  async updatePlants() {
+  async updatePlants(): Promise<void> {
     try {
       this.tableLoading = true;
       let plants: PlantSchema[] = [];
@@ -157,7 +160,7 @@ export default class AppPlants extends BaseAuthComponent {
     }
   }
 
-  async saveManagePlant() {
+  async saveManagePlant(): Promise<void> {
     try {
       this.plantModalLoading = true;
 
@@ -205,7 +208,6 @@ export default class AppPlants extends BaseAuthComponent {
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
     }
-    
   }
 }
 </script>

@@ -23,7 +23,7 @@
       <b-form-group :label="$t('select-result-image-files')">
         <b-form-file v-model="imageFiles" accept="image/png, image/jpeg" multiple></b-form-file>
       </b-form-group>
-      <app-button type="submit" :loading="loading" >{{ $t("apply") }}</app-button>
+      <app-button type="submit" :loading="loading">{{ $t("apply") }}</app-button>
     </b-form>
   </div>
 </template>
@@ -75,10 +75,10 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
           this.successfullyFinished();
         }
       }
-    })
+    });
   }
 
-  @Watch('analysis') async onUpdateAnalysis() {
+  @Watch("analysis") async onUpdateAnalysis() {
     await this.setManageImportFiles();
   }
 
@@ -90,7 +90,6 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
     }
-    
   }
 
   private async setManageImportFiles() {
@@ -114,7 +113,9 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
           this.jsonFile,
           this.analysis!.id,
           this.imageFiles || undefined,
-          (progress) => { appContentEventBus.showInfoAlert("Uploading... " + progress + "%") }
+          progress => {
+            appContentEventBus.showInfoAlert("Uploading... " + progress + "%");
+          }
         );
 
         AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS);

@@ -1,12 +1,6 @@
 <template>
   <div class="visualization">
-    <app-geovisualization
-      ref="openLayers"
-      v-if="hasLayers"
-      :layers="layers"
-      @click="onOpenLayersClick"
-      @sidebarToggle="onSidebarToggled"
-    >
+    <app-geovisualization ref="openLayers" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick">
       <template #topContent>
         <app-collapse name="displaySettings">
           <template #button>
@@ -31,6 +25,7 @@
         </template>
       </template>
     </app-geovisualization>
+
     <div v-if="hasLegend" class="visualization-legend">
       <div v-for="entry in legendEntries" :key="entry.color" class="visualization-legend-entry">
         <div class="visualization-legend-entry-color" :style="`background: ${entry.color}`"></div>
@@ -64,21 +59,21 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref } from "vue-property-decorator";
-import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-import { ComponentLayer } from "./layers/component-layer";
-import { IAnalysisResultSelection } from "../types";
-import { FeatureLike } from "ol/Feature";
-import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { IPlantVisualization, Legend, FeatureInfos, KeyFigureTypeMap } from "@/app/plant/shared/visualization/types";
 import { PILayersHierarchy } from "@/app/plant/shared/visualization/pi-layers-hierarchy";
+import { FeatureInfos, IPlantVisualization, KeyFigureTypeMap, Legend } from "@/app/plant/shared/visualization/types";
+import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppGeovisualization from "@/app/shared/components/app-geovisualization/app-geovisualization.vue";
 import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualization/types/components";
 import { GroupLayer, LayerType, OSMLayer } from "@/app/shared/components/app-geovisualization/types/layers";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
 import AppCollapse from "@/app/shared/components/app-collapse/app-collapse.vue";
+import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
+import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import { FeatureLike } from "ol/Feature";
+import { Component, Prop, Ref } from "vue-property-decorator";
+import { IAnalysisResultSelection } from "../types";
+import { ComponentLayer } from "./layers/component-layer";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -111,11 +106,11 @@ export default class AppVisualization
   showPCS = false;
   legends: Legend[] = [];
   piToastInfo: FeatureInfos = { title: "", records: [{ name: "", descr: "", value: "" }] };
-  
+
   enableMultiSelection = false;
   showCouldNotBeMeasured = true;
   satelliteView = false;
-  
+
   private worldMapLayer!: OSMLayer;
 
   private waitForDom = false;
@@ -193,10 +188,6 @@ export default class AppVisualization
     }
   }
 
-  onSidebarToggled(toggleState: boolean) {
-    this.$emit("sidebarToggle", toggleState);
-  }
-
   onLayerSelected(selected: boolean, legend?: Legend) {
     if (legend) {
       const legendIndex = this.legends.findIndex(l => l.id === legend.id);
@@ -226,7 +217,7 @@ export default class AppVisualization
 
   onShowCouldNotBeMeasuredChanged() {
     appLocalStorage.setItem(STORAGE_KEY_SHOWUNDEFINED, this.showCouldNotBeMeasured);
-    
+
     this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
   }
 
@@ -246,7 +237,7 @@ export default class AppVisualization
       type: "osm",
       selected: true,
       satellite: this.satelliteView,
-    }
+    };
 
     this.layers.push(
       {
@@ -275,10 +266,8 @@ export default class AppVisualization
         selected: false,
         styleClass: "margin-top",
       },
-      this.worldMapLayer,
+      this.worldMapLayer
     );
-
-    console.log(this.layers);
   }
 
   private hideToast() {

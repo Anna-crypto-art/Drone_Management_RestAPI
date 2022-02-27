@@ -1,3 +1,6 @@
+/**
+ * @type {import {  } from "eslint"}
+ */
 module.exports = {
   env: {
     browser: true,
@@ -20,13 +23,14 @@ module.exports = {
     sourceType: "module",
     ecmaFeatures: {
       modules: true,
-      legacyDecorators: true,
-    },
+      legacyDecorators: true
+    }
   },
   plugins: ["vue"],
   rules: {
-    "no-console": "off",
+    "no-console": "warn",
+    "no-debugger": "warn",
     "@typescript-eslint/indent": "off",
-    "@typescript-eslint/explicit-module-boundary-types": "off",
-  },
+    "@typescript-eslint/explicit-module-boundary-types": "off"
+  }
 };

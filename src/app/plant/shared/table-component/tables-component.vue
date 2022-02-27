@@ -3,18 +3,16 @@
     <div class="no-data-placeholder" v-show="!selectedAnalysisResult">
       {{ $t("no-analysis-result-selected") }}
     </div>
-    <div v-show="selectedAnalysisResult">
-      <div>
-        <div class="pull-left">
-          <app-search-input :placeholder="$t('search-pcs')" @search="onSearch"></app-search-input>
-        </div>
-        <div class="pull-right">
-          <app-button variant="secondary" :title="$t('export-csv')" :loading="csvExportLoading" @click="onExportCsv">
-            <b-icon icon="download"></b-icon> {{ $t("export-csv") }}: {{ activeTabLabel }}
-          </app-button>
-        </div>
-        <div class="clearfix"></div>
+    <div v-show="selectedAnalysisResult" class="app-table-root-container">
+      <div class="pull-left">
+        <app-search-input :placeholder="$t('search-pcs')" @search="onSearch"></app-search-input>
       </div>
+      <div class="pull-right">
+        <app-button variant="secondary" :title="$t('export-csv')" :loading="csvExportLoading" @click="onExportCsv">
+          <b-icon icon="download"></b-icon> {{ $t("export-csv") }}: {{ activeTabLabel }}
+        </app-button>
+      </div>
+
       <app-table-container>
         <b-tabs v-model="tabIndex" @activate-tab="onTabChanged">
           <b-tab
@@ -42,22 +40,22 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref } from "vue-property-decorator";
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import AppTableComponent from "@/app/plant/shared/table-component/table-component.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
-import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
+import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
+import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppSearchInput from "@/app/shared/components/app-search-input/app-search-input.vue";
+import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
+import dateHelper from "@/app/shared/services/helper/date-helper";
+import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
+import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import { Component, Prop } from "vue-property-decorator";
 import { IActiveComponent, IActiveTabComponent, IAnalysisResultSelection } from "../types";
 import { ITableComponent } from "./types";
-import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
-import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
-import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
-import dateHelper from "@/app/shared/services/helper/date-helper";
-import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import AppTableComponent from "@/app/plant/shared/table-component/table-component.vue";
-import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 
 @Component({
   name: "app-tables-component",
@@ -175,6 +173,46 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
 <style lang="scss">
 .app-tables-component {
   padding: 60px 20px;
+
+  .app-table-root-container {
+    display: grid;
+    grid-template-rows: max-content auto;
+    gap: 10px;
+
+    grid-template-areas:
+      "pull-left pull-right"
+      "table table";
+
+    .pull-left {
+      grid-area: pull-left;
+    }
+
+    .pull-right {
+      grid-area: pull-right;
+      justify-self: end;
+    }
+
+    .app-table-container {
+      grid-area: table;
+    }
+
+    @media (max-width: 576px) {
+      grid-template-areas:
+        "pull-left"
+        "pull-right"
+        "table";
+
+      .pull-left,
+      .pull-right {
+        justify-self: stretch;
+
+        > :first-child:last-child {
+          width: 100%;
+          max-width: 100%;
+        }
+      }
+    }
+  }
 
   .no-data-placeholder {
     margin-top: 50px;

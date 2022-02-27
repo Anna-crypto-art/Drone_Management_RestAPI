@@ -1,25 +1,25 @@
 import store from "@/app/app-state";
+import { InviteUser, RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { ConfirmLoginResult, TokenResult } from "@/app/shared/services/volateq-api/api-schemas/auth-schema";
+import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
 import { UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 import { HttpClientBase } from "@/app/shared/services/volateq-api/http-client-base";
-import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
-import { InviteUser, RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
-import { baseUrl, apiBaseUrl, environment } from "@/environment/environment";
-import { RouteSchema } from "./api-schemas/route-schema";
+import { apiBaseUrl, baseUrl } from "@/environment/environment";
+import { ApiErrors, ApiException } from "./api-errors";
 import { NewAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
+import { UpdatePlantRequest } from "./api-requests/plant-requests";
 import { AnalysisSchema } from "./api-schemas/analysis-schema";
 import { PlantSchema } from "./api-schemas/plant-schema";
-import { TaskSchema } from "./api-schemas/task-schema";
 import { AnalysisResultDetailedSchema } from "./api-schemas/analysis-result-schema";
 import { TableFilterRequest, TableRequest } from "./api-requests/common/table-requests";
-import { TableResultSchema } from "./api-schemas/table-result-schema";
 import { AnalysisResultFileSchema } from "./api-schemas/analysis-result-file-schema";
 import { ApiComponent } from "./api-components/api-components";
 import { ApiKeyFigure } from "./api-key-figures";
 import { GeoVisualQuery } from "./api-requests/geo-visual-query-requests";
-import { ApiErrors, ApiException } from "./api-errors";
+import { RouteSchema } from "./api-schemas/route-schema";
+import { TableResultSchema } from "./api-schemas/table-result-schema";
+import { TaskSchema } from "./api-schemas/task-schema";
 import { ApiStates } from "./api-states";
-import { UpdatePlantRequest } from "./api-requests/plant-requests";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -187,7 +187,10 @@ export class VolateqAPI extends HttpClientBase {
     await this.post(`/auth/analysis/${analysisId}/cancel-upload`);
   }
 
-  public async updateAnalysis(analysisId: string, updateData: { data_complete?: boolean, flown_at?: string }): Promise<void> {
+  public async updateAnalysis(
+    analysisId: string,
+    updateData: { data_complete?: boolean; flown_at?: string }
+  ): Promise<void> {
     await this.post(`/auth/analysis/${analysisId}`, updateData);
   }
 
@@ -266,9 +269,7 @@ export class VolateqAPI extends HttpClientBase {
   public async generateDownloadUrl(downloadUrl: string): Promise<string> {
     const encodedUrl = encodeURIComponent(encodeURIComponent(downloadUrl));
 
-    const urlTokenResponse: { url_token: string } = await this.get(
-      `/auth/user/generate-url-token/${encodedUrl}`
-    );
+    const urlTokenResponse: { url_token: string } = await this.get(`/auth/user/generate-url-token/${encodedUrl}`);
 
     return `${downloadUrl}&url_token=${encodeURIComponent(urlTokenResponse.url_token)}`;
   }
@@ -324,7 +325,7 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public waitForTask(
-    taskId: string, 
+    taskId: string,
     finished: (task: TaskSchema) => void,
     info?: (infoMessage: string, task: TaskSchema) => void
   ): void {
@@ -375,15 +376,15 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public downloadMultipleAnalysisFilesUrl(analysisId: string, filenames: string[]) {
-    return this.getUrl(`${apiBaseUrl}/auth/analysis/${analysisId}/files-download`, { filenames: filenames })
+    return this.getUrl(`${apiBaseUrl}/auth/analysis/${analysisId}/files-download`, { filenames: filenames });
   }
 
   public getAnalysisFilesInfo(analysisId: string, filenames: string[]): Promise<Record<string, number | null>> {
-    return this.get(`/auth/analysis/${analysisId}/files-info`, { filenames })
+    return this.get(`/auth/analysis/${analysisId}/files-info`, { filenames });
   }
 
   public getStates(): Promise<Record<ApiStates, ApiStates[]>> {
-    return this.get(`/auth/states`)
+    return this.get(`/auth/states`);
   }
 
   public updatePlant(plantId: string, updatePlantRequest: UpdatePlantRequest): Promise<void> {

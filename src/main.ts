@@ -1,4 +1,5 @@
 import Vue from "vue";
+import Vuex from "vuex";
 import VueI18n from "vue-i18n";
 import { BootstrapVue, IconsPlugin } from "bootstrap-vue";
 
@@ -11,6 +12,7 @@ import DateHelper from "@/app/shared/services/helper/date-helper";
 Vue.use(BootstrapVue);
 Vue.use(IconsPlugin);
 Vue.use(VueI18n);
+Vue.use(Vuex);
 
 Vue.config.productionTip = false;
 

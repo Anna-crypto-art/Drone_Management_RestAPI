@@ -3,12 +3,11 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import { Component } from "vue-property-decorator";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { BaseAuthComponent } from "./shared/components/base-auth-component/base-auth-component";
+import { Component } from "vue-property-decorator";
 import appContentEventBus from "./shared/components/app-content/app-content-event-bus";
+import { BaseAuthComponent } from "./shared/components/base-auth-component/base-auth-component";
 
 @Component({
   name: "app-home",
@@ -17,12 +16,13 @@ import appContentEventBus from "./shared/components/app-content/app-content-even
   },
 })
 export default class AppHome extends BaseAuthComponent {
-  async created() {
+  async created(): Promise<void> {
     try {
       if (this.isSuperAdmin) {
         this.$router.push({ name: "Plants" });
       } else {
         const plants = await volateqApi.getPlants();
+
         if (plants.length > 1) {
           this.$router.push({ name: "Plants" });
         } else if (plants.length === 0) {

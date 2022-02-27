@@ -1,9 +1,9 @@
 <template>
   <div class="openlayers-map">
-    <div class="openlayers-map-content"></div>
+    <div class="openlayers-map-content" />
     <div v-show="loading" class="openlayers-map-loading">
       <div class="openlayers-map-loading-icon">
-        <b-spinner></b-spinner>
+        <b-spinner />
       </div>
     </div>
 
@@ -11,9 +11,7 @@
       :layers="layers"
       :map="map"
       :title="title"
-      :layerIdx="intializeToggler"
       @loading="toggleLoading"
-      @sidebarToggle="onSidebarToggle"
     >
       <!-- Pass slots through -->
       <template v-for="(_, slot) in $slots">
@@ -36,7 +34,6 @@ import { click } from "ol/events/condition";
 import "ol/ol.css";
 
 import AppGeovisualLayerSwitcher from "./components/layer-switcher.vue";
-import AppGeovisualToggleLayer from "./components/toggle-layer.vue";
 import { LayerType } from "./types/layers";
 import { IOpenLayersComponent } from "./types/components";
 
@@ -44,7 +41,6 @@ import { IOpenLayersComponent } from "./types/components";
   name: "app-geovisualization",
   components: {
     AppGeovisualLayerSwitcher,
-    AppGeovisualToggleLayer,
   },
 })
 export default class AppGeovisualization extends Vue implements IOpenLayersComponent {
@@ -52,7 +48,6 @@ export default class AppGeovisualization extends Vue implements IOpenLayersCompo
   @Prop() zoom?: number;
   @Prop() center?: [number, number];
   @Prop({ default: "" }) title!: string;
-  @Prop({ default: true }) sidebarOpen!: boolean;
 
   map: Map | null = null;
   loading = false;
@@ -65,18 +60,8 @@ export default class AppGeovisualization extends Vue implements IOpenLayersCompo
     this.map?.setTarget(this.$el.firstChild as HTMLElement);
   }
 
-  intializeToggler(idx: number): void {
-    new AppGeovisualToggleLayer({
-      propsData: { layerIndex: idx, map: this.map },
-    }).$mount();
-  }
-
-  toggleLoading(e: any): void {
+  toggleLoading<Evt extends { loading: boolean }>(e: Evt): void {
     this.loading = e.loading;
-  }
-
-  onSidebarToggle(toggleState: boolean): void {
-    this.$emit("sidebarToggle", toggleState);
   }
 
   private mapSetup(): void {
@@ -107,57 +92,15 @@ export default class AppGeovisualization extends Vue implements IOpenLayersCompo
 $open-width: 300px;
 $header-height: 50px;
 
-.volateq-sidebar {
-  position: absolute;
-  height: 100%;
-  width: $open-width;
-  right: -$open-width;
-
-  pointer-events: all;
-  transition: right 0.2s ease-in-out;
-
-  background-color: white;
-
-  &-header {
-    height: $header-height;
-    padding: 15px;
-    margin-bottom: 20px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    &-close {
-      cursor: pointer;
-      font-size: 2rem;
-    }
-
-    &-title {
-      font-size: x-large;
-    }
-  }
-
-  &-body {
-    width: 100%;
-    height: 100%;
-  }
-
-  &-open {
-    right: 0;
-    box-shadow: 0 0 10px lightgray;
-  }
-}
-
 .openlayers-map {
-  width: 100%;
-  height: 100%;
+  position: relative;
 
-  display: flex;
   box-sizing: border-box;
   overflow: hidden;
 
   &-content {
-    flex: 1 100%;
+    width: 100%;
+    height: 100%;
   }
 
   &-loading {
