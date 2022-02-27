@@ -2,21 +2,25 @@
   <div class="app-table-filter-field-value">
     <b-form-input v-if="isNumericSimple" v-model="filterFieldValue" type="number" 
       size="sm"
+      required
       @change="onChange"
     />
     <b-form-input v-if="isNumericExtended" v-model="filterFieldValue" type="text"
       size="sm"
       @change="onChange"
-      placeholder="1, 2, 3 - 10"
+      required
+      placeholder="1, -2, 3.14 - 10"
     />
     <b-form-select v-if="isBoolean" v-model="filterFieldValue" 
       size="sm"
       @change="onChange"
+      required
       :options="[{ value: true, text: 'true' }, { value: false, text: 'false' }]" 
     />
     <b-form-select v-if="isArray" v-model="filterFieldValue" 
       size="sm"
       @change="onChange"
+      required
       :options="filterFieldOptions"
     />
   </div>

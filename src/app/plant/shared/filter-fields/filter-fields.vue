@@ -14,7 +14,7 @@
     </b-row>
     <b-row class="mar-bottom">
       <b-col v-show="addable">
-        <b-button variant="secondary" size="sm" @click="onAdd">
+        <b-button variant="secondary" @click="onAdd" size="sm">
           <b-icon icon="plus" />
           <slot name="addButton" />
         </b-button>

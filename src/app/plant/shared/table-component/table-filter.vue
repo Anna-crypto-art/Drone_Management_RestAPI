@@ -4,33 +4,38 @@
       <template #button>
         <b-icon icon="filter" class="pad-right" />{{ $t("filter") }}
       </template>
-      <b-row>
-        <b-col sm="6">
-          <h5 class="mar-bottom">{{ $t("filter-by-pi") }}</h5>
-          <app-filter-fields v-model="piFilterFieldValues" :filterFields="piFilterFields">
-            <template #addButton>
-              {{ $t("add-pi-filter") }}
-            </template>
-          </app-filter-fields>
-        </b-col>
-        <b-col sm="6">
-          <h5 class="mar-bottom">{{ $t("filter-by-component") }}</h5>
-          <app-filter-fields 
-            v-model="compFilterFieldValues"
-            :filterFields="compFilterFields" 
-            :extendable="false"
-          />
-        </b-col>
-      </b-row>
-      <b-row class="mar-top">
-        <b-col>
-          <app-button class="pull-left mar-right" @click="onApplyFilter">
-            {{ $t("apply") }}
-          </app-button>
-          <b-button variant="outline-danger" class="pull-left" @click="onReset">{{ $t("reset") }}</b-button>
-          <div class="clear"></div>
-        </b-col>
-      </b-row>
+      <template slot="nextToButton">
+        <slot name="nextToButton" />
+      </template>
+      <b-form @submit.prevent="onApplyFilter">
+        <b-row>
+          <b-col sm="6">
+            <h5 class="mar-bottom">{{ $t("filter-by-pi") }}</h5>
+            <app-filter-fields v-model="piFilterFieldValues" :filterFields="piFilterFields">
+              <template #addButton>
+                {{ $t("add-pi-filter") }}
+              </template>
+            </app-filter-fields>
+          </b-col>
+          <b-col sm="6">
+            <h5 class="mar-bottom">{{ $t("filter-by-component") }}</h5>
+            <app-filter-fields 
+              v-model="compFilterFieldValues"
+              :filterFields="compFilterFields" 
+              :extendable="false"
+            />
+          </b-col>
+        </b-row>
+        <b-row class="mar-top">
+          <b-col>
+            <app-button class="pull-left mar-right" type="submit" style="margin-top: 0 !important;">
+              {{ $t("apply") }}
+            </app-button>
+            <b-button variant="outline-danger" class="pull-left" @click="onReset">{{ $t("reset") }}</b-button>
+            <div class="clear"></div>
+          </b-col>
+        </b-row>
+      </b-form>
     </app-collapse>
   </div>
 </template>

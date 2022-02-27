@@ -2,7 +2,8 @@
   <div class="app-table-filter-field">
     <b-row>
       <b-col>
-        <b-form-select v-model="selectedKey" :options="selectOptions" size="sm"></b-form-select>
+        <b-form-select v-model="selectedKey" :options="selectOptions" @change="onSelectChange" size="sm">
+        </b-form-select>
       </b-col>
       <b-col>
         <app-filter-field-value v-if="filterField" v-model="innerValue" @input="onInput" :filterField="filterField" />
@@ -50,6 +51,11 @@ export default class AppFilterField extends Vue {
 
   get filterField(): FilterField | undefined {
     return this.filterFields.find(filterField => filterField.key === this.selectedKey);
+  }
+
+  onSelectChange() {
+    this.innerValue = null;
+    this.onInput();
   }
 
   onInput() {

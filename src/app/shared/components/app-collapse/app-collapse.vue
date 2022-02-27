@@ -4,9 +4,14 @@
       size="sm"
       v-b-toggle="'collapse-' + name"
       :variant="collapsed ? 'primary' : 'secondary'"
+      class="pull-left mar-right"
     >
-      <slot name="button"></slot>
+      <slot name="button" />
     </b-button>
+    <div class="pull-left">
+      <slot name="nextToButton" />
+    </div>
+    <div class="clear"></div>
     <b-collapse v-model="collapsed" :id="'collapse-' + name">
       <b-card class="mar-top">
         <slot></slot>

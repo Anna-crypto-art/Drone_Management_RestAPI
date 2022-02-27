@@ -223,23 +223,36 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/analysis-result/${analysisResultId}/${componentId}`);
   }
 
+  private getEncodedAnalysisResultFilterParams(filterParams?: TableFilterRequest) {
+    let encodedFilterParams = "";
+    if (filterParams) {
+      if (filterParams.filters) {
+        encodedFilterParams += `&filters=${encodeURIComponent(JSON.stringify(filterParams.filters))}`;
+      }
+      if (filterParams.component_filter) {
+        encodedFilterParams += `&component_filter=${encodeURIComponent(JSON.stringify(filterParams.component_filter))}`;
+      }
+    }
+
+    return encodedFilterParams
+  }
+
   public getSpecificAnalysisResult<T>(
     analysisResultId: string,
     componentId: number,
     params: TableRequest,
     filterParams?: TableFilterRequest,
   ): Promise<TableResultSchema<T>> {
-    if (filterParams) {
-      return this.post(`/auth/analysis-result/${analysisResultId}/${componentId}`, filterParams, undefined, params);
-    }
       
-    return this.get(`/auth/analysis-result/${analysisResultId}/${componentId}`, params);
+    return this.get(`/auth/analysis-result/${analysisResultId}/${componentId}${this.getQueryParams(
+      params)}${this.getEncodedAnalysisResultFilterParams(filterParams)}`);
   }
 
   public getSpecificAnalysisResultCsvUrl(
     analysisResultId: string,
     componentId: number,
     params: TableRequest,
+    filterParams?: TableFilterRequest,
     csvMappings?: { [key: string]: string }
   ): string {
     const encodedCsvMappings =
@@ -247,7 +260,7 @@ export class VolateqAPI extends HttpClientBase {
 
     return `${apiBaseUrl}/auth/analysis-result/${analysisResultId}/${componentId}${this.getQueryParams(
       params
-    )}&csv=1${encodedCsvMappings}`;
+    )}&csv=1${encodedCsvMappings}${this.getEncodedAnalysisResultFilterParams(filterParams)}`;
   }
 
   public async generateDownloadUrl(downloadUrl: string): Promise<string> {

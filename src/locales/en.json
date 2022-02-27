@@ -257,6 +257,7 @@
   "reset": "Reset",
   "subfield": "Subfield",
   "add-pi-filter": "Add PI filter",
+  "show-sum-avg": "Show sums/average values",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",

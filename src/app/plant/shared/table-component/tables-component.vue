@@ -136,6 +136,7 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
           this.selectedAnalysisResult!.id,
           activeComponent.componentId,
           tableComponent.getTableRequestParam(),
+          tableComponent.getTableFilterParam(),
           tableComponent.getCsvColumnMappingsParam()
         );
 

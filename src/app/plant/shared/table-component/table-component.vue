@@ -1,15 +1,18 @@
 <template>
   <div class="app-table-component">
     <app-table-component-container ref="container" :tableName="tableName" :pagination="pagination" size="sm">
-      <b-form-checkbox switch v-model="showSumAvg" class="mar-top mar-bottom" @change="onShowSumAvgChange">
-        {{ $t("show-sum-avg") }}
-      </b-form-checkbox>
       <app-table-filter 
         :analysisResult="analysisResult"
         :activeComponent="activeComponent"
         :plant="plant"
         @filter="onFilter"
-      />
+      >
+        <template #nextToButton>
+          <b-form-checkbox switch v-model="showSumAvg" style="padding-top: 3px" @change="onShowSumAvgChange">
+            {{ $t("show-sum-avg") }}
+          </b-form-checkbox>
+        </template>
+      </app-table-filter>
       <b-table
         :id="tableName"
         hover
@@ -140,6 +143,10 @@ export default class AppTableComponent extends Vue implements ITableComponent {
     return translatedColumnsMapping;
   }
 
+  getTableFilterParam(): TableFilterRequest | undefined {
+    return this.tableFilterRequest;
+  }
+
   refresh(): void {
     this.table.refresh();
   }
@@ -166,9 +173,15 @@ export default class AppTableComponent extends Vue implements ITableComponent {
       if (results.sums) {
         const sumItem = this.mappingHelper.getItem(results.sums);
         for (const key in sumItem) {
-          const val = sumItem[key];
+          let val = sumItem[key];
           if (MathHelper.isFloat(val as any)) {
-            sumItem[key] = MathHelper.roundTo(val as any, 2);
+            sumItem[key] = val = MathHelper.roundTo(val as any, 2);
+          }
+
+          if (tableItems.length > 0 && val !== null) {
+            if (typeof tableItems[0][key] === "number") {
+              sumItem[key] = "μ " + sumItem[key];
+            }
           }
         }
 
