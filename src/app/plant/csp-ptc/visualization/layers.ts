@@ -169,15 +169,15 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     subLayers: [
       {
         keyFigureInfo: { templateName: "scaOrientOffsetClass3", displayName: "sca-orient-offset-class-3", zIndex: 13 },
-        query: { orientation_offset_class: 3 },
+        query: { key_figure_class_name: "ScaTrackingKeyFigure", orientation_offset_class: 3 },
       },
       {
         keyFigureInfo: { templateName: "scaOrientOffsetClass2", displayName: "sca-orient-offset-class-2", zIndex: 12 },
-        query: { orientation_offset_class: 2 },
+        query: { key_figure_class_name: "ScaTrackingKeyFigure", orientation_offset_class: 2 },
       },
       {
         keyFigureInfo: { templateName: "scaOrientOffsetClass1", displayName: "sca-orient-offset-class-1", zIndex: 10 },
-        query: { orientation_offset_class: 1 },
+        query: { key_figure_class_name: "ScaTrackingKeyFigure", orientation_offset_class: 1 },
       },
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
@@ -193,15 +193,15 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     subLayers: [
       {
         keyFigureInfo: { templateName: "scaAvgOrientOffsetClass3", displayName: "sca-avg-orient-offset-class-3", zIndex: 13 },
-        query: { orientation_offset_class: 3 },
+        query: { key_figure_class_name: "ScaAverageTrackingKeyFigure", orientation_offset_class: 3 },
       },
       {
         keyFigureInfo: { templateName: "scaAvgOrientOffsetClass2", displayName: "sca-avg-orient-offset-class-2", zIndex: 12 },
-        query: { orientation_offset_class: 2 },
+        query: { key_figure_class_name: "ScaAverageTrackingKeyFigure", orientation_offset_class: 2 },
       },
       {
         keyFigureInfo: { templateName: "scaAvgOrientOffsetClass1", displayName: "sca-avg-orient-offset-class-1", zIndex: 10 },
-        query: { orientation_offset_class: 1 },
+        query: { key_figure_class_name: "ScaAverageTrackingKeyFigure", orientation_offset_class: 1 },
       },
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },

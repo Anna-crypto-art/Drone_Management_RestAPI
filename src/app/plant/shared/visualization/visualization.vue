@@ -26,7 +26,7 @@
       </template>
     </app-geovisualization>
 
-    <div v-if="hasLegend" class="visualization-legend">
+    <div v-if="hasLegend" :class="'visualization-legend' + (sidebarOpen ? ' sidebar-open' : '')">
       <div v-for="entry in legendEntries" :key="entry.color" class="visualization-legend-entry">
         <div class="visualization-legend-entry-color" :style="`background: ${entry.color}`"></div>
         <div class="visualization-legend-entry-name" v-html="entry.name"></div>
@@ -34,7 +34,7 @@
     </div>
     <b-toast id="piInfoToast" no-auto-hide solid toaster="b-toaster-bottom-center">
       <template #toast-title>
-        <h3>{{ piToastInfo.title }}</h3>
+        <h5>{{ piToastInfo.title }}</h5>
       </template>
       <div>
         <div class="toaster-images" v-if="piToastInfo.images">
@@ -74,6 +74,7 @@ import { FeatureLike } from "ol/Feature";
 import { Component, Prop, Ref } from "vue-property-decorator";
 import { IAnalysisResultSelection } from "../types";
 import { ComponentLayer } from "./layers/component-layer";
+import { State } from "vuex-class";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -95,6 +96,7 @@ export default class AppVisualization
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
   @Prop() componentLayerTypes!: typeof ComponentLayer[];
   @Prop() keyFigureLayers!: KeyFigureTypeMap[];
+  @State(state => state.sidebar["analysis"]) sidebarOpen!: boolean;
 
   @Ref() openLayers!: IOpenLayersComponent;
 
@@ -302,12 +304,17 @@ export default class AppVisualization
       background: rgba(255, 255, 255, 0.8);
     }
 
+    transition: left 0.3s ease-in-out;
     position: absolute;
     bottom: 0.5em;
     left: 0.5em;
     width: auto;
     height: auto;
     padding: 10px 15px 0px 15px;
+
+    &.sidebar-open {
+      left: calc($sidebar-width + 0.5em);
+    }
 
     &-entry {
       display: flex;

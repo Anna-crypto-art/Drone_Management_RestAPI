@@ -10,4 +10,10 @@ export interface GeoVisualQuery {
   orientation_offset_class?: 1 | 2 | 3;
   torsion_class?: 1 | 2 | 3;
   sdx_class?: 1 | 2 | 3;
+  /**
+   * If you need to visualize same PI in several ways,
+   * you can difference the visualizuation of the same PI with this param.
+   * But you need to now the python class name of the key figure.
+   */
+  key_figure_class_name?: string;
 }

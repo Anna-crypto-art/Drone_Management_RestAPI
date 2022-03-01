@@ -36,8 +36,7 @@ export default class AppSidebar extends Vue {
 
 <style lang="scss">
 @import "@/scss/_colors.scss";
-
-$sidebar-width: min(400px, min(70vw, calc(100vw - 50px)));
+@import "@/scss/_variables.scss";
 
 .app-sidebar {
   position: relative;
