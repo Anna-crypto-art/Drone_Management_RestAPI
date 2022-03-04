@@ -27,15 +27,17 @@ export abstract class CspPtcKeyFigureLayer<T extends AnalysisResultSchemaBase> e
     }
   }
 
-  protected getClassColor(classValue: number | undefined): string {
+  protected getClassColor(classValue: number | undefined, color?: string): string {
+    color = color || this.color;
+
     if (classValue === 1) {
       return this.getColorWithAlpha(KeyFigureColors.green, 0.3);
     }
 
     if (classValue === 2) {
-      return this.getColorWithAlpha(this.color!, 0.5);
+      return this.getColorWithAlpha(color!, 0.5);
     }
 
-    return this.color!;
+    return color!;
   }
 }

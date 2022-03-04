@@ -12,15 +12,17 @@ export class SceAlignmentKeyFigureLayer extends OrientationKeyFigureLayer<Analys
     return this.analysisResult.csp_ptc.sce_alignment_deviation_to_drive_class_limits;
   }
 
-  protected getClassColor(classValue: number | undefined): string {
+  protected getClassColor(classValue?: number, color?: string): string {
+    color = color || this.color;
+
     if (classValue === 1) {
       return this.getColorWithAlpha(KeyFigureColors.green, 0.1);
     }
 
     if (classValue === 2) {
-      return this.getColorWithAlpha(this.color!, 0.35);
+      return this.getColorWithAlpha(color!, 0.35);
     }
 
-    return super.getClassColor(classValue);
+    return super.getClassColor(classValue, color);
   }
 }
