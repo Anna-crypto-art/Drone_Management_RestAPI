@@ -104,7 +104,7 @@
   "actual-angle": "Measured orientation",
   "alignment-offset": "Alignment offset",
   "sce-alignment-offset": "Alignment offset",
-  "tracking-offset": "Tracking offset",
+  "tracking-offset": "Tracking encoder offset",
   "sce-alignment-offset_expl": "Deviation of the SCE orientation to the mean value of both SCEs at drive pylon. <br> SCEs with offset values less than 0 point to the east.",
   "tracking-offset_expl": "Tracking offset of the SCA to the 'encoder value' (usually about 90°). <br> SCAs with offset values less than 0 point to the east.",
   "angle-value_expl": "Alignment of the SCE according to plant data",

@@ -81,7 +81,7 @@ export class PILayersHierarchy {
 
   public toggleShowUndefined(showUndefined: boolean): void {
     for (const childLayer of this.getAllChildLayers()) {
-      if (childLayer.query?.undefined !== undefined) {
+      if (childLayer.query?.undefined !== undefined && childLayer.keyFigureInfo.displayName !== "not-measured") {
         childLayer.query.undefined = showUndefined && 1 || 0;
         childLayer.reloadLayer();
       }
