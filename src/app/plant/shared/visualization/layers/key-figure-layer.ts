@@ -19,7 +19,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
 
   protected geoJSON?: {
     type: string;
-    features: { properties: { name: string; value: string | boolean | number } }[];
+    features: { properties: FeatureProperties }[];
     custom: { components_total_count: number; mirrors_per_sce?: number };
   };
 

@@ -10,6 +10,7 @@ export const cspPtcKeyFigureColors: Record<ApiKeyFigure, KeyFigureColors> = {
   [ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID]: KeyFigureColors.RED_retroBerry,
   [ApiKeyFigure.IR_INTENSITY_ID]: KeyFigureColors.RED_retroBerry,
   [ApiKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID]: KeyFigureColors.red,
+  [ApiKeyFigure.HCE_POSITION_ID]: KeyFigureColors.BLUE_midnightDarkRoyalBlue,
 
   // SCA
   [ApiKeyFigure.SCA_TRACKING_DEVIATION_ID]: KeyFigureColors.BLUE_jeopardyBlue,

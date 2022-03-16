@@ -96,6 +96,32 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     transName: "glass-tube-temperature-class-limits",
     keyFigureId: ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
   },
+  {
+    getValue: r => r.hce_position_total_offset,
+    transName: "hce-position-total-offset",
+    transDescr: "hce-position-offset-descr",
+    keyFigureId: ApiKeyFigure.HCE_POSITION_ID,
+    filterType: FilterFieldType.NUMERIC_EXTENDED,
+  },
+  {
+    getValue: r => r.hce_position_offset_class,
+    transName: "hce-position-offset-class",
+    transDescr: "hce-position-offset_expl",
+    keyFigureId: ApiKeyFigure.HCE_POSITION_ID,
+    filterType: FilterFieldType.NUMERIC_EXTENDED,
+  },
+  {
+    getValue: r => r.hce_position_lateral_offset,
+    transName: "hce-position-lateral-offset",
+    keyFigureId: ApiKeyFigure.HCE_POSITION_ID,
+    filterType: FilterFieldType.NUMERIC_EXTENDED,
+  },
+  {
+    getValue: r => r.hce_position_vertical_offset,
+    transName: "hce-position-vertical-offset",
+    keyFigureId: ApiKeyFigure.HCE_POSITION_ID,
+    filterType: FilterFieldType.NUMERIC_EXTENDED,
+  },
 ];
 
 export default analysisResultCspPtcMappingHce;

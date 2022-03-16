@@ -104,6 +104,19 @@
         {{ $t("slope-deviation") }}
         <app-explanation><span v-html="$t('slope-deviation_expl')"></span></app-explanation>
       </template>
+      <template #hcePosition>
+        {{ $t("hce-position-total-offset") }}
+        <app-explanation><span v-html="$t('hce-position-offset_expl')"></span></app-explanation>
+      </template>
+      <template #hcePositionOffsetClass3>
+        {{ getTransAlignmentOffsetClassLimit("hce", 3) }}
+      </template>
+      <template #hcePositionOffsetClass2>
+        {{ getTransAlignmentOffsetClassLimit("hce", 2) }}
+      </template>
+      <template #hcePositionOffsetClass1>
+        {{ getTransAlignmentOffsetClassLimit("hce", 1) }}
+      </template>
     </app-visualization>
   </div>
 </template>
@@ -154,34 +167,36 @@ export default class AppVisualCspPtc
     return this.visualization?.onLayerSelected(selected, legend);
   }
 
-  getTransAlignmentOffsetClassLimit(component_type: "sce" | "sca", class_limit: 1 | 2 | 3): string {
+  getTransAlignmentOffsetClassLimit(componentType: "sce" | "sca" | "hce", classLimit: 1 | 2 | 3): string {
     if (!this.selectedAnalysisResult) {
       return "";
     }
 
-    let offset_class_limits: number[] | null = null;
-    if (component_type === "sce") {
-      offset_class_limits = this.selectedAnalysisResult.csp_ptc.sce_alignment_deviation_to_drive_class_limits;
-    } else if (component_type === "sca") {
-      offset_class_limits = this.selectedAnalysisResult.csp_ptc.sca_tracking_encoder_offset_class_limits;
+    let offsetClassLimits: number[] | null = null;
+    if (componentType === "sce") {
+      offsetClassLimits = this.selectedAnalysisResult.csp_ptc.sce_alignment_deviation_to_drive_class_limits;
+    } else if (componentType === "sca") {
+      offsetClassLimits = this.selectedAnalysisResult.csp_ptc.sca_tracking_encoder_offset_class_limits;
+    } else if (componentType === "hce") {
+      offsetClassLimits = this.selectedAnalysisResult.csp_ptc.hce_position_total_class_limits;
     }
 
-    if (offset_class_limits === null) {
+    if (offsetClassLimits === null) {
       return "";
     }
 
-    if (class_limit === 1) {
-      return this.$t("alignment-offset-class-1", { limit0: offset_class_limits[0] }).toString();
+    if (classLimit === 1) {
+      return this.$t("alignment-offset-class-1", { limit0: offsetClassLimits[0] }).toString();
     }
-    if (class_limit === 2) {
+    if (classLimit === 2) {
       return this.$t("alignment-offset-class-2", {
-        limit1: offset_class_limits[1],
-        limit0: offset_class_limits[0],
+        limit1: offsetClassLimits[1],
+        limit0: offsetClassLimits[0],
       }).toString();
     }
-    if (class_limit === 3) {
+    if (classLimit === 3) {
       return this.$t("alignment-offset-class-3", {
-        limit1: offset_class_limits[1],
+        limit1: offsetClassLimits[1],
       }).toString();
     }
 

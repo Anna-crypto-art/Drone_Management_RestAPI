@@ -1,19 +1,11 @@
 export function complimentaryColor(hexColor: string): string {
-  console.log("hexcolor: " + hexColor);
-
   const rgb = [
     parseInt(hexColor.substring(1, 3), 16),
     parseInt(hexColor.substring(3, 5), 16),
     parseInt(hexColor.substring(5, 7), 16),
   ];
 
-  console.log("rgb");
-  console.log(rgb);
-
   const complementaryRgb = ryb2rgb(complimentary(rgb2ryb(rgb)));
-
-  console.log("complementaryRgb")
-  console.log(complementaryRgb)
 
   return "#" + 
     Math.round(complementaryRgb[0]).toString(16).padEnd(2, "0") +

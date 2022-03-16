@@ -17,4 +17,8 @@ export interface AnalysisResultCspPtcHceSchema extends AnalysisResultSchemaBase 
   oxygen_penetration: boolean;
   glass_tube_temperature_class_limits: number[];
   position_in_loop: number[];
+  hce_position_vertical_offset: number;
+  hce_position_lateral_offset: number;
+  hce_position_total_offset: number;
+  hce_position_offset_class: number;
 }

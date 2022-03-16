@@ -16,4 +16,5 @@ export interface GeoVisualQuery {
    * But you need to now the python class name of the key figure.
    */
   key_figure_class_name?: string;
+  hce_position_offset_class?: 1 | 2 | 3;
 }

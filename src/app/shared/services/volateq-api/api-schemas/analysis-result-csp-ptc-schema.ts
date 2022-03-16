@@ -8,5 +8,6 @@ export interface AnalysisResultCspPtcSchema {
   sca_torsion_class_limits: number[];
   sdx_rms_class_limits: number[];
   glass_tube_temperature_class_count: 3 | 4;
+  hce_position_total_class_limits: number[];
   created_at: string;
 }

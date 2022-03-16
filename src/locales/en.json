@@ -259,6 +259,10 @@
   "subfield": "Subfield",
   "add-pi-filter": "Add PI filter",
   "show-sum-avg": "Show sums/average values",
+  "hce-position-lateral-offset": "HCE position lateral offset",
+  "hce-position-vertical-offset": "HCE position vertical offset",
+  "hce-position-total-offset": "HCE position total offset",
+  "hce-position-offset_expl": "Deviation of HCE from focal line. Positive: Above focal line. Negative: Below focal line",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",
