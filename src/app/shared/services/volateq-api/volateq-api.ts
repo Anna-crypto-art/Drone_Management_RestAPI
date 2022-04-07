@@ -396,7 +396,7 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public runQFlyWizard(analysisId: string, startServer = true): Promise<TaskSchema> {
-    return this.get(`/auth/analysis/${analysisId}/run-qfly-wizard`, { start_server: startServer });
+    return this.get(`/auth/analysis/${analysisId}/run-qfly-wizard`, { start_server: startServer ? 1 : 0 });
   }
 
   public getFieldgeometryComponentCodes(
