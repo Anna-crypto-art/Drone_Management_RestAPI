@@ -3,7 +3,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { LayerBase } from "./layer-base";
 import { FeatureLike } from "ol/Feature";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
-import { KeyFigureColors, KeyFigureInfo } from "./types";
+import { KeyFigureColors, KeyFigureColorScheme, KeyFigureInfo } from "./types";
 import { FeatureInfo, FeatureInfos, FeatureProperties, Legend, IPlantVisualization } from "../types";
 import { AnalysisResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
@@ -17,6 +17,9 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   protected abstract readonly analysisResultMapping: AnalysisResultMappings<T>;
   protected readonly name: string;
 
+  protected abstract get color(): string;
+  protected colorScheme = KeyFigureColorScheme.TRAFFIC_LIGHT;
+
   protected geoJSON?: {
     type: string;
     features: { properties: FeatureProperties }[];
@@ -29,7 +32,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     protected readonly keyFigureId: ApiKeyFigure,
     public readonly keyFigureInfo: KeyFigureInfo,
     public readonly query?: GeoVisualQuery,
-    protected readonly color?: KeyFigureColors
+    protected readonly initColor?: KeyFigureColors,
   ) {
     super(vueComponent);
 
@@ -147,6 +150,10 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     if (this.geoLayerObject) {
       this.geoLayerObject.visible = this.visible;
     }
+  }
+
+  public setColorScheme(colorScheme: KeyFigureColorScheme) {
+    this.colorScheme = colorScheme;
   }
 
   protected get keyFigure(): KeyFigureSchema {

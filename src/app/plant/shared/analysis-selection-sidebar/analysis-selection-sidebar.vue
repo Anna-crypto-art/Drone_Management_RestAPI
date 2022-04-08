@@ -13,10 +13,15 @@
             head-variant="light"
             @row-selected="onAnalysisResultSelected"
           >
+            <!-- 
+              Selection will come with history mode...
+
             <template #head(selected)></template>
             <template #cell(selected)="{ rowSelected }">
               <b-checkbox :checked="rowSelected" disabled class="b-table-selectable-checkbox"></b-checkbox>
             </template>
+            
+            -->
             <template #row-details="row">
               <span class="analysis-selection-sidebar-kpi-badge" v-for="kpi in row.item.kpis" :key="kpi.id">
                 <b-badge variant="primary" :style="'background-color: ' + getKpiColor(kpi)">{{ kpi.name }}</b-badge>
@@ -58,7 +63,7 @@ export default class AppAnalysisSelectionSidebar extends Vue {
   @State(state => state.sidebar["analysis"]) sidebarOpen!: boolean;
 
   analysisResultsTableColumns: BvTableFieldArray = [
-    { key: "selected", label: "" },
+    // { key: "selected", label: "" },
     { key: "name", label: this.$t("name").toString() },
     { key: "date", label: this.$t("acquisition-date").toString() },
   ];
@@ -71,7 +76,8 @@ export default class AppAnalysisSelectionSidebar extends Vue {
         name: analysisResult.analysis.name,
         date: new Date(Date.parse(analysisResult.analysis.flown_at)).toLocaleDateString(),
         kpis: analysisResult.key_figures,
-        _showDetails: true,
+        // only show details for history mode .. that will be implemented in near future
+        _showDetails: false,
       });
     }
 

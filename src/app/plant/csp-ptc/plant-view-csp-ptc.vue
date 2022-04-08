@@ -50,7 +50,7 @@ import { ISidebarModule } from "@/app/shared/stores/sidebar";
 import { Component, Prop, Ref } from "vue-property-decorator";
 import { State } from "vuex-class";
 import { IAnalysisResultSelection } from "../shared/types";
-import { cspPtcKeyFigureColors } from "./csp-ptc-key-figure-colors";
+import { cspPtcKeyFigureRainbowColors } from "./csp-ptc-key-figure-colors";
 
 @Component({
   name: "app-plant-view-csp-ptc",
@@ -127,7 +127,7 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
   }
 
   getPiColor(keyFigure: KeyFigureSchema): string {
-    return cspPtcKeyFigureColors[keyFigure.id];
+    return cspPtcKeyFigureRainbowColors[keyFigure.id];
   }
 
   updateLeftSidebarAbsolute() {

@@ -1,13 +1,22 @@
+import { KeyFigureColors, KeyFigureColorScheme } from "@/app/plant/shared/visualization/layers/types";
 import { ClassHceKeyFigureLayer } from "./shared/class-hce-key-figure-layer";
 
 export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer {
   protected getClassColor(classValue: number | undefined): string {
-    if (this.analysisResult.csp_ptc.glass_tube_temperature_class_count === 4 && classValue === 3) {
-      return this.getColorWithAlpha(this.color!, 0.7);
+    if (this.colorScheme === KeyFigureColorScheme.RAINBOW) {
+      if (this.analysisResult.csp_ptc.glass_tube_temperature_class_count === 4 && classValue === 3) {
+        return this.getColorWithAlpha(this.color!, 0.7);
+      }
+  
+      if (classValue === 2) {
+        return this.getColorWithAlpha(this.color!, 0.3);
+      }
     }
 
-    if (classValue === 2) {
-      return this.getColorWithAlpha(this.color!, 0.3);
+    if (this.colorScheme === KeyFigureColorScheme.TRAFFIC_LIGHT && this.analysisResult.csp_ptc.glass_tube_temperature_class_count === 4
+      && classValue === 3)
+    {
+      return KeyFigureColors.orange;
     }
 
     return super.getClassColor(classValue);

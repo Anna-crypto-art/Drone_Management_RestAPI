@@ -2,7 +2,7 @@ import { LayerType } from "@/app/shared/components/app-geovisualization/types/la
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { KeyFigureLayer } from "./layers/key-figure-layer";
-import { KeyFigureInfo } from "./layers/types";
+import { KeyFigureColorScheme, KeyFigureInfo } from "./layers/types";
 import { GroupKPILayer, KeyFigureTypeMap } from "./types";
 
 /**
@@ -76,6 +76,10 @@ export class PILayersHierarchy {
   public toggleMultiSelection(multiSelection: boolean): void {
     for (const componentId in this.parentComponentKpiLayers) {
       this.parentComponentKpiLayers[componentId].groupLayer.singleSelection = !multiSelection;
+    }
+    for (const childLayer of this.getAllChildLayers()) {
+      childLayer.setColorScheme(multiSelection ? KeyFigureColorScheme.RAINBOW : KeyFigureColorScheme.TRAFFIC_LIGHT);
+      childLayer.reloadLayer();
     }
   }
 

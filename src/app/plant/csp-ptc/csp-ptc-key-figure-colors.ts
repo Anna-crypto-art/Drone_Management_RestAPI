@@ -1,7 +1,7 @@
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { KeyFigureColors } from "../shared/visualization/layers/types";
 
-export const cspPtcKeyFigureColors: Record<ApiKeyFigure, KeyFigureColors> = {
+export const cspPtcKeyFigureRainbowColors: Record<ApiKeyFigure, KeyFigureColors> = {
   // HCE
   [ApiKeyFigure.MISSING_GLASS_TUBE_ID]: KeyFigureColors.BLUE_iurple,
   [ApiKeyFigure.OXYGEN_PENETRATION_ID]: KeyFigureColors.RED_coffeeWithChili,

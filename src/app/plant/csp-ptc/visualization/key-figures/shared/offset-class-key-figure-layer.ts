@@ -1,4 +1,4 @@
-import { KeyFigureColors } from "@/app/plant/shared/visualization/layers/types";
+import { KeyFigureColors, KeyFigureColorScheme } from "@/app/plant/shared/visualization/layers/types";
 import { Legend } from "@/app/plant/shared/visualization/types";
 import { complimentaryColor } from "@/app/shared/services/helper/color-helper";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
@@ -52,12 +52,20 @@ export abstract class OffsetClassKeyFigureLayer<T extends AnalysisResultSchemaBa
       return KeyFigureColors.grey;
     }
 
-    let color: string = this.color!;
+    let color = this.getClassColor(this.getQueryOffsetClass());
     if (complementary && this.getQueryOffsetClass() && this.getQueryOffsetClass()! > 1) {
-      color = complimentaryColor(color);
+      if (this.colorScheme === KeyFigureColorScheme.RAINBOW) {
+        color = complimentaryColor(color);
+      } else if (this.colorScheme === KeyFigureColorScheme.TRAFFIC_LIGHT) {
+        if (this.getQueryOffsetClass() === 2) {
+          color = KeyFigureColors.darkYellow;
+        } else if (this.getQueryOffsetClass() === 3) {
+          color = KeyFigureColors.darkRed;
+        }
+      }
     }
 
-    return this.getClassColor(this.getQueryOffsetClass(), color);
+    return color;
   }
 
   private getLegendName(negativeOffset = false): string {

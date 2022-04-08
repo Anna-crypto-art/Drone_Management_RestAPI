@@ -36,6 +36,11 @@ export interface SubKeyFigureInfo {
   zIndex?: number;
 }
 
+export enum KeyFigureColorScheme {
+  TRAFFIC_LIGHT = 0,
+  RAINBOW = 1,
+}
+
 /**
  * Inspired by https://htmlcolorcodes.com/color-picker/
  *
@@ -71,11 +76,10 @@ export enum KeyFigureColors {
   BLUE_liturgicalTemptation = "#af0083",
 
   green = "green",
-  yellow = "yellow",
+  yellow = "#ffff00",
+  darkYellow = "#888800",
   red = "#ff0000",
-  halfRed = "#ff8080",
-  blue = "#0000ff",
-  halfBlue = "#8080ff",
+  darkRed = "#880000",
   grey = "#666666",
   black = "#000000",
   orange = "#ef7700",
