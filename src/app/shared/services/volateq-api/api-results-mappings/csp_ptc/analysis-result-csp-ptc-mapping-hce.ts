@@ -48,6 +48,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     transName: "glass-tube-temperature",
     keyFigureId: ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
+    enableForDiagram: true,
   },
   {
     getValue: r => r.glass_tube_temperature_class,
@@ -55,6 +56,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     transDescr: "glass-tube-temperature-class_expl",
     keyFigureId: ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
+    enableForDiagram: true,
   },
   {
     getValue: r => r.missing_glass_tube,
@@ -62,6 +64,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     transDescr: "missing-gct_expl",
     keyFigureId: ApiKeyFigure.MISSING_GLASS_TUBE_ID,
     filterType: FilterFieldType.BOOLEAN,
+    enableForDiagram: true,
   },
   {
     getValue: r => r.oxygen_penetration,
@@ -69,6 +72,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     transDescr: "oxygen-penetration_expl",
     keyFigureId: ApiKeyFigure.OXYGEN_PENETRATION_ID,
     filterType: FilterFieldType.BOOLEAN,
+    enableForDiagram: true,
   },
   {
     getValue: r => r.h2_concentration,
@@ -76,6 +80,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     transDescr: "high-hydrogen-concentration_expl",
     keyFigureId: ApiKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID,
     filterType: FilterFieldType.BOOLEAN,
+    enableForDiagram: true,
   },
   {
     getValue: r => r.coating_degraded,
@@ -90,6 +95,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     transDescr: "recommended-action_expl",
     keyFigureId: ApiKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
+    enableForDiagram: true,
   },
   {
     getValue: r => r.glass_tube_temperature_class_limits,

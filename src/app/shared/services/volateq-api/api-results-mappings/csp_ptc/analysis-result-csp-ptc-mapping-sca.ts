@@ -32,6 +32,7 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<AnalysisResultCspPt
     transDescr: "tracking-offset_expl",
     keyFigureId: ApiKeyFigure.SCA_TRACKING_DEVIATION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
+    enableForDiagram: true,
   },
   {
     getValue: r => r.average_tracking_offset,
@@ -39,6 +40,7 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<AnalysisResultCspPt
     transDescr: "average-tracking-offset_expl",
     keyFigureId: ApiKeyFigure.SCA_TRACKING_DEVIATION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
+    enableForDiagram: true,
   },
   {
     getValue: r => r.torsion_caused_friction_mean,
@@ -60,6 +62,7 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<AnalysisResultCspPt
     transDescr: "slope-deviation_expl",
     keyFigureId: ApiKeyFigure.SCA_SDX_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
+    enableForDiagram: true,
   },
 ];
 

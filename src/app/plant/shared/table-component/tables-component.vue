@@ -54,7 +54,9 @@ import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { Component, Prop } from "vue-property-decorator";
-import { IActiveComponent, IActiveTabComponent, IAnalysisResultSelection } from "../types";
+import { AnalysisSelectionService } from "../analysis-selection-sidebar/analysis-selection-service";
+import { AnalysisSelectionEvent } from "../analysis-selection-sidebar/types";
+import { IActiveComponent, IActiveTabComponent } from "../types";
 import { ITableComponent } from "./types";
 
 @Component({
@@ -67,7 +69,7 @@ import { ITableComponent } from "./types";
     AppTableComponent,
   },
 })
-export default class AppTablesComponent extends BaseAuthComponent implements IAnalysisResultSelection {
+export default class AppTablesComponent extends BaseAuthComponent {
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
   @Prop() activeComponents!: IActiveComponent[];
@@ -79,29 +81,35 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
 
   selectedAnalysisResult: AnalysisResultDetailedSchema | null = null;
 
-  selectAnalysisResult(analysisResultId: string | undefined) {
-    this.selectedAnalysisResult =
-      this.analysisResults.find(analysisResult => analysisResult.id === analysisResultId) || null;
+  async created() {
+    AnalysisSelectionService.on(
+      this.plant.id,
+      AnalysisSelectionEvent.ANALYSIS_SELECTED,
+      (selectedAnalysisResultId: string | undefined) => {
+        this.selectedAnalysisResult = this.analysisResults
+          .find(analysisResult => analysisResult.id === selectedAnalysisResultId) || null;
 
-    this.activeTabComponents.length = 0;
+        this.activeTabComponents.length = 0;
 
-    if (this.selectedAnalysisResult) {
-      let tabIdx = 0;
+        if (this.selectedAnalysisResult) {
+          let tabIdx = 0;
 
-      for (const activeComponent of this.activeComponents) {
-        const keyFigure = this.selectedAnalysisResult.key_figures.find(
-          keyFigure => keyFigure.component.id === activeComponent.componentId
-        );
-        if (keyFigure) {
-          this.activeTabComponents.push({
-            ...activeComponent,
-            tabIndex: tabIdx++,
-          });
+          for (const activeComponent of this.activeComponents) {
+            const keyFigure = this.selectedAnalysisResult.key_figures.find(
+              keyFigure => keyFigure.component.id === activeComponent.componentId
+            );
+            if (keyFigure) {
+              this.activeTabComponents.push({
+                ...activeComponent,
+                tabIndex: tabIdx++,
+              });
+            }
+          }
         }
-      }
-    }
 
-    this.onTabChanged(0);
+        this.onTabChanged(0);
+      }
+    )
   }
 
   onSearch(searchText: string) {

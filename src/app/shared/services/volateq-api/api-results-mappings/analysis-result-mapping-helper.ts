@@ -10,7 +10,7 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
     private readonly analysisResult: AnalysisResultDetailedSchema
   ) {}
 
-  private getEntries(): AnalysisResultMappings<T> {
+  public getEntries(): AnalysisResultMappings<T> {
     return this.analysisResultMapping.filter(entry => this.hasKeyFigure(entry));
   }
 

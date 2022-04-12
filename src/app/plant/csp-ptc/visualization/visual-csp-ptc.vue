@@ -122,7 +122,6 @@
 </template>
 
 <script lang="ts">
-import { IAnalysisResultSelection } from "@/app/plant/shared/types";
 import { IPlantVisualization, Legend } from "@/app/plant/shared/visualization/types";
 import AppVisualization from "@/app/plant/shared/visualization/visualization.vue";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
@@ -131,6 +130,8 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Component, Prop, Ref } from "vue-property-decorator";
+import { AnalysisSelectionService } from "../../shared/analysis-selection-sidebar/analysis-selection-service";
+import { AnalysisSelectionEvent } from "../../shared/analysis-selection-sidebar/types";
 import { COMPONENT_LAYERS, KEY_FIGURE_LAYERS } from "./layers";
 
 @Component({
@@ -142,21 +143,26 @@ import { COMPONENT_LAYERS, KEY_FIGURE_LAYERS } from "./layers";
 })
 export default class AppVisualCspPtc
   extends BaseAuthComponent
-  implements IAnalysisResultSelection, IPlantVisualization
+  implements IPlantVisualization
 {
   componentLayerTypes = COMPONENT_LAYERS;
   keyFigureLayers = KEY_FIGURE_LAYERS;
 
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
-  @Ref() visualization: (IAnalysisResultSelection & IPlantVisualization) | undefined;
+  @Ref() visualization: IPlantVisualization | undefined;
 
-  selectAnalysisResult(analysisResultId: string | undefined): void {
-    this.visualization?.selectAnalysisResult(analysisResultId);
-  }
+  private selectedAnalysisResult?: AnalysisResultDetailedSchema;
 
-  get selectedAnalysisResult(): AnalysisResultDetailedSchema | null | undefined {
-    return this.visualization?.selectedAnalysisResult;
+  async created() {
+    AnalysisSelectionService.on(
+      this.plant.id,
+      AnalysisSelectionEvent.ANALYSIS_SELECTED,
+      (selectedAnalysisResultId: string | undefined) => {
+        this.selectedAnalysisResult = this.analysisResults
+          .find(analysisResult => analysisResult.id === selectedAnalysisResultId);
+      }
+    )
   }
 
   get openLayers(): IOpenLayersComponent | undefined {

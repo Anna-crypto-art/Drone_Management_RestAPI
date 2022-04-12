@@ -15,5 +15,6 @@ export interface TableRequest {
 
 export interface TableFilterRequest {
   filters?: Record<string, FilterFieldValueType>;
-  component_filter?: { component_id: ApiComponent, codes: string[] };
+  component_filter?: { component_id: ApiComponent, codes?: string[], grouped?: boolean };
+  columns_selection?: { columns: { name: string, func?: "sum" | "avg" | "count" }[] };
 }

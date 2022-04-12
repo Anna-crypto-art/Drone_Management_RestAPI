@@ -45,6 +45,8 @@ import { BvTableFieldArray } from "bootstrap-vue";
 import Vue from "vue";
 import { Component, Prop, Ref } from "vue-property-decorator";
 import { State } from "vuex-class";
+import { AnalysisSelectionService } from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-service";
+import { AnalysisSelectionEvent } from "./types";
 
 @Component({
   name: "app-analysis-selection-sidebar",
@@ -98,7 +100,7 @@ export default class AppAnalysisSelectionSidebar extends Vue {
     const selectedAnalysisResultId =
       (selectedAnalysisResult && selectedAnalysisResult.length > 0 && selectedAnalysisResult[0].id) || undefined;
 
-    this.$emit("analysisResultSelected", selectedAnalysisResultId);
+    AnalysisSelectionService.emit(this.plant.id, AnalysisSelectionEvent.ANALYSIS_SELECTED, selectedAnalysisResultId)
   }
 
   onSidebarToggled(): void {

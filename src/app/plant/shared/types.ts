@@ -13,8 +13,3 @@ export interface IActiveComponent {
 export interface IActiveTabComponent extends IActiveComponent {
   tabIndex: number;
 }
-
-export interface IAnalysisResultSelection {
-  selectAnalysisResult(analysisResultId: string | undefined): void;
-  selectedAnalysisResult: AnalysisResultDetailedSchema | null | undefined;
-}

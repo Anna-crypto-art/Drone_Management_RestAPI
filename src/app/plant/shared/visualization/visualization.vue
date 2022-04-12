@@ -72,9 +72,10 @@ import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { FeatureLike } from "ol/Feature";
 import { Component, Prop, Ref } from "vue-property-decorator";
-import { IAnalysisResultSelection } from "../types";
 import { ComponentLayer } from "./layers/component-layer";
 import { State } from "vuex-class";
+import { AnalysisSelectionEvent } from "../analysis-selection-sidebar/types";
+import { AnalysisSelectionService } from "../analysis-selection-sidebar/analysis-selection-service";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -90,7 +91,7 @@ const STORAGE_KEY_SATELLITEVIEW = "storage-key-satelliteview";
 })
 export default class AppVisualization
   extends BaseAuthComponent
-  implements IAnalysisResultSelection, IPlantVisualization
+  implements IPlantVisualization
 {
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
@@ -130,14 +131,19 @@ export default class AppVisualization
     setTimeout(() => {
       this.waitForDom = true;
     }, 300);
-  }
 
-  selectAnalysisResult(analysisResultId: string | undefined): void {
-    this.selectedAnalysisResult = this.analysisResults.find(analysisResult => analysisResult.id === analysisResultId);
+    AnalysisSelectionService.on(
+      this.plant.id,
+      AnalysisSelectionEvent.ANALYSIS_SELECTED,
+      (selectedAnalysisResultId: string | undefined) => {
+        this.selectedAnalysisResult = this.analysisResults
+          .find(analysisResult => analysisResult.id === selectedAnalysisResultId);
 
-    this.piLayersHierarchy.setVisibility(this.selectedAnalysisResult?.id);
+        this.piLayersHierarchy.setVisibility(this.selectedAnalysisResult?.id);
 
-    this.hideToast();
+        this.hideToast();
+      }
+    )
   }
 
   get hasLayers(): boolean {

@@ -9,6 +9,7 @@ export interface AnalysisResultMappingEntry<T extends AnalysisResultSchemaBase> 
   transDescr?: string;
   keyFigureId?: ApiKeyFigure;
   filterType?: FilterFieldType;
+  enableForDiagram?: boolean;
 }
 
 export type AnalysisResultMappings<T extends AnalysisResultSchemaBase> = AnalysisResultMappingEntry<T>[];

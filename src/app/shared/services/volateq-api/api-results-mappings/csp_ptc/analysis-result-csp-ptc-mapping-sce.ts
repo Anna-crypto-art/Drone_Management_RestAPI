@@ -19,6 +19,7 @@ const analysisResultCspPtcMappingSce: AnalysisResultMappings<AnalysisResultCspPt
     transDescr: "sce-alignment-offset_expl",
     keyFigureId: ApiKeyFigure.SCE_ALIGNMENT_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
+    enableForDiagram: true,
   },
   {
     getValue: r => r.orientation_uncertainty,

@@ -235,6 +235,9 @@ export class VolateqAPI extends HttpClientBase {
       if (filterParams.component_filter) {
         encodedFilterParams += `&component_filter=${encodeURIComponent(JSON.stringify(filterParams.component_filter))}`;
       }
+      if (filterParams.columns_selection) {
+        encodedFilterParams += `&columns_selection=${encodeURIComponent(JSON.stringify(filterParams.columns_selection))}`;
+      }
     }
 
     return encodedFilterParams

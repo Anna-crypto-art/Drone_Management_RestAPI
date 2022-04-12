@@ -6,7 +6,6 @@
       :analysisResults="analysisResults"
       :getPIColor="getPiColor"
       :absolute="leftSidebarAbsolute"
-      @analysisResultSelected="onAnalysisResultSelected"
     />
     <div class="plant-view-csp-ptc-rightside">
       <h2 :class="'plant-view-csp-ptc-title ' + (sidebarStates['analysis'] ? 'open' : '')">
@@ -17,11 +16,15 @@
           <template #title>
             <b-icon icon="map" />
           </template>
-          <app-visual-csp-ptc ref="visualCspPtc" :analysisResults="analysisResults" :plant="plant" />
+          <app-visual-csp-ptc :analysisResults="analysisResults" :plant="plant" />
         </b-tab>
         <b-tab v-if="hasResults">
           <template #title><b-icon icon="table" /></template>
-          <app-tables-csp-ptc ref="tablesCspPtc" :analysisResults="analysisResults" :plant="plant" />
+          <app-tables-csp-ptc :analysisResults="analysisResults" :plant="plant" />
+        </b-tab>
+        <b-tab v-if="hasResults">
+          <template #title><b-icon icon="bar-chart-fill" /></template>
+          <app-plant-diagram-view-csp-ptc :analysisResults="analysisResults" :plant="plant" />
         </b-tab>
         <b-tab v-if="isSuperAdmin">
           <template #title><b-icon icon="braces" /></template>
@@ -37,7 +40,7 @@ import AppPlantAdminViewCspPtc from "@/app/plant/csp-ptc/plant-admin-view-csp-pt
 import AppTablesCspPtc from "@/app/plant/csp-ptc/tables/tables-csp-ptc.vue";
 import AppVisualCspPtc from "@/app/plant/csp-ptc/visualization/visual-csp-ptc.vue";
 import AppAnalysisSelectionSidebar from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-sidebar.vue";
-import { IAnalysisSelectionSidebar } from "@/app/plant/shared/analysis-selection-sidebar/types";
+import { AnalysisSelectionEvent, IAnalysisSelectionSidebar } from "@/app/plant/shared/analysis-selection-sidebar/types";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
@@ -49,8 +52,9 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { ISidebarModule } from "@/app/shared/stores/sidebar";
 import { Component, Prop, Ref } from "vue-property-decorator";
 import { State } from "vuex-class";
-import { IAnalysisResultSelection } from "../shared/types";
+import { AnalysisSelectionService } from "../shared/analysis-selection-sidebar/analysis-selection-service";
 import { cspPtcKeyFigureRainbowColors } from "./csp-ptc-key-figure-colors";
+import AppPlantDiagramViewCspPtc from "@/app/plant/csp-ptc/plant-diagram-view-csp-ptc.vue";
 
 @Component({
   name: "app-plant-view-csp-ptc",
@@ -62,13 +66,12 @@ import { cspPtcKeyFigureRainbowColors } from "./csp-ptc-key-figure-colors";
     AppSidebar,
     AppAnalysisSelectionSidebar,
     AppPlantAdminViewCspPtc,
+    AppPlantDiagramViewCspPtc,
   },
 })
 export default class AppPlantViewCspPtc extends BaseAuthComponent {
   @Prop() plant!: PlantSchema;
   @Ref() analysisSelectionSidebar!: IAnalysisSelectionSidebar;
-  @Ref() visualCspPtc!: IAnalysisResultSelection;
-  @Ref() tablesCspPtc!: IAnalysisResultSelection;
 
   selectedAnalysisResult: AnalysisResultDetailedSchema | null = null;
 
@@ -95,6 +98,19 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
     this.isMobileQuery = window.matchMedia("screen and (max-width: 1000px)");
     this.isMobileQuery.addEventListener("change", this.isMobileListener);
     this.isMobileListener(this.isMobileQuery);
+
+    AnalysisSelectionService.on(
+      this.plant.id,
+      AnalysisSelectionEvent.ANALYSIS_SELECTED,
+      (selectedAnalysisResultId: string | undefined) => {
+        if (this.analysisResults) {
+          this.selectedAnalysisResult = this.analysisResults
+            .find(analysisResult => analysisResult.id === selectedAnalysisResultId) || null;
+        }
+
+        this.rerenderOLCanvas();
+      }
+    )
   }
 
   unmounted() {
@@ -103,15 +119,6 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
 
   get hasResults(): boolean {
     return this.analysisResults ? this.analysisResults?.length > 0 : false;
-  }
-
-  onAnalysisResultSelected(selectedAnalysisResultId: string | undefined): void {
-    this.visualCspPtc.selectAnalysisResult(selectedAnalysisResultId);
-    this.tablesCspPtc.selectAnalysisResult(selectedAnalysisResultId);
-
-    this.selectedAnalysisResult = this.visualCspPtc?.selectedAnalysisResult || null;
-
-    this.rerenderOLCanvas();
   }
 
   onTabChange(tab: number) {

@@ -11,6 +11,7 @@ const analysisResultCspPtcMappingMirror: AnalysisResultMappings<AnalysisResultCs
     transName: "is-missing-mirror",
     keyFigureId: ApiKeyFigure.MISSING_MIRROR_ID,
     filterType: FilterFieldType.BOOLEAN,
+    enableForDiagram: true,
   },
 ];
 
