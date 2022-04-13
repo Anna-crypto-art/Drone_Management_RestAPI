@@ -59,7 +59,7 @@ export class GeoJSONLoader extends LayerLoader<
     const zoomToHome = () => {
       const padding = 100;
 
-      this.map.getView().fit(geoLayer.getSource().getExtent(), {
+      this.map.getView().fit(geoLayer.getSource()!.getExtent(), {
         duration: 200,
         padding: [padding, padding, padding, padding],
       });

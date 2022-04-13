@@ -39,7 +39,7 @@
           </template>
         </b-form-select>
       </b-col>
-      <b-col>
+      <b-col v-show="showSlot">
         <template v-if="selectedAnalysisResult">
           <div v-for="keyFigureOption in keyFigureOptions" :key="keyFigureOption.value.entry.transName">
             <div v-show="keyFigureOption.value.show">
@@ -50,6 +50,11 @@
       </b-col>
       <b-col>
         <app-button v-show="selectedKeyFigure" @click="onApply" :loading="loading">{{ $t("apply") }}</app-button>
+      </b-col>
+    </b-row>
+    <b-row v-if="barChartData">
+      <b-col>
+        <Bar :chart-data="barChartData" :chart-options="barChartOptions" :height="300" :width="300" />
       </b-col>
     </b-row>
   </div>
@@ -71,11 +76,17 @@ import { Component, Prop } from "vue-property-decorator";
 import { AnalysisSelectionService } from "../analysis-selection-sidebar/analysis-selection-service";
 import { AnalysisSelectionEvent } from "../analysis-selection-sidebar/types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
+import { Bar } from 'vue-chartjs/legacy';
+import { BarChartData, GroupedAnalysisResult } from "./types";
+import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ChartData, ChartOptions } from 'chart.js'
+
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
 @Component({
   name: "app-diagram",
   components: {
-    AppButton
+    AppButton,
+    Bar,
   },
 })
 export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
@@ -95,9 +106,33 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
     show: boolean,
     mappingHelper: AnalysisResultMappingHelper<AnalysisResultSchemaBase>
     componentId: ApiComponent,
-    } | null = null;
-
+  } | null = null;
+  
+  showSlot = false;
   loading = false;
+
+  barChartData: ChartData | null = null;
+  barChartOptions: ChartOptions = {
+    indexAxis: "y",
+    plugins: {
+      legend: {
+        display: false,
+      }
+    },
+    scales: {
+      x: {
+        grid: {
+          display: false
+        }
+      },
+      y: {
+        grid: {
+          display: false
+        }
+      }
+    },
+    responsive: false,
+  }
 
   async created(): Promise<void> {
     AnalysisSelectionService.on(
@@ -133,9 +168,15 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
   }
 
   onKeyFigureSelected() {
+    this.showSlot = false;
+
     if (this.selectedKeyFigure) {
       for (const keyFigureOption of this.keyFigureOptions!) {
         keyFigureOption.value.show = (keyFigureOption.value.entry.transName === this.selectedKeyFigure.entry.transName);
+
+        if (keyFigureOption.value.show && keyFigureOption.value.entry.transName in this.$slots) {
+          this.showSlot = true;
+        }
       }
     }
   }
@@ -144,26 +185,33 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
     try {
       this.loading = true;
 
-      if (!this.tableFilter) {
-        this.tableFilter = {};
+      let tableFilter = this.showSlot ? this.tableFilter : {};
+
+      if (!tableFilter) {
+        tableFilter = {};
       }
 
-      this.tableFilter.component_filter = {
+      tableFilter.component_filter = {
         component_id: this.selectedComponentId!,
         grouped: true,
       }
 
       const columnName: string = this.selectedKeyFigure!.mappingHelper.getColumnsMapping()[this.selectedKeyFigure!.entry.transName];
-      if (!this.tableFilter.columns_selection) {
-        this.tableFilter.columns_selection = { columns: [{ name: columnName }] };
+      if (!tableFilter.columns_selection) {
+        tableFilter.columns_selection = { columns: [{ name: columnName }] };
       }
 
-      volateqApi.getSpecificAnalysisResult(
+      const groupedResults = await volateqApi.getSpecificAnalysisResult<GroupedAnalysisResult>(
         this.selectedAnalysisResult!.id, 
         this.selectedKeyFigure!.componentId,
         { order_by: columnName, order_direction: "desc", limit: 10 },
-        this.tableFilter
+        tableFilter
       );
+
+      this.barChartData = { 
+        labels: groupedResults.items.map(item => item.kks),
+        datasets: [{ data: groupedResults.items.map(item => item[columnName] as number) }]
+      };
     } catch (e) {
       console.error(e);
     } finally {

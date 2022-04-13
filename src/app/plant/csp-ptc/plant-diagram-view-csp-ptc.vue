@@ -8,7 +8,7 @@
       :tableFilter="tableFilter"
     >
       <template #glass-tube-temperature-class>
-        <b-form-select multiple 
+        <b-form-select
           v-model="selectedGlassTubeTemperatureClass"
           :options="glassTubeTemperatureClassOptions"
           @change="onSelectedGlassTubeTemperatureClassChanged"
@@ -55,7 +55,7 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
 
   selectedAnalysisResult: AnalysisResultDetailedSchema | null = null;
 
-  selectedGlassTubeTemperatureClass: number[] = [];
+  selectedGlassTubeTemperatureClass: number | null = null;
 
   tableFilter: TableFilterRequest | null = null;
 
@@ -79,13 +79,13 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
   }
 
   get glassTubeTemperatureClassOptions(): BvSelectOption[] {
-    let tempClass = this.selectedAnalysisResult!.csp_ptc.glass_tube_temperature_class_count;
-
     const classOptions: BvSelectOption[] = [];
-    while (tempClass > 1) {
-      classOptions.push({ value: tempClass, text: this.$t(`glass-tube-temperature-class-${tempClass}`).toString() });
-      tempClass--;
+
+    classOptions.push({ value: "4", text: this.$t(`glass-tube-temperature-class-4`).toString() });
+    if (this.selectedAnalysisResult!.csp_ptc.glass_tube_temperature_class_count === 4) {
+      classOptions.push({ value: "3", text: this.$t(`glass-tube-temperature-class-3`).toString() });
     }
+    classOptions.push({ value: "2", text: this.$t(`glass-tube-temperature-class-2`).toString() });
 
     return classOptions;
   }
@@ -100,7 +100,7 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
       const columnName = analysisResultMappingHelper.getColumnsMapping()['glass-tube-temperature-class'];
 
       // ignore multi in the first step
-      const glassTubeClass = this.selectedGlassTubeTemperatureClass[0];
+      const glassTubeClass = this.selectedGlassTubeTemperatureClass;
 
       this.tableFilter = {
         filters: { [columnName]: glassTubeClass },
