@@ -12,6 +12,7 @@ const analysisResultCspPtcMappingMirror: AnalysisResultMappings<AnalysisResultCs
     keyFigureId: ApiKeyFigure.MISSING_MIRROR_ID,
     filterType: FilterFieldType.BOOLEAN,
     enableForDiagram: true,
+    unit: "Count"
   },
 ];
 

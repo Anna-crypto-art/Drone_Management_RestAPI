@@ -6,6 +6,7 @@
       :componentSelection="componentIdSelection"
       :resultMappings="resultMappings"
       :tableFilter="tableFilter"
+      :labelUnit="labelUnit"
     >
       <template #glass-tube-temperature-class>
         <b-form-select
@@ -58,6 +59,7 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
   selectedGlassTubeTemperatureClass: number | null = null;
 
   tableFilter: TableFilterRequest | null = null;
+  labelUnit = "";
 
   async created() {
     AnalysisSelectionService.on(
@@ -81,9 +83,11 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
   get glassTubeTemperatureClassOptions(): BvSelectOption[] {
     const classOptions: BvSelectOption[] = [];
 
-    classOptions.push({ value: "4", text: this.$t(`glass-tube-temperature-class-4`).toString() });
     if (this.selectedAnalysisResult!.csp_ptc.glass_tube_temperature_class_count === 4) {
+      classOptions.push({ value: "4", text: this.$t(`glass-tube-temperature-class-4`).toString() });
       classOptions.push({ value: "3", text: this.$t(`glass-tube-temperature-class-3`).toString() });
+    } else {
+      classOptions.push({ value: "3", text: this.$t(`glass-tube-temperature-class-4`).toString() });
     }
     classOptions.push({ value: "2", text: this.$t(`glass-tube-temperature-class-2`).toString() });
 
@@ -108,8 +112,11 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
           columns: [{ name: columnName, func: "count" }],
         }
       };
+
+      this.labelUnit = "Count";
     } else {
       this.tableFilter = null;
+      this.labelUnit = "";
     }
   }
 }

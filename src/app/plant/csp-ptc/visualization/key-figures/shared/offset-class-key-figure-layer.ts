@@ -58,11 +58,13 @@ export abstract class OffsetClassKeyFigureLayer<T extends AnalysisResultSchemaBa
         color = complimentaryColor(color);
       } else if (this.colorScheme === KeyFigureColorScheme.TRAFFIC_LIGHT) {
         if (this.getQueryOffsetClass() === 2) {
-          color = KeyFigureColors.darkYellow;
+          color = this.getColorWithAlpha(KeyFigureColors.blue, 0.4);
         } else if (this.getQueryOffsetClass() === 3) {
-          color = KeyFigureColors.darkRed;
+          color = KeyFigureColors.blue;
         }
       }
+    } else if (!complementary && this.getQueryOffsetClass() && this.getQueryOffsetClass() === 2) {
+      color = this.getColorWithAlpha(KeyFigureColors.red, 0.4);
     }
 
     return color;

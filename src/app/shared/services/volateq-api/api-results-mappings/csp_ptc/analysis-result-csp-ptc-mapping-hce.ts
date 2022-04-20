@@ -49,6 +49,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
+    unit: "μ in °C",
   },
   {
     getValue: r => r.glass_tube_temperature_class,
@@ -57,6 +58,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
+    unit: "μ of count"
   },
   {
     getValue: r => r.missing_glass_tube,
@@ -65,6 +67,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.MISSING_GLASS_TUBE_ID,
     filterType: FilterFieldType.BOOLEAN,
     enableForDiagram: true,
+    unit: "Count"
   },
   {
     getValue: r => r.oxygen_penetration,
@@ -73,6 +76,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.OXYGEN_PENETRATION_ID,
     filterType: FilterFieldType.BOOLEAN,
     enableForDiagram: true,
+    unit: "Count"
   },
   {
     getValue: r => r.h2_concentration,
@@ -81,6 +85,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID,
     filterType: FilterFieldType.BOOLEAN,
     enableForDiagram: true,
+    unit: "Count"
   },
   {
     getValue: r => r.coating_degraded,
@@ -96,6 +101,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
+    unit: "Count"
   },
   {
     getValue: r => r.glass_tube_temperature_class_limits,

@@ -126,6 +126,7 @@ export default class AppVisualization
     this.createLayers();
 
     this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
+    this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
 
     // wait for DOM before render OpenLayers
     setTimeout(() => {

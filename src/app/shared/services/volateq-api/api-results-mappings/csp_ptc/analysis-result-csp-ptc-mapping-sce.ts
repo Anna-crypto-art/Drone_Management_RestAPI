@@ -20,6 +20,7 @@ const analysisResultCspPtcMappingSce: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.SCE_ALIGNMENT_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
+    unit: "μ in °",
   },
   {
     getValue: r => r.orientation_uncertainty,

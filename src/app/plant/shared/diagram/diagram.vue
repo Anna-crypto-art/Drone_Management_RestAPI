@@ -1,14 +1,14 @@
 <template>
   <div class="diagram">
-    <b-row>
-      <b-col>
-        <b-form-select v-model="selectedComponentId" :options="componentOptions" >
+    <div class="diagram-select-row">
+      <div class="diagram-select-row-col">
+        <b-form-select v-model="selectedComponentId" :options="componentOptions" @change="onComponentSelected" >
           <template #first>
             <b-form-select-option :value="null" disabled>{{ $t("select-component") }}</b-form-select-option>
           </template>
         </b-form-select>
-      </b-col>
-      <b-col>
+      </div>
+      <div class="diagram-select-row-col">
         <b-form-select v-model="selectedOrderAndLimit" v-show="selectedComponentId">
           <template #first>
             <b-form-select-option :value="null" disabled>{{ $t("select-order-and-limit") }}</b-form-select-option>
@@ -23,14 +23,14 @@
             {{ $t("order-and-limit-selection-text", {limit: 10, order: 'ascending'}) }}
           </b-form-select-option>
           <b-form-select-option :value="{ reverse: false, limit: 25 }">
-            {{ $t("order-and-limit-selection-text", {limit: 25, order: 'descending'}) }}
+            {{ $t("order-and-limit-selection-text", {limit: 25, order: 'ascending'}) }}
           </b-form-select-option>
         </b-form-select>
-      </b-col>
-      <b-col>
+      </div>
+      <div class="diagram-select-row-col">
         <b-form-select v-if="selectedAnalysisResult" 
           v-model="selectedKeyFigure"
-          :options="keyFigureOptions"
+          :options="keyFigureGroupOptions"
           v-show="selectedOrderAndLimit"
           @change="onKeyFigureSelected"
         >
@@ -38,8 +38,8 @@
             <b-form-select-option :value="null" disabled>{{ $t("select-pi") }}</b-form-select-option>
           </template>
         </b-form-select>
-      </b-col>
-      <b-col v-show="showSlot">
+      </div>
+      <div v-show="showSlot" class="diagram-select-row-col">
         <template v-if="selectedAnalysisResult">
           <div v-for="keyFigureOption in keyFigureOptions" :key="keyFigureOption.value.entry.transName">
             <div v-show="keyFigureOption.value.show">
@@ -47,16 +47,19 @@
             </div>
           </div>
         </template>
-      </b-col>
-      <b-col>
+      </div>
+      <div class="diagram-select-row-col apply">
         <app-button v-show="selectedKeyFigure" @click="onApply" :loading="loading">{{ $t("apply") }}</app-button>
-      </b-col>
-    </b-row>
-    <b-row v-if="barChartData">
-      <b-col>
-        <Bar :chart-data="barChartData" :chart-options="barChartOptions" :height="300" :width="300" />
-      </b-col>
-    </b-row>
+      </div>
+    </div>
+    <div v-if="barChartData">
+      <Bar :class="'diagram-bar-chart' + (isMobile ? ' mobile' : '')" 
+        :chart-data="barChartData" 
+        :chart-options="barChartOptions" 
+        :height="charHeight" 
+        :width="charWidth" 
+      />
+    </div>
   </div>
 </template>
 
@@ -71,16 +74,17 @@ import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { BvSelectOption } from "@/app/shared/types";
+import { BvSelectOption, BvSelectGroupOption } from "@/app/shared/types";
 import { Component, Prop } from "vue-property-decorator";
 import { AnalysisSelectionService } from "../analysis-selection-sidebar/analysis-selection-service";
 import { AnalysisSelectionEvent } from "../analysis-selection-sidebar/types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { Bar } from 'vue-chartjs/legacy';
-import { BarChartData, GroupedAnalysisResult } from "./types";
+import { GroupedAnalysisResult } from "./types";
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ChartData, ChartOptions } from 'chart.js'
+import ChartDataLables from "chartjs-plugin-datalabels";
 
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ChartDataLables)
 
 @Component({
   name: "app-diagram",
@@ -95,9 +99,13 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
   @Prop() componentSelection!: ApiComponent[];
   @Prop() resultMappings!: { componentId: ApiComponent, resultMapping: AnalysisResultMappings<AnalysisResultSchemaBase>}[];
   @Prop({ default: null }) tableFilter!: TableFilterRequest | null;
+  @Prop({ default: "" }) labelUnit!: string;
+  
+  // TODO: make @State(mobile) working...
+  isMobile = false;
   
   selectedAnalysisResult: AnalysisResultDetailedSchema | null = null;
-  keyFigureOptions: BvSelectOption[] | null = null;
+  keyFigureGroupOptions: BvSelectGroupOption[] | null = null;
 
   selectedComponentId: ApiComponent | null = null;
   selectedOrderAndLimit: { reverse: boolean, limit: number } | null = null;
@@ -111,23 +119,38 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
   showSlot = false;
   loading = false;
 
+  charWidth = 300;
+  charHeight = 200;
   barChartData: ChartData | null = null;
   barChartOptions: ChartOptions = {
     indexAxis: "y",
     plugins: {
       legend: {
         display: false,
+      },
+      datalabels: {
+        color: "#fff",
       }
     },
     scales: {
       x: {
         grid: {
           display: false
+        },
+        title: {
+          display: true,
+          text: "",
+          align: "end",
         }
       },
       y: {
         grid: {
           display: false
+        },
+        title: {
+          display: true,
+          text: "",
+          align: "end",
         }
       }
     },
@@ -143,21 +166,14 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
           .find(analysisResult => analysisResult.id === selectedAnalysisResultId) || null;
 
         if (this.selectedAnalysisResult) {
-          let keyFigureSelectOptions: BvSelectOption[] = [];
-          for (const resultMapping of this.resultMappings) {
-            const analysisResultMappingHelper = new AnalysisResultMappingHelper(resultMapping.resultMapping, this.selectedAnalysisResult!);
-
-            keyFigureSelectOptions = [
-              ...keyFigureSelectOptions, 
-              ...analysisResultMappingHelper.getEntries().filter(entry => entry.enableForDiagram).map(entry => ({
-                value: { entry, show: false, mappingHelper: analysisResultMappingHelper, componentId: resultMapping.componentId },
-                text: this.$t(entry.transName).toString(),
-            }))];
-          }
-          this.keyFigureOptions = keyFigureSelectOptions;
+          this.updateKeyFigureGroupSelection();
         }
       }
     );
+
+    this.isMobile = window.matchMedia("screen and (max-width: 1000px)").matches;
+    this.charWidth = this.isMobile ? 300 : 800;
+    this.charHeight = this.isMobile ? 200 : 600;
   }
 
   get componentOptions(): BvSelectOption[] {
@@ -167,15 +183,26 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
     }));
   }
 
+  get keyFigureOptions(): BvSelectOption[] {
+    return this.keyFigureGroupOptions!
+      .reduce((prev, current) => [...prev, ...current.options] as any, []);
+  }
+
+  onComponentSelected() {
+    this.updateKeyFigureGroupSelection();
+  }
+
   onKeyFigureSelected() {
     this.showSlot = false;
 
     if (this.selectedKeyFigure) {
-      for (const keyFigureOption of this.keyFigureOptions!) {
-        keyFigureOption.value.show = (keyFigureOption.value.entry.transName === this.selectedKeyFigure.entry.transName);
+      for (const keyFigureGroupOption of this.keyFigureGroupOptions!) {
+        for (const keyFigureOption of keyFigureGroupOption.options) {
+          keyFigureOption.value.show = (keyFigureOption.value.entry.transName === this.selectedKeyFigure.entry.transName);
 
-        if (keyFigureOption.value.show && keyFigureOption.value.entry.transName in this.$slots) {
-          this.showSlot = true;
+          if (keyFigureOption.value.show && keyFigureOption.value.entry.transName in this.$slots) {
+            this.showSlot = true;
+          }
         }
       }
     }
@@ -185,7 +212,15 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
     try {
       this.loading = true;
 
-      let tableFilter = this.showSlot ? this.tableFilter : {};
+      let tableFilter: TableFilterRequest | null = {};
+      let labelUnit = this.selectedKeyFigure!.entry.unit;
+      if (this.showSlot) {
+        tableFilter = this.tableFilter;
+        labelUnit = this.labelUnit && this.labelUnit || labelUnit;
+      }
+
+      this.barChartOptions["scales"]!["x"]!["title"]["text"] = labelUnit;
+      this.barChartOptions["scales"]!["y"]!["title"]["text"] = this.$t(apiComponentNames[this.selectedComponentId!]).toString();
 
       if (!tableFilter) {
         tableFilter = {};
@@ -196,21 +231,48 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
         grouped: true,
       }
 
+      const isCountTableUnit = labelUnit === "Count";
+
       const columnName: string = this.selectedKeyFigure!.mappingHelper.getColumnsMapping()[this.selectedKeyFigure!.entry.transName];
       if (!tableFilter.columns_selection) {
-        tableFilter.columns_selection = { columns: [{ name: columnName }] };
+        tableFilter.columns_selection = { columns: [{ name: columnName, func: isCountTableUnit ? "count" : "avg" }] };
+      }
+      if (isCountTableUnit) {
+        if (!tableFilter.filters) {
+          tableFilter.filters = { [columnName]: true };
+        }
       }
 
       const groupedResults = await volateqApi.getSpecificAnalysisResult<GroupedAnalysisResult>(
         this.selectedAnalysisResult!.id, 
         this.selectedKeyFigure!.componentId,
-        { order_by: columnName, order_direction: "desc", limit: 10 },
+        { 
+          order_by: columnName, 
+          order_direction: this.selectedOrderAndLimit!.reverse ? "desc" : "asc",
+          limit: this.selectedOrderAndLimit!.limit,
+        },
         tableFilter
       );
 
+      const totalOfPercantage = isCountTableUnit && groupedResults.total;
+      if (totalOfPercantage) {
+        this.barChartOptions.plugins!.datalabels!.formatter = (val: number) => {
+          const roundedVal = Math.round(val * 100) / 100;
+
+          return roundedVal + ` (${Math.round(val / totalOfPercantage * 10000) / 100}%)`;
+        };
+      } else {
+        this.barChartOptions.plugins!.datalabels!.formatter = (val: number) => {
+          return Math.round(val * 100) / 100;
+        };
+      }
+
       this.barChartData = { 
         labels: groupedResults.items.map(item => item.kks),
-        datasets: [{ data: groupedResults.items.map(item => item[columnName] as number) }]
+        datasets: [{ 
+          data: groupedResults.items.map(item => item[columnName] as number), 
+          backgroundColor: "rgba(6, 107, 226, 0.8)",
+        }],
       };
     } catch (e) {
       console.error(e);
@@ -218,5 +280,63 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
       this.loading = false;
     }
   }
+
+  private updateKeyFigureGroupSelection(): void {
+    const keyFigureSelectOptions: BvSelectGroupOption[] = [];
+    for (const resultMapping of this.resultMappings) {
+      const analysisResultMappingHelper = new AnalysisResultMappingHelper(
+        resultMapping.resultMapping, 
+        this.selectedAnalysisResult!
+      );
+
+      if (this.selectedComponentId !== resultMapping.componentId) {
+        keyFigureSelectOptions.push({
+          label: this.$t(apiComponentNames[resultMapping.componentId]).toString(),
+          options: analysisResultMappingHelper.getEntries()
+            .filter(entry => entry.enableForDiagram)
+            .map(entry => ({
+              value: { 
+                entry,
+                show: false,
+                mappingHelper: analysisResultMappingHelper,
+                componentId: resultMapping.componentId 
+              },
+              text: this.$t(entry.transName).toString(),
+            }))
+        });
+      }
+    }
+
+    this.keyFigureGroupOptions = keyFigureSelectOptions;
+  }
 }
 </script>
+
+<style lang="scss">
+.diagram {
+  &-bar-chart {
+    width: 800px;
+    height: 600px;
+    margin: 60px auto 0;
+
+    &.mobile {
+      width: 300px;
+      height: 200px;
+    }
+  }
+  &-select-row {
+    display: flex;
+    &-col {
+      flex: 2;
+      padding-right: 15px;
+      &.apply {
+        flex: 1;
+        button {
+          width: 100%;
+        }
+        padding-right: 0;
+      }
+    }
+  }
+}
+</style>

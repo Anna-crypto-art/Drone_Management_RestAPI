@@ -33,6 +33,7 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.SCA_TRACKING_DEVIATION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
+    unit: "μ in °",
   },
   {
     getValue: r => r.average_tracking_offset,
@@ -41,6 +42,7 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.SCA_TRACKING_DEVIATION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
+    unit: "μ in °",
   },
   {
     getValue: r => r.torsion_caused_friction_mean,
