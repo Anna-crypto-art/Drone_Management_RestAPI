@@ -11,6 +11,7 @@ import { GroupKPILayer, KeyFigureTypeMap } from "./types";
  */
 export class PILayersHierarchy {
   private parentComponentKpiLayers!: GroupKPILayer[];
+  private readonly analysisResultIds: (string | string[])[] = [];
 
   constructor(
     private readonly vueComponent: Vue,
@@ -18,6 +19,10 @@ export class PILayersHierarchy {
     private readonly keyFigureLayers: KeyFigureTypeMap[]
   ) {
     this.createGroupedKPILayers();
+  }
+
+  public addAnalysisResultIds(analysisResultIds: string | string[]) {
+    this.analysisResultIds.push(analysisResultIds);
   }
 
   public getGeoJSONLayers(): LayerType[] {
@@ -95,38 +100,50 @@ export class PILayersHierarchy {
   private createGroupedKPILayers() {
     const parentComponentLayers: Record<number, GroupKPILayer> = {};
 
-    for (const analysisResult of this.analysisResults) {
-      for (const keyFigureTypeMap of this.keyFigureLayers) {
-        const keyFigure = analysisResult.key_figures.find(keyFigure => keyFigure.id === keyFigureTypeMap.keyFigureId);
-        if (keyFigure) {
-          if (!(keyFigure.component.id in parentComponentLayers)) {
-            parentComponentLayers[keyFigure.component.id] = {
-              componentId: keyFigure.component.id,
-              groupLayer: {
-                name: this.vueComponent.$t(keyFigure.component.abbrev).toString(),
-                type: "group",
-                childLayers: [],
-                visible: false,
-                singleSelection: true,
-              },
-              keyFigureLayers: [],
-              subGroupLayers: [],
-            };
-          }
+    const currentChildLayers = this.getAllChildLayers();
 
-          const kpiLayer = this.createKPILayers(analysisResult, keyFigureTypeMap);
-          if (kpiLayer) {
-            const groupLayer = parentComponentLayers[keyFigure.component.id];
-            if (kpiLayer instanceof KeyFigureLayer) {
-              groupLayer.groupLayer.childLayers.push(kpiLayer.toGeoLayer());
-              groupLayer.keyFigureLayers.push(kpiLayer);
-            } else {
-              groupLayer.groupLayer.childLayers.push(kpiLayer.groupLayer);
-              groupLayer.subGroupLayers!.push(kpiLayer);
+    for (const analysisResultIds in this.analysisResultIds) {
+      if (Array.isArray(analysisResultIds)) { 
+        // compare mode
+
+      } else {
+        const analysisResult = this.analysisResults.find(analysisResult => analysisResult.id === analysisResultIds)!;
+        for (const keyFigureTypeMap of this.keyFigureLayers) {
+          const keyFigure = analysisResult.key_figures.find(keyFigure => keyFigure.id === keyFigureTypeMap.keyFigureId);
+          const isNewAnalysisResult = !currentChildLayers
+            .find(keyFigureLayer => keyFigureLayer.analysisResult.id === analysisResult.id);
+
+          if (keyFigure && isNewAnalysisResult) {
+            if (!(keyFigure.component.id in parentComponentLayers)) {
+              parentComponentLayers[keyFigure.component.id] = {
+                componentId: keyFigure.component.id,
+                groupLayer: {
+                  name: this.vueComponent.$t(keyFigure.component.abbrev).toString(),
+                  type: "group",
+                  childLayers: [],
+                  visible: false,
+                  singleSelection: true,
+                },
+                keyFigureLayers: [],
+                subGroupLayers: [],
+              };
+            }
+  
+            const kpiLayer = this.createKPILayers(analysisResult, keyFigureTypeMap);
+            if (kpiLayer) {
+              const groupLayer = parentComponentLayers[keyFigure.component.id];
+              if (kpiLayer instanceof KeyFigureLayer) {
+                groupLayer.groupLayer.childLayers.push(kpiLayer.toGeoLayer());
+                groupLayer.keyFigureLayers.push(kpiLayer);
+              } else {
+                groupLayer.groupLayer.childLayers.push(kpiLayer.groupLayer);
+                groupLayer.subGroupLayers!.push(kpiLayer);
+              }
             }
           }
         }
       }
+      
     }
 
     this.parentComponentKpiLayers = Object.keys(parentComponentLayers).map(
