@@ -78,7 +78,7 @@ export default class AppTableComponent extends Vue implements ITableComponent {
   tableName!: string;
 
   pagination = { currentPage: 1, perPage: 10, total: 0 };
-  showSumAvg = true;
+  showSumAvg = false;
 
   private last_ctx: BvTableCtxObject | undefined;
   private searchText = "";

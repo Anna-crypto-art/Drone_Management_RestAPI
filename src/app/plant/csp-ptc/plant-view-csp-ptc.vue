@@ -20,7 +20,7 @@
         </b-tab>
         <b-tab v-if="hasResults">
           <template #title><b-icon icon="table" /></template>
-          <app-tables-csp-ptc :analysisResults="analysisResults" :plant="plant" />
+          <app-tables-csp-ptc v-if="loadTables" :analysisResults="analysisResults" :plant="plant" />
         </b-tab>
         <b-tab v-if="hasResults">
           <template #title><b-icon icon="bar-chart-fill" /></template>
@@ -82,6 +82,9 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
 
   leftSidebarAbsolute = true; // TODO: Make it absolute on all tabs?
   currentTab = 0;
+  // Load table data if user switches to table view, only
+  // So we avoid keeping REST-API busy for no reason.
+  loadTables = false;
 
   private isMobile!: boolean; // TODO: Replace this with the new mobile store
   private isMobileQuery!: MediaQueryList;
@@ -121,9 +124,23 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
     return this.analysisResults ? this.analysisResults?.length > 0 : false;
   }
 
-  onTabChange(tab: number) {
+  async onTabChange(tab: number) {
     this.currentTab = tab;
     this.updateLeftSidebarAbsolute();
+
+    if (this.hasResults) {
+      if (this.currentTab === 1) { // 1 = tables
+        this.loadTables = true; 
+      }
+
+      if (this.currentTab === 1 || this.currentTab === 0) { // 0 = map
+        // wait for tables or map component to be loaded and fire ANALYSIS_SELECTED event to load data or rerender
+        if (this.selectedAnalysisResult) {
+          await this.$nextTick();
+          AnalysisSelectionService.emit(this.plant.id, AnalysisSelectionEvent.ANALYSIS_SELECTED, this.selectedAnalysisResult.id);
+        }
+      }
+    }
   }
 
   private rerenderOLCanvas(timeout = 0): void {
