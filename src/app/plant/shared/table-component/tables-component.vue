@@ -88,8 +88,6 @@ export default class AppTablesComponent extends AnalysisSelectionBaseComponent {
 
   protected onMultiAnalysesSelected() {
     this.setActiveTabComponents();
-
-    console.log("blub");
   }
 
   private setActiveTabComponents() {

@@ -98,11 +98,6 @@ export default class AppAnalysisSelectionSidebar extends Vue {
   }
 
   onAnalysisResultSelected(selectedAnalysisResult: { id: string }[]): void {
-    console.log("this.compareMode");
-    console.log(this.compareMode);
-    console.log("selectedAnalysisResult")
-    console.log(selectedAnalysisResult)
-
     if (selectedAnalysisResult) {
       if (!this.compareMode && selectedAnalysisResult.length === 1) {
         AnalysisSelectionService.emit(
