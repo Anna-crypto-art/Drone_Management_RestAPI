@@ -267,6 +267,7 @@
   "select-order-and-limit": "Select order and limit",
   "order-and-limit-selection-text": "First {limit} {order}",
   "select-pi": "Select PI",
+  "compare-mode": "Compare analyses",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",

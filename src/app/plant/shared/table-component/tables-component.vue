@@ -27,7 +27,8 @@
             </template>
             <app-table-component
               :ref="generateRefTableName(activeTabComponent)"
-              :analysisResult="selectedAnalysisResult"
+              :analysisResult="firstAnalysisResult"
+              :compareAnalysisResult="compareAnalysisResult"
               :activeComponent="activeTabComponent"
               :plant="plant"
             >
@@ -46,7 +47,6 @@ import appContentEventBus from "@/app/shared/components/app-content/app-content-
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppSearchInput from "@/app/shared/components/app-search-input/app-search-input.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
@@ -54,8 +54,7 @@ import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { Component, Prop } from "vue-property-decorator";
-import { AnalysisSelectionService } from "../analysis-selection-sidebar/analysis-selection-service";
-import { AnalysisSelectionEvent } from "../analysis-selection-sidebar/types";
+import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
 import { IActiveComponent, IActiveTabComponent } from "../types";
 import { ITableComponent } from "./types";
 
@@ -69,7 +68,7 @@ import { ITableComponent } from "./types";
     AppTableComponent,
   },
 })
-export default class AppTablesComponent extends BaseAuthComponent {
+export default class AppTablesComponent extends AnalysisSelectionBaseComponent {
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
   @Prop() activeComponents!: IActiveComponent[];
@@ -79,37 +78,40 @@ export default class AppTablesComponent extends BaseAuthComponent {
   activeTabLabel = "";
   readonly activeTabComponents: IActiveTabComponent[] = [];
 
-  selectedAnalysisResult: AnalysisResultDetailedSchema | null = null;
-
   async created() {
-    AnalysisSelectionService.on(
-      this.plant.id,
-      AnalysisSelectionEvent.ANALYSIS_SELECTED,
-      (selectedAnalysisResultId: string | undefined) => {
-        this.selectedAnalysisResult = this.analysisResults
-          .find(analysisResult => analysisResult.id === selectedAnalysisResultId) || null;
+    await super.created();
+  }
 
-        this.activeTabComponents.length = 0;
+  protected onAnalysisSelected() {
+    this.setActiveTabComponents();
+  }
 
-        if (this.selectedAnalysisResult) {
-          let tabIdx = 0;
+  protected onMultiAnalysesSelected() {
+    this.setActiveTabComponents();
 
-          for (const activeComponent of this.activeComponents) {
-            const keyFigure = this.selectedAnalysisResult.key_figures.find(
-              keyFigure => keyFigure.component.id === activeComponent.componentId
-            );
-            if (keyFigure) {
-              this.activeTabComponents.push({
-                ...activeComponent,
-                tabIndex: tabIdx++,
-              });
-            }
-          }
+    console.log("blub");
+  }
+
+  private setActiveTabComponents() {
+    this.activeTabComponents.length = 0;
+
+    if (this.hasAnyAnalysisSelected()) {
+      let tabIdx = 0;
+
+      for (const activeComponent of this.activeComponents) {
+        const keyFigure = this.getKeyFigures().find(
+          keyFigure => keyFigure.component.id === activeComponent.componentId
+        );
+        if (keyFigure) {
+          this.activeTabComponents.push({
+            ...activeComponent,
+            tabIndex: tabIdx++,
+          });
         }
-
-        this.onTabChanged(0);
       }
-    )
+    }
+
+    this.onTabChanged(0);
   }
 
   onSearch(searchText: string) {

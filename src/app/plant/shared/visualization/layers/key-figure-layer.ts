@@ -156,6 +156,11 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     this.colorScheme = colorScheme;
   }
 
+  protected get id() {
+    return `${this.analysisResult.id}__
+      ${this.keyFigureInfo.displayName || this.keyFigureInfo.keyName || this.keyFigureInfo.templateName}`;
+  }
+
   protected get keyFigure(): KeyFigureSchema {
     return this.analysisResult.key_figures.find(keyFigure => keyFigure.id === this.keyFigureId)!;
   }

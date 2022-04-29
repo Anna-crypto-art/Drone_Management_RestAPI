@@ -42,6 +42,10 @@ export abstract class LayerBase {
     return this.name;
   }
 
+  protected get id(): string | undefined {
+    return undefined
+  }
+
   public showPCS(show: boolean): void {
     this._showPCS = show;
   }
@@ -68,6 +72,7 @@ export abstract class LayerBase {
         zIndex: this.zIndex,
         layerType: "VectorImageLayer",
         reloadLayer: this.refreshLayer,
+        id: this.id
       };
     }
 

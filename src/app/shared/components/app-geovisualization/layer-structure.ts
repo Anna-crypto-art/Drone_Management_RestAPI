@@ -54,6 +54,10 @@ export class LayerStructure extends EventEmitter {
     return this._name || this.getLayerType()?.name || "";
   }
 
+  public get id(): string | (() => VNode[]) {
+    return this.getLayerType()?.id || this.name;
+  }
+
   public addChildLayer(childLayer: LayerStructure): void {
     this.childLayers.push(childLayer);
 
@@ -96,5 +100,13 @@ export class LayerStructure extends EventEmitter {
 
   public get styleClass(): string {
     return this.getLayerType()?.styleClass || "";
+  }
+
+  public hasChildLayer(id: string): boolean {
+    return !!this.getChildLayer(id);
+  }
+
+  public getChildLayer(id: string): LayerStructure | undefined {
+    return this.getChildLayers().find(childLayer => childLayer.id === id);
   }
 }

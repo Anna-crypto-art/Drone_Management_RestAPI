@@ -38,7 +38,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Component, Prop, Ref } from "vue-property-decorator";
+import { Component, Prop, Ref, Watch } from "vue-property-decorator";
 import { BvTableCtxObject } from "bootstrap-vue";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import AppTableComponentContainer from "@/app/plant/shared/table-component/table-component-container.vue";
@@ -57,6 +57,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import AppTableFilter from "@/app/plant/shared/table-component/table-filter.vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { MathHelper } from "@/app/shared/services/helper/math-helper";
+import { TableResultSchema } from "@/app/shared/services/volateq-api/api-schemas/table-result-schema";
 
 @Component({
   name: "app-table-component",
@@ -70,7 +71,7 @@ export default class AppTableComponent extends Vue implements ITableComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) analysisResult!: AnalysisResultDetailedSchema;
   @Prop({ required: true }) activeComponent!: IActiveComponent;
-  @Prop({ default: false }) loadAllResults!: boolean;
+  @Prop({ default: null }) compareAnalysisResult!: AnalysisResultDetailedSchema | null;
   @Ref() container!: ITableComponentContainer;
   @Ref() table!: any;
 
@@ -106,6 +107,10 @@ export default class AppTableComponent extends Vue implements ITableComponent {
     this.mappingHelper = new AnalysisResultMappingHelper(this.activeComponent.mapping, this.analysisResult);
     this.columns = this.mappingHelper.getColumns(transName => this.$t(transName));
     this.columnsMapping = this.mappingHelper.getColumnsMapping();
+  }
+
+  @Watch('compareAnalysisResult') onCompareAnalysisResultChanged() {
+    this.refresh();
   }
 
   onFilter(tableFilterRequest?: TableFilterRequest) {
@@ -156,16 +161,7 @@ export default class AppTableComponent extends Vue implements ITableComponent {
     this.last_ctx = ctx;
 
     try {
-      if (this.loadAllResults) {
-        return this.getAllResults(ctx);
-      }
-
-      const results = await volateqApi.getSpecificAnalysisResult<AnalysisResultSchemaBase>(
-        this.analysisResult.id,
-        this.activeComponent.componentId,
-        this.getTableRequestParam(),
-        this.tableFilterRequest,
-      );
+      const results = await this.getAnalysisResults();
       this.pagination.total = results.total;
 
       const tableItems = this.mappingHelper.getItems(results.items);
@@ -201,41 +197,23 @@ export default class AppTableComponent extends Vue implements ITableComponent {
     return [];
   }
 
-  async getAllResults(ctx: BvTableCtxObject): Promise<any[]> {
-    await apiResultsLoader.loadResults(this.analysisResult.id, this.activeComponent.componentId);
-
-    let results = apiResultsLoader.getResults(this.analysisResult.id, this.activeComponent.componentId)!;
-
-    if (this.searchText) {
-      results = results.filter(item =>
-        item.fieldgeometry_component.kks.toUpperCase().startsWith(this.searchText.toUpperCase())
+  private async getAnalysisResults(): Promise<TableResultSchema<AnalysisResultSchemaBase>> {
+    if (this.compareAnalysisResult) {
+      return await volateqApi.getSpecificAnalysisResultCompared<AnalysisResultSchemaBase>(
+        this.analysisResult.id,
+        this.activeComponent.componentId,
+        this.compareAnalysisResult.id,
+        this.getTableRequestParam(),
+        this.tableFilterRequest,
       );
     }
 
-    const items = this.mappingHelper.getItems(results);
-    this.pagination.total = items.length;
-
-    if (ctx.sortBy) {
-      items.sort((a, b) => {
-        const valA = a[ctx.sortBy!] as string | number;
-        const valB = b[ctx.sortBy!] as string | number;
-
-        if (valA < valB) {
-          return ctx.sortDesc ? 1 : -1;
-        }
-        if (valA > valB) {
-          return ctx.sortDesc ? -1 : 1;
-        }
-        return 0;
-      });
-    }
-
-    const slicedItems = items.slice(
-      (ctx.currentPage - 1) * ctx.perPage,
-      (ctx.currentPage - 1) * ctx.perPage + ctx.perPage
+    return await volateqApi.getSpecificAnalysisResult<AnalysisResultSchemaBase>(
+      this.analysisResult.id,
+      this.activeComponent.componentId,
+      this.getTableRequestParam(),
+      this.tableFilterRequest,
     );
-
-    return slicedItems;
   }
 }
 </script>

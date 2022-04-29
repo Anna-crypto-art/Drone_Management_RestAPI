@@ -25,23 +25,18 @@
 
 <script lang="ts">
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { Component, Prop } from "vue-property-decorator";
 import AppDiagram from "@/app/plant/shared/diagram/diagram.vue";
-import { apiComponentsFilter } from "@/app/shared/services/volateq-api/api-components/api-components-filter";
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 import { AnalysisResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
-import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { allCspPtcMappings } from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping";
-import { AnalysisSelectionService } from "../shared/analysis-selection-sidebar/analysis-selection-service";
-import { AnalysisSelectionEvent } from "../shared/analysis-selection-sidebar/types";
 import { BvSelectOption } from "@/app/shared/types";
 import { TableFilterRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
 import analysisResultCspPtcMappingHce from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-hce";
+import { AnalysisSelectionBaseComponent } from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-base-component";
 
 @Component({
   name: "app-plant-diagram-view-csp-ptc",
@@ -50,11 +45,9 @@ import analysisResultCspPtcMappingHce from "@/app/shared/services/volateq-api/ap
     AppDiagram,
   },
 })
-export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
+export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComponent {
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
-
-  selectedAnalysisResult: AnalysisResultDetailedSchema | null = null;
 
   selectedGlassTubeTemperatureClass: number | null = null;
 
@@ -62,14 +55,7 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
   labelUnit = "";
 
   async created() {
-    AnalysisSelectionService.on(
-      this.plant.id,
-      AnalysisSelectionEvent.ANALYSIS_SELECTED,
-      (selectedAnalysisResultId: string | undefined) => {
-        this.selectedAnalysisResult = this.analysisResults
-          .find(analysisResult => analysisResult.id === selectedAnalysisResultId) || null;
-      }
-    );
+    await super.created();
   }
 
   get componentIdSelection(): ApiComponent[] {
@@ -81,9 +67,13 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
   }
 
   get glassTubeTemperatureClassOptions(): BvSelectOption[] {
+    if (!this.selectedAnalysisResult) {
+      return [];
+    }
+
     const classOptions: BvSelectOption[] = [];
 
-    if (this.selectedAnalysisResult!.csp_ptc.glass_tube_temperature_class_count === 4) {
+    if (this.selectedAnalysisResult.csp_ptc.glass_tube_temperature_class_count === 4) {
       classOptions.push({ value: "4", text: this.$t(`glass-tube-temperature-class-4`).toString() });
       classOptions.push({ value: "3", text: this.$t(`glass-tube-temperature-class-3`).toString() });
     } else {

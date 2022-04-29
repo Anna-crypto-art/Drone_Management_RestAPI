@@ -45,7 +45,7 @@ import { Map } from "ol";
 import { Zoom } from "ol/control";
 import { easeOut } from "ol/easing";
 import Vue from "vue";
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Watch } from "vue-property-decorator";
 import { State } from "vuex-class";
 import { LayerStructure } from "../layer-structure";
 import { CustomLoader } from "../loader/custom-loader";
@@ -75,6 +75,10 @@ export default class AppGeovisualLayerSwitcher extends Vue {
 
   @State(state => state.sidebar["layer-switcher"]) sidebarOpen!: boolean;
 
+  @Watch('layers', { deep: true }) onLayersChanged() {
+    this.layerSetup(this.rootLayer, this.layers);
+  }
+
   mounted(): void {
     this.layerSetup(this.rootLayer, this.layers);
 
@@ -91,26 +95,33 @@ export default class AppGeovisualLayerSwitcher extends Vue {
     };
 
     for (const layer of layers) {
-      const name = layer.name;
-
+      const layerId: string = layer.id || layer.name;
+      
       switch (layer.type) {
         case "osm": {
-          parentLayer.addChildLayer(new LayerStructure(new OSMLoader(layer, this.map, setLoadigState), name));
+          if (!parentLayer.hasChildLayer(layerId)) {
+            parentLayer.addChildLayer(new LayerStructure(new OSMLoader(layer, this.map, setLoadigState), layer.name));
+          }
 
           break;
         }
 
         case "geojson": {
-          const geoLayerStruct = new LayerStructure(new GeoJSONLoader(layer, this.map, setLoadigState), name);
-
-          parentLayer.addChildLayer(geoLayerStruct);
+          if (!parentLayer.hasChildLayer(layerId)) {
+            parentLayer.addChildLayer(
+              new LayerStructure(new GeoJSONLoader(layer, this.map, setLoadigState), layer.name)
+            );
+          }
 
           break;
         }
 
         case "group": {
-          const groupLayerStruct = new LayerStructure(undefined, name || layer.name, layer);
-          parentLayer.addChildLayer(groupLayerStruct);
+          let groupLayerStruct = parentLayer.getChildLayer(layerId);
+          if (!groupLayerStruct) {
+            groupLayerStruct = new LayerStructure(undefined, layer.name, layer);
+            parentLayer.addChildLayer(groupLayerStruct);
+          }
 
           this.layerSetup(groupLayerStruct, layer.childLayers);
 
@@ -118,12 +129,16 @@ export default class AppGeovisualLayerSwitcher extends Vue {
         }
 
         case "custom": {
-          const customLayerStruct = new LayerStructure(new CustomLoader(layer, this.map, setLoadigState), name);
-          parentLayer.addChildLayer(customLayerStruct);
+          if (!parentLayer.hasChildLayer(layerId)) {
+            parentLayer.addChildLayer(
+              new LayerStructure(new CustomLoader(layer, this.map, setLoadigState), layer.name)
+            );
+          }
 
           break;
         }
       }
+      
     }
   }
 

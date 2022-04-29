@@ -8,6 +8,7 @@ export interface BaseLayerType {
   visible?: boolean;
   styleClass?: string;
   reloadLayer?: boolean;
+  id?: string;
 }
 
 export interface GeoJSONLayer extends BaseLayerType {

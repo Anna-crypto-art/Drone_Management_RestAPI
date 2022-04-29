@@ -2,26 +2,24 @@
   <div :class="'analysis-selection-sidebar' + (absolute ? ' absolute' : '')">
     <app-sidebar :open="sidebarOpen" @toggled="onSidebarToggled">
       <div class="analysis-selection-sidebar-leftside">
+        <div class="analysis-selection-sidebar-leftside-settings">
+          <b-checkbox switch v-model="compareMode" @change="onCompareModeChanged">{{ $t("compare-mode") }}</b-checkbox>
+        </div>
         <app-table-container size="sm">
           <b-table
             ref="analysisResultsTable"
             :items="analysisResultsTableItems"
             :fields="analysisResultsTableColumns"
-            select-mode="single"
+            :select-mode="selectMode"
             selectable
             hover
             head-variant="light"
             @row-selected="onAnalysisResultSelected"
           >
-            <!-- 
-              Selection will come with history mode...
-
             <template #head(selected)></template>
             <template #cell(selected)="{ rowSelected }">
-              <b-checkbox :checked="rowSelected" disabled class="b-table-selectable-checkbox"></b-checkbox>
+              <b-checkbox v-if="compareMode" :checked="rowSelected" disabled class="b-table-selectable-checkbox"></b-checkbox>
             </template>
-            
-            -->
             <template #row-details="row">
               <span class="analysis-selection-sidebar-kpi-badge" v-for="kpi in row.item.kpis" :key="kpi.id">
                 <b-badge variant="primary" :style="'background-color: ' + getKpiColor(kpi)">{{ kpi.name }}</b-badge>
@@ -65,11 +63,14 @@ export default class AppAnalysisSelectionSidebar extends Vue {
   @State(state => state.sidebar["analysis"]) sidebarOpen!: boolean;
 
   analysisResultsTableColumns: BvTableFieldArray = [
-    // { key: "selected", label: "" },
+    { key: "selected", label: "" },
     { key: "name", label: this.$t("name").toString() },
     { key: "date", label: this.$t("acquisition-date").toString() },
   ];
   analysisResultsTableItems: Record<string, unknown>[] = [];
+
+  compareMode = false;
+  selectMode = "single";
 
   async created() {
     for (const analysisResult of this.analysisResults) {
@@ -97,14 +98,34 @@ export default class AppAnalysisSelectionSidebar extends Vue {
   }
 
   onAnalysisResultSelected(selectedAnalysisResult: { id: string }[]): void {
-    const selectedAnalysisResultId =
-      (selectedAnalysisResult && selectedAnalysisResult.length > 0 && selectedAnalysisResult[0].id) || undefined;
+    console.log("this.compareMode");
+    console.log(this.compareMode);
+    console.log("selectedAnalysisResult")
+    console.log(selectedAnalysisResult)
 
-    AnalysisSelectionService.emit(this.plant.id, AnalysisSelectionEvent.ANALYSIS_SELECTED, selectedAnalysisResultId)
+    if (selectedAnalysisResult) {
+      if (!this.compareMode && selectedAnalysisResult.length === 1) {
+        AnalysisSelectionService.emit(
+          this.plant.id,
+          AnalysisSelectionEvent.ANALYSIS_SELECTED,
+          selectedAnalysisResult[0].id
+        );
+      } else if (this.compareMode && selectedAnalysisResult.length === 2) {
+        AnalysisSelectionService.emit(
+          this.plant.id,
+          AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED,
+          [selectedAnalysisResult[0].id, selectedAnalysisResult[1].id]
+        );
+      }
+    }
   }
 
   onSidebarToggled(): void {
     this.$store.direct.commit.sidebar.toggle({ name: "analysis" });
+  }
+
+  onCompareModeChanged(): void {
+    this.selectMode = this.compareMode ? "multi" : "single";
   }
 
   getKpiColor(keyFigure: KeyFigureSchema): string {
@@ -134,6 +155,10 @@ export default class AppAnalysisSelectionSidebar extends Vue {
 
     .app-table-container {
       margin-top: 0;
+    }
+
+    &-settings {
+      margin: 15px 0;
     }
   }
   &-kpi-badge {

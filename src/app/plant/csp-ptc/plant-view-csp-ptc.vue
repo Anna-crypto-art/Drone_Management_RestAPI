@@ -44,7 +44,6 @@ import { AnalysisSelectionEvent, IAnalysisSelectionSidebar } from "@/app/plant/s
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
@@ -55,6 +54,7 @@ import { State } from "vuex-class";
 import { AnalysisSelectionService } from "../shared/analysis-selection-sidebar/analysis-selection-service";
 import { cspPtcKeyFigureRainbowColors } from "./csp-ptc-key-figure-colors";
 import AppPlantDiagramViewCspPtc from "@/app/plant/csp-ptc/plant-diagram-view-csp-ptc.vue";
+import { AnalysisSelectionBaseComponent } from "../shared/analysis-selection-sidebar/analysis-selection-base-component";
 
 @Component({
   name: "app-plant-view-csp-ptc",
@@ -69,13 +69,11 @@ import AppPlantDiagramViewCspPtc from "@/app/plant/csp-ptc/plant-diagram-view-cs
     AppPlantDiagramViewCspPtc,
   },
 })
-export default class AppPlantViewCspPtc extends BaseAuthComponent {
+export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
   @Prop() plant!: PlantSchema;
   @Ref() analysisSelectionSidebar!: IAnalysisSelectionSidebar;
 
-  selectedAnalysisResult: AnalysisResultDetailedSchema | null = null;
-
-  private analysisResults: AnalysisResultDetailedSchema[] | null = null;
+  analysisResults: AnalysisResultDetailedSchema[] | null = null;
 
   @State(state => state.sidebar) sidebarStates!: ISidebarModule;
   preMobileSidebarState: ISidebarModule | null = null;
@@ -96,24 +94,17 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
   }
 
   async created(): Promise<void> {
+    await super.created();
+
     this.analysisResults = await volateqApi.getAnalysisResults(this.plant.id);
 
     this.isMobileQuery = window.matchMedia("screen and (max-width: 1000px)");
     this.isMobileQuery.addEventListener("change", this.isMobileListener);
     this.isMobileListener(this.isMobileQuery);
+  }
 
-    AnalysisSelectionService.on(
-      this.plant.id,
-      AnalysisSelectionEvent.ANALYSIS_SELECTED,
-      (selectedAnalysisResultId: string | undefined) => {
-        if (this.analysisResults) {
-          this.selectedAnalysisResult = this.analysisResults
-            .find(analysisResult => analysisResult.id === selectedAnalysisResultId) || null;
-        }
-
-        this.rerenderOLCanvas();
-      }
-    )
+  protected onAnalysisSelected() {
+    this.rerenderOLCanvas();
   }
 
   unmounted() {

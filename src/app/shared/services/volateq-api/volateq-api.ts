@@ -249,7 +249,6 @@ export class VolateqAPI extends HttpClientBase {
     params: TableRequest,
     filterParams?: TableFilterRequest,
   ): Promise<TableResultSchema<T>> {
-      
     return this.get(`/auth/analysis-result/${analysisResultId}/${componentId}${this.getQueryParams(
       params)}${this.getEncodedAnalysisResultFilterParams(filterParams)}`);
   }
@@ -268,6 +267,17 @@ export class VolateqAPI extends HttpClientBase {
       params
     )}&csv=1${encodedCsvMappings}${this.getEncodedAnalysisResultFilterParams(filterParams)}`;
   }
+
+  public getSpecificAnalysisResultCompared<T>(
+    analysisResultId: string,
+    componentId: number,
+    compareAnalysisResultId: string,
+    params: TableRequest,
+    filterParams?: TableFilterRequest,
+  ): Promise<TableResultSchema<T>> {
+    return this.get(`/auth/analysis-result/compare/${analysisResultId}/${componentId}/${compareAnalysisResultId}${this.getQueryParams(
+      params)}${this.getEncodedAnalysisResultFilterParams(filterParams)}`);
+  }    
 
   public async generateDownloadUrl(downloadUrl: string): Promise<string> {
     const encodedUrl = encodeURIComponent(encodeURIComponent(downloadUrl));

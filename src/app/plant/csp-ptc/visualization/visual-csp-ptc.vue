@@ -126,12 +126,10 @@ import { IPlantVisualization, Legend } from "@/app/plant/shared/visualization/ty
 import AppVisualization from "@/app/plant/shared/visualization/visualization.vue";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualization/types/components";
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Component, Prop, Ref } from "vue-property-decorator";
-import { AnalysisSelectionService } from "../../shared/analysis-selection-sidebar/analysis-selection-service";
-import { AnalysisSelectionEvent } from "../../shared/analysis-selection-sidebar/types";
+import { AnalysisSelectionBaseComponent } from "../../shared/analysis-selection-sidebar/analysis-selection-base-component";
 import { COMPONENT_LAYERS, KEY_FIGURE_LAYERS } from "./layers";
 
 @Component({
@@ -142,7 +140,7 @@ import { COMPONENT_LAYERS, KEY_FIGURE_LAYERS } from "./layers";
   },
 })
 export default class AppVisualCspPtc
-  extends BaseAuthComponent
+  extends AnalysisSelectionBaseComponent
   implements IPlantVisualization
 {
   componentLayerTypes = COMPONENT_LAYERS;
@@ -152,17 +150,8 @@ export default class AppVisualCspPtc
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
   @Ref() visualization: IPlantVisualization | undefined;
 
-  private selectedAnalysisResult?: AnalysisResultDetailedSchema;
-
   async created() {
-    AnalysisSelectionService.on(
-      this.plant.id,
-      AnalysisSelectionEvent.ANALYSIS_SELECTED,
-      (selectedAnalysisResultId: string | undefined) => {
-        this.selectedAnalysisResult = this.analysisResults
-          .find(analysisResult => analysisResult.id === selectedAnalysisResultId);
-      }
-    )
+    await super.created();
   }
 
   get openLayers(): IOpenLayersComponent | undefined {

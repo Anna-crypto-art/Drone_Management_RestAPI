@@ -64,7 +64,6 @@
 </template>
 
 <script lang="ts">
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 import { apiComponentNames } from "@/app/shared/services/volateq-api/api-components/api-components-name";
 import { TableFilterRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
@@ -76,13 +75,12 @@ import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { BvSelectOption, BvSelectGroupOption } from "@/app/shared/types";
 import { Component, Prop } from "vue-property-decorator";
-import { AnalysisSelectionService } from "../analysis-selection-sidebar/analysis-selection-service";
-import { AnalysisSelectionEvent } from "../analysis-selection-sidebar/types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { Bar } from 'vue-chartjs/legacy';
 import { GroupedAnalysisResult } from "./types";
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ChartData, ChartOptions } from 'chart.js'
 import ChartDataLables from "chartjs-plugin-datalabels";
+import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ChartDataLables)
 
@@ -93,7 +91,7 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale,
     Bar,
   },
 })
-export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
+export default class AppDiagram extends AnalysisSelectionBaseComponent {
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
   @Prop() componentSelection!: ApiComponent[];
@@ -104,7 +102,6 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
   // TODO: make @State(mobile) working...
   isMobile = false;
   
-  selectedAnalysisResult: AnalysisResultDetailedSchema | null = null;
   keyFigureGroupOptions: BvSelectGroupOption[] | null = null;
 
   selectedComponentId: ApiComponent | null = null;
@@ -158,22 +155,17 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent {
   }
 
   async created(): Promise<void> {
-    AnalysisSelectionService.on(
-      this.plant.id,
-      AnalysisSelectionEvent.ANALYSIS_SELECTED,
-      (selectedAnalysisResultId: string | undefined) => {
-        this.selectedAnalysisResult = this.analysisResults
-          .find(analysisResult => analysisResult.id === selectedAnalysisResultId) || null;
-
-        if (this.selectedAnalysisResult) {
-          this.updateKeyFigureGroupSelection();
-        }
-      }
-    );
+    await super.created();
 
     this.isMobile = window.matchMedia("screen and (max-width: 1000px)").matches;
     this.charWidth = this.isMobile ? 300 : 800;
     this.charHeight = this.isMobile ? 200 : 600;
+  }
+
+  protected onAnalysisSelected() {
+    if (this.selectedAnalysisResult) {
+      this.updateKeyFigureGroupSelection();
+    }
   }
 
   get componentOptions(): BvSelectOption[] {
