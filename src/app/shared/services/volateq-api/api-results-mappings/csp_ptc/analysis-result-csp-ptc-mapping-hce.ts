@@ -1,10 +1,10 @@
 import { FilterFieldType } from "@/app/plant/shared/filter-fields/types";
 import { ApiKeyFigure } from "../../api-key-figures";
-import { AnalysisResultCspPtcHceSchema } from "../../api-schemas/analysis-result-csp-ptc-hce-schema";
+import { AnalysisResultCspPtcHceComparedSchema, AnalysisResultCspPtcHceSchema } from "../../api-schemas/analysis-result-csp-ptc-hce-schema";
 import analysisResultMappingBase from "../analysis-result-mapping-base";
 import { AnalysisResultMappings } from "../types";
 
-const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPtcHceSchema> = [
+const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPtcHceSchema, AnalysisResultCspPtcHceComparedSchema> = [
   ...analysisResultMappingBase,
   {
     getValue: r => r.htf_temperature,
@@ -50,6 +50,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
     unit: "μ in °C",
+    getDiffValue: r => r.glass_tube_temperature__diff,
   },
   {
     getValue: r => r.glass_tube_temperature_class,
@@ -58,7 +59,8 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
-    unit: "μ of count"
+    unit: "μ of count",
+    getDiffValue: r => r.glass_tube_temperature_class__diff,
   },
   {
     getValue: r => r.missing_glass_tube,

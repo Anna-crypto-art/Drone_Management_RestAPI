@@ -9,3 +9,9 @@ export interface BvSelectGroupOption {
 }
 
 export type BvSelectCombinedOption = BvSelectOption | BvSelectGroupOption;
+
+export interface BvTableCellData {
+  item: any;
+  value: any;
+  field: { key: string, label: string };
+}

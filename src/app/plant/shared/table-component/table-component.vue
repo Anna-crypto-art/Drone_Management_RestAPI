@@ -31,6 +31,10 @@
             <span v-html="$t(column.field.labelExpl)"></span>
           </app-explanation>
         </template>
+        <template #cell()="data">
+          {{ data.value }}
+          <span v-if="compareAnalysisResult" v-html="getComparedCellValue(data)"></span>
+        </template>
       </b-table>
     </app-table-component-container>
   </div>
@@ -58,6 +62,7 @@ import AppTableFilter from "@/app/plant/shared/table-component/table-filter.vue"
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { MathHelper } from "@/app/shared/services/helper/math-helper";
 import { TableResultSchema } from "@/app/shared/services/volateq-api/api-schemas/table-result-schema";
+import { BvTableCellData } from "@/app/shared/types";
 
 @Component({
   name: "app-table-component",
@@ -214,6 +219,22 @@ export default class AppTableComponent extends Vue implements ITableComponent {
       this.getTableRequestParam(),
       this.tableFilterRequest,
     );
+  }
+
+  getComparedCellValue(data: BvTableCellData): string {
+    // console.log("getComparedCellValue")
+    // console.log(data)
+
+    if (this.compareAnalysisResult) {
+      const diffKey = data.field.key + "__diff";
+      if (diffKey in data.item) {
+        console.log(data.item[data.field.key]);
+        console.log(data.item[diffKey]);
+        return `<b style="padding-left: 5px">${data.item[diffKey]}</b>`
+      }
+    }
+
+    return "";
   }
 }
 </script>

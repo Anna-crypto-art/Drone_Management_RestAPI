@@ -6,3 +6,7 @@ export interface AnalysisResultCspPtcSceSchema extends AnalysisResultSchemaBase 
   alignment_deviation_to_drive: number;
   sdx_rms_value: number;
 }
+
+export interface AnalysisResultCspPtcSceComparedSchema extends AnalysisResultCspPtcSceSchema {
+  alignment_deviation_to_drive__diff: number;
+}
