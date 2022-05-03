@@ -1,9 +1,9 @@
 <template>
   <div class="app-tables-component">
-    <div class="no-data-placeholder" v-show="!selectedAnalysisResult">
+    <div class="no-data-placeholder" v-if="!firstAnalysisResult">
       {{ $t("no-analysis-result-selected") }}
     </div>
-    <div v-show="selectedAnalysisResult" class="app-table-root-container">
+    <div v-if="firstAnalysisResult" class="app-table-root-container">
       <div class="pull-left">
         <app-search-input :placeholder="$t('search-pcs')" @search="onSearch"></app-search-input>
       </div>
@@ -17,7 +17,7 @@
         <b-tabs v-model="tabIndex" @activate-tab="onTabChanged">
           <b-tab
             v-for="activeTabComponent in activeTabComponents"
-            :key="selectedAnalysisResult.id + '_' + activeTabComponent.label"
+            :key="firstAnalysisResult.id + '_' + activeTabComponent.label"
           >
             <template #title>
               {{ $t(activeTabComponent.label) }}
@@ -170,7 +170,7 @@ export default class AppTablesComponent extends AnalysisSelectionBaseComponent {
   }
 
   private generateRefTableName(activeTabComponent: IActiveComponent): string {
-    return ["tableComponent", this.selectedAnalysisResult!.id, activeTabComponent.componentId].join("_");
+    return ["tableComponent", this.firstAnalysisResult!.id, activeTabComponent.componentId].join("_");
   }
 
   private getSelectedActiveComponent(): IActiveTabComponent | undefined {

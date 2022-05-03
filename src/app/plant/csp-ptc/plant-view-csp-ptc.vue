@@ -125,10 +125,11 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
       }
 
       if (this.currentTab === 1 || this.currentTab === 0) { // 0 = map
-        // wait for tables or map component to be loaded and fire ANALYSIS_SELECTED event to load data or rerender
-        if (this.selectedAnalysisResult) {
+        // wait for tables or map component to be loaded and
+        // fire last Analysis event to load data or rerender
+        if (this.firstAnalysisResult) {
           await this.$nextTick();
-          AnalysisSelectionService.emit(this.plant.id, AnalysisSelectionEvent.ANALYSIS_SELECTED, this.selectedAnalysisResult.id);
+          AnalysisSelectionService.whazzup(this.plant.id);
         }
       }
     }

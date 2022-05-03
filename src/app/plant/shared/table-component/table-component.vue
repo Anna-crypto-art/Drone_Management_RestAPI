@@ -53,7 +53,7 @@ import { ITableComponent } from "./types";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
-import { BvTableFieldExtArray } from "@/app/shared/services/volateq-api/api-results-mappings/types";
+import { AnalysisResultMappings, BvTableFieldExtArray } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import apiResultsLoader from "@/app/shared/services/volateq-api/api-results-loader";
 import { TableFilterRequest, TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
@@ -91,6 +91,7 @@ export default class AppTableComponent extends Vue implements ITableComponent {
   private tableFilterRequest?: TableFilterRequest
 
   private mappingHelper!: AnalysisResultMappingHelper<AnalysisResultSchemaBase>;
+  private mappingEntries!: AnalysisResultMappings<AnalysisResultSchemaBase>;
   private columnsMapping!: Record<string, string>;
 
   protected startLoading() {
@@ -110,6 +111,7 @@ export default class AppTableComponent extends Vue implements ITableComponent {
     this.tableName = "table_" + this.analysisResult.id + "_" + this.activeComponent.componentId;
 
     this.mappingHelper = new AnalysisResultMappingHelper(this.activeComponent.mapping, this.analysisResult);
+    this.mappingEntries = this.mappingHelper.getEntries();
     this.columns = this.mappingHelper.getColumns(transName => this.$t(transName));
     this.columnsMapping = this.mappingHelper.getColumnsMapping();
   }
@@ -222,15 +224,26 @@ export default class AppTableComponent extends Vue implements ITableComponent {
   }
 
   getComparedCellValue(data: BvTableCellData): string {
-    // console.log("getComparedCellValue")
-    // console.log(data)
-
     if (this.compareAnalysisResult) {
       const diffKey = data.field.key + "__diff";
       if (diffKey in data.item) {
-        console.log(data.item[data.field.key]);
-        console.log(data.item[diffKey]);
-        return `<b style="padding-left: 5px">${data.item[diffKey]}</b>`
+        const mappingEntry = this.mappingEntries.find(entry => entry.transName === data.field.key);
+        if (mappingEntry) {
+          const diffValue: number = data.item[diffKey];
+          let textColorClass = "text-grey";
+          if (diffValue > 0 && mappingEntry.diffPositive === "positive" ||
+            diffValue < 0 && mappingEntry.diffPositive === "negative")
+          {
+            textColorClass = "text-success";
+          } 
+          else if (diffValue > 0 && mappingEntry.diffPositive === "negative" ||
+            diffValue < 0 && mappingEntry.diffPositive === "positive") 
+          {
+            textColorClass = "text-danger";
+          }
+          
+          return `<span class="diff ${textColorClass}">${data.item[diffKey]}</span>`;
+        }
       }
     }
 
@@ -239,9 +252,19 @@ export default class AppTableComponent extends Vue implements ITableComponent {
 }
 </script>
 <style lang="scss">
+@import "@/scss/_colors.scss";
+
 .app-table-component {
   tr.table-primary > td {
     font-weight: bold !important;
+  }
+
+  tr > td .diff {
+    padding-left: 5px;
+
+    &.text-grey {
+      color: $grey;
+    }
   }
 }
 </style>

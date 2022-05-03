@@ -98,20 +98,28 @@ export default class AppAnalysisSelectionSidebar extends Vue {
   }
 
   onAnalysisResultSelected(selectedAnalysisResult: { id: string }[]): void {
-    if (selectedAnalysisResult) {
-      if (!this.compareMode && selectedAnalysisResult.length === 1) {
-        AnalysisSelectionService.emit(
-          this.plant.id,
-          AnalysisSelectionEvent.ANALYSIS_SELECTED,
-          selectedAnalysisResult[0].id
-        );
-      } else if (this.compareMode && selectedAnalysisResult.length === 2) {
-        AnalysisSelectionService.emit(
-          this.plant.id,
-          AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED,
-          [selectedAnalysisResult[0].id, selectedAnalysisResult[1].id]
-        );
+    if (this.compareMode) {
+      let selectedAnalysisResultIds: string[] | undefined = undefined;
+      if (selectedAnalysisResult && selectedAnalysisResult.length === 2) {
+        selectedAnalysisResultIds = [selectedAnalysisResult[0].id, selectedAnalysisResult[1].id];
       }
+
+      AnalysisSelectionService.emit(
+        this.plant.id,
+        AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED,
+        selectedAnalysisResultIds
+      );
+    } else {
+      let selectedAnalysisResultId: string | undefined = undefined
+      if (selectedAnalysisResult && selectedAnalysisResult.length > 0) {
+        selectedAnalysisResultId = selectedAnalysisResult[0].id;
+      }
+
+      AnalysisSelectionService.emit(
+        this.plant.id,
+        AnalysisSelectionEvent.ANALYSIS_SELECTED,
+        selectedAnalysisResultId
+      );
     }
   }
 

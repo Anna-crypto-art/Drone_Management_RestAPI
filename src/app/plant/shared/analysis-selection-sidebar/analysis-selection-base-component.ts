@@ -19,9 +19,17 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
       this.plant.id,
       AnalysisSelectionEvent.ANALYSIS_SELECTED,
       (selectedAnalysisResultId: string | undefined) => {
+        // console.log(this.constructor.name)
+        // console.log(AnalysisSelectionEvent.ANALYSIS_SELECTED)
+        // console.log(selectedAnalysisResultId)
+
         if (this.analysisResults) {
           this.selectedAnalysisResult = this.analysisResults
             .find(analysisResult => analysisResult.id === selectedAnalysisResultId) || null;
+
+          if (this.selectedAnalysisResult) {
+            this.selectedAnalysesResults = null;
+          }
         }
 
         this.onAnalysisSelected();
@@ -32,11 +40,19 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
       this.plant.id,
       AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED,
       (selectedAnalysisResultIds: string[] | undefined) => {
+        // console.log(this.constructor.name)
+        // console.log(AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED)
+        // console.log(selectedAnalysisResultIds)
+
         if (!selectedAnalysisResultIds) {
           this.selectedAnalysesResults = null;
         } else if (this.analysisResults) {
           this.selectedAnalysesResults = this.analysisResults
             .filter(analysisResult => selectedAnalysisResultIds.includes(analysisResult.id));
+
+            if (this.selectedAnalysesResults) {
+              this.selectedAnalysisResult = null;
+            }
         }
 
         this.onMultiAnalysesSelected();

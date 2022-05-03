@@ -1,10 +1,11 @@
 import { FilterFieldType } from "@/app/plant/shared/filter-fields/types";
 import { ApiKeyFigure } from "../../api-key-figures";
-import { AnalysisResultCspPtcScaSchema } from "../../api-schemas/analysis-result-csp-ptc-sca-schema";
+import { AnalysisResultCspPtcScaComparedSchema, AnalysisResultCspPtcScaSchema } from "../../api-schemas/analysis-result-csp-ptc-sca-schema";
 import analysisResultMappingBase from "../analysis-result-mapping-base";
 import { AnalysisResultMappings } from "../types";
 
-const analysisResultCspPtcMappingSca: AnalysisResultMappings<AnalysisResultCspPtcScaSchema> = [
+const analysisResultCspPtcMappingSca: AnalysisResultMappings<
+  AnalysisResultCspPtcScaSchema, AnalysisResultCspPtcScaComparedSchema> = [
   ...analysisResultMappingBase,
   {
     getValue: r => r.encoder_value,
@@ -34,6 +35,8 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<AnalysisResultCspPt
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
     unit: "μ in °",
+    getDiffValue: r => r.tracking_encoder_offset__diff,
+    diffPositive: "negative",
   },
   {
     getValue: r => r.average_tracking_offset,
@@ -43,6 +46,8 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<AnalysisResultCspPt
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
     unit: "μ in °",
+    getDiffValue: r => r.average_tracking_offset__diff,
+    diffPositive: "negative",
   },
   {
     getValue: r => r.torsion_caused_friction_mean,
@@ -50,13 +55,8 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<AnalysisResultCspPt
     transDescr: "torsion-caused-friction-mean_expl",
     keyFigureId: ApiKeyFigure.SCA_FRICTION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
-  },
-  {
-    getValue: r => r.torsion_caused_friction_mean,
-    transName: "torsion-caused-friction-mean",
-    transDescr: "torsion-caused-friction-mean_expl",
-    keyFigureId: ApiKeyFigure.SCA_FRICTION_ID,
-    filterType: FilterFieldType.NUMERIC_EXTENDED,
+    getDiffValue: r => r.torsion_caused_friction_mean__diff,
+    diffPositive: "negative",
   },
   {
     getValue: r => r.sdx_rms_value,
@@ -65,6 +65,8 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.SCA_SDX_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
+    getDiffValue: r => r.sdx_rms_value__diff,
+    diffPositive: "negative",
   },
 ];
 

@@ -1,10 +1,11 @@
 import { FilterFieldType } from "@/app/plant/shared/filter-fields/types";
 import { ApiKeyFigure } from "../../api-key-figures";
-import { AnalysisResultCspPtcSceSchema } from "../../api-schemas/analysis-result-csp-ptc-sce-schema";
+import { AnalysisResultCspPtcSceComparedSchema, AnalysisResultCspPtcSceSchema } from "../../api-schemas/analysis-result-csp-ptc-sce-schema";
 import analysisResultMappingBase from "../analysis-result-mapping-base";
 import { AnalysisResultMappings } from "../types";
 
-const analysisResultCspPtcMappingSce: AnalysisResultMappings<AnalysisResultCspPtcSceSchema> = [
+const analysisResultCspPtcMappingSce: AnalysisResultMappings<
+  AnalysisResultCspPtcSceSchema, AnalysisResultCspPtcSceComparedSchema> = [
   ...analysisResultMappingBase,
   {
     getValue: r => r.absolute_orientation,
@@ -21,6 +22,8 @@ const analysisResultCspPtcMappingSce: AnalysisResultMappings<AnalysisResultCspPt
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
     unit: "μ in °",
+    getDiffValue: r => r.alignment_deviation_to_drive__diff,
+    diffPositive: "negative",
   },
   {
     getValue: r => r.orientation_uncertainty,
