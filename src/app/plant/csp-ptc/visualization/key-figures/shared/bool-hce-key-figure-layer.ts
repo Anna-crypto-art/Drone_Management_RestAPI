@@ -27,6 +27,13 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
         width: this.stokeWidth,
       }),
       text: this.showText(feature),
+      image: new Icon(({
+        anchor: [0.5, 36], 
+        anchorXUnits: "fraction",
+        anchorYUnits: "pixels",
+        opacity: 1,
+        src: "/images/brdrone.png",
+    })),
     });
   }
 
