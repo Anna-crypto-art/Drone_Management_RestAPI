@@ -133,7 +133,15 @@ export default class AppVisualization
   }
 
   protected onAnalysisSelected() {
-    this.piLayersHierarchy.addAndSelectAnalysisResult(this.selectedAnalysisResult?.id);
+    this.piLayersHierarchy.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
+    this.piLayersHierarchy.setCompareAnalysisResult(null);
+
+    this.hideToast();
+  }
+
+  protected onMultiAnalysesSelected() {
+    this.piLayersHierarchy.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
+    this.piLayersHierarchy.setCompareAnalysisResult(this.compareAnalysisResult || null);
 
     this.hideToast();
   }

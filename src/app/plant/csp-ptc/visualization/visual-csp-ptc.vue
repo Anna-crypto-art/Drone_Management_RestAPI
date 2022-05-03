@@ -32,8 +32,8 @@
       </template>
       <template #glassTubeTemperatureClass3>
         {{
-          (selectedAnalysisResult &&
-            (selectedAnalysisResult.csp_ptc.glass_tube_temperature_class_count === 3
+          (firstAnalysisResult &&
+            (firstAnalysisResult.csp_ptc.glass_tube_temperature_class_count === 3
               ? $t("glass-tube-temperature-class-4")
               : $t("glass-tube-temperature-class-3"))) ||
           ""
@@ -163,17 +163,17 @@ export default class AppVisualCspPtc
   }
 
   getTransAlignmentOffsetClassLimit(componentType: "sce" | "sca" | "hce", classLimit: 1 | 2 | 3): string {
-    if (!this.selectedAnalysisResult) {
+    if (!this.firstAnalysisResult) {
       return "";
     }
 
     let offsetClassLimits: number[] | null = null;
     if (componentType === "sce") {
-      offsetClassLimits = this.selectedAnalysisResult.csp_ptc.sce_alignment_deviation_to_drive_class_limits;
+      offsetClassLimits = this.firstAnalysisResult.csp_ptc.sce_alignment_deviation_to_drive_class_limits;
     } else if (componentType === "sca") {
-      offsetClassLimits = this.selectedAnalysisResult.csp_ptc.sca_tracking_encoder_offset_class_limits;
+      offsetClassLimits = this.firstAnalysisResult.csp_ptc.sca_tracking_encoder_offset_class_limits;
     } else if (componentType === "hce") {
-      offsetClassLimits = this.selectedAnalysisResult.csp_ptc.hce_position_total_class_limits;
+      offsetClassLimits = this.firstAnalysisResult.csp_ptc.hce_position_total_class_limits;
     }
 
     if (offsetClassLimits === null) {

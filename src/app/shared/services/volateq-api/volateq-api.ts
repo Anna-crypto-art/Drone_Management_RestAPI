@@ -320,6 +320,16 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/geo-visual/${plantId}/${analysisResultId}/key-figure/${keyFiguresId}`, query_params);
   }
 
+  public getKeyFiguresGeoVisualCompare(
+    plantId: string,
+    analysisResultId: string,
+    compareAnalysisResultId: string,
+    keyFiguresId: ApiKeyFigure,
+    query_params?: GeoVisualQuery
+  ): Promise<any> {
+    return this.get(`/auth/geo-visual/compare/${plantId}/${analysisResultId}/${compareAnalysisResultId}/key-figure/${keyFiguresId}`, query_params);
+  }
+
   public async getAnalysisResults(plantId: string): Promise<AnalysisResultDetailedSchema[]> {
     const analysisResults = await this.get(`/auth/plant/${plantId}/analysis-results`);
 

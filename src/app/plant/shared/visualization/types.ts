@@ -30,6 +30,7 @@ export interface IPlantVisualization {
 export interface FeatureProperties {
   name: string;
   value?: number | boolean | string | null;
+  diff_value?: number;
 }
 
 export interface FeatureImage {

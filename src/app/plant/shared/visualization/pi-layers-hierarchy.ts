@@ -14,8 +14,8 @@ export class PILayersHierarchy {
   private readonly parentComponentKpiLayers: GroupKPILayer[];
   // Each groupLayer refs to the groupLayer object in parentComponentKpiLayers
   public readonly groupLayers: LayerType[];
-  private readonly analysisResultIds: (string | string[])[];
-  private selectedAnalysisResultId: string | string[] | undefined;
+  private readonly analysisResultIds: string[];
+  private selectedAnalysisResultId: string | undefined;
 
   constructor(
     private readonly vueComponent: Vue,
@@ -27,11 +27,11 @@ export class PILayersHierarchy {
     this.analysisResultIds = [];
   }
 
-  public addAndSelectAnalysisResult(analysisResultIds: string | string[] | undefined) {
-    this.selectedAnalysisResultId = analysisResultIds
+  public addAndSelectAnalysisResult(analysisResultId: string | undefined) {
+    this.selectedAnalysisResultId = analysisResultId
     
-    if (analysisResultIds) {
-      this.analysisResultIds.push(analysisResultIds);
+    if (analysisResultId && !this.analysisResultIds.find(id => id === analysisResultId)) {
+      this.analysisResultIds.push(analysisResultId);
 
       this.updateGroupedKPILayers();
     }
@@ -76,33 +76,35 @@ export class PILayersHierarchy {
     }
   }
 
+  public setCompareAnalysisResult(analysisResult: AnalysisResultDetailedSchema | null) {
+    for (const childLayer of this.getAllChildLayers()) {
+      childLayer.setCompareAnalysisResult(analysisResult);
+      childLayer.reloadLayer();
+    }
+  }
+
   private updateGroupedKPILayers() {
     const currentChildLayers = this.getAllChildLayers();
 
     for (const analysisResultIds of this.analysisResultIds) {
-      if (Array.isArray(analysisResultIds)) { 
-        // compare mode
+      const analysisResult = this.analysisResults.find(analysisResult => analysisResult.id === analysisResultIds)!;
+      for (const keyFigureTypeMap of this.keyFigureLayers) {
+        const keyFigure: KeyFigureSchema | undefined = analysisResult.key_figures
+          .find(keyFigure => keyFigure.id === keyFigureTypeMap.keyFigureId);
+        const isNewAnalysisResult = !currentChildLayers
+          .find(keyFigureLayer => keyFigureLayer.analysisResult.id === analysisResult.id);
 
-      } else {
-        const analysisResult = this.analysisResults.find(analysisResult => analysisResult.id === analysisResultIds)!;
-        for (const keyFigureTypeMap of this.keyFigureLayers) {
-          const keyFigure: KeyFigureSchema | undefined = analysisResult.key_figures
-            .find(keyFigure => keyFigure.id === keyFigureTypeMap.keyFigureId);
-          const isNewAnalysisResult = !currentChildLayers
-            .find(keyFigureLayer => keyFigureLayer.analysisResult.id === analysisResult.id);
+        if (keyFigure && isNewAnalysisResult) {
+          const parentComponentKpiLayer = this.getOrCreateParentComponentLayer(keyFigure)
 
-          if (keyFigure && isNewAnalysisResult) {
-            const parentComponentKpiLayer = this.getOrCreateParentComponentLayer(keyFigure)
-  
-            const kpiLayer = this.createKPILayers(analysisResult, keyFigureTypeMap);
-            if (kpiLayer) {
-              if (kpiLayer instanceof KeyFigureLayer) {
-                parentComponentKpiLayer.groupLayer.childLayers.push(kpiLayer.toGeoLayer());
-                parentComponentKpiLayer.keyFigureLayers.push(kpiLayer);
-              } else {
-                parentComponentKpiLayer.groupLayer.childLayers.push(kpiLayer.groupLayer);
-                parentComponentKpiLayer.subGroupLayers!.push(kpiLayer);
-              }
+          const kpiLayer = this.createKPILayers(analysisResult, keyFigureTypeMap);
+          if (kpiLayer) {
+            if (kpiLayer instanceof KeyFigureLayer) {
+              parentComponentKpiLayer.groupLayer.childLayers.push(kpiLayer.toGeoLayer());
+              parentComponentKpiLayer.keyFigureLayers.push(kpiLayer);
+            } else {
+              parentComponentKpiLayer.groupLayer.childLayers.push(kpiLayer.groupLayer);
+              parentComponentKpiLayer.subGroupLayers!.push(kpiLayer);
             }
           }
         }
@@ -137,12 +139,8 @@ export class PILayersHierarchy {
 
       return !allInvisble;
     }
-
-    if (Array.isArray(this.selectedAnalysisResultId)) {
-      // compare mode
-    } else {
-      setVisibilityRec(this.selectedAnalysisResultId, this.parentComponentKpiLayers);
-    }
+    
+    setVisibilityRec(this.selectedAnalysisResultId, this.parentComponentKpiLayers);
   }
 
   private getOrCreateParentComponentLayer(keyFigure: KeyFigureSchema): GroupKPILayer {

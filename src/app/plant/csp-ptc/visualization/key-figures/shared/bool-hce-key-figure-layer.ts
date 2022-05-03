@@ -1,10 +1,12 @@
 import { KeyFigureColors } from "@/app/plant/shared/visualization/layers/types";
 import { Legend } from "@/app/plant/shared/visualization/types";
 import { FeatureLike } from "ol/Feature";
-import { Stroke, Style } from "ol/style";
+import { Stroke, Style, Icon, Image } from "ol/style";
 import { HceKeyFigureLayer } from "./hce-key-figure-layer";
 
 export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
+  protected enableCompare = true;
+
   public getStyle(feature: FeatureLike): Style {
     const featureValue: boolean | null | undefined = this.getPropertyValue<boolean | null>(feature);
 
@@ -15,10 +17,31 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
           width: this.stokeWidth,
         }),
         text: this.showText(feature),
+
       });
     }
 
-    return super.getStyle(feature);
+    return new Style({
+      stroke: new Stroke({
+        color: this.getDiffColor(feature),
+        width: this.stokeWidth,
+      }),
+      text: this.showText(feature),
+    });
+  }
+
+  private getDiffValue(feature: FeatureLike): number | undefined {
+    if (this.enableCompare && this.compareAnalysisResult) {
+      return this.getPropertyDiffValue(feature);
+    }
+  }
+
+  protected getDiffColor(feature: FeatureLike): string {
+    if (this.getDiffValue(feature) === -1) {
+      return this.getColorWithAlpha(this.color, 0.3);
+    }
+
+    return this.getColor();
   }
 
   protected getLegend(): Legend | undefined {

@@ -19,6 +19,8 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
 
   protected abstract get color(): string;
   protected colorScheme = KeyFigureColorScheme.TRAFFIC_LIGHT;
+  protected enableCompare = false;
+  protected compareAnalysisResult: AnalysisResultDetailedSchema | null = null;
 
   protected geoJSON?: {
     type: string;
@@ -118,13 +120,31 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     return this.getProperties(feature)?.value as unknown as T;
   }
 
+  protected getPropertyDiffValue(feature: FeatureLike): number | undefined {
+    if (this.enableCompare && this.compareAnalysisResult) {
+      return this.getProperties(feature)?.diff_value as number;
+    }
+
+    return undefined;
+  }
+
   public async load(): Promise<Record<string, unknown>> {
-    this.geoJSON = await volateqApi.getKeyFiguresGeoVisual(
-      this.vueComponent.plant.id,
-      this.analysisResult.id,
-      this.keyFigure.id,
-      this.query
-    );
+    if (this.enableCompare && this.compareAnalysisResult) {
+      this.geoJSON = await volateqApi.getKeyFiguresGeoVisualCompare(
+        this.vueComponent.plant.id,
+        this.analysisResult.id,
+        this.compareAnalysisResult.id,
+        this.keyFigure.id,
+        this.query
+      )
+    } else {
+      this.geoJSON = await volateqApi.getKeyFiguresGeoVisual(
+        this.vueComponent.plant.id,
+        this.analysisResult.id,
+        this.keyFigure.id,
+        this.query
+      );
+    }
 
     return this.geoJSON as Record<string, unknown>;
   }
@@ -154,6 +174,12 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
 
   public setColorScheme(colorScheme: KeyFigureColorScheme) {
     this.colorScheme = colorScheme;
+  }
+
+  public setCompareAnalysisResult(compareAnalysisResult: AnalysisResultDetailedSchema | null) {
+    if (this.enableCompare) {
+      this.compareAnalysisResult = compareAnalysisResult;
+    }
   }
 
   protected get id() {
