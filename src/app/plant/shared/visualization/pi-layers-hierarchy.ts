@@ -16,6 +16,7 @@ export class PILayersHierarchy {
   public readonly groupLayers: LayerType[];
   private readonly analysisResultIds: string[];
   private selectedAnalysisResultId: string | undefined;
+  private compareAnylysisResultId: string | undefined;
 
   constructor(
     private readonly vueComponent: Vue,
@@ -35,8 +36,6 @@ export class PILayersHierarchy {
 
       this.updateGroupedKPILayers();
     }
-
-    this.updateVisibility();
   }
 
   public getAllChildLayers(): KeyFigureLayer<AnalysisResultSchemaBase>[] {
@@ -77,9 +76,13 @@ export class PILayersHierarchy {
   }
 
   public setCompareAnalysisResult(analysisResult: AnalysisResultDetailedSchema | null) {
+    this.compareAnylysisResultId = analysisResult?.id;
+
     for (const childLayer of this.getAllChildLayers()) {
       childLayer.setCompareAnalysisResult(analysisResult);
-      childLayer.reloadLayer();
+      if (childLayer.isCompareEnabled) {
+        childLayer.reloadLayer();
+      }
     }
   }
 
@@ -112,13 +115,17 @@ export class PILayersHierarchy {
     }
   }
 
-  private updateVisibility(): void {
-    function setVisibilityRec(analysisResultId: string | undefined, groupKpiLayers: GroupKPILayer[]) {
+  public updateVisibility(): void {
+    const setVisibilityRec = (groupKpiLayers: GroupKPILayer[]) => {
       let allInvisble = true;
       for (const groupKpiLayer of groupKpiLayers) {
         let allKeyFiguresInvisible = true;
         for (const keyFigureLayer of groupKpiLayer.keyFigureLayers) {
-          const visible = (analysisResultId && keyFigureLayer.analysisResult.id == analysisResultId) || false;
+          let visible = (this.selectedAnalysisResultId && keyFigureLayer.analysisResult.id == this.selectedAnalysisResultId) || false;
+          if (visible && this.compareAnylysisResultId) {
+            visible = keyFigureLayer.hasKeyFigureForCompareAnalysisResult();
+          }
+
           keyFigureLayer.setVisible(visible);
 
           if (visible) {
@@ -127,7 +134,8 @@ export class PILayersHierarchy {
         }
 
         if (groupKpiLayer.subGroupLayers && groupKpiLayer.subGroupLayers.length > 0) {
-          groupKpiLayer.groupLayer.visible = setVisibilityRec(analysisResultId, groupKpiLayer.subGroupLayers);
+          const childLayersVisible = setVisibilityRec(groupKpiLayer.subGroupLayers);
+          groupKpiLayer.groupLayer.visible = !allKeyFiguresInvisible || childLayersVisible;
         } else {
           groupKpiLayer.groupLayer.visible = !allKeyFiguresInvisible;
         }
@@ -140,7 +148,7 @@ export class PILayersHierarchy {
       return !allInvisble;
     }
     
-    setVisibilityRec(this.selectedAnalysisResultId, this.parentComponentKpiLayers);
+    setVisibilityRec(this.parentComponentKpiLayers);
   }
 
   private getOrCreateParentComponentLayer(keyFigure: KeyFigureSchema): GroupKPILayer {

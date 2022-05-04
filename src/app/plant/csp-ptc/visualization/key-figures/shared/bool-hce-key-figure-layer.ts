@@ -1,5 +1,5 @@
 import { KeyFigureColors } from "@/app/plant/shared/visualization/layers/types";
-import { Legend } from "@/app/plant/shared/visualization/types";
+import { Legend, LegendEntry } from "@/app/plant/shared/visualization/types";
 import { FeatureLike } from "ol/Feature";
 import { Stroke, Style, Icon, Image } from "ol/style";
 import { HceKeyFigureLayer } from "./hce-key-figure-layer";
@@ -21,31 +21,16 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
       });
     }
 
-    return new Style({
-      stroke: new Stroke({
-        color: this.getDiffColor(feature),
-        width: this.stokeWidth,
-      }),
-      text: this.showText(feature),
-      image: new Icon(({
-        anchor: [0.5, 36], 
-        anchorXUnits: "fraction",
-        anchorYUnits: "pixels",
-        opacity: 1,
-        src: "/images/brdrone.png",
-    })),
-    });
-  }
-
-  private getDiffValue(feature: FeatureLike): number | undefined {
-    if (this.enableCompare && this.compareAnalysisResult) {
-      return this.getPropertyDiffValue(feature);
-    }
+    return super.getStyle(feature);
   }
 
   protected getDiffColor(feature: FeatureLike): string {
-    if (this.getDiffValue(feature) === -1) {
-      return this.getColorWithAlpha(this.color, 0.3);
+    const diffValue = this.getPropertyDiffValue(feature);
+    if (diffValue === -1) {
+      return KeyFigureColors.green;
+    }
+    if (diffValue === 1) {
+      return KeyFigureColors.black;
     }
 
     return this.getColor();
@@ -57,7 +42,26 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
     }
 
     const notMeasuredFeaturesCount = this.geoJSON.features.filter(feature => feature.properties.value === null).length;
-    const featuresCount = this.geoJSON.features.length - notMeasuredFeaturesCount;
+    let featuresCount = this.geoJSON.features.length - notMeasuredFeaturesCount;
+
+    let compareEntries: LegendEntry[] = [];
+    if (this.compareAnalysisResult) {
+      const fixedFeaturesCount = this.geoJSON.features.filter(feature => feature.properties.diff_value === -1).length;
+      const newFeaturesCount = this.geoJSON.features.filter(feature => feature.properties.diff_value === 1).length;
+
+      featuresCount = featuresCount - fixedFeaturesCount;
+
+      compareEntries = [
+        {
+          color: KeyFigureColors.green,
+          name: this.vueComponent.$t("fixed").toString() + this.getLegendEntryCount(fixedFeaturesCount),
+        },
+        {
+          color: KeyFigureColors.black,
+          name: this.vueComponent.$t("new").toString() + this.getLegendEntryCount(newFeaturesCount),
+        }
+      ]
+    }
 
     const legend = {
       id: this.keyFigureId.toString(),
@@ -68,6 +72,7 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
             this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
             this.getLegendEntryCount(featuresCount),
         },
+        ...compareEntries
       ],
     };
 

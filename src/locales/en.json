@@ -268,6 +268,8 @@
   "order-and-limit-selection-text": "First {limit} {order}",
   "select-pi": "Select PI",
   "compare-mode": "Compare analyses",
+  "fixed": "Fixed",
+  "new": "New",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",

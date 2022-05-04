@@ -43,7 +43,11 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
       (this.keyFigureInfo.displayName && this.vueComponent.$t(this.keyFigureInfo.displayName).toString()) ||
       (this.keyFigureInfo.keyName && this.vueComponent.$t(this.keyFigureInfo.keyName).toString()))!;
     this.zIndex = this.keyFigureInfo.zIndex || 9; // 9 - to make sure PIs overlay components, always
+
+    this.created();
   }
+
+  protected created(): void {/* override me */}
 
   protected getLegend(): Legend | undefined {
     return undefined;
@@ -180,6 +184,19 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     if (this.enableCompare) {
       this.compareAnalysisResult = compareAnalysisResult;
     }
+  }
+
+  public get isCompareEnabled(): boolean {
+    return this.enableCompare;
+  }
+
+  public hasKeyFigureForCompareAnalysisResult(): boolean {
+    if (this.isCompareEnabled && this.compareAnalysisResult) {
+      return !!(this.analysisResult.key_figures.find(keyFigure => keyFigure.id === this.keyFigureId) &&
+        this.compareAnalysisResult.key_figures.find(keyFigure => keyFigure.id === this.keyFigureId));
+    }
+
+    return false;
   }
 
   protected get id() {

@@ -135,6 +135,7 @@ export default class AppVisualization
   protected onAnalysisSelected() {
     this.piLayersHierarchy.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     this.piLayersHierarchy.setCompareAnalysisResult(null);
+    this.piLayersHierarchy.updateVisibility();
 
     this.hideToast();
   }
@@ -142,6 +143,7 @@ export default class AppVisualization
   protected onMultiAnalysesSelected() {
     this.piLayersHierarchy.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     this.piLayersHierarchy.setCompareAnalysisResult(this.compareAnalysisResult || null);
+    this.piLayersHierarchy.updateVisibility();
 
     this.hideToast();
   }

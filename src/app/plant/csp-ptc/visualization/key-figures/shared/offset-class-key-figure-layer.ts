@@ -1,5 +1,5 @@
 import { KeyFigureColors, KeyFigureColorScheme } from "@/app/plant/shared/visualization/layers/types";
-import { Legend } from "@/app/plant/shared/visualization/types";
+import { Legend, LegendEntry } from "@/app/plant/shared/visualization/types";
 import { complimentaryColor } from "@/app/shared/services/helper/color-helper";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { FeatureLike } from "ol/Feature";
@@ -10,10 +10,14 @@ export abstract class OffsetClassKeyFigureLayer<T extends AnalysisResultSchemaBa
   protected abstract getOffsetClassLimits(): number[];
   protected abstract getQueryOffsetClass(): number | undefined;
 
+  protected created(): void {
+    this.enableCompare = this.getQueryOffsetClass() === 3;
+  }
+
   public getStyle(feature: FeatureLike): Style {
     const offset = this.getProperties(feature)?.value;
     const complementary = offset !== undefined && offset !== null && offset < 0;
-    const offsetColor = this.getOffsetColor(complementary);
+    const offsetColor = this.getDiffColor(feature, complementary);
 
     return new Style({
       fill: new Fill({
@@ -23,27 +27,82 @@ export abstract class OffsetClassKeyFigureLayer<T extends AnalysisResultSchemaBa
     });
   }
 
+  protected getDiffColor(feature: FeatureLike, complementary = false): string {
+    if (this.compareAnalysisResult) {
+      const diffValue = this.getPropertyDiffValue(feature);
+      if (diffValue !== undefined) {
+        if (diffValue < 0) {
+          return KeyFigureColors.green;
+        }
+        if (diffValue > 0) {
+          return KeyFigureColors.black;
+        }
+      }
+    }
+
+    return this.getOffsetColor(complementary)
+  }
+
   protected getLegend(): Legend | undefined {
     if (!this.geoJSON) {
       return undefined;
     }
 
-    const legendEntries = [{
+    let negativeFeatureCount = this.geoJSON!.features.filter(feature => feature.properties.value! < 0).length;
+    let positiveFeatureCount = this.geoJSON!.features.filter(feature => feature.properties.value! >= 0).length;
+
+    let compareEntries: LegendEntry[] = []
+    if (this.compareAnalysisResult) {
+      const limitAt1 = this.getOffsetClassLimits()[1];
+
+      const negativeFixedFeatureCount = this.geoJSON!.features.filter(feature => {
+        return feature.properties.value! < 0 && feature.properties.diff_value && feature.properties.diff_value < 0 
+          && Math.abs(feature.properties.value! as number) < limitAt1;
+      }).length;
+
+      const positiveFixedFeatureCount = this.geoJSON!.features.filter(feature => {
+        return feature.properties.value! >= 0 && feature.properties.diff_value && feature.properties.diff_value < 0 
+          && feature.properties.value! < limitAt1;
+      }).length;
+
+      negativeFeatureCount -= negativeFixedFeatureCount;
+      positiveFeatureCount -= positiveFixedFeatureCount;
+
+      const newFeaturesCount = this.geoJSON!.features.filter(feature => {
+        return feature.properties.diff_value && feature.properties.diff_value > 0 && 
+          ((feature.properties.value! as number) - feature.properties.diff_value) < limitAt1;
+      }).length;
+
+      compareEntries = [
+        {
+          color: KeyFigureColors.green,
+          name: this.vueComponent.$t("fixed").toString() + 
+            this.getLegendEntryCount(negativeFixedFeatureCount + positiveFixedFeatureCount)
+        },
+        {
+          color: KeyFigureColors.black,
+          name: this.vueComponent.$t("new").toString() + 
+            this.getLegendEntryCount(newFeaturesCount)
+        }
+      ]
+    } 
+
+    const legendEntries: LegendEntry[] = [{
         color: this.getOffsetColor(),
-        name: this.getLegendName(),
+        name: this.getLegendName(false, positiveFeatureCount),
       },
     ];
 
     if (this.getQueryOffsetClass() === 2 || this.getQueryOffsetClass() === 3) {
       legendEntries.push({
         color: this.getOffsetColor(true),
-        name: this.getLegendName(true),
+        name: this.getLegendName(true, negativeFeatureCount),
       });
     }
 
     return {
       id: this.keyFigureInfo.displayName!,
-      entries: legendEntries
+      entries: [...legendEntries, ...compareEntries]
     };
   }
 
@@ -70,7 +129,7 @@ export abstract class OffsetClassKeyFigureLayer<T extends AnalysisResultSchemaBa
     return color;
   }
 
-  private getLegendName(negativeOffset = false): string {
+  private getLegendName(negativeOffset = false, featureCount: number): string {
     const limitAt0 = this.getOffsetClassLimits()[0];
     const limitAt1 = this.getOffsetClassLimits()[1];
 
@@ -82,11 +141,7 @@ export abstract class OffsetClassKeyFigureLayer<T extends AnalysisResultSchemaBa
       return `less than ${limitAt0}°: ${this.getLegendEntryCount()}`;
     }
 
-    const featureCount = this.geoJSON!.features.filter(feature => 
-      negativeOffset ? feature.properties.value! < 0 :
-      feature.properties.value! >= 0
-    ).length;
-
+    
     if (this.getQueryOffsetClass() === 2) {
       if (negativeOffset) {
         return `between -${limitAt1}° and -${limitAt0}°: ${this.getLegendEntryCount(featureCount)}`;

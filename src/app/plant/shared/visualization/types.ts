@@ -9,9 +9,14 @@ import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant
 import { KeyFigureLayer } from "./layers/key-figure-layer";
 import { KeyFigureColors, KeyFigureInfo, SubKeyFigureInfo } from "./layers/types";
 
+export interface LegendEntry {
+  color: string;
+  name: string;
+}
+
 export interface Legend {
   id: string;
-  entries: { color: string; name: string }[];
+  entries: LegendEntry[];
 }
 
 export interface GroupKPILayer {
