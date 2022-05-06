@@ -67,13 +67,13 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
   }
 
   get glassTubeTemperatureClassOptions(): BvSelectOption[] {
-    if (!this.selectedAnalysisResult) {
+    if (!this.firstAnalysisResult) {
       return [];
     }
 
     const classOptions: BvSelectOption[] = [];
 
-    if (this.selectedAnalysisResult.csp_ptc.glass_tube_temperature_class_count === 4) {
+    if (this.firstAnalysisResult.csp_ptc.glass_tube_temperature_class_count === 4) {
       classOptions.push({ value: "4", text: this.$t(`glass-tube-temperature-class-4`).toString() });
       classOptions.push({ value: "3", text: this.$t(`glass-tube-temperature-class-3`).toString() });
     } else {
@@ -88,7 +88,7 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
     if (this.selectedGlassTubeTemperatureClass) {
       const analysisResultMappingHelper = new AnalysisResultMappingHelper(
         analysisResultCspPtcMappingHce, 
-        this.selectedAnalysisResult!
+        this.firstAnalysisResult!
       );
 
       const columnName = analysisResultMappingHelper.getColumnsMapping()['glass-tube-temperature-class'];
@@ -99,7 +99,7 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
       this.tableFilter = {
         filters: { [columnName]: glassTubeClass },
         columns_selection: {
-          columns: [{ name: columnName, func: "count" }],
+          columns: [{ name: columnName, func: "sum" }],
         }
       };
 

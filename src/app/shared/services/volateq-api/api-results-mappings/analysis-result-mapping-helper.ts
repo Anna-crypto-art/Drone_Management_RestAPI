@@ -5,10 +5,16 @@ import VueI18n from "vue-i18n";
 import { FilterFieldType } from "@/app/plant/shared/filter-fields/types";
 
 export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
+  private compareAnalysisResult: AnalysisResultDetailedSchema | null = null;
+
   constructor(
     private readonly analysisResultMapping: AnalysisResultMappings<T>,
     private readonly analysisResult: AnalysisResultDetailedSchema
   ) {}
+
+  public setCompareAnalysisResult(compareAnalysisResult: AnalysisResultDetailedSchema | null) {
+    this.compareAnalysisResult = compareAnalysisResult;
+  }
 
   public getEntries(): AnalysisResultMappings<T> {
     return this.analysisResultMapping.filter(entry => this.hasKeyFigure(entry));
@@ -71,7 +77,15 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
   public hasKeyFigure(mappingEntry: AnalysisResultMappingEntry<T>): boolean {
     return (
       mappingEntry.keyFigureId === undefined ||
-      !!this.analysisResult.key_figures.find(keyFigure => keyFigure.id === mappingEntry.keyFigureId)
+      (
+        this.compareAnalysisResult === null &&
+        !!this.analysisResult.key_figures.find(keyFigure => keyFigure.id === mappingEntry.keyFigureId)
+      ) ||
+      (
+        this.compareAnalysisResult !== null &&
+        !!this.analysisResult.key_figures.find(keyFigure => keyFigure.id === mappingEntry.keyFigureId) &&
+        !!this.compareAnalysisResult.key_figures.find(keyFigure => keyFigure.id === mappingEntry.keyFigureId)
+      )
     );
   }
 

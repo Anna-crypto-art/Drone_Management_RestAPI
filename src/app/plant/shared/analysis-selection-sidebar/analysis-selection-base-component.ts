@@ -19,10 +19,6 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
       this.plant.id,
       AnalysisSelectionEvent.ANALYSIS_SELECTED,
       (selectedAnalysisResultId: string | undefined) => {
-        // console.log(this.constructor.name)
-        // console.log(AnalysisSelectionEvent.ANALYSIS_SELECTED)
-        // console.log(selectedAnalysisResultId)
-
         if (this.analysisResults) {
           this.selectedAnalysisResult = this.analysisResults
             .find(analysisResult => analysisResult.id === selectedAnalysisResultId) || null;
@@ -40,10 +36,6 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
       this.plant.id,
       AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED,
       (selectedAnalysisResultIds: string[] | undefined) => {
-        // console.log(this.constructor.name)
-        // console.log(AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED)
-        // console.log(selectedAnalysisResultIds)
-
         if (!selectedAnalysisResultIds) {
           this.selectedAnalysesResults = null;
         } else if (this.analysisResults) {
