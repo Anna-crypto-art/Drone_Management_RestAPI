@@ -1,9 +1,9 @@
 <template>
   <div class="app-tables-component">
-    <div class="no-data-placeholder" v-show="!selectedAnalysisResult">
+    <div class="no-data-placeholder" v-if="!firstAnalysisResult">
       {{ $t("no-analysis-result-selected") }}
     </div>
-    <div v-show="selectedAnalysisResult" class="app-table-root-container">
+    <div v-if="firstAnalysisResult" class="app-table-root-container">
       <div class="pull-left">
         <app-search-input :placeholder="$t('search-pcs')" @search="onSearch"></app-search-input>
       </div>
@@ -17,7 +17,7 @@
         <b-tabs v-model="tabIndex" @activate-tab="onTabChanged">
           <b-tab
             v-for="activeTabComponent in activeTabComponents"
-            :key="selectedAnalysisResult.id + '_' + activeTabComponent.label"
+            :key="firstAnalysisResult.id + '_' + activeTabComponent.label"
           >
             <template #title>
               {{ $t(activeTabComponent.label) }}
@@ -27,7 +27,8 @@
             </template>
             <app-table-component
               :ref="generateRefTableName(activeTabComponent)"
-              :analysisResult="selectedAnalysisResult"
+              :analysisResult="firstAnalysisResult"
+              :compareAnalysisResult="compareAnalysisResult"
               :activeComponent="activeTabComponent"
               :plant="plant"
             >
@@ -46,7 +47,6 @@ import appContentEventBus from "@/app/shared/components/app-content/app-content-
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppSearchInput from "@/app/shared/components/app-search-input/app-search-input.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
@@ -54,7 +54,8 @@ import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { Component, Prop } from "vue-property-decorator";
-import { IActiveComponent, IActiveTabComponent, IAnalysisResultSelection } from "../types";
+import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
+import { IActiveComponent, IActiveTabComponent } from "../types";
 import { ITableComponent } from "./types";
 
 @Component({
@@ -67,7 +68,7 @@ import { ITableComponent } from "./types";
     AppTableComponent,
   },
 })
-export default class AppTablesComponent extends BaseAuthComponent implements IAnalysisResultSelection {
+export default class AppTablesComponent extends AnalysisSelectionBaseComponent {
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
   @Prop() activeComponents!: IActiveComponent[];
@@ -77,19 +78,26 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
   activeTabLabel = "";
   readonly activeTabComponents: IActiveTabComponent[] = [];
 
-  selectedAnalysisResult: AnalysisResultDetailedSchema | null = null;
+  async created() {
+    await super.created();
+  }
 
-  selectAnalysisResult(analysisResultId: string | undefined) {
-    this.selectedAnalysisResult =
-      this.analysisResults.find(analysisResult => analysisResult.id === analysisResultId) || null;
+  protected onAnalysisSelected() {
+    this.setActiveTabComponents();
+  }
 
+  protected onMultiAnalysesSelected() {
+    this.setActiveTabComponents();
+  }
+
+  private setActiveTabComponents() {
     this.activeTabComponents.length = 0;
 
-    if (this.selectedAnalysisResult) {
+    if (this.hasAnyAnalysisSelected()) {
       let tabIdx = 0;
 
       for (const activeComponent of this.activeComponents) {
-        const keyFigure = this.selectedAnalysisResult.key_figures.find(
+        const keyFigure = this.getKeyFigures().find(
           keyFigure => keyFigure.component.id === activeComponent.componentId
         );
         if (keyFigure) {
@@ -162,7 +170,7 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
   }
 
   private generateRefTableName(activeTabComponent: IActiveComponent): string {
-    return ["tableComponent", this.selectedAnalysisResult!.id, activeTabComponent.componentId].join("_");
+    return ["tableComponent", this.firstAnalysisResult!.id, activeTabComponent.componentId].join("_");
   }
 
   private getSelectedActiveComponent(): IActiveTabComponent | undefined {

@@ -1,10 +1,12 @@
 import { KeyFigureColors } from "@/app/plant/shared/visualization/layers/types";
-import { Legend } from "@/app/plant/shared/visualization/types";
+import { Legend, LegendEntry } from "@/app/plant/shared/visualization/types";
 import { FeatureLike } from "ol/Feature";
-import { Stroke, Style } from "ol/style";
+import { Stroke, Style, Icon, Image } from "ol/style";
 import { HceKeyFigureLayer } from "./hce-key-figure-layer";
 
 export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
+  protected enableCompare = true;
+
   public getStyle(feature: FeatureLike): Style {
     const featureValue: boolean | null | undefined = this.getPropertyValue<boolean | null>(feature);
 
@@ -15,10 +17,23 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
           width: this.stokeWidth,
         }),
         text: this.showText(feature),
+
       });
     }
 
     return super.getStyle(feature);
+  }
+
+  protected getDiffColor(feature: FeatureLike): string {
+    const diffValue = this.getPropertyDiffValue(feature);
+    if (diffValue === -1) {
+      return KeyFigureColors.green;
+    }
+    if (diffValue === 1) {
+      return KeyFigureColors.black;
+    }
+
+    return this.getColor();
   }
 
   protected getLegend(): Legend | undefined {
@@ -27,7 +42,26 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
     }
 
     const notMeasuredFeaturesCount = this.geoJSON.features.filter(feature => feature.properties.value === null).length;
-    const featuresCount = this.geoJSON.features.length - notMeasuredFeaturesCount;
+    let featuresCount = this.geoJSON.features.length - notMeasuredFeaturesCount;
+
+    let compareEntries: LegendEntry[] = [];
+    if (this.compareAnalysisResult) {
+      const fixedFeaturesCount = this.geoJSON.features.filter(feature => feature.properties.diff_value === -1).length;
+      const newFeaturesCount = this.geoJSON.features.filter(feature => feature.properties.diff_value === 1).length;
+
+      featuresCount = featuresCount - fixedFeaturesCount;
+
+      compareEntries = [
+        {
+          color: KeyFigureColors.green,
+          name: this.vueComponent.$t("fixed").toString() + this.getLegendEntryCount(fixedFeaturesCount),
+        },
+        {
+          color: KeyFigureColors.black,
+          name: this.vueComponent.$t("new").toString() + this.getLegendEntryCount(newFeaturesCount),
+        }
+      ]
+    }
 
     const legend = {
       id: this.keyFigureId.toString(),
@@ -38,6 +72,7 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
             this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
             this.getLegendEntryCount(featuresCount),
         },
+        ...compareEntries
       ],
     };
 

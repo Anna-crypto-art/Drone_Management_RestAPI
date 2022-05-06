@@ -1,10 +1,10 @@
 import { FilterFieldType } from "@/app/plant/shared/filter-fields/types";
 import { ApiKeyFigure } from "../../api-key-figures";
-import { AnalysisResultCspPtcHceSchema } from "../../api-schemas/analysis-result-csp-ptc-hce-schema";
+import { AnalysisResultCspPtcHceComparedSchema, AnalysisResultCspPtcHceSchema } from "../../api-schemas/analysis-result-csp-ptc-hce-schema";
 import analysisResultMappingBase from "../analysis-result-mapping-base";
 import { AnalysisResultMappings } from "../types";
 
-const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPtcHceSchema> = [
+const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPtcHceSchema, AnalysisResultCspPtcHceComparedSchema> = [
   ...analysisResultMappingBase,
   {
     getValue: r => r.htf_temperature,
@@ -48,6 +48,10 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     transName: "glass-tube-temperature",
     keyFigureId: ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
+    enableForDiagram: true,
+    unit: "μ in °C",
+    getDiffValue: r => r.glass_tube_temperature__diff,
+    diffPositive: "negative",
   },
   {
     getValue: r => r.glass_tube_temperature_class,
@@ -55,6 +59,10 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     transDescr: "glass-tube-temperature-class_expl",
     keyFigureId: ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
+    enableForDiagram: true,
+    unit: "μ of count",
+    getDiffValue: r => r.glass_tube_temperature_class__diff,
+    diffPositive: "negative",
   },
   {
     getValue: r => r.missing_glass_tube,
@@ -62,6 +70,10 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     transDescr: "missing-gct_expl",
     keyFigureId: ApiKeyFigure.MISSING_GLASS_TUBE_ID,
     filterType: FilterFieldType.BOOLEAN,
+    enableForDiagram: true,
+    unit: "Count",
+    getDiffValue: r => r.missing_glass_tube__diff,
+    diffPositive: "negative",
   },
   {
     getValue: r => r.oxygen_penetration,
@@ -69,6 +81,10 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     transDescr: "oxygen-penetration_expl",
     keyFigureId: ApiKeyFigure.OXYGEN_PENETRATION_ID,
     filterType: FilterFieldType.BOOLEAN,
+    enableForDiagram: true,
+    unit: "Count",
+    getDiffValue: r => r.oxygen_penetration__diff,
+    diffPositive: "negative",
   },
   {
     getValue: r => r.h2_concentration,
@@ -76,6 +92,10 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     transDescr: "high-hydrogen-concentration_expl",
     keyFigureId: ApiKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID,
     filterType: FilterFieldType.BOOLEAN,
+    enableForDiagram: true,
+    unit: "Count",
+    getDiffValue: r => r.h2_concentration__diff,
+    diffPositive: "negative",
   },
   {
     getValue: r => r.coating_degraded,
@@ -90,6 +110,8 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     transDescr: "recommended-action_expl",
     keyFigureId: ApiKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
+    enableForDiagram: true,
+    unit: "Count"
   },
   {
     getValue: r => r.glass_tube_temperature_class_limits,

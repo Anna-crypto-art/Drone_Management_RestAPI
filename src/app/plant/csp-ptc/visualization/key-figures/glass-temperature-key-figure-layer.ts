@@ -1,7 +1,30 @@
 import { KeyFigureColors, KeyFigureColorScheme } from "@/app/plant/shared/visualization/layers/types";
+import { Legend, LegendEntry } from "@/app/plant/shared/visualization/types";
+import { FeatureLike } from "ol/Feature";
 import { ClassHceKeyFigureLayer } from "./shared/class-hce-key-figure-layer";
 
 export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer {
+  protected created(): void {
+    this.enableCompare = this.analysisResult.csp_ptc.glass_tube_temperature_class_count === this.query!.glass_tube_temperature_class!
+  }
+
+  protected getDiffColor(feature: FeatureLike): string {
+    const diffValue = this.getPropertyDiffValue(feature);
+    if (diffValue !== undefined && (diffValue > 0 || diffValue < 0)) {
+      const classValue = this.query?.glass_tube_temperature_class;
+      if (classValue) {
+        if (diffValue > 0) {
+          return KeyFigureColors.black;
+        }
+        if (diffValue < 0) {
+          return KeyFigureColors.green;
+        }
+      }
+    }
+
+    return super.getDiffColor(feature);
+  }
+
   protected getClassColor(classValue: number | undefined): string {
     if (this.colorScheme === KeyFigureColorScheme.RAINBOW) {
       if (this.analysisResult.csp_ptc.glass_tube_temperature_class_count === 4 && classValue === 3) {
@@ -20,6 +43,42 @@ export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer {
     }
 
     return super.getClassColor(classValue);
+  }
+
+  protected getLegend(): Legend | undefined {
+    if (!this.geoJSON) {
+      return undefined;
+    }
+
+    let compareEntries: LegendEntry[] = [];
+    let featureCount = this.geoJSON!.features.length
+    if (this.compareAnalysisResult) {
+      const fixedFeaturesCount = this.geoJSON.features.filter(feature => feature.properties.diff_value && feature.properties.diff_value < 0).length;
+      const newFeaturesCount = this.geoJSON.features.filter(feature => feature.properties.diff_value && feature.properties.diff_value > 0).length;
+      featureCount = featureCount - fixedFeaturesCount;
+
+      compareEntries = [
+        {
+          color: KeyFigureColors.green,
+          name: this.vueComponent.$t("fixed").toString() + this.getLegendEntryCount(fixedFeaturesCount),
+        },
+        {
+          color: KeyFigureColors.black,
+          name: this.vueComponent.$t("new").toString() + this.getLegendEntryCount(newFeaturesCount),
+        }
+      ]
+    }
+
+    return {
+      id: this.keyFigureInfo.displayName || this.keyFigureId.toString(),
+      entries: [
+        {
+          color: this.getColor(),
+          name: this.vueComponent.$t(this.getLegendName()).toString() + this.getLegendEntryCount(featureCount),
+        },
+        ...compareEntries
+      ],
+    };
   }
 
   protected getLegendName(): string {

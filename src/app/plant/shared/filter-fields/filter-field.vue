@@ -18,6 +18,7 @@ import { Component, Prop, Watch } from "vue-property-decorator";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { FilterField, FilterFieldValue, FilterFieldValueType } from "./types";
 import AppFilterFieldValue from "@/app/plant/shared/filter-fields/filter-field-value.vue";
+import { BvSelectOption } from "@/app/shared/types";
 
 @Component({
   name: "app-filter-field",
@@ -42,7 +43,7 @@ export default class AppFilterField extends Vue {
     this.setFilterFieldValue();
   }
 
-  get selectOptions(): { value: string | number, text: string }[] {
+  get selectOptions(): BvSelectOption[] {
     return this.filterFields.map(filterField => ({
       value: filterField.key,
       text: filterField.name

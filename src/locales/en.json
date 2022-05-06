@@ -263,6 +263,13 @@
   "hce-position-vertical-offset": "HCE position vertical offset",
   "hce-position-total-offset": "HCE position total offset",
   "hce-position-offset_expl": "Deviation of HCE from focal line. Positive: Above focal line. Negative: Below focal line",
+  "select-component": "Select component",
+  "select-order-and-limit": "Select order and limit",
+  "order-and-limit-selection-text": "First {limit} {order}",
+  "select-pi": "Select PI",
+  "compare-mode": "Compare analyses",
+  "fixed": "Fixed",
+  "new": "New",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",

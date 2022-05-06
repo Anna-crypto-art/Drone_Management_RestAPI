@@ -3,15 +3,19 @@ import { BvTableField } from "bootstrap-vue";
 import { ApiKeyFigure } from "../api-key-figures";
 import { AnalysisResultSchemaBase } from "../api-schemas/analysis-result-schema-base";
 
-export interface AnalysisResultMappingEntry<T extends AnalysisResultSchemaBase> {
+export interface AnalysisResultMappingEntry<T extends AnalysisResultSchemaBase, C = any> {
   getValue: (result: T) => unknown;
   transName: string;
   transDescr?: string;
   keyFigureId?: ApiKeyFigure;
   filterType?: FilterFieldType;
+  enableForDiagram?: boolean;
+  unit?: string;
+  getDiffValue?: (result: C) => unknown;
+  diffPositive?: "negative" | "positive" | "neutral";
 }
 
-export type AnalysisResultMappings<T extends AnalysisResultSchemaBase> = AnalysisResultMappingEntry<T>[];
+export type AnalysisResultMappings<T extends AnalysisResultSchemaBase, C = any> = AnalysisResultMappingEntry<T, C>[];
 
 export interface BvTableFieldExt extends BvTableField {
   labelExpl?: string;

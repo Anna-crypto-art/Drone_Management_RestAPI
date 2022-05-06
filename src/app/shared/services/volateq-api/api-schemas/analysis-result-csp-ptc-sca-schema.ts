@@ -13,3 +13,10 @@ export interface AnalysisResultCspPtcScaSchema extends AnalysisResultSchemaBase 
   ortho_image_ir_url?: string;
   ortho_image_sdx_url?: string;
 }
+
+export interface AnalysisResultCspPtcScaComparedSchema extends AnalysisResultCspPtcScaSchema {
+  tracking_encoder_offset__diff: number;
+  average_tracking_offset__diff: number;
+  torsion_caused_friction_mean__diff: number;
+  sdx_rms_value__diff: number;
+}

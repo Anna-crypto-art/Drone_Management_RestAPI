@@ -80,30 +80,6 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     ],
   },
   {
-    keyFigureId: ApiKeyFigure.IR_INTENSITY_ID,
-    layerType: ClassHceKeyFigureLayer,
-    keyFigureInfo: { templateName: "irIntensity", keyName: "ir-intensity-class" },
-    subLayers: [
-      {
-        keyFigureInfo: { displayName: "ir-intensity-class-3", zIndex: 13 },
-        query: { ir_intensity_class: 3 },
-      },
-      {
-        keyFigureInfo: { displayName: "ir-intensity-class-2", zIndex: 12 },
-        query: { ir_intensity_class: 2 },
-      },
-      {
-        keyFigureInfo: { displayName: "ir-intensity-class-1", zIndex: 10 },
-        query: { ir_intensity_class: 1 },
-      },
-      {
-        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
-        color: KeyFigureColors.grey,
-        query: { undefined: 1 },
-      },
-    ],
-  },
-  {
     keyFigureId: ApiKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID,
     layerType: RecommendedActionKeyFigureLayer,
     keyFigureInfo: { templateName: "recommendedAction", keyName: "recommended-action" },

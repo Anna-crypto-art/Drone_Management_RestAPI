@@ -6,7 +6,6 @@
       :analysisResults="analysisResults"
       :getPIColor="getPiColor"
       :absolute="leftSidebarAbsolute"
-      @analysisResultSelected="onAnalysisResultSelected"
     />
     <div class="plant-view-csp-ptc-rightside">
       <h2 :class="'plant-view-csp-ptc-title ' + (sidebarStates['analysis'] ? 'open' : '')">
@@ -17,11 +16,15 @@
           <template #title>
             <b-icon icon="map" />
           </template>
-          <app-visual-csp-ptc ref="visualCspPtc" :analysisResults="analysisResults" :plant="plant" />
+          <app-visual-csp-ptc :analysisResults="analysisResults" :plant="plant" />
         </b-tab>
         <b-tab v-if="hasResults">
           <template #title><b-icon icon="table" /></template>
-          <app-tables-csp-ptc ref="tablesCspPtc" :analysisResults="analysisResults" :plant="plant" />
+          <app-tables-csp-ptc v-if="loadTables" :analysisResults="analysisResults" :plant="plant" />
+        </b-tab>
+        <b-tab v-if="hasResults">
+          <template #title><b-icon icon="bar-chart-fill" /></template>
+          <app-plant-diagram-view-csp-ptc :analysisResults="analysisResults" :plant="plant" />
         </b-tab>
         <b-tab v-if="isSuperAdmin">
           <template #title><b-icon icon="braces" /></template>
@@ -37,11 +40,10 @@ import AppPlantAdminViewCspPtc from "@/app/plant/csp-ptc/plant-admin-view-csp-pt
 import AppTablesCspPtc from "@/app/plant/csp-ptc/tables/tables-csp-ptc.vue";
 import AppVisualCspPtc from "@/app/plant/csp-ptc/visualization/visual-csp-ptc.vue";
 import AppAnalysisSelectionSidebar from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-sidebar.vue";
-import { IAnalysisSelectionSidebar } from "@/app/plant/shared/analysis-selection-sidebar/types";
+import { AnalysisSelectionEvent, IAnalysisSelectionSidebar } from "@/app/plant/shared/analysis-selection-sidebar/types";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
@@ -49,8 +51,10 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { ISidebarModule } from "@/app/shared/stores/sidebar";
 import { Component, Prop, Ref } from "vue-property-decorator";
 import { State } from "vuex-class";
-import { IAnalysisResultSelection } from "../shared/types";
+import { AnalysisSelectionService } from "../shared/analysis-selection-sidebar/analysis-selection-service";
 import { cspPtcKeyFigureRainbowColors } from "./csp-ptc-key-figure-colors";
+import AppPlantDiagramViewCspPtc from "@/app/plant/csp-ptc/plant-diagram-view-csp-ptc.vue";
+import { AnalysisSelectionBaseComponent } from "../shared/analysis-selection-sidebar/analysis-selection-base-component";
 
 @Component({
   name: "app-plant-view-csp-ptc",
@@ -62,23 +66,23 @@ import { cspPtcKeyFigureRainbowColors } from "./csp-ptc-key-figure-colors";
     AppSidebar,
     AppAnalysisSelectionSidebar,
     AppPlantAdminViewCspPtc,
+    AppPlantDiagramViewCspPtc,
   },
 })
-export default class AppPlantViewCspPtc extends BaseAuthComponent {
+export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
   @Prop() plant!: PlantSchema;
   @Ref() analysisSelectionSidebar!: IAnalysisSelectionSidebar;
-  @Ref() visualCspPtc!: IAnalysisResultSelection;
-  @Ref() tablesCspPtc!: IAnalysisResultSelection;
 
-  selectedAnalysisResult: AnalysisResultDetailedSchema | null = null;
-
-  private analysisResults: AnalysisResultDetailedSchema[] | null = null;
+  analysisResults: AnalysisResultDetailedSchema[] | null = null;
 
   @State(state => state.sidebar) sidebarStates!: ISidebarModule;
   preMobileSidebarState: ISidebarModule | null = null;
 
   leftSidebarAbsolute = true; // TODO: Make it absolute on all tabs?
   currentTab = 0;
+  // Load table data if user switches to table view, only
+  // So we avoid keeping REST-API busy for no reason.
+  loadTables = false;
 
   private isMobile!: boolean; // TODO: Replace this with the new mobile store
   private isMobileQuery!: MediaQueryList;
@@ -90,11 +94,17 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
   }
 
   async created(): Promise<void> {
+    await super.created();
+
     this.analysisResults = await volateqApi.getAnalysisResults(this.plant.id);
 
     this.isMobileQuery = window.matchMedia("screen and (max-width: 1000px)");
     this.isMobileQuery.addEventListener("change", this.isMobileListener);
     this.isMobileListener(this.isMobileQuery);
+  }
+
+  protected onAnalysisSelected() {
+    this.rerenderOLCanvas();
   }
 
   unmounted() {
@@ -105,18 +115,24 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent {
     return this.analysisResults ? this.analysisResults?.length > 0 : false;
   }
 
-  onAnalysisResultSelected(selectedAnalysisResultId: string | undefined): void {
-    this.visualCspPtc.selectAnalysisResult(selectedAnalysisResultId);
-    this.tablesCspPtc.selectAnalysisResult(selectedAnalysisResultId);
-
-    this.selectedAnalysisResult = this.visualCspPtc?.selectedAnalysisResult || null;
-
-    this.rerenderOLCanvas();
-  }
-
-  onTabChange(tab: number) {
+  async onTabChange(tab: number) {
     this.currentTab = tab;
     this.updateLeftSidebarAbsolute();
+
+    if (this.hasResults) {
+      if (this.currentTab === 1) { // 1 = tables
+        this.loadTables = true; 
+      }
+
+      if (this.currentTab === 1 || this.currentTab === 0) { // 0 = map
+        // wait for tables or map component to be loaded and
+        // fire last Analysis event to load data or rerender
+        if (this.firstAnalysisResult) {
+          await this.$nextTick();
+          AnalysisSelectionService.whazzup(this.plant.id);
+        }
+      }
+    }
   }
 
   private rerenderOLCanvas(timeout = 0): void {

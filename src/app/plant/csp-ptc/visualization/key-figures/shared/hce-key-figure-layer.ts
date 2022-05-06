@@ -15,11 +15,15 @@ export class HceKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisResultCspPtc
   public getStyle(feature: FeatureLike): Style {
     return new Style({
       stroke: new Stroke({
-        color: this.getColor(),
+        color: this.getDiffColor(feature),
         width: this.stokeWidth,
       }),
       text: this.showText(feature),
     });
+  }
+
+  protected getDiffColor(feature: FeatureLike): string {
+    return this.getColor();
   }
 
   protected getColor(): string {

@@ -32,8 +32,8 @@
       </template>
       <template #glassTubeTemperatureClass3>
         {{
-          (selectedAnalysisResult &&
-            (selectedAnalysisResult.csp_ptc.glass_tube_temperature_class_count === 3
+          (firstAnalysisResult &&
+            (firstAnalysisResult.csp_ptc.glass_tube_temperature_class_count === 3
               ? $t("glass-tube-temperature-class-4")
               : $t("glass-tube-temperature-class-3"))) ||
           ""
@@ -122,15 +122,14 @@
 </template>
 
 <script lang="ts">
-import { IAnalysisResultSelection } from "@/app/plant/shared/types";
 import { IPlantVisualization, Legend } from "@/app/plant/shared/visualization/types";
 import AppVisualization from "@/app/plant/shared/visualization/visualization.vue";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualization/types/components";
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Component, Prop, Ref } from "vue-property-decorator";
+import { AnalysisSelectionBaseComponent } from "../../shared/analysis-selection-sidebar/analysis-selection-base-component";
 import { COMPONENT_LAYERS, KEY_FIGURE_LAYERS } from "./layers";
 
 @Component({
@@ -141,22 +140,18 @@ import { COMPONENT_LAYERS, KEY_FIGURE_LAYERS } from "./layers";
   },
 })
 export default class AppVisualCspPtc
-  extends BaseAuthComponent
-  implements IAnalysisResultSelection, IPlantVisualization
+  extends AnalysisSelectionBaseComponent
+  implements IPlantVisualization
 {
   componentLayerTypes = COMPONENT_LAYERS;
   keyFigureLayers = KEY_FIGURE_LAYERS;
 
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
-  @Ref() visualization: (IAnalysisResultSelection & IPlantVisualization) | undefined;
+  @Ref() visualization: IPlantVisualization | undefined;
 
-  selectAnalysisResult(analysisResultId: string | undefined): void {
-    this.visualization?.selectAnalysisResult(analysisResultId);
-  }
-
-  get selectedAnalysisResult(): AnalysisResultDetailedSchema | null | undefined {
-    return this.visualization?.selectedAnalysisResult;
+  async created() {
+    await super.created();
   }
 
   get openLayers(): IOpenLayersComponent | undefined {
@@ -168,17 +163,17 @@ export default class AppVisualCspPtc
   }
 
   getTransAlignmentOffsetClassLimit(componentType: "sce" | "sca" | "hce", classLimit: 1 | 2 | 3): string {
-    if (!this.selectedAnalysisResult) {
+    if (!this.firstAnalysisResult) {
       return "";
     }
 
     let offsetClassLimits: number[] | null = null;
     if (componentType === "sce") {
-      offsetClassLimits = this.selectedAnalysisResult.csp_ptc.sce_alignment_deviation_to_drive_class_limits;
+      offsetClassLimits = this.firstAnalysisResult.csp_ptc.sce_alignment_deviation_to_drive_class_limits;
     } else if (componentType === "sca") {
-      offsetClassLimits = this.selectedAnalysisResult.csp_ptc.sca_tracking_encoder_offset_class_limits;
+      offsetClassLimits = this.firstAnalysisResult.csp_ptc.sca_tracking_encoder_offset_class_limits;
     } else if (componentType === "hce") {
-      offsetClassLimits = this.selectedAnalysisResult.csp_ptc.hce_position_total_class_limits;
+      offsetClassLimits = this.firstAnalysisResult.csp_ptc.hce_position_total_class_limits;
     }
 
     if (offsetClassLimits === null) {

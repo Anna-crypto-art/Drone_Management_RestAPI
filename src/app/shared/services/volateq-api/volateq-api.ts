@@ -235,6 +235,9 @@ export class VolateqAPI extends HttpClientBase {
       if (filterParams.component_filter) {
         encodedFilterParams += `&component_filter=${encodeURIComponent(JSON.stringify(filterParams.component_filter))}`;
       }
+      if (filterParams.columns_selection) {
+        encodedFilterParams += `&columns_selection=${encodeURIComponent(JSON.stringify(filterParams.columns_selection))}`;
+      }
     }
 
     return encodedFilterParams
@@ -246,7 +249,6 @@ export class VolateqAPI extends HttpClientBase {
     params: TableRequest,
     filterParams?: TableFilterRequest,
   ): Promise<TableResultSchema<T>> {
-      
     return this.get(`/auth/analysis-result/${analysisResultId}/${componentId}${this.getQueryParams(
       params)}${this.getEncodedAnalysisResultFilterParams(filterParams)}`);
   }
@@ -265,6 +267,17 @@ export class VolateqAPI extends HttpClientBase {
       params
     )}&csv=1${encodedCsvMappings}${this.getEncodedAnalysisResultFilterParams(filterParams)}`;
   }
+
+  public getSpecificAnalysisResultCompared<T>(
+    analysisResultId: string,
+    componentId: number,
+    compareAnalysisResultId: string,
+    params: TableRequest,
+    filterParams?: TableFilterRequest,
+  ): Promise<TableResultSchema<T>> {
+    return this.get(`/auth/analysis-result/compare/${analysisResultId}/${componentId}/${compareAnalysisResultId}${this.getQueryParams(
+      params)}${this.getEncodedAnalysisResultFilterParams(filterParams)}`);
+  }    
 
   public async generateDownloadUrl(downloadUrl: string): Promise<string> {
     const encodedUrl = encodeURIComponent(encodeURIComponent(downloadUrl));
@@ -305,6 +318,16 @@ export class VolateqAPI extends HttpClientBase {
     query_params?: GeoVisualQuery
   ): Promise<any> {
     return this.get(`/auth/geo-visual/${plantId}/${analysisResultId}/key-figure/${keyFiguresId}`, query_params);
+  }
+
+  public getKeyFiguresGeoVisualCompare(
+    plantId: string,
+    analysisResultId: string,
+    compareAnalysisResultId: string,
+    keyFiguresId: ApiKeyFigure,
+    query_params?: GeoVisualQuery
+  ): Promise<any> {
+    return this.get(`/auth/geo-visual/compare/${plantId}/${analysisResultId}/${compareAnalysisResultId}/key-figure/${keyFiguresId}`, query_params);
   }
 
   public async getAnalysisResults(plantId: string): Promise<AnalysisResultDetailedSchema[]> {

@@ -65,16 +65,15 @@ import AppExplanation from "@/app/shared/components/app-explanation/app-explanat
 import AppGeovisualization from "@/app/shared/components/app-geovisualization/app-geovisualization.vue";
 import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualization/types/components";
 import { GroupLayer, LayerType, OSMLayer } from "@/app/shared/components/app-geovisualization/types/layers";
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
 import AppCollapse from "@/app/shared/components/app-collapse/app-collapse.vue";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { FeatureLike } from "ol/Feature";
 import { Component, Prop, Ref } from "vue-property-decorator";
-import { IAnalysisResultSelection } from "../types";
 import { ComponentLayer } from "./layers/component-layer";
 import { State } from "vuex-class";
+import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -89,8 +88,8 @@ const STORAGE_KEY_SATELLITEVIEW = "storage-key-satelliteview";
   },
 })
 export default class AppVisualization
-  extends BaseAuthComponent
-  implements IAnalysisResultSelection, IPlantVisualization
+  extends AnalysisSelectionBaseComponent
+  implements IPlantVisualization
 {
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
@@ -99,8 +98,6 @@ export default class AppVisualization
   @State(state => state.sidebar["analysis"]) sidebarOpen!: boolean;
 
   @Ref() openLayers!: IOpenLayersComponent;
-
-  selectedAnalysisResult: AnalysisResultDetailedSchema | null | undefined = null;
 
   piLayersHierarchy!: PILayersHierarchy;
   componentLayers: ComponentLayer[] = [];
@@ -118,6 +115,8 @@ export default class AppVisualization
   private waitForDom = false;
 
   async created() {
+    await super.created();
+
     this.enableMultiSelection = appLocalStorage.getItem(STORAGE_KEY_MULTISELECTION) || false;
     this.showCouldNotBeMeasured = !!appLocalStorage.getItem(STORAGE_KEY_SHOWUNDEFINED);
     this.satelliteView = appLocalStorage.getItem(STORAGE_KEY_SATELLITEVIEW) || false;
@@ -125,6 +124,7 @@ export default class AppVisualization
     this.createLayers();
 
     this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
+    this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
 
     // wait for DOM before render OpenLayers
     setTimeout(() => {
@@ -132,10 +132,18 @@ export default class AppVisualization
     }, 300);
   }
 
-  selectAnalysisResult(analysisResultId: string | undefined): void {
-    this.selectedAnalysisResult = this.analysisResults.find(analysisResult => analysisResult.id === analysisResultId);
+  protected onAnalysisSelected() {
+    this.piLayersHierarchy.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
+    this.piLayersHierarchy.setCompareAnalysisResult(null);
+    this.piLayersHierarchy.updateVisibility();
 
-    this.piLayersHierarchy.setVisibility(this.selectedAnalysisResult?.id);
+    this.hideToast();
+  }
+
+  protected onMultiAnalysesSelected() {
+    this.piLayersHierarchy.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
+    this.piLayersHierarchy.setCompareAnalysisResult(this.compareAnalysisResult || null);
+    this.piLayersHierarchy.updateVisibility();
 
     this.hideToast();
   }
@@ -245,7 +253,7 @@ export default class AppVisualization
       {
         name: this.$t("performance-indicators").toString(),
         type: "group",
-        childLayers: this.piLayersHierarchy.getGeoJSONLayers(),
+        childLayers: this.piLayersHierarchy.groupLayers,
         singleSelection: true,
       },
       {

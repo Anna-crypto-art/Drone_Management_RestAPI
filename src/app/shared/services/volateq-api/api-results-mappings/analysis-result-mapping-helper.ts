@@ -10,7 +10,7 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
     private readonly analysisResult: AnalysisResultDetailedSchema
   ) {}
 
-  private getEntries(): AnalysisResultMappings<T> {
+  public getEntries(): AnalysisResultMappings<T> {
     return this.analysisResultMapping.filter(entry => this.hasKeyFigure(entry));
   }
 
@@ -49,6 +49,10 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
 
     for (const mappingEntry of this.getEntries()) {
       item[mappingEntry.transName] = mappingEntry.getValue(result);
+
+      if (mappingEntry.getDiffValue) {
+        item[`${mappingEntry.transName}__diff`] = mappingEntry.getDiffValue(result as unknown);
+      }
     }
 
     return item;

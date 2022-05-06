@@ -22,3 +22,13 @@ export interface AnalysisResultCspPtcHceSchema extends AnalysisResultSchemaBase 
   hce_position_total_offset: number;
   hce_position_offset_class: number;
 }
+
+export interface AnalysisResultCspPtcHceComparedSchema extends AnalysisResultCspPtcHceSchema {
+  ambient_temperature__diff: number;
+  wind_speed__diff: number;
+  glass_tube_temperature__diff: number;
+  h2_concentration__diff: number;
+  missing_glass_tube__diff: number;
+  oxygen_penetration__diff: number;
+  glass_tube_temperature_class__diff: number;
+}

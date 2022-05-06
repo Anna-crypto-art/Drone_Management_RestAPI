@@ -31,6 +31,10 @@
             <span v-html="$t(column.field.labelExpl)"></span>
           </app-explanation>
         </template>
+        <template #cell()="data">
+          {{ data.value }}
+          <span v-if="compareAnalysisResult" v-html="getComparedCellValue(data)"></span>
+        </template>
       </b-table>
     </app-table-component-container>
   </div>
@@ -38,7 +42,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Component, Prop, Ref } from "vue-property-decorator";
+import { Component, Prop, Ref, Watch } from "vue-property-decorator";
 import { BvTableCtxObject } from "bootstrap-vue";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import AppTableComponentContainer from "@/app/plant/shared/table-component/table-component-container.vue";
@@ -49,7 +53,7 @@ import { ITableComponent } from "./types";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
-import { BvTableFieldExtArray } from "@/app/shared/services/volateq-api/api-results-mappings/types";
+import { AnalysisResultMappings, BvTableFieldExtArray } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import apiResultsLoader from "@/app/shared/services/volateq-api/api-results-loader";
 import { TableFilterRequest, TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
@@ -57,6 +61,8 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import AppTableFilter from "@/app/plant/shared/table-component/table-filter.vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { MathHelper } from "@/app/shared/services/helper/math-helper";
+import { TableResultSchema } from "@/app/shared/services/volateq-api/api-schemas/table-result-schema";
+import { BvTableCellData } from "@/app/shared/types";
 
 @Component({
   name: "app-table-component",
@@ -70,7 +76,7 @@ export default class AppTableComponent extends Vue implements ITableComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) analysisResult!: AnalysisResultDetailedSchema;
   @Prop({ required: true }) activeComponent!: IActiveComponent;
-  @Prop({ default: false }) loadAllResults!: boolean;
+  @Prop({ default: null }) compareAnalysisResult!: AnalysisResultDetailedSchema | null;
   @Ref() container!: ITableComponentContainer;
   @Ref() table!: any;
 
@@ -78,13 +84,14 @@ export default class AppTableComponent extends Vue implements ITableComponent {
   tableName!: string;
 
   pagination = { currentPage: 1, perPage: 10, total: 0 };
-  showSumAvg = true;
+  showSumAvg = false;
 
   private last_ctx: BvTableCtxObject | undefined;
   private searchText = "";
   private tableFilterRequest?: TableFilterRequest
 
   private mappingHelper!: AnalysisResultMappingHelper<AnalysisResultSchemaBase>;
+  private mappingEntries!: AnalysisResultMappings<AnalysisResultSchemaBase>;
   private columnsMapping!: Record<string, string>;
 
   protected startLoading() {
@@ -104,8 +111,13 @@ export default class AppTableComponent extends Vue implements ITableComponent {
     this.tableName = "table_" + this.analysisResult.id + "_" + this.activeComponent.componentId;
 
     this.mappingHelper = new AnalysisResultMappingHelper(this.activeComponent.mapping, this.analysisResult);
+    this.mappingEntries = this.mappingHelper.getEntries();
     this.columns = this.mappingHelper.getColumns(transName => this.$t(transName));
     this.columnsMapping = this.mappingHelper.getColumnsMapping();
+  }
+
+  @Watch('compareAnalysisResult') onCompareAnalysisResultChanged() {
+    this.refresh();
   }
 
   onFilter(tableFilterRequest?: TableFilterRequest) {
@@ -156,16 +168,7 @@ export default class AppTableComponent extends Vue implements ITableComponent {
     this.last_ctx = ctx;
 
     try {
-      if (this.loadAllResults) {
-        return this.getAllResults(ctx);
-      }
-
-      const results = await volateqApi.getSpecificAnalysisResult<AnalysisResultSchemaBase>(
-        this.analysisResult.id,
-        this.activeComponent.componentId,
-        this.getTableRequestParam(),
-        this.tableFilterRequest,
-      );
+      const results = await this.getAnalysisResults();
       this.pagination.total = results.total;
 
       const tableItems = this.mappingHelper.getItems(results.items);
@@ -201,48 +204,67 @@ export default class AppTableComponent extends Vue implements ITableComponent {
     return [];
   }
 
-  async getAllResults(ctx: BvTableCtxObject): Promise<any[]> {
-    await apiResultsLoader.loadResults(this.analysisResult.id, this.activeComponent.componentId);
-
-    let results = apiResultsLoader.getResults(this.analysisResult.id, this.activeComponent.componentId)!;
-
-    if (this.searchText) {
-      results = results.filter(item =>
-        item.fieldgeometry_component.kks.toUpperCase().startsWith(this.searchText.toUpperCase())
+  private async getAnalysisResults(): Promise<TableResultSchema<AnalysisResultSchemaBase>> {
+    if (this.compareAnalysisResult) {
+      return await volateqApi.getSpecificAnalysisResultCompared<AnalysisResultSchemaBase>(
+        this.analysisResult.id,
+        this.activeComponent.componentId,
+        this.compareAnalysisResult.id,
+        this.getTableRequestParam(),
+        this.tableFilterRequest,
       );
     }
 
-    const items = this.mappingHelper.getItems(results);
-    this.pagination.total = items.length;
+    return await volateqApi.getSpecificAnalysisResult<AnalysisResultSchemaBase>(
+      this.analysisResult.id,
+      this.activeComponent.componentId,
+      this.getTableRequestParam(),
+      this.tableFilterRequest,
+    );
+  }
 
-    if (ctx.sortBy) {
-      items.sort((a, b) => {
-        const valA = a[ctx.sortBy!] as string | number;
-        const valB = b[ctx.sortBy!] as string | number;
-
-        if (valA < valB) {
-          return ctx.sortDesc ? 1 : -1;
+  getComparedCellValue(data: BvTableCellData): string {
+    if (this.compareAnalysisResult) {
+      const diffKey = data.field.key + "__diff";
+      if (diffKey in data.item) {
+        const mappingEntry = this.mappingEntries.find(entry => entry.transName === data.field.key);
+        if (mappingEntry) {
+          const diffValue: number = data.item[diffKey];
+          let textColorClass = "text-grey";
+          if (diffValue > 0 && mappingEntry.diffPositive === "positive" ||
+            diffValue < 0 && mappingEntry.diffPositive === "negative")
+          {
+            textColorClass = "text-success";
+          } 
+          else if (diffValue > 0 && mappingEntry.diffPositive === "negative" ||
+            diffValue < 0 && mappingEntry.diffPositive === "positive") 
+          {
+            textColorClass = "text-danger";
+          }
+          
+          return `<span class="diff ${textColorClass}">${data.item[diffKey]}</span>`;
         }
-        if (valA > valB) {
-          return ctx.sortDesc ? -1 : 1;
-        }
-        return 0;
-      });
+      }
     }
 
-    const slicedItems = items.slice(
-      (ctx.currentPage - 1) * ctx.perPage,
-      (ctx.currentPage - 1) * ctx.perPage + ctx.perPage
-    );
-
-    return slicedItems;
+    return "";
   }
 }
 </script>
 <style lang="scss">
+@import "@/scss/_colors.scss";
+
 .app-table-component {
   tr.table-primary > td {
     font-weight: bold !important;
+  }
+
+  tr > td .diff {
+    padding-left: 5px;
+
+    &.text-grey {
+      color: $grey;
+    }
   }
 }
 </style>

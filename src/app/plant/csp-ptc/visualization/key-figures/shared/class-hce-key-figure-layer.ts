@@ -1,4 +1,3 @@
-import { KeyFigureColors } from "@/app/plant/shared/visualization/layers/types";
 import { Legend } from "@/app/plant/shared/visualization/types";
 import { HceKeyFigureLayer } from "./hce-key-figure-layer";
 
