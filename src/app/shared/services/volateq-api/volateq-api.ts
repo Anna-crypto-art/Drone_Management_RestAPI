@@ -399,6 +399,10 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/analysis/${analysisId}/run-qfly-wizard`, { start_server: startServer ? 1 : 0 });
   }
 
+  public getAnalysisMonitoring(): Promise<JSON> {
+    return this.get(`/auth/analysis-monitoring`);
+  }
+
   public getFieldgeometryComponentCodes(
     fieldgeometryId: string,
     componentId: ApiComponent
