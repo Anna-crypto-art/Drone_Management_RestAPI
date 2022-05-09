@@ -24,13 +24,11 @@ export default class AppAnalysisMonitoring extends BaseAuthComponent {
   monitoring_json = {'test': false};
   
   async created() {
-    this.monitoring_json = await volateqApi.getAnalysisMonitoring();
-    console.log(this.monitoring_json)
-    /*try {
+    try {
       this.monitoring_json = await volateqApi.getAnalysisMonitoring();
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
-    }*/
+    }
   }
 }
 </script>
