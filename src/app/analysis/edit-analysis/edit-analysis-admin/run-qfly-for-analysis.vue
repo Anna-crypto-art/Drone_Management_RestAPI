@@ -1,6 +1,5 @@
 <template>
-  <div class="admin-box">
-    <h4>{{ $t("run-qfly-server") }}</h4>
+  <app-box :title="$t('run-qfly-server')">
     <b-form-checkbox v-model="startServer">
       {{ $t("start-qlfy-server") }}
     </b-form-checkbox>
@@ -25,7 +24,7 @@
     >
       {{ $t("run-qfly-wizard") }}
     </app-button>
-  </div>
+  </app-box>
 </template>
 
 <script lang="ts">
@@ -41,11 +40,13 @@ import { AnalysisEventService } from "../../shared/analysis-event-service";
 import { AnalysisEvent } from "../../shared/types";
 import { TaskSchema } from "@/app/shared/services/volateq-api/api-schemas/task-schema";
 import { ApiTasks } from "@/app/shared/services/volateq-api/api-tasks";
+import AppBox from "@/app/shared/components/app-box/app-box.vue";
 
 @Component({
   name: "app-run-qfly-for-analysis",
   components: {
     AppButton,
+    AppBox,
   },
 })
 export default class AppRunQFlyForAnalysis extends BaseAuthComponent {

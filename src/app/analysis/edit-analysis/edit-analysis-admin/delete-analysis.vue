@@ -1,14 +1,13 @@
 <template>
-  <div class="admin-box">
-    <h4>{{ $t("delete-analysis") }}</h4>
+  <app-box :title="$t('delete-analysis')">
     <app-button type="button" variant="danger" :loading="loading" @click="onDeleteAnalysisClick">
       {{ $t("delete") }}
     </app-button>
-  </div>
+  </app-box>
 </template>
 
 <script lang="ts">
-import { Component, Ref, Prop } from "vue-property-decorator";
+import { Component, Prop } from "vue-property-decorator";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
@@ -17,11 +16,13 @@ import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
 import { UPLOAD_ANALYSIS_STORAGE_KEY } from "@/app/shared/components/fetch-component/storage-keys";
 import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
+import AppBox from "@/app/shared/components/app-box/app-box.vue";
 
 @Component({
   name: "app-delete-analysis",
   components: {
     AppButton,
+    AppBox,
   },
 })
 export default class AppDeleteAnalysis extends BaseAuthComponent {

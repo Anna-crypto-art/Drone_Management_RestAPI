@@ -1,8 +1,13 @@
 <template>
   <div class="plant-view-diagram-csp-ptc">
-    <app-diagram 
-      :analysisResults="analysisResults" 
+    <app-diagram-overview
       :plant="plant"
+      :analysisResults="analysisResults" 
+      :resultMappings="resultMappings"
+    />
+    <app-diagram 
+      :plant="plant"
+      :analysisResults="analysisResults" 
       :componentSelection="componentIdSelection"
       :resultMappings="resultMappings"
       :tableFilter="tableFilter"
@@ -37,12 +42,14 @@ import { TableFilterRequest } from "@/app/shared/services/volateq-api/api-reques
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
 import analysisResultCspPtcMappingHce from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-hce";
 import { AnalysisSelectionBaseComponent } from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-base-component";
+import AppDiagramOverview from "@/app/plant/shared/diagram/diagram-overview.vue";
 
 @Component({
   name: "app-plant-diagram-view-csp-ptc",
   components: {
     AppExplanation,
     AppDiagram,
+    AppDiagramOverview,
   },
 })
 export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComponent {
@@ -115,6 +122,6 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
 
 <style>
   .plant-view-diagram-csp-ptc {
-    padding: 60px 40px;
+    padding: 30px 20px;
   }
 </style>

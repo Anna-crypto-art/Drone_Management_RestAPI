@@ -1,15 +1,17 @@
 <template>
-  <div class="admin-box">
-    <h4>
-      {{ $t("update-analysis-state") }}
-      <br />
-      <small
-        v-if="!analysis.plant.in_setup_phase"
-        class="grayed"
-        v-html="$t('attention-state-update-starts-evaulation_expl')"
-      >
-      </small>
-    </h4>
+  <app-box>
+    <template #title>
+      <h4 style="margin-bottom: 1em">
+        {{ $t("update-analysis-state") }}
+        <br />
+        <small
+          v-if="!analysis.plant.in_setup_phase"
+          class="grayed"
+          v-html="$t('attention-state-update-starts-evaulation_expl')"
+        >
+        </small>
+      </h4>
+    </template>
     <b-form @submit.prevent="onSubmitUpdateState">
       <b-form-group>
         <b-form-checkbox v-model="sendNotification">
@@ -24,7 +26,7 @@
       </b-form-group>
       <app-button type="submit" :loading="loading">{{ $t("update") }}</app-button>
     </b-form>
-  </div>
+  </app-box>
 </template>
 
 <script lang="ts">
@@ -38,11 +40,13 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { Component, Prop, Watch } from "vue-property-decorator";
 import { AnalysisEventService } from "../../shared/analysis-event-service";
 import { AnalysisEvent } from "../../shared/types";
+import AppBox from "@/app/shared/components/app-box/app-box.vue";
 
 @Component({
   name: "app-update-analysis-state",
   components: {
     AppButton,
+    AppBox,
   },
 })
 export default class AppUpdateAnalysisState extends BaseAuthComponent {

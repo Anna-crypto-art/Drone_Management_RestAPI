@@ -20,6 +20,11 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
     return this.analysisResultMapping.filter(entry => this.hasKeyFigure(entry));
   }
 
+  public getDiagramEntries(): AnalysisResultMappings<T> {
+    return this.getEntries()
+      .filter(entry => entry.enableForDiagram && (!this.compareAnalysisResult || !!entry.getDiffValue));
+  }
+
   public getFields(): { key: string, filterType?: FilterFieldType }[] {
     return this.getEntries().map(entry => ({
       key: entry.transName,

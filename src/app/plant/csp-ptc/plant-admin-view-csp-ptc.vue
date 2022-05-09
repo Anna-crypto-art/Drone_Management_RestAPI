@@ -10,8 +10,7 @@
       </b-row>
       <b-row>
         <b-col sm="6">
-          <div class="admin-box">
-            <h4>{{ $t("analysis-visibility-of", { analysisName: analysisResultName }) }}</h4>
+          <app-box :title="$t('analysis-visibility-of', { analysisName: analysisResultName })">
             <b-form-checkbox
               v-show="analysisResultReleased !== null"
               v-model="analysisResultReleased"
@@ -20,11 +19,10 @@
             >
               {{ analysisResultReleased ? $t("released") : $t("invisible-for-customer") }}
             </b-form-checkbox>
-          </div>
+          </app-box>
         </b-col>
         <b-col sm="6">
-          <div class="admin-box">
-            <h4>{{ $t("edit-plant") }}</h4>
+          <app-box :title="$t('edit-plant')">
             <b-form @submit.prevent="onSubmitEditPlant">
               <b-form-group>
                 <b-form-checkbox v-model="editPlant.inSetupPhase">
@@ -33,7 +31,7 @@
               </b-form-group>
               <app-button type="submit" :loading="editPlantLoading">{{ $t("apply") }}</app-button>
             </b-form>
-          </div>
+          </app-box>
         </b-col>
       </b-row>
     </b-container>
@@ -48,11 +46,13 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
+import AppBox from "@/app/shared/components/app-box/app-box.vue";
 
 @Component({
   name: "app-plant-admin-view-csp-ptc",
   components: {
-    AppButton
+    AppButton,
+    AppBox
   },
 })
 export default class AppPlantAdminViewCspPtc extends BaseAuthComponent {

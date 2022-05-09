@@ -25,15 +25,14 @@
           </template>
           <b-row>
             <b-col sm>
-              <div class="admin-box">
-                <h4>{{ $t("edit-analysis") }}</h4>
+              <app-box :title="$t('edit-analysis')">
                 <b-form @submit.prevent="onSubmitEditAnalysis">
                   <b-form-group :label="$t('acquisition-date')" label-cols-sm="4" label-cols-lg="2">
                     <b-datepicker v-model="flownAt" required /> 
                   </b-form-group>
                   <app-button type="submit" :loading="loading">{{ $t("apply") }}</app-button>
                 </b-form>
-              </div>
+              </app-box>
             </b-col>
           </b-row>
         </b-tab>
@@ -65,7 +64,7 @@ import { AnalysisEventService } from "@/app/analysis/shared/analysis-event-servi
 import { AnalysisEvent } from "../shared/types";
 import { TaskSchema } from "@/app/shared/services/volateq-api/api-schemas/task-schema";
 import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
-import { AppAlertEvents } from "@/app/shared/services/app-alert/app-alert";
+import AppBox from "@/app/shared/components/app-box/app-box.vue";
 
 @Component({
   name: "app-edit-analysis",
@@ -76,6 +75,7 @@ import { AppAlertEvents } from "@/app/shared/services/app-alert/app-alert";
     AppDownloadAnalysisFiles,
     AppEditAnalysisAdmin,
     AppUploadAnalysisFiles,
+    AppBox,
   },
 })
 export default class AppEditAnalysis extends BaseAuthComponent {

@@ -1,6 +1,5 @@
 <template>
-  <div class="admin-box">
-    <h4>{{ $t("manage-result-files") }}</h4>
+  <app-box :title="$t('manage-result-files')">
     <b-form @submit.prevent="saveManageResultFiles">
       <b-form-group v-show="analysis.analysis_result" :label="$t('download-existing-result-files')">
         <a
@@ -25,7 +24,7 @@
       </b-form-group>
       <app-button type="submit" :loading="loading">{{ $t("apply") }}</app-button>
     </b-form>
-  </div>
+  </app-box>
 </template>
 
 <script lang="ts">
@@ -43,11 +42,13 @@ import { AnalysisEvent } from "../../shared/types";
 import { TaskSchema } from "@/app/shared/services/volateq-api/api-schemas/task-schema";
 import { ApiTasks } from "@/app/shared/services/volateq-api/api-tasks";
 import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
+import AppBox from "@/app/shared/components/app-box/app-box.vue";
 
 @Component({
   name: "app-import-analysis-result",
   components: {
     AppButton,
+    AppBox
   },
 })
 export default class AppImportAnalysisResult extends BaseAuthComponent {

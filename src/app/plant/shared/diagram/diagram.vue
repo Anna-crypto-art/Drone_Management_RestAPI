@@ -1,67 +1,71 @@
 <template>
   <div class="diagram">
-    <div class="diagram-select-row">
-      <div class="diagram-select-row-col">
-        <b-form-select v-model="selectedComponentId" :options="componentOptions" @change="onComponentSelected">
-          <template #first>
-            <b-form-select-option :value="null" disabled>{{ $t("select-component") }}</b-form-select-option>
-          </template>
-        </b-form-select>
-      </div>
-      <div class="diagram-select-row-col">
-        <b-form-select v-model="selectedOrderAndLimit" v-show="selectedComponentId">
-          <template #first>
-            <b-form-select-option :value="null" disabled>{{ $t("select-order-and-limit") }}</b-form-select-option>
-          </template>
-          <b-form-select-option :value="{ reverse: true, limit: 10 }">
-            {{ $t("order-and-limit-selection-text", { limit: 10, order: "descending" }) }}
-          </b-form-select-option>
-          <b-form-select-option :value="{ reverse: true, limit: 25 }">
-            {{ $t("order-and-limit-selection-text", { limit: 25, order: "descending" }) }}
-          </b-form-select-option>
-          <b-form-select-option :value="{ reverse: false, limit: 10 }">
-            {{ $t("order-and-limit-selection-text", { limit: 10, order: "ascending" }) }}
-          </b-form-select-option>
-          <b-form-select-option :value="{ reverse: false, limit: 25 }">
-            {{ $t("order-and-limit-selection-text", { limit: 25, order: "ascending" }) }}
-          </b-form-select-option>
-        </b-form-select>
-      </div>
-      <div class="diagram-select-row-col">
-        <b-form-select
-          v-if="firstAnalysisResult"
-          v-model="selectedKeyFigure"
-          :options="keyFigureGroupOptions"
-          v-show="selectedOrderAndLimit"
-          @change="onKeyFigureSelected"
-        >
-          <template #first>
-            <b-form-select-option :value="null" disabled>{{ $t("select-pi") }}</b-form-select-option>
-          </template>
-        </b-form-select>
-      </div>
-      <div v-show="showSlot" class="diagram-select-row-col">
-        <template v-if="firstAnalysisResult">
-          <div v-for="keyFigureOption in keyFigureOptions" :key="keyFigureOption.value.entry.transName">
-            <div v-show="keyFigureOption.value.show">
-              <slot :name="keyFigureOption.value.entry.transName" />
+    <app-box :title="$t('create-a-diagram')">
+      <div class="diagram-select-row">
+        <div class="diagram-select-row-col">
+          <b-form-select v-model="selectedComponentId" :options="componentOptions" @change="onComponentSelected">
+            <template #first>
+              <b-form-select-option :value="null" disabled>{{ $t("select-component") }}</b-form-select-option>
+            </template>
+          </b-form-select>
+        </div>
+        <div class="diagram-select-row-col">
+          <b-form-select v-model="selectedOrderAndLimit" v-show="selectedComponentId">
+            <template #first>
+              <b-form-select-option :value="null" disabled>{{ $t("select-order-and-limit") }}</b-form-select-option>
+            </template>
+            <b-form-select-option :value="{ reverse: true, limit: 10 }">
+              {{ $t("order-and-limit-selection-text", { limit: 10, order: "descending" }) }}
+            </b-form-select-option>
+            <b-form-select-option :value="{ reverse: true, limit: 25 }">
+              {{ $t("order-and-limit-selection-text", { limit: 25, order: "descending" }) }}
+            </b-form-select-option>
+            <b-form-select-option :value="{ reverse: false, limit: 10 }">
+              {{ $t("order-and-limit-selection-text", { limit: 10, order: "ascending" }) }}
+            </b-form-select-option>
+            <b-form-select-option :value="{ reverse: false, limit: 25 }">
+              {{ $t("order-and-limit-selection-text", { limit: 25, order: "ascending" }) }}
+            </b-form-select-option>
+          </b-form-select>
+        </div>
+        <div class="diagram-select-row-col">
+          <b-form-select
+            v-if="firstAnalysisResult"
+            v-model="selectedKeyFigure"
+            :options="keyFigureGroupOptions"
+            v-show="selectedOrderAndLimit"
+            @change="onKeyFigureSelected"
+          >
+            <template #first>
+              <b-form-select-option :value="null" disabled>{{ $t("select-pi") }}</b-form-select-option>
+            </template>
+          </b-form-select>
+        </div>
+        <div v-show="showSlot" class="diagram-select-row-col">
+          <template v-if="firstAnalysisResult">
+            <div v-for="keyFigureOption in keyFigureOptions" :key="keyFigureOption.value.entry.transName">
+              <div v-show="keyFigureOption.value.show">
+                <slot :name="keyFigureOption.value.entry.transName" />
+              </div>
             </div>
-          </div>
-        </template>
+          </template>
+        </div>
+        <div class="diagram-select-row-col apply">
+          <app-button v-show="selectedKeyFigure" @click="onApply" :loading="loading">{{ $t("apply") }}</app-button>
+        </div>
       </div>
-      <div class="diagram-select-row-col apply">
-        <app-button v-show="selectedKeyFigure" @click="onApply" :loading="loading">{{ $t("apply") }}</app-button>
+      <div :style="'width: 100%; height: ' + charHeight + 'px'">
+        <div v-if="barChartData">
+          <Bar
+            :class="'diagram-bar-chart' + (isMobile ? ' mobile' : '')"
+            :chart-data="barChartData"
+            :chart-options="barChartOptions"
+            :height="charHeight"
+            :width="charWidth"
+          />
+        </div>
       </div>
-    </div>
-    <div v-if="barChartData">
-      <Bar
-        :class="'diagram-bar-chart' + (isMobile ? ' mobile' : '')"
-        :chart-data="barChartData"
-        :chart-options="barChartOptions"
-        :height="charHeight"
-        :width="charWidth"
-      />
-    </div>
+    </app-box>
   </div>
 </template>
 
@@ -97,6 +101,8 @@ import {
 import ChartDataLables from "chartjs-plugin-datalabels";
 import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
 import { TableResultSchema } from "@/app/shared/services/volateq-api/api-schemas/table-result-schema";
+import { MathHelper } from "@/app/shared/services/helper/math-helper";
+import AppBox from "@/app/shared/components/app-box/app-box.vue";
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ChartDataLables);
 
@@ -105,6 +111,7 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale,
   components: {
     AppButton,
     Bar,
+    AppBox,
   },
 })
 export default class AppDiagram extends AnalysisSelectionBaseComponent {
@@ -230,8 +237,7 @@ export default class AppDiagram extends AnalysisSelectionBaseComponent {
 
       const tableFilter: TableFilterRequest = this.getTableFilterRequest();
 
-      const columnName: string =
-        this.selectedKeyFigure!.mappingHelper.getColumnsMapping()[this.selectedKeyFigure!.entry.transName];
+      const columnName: string = this.getColumnNameBySelectedKeyFigure();
 
       const groupedResults = this.compareAnalysisResult ?
         await volateqApi.getSpecificAnalysisResultCompared<GroupedAnalysisResult>(
@@ -292,8 +298,7 @@ export default class AppDiagram extends AnalysisSelectionBaseComponent {
 
     const isCountTableUnit = this.getLabelUnit() === "Count";
 
-    const columnName: string =
-      this.selectedKeyFigure!.mappingHelper.getColumnsMapping()[this.selectedKeyFigure!.entry.transName];
+    const columnName: string = this.getColumnNameBySelectedKeyFigure();
     if (!tableFilter.columns_selection) {
       tableFilter.columns_selection = { columns: [{ name: columnName, func: isCountTableUnit ? "sum" : "avg" }] };
     }
@@ -315,6 +320,10 @@ export default class AppDiagram extends AnalysisSelectionBaseComponent {
     return labelUnit || "";
   }
 
+  private getColumnNameBySelectedKeyFigure(): string {
+    return this.selectedKeyFigure!.mappingHelper.getColumnsMapping()[this.selectedKeyFigure!.entry.transName];
+  }
+
   private setBarChartOptions(groupedResults: TableResultSchema<GroupedAnalysisResult>): void {
     const labelUnit: string = this.getLabelUnit();
 
@@ -325,16 +334,22 @@ export default class AppDiagram extends AnalysisSelectionBaseComponent {
 
     const isCountTableUnit = labelUnit === "Count";
     const totalOfPercantage = isCountTableUnit && groupedResults.total;
-    if (totalOfPercantage) {
+    if (totalOfPercantage && !this.compareAnalysisResult) {
       this.barChartOptions.plugins!.datalabels!.formatter = (val: number) => {
-        const roundedVal = Math.round(val * 100) / 100;
-
-        return roundedVal + ` (${Math.round((val / totalOfPercantage) * 10000) / 100}%)`;
+        return MathHelper.roundTo(val, 0) + ` (${MathHelper.roundTo(val / totalOfPercantage * 100, 2)}%)`;
       };
     } else {
-      this.barChartOptions.plugins!.datalabels!.formatter = (val: number) => {
-        return Math.round(val * 100) / 100;
-      };
+      const roundPrecision = isCountTableUnit ? 0 : 2;
+      if (this.compareAnalysisResult) {
+        const columnName = this.getColumnNameBySelectedKeyFigure();
+        
+        const noDiffValues: number[] = groupedResults.items.map(item => item[columnName] as number);
+        this.barChartOptions.plugins!.datalabels!.formatter = (val: number, context: any) => {
+          return `${MathHelper.roundTo(val, roundPrecision)} (${MathHelper.roundTo(noDiffValues[context.dataIndex], roundPrecision)})`;
+        };
+      } else {
+        this.barChartOptions.plugins!.datalabels!.formatter = (val: number) => MathHelper.roundTo(val, roundPrecision);
+      }
     }
   }
 
@@ -349,9 +364,7 @@ export default class AppDiagram extends AnalysisSelectionBaseComponent {
       analysisResultMappingHelper.setCompareAnalysisResult(this.compareAnalysisResult);
 
       if (this.selectedComponentId !== resultMapping.componentId) {
-        const options = analysisResultMappingHelper
-          .getEntries()
-          .filter(entry => entry.enableForDiagram && (!this.compareAnalysisResult || !!entry.getDiffValue))
+        const options = analysisResultMappingHelper.getDiagramEntries()
           .map(entry => ({
             value: {
               entry,

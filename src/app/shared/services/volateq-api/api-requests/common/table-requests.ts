@@ -13,8 +13,13 @@ export interface TableRequest {
   sums?: 0 | 1;
 }
 
+export interface TableColumnSelect {
+  name: string;
+  func?: "sum" | "avg" | "count";
+}
+
 export interface TableFilterRequest {
   filters?: Record<string, FilterFieldValueType>;
   component_filter?: { component_id: ApiComponent, codes?: string[], grouped?: boolean };
-  columns_selection?: { columns: { name: string, func?: "sum" | "avg" | "count" }[] };
+  columns_selection?: { columns: TableColumnSelect[] };
 }

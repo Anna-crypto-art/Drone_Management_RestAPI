@@ -24,7 +24,7 @@
         </b-tab>
         <b-tab v-if="hasResults">
           <template #title><b-icon icon="bar-chart-fill" /></template>
-          <app-plant-diagram-view-csp-ptc :analysisResults="analysisResults" :plant="plant" />
+          <app-plant-diagram-view-csp-ptc v-if="loadDiagrams" :analysisResults="analysisResults" :plant="plant" />
         </b-tab>
         <b-tab v-if="isSuperAdmin">
           <template #title><b-icon icon="braces" /></template>
@@ -83,6 +83,7 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
   // Load table data if user switches to table view, only
   // So we avoid keeping REST-API busy for no reason.
   loadTables = false;
+  loadDiagrams = false; // same for diagrams
 
   private isMobile!: boolean; // TODO: Replace this with the new mobile store
   private isMobileQuery!: MediaQueryList;
@@ -122,9 +123,11 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
     if (this.hasResults) {
       if (this.currentTab === 1) { // 1 = tables
         this.loadTables = true; 
+      } else if (this.currentTab === 2) { // 2 = diagrams
+        this.loadDiagrams = true; 
       }
 
-      if (this.currentTab === 1 || this.currentTab === 0) { // 0 = map
+      if (this.currentTab === 1 || this.currentTab === 0 || this.currentTab === 2) { // 0 = map
         // wait for tables or map component to be loaded and
         // fire last Analysis event to load data or rerender
         if (this.firstAnalysisResult) {
@@ -186,14 +189,6 @@ $left-width: 400px;
 
     &-container {
       padding: 0;
-    }
-
-    h4 {
-      margin: 1.5em 0 0.5em 0;
-
-      &:first-child {
-        margin-top: 0;
-      }
     }
   }
 }
