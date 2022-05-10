@@ -9,7 +9,7 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
 
   constructor(
     private readonly analysisResultMapping: AnalysisResultMappings<T>,
-    private readonly analysisResult: AnalysisResultDetailedSchema
+    private readonly analysisResult: AnalysisResultDetailedSchema,
   ) {}
 
   public setCompareAnalysisResult(compareAnalysisResult: AnalysisResultDetailedSchema | null) {

@@ -1,7 +1,7 @@
 import { KeyFigureColors } from "@/app/plant/shared/visualization/layers/types";
 import { Legend, LegendEntry } from "@/app/plant/shared/visualization/types";
 import { FeatureLike } from "ol/Feature";
-import { Stroke, Style, Icon, Image } from "ol/style";
+import { Stroke, Style } from "ol/style";
 import { HceKeyFigureLayer } from "./hce-key-figure-layer";
 
 export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
@@ -17,7 +17,6 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
           width: this.stokeWidth,
         }),
         text: this.showText(feature),
-
       });
     }
 

@@ -277,7 +277,17 @@ export class VolateqAPI extends HttpClientBase {
   ): Promise<TableResultSchema<T>> {
     return this.get(`/auth/analysis-result/compare/${analysisResultId}/${componentId}/${compareAnalysisResultId}${this.getQueryParams(
       params)}${this.getEncodedAnalysisResultFilterParams(filterParams)}`);
-  }    
+  }
+
+  public getAnalysisResultHistory<T>(
+    plantId: string,
+    componentId: number,
+    params: TableRequest,
+    filterParams?: TableFilterRequest,
+  ): Promise<TableResultSchema<T>> {
+    return this.get(`/auth/analysis-results/history/${plantId}/${componentId}${this.getQueryParams(params)}
+      ${this.getEncodedAnalysisResultFilterParams(filterParams)}`);
+  }
 
   public async generateDownloadUrl(downloadUrl: string): Promise<string> {
     const encodedUrl = encodeURIComponent(encodeURIComponent(downloadUrl));
@@ -340,11 +350,10 @@ export class VolateqAPI extends HttpClientBase {
 
   public importFieldgeometry(
     file: File,
-    customerId: string,
     plantId: string,
     clearBefore: boolean
   ): Promise<TaskSchema> {
-    return this.postForm(`/auth/fieldgeometry/${customerId}/${plantId}?clear_before=${clearBefore}`, { file });
+    return this.postForm(`/auth/fieldgeometry/${plantId}?clear_before=${clearBefore}`, { file });
   }
 
   public waitForTask(

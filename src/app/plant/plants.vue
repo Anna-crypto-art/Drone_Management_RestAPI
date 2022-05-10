@@ -166,7 +166,6 @@ export default class AppPlants extends BaseAuthComponent {
 
       const task = await volateqApi.importFieldgeometry(
         this.managePlantModel.file!,
-        this.managePlantModel.plant!.customerId,
         this.managePlantModel.plant!.id,
         this.managePlantModel.clearBefore
       );

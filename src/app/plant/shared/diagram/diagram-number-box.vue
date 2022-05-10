@@ -1,7 +1,7 @@
 <template>
-  <div class="diagram-number-box">
+  <div :class="'diagram-number-box' + (active ? ' active' : '')">
     <slot name="name">
-      <div class="diagram-number-box-name grayed">{{ name }}</div>
+      <div class="diagram-number-box-name grayed">{{ $t(name) }}</div>
     </slot>
     <slot name="number">
       <div class="diagram-number-box-number">
@@ -14,27 +14,20 @@
         {{ unit }}
       </div>
     </slot>
-    <!-- <slot name="evolution">
-      <div class="diagram-number-box-diff" v-if="diff !== null">
-        <strong :class="success ? 'text-success' : 'text-danger'">{{ diff }}</strong>
-        <span>{{ diffText }}</span>
-        
-      </div>
-    </slot> -->
     <slot name="action" v-if="showActionButton">
-      <app-button class="diagram-number-box-button" variant="primary" >{{ $t('view') }}</app-button>
+      <app-button class="diagram-number-box-button" :variant="buttonVariant" @click="onActionButtonClick">
+        {{ active ? $t('close') : $t('view') }}
+      </app-button>
     </slot>
-    <!-- <b-collapse :id="toggleId" v-if="showActionButton">
-      <slot name="diagram-view">
-        blub
-      </slot>
-    </b-collapse> -->
+    <div class="diagram-history-container" v-show="active">
+      <slot name="historyDiagram" />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue"
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Watch } from "vue-property-decorator";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 
 @Component({
@@ -43,18 +36,19 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
     AppButton,
   }
 })
-export default class AppDiagramNumberBox extends Vue{
+export default class AppDiagramNumberBox extends Vue {
   @Prop({ required: true }) name!: string;
   @Prop({ required: true }) num!: string;
   @Prop({ default: null }) diff!: string | null;
   @Prop({ default: null }) unit!: string | null;
   @Prop({ default: null }) variant!: 'success' | 'danger' | 'default' | null;
-  @Prop({ default: false }) showActionButton!: boolean;
+  @Prop({ default: true }) showActionButton!: boolean;
+  @Prop({ default: false }) active!: boolean;
 
-  toggleId!: string;
+  buttonVariant = "primary";
 
-  created() {
-    this.toggleId = `${this.name}_${this.num}`;
+  @Watch('active') async onActiveChanged() {
+    this.buttonVariant = this.active ? "secondary" : "primary";
   }
 
   get textVariant() {
@@ -67,6 +61,10 @@ export default class AppDiagramNumberBox extends Vue{
     }
 
     return '';
+  }
+
+  onActionButtonClick() {
+    this.$emit("actionButtonClick", this.name)
   }
 }
 </script>
@@ -81,14 +79,44 @@ export default class AppDiagramNumberBox extends Vue{
   width: 250px;
   height: 200px;
   background-color: $white;
+  position: relative;
 
+  transition: all 0.3s ease;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &.active {
+    width: calc(800px + 3em);
+    height: 600px;
+
+    // background-color: $blue;
+    // color: $white !important;
+
+    // .diagram-number-box-number .text-success {
+    //   color: $light-green !important;
+    // }
+
+    // .grayed {
+    //   color: $hover-light-blue !important
+    // }
+
+    .diagram-number-box-button {
+      top: 1em;
+      bottom: auto;
+    }
+  }
+  
   &-number {
     font-weight: bold;
     font-size: 2em;
   }
 
-  &:last-child {
-    margin-bottom: 0;
+  &-button {
+    position: absolute;
+    bottom: 1em;
+    right: 1em;
   }
 }
 </style>

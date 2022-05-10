@@ -5,6 +5,11 @@ export interface GroupedAnalysisResult {
   [column: string]: number | string;
 }
 
+export interface AnalysisHistoryResult {
+  flown_at: string;
+  [column: string]: number | string;
+}
+
 export interface BarChartData {
   labels: string[];
   datasets: { data: number[] }[];
@@ -17,6 +22,7 @@ export interface DiagramNumberBox {
   diff: number | string | null;
   unit: string | null;
   variant: string | null;
+  active: boolean;
 }
 
 export interface DiagramNumberBoxComponentGroup {

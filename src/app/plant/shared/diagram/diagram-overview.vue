@@ -1,20 +1,24 @@
 <template>
   <div class="diagram-overview">
     <app-box :title="$t('overview')" :loading="loading">
-      <!-- <div v-for="numberBoxComponentGroup in numberBoxComponentGroups" :key="numberBoxComponentGroup.componentName">
-        <h5>{{ $t(numberBoxComponentGroup.componentName) }}</h5>-->
-        <div class="diagram-overview-group"> 
-          <app-diagram-number-box v-for="numberBox in numberBoxes" 
-            :key="numberBox.keyFigureId + '_' + numberBox.keyFigureName"
-            :name="numberBox.keyFigureName"
-            :num="numberBox.num"
-            :variant="numberBox.variant"
-            :diff="numberBox.diff"
-            :unit="numberBox.unit"
-          />
-        </div>
-      <!--</div> -->
+      <div class="diagram-overview-group"> 
+        <app-diagram-number-box v-for="numberBox in numberBoxes" 
+          :key="numberBox.keyFigureId + '_' + numberBox.keyFigureName"
+          :name="numberBox.keyFigureName"
+          :num="numberBox.num"
+          :variant="numberBox.variant"
+          :diff="numberBox.diff"
+          :unit="numberBox.unit"
+          :active="numberBox.active"
+          @actionButtonClick="onActionButtonClick"
+        >
+          <template #historyDiagram>
+            <slot name="diagramHistory" />
+          </template>
+        </app-diagram-number-box>
+      </div>
     </app-box>
+    
   </div>
 </template>
 
@@ -32,12 +36,12 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import AppDiagramNumberBox  from "@/app/plant/shared/diagram/diagram-number-box.vue";
-import { DiagramNumberBox, DiagramNumberBoxComponentGroup, GroupedAnalysisResult } from "./types";
-import { apiComponentNames } from "@/app/shared/services/volateq-api/api-components/api-components-name";
+import { DiagramNumberBox, GroupedAnalysisResult } from "./types";
 import { TableColumnSelect, TableFilterRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { FilterFieldType } from "../filter-fields/types";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { MathHelper } from "@/app/shared/services/helper/math-helper";
+import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 
 @Component({
   name: "app-diagram-overview",
@@ -56,12 +60,36 @@ export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
   }[];
 
   loading = false;
+  viewedNumberBox: DiagramNumberBox | null = null;
 
-  // numberBoxComponentGroups: DiagramNumberBoxComponentGroup[] = [];
   numberBoxes: DiagramNumberBox[] = [];
 
   async created(): Promise<void> {
     await super.created();
+  }
+
+  onActionButtonClick(keyFigureName: string) {
+    console.log("keyFigureName")
+    console.log(keyFigureName)
+
+    if (this.viewedNumberBox) {
+      this.viewedNumberBox.active = false;
+
+      if (this.viewedNumberBox.keyFigureName === keyFigureName) {
+        this.viewedNumberBox = null;
+        return;  
+      }
+      
+      this.viewedNumberBox = null;
+    }
+
+    this.viewedNumberBox = this.numberBoxes.find(numberBox => numberBox.keyFigureName === keyFigureName) || null;
+
+    if (this.viewedNumberBox) {
+      this.viewedNumberBox.active = true;
+    }
+
+    this.$emit("viewHistoryDiagram", this.viewedNumberBox);
   }
 
   protected async onAnalysisSelected() {
@@ -121,8 +149,6 @@ export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
           )
         ).items[0];
 
-        // const numberBoxes: DiagramNumberBox[] = [];
-
         for (const entry of analysisResultMappingHelper.getDiagramEntries()) {
           const columnName = columnsMapping[entry.transName];
           const columnNameDiff = this.compareAnalysisResult ? columnName + "__diff" : null;
@@ -143,23 +169,19 @@ export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
 
           this.numberBoxes.push({
             keyFigureId: entry.keyFigureId!,
-            keyFigureName: this.$t(entry.transName).toString(),
+            keyFigureName: entry.transName,
             num: MathHelper.roundTo(groupedResult[columnName] as number, precision),
             diff: columnNameDiff ? MathHelper.roundTo(groupedResult[columnNameDiff] as number, precision) : null,
             variant: variant,
             unit: entry.unit || null,
+            active: false,
           });
         }
-
-        // this.numberBoxComponentGroups.push({
-        //   componentName: apiComponentNames[resultMapping.componentId],
-        //   numberBoxes: numberBoxes
-        // });
       }
     }
 
     this.loading = false;
-  }
+  } 
 }
 </script>
 

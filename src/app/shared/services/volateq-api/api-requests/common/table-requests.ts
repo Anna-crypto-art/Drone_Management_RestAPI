@@ -20,6 +20,6 @@ export interface TableColumnSelect {
 
 export interface TableFilterRequest {
   filters?: Record<string, FilterFieldValueType>;
-  component_filter?: { component_id: ApiComponent, codes?: string[], grouped?: boolean };
+  component_filter?: { component_id?: ApiComponent, codes?: string[], grouped?: boolean };
   columns_selection?: { columns: TableColumnSelect[] };
 }
