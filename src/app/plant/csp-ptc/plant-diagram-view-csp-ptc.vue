@@ -4,21 +4,7 @@
       :plant="plant"
       :analysisResults="analysisResults" 
       :resultMappings="resultMappings"
-      @viewHistoryDiagram="onViewHistoryDiagram"
-    >
-      <!-- <template #[dynmaic] see https://vuejs.org/guide/components/slots.html#dynamic-slot-names -->
-      <template #diagramHistory>
-        <app-diagram-history v-if="viewedNumberBox && firstAnalysisResult"
-          :plant="plant"
-          :keyFigure="viewedKeyFigure"
-          :keyFigureName="viewedNumberBox.keyFigureName"
-          :analysisResult="firstAnalysisResult"
-          :analysisResults="analysisResults"
-          :componentSelection="componentIdSelection"
-          :resultMappings="resultMappings"
-        />
-      </template>
-    </app-diagram-overview>
+    />
     <app-diagram 
       :plant="plant"
       :analysisResults="analysisResults" 
@@ -74,8 +60,6 @@ import AppDiagramHistory from "@/app/plant/shared/diagram/diagram-history.vue";
 export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComponent {
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
-
-  viewedNumberBox: DiagramNumberBox | null = null;
 
   selectedGlassTubeTemperatureClass: number | null = null;
 
@@ -136,18 +120,6 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
       this.tableFilter = null;
       this.labelUnit = "";
     }
-  }
-
-  onViewHistoryDiagram(viewedNumberBox: DiagramNumberBox | null) {
-    this.viewedNumberBox = viewedNumberBox;
-  }
-
-  get viewedKeyFigure(): KeyFigureSchema | undefined {
-    if (this.viewedNumberBox && this.firstAnalysisResult) {
-      return this.firstAnalysisResult.key_figures.find(keyFigure => keyFigure.id === this.viewedNumberBox!.keyFigureId);
-    }
-
-    return undefined;
   }
 }
 </script>

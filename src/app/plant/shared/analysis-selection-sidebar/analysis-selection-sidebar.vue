@@ -2,7 +2,7 @@
   <div :class="'analysis-selection-sidebar' + (absolute ? ' absolute' : '')">
     <app-sidebar :open="sidebarOpen" @toggled="onSidebarToggled">
       <div class="analysis-selection-sidebar-leftside">
-        <div class="analysis-selection-sidebar-leftside-settings">
+        <div class="analysis-selection-sidebar-leftside-settings" v-if="analysisResults.length > 1">
           <b-checkbox switch v-model="compareMode" @change="onCompareModeChanged">{{ $t("compare-mode") }}</b-checkbox>
         </div>
         <app-table-container size="sm">
@@ -127,8 +127,14 @@ export default class AppAnalysisSelectionSidebar extends Vue {
     this.$store.direct.commit.sidebar.toggle({ name: "analysis" });
   }
 
-  onCompareModeChanged(): void {
+  async onCompareModeChanged() {
     this.selectMode = this.compareMode ? "multi" : "single";
+
+    if (!this.compareMode) {
+      // if compare mode has been finished, select first row again
+      await this.$nextTick();
+      this.analysisResultsTable.selectRow(0);
+    }
   }
 
   getKpiColor(keyFigure: KeyFigureSchema): string {

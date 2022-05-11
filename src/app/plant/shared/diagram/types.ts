@@ -1,4 +1,5 @@
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
+import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 
 export interface GroupedAnalysisResult {
   kks: string;
@@ -16,7 +17,7 @@ export interface BarChartData {
 }
 
 export interface DiagramNumberBox {
-  keyFigureId: ApiKeyFigure;
+  keyFigure: KeyFigureSchema;
   keyFigureName: string;
   num: number | string;
   diff: number | string | null;

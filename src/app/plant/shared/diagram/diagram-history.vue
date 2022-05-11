@@ -86,11 +86,12 @@ export default class AppDiagramHistory extends BaseAuthComponent {
   @Prop({ required: true }) keyFigureName!: string;
   @Prop({ required: true }) analysisResult!: AnalysisResultDetailedSchema;
   @Prop({ required: true }) analysisResults!: AnalysisResultDetailedSchema[];
-  @Prop({ required: true }) componentSelection!: ApiComponent[];
+  // @Prop({ required: true }) componentSelection!: ApiComponent[];
   @Prop({ required: true }) resultMappings!: {
     componentId: ApiComponent;
     resultMapping: AnalysisResultMappings<AnalysisResultSchemaBase>;
   }[];
+  @Prop({ required: true }) load!: boolean;
   
 
   // TODO: make @State(mobile) working...
@@ -109,6 +110,7 @@ export default class AppDiagramHistory extends BaseAuthComponent {
       },
       datalabels: {
         // color: "#fff",
+        align: "top",
       },
     },
     scales: {
@@ -136,8 +138,10 @@ export default class AppDiagramHistory extends BaseAuthComponent {
     responsive: false,
   };
 
-  @Watch('keyFigureName') async onKeyFigureChanged() {
-    await this.loadHistoryData();
+  @Watch('load') async onKeyFigureChanged() {
+    if (this.load) {
+      await this.loadHistoryData();
+    }
   }
 
   async created(): Promise<void> {
@@ -145,27 +149,22 @@ export default class AppDiagramHistory extends BaseAuthComponent {
 
     this.isMobile = window.matchMedia("screen and (max-width: 1000px)").matches;
     this.charWidth = this.isMobile ? 300 : 800;
-    this.charHeight = this.isMobile ? 200 : 400;
-
-    await this.loadHistoryData();
+    this.charHeight = this.isMobile ? 150 : 400;
   }
 
-  get componentOptions(): BvSelectOption[] {
-    return this.componentSelection.map(comp => ({
-      value: comp,
-      text: this.$t(apiComponentNames[comp]).toString(),
-    }));
-  }
+  // get componentOptions(): BvSelectOption[] {
+  //   return this.componentSelection.map(comp => ({
+  //     value: comp,
+  //     text: this.$t(apiComponentNames[comp]).toString(),
+  //   }));
+  // }
 
-  onComponentSelected() {
-    // do something
-  }
+  // onComponentSelected() {
+  //   // do something
+  // }
 
   private async loadHistoryData() {
     try {
-      console.log("loadHistoryData this.keyFigureName");
-      console.log(this.keyFigureName)
-
       this.loading = true;
 
       const tableFilter: TableFilterRequest = this.getTableFilterRequest();
@@ -188,6 +187,7 @@ export default class AppDiagramHistory extends BaseAuthComponent {
           {
             data: groupedResults.items.map(item => item[columnName] as number),
             backgroundColor: "rgba(6, 107, 226, 0.8)",
+            borderColor: "rgba(6, 107, 226, 0.8)",
           },
         ],
       };
@@ -207,9 +207,9 @@ export default class AppDiagramHistory extends BaseAuthComponent {
     );
   }
 
-  async onApply() {
-    // do something
-  }
+  // async onApply() {
+  //   // do something
+  // }
 
   private getTableFilterRequest(): TableFilterRequest {
     const tableFilter: TableFilterRequest = { component_filter: { grouped: true, component_id: 0 }};
@@ -250,13 +250,11 @@ export default class AppDiagramHistory extends BaseAuthComponent {
   private setBarChartOptions(): void {
     const labelUnit: string = this.getLabelUnit();
 
-    this.lineChartOptions["scales"]!["x"]!["title"]["text"] = labelUnit;
-    this.lineChartOptions["scales"]!["y"]!["title"]["text"] = this.$t(
-      apiComponentNames[this.selectedComponentId!]
-    ).toString();
+    // this.lineChartOptions["scales"]!["x"]!["title"]["text"] = labelUnit;
+    this.lineChartOptions["scales"]!["y"]!["title"]["text"] = labelUnit;
 
     const isCountTableUnit = labelUnit === "Count";
-    const roundPrecision = isCountTableUnit ? 0 : 2;    
+    const roundPrecision = isCountTableUnit ? 0 : 3;    
 
     this.lineChartOptions.plugins!.datalabels!.formatter = (val: number) => MathHelper.roundTo(val, roundPrecision);
      

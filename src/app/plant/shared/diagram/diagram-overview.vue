@@ -1,24 +1,32 @@
 <template>
   <div class="diagram-overview">
-    <app-box :title="$t('overview')" :loading="loading">
+    <app-box :title="$t('overview-of-pis')" :loading="loading">
       <div class="diagram-overview-group"> 
         <app-diagram-number-box v-for="numberBox in numberBoxes" 
-          :key="numberBox.keyFigureId + '_' + numberBox.keyFigureName"
+          :key="numberBox.keyFigure.id + '_' + numberBox.keyFigureName"
           :name="numberBox.keyFigureName"
           :num="numberBox.num"
           :variant="numberBox.variant"
           :diff="numberBox.diff"
           :unit="numberBox.unit"
           :active="numberBox.active"
+          :showActionButton="analysisResults.length > 0"
           @actionButtonClick="onActionButtonClick"
         >
           <template #historyDiagram>
-            <slot name="diagramHistory" />
+            <app-diagram-history
+              :plant="plant"
+              :keyFigure="numberBox.keyFigure"
+              :keyFigureName="numberBox.keyFigureName"
+              :analysisResult="firstAnalysisResult"
+              :analysisResults="analysisResults"
+              :resultMappings="resultMappings"
+              :load="numberBox.active"
+            />
           </template>
         </app-diagram-number-box>
       </div>
     </app-box>
-    
   </div>
 </template>
 
@@ -42,6 +50,7 @@ import { FilterFieldType } from "../filter-fields/types";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { MathHelper } from "@/app/shared/services/helper/math-helper";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
+import AppDiagramHistory from "@/app/plant/shared/diagram/diagram-history.vue";
 
 @Component({
   name: "app-diagram-overview",
@@ -49,6 +58,7 @@ import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/k
     AppButton,
     AppBox,
     AppDiagramNumberBox,
+    AppDiagramHistory,
   },
 })
 export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
@@ -69,15 +79,12 @@ export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
   }
 
   onActionButtonClick(keyFigureName: string) {
-    console.log("keyFigureName")
-    console.log(keyFigureName)
-
     if (this.viewedNumberBox) {
       this.viewedNumberBox.active = false;
 
       if (this.viewedNumberBox.keyFigureName === keyFigureName) {
         this.viewedNumberBox = null;
-        return;  
+        return;
       }
       
       this.viewedNumberBox = null;
@@ -88,8 +95,6 @@ export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
     if (this.viewedNumberBox) {
       this.viewedNumberBox.active = true;
     }
-
-    this.$emit("viewHistoryDiagram", this.viewedNumberBox);
   }
 
   protected async onAnalysisSelected() {
@@ -155,7 +160,8 @@ export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
 
           const precision = entry.unit === "Count" ? 0 : 3;
 
-          let variant: string | null = null;          
+          let variant: string | null = null;
+          let plusSymbol = "";   
           if (columnNameDiff) {
             const diffValue = groupedResult[columnNameDiff] as number;
             if (diffValue < 0) {
@@ -164,14 +170,15 @@ export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
               variant = "default";
             } else if (diffValue > 0) {
               variant = "danger";
+              plusSymbol = "+";
             }
           }
-
+          
           this.numberBoxes.push({
-            keyFigureId: entry.keyFigureId!,
+            keyFigure: this.firstAnalysisResult!.key_figures.find(keyFigure => keyFigure.id === entry.keyFigureId)!,
             keyFigureName: entry.transName,
             num: MathHelper.roundTo(groupedResult[columnName] as number, precision),
-            diff: columnNameDiff ? MathHelper.roundTo(groupedResult[columnNameDiff] as number, precision) : null,
+            diff: columnNameDiff ? plusSymbol + MathHelper.roundTo(groupedResult[columnNameDiff] as number, precision) : null,
             variant: variant,
             unit: entry.unit || null,
             active: false,
