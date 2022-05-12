@@ -111,12 +111,14 @@ export default class AppTableComponent extends Vue implements ITableComponent {
     this.tableName = "table_" + this.analysisResult.id + "_" + this.activeComponent.componentId;
 
     this.mappingHelper = new AnalysisResultMappingHelper(this.activeComponent.mapping, this.analysisResult);
+    this.mappingHelper.setCompareAnalysisResult(this.compareAnalysisResult);
     this.mappingEntries = this.mappingHelper.getEntries();
     this.columns = this.mappingHelper.getColumns(transName => this.$t(transName));
     this.columnsMapping = this.mappingHelper.getColumnsMapping();
   }
 
   @Watch('compareAnalysisResult') onCompareAnalysisResultChanged() {
+    this.mappingHelper.setCompareAnalysisResult(this.compareAnalysisResult);
     this.refresh();
   }
 

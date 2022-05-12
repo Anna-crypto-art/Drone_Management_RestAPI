@@ -1,7 +1,7 @@
 <template>
   <div class="openlayers-map">
     <div class="openlayers-map-content" />
-    <div v-show="loading" class="openlayers-map-loading">
+    <div v-show="isLoading" class="openlayers-map-loading">
       <div class="openlayers-map-loading-icon">
         <b-spinner />
       </div>
@@ -48,9 +48,11 @@ export default class AppGeovisualization extends Vue implements IOpenLayersCompo
   @Prop() zoom?: number;
   @Prop() center?: [number, number];
   @Prop({ default: "" }) title!: string;
+  @Prop({ default: false }) loading!: boolean;
 
   map: Map | null = null;
-  loading = false;
+  
+  layerLoading = false;
 
   created(): void {
     this.mapSetup();
@@ -61,7 +63,11 @@ export default class AppGeovisualization extends Vue implements IOpenLayersCompo
   }
 
   toggleLoading<Evt extends { loading: boolean }>(e: Evt): void {
-    this.loading = e.loading;
+    this.layerLoading = e.loading;
+  }
+
+  get isLoading(): boolean {
+    return this.layerLoading || this.loading;
   }
 
   private mapSetup(): void {

@@ -5,6 +5,8 @@ import { ClassHceKeyFigureLayer } from "./shared/class-hce-key-figure-layer";
 
 export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer {
   protected created(): void {
+    super.created();
+
     this.enableCompare = this.analysisResult.csp_ptc.glass_tube_temperature_class_count === this.query!.glass_tube_temperature_class!
   }
 

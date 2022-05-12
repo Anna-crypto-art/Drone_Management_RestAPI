@@ -47,6 +47,7 @@ export interface FeatureInfos {
   title: string;
   records: FeatureInfo[];
   images?: FeatureImage[];
+  actions?: FeatureActions;
 }
 
 export interface FeatureInfo {
@@ -54,6 +55,17 @@ export interface FeatureInfo {
   value: string;
   descr?: string;
   bold?: boolean;
+}
+
+export interface FeatureActions {
+  buttonVariant: string;
+  name: string;
+  actions: FeatureAction[];
+}
+
+export interface FeatureAction {
+  name: string;
+  action: () => Promise<void>;
 }
 
 export type KeyFigureTypeMap = {

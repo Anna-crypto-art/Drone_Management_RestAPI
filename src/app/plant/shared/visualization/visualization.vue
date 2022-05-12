@@ -1,6 +1,6 @@
 <template>
   <div class="visualization">
-    <app-geovisualization ref="openLayers" v-if="hasLayers" :layers="layers" @click="onOpenLayersClick">
+    <app-geovisualization ref="openLayers" v-if="hasLayers" :layers="layers" :loading="loading" @click="onOpenLayersClick">
       <template #topContent>
         <app-collapse name="displaySettings">
           <template #button>
@@ -54,6 +54,20 @@
           <b-col>{{ featureInfo.value }}</b-col>
         </b-row>
       </div>
+      <div v-if="piToastInfo.actions" class="toaster-actions">
+        <app-dropdown-button 
+          :variant="piToastInfo.actions.buttonVariant"
+          :title="piToastInfo.actions.name"
+          :loading="toastDropdownButtonLoading"
+          size="sm"
+        >
+          <b-dropdown-item-button v-for="action in piToastInfo.actions.actions" :key="action.name"
+            @click="onClickFeatureAction(action.name)"
+          >
+            {{ action.name }}
+          </b-dropdown-item-button>
+        </app-dropdown-button>
+      </div>
     </b-toast>
   </div>
 </template>
@@ -74,6 +88,7 @@ import { Component, Prop, Ref } from "vue-property-decorator";
 import { ComponentLayer } from "./layers/component-layer";
 import { State } from "vuex-class";
 import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
+import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-dropdown-button.vue";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -85,6 +100,7 @@ const STORAGE_KEY_SATELLITEVIEW = "storage-key-satelliteview";
     AppGeovisualization,
     AppExplanation,
     AppCollapse,
+    AppDropdownButton,
   },
 })
 export default class AppVisualization
@@ -105,6 +121,8 @@ export default class AppVisualization
   showPCS = false;
   legends: Legend[] = [];
   piToastInfo: FeatureInfos = { title: "", records: [{ name: "", descr: "", value: "" }] };
+  loading = false;
+  toastDropdownButtonLoading = false;
 
   enableMultiSelection = false;
   showCouldNotBeMeasured = true;
@@ -170,31 +188,37 @@ export default class AppVisualization
   }
 
   async onOpenLayersClick(features: FeatureLike[]) {
-    let mergedFeatureInfos: FeatureInfos | undefined;
-    for (const kpiLayer of this.piLayersHierarchy.getAllChildLayers()) {
-      const featureInfos = await kpiLayer.onClick(features);
-
-      if (featureInfos) {
-        if (!mergedFeatureInfos) {
-          mergedFeatureInfos = featureInfos;
-        } else if (mergedFeatureInfos.title === featureInfos.title) {
-          mergedFeatureInfos.records.forEach((featureInfo, index) => {
-            if (!featureInfo.bold && featureInfos.records[index].bold) {
-              featureInfo.bold = true;
-            }
-          });
+    try {
+      this.loading = false;
+      
+      let mergedFeatureInfos: FeatureInfos | undefined;
+      for (const kpiLayer of this.piLayersHierarchy.getAllChildLayers()) {
+        const featureInfos = await kpiLayer.onClick(features);
+  
+        if (featureInfos) {
+          if (!mergedFeatureInfos) {
+            mergedFeatureInfos = featureInfos;
+          } else if (mergedFeatureInfos.title === featureInfos.title) {
+            mergedFeatureInfos.records.forEach((featureInfo, index) => {
+              if (!featureInfo.bold && featureInfos.records[index].bold) {
+                featureInfo.bold = true;
+              }
+            });
+          }
         }
       }
-    }
-
-    if (mergedFeatureInfos) {
-      this.piToastInfo = mergedFeatureInfos;
-    }
-
-    if (mergedFeatureInfos) {
-      this.$bvToast.show("piInfoToast");
-    } else {
-      this.hideToast();
+  
+      if (mergedFeatureInfos) {
+        this.piToastInfo = mergedFeatureInfos;
+      }
+  
+      if (mergedFeatureInfos) {
+        this.$bvToast.show("piInfoToast");
+      } else {
+        this.hideToast();
+      }
+    } finally {
+      this.loading = false;
     }
   }
 
@@ -236,6 +260,17 @@ export default class AppVisualization
 
     this.worldMapLayer.satellite = this.satelliteView;
     this.worldMapLayer.reloadLayer = true;
+  }
+
+  async onClickFeatureAction(actionName: string) {
+    try {
+      this.toastDropdownButtonLoading = true;
+
+      await this.piToastInfo.actions!.actions.find(action => action.name === actionName)!.action();
+    }
+    finally {
+      this.toastDropdownButtonLoading = false;
+    }
   }
 
   private createLayers(): void {
@@ -358,5 +393,8 @@ export default class AppVisualization
     max-width: calc(500px - 1.5rem);
   }
   margin-bottom: 0.75rem;
+}
+.toaster-actions {
+  margin-top: 15px;
 }
 </style>

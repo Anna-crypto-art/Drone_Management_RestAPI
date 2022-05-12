@@ -11,6 +11,8 @@ export abstract class OffsetClassKeyFigureLayer<T extends AnalysisResultSchemaBa
   protected abstract getQueryOffsetClass(): number | undefined;
 
   protected created(): void {
+    super.created();
+
     this.enableCompare = this.getQueryOffsetClass() === 3;
   }
 

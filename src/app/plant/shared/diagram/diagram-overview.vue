@@ -10,7 +10,7 @@
           :diff="numberBox.diff"
           :unit="numberBox.unit"
           :active="numberBox.active"
-          :showActionButton="analysisResults.length > 0"
+          :showActionButton="analysisResults.length > 1"
           @actionButtonClick="onActionButtonClick"
         >
           <template #historyDiagram>

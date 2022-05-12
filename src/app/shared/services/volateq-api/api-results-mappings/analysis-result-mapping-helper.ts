@@ -61,7 +61,7 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
     for (const mappingEntry of this.getEntries()) {
       item[mappingEntry.transName] = mappingEntry.getValue(result);
 
-      if (mappingEntry.getDiffValue) {
+      if (this.compareAnalysisResult && mappingEntry.getDiffValue) {
         item[`${mappingEntry.transName}__diff`] = mappingEntry.getDiffValue(result as unknown);
       }
     }

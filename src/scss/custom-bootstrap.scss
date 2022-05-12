@@ -89,8 +89,9 @@ $theme-colors: (
 
 .dropdown-menu {
   border-radius: 0;
-  border: none;
-  box-shadow: 0px 20px 20px $grey;
+  // border: none;
+  border-color: $border-color-grey;
+  // box-shadow: 0px 20px 20px $grey;
 }
 
 .nav-pills .nav-link {
