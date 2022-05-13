@@ -30,6 +30,7 @@ export interface IPlantVisualization {
   plant: PlantSchema;
   openLayers: IOpenLayersComponent | undefined;
   onLayerSelected(selected: boolean, legend?: Legend);
+  hideToast: () => void;
 }
 
 export interface FeatureProperties {

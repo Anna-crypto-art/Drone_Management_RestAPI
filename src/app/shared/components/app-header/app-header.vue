@@ -34,7 +34,7 @@
 
           <b-dropdown-item href="/settings/users" v-if="isSuperAdmin" class="link">{{ $t("users") }}</b-dropdown-item>
 
-          <b-dropdown-item href="/analysis-monitoring" v-if="isSuperAdmin" class="link">{{ $t("Monitoring") }}</b-dropdown-item>
+          <b-dropdown-item href="/analysis-monitoring" v-if="isSuperAdmin" class="link">{{ $t("monitoring") }}</b-dropdown-item>
 
           <b-dropdown-divider />
 

@@ -5,7 +5,7 @@ import { asArray, asString } from "ol/color";
 import { IPlantVisualization } from "../types";
 import { GeoJSONLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 
-const GEO_JSON_OPTIONS = { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" };
+export const GEO_JSON_OPTIONS = { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" };
 
 /**
  * Represents a geojson layer

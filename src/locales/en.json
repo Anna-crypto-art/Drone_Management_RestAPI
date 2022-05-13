@@ -272,6 +272,9 @@
   "new": "New",
   "create-a-diagram": "Create a diagram",
   "overview-of-pis": "Overview of all Performance Indicators",
+  "show-ortho-image": "Show ortho image",
+  "clear-ortho-images": "Clear ortho images",
+  "monitoring": "Monitoring",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",

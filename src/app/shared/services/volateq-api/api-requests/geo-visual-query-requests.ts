@@ -17,4 +17,10 @@ export interface GeoVisualQuery {
    */
   key_figure_class_name?: string;
   hce_position_offset_class?: 1 | 2 | 3;
+
+  /**
+   * Parameters for load ortho images
+   */
+  child_component_id?: number;
+  child_pcs?: string;
 }

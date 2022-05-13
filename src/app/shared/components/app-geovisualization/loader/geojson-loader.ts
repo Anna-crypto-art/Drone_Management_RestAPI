@@ -1,5 +1,5 @@
 import { LoadingEvent } from "../types/events";
-import { GeoJSONLayer } from "../types/layers";
+import { GeoJSONLayer, VectorGeoLayer } from "../types/layers";
 import Feature from "ol/Feature";
 import GeoJSON from "ol/format/GeoJSON";
 import Geometry from "ol/geom/Geometry";
@@ -31,12 +31,16 @@ export class GeoJSONLoader extends LayerLoader<
       this.setFeatureStyle(feature);
     });
 
-    let geoLayer: VectorLayer<VectorSource<Geometry>> | VectorImageLayer<VectorSource<Geometry>>;
+    let geoLayer: VectorGeoLayer;
+
+    const properties = { id: this.layerType.id };
+
     if (this.layerType.layerType === undefined || this.layerType.layerType === "VectorLayer") {
-      geoLayer = new VectorLayer({ source });
+      geoLayer = new VectorLayer({ source, properties });
     } else if (this.layerType.layerType === "VectorImageLayer") {
       // More performant, but less accurate, rendering
       geoLayer = new VectorImageLayer({
+        properties,
         source,
         // A larger ratio avoids cut images during panning, but will cause a decrease in performance.
         // See https://openlayers.org/en/latest/apidoc/module-ol_layer_VectorImage-VectorImageLayer.html

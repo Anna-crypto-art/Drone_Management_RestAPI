@@ -13,7 +13,7 @@ module.exports = {
         changeOrigin: true,
       },
     },
-    // headers: { "Access-Control-Allow-Origin": "*" }
+    headers: { "Access-Control-Allow-Origin": "https://volateq-customer-data.s3.amazonaws.com, http://localhost:5000/" }
   },
   configureWebpack: {
     mode: inProduction ? "production" : "development",

@@ -151,6 +151,12 @@ export class PILayersHierarchy {
     setVisibilityRec(this.parentComponentKpiLayers);
   }
 
+  public clearOrthoImages(): void {
+    for (const layer of this.getAllChildLayers()) {
+      layer.removeOrthoImageFeatures();
+    }
+  }
+
   private getOrCreateParentComponentLayer(keyFigure: KeyFigureSchema): GroupKPILayer {
     let parentComponentKpiLayer = this.parentComponentKpiLayers
       .find(parentComponentKpiLayer => parentComponentKpiLayer.componentId === keyFigure.component_id);

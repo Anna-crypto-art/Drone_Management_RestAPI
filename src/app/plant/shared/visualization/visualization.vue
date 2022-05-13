@@ -15,6 +15,8 @@
           <b-form-checkbox v-model="satelliteView" switch @change="onSatelliteViewChanged">
             {{ $t("satellite-view") }}
           </b-form-checkbox>
+          <br>
+          <app-button variant="secondary" size="sm" @click="onClearOrthoImagesClick">{{ $t('clear-ortho-images') }}</app-button>
         </app-collapse>
       </template>
 
@@ -89,6 +91,7 @@ import { ComponentLayer } from "./layers/component-layer";
 import { State } from "vuex-class";
 import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
 import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-dropdown-button.vue";
+import AppButton from "@/app/shared/components/app-button/app-button.vue";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -101,6 +104,7 @@ const STORAGE_KEY_SATELLITEVIEW = "storage-key-satelliteview";
     AppExplanation,
     AppCollapse,
     AppDropdownButton,
+    AppButton,
   },
 })
 export default class AppVisualization
@@ -273,6 +277,10 @@ export default class AppVisualization
     }
   }
 
+  onClearOrthoImagesClick() {
+    this.piLayersHierarchy.clearOrthoImages();
+  }
+
   private createLayers(): void {
     this.componentLayers = this.componentLayerTypes.map(componentType => new (componentType as any)(this));
     this.piLayersHierarchy = new PILayersHierarchy(this, this.analysisResults, this.keyFigureLayers);
@@ -315,7 +323,7 @@ export default class AppVisualization
     );
   }
 
-  private hideToast() {
+  public hideToast() {
     this.$bvToast.hide("piInfoToast");
   }
 }

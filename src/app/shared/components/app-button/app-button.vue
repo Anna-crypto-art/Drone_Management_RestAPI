@@ -1,5 +1,5 @@
 <template>
-  <b-button :variant="variant" :type="type" :class="cls" :disabled="isDisabled" @click="onClick">
+  <b-button :variant="variant" :type="type" :class="cls" :disabled="isDisabled" :size="size" @click="onClick">
     <span class="app-button-loading" v-show="loading"><b-spinner small></b-spinner></span><slot></slot>
   </b-button>
 </template>
@@ -17,6 +17,7 @@ export default class AppButton extends Vue {
   @Prop({ default: "primary" }) variant!: string;
   @Prop({ default: false }) disabled!: boolean;
   @Prop({ default: false }) loading!: boolean;
+  @Prop({ default: "" }) size!: string;
 
   get isDisabled() {
     return this.loading || this.disabled;

@@ -1,4 +1,6 @@
-import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
+import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
+import { Feature } from "ol";
+import { Geometry } from "ol/geom";
 
 export interface KeyFigureInfo {
   /**
@@ -84,4 +86,11 @@ export enum KeyFigureColors {
   black = "#000000",
   orange = "#ef7700",
   blue = "#0000ff",
+}
+
+export interface OrthoImage {
+   name: string,
+   keyFigureId: ApiKeyFigure,
+   available: boolean,
+   features?: Feature<Geometry>[]
 }

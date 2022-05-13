@@ -197,5 +197,9 @@ export default class AppVisualCspPtc
 
     throw new Error("class_limit not allowed");
   }
+
+  public hideToast(): void {
+    this.visualization?.hideToast();
+  }
 }
 </script>

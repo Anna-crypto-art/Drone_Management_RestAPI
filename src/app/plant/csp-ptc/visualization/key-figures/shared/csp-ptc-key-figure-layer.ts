@@ -23,6 +23,18 @@ export abstract class CspPtcKeyFigureLayer<T extends AnalysisResultSchemaBase> e
     super(vueComponent, analysisResult, keyFigureId, keyFigureInfo, query, initColor);
   }
 
+  protected created(): void {
+    super.created();
+
+    this.orthoImages = [
+      { name: "RGB", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_ID, available: false },
+      { name: "IR", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_IR_ID, available: false },
+      { name: "SDX", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_SDX_ID, available: false },
+    ];
+
+    this.setOrthoImageAvailable();
+  }
+
   protected get color(): string {
     if (this.initColor) {
       return this.initColor;

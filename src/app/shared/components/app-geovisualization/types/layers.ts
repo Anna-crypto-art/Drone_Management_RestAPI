@@ -1,3 +1,7 @@
+import { Geometry } from "ol/geom";
+import VectorLayer from "ol/layer/Vector";
+import VectorImageLayer from "ol/layer/VectorImage";
+import VectorSource from "ol/source/Vector";
 import { StyleFunction } from "ol/style/Style";
 
 export interface BaseLayerType {
@@ -41,3 +45,5 @@ export interface CustomLayer extends BaseLayerType {
 }
 
 export type LayerType = GeoJSONLayer | OSMLayer | GroupLayer | CustomLayer;
+
+export type VectorGeoLayer = VectorLayer<VectorSource<Geometry>> | VectorImageLayer<VectorSource<Geometry>>;
