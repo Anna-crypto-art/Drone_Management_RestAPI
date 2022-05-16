@@ -295,7 +295,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
 
   protected setImageFeatureStyle(feature: Feature<Geometry>) {
     const img = new Image();
-
+    img.crossOrigin = "Anonymous";
     img.onload = () => {
       feature.setStyle(
         new Style({
