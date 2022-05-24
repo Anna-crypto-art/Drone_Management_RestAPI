@@ -182,6 +182,10 @@ import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import { UserItem, UserPlant } from "@/app/settings/users/types";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 
+
+const MAX_USERS_PER_CUSTOMER = 10;
+
+
 @Component({
   name: "app-settings-users",
   components: {
@@ -412,6 +416,13 @@ export default class AppSettingsUsers extends Vue {
   }
 
   onCustomerChanged() {
+    if (this.newUser.customer_id) {
+      const userCount = this.rows.filter(user => user.customer.id === this.newUser.customer_id).length;
+      if (userCount >= MAX_USERS_PER_CUSTOMER) {
+        this.appInviteModal.alertInfo(this.$t("user-limit-for-customer-reached").toString());
+      }
+    }
+
     this.setInviteUserCustomerPlants();
   }
 
