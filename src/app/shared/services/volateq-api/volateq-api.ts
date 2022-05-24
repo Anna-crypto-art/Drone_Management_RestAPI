@@ -74,8 +74,8 @@ export class VolateqAPI extends HttpClientBase {
     await store.dispatch.auth.updateToken({ token: "", role: "", customer_id: undefined });
   }
 
-  public async getUsers(): Promise<UserSchema[]> {
-    return this.get("/auth/users");
+  public async getUsers(customerId?: string): Promise<UserSchema[]> {
+    return this.get("/auth/users", customerId ? { customer_id: customerId } : undefined);
   }
 
   public async getCustomers(): Promise<CustomerSchema[]> {
@@ -88,12 +88,20 @@ export class VolateqAPI extends HttpClientBase {
     return `${baseUrl}/confirm/${confirmKey}`;
   }
 
+  public async assignPlantsToUser(userId: string, plantIds: string[]): Promise<void> {
+    await this.post(`/auth/user/${userId}/assign-plants`, { plant_ids: plantIds });
+  }
+
   public async getInvitedUser(confirmKey: string): Promise<UserSchema> {
     return this.get(`/confirm/${confirmKey}`);
   }
 
   public async registerUser(confirmKey: string, user: RegisterUser): Promise<void> {
     await this.post(`/confirm/${confirmKey}`, user);
+  }
+
+  public async deleteUser(userId): Promise<void> {
+    await this.delete(`/auth/user/${userId}/delete`);
   }
 
   public async getRoutes(
@@ -128,15 +136,6 @@ export class VolateqAPI extends HttpClientBase {
 
   public getAnalysisFileDownloadUrl(analysisId: string, fileName: string): Promise<{ url: string }> {
     return this.get(`/auth/analysis/${analysisId}/file/${fileName}`);
-  }
-
-  public getPlants(customerId?: string): Promise<PlantSchema[]> {
-    customerId = customerId || store.state.auth.customer_id;
-    if (!customerId) {
-      throw Error("Missing customer_id");
-    }
-
-    return this.get(`/auth/customer/${customerId}/plants`);
   }
 
   public forgotPassword(email: string): Promise<void> {
@@ -395,8 +394,8 @@ export class VolateqAPI extends HttpClientBase {
     return this.post(`/auth/analysis-result/${analysisResultId}`, updates);
   }
 
-  public getAllPlants(): Promise<PlantSchema[]> {
-    return this.get(`/auth/plants`);
+  public getPlants(with_analysis_results_count = false): Promise<PlantSchema[]> {
+    return this.get(`/auth/plants`, { with_analysis_results_count: with_analysis_results_count ? 1 : 0 });
   }
 
   public getAnalysisResultFileUrl(analysisResultFileId: string): Promise<{ url: string }> {

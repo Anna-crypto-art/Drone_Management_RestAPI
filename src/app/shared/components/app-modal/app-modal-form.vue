@@ -2,8 +2,10 @@
   <b-modal class="app-modal-form" :id="id" :ok-title="okTitle" no-close-on-backdrop>
     <template v-slot:modal-title>
       <div class="app-modal-form-title">
-        <h2>{{ title }}</h2>
-        <div v-if="subtitle" v-html="subtitle" class="app-modal-form-title-subtitle grayed"></div>
+        <slot name="modal-title">
+          <h2>{{ title }}</h2>
+          <div v-if="subtitle" v-html="subtitle" class="app-modal-form-title-subtitle grayed"></div>
+        </slot>
       </div>
     </template>
     <b-alert

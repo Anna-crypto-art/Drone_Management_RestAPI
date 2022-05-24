@@ -57,7 +57,7 @@ export default class AppNewAnalysis extends BaseAuthComponent {
 
   async created() {
     try {
-      const plants = await volateqApi.getAllPlants();
+      const plants = await volateqApi.getPlants();
       this.plantOptions = plants.map(plant => ({ value: plant.id, text: plant.name }));
       if (plants.length === 1) {
         this.selected_plant_id = plants[0].id;

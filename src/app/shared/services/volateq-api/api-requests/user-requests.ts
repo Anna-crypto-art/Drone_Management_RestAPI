@@ -4,6 +4,7 @@ export interface InviteUser {
   email: string;
   role: ApiRoles | "";
   customer_id?: string;
+  plant_ids?: string[];
 }
 
 export interface RegisterUser {

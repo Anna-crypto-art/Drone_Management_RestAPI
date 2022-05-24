@@ -199,7 +199,7 @@ export default class AppAnalysis extends BaseAuthComponent {
   }
 
   private async getPlants() {
-    const plants: PlantSchema[] = await volateqApi.getAllPlants();
+    const plants: PlantSchema[] = await volateqApi.getPlants();
     // Hide the filter if one plant is available
     if (plants.length > 1) {
       this.plants = plants.map(plant => ({ value: plant.id, text: plant.name }));

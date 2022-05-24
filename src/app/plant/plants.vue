@@ -121,6 +121,7 @@ export default class AppPlants extends BaseAuthComponent {
     ];
 
     if (this.isSuperAdmin) {
+      this.columns.push({ key: "customers", label: this.$t("customers").toString() })
       this.columns.push({ key: "actions" });
     }
 
@@ -130,27 +131,18 @@ export default class AppPlants extends BaseAuthComponent {
   async updatePlants(): Promise<void> {
     try {
       this.tableLoading = true;
-      let plants: PlantSchema[] = [];
-
-      if (this.isSuperAdmin) {
-        const customers = await volateqApi.getCustomers();
-        for (const customer of customers) {
-          plants = plants.concat(await volateqApi.getPlants(customer.id));
-        }
-      } else {
-        plants = await volateqApi.getPlants();
-      }
+      const plants: PlantSchema[] = await volateqApi.getPlants(true);
 
       this.plants = [];
       for (const plant of plants) {
         this.plants.push({
           id: plant.id,
-          customerId: plant.customer_id,
           name: plant.name,
           digitized: !!plant.fieldgeometry,
-          analysesCount: (await volateqApi.getAnalysisResults(plant.id)).length,
+          analysesCount: plant.analysis_results_count!,
           established: !plant.in_setup_phase,
           fieldgeometry: plant.fieldgeometry,
+          customers: plant.customers.map(customer => customer.name).join(", "),
         });
       }
     } catch (e) {
