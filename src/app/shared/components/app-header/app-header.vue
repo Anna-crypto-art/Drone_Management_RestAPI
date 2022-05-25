@@ -29,11 +29,8 @@
           <template #button-content>
             <b-icon icon="gear-fill" font-scale="1.5" />
           </template>
-
-          <b-dropdown-item href="/" class="link">{{ $t("profile") }}</b-dropdown-item>
-
           <b-dropdown-item href="/settings/users" v-if="isSuperAdmin" class="link">{{ $t("users") }}</b-dropdown-item>
-
+          <b-dropdown-item href="/settings/customers" v-if="isSuperAdmin" class="link">{{ $t("customers") }}</b-dropdown-item>
           <b-dropdown-item href="/analysis-monitoring" v-if="isSuperAdmin" class="link">{{ $t("monitoring") }}</b-dropdown-item>
 
           <b-dropdown-divider />
@@ -112,6 +109,10 @@ export default class AppHeader extends BaseAuthComponent {
   }
 
   &-menu {
+    .dropdown-item {
+      color: $blue;
+    }
+
     .nav-link {
       background: $blue;
 
@@ -130,12 +131,6 @@ export default class AppHeader extends BaseAuthComponent {
           background-color: $hover-blue;
         }
       }
-    }
-  }
-
-  &-settings-menu {
-    .dropdown-item {
-      color: $blue;
     }
   }
 

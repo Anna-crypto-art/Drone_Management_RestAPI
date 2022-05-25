@@ -20,6 +20,7 @@ import { RouteSchema } from "./api-schemas/route-schema";
 import { TableResultSchema } from "./api-schemas/table-result-schema";
 import { TaskSchema } from "./api-schemas/task-schema";
 import { ApiStates } from "./api-states";
+import { CustomerRequest } from "./api-requests/customer-requests";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -114,7 +115,7 @@ export class VolateqAPI extends HttpClientBase {
     return this.post(`/auth/analysis`, newAnalyis);
   }
 
-  public async getAllAnalysis(queryParams?: { plant_id?: string }): Promise<AnalysisSchema[]> {
+  public async getAllAnalysis(queryParams?: { plant_id?: string, customer_id?: string }): Promise<AnalysisSchema[]> {
     return this.get(`/auth/analysis`, queryParams);
   }
 
@@ -439,6 +440,22 @@ export class VolateqAPI extends HttpClientBase {
     componentId: ApiComponent
   ): Promise<string[]> {
     return this.get(`/auth/fieldgeometry/${fieldgeometryId}/${componentId}/component-codes`);
+  }
+
+  public getCusomters(): Promise<CustomerSchema[]> {
+    return this.get(`/auth/customers`);
+  }
+
+  public async createCustomer(customerRequest: CustomerRequest): Promise<void> {
+    await this.post(`/auth/customer`, customerRequest);
+  }
+
+  public async updateCustomer(customerId: string, customerRequest: CustomerRequest): Promise<void> {
+    await this.post(`/auth/customer/${customerId}`, customerRequest);
+  }
+
+  public async deleteCustomer(customerId: string): Promise<void> {
+    await this.delete(`/auth/customer/${customerId}`);
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {

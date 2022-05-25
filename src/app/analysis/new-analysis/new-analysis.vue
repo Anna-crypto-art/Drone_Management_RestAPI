@@ -10,7 +10,12 @@
           <b-row style="margin-bottom: 25px">
             <b-col sm="4" v-if="plantOptions.length > 1">
               <b-form-group label-cols="auto" :label="$t('plant')">
-                <b-form-select required v-model="selected_plant_id" :options="plantOptions"></b-form-select>
+                <b-form-select required v-model="selectedPlantId" :options="plantOptions" @change="onPlantSelectionChanged"></b-form-select>
+              </b-form-group>
+            </b-col>
+            <b-col sm="4" v-if="customerOptions.length > 1">
+              <b-form-group label-cols="auto" :label="$t('customer')">
+                <b-form-select required v-model="selectedCustomerId" :options="customerOptions"></b-form-select>
               </b-form-group>
             </b-col>
             <b-col sm="4">
@@ -38,6 +43,7 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import AppAnalysisUpload from "@/app/analysis/shared/analysis-upload.vue";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 
 @Component({
   name: "app-new-analysis",
@@ -48,8 +54,13 @@ import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/an
   },
 })
 export default class AppNewAnalysis extends BaseAuthComponent {
-  selected_plant_id: string | null = null;
+  plants!: PlantSchema[];
+  
+  selectedPlantId: string | null = null;
   plantOptions: Array<any> = [];
+
+  selectedCustomerId: string | null = null;
+  customerOptions: Array<any> = [];
 
   flownAt: string | null = null;
 
@@ -57,13 +68,22 @@ export default class AppNewAnalysis extends BaseAuthComponent {
 
   async created() {
     try {
-      const plants = await volateqApi.getPlants();
-      this.plantOptions = plants.map(plant => ({ value: plant.id, text: plant.name }));
-      if (plants.length === 1) {
-        this.selected_plant_id = plants[0].id;
+      this.plants = await volateqApi.getPlants();
+      this.plantOptions = this.plants.map(plant => ({ value: plant.id, text: plant.name }));
+      if (this.plants.length === 1) {
+        this.selectedPlantId = this.plants[0].id;
       }
     } catch (e) {
       appContentEventBus.showError(e as ApiException);
+    }
+  }
+
+  onPlantSelectionChanged() {
+    const plant = this.plants.find(plant => plant.id === this.selectedPlantId);
+    if (plant && plant.customers.length > 1) {
+      this.customerOptions = plant.customers.map(customer => ({ value: customer.id, text: customer.name }));
+    } else {
+      this.customerOptions = [];
     }
   }
 
@@ -75,9 +95,10 @@ export default class AppNewAnalysis extends BaseAuthComponent {
       }
 
       const analysisIdObj = await volateqApi.createAnalysis({
-        plant_id: this.selected_plant_id!,
+        plant_id: this.selectedPlantId!,
         files: files,
         flown_at: this.flownAt!,
+        customer_id: this.selectedCustomerId || undefined,
       });
   
       this.analysis = await volateqApi.getAnalysis(analysisIdObj.id);

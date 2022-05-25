@@ -17,9 +17,3 @@ export interface UserItem {
   role: string
   plants: SimplePlantSchema[],
 }
-
-export interface UserPlant {
-  plant: SimplePlantSchema;
-  selected: boolean;
-  otherCustomers?: string;
-}

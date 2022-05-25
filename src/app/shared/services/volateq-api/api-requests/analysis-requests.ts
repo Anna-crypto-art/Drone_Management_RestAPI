@@ -4,6 +4,7 @@ export interface NewAnalysis {
   plant_id: string;
   files: string[];
   flown_at: string;
+  customer_id?: string;
 }
 
 export interface UpdateAnalysisState {

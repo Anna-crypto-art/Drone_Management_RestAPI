@@ -10,16 +10,27 @@
           {{ createNewAnalysisBtnText }}
         </b-button>
       </router-link>
-      <div class="app-analysis-plants-filter pull-right" v-show="plants">
+      <div class="app-analysis-plants-filter pull-right" v-show="plantSelection">
         <b-form-select
           id="plants"
           class="app-analysis-plants-filter-select"
           v-model="selectedPlantId"
-          :options="plants"
+          :options="plantSelection"
           @change="onPlantSelectionChanged"
         >
         </b-form-select>
         <label class="app-analysis-plants-filter-label" for="plants">{{ $t("plant") }}</label>
+      </div>
+      <div class="app-analysis-customer-filter pull-right" v-show="customers">
+        <b-form-select
+          id="customers"
+          class="app-analysis-customers-filter-select"
+          v-model="selectedCustomerId"
+          :options="customers"
+          @change="onCustomerSelectionChanged"
+        >
+        </b-form-select>
+        <label class="app-analysis-customers-filter-label" for="customers">{{ $t("customer") }}</label>
       </div>
       <div class="clear"></div>
       <app-table-container>
@@ -46,6 +57,10 @@
           </template>
           <template #cell(name)="row">
             <router-link :to="{ name: 'EditAnalysis', params: { id: row.item.id } }">{{ row.item.name }}</router-link>
+          </template>
+          <template #cell(plant)="row">
+            {{ row.item.plant }}<br />
+            <small class="grayed">{{ row.item.customer }}</small>
           </template>
           <template #cell(user)="row">
             <span v-if="row.item.user.userName">
@@ -114,8 +129,14 @@ import volateqApi from "../shared/services/volateq-api/volateq-api";
 })
 export default class AppAnalysis extends BaseAuthComponent {
   columns: BvTableFieldArray = [];
-  plants: Array<any> | null = null;
+
+  plants!: PlantSchema[];
+  plantSelection: Array<any> | null = null;
   selectedPlantId: string | null = null;
+
+  customers: Array<any> | null = null;
+  selectedCustomerId: string | null = null;
+
   analysisRows: Array<any> | null = null;
   isLoading = true;
 
@@ -153,6 +174,25 @@ export default class AppAnalysis extends BaseAuthComponent {
   }
 
   async onPlantSelectionChanged() {
+    if (this.selectedPlantId) {
+      const plant = this.plants!.find(plant => plant.id === this.selectedPlantId);
+      if (plant!.customers.length > 1) {
+        this.customers = [
+          { value: null, text: "" },
+          ...plant!.customers.map(customer => ({ value: customer.id, text: customer.name }))
+        ];
+      } else {
+        this.customers = null;
+      }
+    } else {
+      this.customers = null;
+    }
+    
+
+    await this.updateAnalysisRows();
+  }
+
+  async onCustomerSelectionChanged() {
     await this.updateAnalysisRows();
   }
 
@@ -168,8 +208,15 @@ export default class AppAnalysis extends BaseAuthComponent {
     this.isLoading = true;
 
     try {
-      const plant_id_filter = (this.selectedPlantId && { plant_id: this.selectedPlantId }) || undefined;
-      this.analysisRows = (await volateqApi.getAllAnalysis(plant_id_filter)).map((a: AnalysisSchema) => {
+      const analysisFilter: { plant_id?: string, customer_id?: string } = {};
+      if (this.selectedPlantId) {
+        analysisFilter.plant_id = this.selectedPlantId;
+      }
+      if (this.selectedCustomerId) {
+        analysisFilter.customer_id = this.selectedCustomerId;
+      }
+      
+      this.analysisRows = (await volateqApi.getAllAnalysis(analysisFilter)).map((a: AnalysisSchema) => {
         const row = {
           id: a.id,
           name: a.name,
@@ -187,6 +234,7 @@ export default class AppAnalysis extends BaseAuthComponent {
           files: a.files,
           plantId: a.plant.id,
           plant: a.plant.name,
+          customer: a.customer.name,
         };
 
         return row;
@@ -199,11 +247,11 @@ export default class AppAnalysis extends BaseAuthComponent {
   }
 
   private async getPlants() {
-    const plants: PlantSchema[] = await volateqApi.getPlants();
+    this.plants = await volateqApi.getPlants();
     // Hide the filter if one plant is available
-    if (plants.length > 1) {
-      this.plants = plants.map(plant => ({ value: plant.id, text: plant.name }));
-      this.plants.unshift({ value: null, text: "" });
+    if (this.plants.length > 1) {
+      this.plantSelection = this.plants.map(plant => ({ value: plant.id, text: plant.name }));
+      this.plantSelection.unshift({ value: null, text: "" });
     }
   }
 }
@@ -216,11 +264,11 @@ export default class AppAnalysis extends BaseAuthComponent {
   }
 }
 
-.app-analysis-plants-filter-select {
+.app-analysis-plants-filter-select, .app-analysis-customers-filter-select {
   width: 200px !important;
   float: right;
 }
-.app-analysis-plants-filter-label {
+.app-analysis-plants-filter-label, .app-analysis-customers-filter-label {
   float: right;
   margin-top: 5px;
   padding-right: 1em;

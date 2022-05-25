@@ -179,7 +179,8 @@ import { InviteUser } from "@/app/shared/services/volateq-api/api-requests/user-
 import { ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
 import { BvTableFieldArray } from "bootstrap-vue";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
-import { UserItem, UserPlant } from "@/app/settings/users/types";
+import { UserItem } from "@/app/settings/users/types";
+import { SelectPlant } from "@/app/settings/types";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 
 
@@ -208,12 +209,12 @@ export default class AppSettingsUsers extends Vue {
   ];
   newUser: InviteUser = this.initialInviteUser();
   selectedCustomerId: string | null = null;
-  inviteUserCustomerPlants: UserPlant[] = [];
+  inviteUserCustomerPlants: SelectPlant[] = [];
 
   @Ref() appEditUserModal!: IAppModalForm;
   editUserLoading = false;
   editUser: UserItem | null = null;
-  editUserCustomerPlants: UserPlant[] = [];
+  editUserCustomerPlants: SelectPlant[] = [];
 
   async created() {
     this.columns = [
