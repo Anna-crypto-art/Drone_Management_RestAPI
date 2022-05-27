@@ -294,6 +294,13 @@
   "customer-created-success": "Customer created successfully",
   "customer-updated-success": "Customer updated successfully",
   "customer-deleted-success": "Customer \"{customer}\" deleted successfully",
+  "technology": "Technology",
+  "create-plant": "Create plant",
+  "plant-created-success": "Plant created successfully",
+  "plant-deleted-success": "Plant \"{plant}\" deleted successfully",
+  "plant-updated-success": "Plant \"{plant}\" updated successfully",
+  "delete-plant": "Delete plant",
+  "sure-delete-plant": "Delete plant \"{plant}\". This cannot be undone. Are you sure?",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",

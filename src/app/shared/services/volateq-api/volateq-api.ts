@@ -7,7 +7,7 @@ import { HttpClientBase } from "@/app/shared/services/volateq-api/http-client-ba
 import { apiBaseUrl, baseUrl } from "@/environment/environment";
 import { ApiErrors, ApiException } from "./api-errors";
 import { NewAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
-import { UpdatePlantRequest } from "./api-requests/plant-requests";
+import { CreatePlantRequest, UpdatePlantRequest } from "./api-requests/plant-requests";
 import { AnalysisSchema } from "./api-schemas/analysis-schema";
 import { PlantSchema } from "./api-schemas/plant-schema";
 import { AnalysisResultDetailedSchema } from "./api-schemas/analysis-result-schema";
@@ -21,6 +21,7 @@ import { TableResultSchema } from "./api-schemas/table-result-schema";
 import { TaskSchema } from "./api-schemas/task-schema";
 import { ApiStates } from "./api-states";
 import { CustomerRequest } from "./api-requests/customer-requests";
+import { TechnologySchema } from "./api-schemas/technology-schema";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -77,10 +78,6 @@ export class VolateqAPI extends HttpClientBase {
 
   public async getUsers(customerId?: string): Promise<UserSchema[]> {
     return this.get("/auth/users", customerId ? { customer_id: customerId } : undefined);
-  }
-
-  public async getCustomers(): Promise<CustomerSchema[]> {
-    return this.get("/auth/customers");
   }
 
   public async inviteUser(user: InviteUser): Promise<string> {
@@ -395,8 +392,11 @@ export class VolateqAPI extends HttpClientBase {
     return this.post(`/auth/analysis-result/${analysisResultId}`, updates);
   }
 
-  public getPlants(with_analysis_results_count = false): Promise<PlantSchema[]> {
-    return this.get(`/auth/plants`, { with_analysis_results_count: with_analysis_results_count ? 1 : 0 });
+  public getPlants(withAnalysisResultsCount = false, customerId?: string): Promise<PlantSchema[]> {
+    return this.get(`/auth/plants`, { 
+      with_analysis_results_count: withAnalysisResultsCount ? 1 : 0,
+      customer_id: customerId
+    });
   }
 
   public getAnalysisResultFileUrl(analysisResultFileId: string): Promise<{ url: string }> {
@@ -442,7 +442,7 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/fieldgeometry/${fieldgeometryId}/${componentId}/component-codes`);
   }
 
-  public getCusomters(): Promise<CustomerSchema[]> {
+  public getCustomers(): Promise<CustomerSchema[]> {
     return this.get(`/auth/customers`);
   }
 
@@ -456,6 +456,18 @@ export class VolateqAPI extends HttpClientBase {
 
   public async deleteCustomer(customerId: string): Promise<void> {
     await this.delete(`/auth/customer/${customerId}`);
+  }
+
+  public async getTechnologies(): Promise<TechnologySchema[]> {
+    return await this.get(`/auth/technologies`);
+  }
+
+  public async createPlant(createPlantRequest: CreatePlantRequest): Promise<void> {
+    await this.post(`/auth/plant`, createPlantRequest);
+  }
+
+  public async deletePlant(plantId: string): Promise<void> {
+    await this.delete(`/auth/plant/${plantId}`);
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {

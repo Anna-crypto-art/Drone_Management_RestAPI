@@ -33,7 +33,7 @@
           <b-dropdown-item href="/settings/customers" v-if="isSuperAdmin" class="link">{{ $t("customers") }}</b-dropdown-item>
           <b-dropdown-item href="/analysis-monitoring" v-if="isSuperAdmin" class="link">{{ $t("monitoring") }}</b-dropdown-item>
 
-          <b-dropdown-divider />
+          <b-dropdown-divider v-if="isSuperAdmin" />
 
           <b-dropdown-form>
             <b-button @click="logout" class="width-100pc">{{ $t("logout") }}</b-button>

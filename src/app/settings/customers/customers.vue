@@ -202,7 +202,7 @@ export default class AppSettingsCustomers extends Vue {
     this.selectPlants = this.plants.map(plant => ({
       plant: plant,
       selected: false,
-      otherCustomers: plant.customers.map(customer => customer.name).join(", "),
+      otherCustomers: plant.customers!.map(customer => customer.name).join(", "),
     }));
 
     this.customerModalTitle = this.$t("create-customer").toString();
@@ -218,7 +218,7 @@ export default class AppSettingsCustomers extends Vue {
     this.selectPlants = this.plants.map(plant => ({
       plant: plant,
       selected: !!customerItem.plants.find(customerPlant => customerPlant.id === plant.id),
-      otherCustomers: plant.customers.filter(customer => customer.id !== customerItem.id)
+      otherCustomers: plant.customers!.filter(customer => customer.id !== customerItem.id)
         .map(customer => customer.name).join(", "),
     }));
 

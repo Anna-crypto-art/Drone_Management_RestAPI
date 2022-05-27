@@ -1,15 +1,17 @@
 import { CustomerSchema } from "./customer-schemas";
 import { FieldgeometrySchema } from "./fieldgeometry-schema";
+import { TechnologySchema } from "./technology-schema";
 
-export interface SimplePlantSchema {
+export interface PlantSchema {
   id: string;
   name: string;
   in_setup_phase: boolean;
   technology_id: number;
-}
-
-export interface PlantSchema extends SimplePlantSchema {
-  customers: CustomerSchema[];
+  technology: TechnologySchema;
   fieldgeometry?: FieldgeometrySchema;
   analysis_results_count?: number;
+  /**
+   * only available for SUPER_ADMINS
+   */
+  customers?: CustomerSchema[];
 }

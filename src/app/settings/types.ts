@@ -1,7 +1,7 @@
-import { SimplePlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
+import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
 
 export interface SelectPlant {
-  plant: SimplePlantSchema;
+  plant: PlantSchema;
   selected: boolean;
   otherCustomers?: string;
 }

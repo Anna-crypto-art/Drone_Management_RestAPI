@@ -1,6 +1,6 @@
 import { RoleSchema } from "@/app/shared/services/volateq-api/api-schemas/role-schema";
 import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
-import { SimplePlantSchema } from "./plant-schema";
+import { PlantSchema } from "./plant-schema";
 
 export interface NotifiacationSettingsSchema {
   init_debug_phase: boolean;
@@ -36,7 +36,7 @@ export interface UserSchema {
   state: UserStateSchema;
   is_locked: boolean;
   customer?: CustomerSchema;
-  plants?: SimplePlantSchema[];
+  plants?: PlantSchema[];
 }
 
 export interface UserInfoSchema {

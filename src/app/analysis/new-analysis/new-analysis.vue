@@ -80,7 +80,7 @@ export default class AppNewAnalysis extends BaseAuthComponent {
 
   onPlantSelectionChanged() {
     const plant = this.plants.find(plant => plant.id === this.selectedPlantId);
-    if (plant && plant.customers.length > 1) {
+    if (plant && plant.customers && plant.customers.length > 1) {
       this.customerOptions = plant.customers.map(customer => ({ value: customer.id, text: customer.name }));
     } else {
       this.customerOptions = [];

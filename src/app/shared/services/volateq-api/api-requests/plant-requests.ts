@@ -1,3 +1,10 @@
 export interface UpdatePlantRequest {
-    in_setup_phase: boolean;
+    name?: string;
+    in_setup_phase?: boolean;
+}
+
+export interface CreatePlantRequest {
+    name: string;
+    customer_id: string;
+    technology_id: number;
 }

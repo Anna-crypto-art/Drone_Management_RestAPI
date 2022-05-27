@@ -7,6 +7,7 @@ export interface PlantItem {
   digitized: boolean;
   analysesCount: number;
   established: boolean,
+  technology: string;
   customers?: string;
   fieldgeometry?: FieldgeometrySchema;
 }

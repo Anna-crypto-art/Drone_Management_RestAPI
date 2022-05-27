@@ -1,4 +1,4 @@
-import { SimplePlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 
 export interface UserItem {
   id: string,
@@ -15,5 +15,5 @@ export interface UserItem {
     id: string | null,
   },
   role: string
-  plants: SimplePlantSchema[],
+  plants: PlantSchema[],
 }

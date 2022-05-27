@@ -176,7 +176,7 @@ export default class AppAnalysis extends BaseAuthComponent {
   async onPlantSelectionChanged() {
     if (this.selectedPlantId) {
       const plant = this.plants!.find(plant => plant.id === this.selectedPlantId);
-      if (plant!.customers.length > 1) {
+      if (plant!.customers && plant!.customers.length > 1) {
         this.customers = [
           { value: null, text: "" },
           ...plant!.customers.map(customer => ({ value: customer.id, text: customer.name }))

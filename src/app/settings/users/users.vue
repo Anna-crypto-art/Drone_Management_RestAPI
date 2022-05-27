@@ -438,11 +438,11 @@ export default class AppSettingsUsers extends Vue {
   setInviteUserCustomerPlants() {
     if (this.newUser?.customer_id) {
       this.inviteUserCustomerPlants = this.plants
-        .filter(plant => plant.customers.find(customer => customer.id === this.newUser.customer_id))
+        .filter(plant => plant.customers!.find(customer => customer.id === this.newUser.customer_id))
         .map(plant => ({ 
           plant,
           selected: false,
-          otherCustomers: plant.customers.filter(customer => customer.id !== this.newUser.customer_id)
+          otherCustomers: plant.customers!.filter(customer => customer.id !== this.newUser.customer_id)
             .map(customer => customer.name).join(', ')
         }));
     } else {
@@ -475,11 +475,11 @@ export default class AppSettingsUsers extends Vue {
   setEditUserCustomerPlants() {
     if (this.editUser?.customer.id) {
       this.editUserCustomerPlants = this.plants
-          .filter(plant => plant.customers.find(customer => customer.id === this.editUser!.customer.id))
+          .filter(plant => plant.customers!.find(customer => customer.id === this.editUser!.customer.id))
           .map(plant => ({
             plant,
             selected: !!this.editUser!.plants.find(userPlant => userPlant.id === plant.id),
-            otherCustomers: plant.customers.filter(customer => customer.id !== this.editUser!.customer.id)
+            otherCustomers: plant.customers!.filter(customer => customer.id !== this.editUser!.customer.id)
               .map(customer => customer.name).join(', ')
           }));
     } else {

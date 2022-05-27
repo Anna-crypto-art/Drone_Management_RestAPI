@@ -39,7 +39,7 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 })
 export default class AppModalForm extends Vue implements IAppModalForm {
   @Prop({ required: true }) id!: string;
-  @Prop({ required: true }) title!: string;
+  @Prop({ default: "" }) title!: string;
   @Prop() subtitle: string | undefined;
   @Prop({ required: true }) okTitle!: string;
   @Prop({ default: false }) modalLoading!: boolean;

@@ -1,4 +1,4 @@
-import { SimplePlantSchema } from "./plant-schema";
+import { PlantSchema } from "./plant-schema";
 
 export interface AddressSchema {
   street: string;
@@ -18,5 +18,5 @@ export interface CustomerSchema {
   name: string;
   role: CustomerRole;
   profile: AddressSchema;
-  plants: SimplePlantSchema[];
+  plants: PlantSchema[];
 }
