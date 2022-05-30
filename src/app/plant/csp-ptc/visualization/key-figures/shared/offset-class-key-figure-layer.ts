@@ -140,23 +140,25 @@ export abstract class OffsetClassKeyFigureLayer<T extends AnalysisResultSchemaBa
     }
 
     if (this.getQueryOffsetClass() === 1) {
-      return `less than ${limitAt0}°: ${this.getLegendEntryCount()}`;
+      return this.vueComponent.$t("less-than", {limit: limitAt0 + "°"}).toString() + ": " + this.getLegendEntryCount();
     }
 
-    
     if (this.getQueryOffsetClass() === 2) {
       if (negativeOffset) {
-        return `between -${limitAt1}° and -${limitAt0}°: ${this.getLegendEntryCount(featureCount)}`;
+        return this.vueComponent.$t("between-and", {limit1: "-" + limitAt1 + "°", limit2: "-" + limitAt0 + "°"}).toString() +
+          ": " + this.getLegendEntryCount();
       }
 
-      return `between ${limitAt0}° and ${limitAt1}°: ${this.getLegendEntryCount(featureCount)}`;
+      return this.vueComponent.$t("between-and", {limit1: limitAt0 + "°", limit2: limitAt1 + "°"}).toString() +
+          ": " + this.getLegendEntryCount();
     }
+    
     if (this.getQueryOffsetClass() === 3) {
       if (negativeOffset) {
-        return `less than -${limitAt1}°: ${this.getLegendEntryCount(featureCount)}`;
+        return this.vueComponent.$t("less-than", {limit: "-" + limitAt1 + "°"}).toString() + ": " + this.getLegendEntryCount();
       }
 
-      return `greater than ${limitAt1}°: ${this.getLegendEntryCount(featureCount)}`;
+      return this.vueComponent.$t("greater-than", {limit: limitAt1 + "°"}).toString() + ": " + this.getLegendEntryCount();
     }
 
     throw Error("Unsupported query value for orientation offset");

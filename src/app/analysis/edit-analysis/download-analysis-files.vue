@@ -30,10 +30,19 @@
         <template #cell(selected)="{ rowSelected }">
           <b-checkbox :checked="rowSelected" disabled class="b-table-selectable-checkbox"> </b-checkbox>
         </template>
-        <template #row-details="row">
-          <span class="analysis-selection-sidebar-kpi-badge" v-for="kpi in row.item.kpis" :key="kpi.id">
-            <b-badge variant="primary" :style="'background-color: ' + getKpiColor(kpi)">{{ kpi.name }}</b-badge>
-          </span>
+        <template #cell(size)="row">
+          <div v-if="row.item.size === null" class="hover-cell pull-right">
+            <b-button
+              @click="onLoadFileSizeClick(row.item.name)"
+              variant="secondary"
+              size="sm"
+              :title="$t('load-file-size')"
+            >
+              {{ $t("load-file-size") }}
+            </b-button>
+          </div>
+          <span v-if="row.item.size">{{ row.item.size }}</span>
+          <span v-if="row.item.size === false">{{ $t("not-found") }}</span>
         </template>
       </b-table>
     </app-table-container>
@@ -72,19 +81,19 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
     { key: "name", label: this.$t("name").toString() },
     { key: "size", label: this.$t("size").toString() },
   ];
-  downloadFilesTableItems: { name: string }[] = [];
+  downloadFilesTableItems: { name: string, size: null | false | string }[] = [];
 
   allDownloadFilesSelected = false;
   private selectedDonwloadFiles: { name: string }[] = [];
 
-  isFilesLoading = true;
+  isFilesLoading = false;
 
   async created() {
-    await this.setDownloadFilesTableItems();
+    this.setDownloadFilesTableItems();
   }
 
-  @Watch('analysis') async onAnalysisChanged() {
-    await this.setDownloadFilesTableItems();
+  @Watch('analysis') onAnalysisChanged() {
+    this.setDownloadFilesTableItems();
   }
 
   onDownloadFilesSelected(selectedDownloadFiles: { name: string }[]) {
@@ -134,26 +143,28 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
     }
   }
 
-  private async setDownloadFilesTableItems() {
+  async onLoadFileSizeClick(filename: string) {
     this.isFilesLoading = true;
-
     try {
-      let files: string[] = [];
-      for (const key of Object.keys(this.analysis.files)) {
-        files = files.concat(this.analysis!.files[key]);
-      }
-      files.sort();
-
-      const fileInfos = await volateqApi.getAnalysisFilesInfo(this.analysis.id, files);
-      this.downloadFilesTableItems = Object.keys(fileInfos).map(filename => ({
-        name: filename,
-        size: fileInfos[filename] !== null ? getReadableFileSize(fileInfos[filename]!) : this.$t("missing").toString(),
-      }));
+      const fileInfos = await volateqApi.getAnalysisFilesInfo(this.analysis.id, [filename]);
+      const fileItem = this.downloadFilesTableItems.find(item => item.name === filename);
+      
+      fileItem!.size = fileInfos[filename] !== null ? getReadableFileSize(fileInfos[filename]!) : false;
     } catch (e) {
       AppContentEventService.showError(this.analysis.id, e as ApiException);
     } finally {
       this.isFilesLoading = false;
     }
+  }
+
+  private async setDownloadFilesTableItems() {
+    let files: string[] = [];
+    for (const key of Object.keys(this.analysis.files)) {
+      files = files.concat(this.analysis!.files[key]);
+    }
+    files.sort();
+
+    this.downloadFilesTableItems = files.map(file => ({ name: file, size: null }));
   }
 }
 </script>
