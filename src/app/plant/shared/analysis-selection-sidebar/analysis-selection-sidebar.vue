@@ -3,7 +3,10 @@
     <app-sidebar :open="sidebarOpen" @toggled="onSidebarToggled">
       <div class="analysis-selection-sidebar-leftside">
         <div class="analysis-selection-sidebar-leftside-settings" v-if="analysisResults.length > 1">
-          <b-checkbox switch v-model="compareMode" @change="onCompareModeChanged">{{ $t("compare-mode") }}</b-checkbox>
+          <b-checkbox switch v-model="compareMode" @change="onCompareModeChanged">
+            {{ $t("compare-mode") }}
+            <app-explanation>{{ $t("compare-mode_descr") }}</app-explanation>
+          </b-checkbox>
         </div>
         <app-table-container size="sm">
           <b-table
@@ -71,6 +74,7 @@ export default class AppAnalysisSelectionSidebar extends Vue {
 
   compareMode = false;
   selectMode = "single";
+  lastSelectedAnalysisResults: { id: string }[] = [];
 
   async created() {
     for (const analysisResult of this.analysisResults) {
@@ -98,6 +102,15 @@ export default class AppAnalysisSelectionSidebar extends Vue {
   }
 
   onAnalysisResultSelected(selectedAnalysisResult: { id: string }[]): void {
+    if (selectedAnalysisResult.length > 2) {
+      const newSelectedIndex = selectedAnalysisResult
+        .findIndex(selected => !this.lastSelectedAnalysisResults.find(lastSelected => lastSelected.id === selected.id))
+      
+      this.analysisResultsTable.unselectRow(newSelectedIndex)
+      return;
+    }
+    this.lastSelectedAnalysisResults = selectedAnalysisResult;
+
     if (this.compareMode) {
       let selectedAnalysisResultIds: string[] | undefined = undefined;
       if (selectedAnalysisResult && selectedAnalysisResult.length === 2) {
@@ -146,6 +159,11 @@ export default class AppAnalysisSelectionSidebar extends Vue {
 <style lang="scss">
 @import "@/scss/_colors.scss";
 @import "@/scss/_variables.scss";
+
+// Fix sidebar overlays toaster
+.b-popover {
+  z-index: 10;
+}
 
 .analysis-selection-sidebar {
   height: calc(100vh - #{$header-height});

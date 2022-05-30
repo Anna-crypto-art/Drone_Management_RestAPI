@@ -29,7 +29,7 @@
     </app-geovisualization>
 
     <div v-if="hasLegend" :class="'visualization-legend' + (sidebarOpen ? ' sidebar-open' : '')">
-      <div v-for="entry in legendEntries" :key="entry.color" class="visualization-legend-entry">
+      <div v-for="entry in legendEntries" :key="entry.color" :class="'visualization-legend-entry' + (entry.indent ? ' pad-left' : '')">
         <div class="visualization-legend-entry-color" :style="`background: ${entry.color}`"></div>
         <div class="visualization-legend-entry-name" v-html="entry.name"></div>
       </div>

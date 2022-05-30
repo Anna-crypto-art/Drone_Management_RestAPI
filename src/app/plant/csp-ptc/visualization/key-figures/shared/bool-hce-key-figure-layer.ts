@@ -25,10 +25,13 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
 
   protected getDiffColor(feature: FeatureLike): string {
     const diffValue = this.getPropertyDiffValue(feature);
-    if (diffValue === -1) {
+    if (diffValue === -1) { // Fixed
       return KeyFigureColors.green;
     }
-    if (diffValue === 1) {
+    if (diffValue === 1) { // New
+      return KeyFigureColors.red;
+    }
+    if (diffValue !== undefined) { // Compare mode on
       return KeyFigureColors.black;
     }
 
@@ -52,13 +55,14 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
 
       compareEntries = [
         {
+          color: KeyFigureColors.red,
+          name: this.vueComponent.$t("of-which-are-new").toString() + this.getLegendEntryCount(newFeaturesCount),
+          indent: true,
+        },
+        {
           color: KeyFigureColors.green,
           name: this.vueComponent.$t("fixed").toString() + this.getLegendEntryCount(fixedFeaturesCount),
         },
-        {
-          color: KeyFigureColors.black,
-          name: this.vueComponent.$t("new").toString() + this.getLegendEntryCount(newFeaturesCount),
-        }
       ]
     }
 
@@ -66,7 +70,7 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
       id: this.keyFigureId.toString(),
       entries: [
         {
-          color: this.color!,
+          color: this.compareAnalysisResult ? KeyFigureColors.black : this.color!,
           name:
             this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
             this.getLegendEntryCount(featuresCount),

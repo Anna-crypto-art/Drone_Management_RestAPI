@@ -12,16 +12,21 @@ export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer {
 
   protected getDiffColor(feature: FeatureLike): string {
     const diffValue = this.getPropertyDiffValue(feature);
-    if (diffValue !== undefined && (diffValue > 0 || diffValue < 0)) {
-      const classValue = this.query?.glass_tube_temperature_class;
-      if (classValue) {
-        if (diffValue > 0) {
-          return KeyFigureColors.black;
-        }
-        if (diffValue < 0) {
-          return KeyFigureColors.green;
+    
+    if (diffValue !== undefined) { // compare mode
+      if (diffValue > 0 || diffValue < 0) {
+        const classValue = this.query?.glass_tube_temperature_class;
+        if (classValue) {
+          if (diffValue > 0) { // New
+            return KeyFigureColors.red;
+          }
+          if (diffValue < 0) { // Fixed
+            return KeyFigureColors.green;
+          }
         }
       }
+
+      return KeyFigureColors.black;
     }
 
     return super.getDiffColor(feature);
@@ -61,13 +66,14 @@ export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer {
 
       compareEntries = [
         {
+          color: KeyFigureColors.red,
+          name: this.vueComponent.$t("of-which-are-new").toString() + this.getLegendEntryCount(newFeaturesCount),
+          indent: true,
+        },
+        {
           color: KeyFigureColors.green,
           name: this.vueComponent.$t("fixed").toString() + this.getLegendEntryCount(fixedFeaturesCount),
         },
-        {
-          color: KeyFigureColors.black,
-          name: this.vueComponent.$t("new").toString() + this.getLegendEntryCount(newFeaturesCount),
-        }
       ]
     }
 
@@ -75,7 +81,7 @@ export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer {
       id: this.keyFigureInfo.displayName || this.keyFigureId.toString(),
       entries: [
         {
-          color: this.getColor(),
+          color: this.compareAnalysisResult ? KeyFigureColors.black : this.getColor(),
           name: this.vueComponent.$t(this.getLegendName()).toString() + this.getLegendEntryCount(featureCount),
         },
         ...compareEntries

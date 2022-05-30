@@ -12,6 +12,7 @@ import { KeyFigureColors, KeyFigureInfo, SubKeyFigureInfo } from "./layers/types
 export interface LegendEntry {
   color: string;
   name: string;
+  indent?: boolean;
 }
 
 export interface Legend {
