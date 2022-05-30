@@ -2,7 +2,7 @@
   <div class="app-table-filter mar-top mar-bottom" v-if="analysisResult">
     <app-collapse :name="analysisResult.id">
       <template #button>
-        <b-icon icon="filter" class="pad-right" />{{ $t("filter") }}
+        <b-icon icon="filter" /> <span class="pad-left">{{ $t("filter") }}</span>
       </template>
       <template slot="nextToButton">
         <slot name="nextToButton" />

@@ -4,7 +4,7 @@
       <template #topContent>
         <app-collapse name="displaySettings">
           <template #button>
-            <b-icon icon="gear-fill" class="pad-right" /> {{ $t("display-settings") }}
+            <b-icon icon="gear-fill" /> <span class="pad-left">{{ $t("display-settings") }}</span>
           </template>
           <b-form-checkbox v-model="enableMultiSelection" switch @change="onMultiSelectionChanged">
             {{ $t("multi-selection") }} <app-explanation>{{ $t("multi-selection-overlapping_expl") }}</app-explanation>
