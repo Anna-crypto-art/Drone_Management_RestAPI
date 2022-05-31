@@ -1,5 +1,5 @@
 import { KeyFigureColors } from "@/app/plant/shared/visualization/layers/types";
-import { Legend, LegendEntry } from "@/app/plant/shared/visualization/types";
+import { FeatureProperties, Legend, LegendEntry, PropsFeature } from "@/app/plant/shared/visualization/types";
 import { FeatureLike } from "ol/Feature";
 import { Stroke, Style } from "ol/style";
 import { HceKeyFigureLayer } from "./hce-key-figure-layer";
@@ -23,19 +23,16 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
     return super.getStyle(feature);
   }
 
-  protected getDiffColor(feature: FeatureLike): string {
-    const diffValue = this.getPropertyDiffValue(feature);
+  protected getDiffColor(featureProperties: FeatureProperties): string {
+    const diffValue = featureProperties.diff_value
     if (diffValue === -1) { // Fixed
       return KeyFigureColors.green;
     }
     if (diffValue === 1) { // New
       return KeyFigureColors.red;
     }
-    if (diffValue !== undefined) { // Compare mode on
-      return KeyFigureColors.black;
-    }
 
-    return this.getColor();
+    return KeyFigureColors.black;
   }
 
   protected getLegend(): Legend | undefined {
@@ -79,7 +76,7 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
       ],
     };
 
-    if (this.query?.undefined) {
+    if (this.query?.undefined && !this.compareAnalysisResult) {
       legend.entries.push({
         color: KeyFigureColors.grey,
         name: this.vueComponent.$t("not-measured").toString() + this.getLegendEntryCount(notMeasuredFeaturesCount),

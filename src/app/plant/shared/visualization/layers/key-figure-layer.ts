@@ -4,7 +4,7 @@ import { GEO_JSON_OPTIONS, LayerBase } from "./layer-base";
 import { FeatureLike } from "ol/Feature";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { KeyFigureColors, KeyFigureColorScheme, KeyFigureInfo, OrthoImage } from "./types";
-import { FeatureInfo, FeatureInfos, FeatureProperties, Legend, IPlantVisualization, FeatureAction } from "../types";
+import { FeatureInfo, FeatureInfos, FeatureProperties, Legend, IPlantVisualization, FeatureAction, PropsFeature } from "../types";
 import { AnalysisResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
 import Vue from "vue";
@@ -12,7 +12,6 @@ import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/k
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
-import VectorImageLayer from "ol/layer/VectorImage";
 import { VectorGeoLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 import { Geometry, SimpleGeometry } from "ol/geom";
 import Feature from "ol/Feature";
@@ -34,7 +33,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
 
   protected geoJSON?: {
     type: string;
-    features: { properties: FeatureProperties }[];
+    features: PropsFeature[];
     custom: { components_total_count: number; mirrors_per_sce?: number };
   };
 

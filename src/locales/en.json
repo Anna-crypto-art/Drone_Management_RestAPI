@@ -307,6 +307,8 @@
   "between-and": "Between {limit1} and {limit2}",
   "less-than": "Less than {limit}",
   "compare-mode_descr": "The younger analysis is the starting point (the left number in the substraction), always. In the table view the difference values will be used for sorting and filtering",
+  "of-which-are-new-but-improved": "Of which are new, but improved",
+  "improved-not-fixed": "Improved, but not fixed",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",

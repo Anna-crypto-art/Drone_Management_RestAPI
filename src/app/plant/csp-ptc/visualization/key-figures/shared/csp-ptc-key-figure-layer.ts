@@ -1,8 +1,4 @@
-import { IPlantVisualization, Legend } from "@/app/plant/shared/visualization/types";
-import analysisResultCspPtcMappingHce from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-hce";
-import { AnalysisResultCspPtcHceSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-hce-schema";
-import { FeatureLike } from "ol/Feature";
-import { Stroke, Style } from "ol/style";
+import { ComparedFeatures, ComparedFeatureType, FeatureProperties, IPlantVisualization } from "@/app/plant/shared/visualization/types";
 import { KeyFigureLayer } from "@/app/plant/shared/visualization/layers/key-figure-layer";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { KeyFigureColors, KeyFigureColorScheme, KeyFigureInfo } from "@/app/plant/shared/visualization/layers/types";
@@ -73,5 +69,90 @@ export abstract class CspPtcKeyFigureLayer<T extends AnalysisResultSchemaBase> e
     }
 
     return this.color!;
+  }
+
+  protected getDiffColorByComparedFeatureType(comparedFeatureType: ComparedFeatureType): string {
+    switch (comparedFeatureType) {
+      case ComparedFeatureType.GONE_FIXED:
+        return KeyFigureColors.green;
+      
+      case ComparedFeatureType.GONE_IMPROVED:
+        return this.getColorWithAlpha(KeyFigureColors.green, 0.5)
+      
+      case ComparedFeatureType.NEW_WORSENED:
+        return KeyFigureColors.red;
+
+      case ComparedFeatureType.NEW_IMPROVED:
+        return KeyFigureColors.grey;
+
+      case ComparedFeatureType.NO_CHANGE:
+        return KeyFigureColors.black;
+      
+      case ComparedFeatureType.GONE_WORSENED:
+        return KeyFigureColors.blue;
+    }
+  }
+
+  protected getComparedFeatures(currentClass: number): ComparedFeatures {
+    const comparedFeatures: ComparedFeatures = {
+      goneFeatures: [],
+      goneFixedFeatures: [],
+      goneImprovedFeatures: [],
+      newFeatures: [],
+      newImprovedFeatures: [],
+      newWorsenedFeatures: [],
+    };
+
+    for (const propFeature of this.geoJSON!.features) {
+      const comparedFeatureType = this.getComparedFeatureType(propFeature.properties, currentClass);
+      if (comparedFeatureType === ComparedFeatureType.GONE_FIXED) {
+        comparedFeatures.goneFeatures.push(propFeature);
+        comparedFeatures.goneFixedFeatures.push(propFeature);
+      } 
+      else if (comparedFeatureType === ComparedFeatureType.GONE_IMPROVED) {
+        comparedFeatures.goneFeatures.push(propFeature);
+        comparedFeatures.goneImprovedFeatures.push(propFeature);
+      }
+      else if (comparedFeatureType === ComparedFeatureType.GONE_WORSENED) {
+        comparedFeatures.goneFeatures.push(propFeature);
+      }
+      else if (comparedFeatureType === ComparedFeatureType.NEW_WORSENED) {
+        comparedFeatures.newFeatures.push(propFeature);
+        comparedFeatures.newWorsenedFeatures.push(propFeature);
+      } 
+      else if (comparedFeatureType === ComparedFeatureType.NEW_IMPROVED) {
+        comparedFeatures.newFeatures.push(propFeature);
+        comparedFeatures.newImprovedFeatures.push(propFeature);
+      }
+    }
+
+    return comparedFeatures;
+  }
+
+  protected getComparedFeatureType(properties: FeatureProperties, currentClass: number): ComparedFeatureType {
+    const featureValue: number = properties.value! as number;
+    const featureDiffValue: number = properties.diff_value! as number;
+
+    if (featureDiffValue === 0) {
+      return ComparedFeatureType.NO_CHANGE;
+    }
+
+    if (featureValue !== currentClass) {
+      if (featureDiffValue > 0) {
+        return ComparedFeatureType.GONE_WORSENED;
+      }
+
+      if (featureValue === 1) {
+        return ComparedFeatureType.GONE_FIXED;
+      }
+      
+      return ComparedFeatureType.GONE_IMPROVED;
+    } 
+    
+    if (featureValue > 0) {
+      return ComparedFeatureType.NEW_WORSENED;
+    } 
+    
+    return ComparedFeatureType.NEW_IMPROVED;
   }
 }

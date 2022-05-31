@@ -1,4 +1,4 @@
-import { LayerType } from "@/app/shared/components/app-geovisualization/types/layers";
+import { GroupLayer, LayerType } from "@/app/shared/components/app-geovisualization/types/layers";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { KeyFigureLayer } from "./layers/key-figure-layer";
@@ -56,9 +56,17 @@ export class PILayersHierarchy {
     return allChildLayers;
   }
 
-  public toggleMultiSelection(multiSelection: boolean): void {
+  public toggleMultiSelection(multiSelection: boolean, deep = false): void {
     for (const componentId in this.parentComponentKpiLayers) {
       this.parentComponentKpiLayers[componentId].groupLayer.singleSelection = !multiSelection;
+      
+      if (deep) {
+        if (this.parentComponentKpiLayers[componentId].subGroupLayers) {
+          for (const childLayer of this.parentComponentKpiLayers[componentId].groupLayer.childLayers) {
+            (childLayer as GroupLayer).singleSelection = !multiSelection;
+          }
+        }
+      }
     }
     for (const childLayer of this.getAllChildLayers()) {
       childLayer.setColorScheme(multiSelection ? KeyFigureColorScheme.RAINBOW : KeyFigureColorScheme.TRAFFIC_LIGHT);

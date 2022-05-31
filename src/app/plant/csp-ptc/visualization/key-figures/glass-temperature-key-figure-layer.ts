@@ -1,35 +1,17 @@
 import { KeyFigureColors, KeyFigureColorScheme } from "@/app/plant/shared/visualization/layers/types";
-import { Legend, LegendEntry } from "@/app/plant/shared/visualization/types";
-import { FeatureLike } from "ol/Feature";
+import { ComparedFeatureType, FeatureProperties, Legend, LegendEntry, PropsFeature } from "@/app/plant/shared/visualization/types";
 import { ClassHceKeyFigureLayer } from "./shared/class-hce-key-figure-layer";
 
 export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer {
   protected created(): void {
     super.created();
 
-    this.enableCompare = this.analysisResult.csp_ptc.glass_tube_temperature_class_count === this.query!.glass_tube_temperature_class!
+    this.enableCompare = this.query!.glass_tube_temperature_class! > 1;
   }
 
-  protected getDiffColor(feature: FeatureLike): string {
-    const diffValue = this.getPropertyDiffValue(feature);
-    
-    if (diffValue !== undefined) { // compare mode
-      if (diffValue > 0 || diffValue < 0) {
-        const classValue = this.query?.glass_tube_temperature_class;
-        if (classValue) {
-          if (diffValue > 0) { // New
-            return KeyFigureColors.red;
-          }
-          if (diffValue < 0) { // Fixed
-            return KeyFigureColors.green;
-          }
-        }
-      }
-
-      return KeyFigureColors.black;
-    }
-
-    return super.getDiffColor(feature);
+  protected getDiffColor(featureProperties: FeatureProperties): string {
+    const comparedFeatureType = this.getComparedFeatureType(featureProperties, this.query!.glass_tube_temperature_class!);
+    return this.getDiffColorByComparedFeatureType(comparedFeatureType);
   }
 
   protected getClassColor(classValue: number | undefined): string {
@@ -57,24 +39,39 @@ export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer {
       return undefined;
     }
 
-    let compareEntries: LegendEntry[] = [];
+    const compareEntries: LegendEntry[] = [];
     let featureCount = this.geoJSON!.features.length
     if (this.compareAnalysisResult) {
-      const fixedFeaturesCount = this.geoJSON.features.filter(feature => feature.properties.diff_value && feature.properties.diff_value < 0).length;
-      const newFeaturesCount = this.geoJSON.features.filter(feature => feature.properties.diff_value && feature.properties.diff_value > 0).length;
-      featureCount = featureCount - fixedFeaturesCount;
+      const comparedFeatures = this.getComparedFeatures(this.query!.glass_tube_temperature_class!);
+      featureCount -= comparedFeatures.goneFeatures.length;
 
-      compareEntries = [
-        {
-          color: KeyFigureColors.red,
-          name: this.vueComponent.$t("of-which-are-new").toString() + this.getLegendEntryCount(newFeaturesCount),
+      compareEntries.push({
+        color: KeyFigureColors.red,
+        name: this.vueComponent.$t("of-which-are-new").toString() + 
+          this.getLegendEntryCount(comparedFeatures.newWorsenedFeatures.length),
+        indent: true,
+      });
+
+      if (comparedFeatures.newImprovedFeatures.length > 0) {
+        compareEntries.push({
+          color: KeyFigureColors.grey,
+          name: this.vueComponent.$t("of-which-are-new-but-improved").toString() + 
+            this.getLegendEntryCount(comparedFeatures.newImprovedFeatures.length),
           indent: true,
-        },
-        {
-          color: KeyFigureColors.green,
-          name: this.vueComponent.$t("fixed").toString() + this.getLegendEntryCount(fixedFeaturesCount),
-        },
-      ]
+        });
+      }
+
+      compareEntries.push({
+        color: KeyFigureColors.green,
+        name: this.vueComponent.$t("fixed").toString() + this.getLegendEntryCount(comparedFeatures.goneFixedFeatures.length),
+      });
+
+      if (comparedFeatures.goneImprovedFeatures.length > 0) {
+        compareEntries.push({
+          color: this.getColorWithAlpha(KeyFigureColors.green, 0.5),
+          name: this.vueComponent.$t("improved-not-fixed").toString() + this.getLegendEntryCount(comparedFeatures.goneImprovedFeatures.length),
+        });
+      }
     }
 
     return {

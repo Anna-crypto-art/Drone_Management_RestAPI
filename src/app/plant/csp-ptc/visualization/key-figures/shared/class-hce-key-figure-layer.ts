@@ -30,4 +30,6 @@ export class ClassHceKeyFigureLayer extends HceKeyFigureLayer {
   protected getLegendName(): string {
     return (this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!;
   }
+
+  
 }

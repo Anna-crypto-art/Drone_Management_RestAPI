@@ -134,29 +134,33 @@ export default class AppVisualization
 
   private worldMapLayer!: OSMLayer;
 
-  private waitForDom = false;
+  private isMounted = false;
 
   async created() {
     await super.created();
 
     this.enableMultiSelection = appLocalStorage.getItem(STORAGE_KEY_MULTISELECTION) || false;
-    this.showCouldNotBeMeasured = !!appLocalStorage.getItem(STORAGE_KEY_SHOWUNDEFINED);
+    this.showCouldNotBeMeasured = appLocalStorage.getItem(STORAGE_KEY_SHOWUNDEFINED) || false;
     this.satelliteView = appLocalStorage.getItem(STORAGE_KEY_SATELLITEVIEW) || false;
 
-    this.createLayers();
+    this.createLayers();    
+  }
+
+  async mounted() {
+    await this.$nextTick();
+
+    // wait for DOM before render OpenLayers
+    this.isMounted = true;
 
     this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
     this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
-
-    // wait for DOM before render OpenLayers
-    setTimeout(() => {
-      this.waitForDom = true;
-    }, 300);
   }
 
   protected onAnalysisSelected() {
     this.piLayersHierarchy.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     this.piLayersHierarchy.setCompareAnalysisResult(null);
+    this.piLayersHierarchy.toggleMultiSelection(true, true);
+    this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
     this.piLayersHierarchy.updateVisibility();
 
     this.hideToast();
@@ -165,13 +169,14 @@ export default class AppVisualization
   protected onMultiAnalysesSelected() {
     this.piLayersHierarchy.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     this.piLayersHierarchy.setCompareAnalysisResult(this.compareAnalysisResult || null);
+    this.piLayersHierarchy.toggleMultiSelection(false, true);
     this.piLayersHierarchy.updateVisibility();
 
     this.hideToast();
   }
 
   get hasLayers(): boolean {
-    return this.layers.length > 0 && this.waitForDom;
+    return this.layers.length > 0 && this.isMounted;
   }
 
   get hasLegend(): boolean {
