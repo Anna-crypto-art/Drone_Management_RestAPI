@@ -13,9 +13,15 @@ export interface TableRequest {
   sums?: 0 | 1;
 }
 
+export interface ColumnFuncCondition {
+  compare_mode: "equal" | "less" | "greater" | "between";
+  compare_values: number[];
+}
+
 export interface TableColumnSelect {
   name: string;
   func?: "sum" | "avg" | "count";
+  func_condition?: ColumnFuncCondition;
 }
 
 export interface TableFilterRequest {

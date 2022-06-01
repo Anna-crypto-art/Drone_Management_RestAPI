@@ -48,7 +48,6 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     transName: "glass-tube-temperature",
     keyFigureId: ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
-    enableForDiagram: true,
     unit: "μ in °C",
     getDiffValue: r => r.glass_tube_temperature__diff,
     diffPositive: "negative",

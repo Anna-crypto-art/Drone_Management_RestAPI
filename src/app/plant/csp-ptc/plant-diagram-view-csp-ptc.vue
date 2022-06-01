@@ -38,14 +38,16 @@ import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/a
 import { AnalysisResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { allCspPtcMappings } from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping";
 import { BvSelectOption } from "@/app/shared/types";
-import { TableFilterRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
+import { TableColumnSelect, TableFilterRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
 import analysisResultCspPtcMappingHce from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-hce";
 import { AnalysisSelectionBaseComponent } from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-base-component";
 import AppDiagramOverview from "@/app/plant/shared/diagram/diagram-overview.vue";
-import { DiagramNumberBox } from "../shared/diagram/types";
+import { DiagramNumberBox, DiagramResultMappings } from "../shared/diagram/types";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import AppDiagramHistory from "@/app/plant/shared/diagram/diagram-history.vue";
+import { FilterFieldType } from "../shared/filter-fields/types";
+import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
     
 
 @Component({
@@ -70,11 +72,66 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
     await super.created();
   }
 
+  onAnalysisSelected() {
+    this.setTableFilters();
+  }
+
+  private setTableFilters() {
+    for (const cspPtcMapping of allCspPtcMappings) {
+      const analysisResultMappingHelper = new AnalysisResultMappingHelper(
+          cspPtcMapping.resultMapping,
+          this.firstAnalysisResult!
+        );
+
+      analysisResultMappingHelper.setCompareAnalysisResult(this.compareAnalysisResult);
+
+      const columnsMapping = analysisResultMappingHelper.getColumnsMapping();
+      const diagramEntries = analysisResultMappingHelper.getDiagramEntries();
+
+      if (cspPtcMapping.componentId === ApiComponent.CSP_PTC_ABSORBER) {
+        const columnsSelection: TableColumnSelect[] = [];
+        for (const entry of diagramEntries) {
+          if (entry.filterType === FilterFieldType.BOOLEAN) {
+            columnsSelection.push({
+              name: columnsMapping[entry.transName],
+              func: "sum",
+            });
+          } else if (entry.keyFigureId === ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID) {
+            columnsSelection.push({
+              name: columnsMapping[entry.transName],// + ": "
+                // + this.$t("glass-tube-temperature-class-" 
+                //   + this.firstAnalysisResult!.csp_ptc.glass_tube_temperature_class_count).toString(),
+              func: "count",
+              func_condition: {
+                compare_mode: "equal",
+                compare_values: [this.firstAnalysisResult!.csp_ptc.glass_tube_temperature_class_count],
+              },
+            });
+          } else if (entry.keyFigureId === ApiKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID) {
+            columnsSelection.push({
+              name: columnsMapping[entry.transName],// + ": " + this.$t("recommended-action-class-3").toString(),
+              func: "count",
+              func_condition: {
+                compare_mode: "equal",
+                compare_values: [3]
+              },
+            })
+          }
+        }
+        
+        cspPtcMapping.tableFilter = {
+          component_filter: { component_id: 0 /* plant */, grouped: true },
+          columns_selection: { columns: columnsSelection },
+        };
+      }
+    }
+  }
+
   get componentIdSelection(): ApiComponent[] {
     return [ApiComponent.CSP_PTC_SUBFIELD, ApiComponent.CSP_PTC_LOOP, ApiComponent.CSP_PTC_SCA];
   }
 
-  get resultMappings(): { componentId: ApiComponent, resultMapping: AnalysisResultMappings<any> }[] {
+  get resultMappings(): DiagramResultMappings[] {
     return allCspPtcMappings;
   }
 

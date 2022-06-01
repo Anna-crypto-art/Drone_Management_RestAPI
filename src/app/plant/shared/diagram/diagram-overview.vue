@@ -44,12 +44,11 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import AppDiagramNumberBox  from "@/app/plant/shared/diagram/diagram-number-box.vue";
-import { DiagramNumberBox, GroupedAnalysisResult } from "./types";
+import { DiagramNumberBox, DiagramResultMappings, GroupedAnalysisResult } from "./types";
 import { TableColumnSelect, TableFilterRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { FilterFieldType } from "../filter-fields/types";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { MathHelper } from "@/app/shared/services/helper/math-helper";
-import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import AppDiagramHistory from "@/app/plant/shared/diagram/diagram-history.vue";
 
 @Component({
@@ -64,10 +63,7 @@ import AppDiagramHistory from "@/app/plant/shared/diagram/diagram-history.vue";
 export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
-  @Prop() resultMappings!: {
-    componentId: ApiComponent;
-    resultMapping: AnalysisResultMappings<AnalysisResultSchemaBase>;
-  }[];
+  @Prop() resultMappings!: DiagramResultMappings[];
 
   loading = false;
   viewedNumberBox: DiagramNumberBox | null = null;
@@ -108,6 +104,31 @@ export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
       await this.updateNumberBoxes();
     }
   }
+
+  private getTableFilter(
+    diagramEntries: AnalysisResultMappings<AnalysisResultSchemaBase, any>,
+    columnsMapping: Record<string, string>
+  ): TableFilterRequest | undefined {
+    const columnsSelection: TableColumnSelect[] = [];
+
+    for (const entry of diagramEntries) {
+      columnsSelection.push({
+        name: columnsMapping[entry.transName],
+        func: entry.filterType === FilterFieldType.BOOLEAN ? "sum" : "avg",
+      });
+    }
+
+    if (columnsSelection.length > 0) {
+      const tableFilter: TableFilterRequest = {
+        component_filter: { component_id: 0 /* plant */, grouped: true },
+        columns_selection: { columns: columnsSelection },
+      };
+
+      return tableFilter;
+    }
+
+    return undefined;
+  }
   
   private async updateNumberBoxes(): Promise<void> {
     this.loading = true;
@@ -123,21 +144,10 @@ export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
       analysisResultMappingHelper.setCompareAnalysisResult(this.compareAnalysisResult);
 
       const columnsMapping = analysisResultMappingHelper.getColumnsMapping();
-      const columnsSelection: TableColumnSelect[] = [];
+      const diagramEntries = analysisResultMappingHelper.getDiagramEntries();
+      const tableFilter = resultMapping.tableFilter || this.getTableFilter(diagramEntries, columnsMapping);
 
-      for (const entry of analysisResultMappingHelper.getDiagramEntries()) {
-        columnsSelection.push({
-          name: columnsMapping[entry.transName],
-          func: entry.filterType === FilterFieldType.BOOLEAN ? "sum" : "avg",
-        });
-      }
-
-      if (columnsSelection.length > 0) {
-        const tableFilter: TableFilterRequest = {
-          component_filter: { component_id: 0 /* plant */, grouped: true },
-          columns_selection: { columns: columnsSelection },
-        };
-
+      if (tableFilter) {
         const groupedResult: GroupedAnalysisResult = (this.compareAnalysisResult ?
           await volateqApi.getSpecificAnalysisResultCompared<GroupedAnalysisResult>(
             this.firstAnalysisResult!.id,
@@ -154,7 +164,7 @@ export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
           )
         ).items[0];
 
-        for (const entry of analysisResultMappingHelper.getDiagramEntries()) {
+        for (const entry of diagramEntries) {
           const columnName = columnsMapping[entry.transName];
           const columnNameDiff = this.compareAnalysisResult ? columnName + "__diff" : null;
 
