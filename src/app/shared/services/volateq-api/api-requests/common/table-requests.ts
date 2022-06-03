@@ -22,6 +22,7 @@ export interface TableColumnSelect {
   name: string;
   func?: "sum" | "avg" | "count";
   func_condition?: ColumnFuncCondition;
+  label?: string;
 }
 
 export interface TableFilterRequest {

@@ -86,6 +86,8 @@ export enum KeyFigureColors {
   black = "#000000",
   orange = "#ef7700",
   blue = "#0000ff",
+
+  volateqBlue = "rgba(6, 107, 226, 0.8)",
 }
 
 export interface OrthoImage {

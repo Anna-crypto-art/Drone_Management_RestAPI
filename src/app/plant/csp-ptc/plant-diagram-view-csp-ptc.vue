@@ -48,6 +48,7 @@ import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/k
 import AppDiagramHistory from "@/app/plant/shared/diagram/diagram-history.vue";
 import { FilterFieldType } from "../shared/filter-fields/types";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
+import { KeyFigureColors } from "../shared/visualization/layers/types";
     
 
 @Component({
@@ -65,7 +66,9 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
 
   selectedGlassTubeTemperatureClass: number | null = null;
 
+  numberBoxes: DiagramNumberBox[] | null = null;
   tableFilter: TableFilterRequest | null = null;
+
   labelUnit = "";
 
   async created() {
@@ -73,10 +76,10 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
   }
 
   onAnalysisSelected() {
-    this.setTableFilters();
+    this.updateMappings();
   }
 
-  private setTableFilters() {
+  private updateMappings() {
     for (const cspPtcMapping of allCspPtcMappings) {
       const analysisResultMappingHelper = new AnalysisResultMappingHelper(
           cspPtcMapping.resultMapping,
@@ -87,44 +90,112 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
 
       const columnsMapping = analysisResultMappingHelper.getColumnsMapping();
       const diagramEntries = analysisResultMappingHelper.getDiagramEntries();
+            
+      const columnsSelection = this.getColumnsSelection(diagramEntries, columnsMapping);
+      cspPtcMapping.tableFilter = {
+        component_filter: { component_id: 0 /* plant */, grouped: true },
+        columns_selection: { columns: columnsSelection },
+      };
 
-      if (cspPtcMapping.componentId === ApiComponent.CSP_PTC_ABSORBER) {
-        const columnsSelection: TableColumnSelect[] = [];
-        for (const entry of diagramEntries) {
-          if (entry.filterType === FilterFieldType.BOOLEAN) {
-            columnsSelection.push({
-              name: columnsMapping[entry.transName],
-              func: "sum",
-            });
-          } else if (entry.keyFigureId === ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID) {
-            columnsSelection.push({
-              name: columnsMapping[entry.transName],// + ": "
-                // + this.$t("glass-tube-temperature-class-" 
-                //   + this.firstAnalysisResult!.csp_ptc.glass_tube_temperature_class_count).toString(),
-              func: "count",
-              func_condition: {
-                compare_mode: "equal",
-                compare_values: [this.firstAnalysisResult!.csp_ptc.glass_tube_temperature_class_count],
-              },
-            });
-          } else if (entry.keyFigureId === ApiKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID) {
-            columnsSelection.push({
-              name: columnsMapping[entry.transName],// + ": " + this.$t("recommended-action-class-3").toString(),
-              func: "count",
-              func_condition: {
-                compare_mode: "equal",
-                compare_values: [3]
-              },
-            })
-          }
+      cspPtcMapping.numberBoxes = this.getNumberBoxes(diagramEntries, columnsMapping);
+    }
+  }
+
+  private getColumnsSelection(
+    diagramEntries: AnalysisResultMappings<any>,
+    columnsMapping: Record<string, string>
+  ): TableColumnSelect[] {
+    const columnsSelection: TableColumnSelect[] = [];
+    for (const entry of diagramEntries) {
+      const columnName = columnsMapping[entry.transName];
+
+      if (entry.filterType === FilterFieldType.BOOLEAN) {
+        columnsSelection.push({
+          name: columnName,
+          func: "sum",
+        });
+      } else if (entry.keyFigureId === ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID) {
+        for (let i = this.firstAnalysisResult!.csp_ptc.glass_tube_temperature_class_count; i > 1; i--) {
+          columnsSelection.push({
+            name: columnName,
+            func: "count",
+            func_condition: {
+              compare_mode: "equal",
+              compare_values: [i],
+            },
+            label: columnName + "_" + i,
+          });
         }
-        
-        cspPtcMapping.tableFilter = {
-          component_filter: { component_id: 0 /* plant */, grouped: true },
-          columns_selection: { columns: columnsSelection },
-        };
+      } else if (entry.keyFigureId === ApiKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID) {
+        for (const recActionClass of [3, 2]) {
+          columnsSelection.push({
+            name: columnName,
+            func: "count",
+            func_condition: {
+              compare_mode: "equal",
+              compare_values: [recActionClass],
+            },
+            label: columnName + "_" + recActionClass,
+          });
+        }
       }
     }
+
+    return columnsSelection;
+  }
+
+  private getNumberBoxes(
+    diagramEntries: AnalysisResultMappings<any>,
+    columnsMapping: Record<string, string>
+  ): DiagramNumberBox[] {
+    const numberBoxes: DiagramNumberBox[] = [];
+    for (const entry of diagramEntries) {
+      const numberBox: DiagramNumberBox = {
+        keyFigure: this.firstAnalysisResult!.key_figures.find(keyFigure => keyFigure.id === entry.keyFigureId)!,
+        id: entry.keyFigureId + '_' + entry.transName,
+        displayName: this.$t(entry.transName).toString(),
+        columnName: columnsMapping[entry.transName],
+        precision: 0,
+        active: false,
+        loaded: false,
+        color: KeyFigureColors.red,
+      };
+
+      let colorMap: Record<number, string> = {};
+      if (entry.keyFigureId === ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID) {
+        numberBox.nums = [];
+
+        if (this.firstAnalysisResult!.csp_ptc.glass_tube_temperature_class_count === 4) {
+          colorMap = { 4: KeyFigureColors.red, 3: KeyFigureColors.orange, 2: KeyFigureColors.yellow };
+        } else {
+          colorMap = { 3: KeyFigureColors.red, 2: KeyFigureColors.yellow };
+        }
+        
+        for (let i = this.firstAnalysisResult!.csp_ptc.glass_tube_temperature_class_count; i > 1; i--) {
+          numberBox.nums.push({
+            displayName: this.$t("glass-tube-temperature-class-" + i).toString(),
+            columnName: numberBox.columnName + "_" + i,
+            color: colorMap[i],
+          });
+        }
+      } else if (entry.keyFigureId === ApiKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID) {
+        numberBox.nums = [];
+
+        colorMap = { 3: KeyFigureColors.red, 2: KeyFigureColors.yellow };
+
+        for (const recActionClass of [3, 2]) {
+          numberBox.nums.push({
+            displayName: this.$t("recommended-action-class-" + recActionClass).toString(),
+            columnName: numberBox.columnName + "_" + recActionClass,
+            color: colorMap[recActionClass],
+          });
+        }
+      }
+
+      numberBoxes.push(numberBox);
+    }
+
+    return numberBoxes;
   }
 
   get componentIdSelection(): ApiComponent[] {

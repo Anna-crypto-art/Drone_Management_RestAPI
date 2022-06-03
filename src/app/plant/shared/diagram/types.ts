@@ -20,14 +20,23 @@ export interface BarChartData {
   datasets: { data: number[] }[];
 }
 
-export interface DiagramNumberBox {
+export interface DiagramNumberBoxNum {
+  displayName: string;
+  columnName: string;
+  num?: number | string;
+  diff?: number | string;
+  diffVariant?: string;
+  color?: string;
+}
+
+export interface DiagramNumberBox extends DiagramNumberBoxNum {
+  id: string;
   keyFigure: KeyFigureSchema;
-  keyFigureName: string;
-  num: number | string;
-  diff: number | string | null;
-  unit: string | null;
-  variant: string | null;
+  loaded: boolean;
+  precision: number;
   active: boolean;
+  unit?: string;
+  nums?: DiagramNumberBoxNum[];
 }
 
 export interface DiagramNumberBoxComponentGroup {
@@ -39,4 +48,5 @@ export interface DiagramResultMappings {
   componentId: ApiComponent;
   resultMapping: AnalysisResultMappings<any>;
   tableFilter?: TableFilterRequest;
+  numberBoxes?: DiagramNumberBox[];
 }

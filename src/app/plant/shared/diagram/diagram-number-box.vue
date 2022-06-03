@@ -1,25 +1,36 @@
 <template>
-  <div :class="'diagram-number-box' + (active ? ' active' : '')">
+  <div :class="'diagram-number-box' + (numberBox.active ? ' active' : '')">
     <slot name="name">
-      <div class="diagram-number-box-name grayed">{{ $t(name) }}</div>
+      <div class="diagram-number-box-name grayed">{{ numberBox.displayName }}</div>
     </slot>
     <slot name="number">
-      <div class="diagram-number-box-number">
-        <span>{{ num }}</span>
-        <small v-if="diff !== null" :class="textVariant">
-          {{ diff }}
+      <div class="diagram-number-box-number" v-if="numberBox.num">
+        <span>{{ numberBox.num }}</span>
+        <small v-if="numberBox.diff !== undefined" :class="textVariant">
+          {{ numberBox.diff }}
         </small>
       </div>
-      <div v-if="unit" class="diagram-number-box-number-label grayed">
+      <div class="diagram-number-box-numbers" v-if="numberBox.nums">
+        <b-row v-for="num in numberBox.nums" :key="num.columnName">
+          <b-col cols="8">{{ num.displayName }}</b-col>
+          <b-col>
+            <strong class="diagram-number-box-numbers-num">{{ num.num }}</strong>
+            <small v-if="num.diff !== undefined" :class="getTextVariant(num.diffVariant)">
+              {{ num.diff }}
+            </small>
+          </b-col>
+        </b-row>
+      </div>
+      <div v-if="numberBox.unit" class="diagram-number-box-number-label grayed">
         {{ unit }}
       </div>
     </slot>
     <slot name="action" v-if="showActionButton">
       <app-button class="diagram-number-box-button" :variant="buttonVariant" @click="onActionButtonClick">
-        {{ active ? $t('close') : $t('view') }}
+        {{ numberBox.active ? $t('close') : $t('view') }}
       </app-button>
     </slot>
-    <div class="diagram-history-container" v-show="active">
+    <div class="diagram-history-container" v-show="numberBox.active">
       <slot name="historyDiagram" />
     </div>
   </div>
@@ -29,6 +40,7 @@
 import Vue from "vue"
 import { Component, Prop, Watch } from "vue-property-decorator";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
+import { DiagramNumberBox } from "./types";
 
 @Component({
   name: "app-diagram-number-box",
@@ -37,26 +49,25 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
   }
 })
 export default class AppDiagramNumberBox extends Vue {
-  @Prop({ required: true }) name!: string;
-  @Prop({ required: true }) num!: string;
-  @Prop({ default: null }) diff!: string | null;
-  @Prop({ default: null }) unit!: string | null;
-  @Prop({ default: null }) variant!: 'success' | 'danger' | 'default' | null;
+  @Prop({ required: true }) numberBox!: DiagramNumberBox;
   @Prop({ default: true }) showActionButton!: boolean;
-  @Prop({ default: false }) active!: boolean;
 
   buttonVariant = "primary";
 
-  @Watch('active') async onActiveChanged() {
-    this.buttonVariant = this.active ? "secondary" : "primary";
+  @Watch('numberBox.active') async onActiveChanged() {
+    this.buttonVariant = this.numberBox.active ? "secondary" : "primary";
   }
 
   get textVariant() {
-    if (this.variant === 'success') {
+    return this.getTextVariant(this.numberBox.diffVariant!)
+  }
+
+  getTextVariant(diffVariant: string) {
+    if (diffVariant === 'success') {
       return 'text-success';
-    } else if (this.variant === 'danger') {
+    } else if (diffVariant === 'danger') {
       return 'text-danger';
-    } else if (this.variant === 'default') {
+    } else if (diffVariant === 'default') {
       return 'grayed';
     }
 
@@ -64,7 +75,7 @@ export default class AppDiagramNumberBox extends Vue {
   }
 
   onActionButtonClick() {
-    this.$emit("actionButtonClick", this.name)
+    this.$emit("actionButtonClick", this.numberBox.id)
   }
 }
 </script>
@@ -82,6 +93,12 @@ export default class AppDiagramNumberBox extends Vue {
   position: relative;
 
   transition: all 0.3s ease;
+
+  &-name {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
 
   &:last-child {
     margin-bottom: 0;
@@ -111,6 +128,14 @@ export default class AppDiagramNumberBox extends Vue {
   &-number {
     font-weight: bold;
     font-size: 2em;
+  }
+  &-numbers {
+    margin-top: 5px;
+
+    &-num {
+      font-weight: bold;
+      font-size: 1.3em;
+    }
   }
 
   &-button {
