@@ -55,6 +55,7 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
     transDescr: "torsion-caused-friction-mean_expl",
     keyFigureId: ApiKeyFigure.SCA_FRICTION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
+    enableForDiagram: true,
     getDiffValue: r => r.torsion_caused_friction_mean__diff,
     diffPositive: "negative",
   },

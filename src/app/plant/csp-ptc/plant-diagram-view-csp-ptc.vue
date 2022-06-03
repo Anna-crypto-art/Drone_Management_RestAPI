@@ -79,6 +79,10 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
     this.updateMappings();
   }
 
+  onMultiAnalysesSelected() {
+    this.updateMappings();
+  }
+
   private updateMappings() {
     for (const cspPtcMapping of allCspPtcMappings) {
       const analysisResultMappingHelper = new AnalysisResultMappingHelper(
@@ -97,6 +101,11 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
         columns_selection: { columns: columnsSelection },
       };
 
+      if (cspPtcMapping.componentId === ApiComponent.CSP_PTC_MIRROR) {
+        // Speeds up query for table analysis_result_csp_ptc_mirror
+        cspPtcMapping.tableFilter.filters = { is_missing: true };
+      }
+
       cspPtcMapping.numberBoxes = this.getNumberBoxes(diagramEntries, columnsMapping);
     }
   }
@@ -109,12 +118,7 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
     for (const entry of diagramEntries) {
       const columnName = columnsMapping[entry.transName];
 
-      if (entry.filterType === FilterFieldType.BOOLEAN) {
-        columnsSelection.push({
-          name: columnName,
-          func: "sum",
-        });
-      } else if (entry.keyFigureId === ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID) {
+      if (entry.keyFigureId === ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID) {
         for (let i = this.firstAnalysisResult!.csp_ptc.glass_tube_temperature_class_count; i > 1; i--) {
           columnsSelection.push({
             name: columnName,
@@ -138,6 +142,41 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
             label: columnName + "_" + recActionClass,
           });
         }
+      } else if (entry.keyFigureId === ApiKeyFigure.SCA_TRACKING_DEVIATION_ID || 
+        entry.keyFigureId === ApiKeyFigure.SCE_ALIGNMENT_ID || 
+        entry.keyFigureId === ApiKeyFigure.SCA_SDX_ID ||
+        entry.keyFigureId === ApiKeyFigure.SCA_FRICTION_ID)
+      {
+        const classLimits = {
+          [ApiKeyFigure.SCA_TRACKING_DEVIATION_ID]: this.firstAnalysisResult!.csp_ptc.sca_tracking_encoder_offset_class_limits,
+          [ApiKeyFigure.SCE_ALIGNMENT_ID]: this.firstAnalysisResult!.csp_ptc.sce_alignment_deviation_to_drive_class_limits,
+          [ApiKeyFigure.SCA_SDX_ID]: this.firstAnalysisResult!.csp_ptc.sdx_rms_class_limits,
+          [ApiKeyFigure.SCA_FRICTION_ID]: this.firstAnalysisResult!.csp_ptc.sca_torsion_class_limits,
+        }[entry.keyFigureId];
+
+        columnsSelection.push({
+          name: columnName,
+          func: "count",
+          func_condition: {
+            compare_mode: "greater",
+            compare_values: [classLimits[1] - 0.001], // greaterEqual
+          },
+          label: columnName + "_" + 3,
+        });
+        columnsSelection.push({
+          name: columnName,
+          func: "count",
+          func_condition: {
+            compare_mode: "between", // postgresql between is inclusive (<= and >=)
+            compare_values: [classLimits[0], classLimits[1] - 0.001],
+          },
+          label: columnName + "_" + 2,
+        });
+      } else if (entry.filterType === FilterFieldType.BOOLEAN) {
+        columnsSelection.push({
+          name: columnName,
+          func: "sum",
+        });
       }
     }
 
@@ -161,14 +200,13 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
         color: KeyFigureColors.red,
       };
 
-      let colorMap: Record<number, string> = {};
+      let colorMap: Record<number, string> = { 3: KeyFigureColors.red, 2: KeyFigureColors.yellow };
+
       if (entry.keyFigureId === ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID) {
         numberBox.nums = [];
 
         if (this.firstAnalysisResult!.csp_ptc.glass_tube_temperature_class_count === 4) {
           colorMap = { 4: KeyFigureColors.red, 3: KeyFigureColors.orange, 2: KeyFigureColors.yellow };
-        } else {
-          colorMap = { 3: KeyFigureColors.red, 2: KeyFigureColors.yellow };
         }
         
         for (let i = this.firstAnalysisResult!.csp_ptc.glass_tube_temperature_class_count; i > 1; i--) {
@@ -181,13 +219,60 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
       } else if (entry.keyFigureId === ApiKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID) {
         numberBox.nums = [];
 
-        colorMap = { 3: KeyFigureColors.red, 2: KeyFigureColors.yellow };
-
         for (const recActionClass of [3, 2]) {
           numberBox.nums.push({
             displayName: this.$t("recommended-action-class-" + recActionClass).toString(),
             columnName: numberBox.columnName + "_" + recActionClass,
             color: colorMap[recActionClass],
+          });
+        }
+      } else if (entry.keyFigureId === ApiKeyFigure.SCA_TRACKING_DEVIATION_ID ||
+        entry.keyFigureId === ApiKeyFigure.SCE_ALIGNMENT_ID) 
+      {
+        const classLimits = entry.keyFigureId === ApiKeyFigure.SCA_TRACKING_DEVIATION_ID ?
+          this.firstAnalysisResult!.csp_ptc.sca_tracking_encoder_offset_class_limits :
+          this.firstAnalysisResult!.csp_ptc.sce_alignment_deviation_to_drive_class_limits;
+
+        numberBox.nums = [];
+
+        for (const offsetClass of [3, 2]) {
+          numberBox.nums.push({
+            displayName: this.$t("alignment-offset-class-" + offsetClass, {
+              limit0: classLimits[0],
+              limit1: classLimits[1],
+            }).toString(),
+            columnName: numberBox.columnName + "_" + offsetClass,
+            color: colorMap[offsetClass],
+          });
+        }
+      } else if (entry.keyFigureId === ApiKeyFigure.SCA_SDX_ID) {
+        const classLimits = this.firstAnalysisResult!.csp_ptc.sdx_rms_class_limits
+
+        numberBox.nums = [];
+
+        for (const slopeClass of [3, 2]) {
+          numberBox.nums.push({
+            displayName: this.$t("slope-deviation-class-" + slopeClass, {
+              limit0: classLimits[0],
+              limit1: classLimits[1],
+            }).toString(),
+            columnName: numberBox.columnName + "_" + slopeClass,
+            color: colorMap[slopeClass],
+          });
+        }
+      } else if (entry.keyFigureId === ApiKeyFigure.SCA_FRICTION_ID) {
+        const classLimits = this.firstAnalysisResult!.csp_ptc.sca_torsion_class_limits
+
+        numberBox.nums = [];
+
+        for (const torsClass of [3, 2]) {
+          numberBox.nums.push({
+            displayName: this.$t("sca-torsion-class-" + torsClass, {
+              limit0: classLimits[0],
+              limit1: classLimits[1],
+            }).toString(),
+            columnName: numberBox.columnName + "_" + torsClass,
+            color: colorMap[torsClass],
           });
         }
       }

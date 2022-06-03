@@ -31,4 +31,5 @@ export interface AnalysisResultCspPtcHceComparedSchema extends AnalysisResultCsp
   missing_glass_tube__diff: number;
   oxygen_penetration__diff: number;
   glass_tube_temperature_class__diff: number;
+  recommended_action_class__diff: number;
 }

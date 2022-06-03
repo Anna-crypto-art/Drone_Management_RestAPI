@@ -108,6 +108,10 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
     this.rerenderOLCanvas();
   }
 
+  protected onMultiAnalysesSelected() {
+    this.rerenderOLCanvas();
+  }
+
   unmounted() {
     this.isMobileQuery.removeEventListener("change", this.isMobileListener);
   }

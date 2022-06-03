@@ -110,7 +110,9 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
-    unit: "Count"
+    unit: "Count",
+    getDiffValue: r => r.recommended_action_class__diff,
+    diffPositive: "negative",
   },
   {
     getValue: r => r.glass_tube_temperature_class_limits,
