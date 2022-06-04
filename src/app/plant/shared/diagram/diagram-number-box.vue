@@ -49,7 +49,8 @@
       >
         <b-icon icon="bar-chart-fill" />
       </app-button>
-      <app-button class="diagram-number-box-action-buttons-button" 
+      <app-button class="diagram-number-box-action-buttons-button"
+        v-show="false"
         variant="secondary"
         @click="onViewMapButtonClick"
         :title="$t('show-in-map')"
