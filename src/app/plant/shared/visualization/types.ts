@@ -113,6 +113,7 @@ export enum ComparedFeatureType {
 
 export type KeyFigureTypeMap = {
   keyFigureId: ApiKeyFigure;
+  selected?: boolean;
   layerType: any; // (typeof KeyFigureLayer) leads to: Type "T" is not assignable to type "AnalysisResultCspPtcHceSchema"
   /**
    * applies to all subLayers if not overwritten

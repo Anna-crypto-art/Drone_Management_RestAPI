@@ -309,6 +309,12 @@
   "compare-mode_descr": "The younger analysis is the starting point (the left number in the substraction), always. In the table view the difference values will be used for sorting and filtering",
   "of-which-are-new-but-improved": "Of which are new, but improved",
   "improved-not-fixed": "Improved, but not fixed",
+  "close": "Close",
+  "show-history-diagram": "Show history diagram",
+  "show-areas-diagram": "Show component area based diagram",
+  "component-area": "Area",
+  "order-by": "Order by",
+  "show-in-map": "Show in map",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",

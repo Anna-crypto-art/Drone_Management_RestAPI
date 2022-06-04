@@ -69,14 +69,8 @@ export default class AppDiagramHistory extends BaseAuthComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) numberBox!: DiagramNumberBox;
   @Prop({ required: true }) tableFilter!: TableFilterRequest;
-  @Prop({ required: true }) analysisResult!: AnalysisResultDetailedSchema;
   @Prop({ required: true }) analysisResults!: AnalysisResultDetailedSchema[];
-  @Prop({ required: true }) resultMappings!: {
-    componentId: ApiComponent;
-    resultMapping: AnalysisResultMappings<AnalysisResultSchemaBase>;
-  }[];
   @Prop({ required: true }) load!: boolean;
-
   
   // TODO: make @State(mobile) working...
   isMobile = false;
@@ -121,7 +115,7 @@ export default class AppDiagramHistory extends BaseAuthComponent {
     responsive: false,
   };
 
-  @Watch('load') async onKeyFigureChanged() {
+  @Watch('load') async onLoadChanged() {
     if (this.load) {
       await this.loadHistoryData();
     }
@@ -192,8 +186,7 @@ export default class AppDiagramHistory extends BaseAuthComponent {
 
 .diagram-line-chart {
   width: 800px;
-  height: 600px;
-  margin: 60px auto 0;
+  height: 400px;
 
   &.mobile {
     width: 300px;

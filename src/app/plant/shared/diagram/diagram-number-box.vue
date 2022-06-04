@@ -1,5 +1,5 @@
 <template>
-  <div :class="'diagram-number-box' + (numberBox.active ? ' active' : '')">
+  <div :class="'diagram-number-box' + (active ? ' active' : '')">
     <slot name="name">
       <div class="diagram-number-box-name grayed">{{ numberBox.displayName }}</div>
     </slot>
@@ -25,20 +25,51 @@
         {{ unit }}
       </div>
     </slot>
-    <slot name="action" v-if="showActionButton">
-      <app-button class="diagram-number-box-button" :variant="buttonVariant" @click="onActionButtonClick">
-        {{ numberBox.active ? $t('close') : $t('view') }}
+    <app-button class="diagram-number-box-close-button" 
+      variant="secondary"
+      @click="onCloseButtonClick"
+      v-show="active"
+    >
+      {{ $t("close") }}
+    </app-button>
+    <div class="diagram-number-box-action-buttons">
+      <app-button class="diagram-number-box-action-buttons-button" 
+        v-if="showHistoryButton"
+        variant="primary"
+        @click="onShowHistoryButtonClick"
+        :title="$t('show-history-diagram')"
+      >
+        <b-icon icon="graph-up" />
       </app-button>
-    </slot>
-    <div class="diagram-history-container" v-show="numberBox.active">
+      <app-button class="diagram-number-box-action-buttons-button" 
+        v-if="showAreasButton"
+        variant="primary"
+        @click="onShowAreasButtonClick"
+        :title="$t('show-areas-diagram')"
+      >
+        <b-icon icon="bar-chart-fill" />
+      </app-button>
+      <app-button class="diagram-number-box-action-buttons-button" 
+        variant="secondary"
+        @click="onViewMapButtonClick"
+        :title="$t('show-in-map')"
+      >
+        <b-icon icon="map" />
+      </app-button>
+      <div class="clearfix"></div>
+    </div>
+    <div class="diagram-container" v-show="numberBox.historyActive">
       <slot name="historyDiagram" />
+    </div>
+    <div class="diagram-container" v-show="numberBox.areasActive">
+      <slot name="areasDiagram" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue"
-import { Component, Prop, Watch } from "vue-property-decorator";
+import { Component, Prop } from "vue-property-decorator";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { DiagramNumberBox } from "./types";
 
@@ -50,16 +81,15 @@ import { DiagramNumberBox } from "./types";
 })
 export default class AppDiagramNumberBox extends Vue {
   @Prop({ required: true }) numberBox!: DiagramNumberBox;
-  @Prop({ default: true }) showActionButton!: boolean;
-
-  buttonVariant = "primary";
-
-  @Watch('numberBox.active') async onActiveChanged() {
-    this.buttonVariant = this.numberBox.active ? "secondary" : "primary";
-  }
+  @Prop({ default: true }) showHistoryButton!: boolean;
+  @Prop({ default: true }) showAreasButton!: boolean;
 
   get textVariant() {
     return this.getTextVariant(this.numberBox.diffVariant!)
+  }
+
+  get active(): boolean {
+    return !!(this.numberBox.historyActive || this.numberBox.areasActive);
   }
 
   getTextVariant(diffVariant: string) {
@@ -74,8 +104,18 @@ export default class AppDiagramNumberBox extends Vue {
     return '';
   }
 
-  onActionButtonClick() {
-    this.$emit("actionButtonClick", this.numberBox.id)
+  onShowHistoryButtonClick() {
+    this.$emit("showHistoryButtonClick", this.numberBox.id)
+  }
+  onShowAreasButtonClick() {
+    this.$emit("showAreasButtonClick", this.numberBox.id)
+  }
+  onCloseButtonClick() {
+    this.$emit("closeButtonClick", this.numberBox.id)
+  }
+
+  onViewMapButtonClick() {
+    this.$emit("viewMapButtonClick", this.numberBox.id);
   }
 }
 </script>
@@ -106,23 +146,7 @@ export default class AppDiagramNumberBox extends Vue {
 
   &.active {
     width: calc(800px + 3em);
-    height: 600px;
-
-    // background-color: $blue;
-    // color: $white !important;
-
-    // .diagram-number-box-number .text-success {
-    //   color: $light-green !important;
-    // }
-
-    // .grayed {
-    //   color: $hover-light-blue !important
-    // }
-
-    .diagram-number-box-button {
-      top: 1em;
-      bottom: auto;
-    }
+    height: 625px;
   }
   
   &-number {
@@ -138,10 +162,27 @@ export default class AppDiagramNumberBox extends Vue {
     }
   }
 
-  &-button {
+  &-action-buttons {
     position: absolute;
-    bottom: 1em;
+    top: 145px;
     right: 1em;
+
+    &-button {
+      float: right;
+      margin-left: 5px;
+    }
+  }
+
+  &-close-button {
+    position: absolute;
+    top: 1em;
+    right: 1em;
+  }
+
+  .diagram-container {
+    position: absolute;
+    left: 1em;
+    bottom: 1em;
   }
 }
 </style>

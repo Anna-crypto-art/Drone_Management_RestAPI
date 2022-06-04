@@ -83,9 +83,16 @@ export enum KeyFigureColors {
   red = "#ff0000",
   darkRed = "#880000",
   grey = "#666666",
+  lightGrey = "#cccccc",
   black = "#000000",
   orange = "#ef7700",
   blue = "#0000ff",
+
+  diagramYellow = "#d4b504",
+  diagramRed = "#b50e02",
+
+  diagramBad = "#dc3545",
+  diagramGood = "#28a745",
 
   volateqBlue = "rgba(6, 107, 226, 0.8)",
 }

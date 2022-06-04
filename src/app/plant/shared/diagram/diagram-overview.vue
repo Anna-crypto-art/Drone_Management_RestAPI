@@ -5,17 +5,29 @@
         <app-diagram-number-box v-for="numberBox in numberBoxes" :key="numberBox.id"
           :numberBox="numberBox"
           :showActionButton="analysisResults.length > 1"
-          @actionButtonClick="onActionButtonClick"
+          @showHistoryButtonClick="onShowHistoryButtonClick"
+          @showAreasButtonClick="onShowAreasButtonClick"
+          @closeButtonClick="onCloseButtonClick"
+          @viewMapButtonClick="onViewMapButtonClick"
         >
           <template #historyDiagram>
             <app-diagram-history
               :plant="plant"
               :numberBox="numberBox"
               :tableFilter="getTableFilter(numberBox)"
-              :analysisResult="firstAnalysisResult"
               :analysisResults="analysisResults"
-              :resultMappings="resultMappings"
-              :load="numberBox.active"
+              :load="numberBox.historyActive"
+            />
+          </template>
+          <template #areasDiagram>
+            <app-diagram-areas
+              :plant="plant"
+              :numberBox="numberBox"
+              :tableFilter="getTableFilter(numberBox)"
+              :analysisResult="firstAnalysisResult"
+              :compareAnalysisResult="compareAnalysisResult"
+              :componentSelection="componentSelection"
+              :load="numberBox.areasActive"
             />
           </template>
         </app-diagram-number-box>
@@ -27,11 +39,7 @@
 <script lang="ts">
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
-import {
-  AnalysisResultMappings,
-} from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Component, Prop } from "vue-property-decorator";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
@@ -39,11 +47,11 @@ import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/an
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import AppDiagramNumberBox  from "@/app/plant/shared/diagram/diagram-number-box.vue";
 import { DiagramNumberBox, DiagramNumberBoxNum, DiagramResultMappings, GroupedAnalysisResult } from "./types";
-import { TableColumnSelect, TableFilterRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
-import { FilterFieldType } from "../filter-fields/types";
+import { TableFilterRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { MathHelper } from "@/app/shared/services/helper/math-helper";
 import AppDiagramHistory from "@/app/plant/shared/diagram/diagram-history.vue";
+import AppDiagramAreas from "@/app/plant/shared/diagram/diagram-areas.vue";
 
 @Component({
   name: "app-diagram-overview",
@@ -52,12 +60,14 @@ import AppDiagramHistory from "@/app/plant/shared/diagram/diagram-history.vue";
     AppBox,
     AppDiagramNumberBox,
     AppDiagramHistory,
+    AppDiagramAreas,
   },
 })
 export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
   @Prop() resultMappings!: DiagramResultMappings[];
+  @Prop() componentSelection!: ApiComponent[];
   
   numberBoxes: DiagramNumberBox[] | null = null;
 
@@ -68,23 +78,41 @@ export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
     await super.created();
   }
 
-  onActionButtonClick(numberBoxId: string) {
-    if (this.viewedNumberBox) {
-      this.viewedNumberBox.active = false;
+  onShowHistoryButtonClick(numberBoxId: string) {
+    const numberBox = this.numberBoxes!.find(numberBox => numberBox.id === numberBoxId)!;
+    this.activateNumberBox(numberBox);
+    numberBox.historyActive = true;
+    numberBox.areasActive = false;
+  }
 
-      if (this.viewedNumberBox.id === numberBoxId) {
-        this.viewedNumberBox = null;
-        return;
-      }
-      
+  onShowAreasButtonClick(numberBoxId: string) {
+    const numberBox = this.numberBoxes!.find(numberBox => numberBox.id === numberBoxId)!;
+    this.activateNumberBox(numberBox);
+    numberBox.areasActive = true;
+    numberBox.historyActive = false;
+  }
+
+  onCloseButtonClick() {
+    if (this.viewedNumberBox) {
+      this.viewedNumberBox.historyActive = false;
+      this.viewedNumberBox.areasActive = false;
       this.viewedNumberBox = null;
     }
+  }
 
-    this.viewedNumberBox = this.numberBoxes!.find(numberBox => numberBox.id === numberBoxId) || null;
+  onViewMapButtonClick(numberBoxId: string) {
+    const numberBox = this.numberBoxes!.find(numberBox => numberBox.id === numberBoxId)!;
 
-    if (this.viewedNumberBox) {
-      this.viewedNumberBox.active = true;
+    this.$router.push({ name: "Plant", params: { id: this.plant.id }, query: { pi: numberBox.keyFigure.id + "" }})
+    this.$router.go(0);
+  }
+
+  private activateNumberBox(numberBox: DiagramNumberBox) {
+    if (this.viewedNumberBox && this.viewedNumberBox.id !== numberBox.id) {
+      this.onCloseButtonClick();
     }
+
+    this.viewedNumberBox = numberBox;
   }
 
   getTableFilter(numberBox: DiagramNumberBox): TableFilterRequest {

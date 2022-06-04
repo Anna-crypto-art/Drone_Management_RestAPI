@@ -44,8 +44,13 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     public readonly keyFigureInfo: KeyFigureInfo,
     public readonly query?: GeoVisualQuery,
     protected readonly initColor?: KeyFigureColors,
+    selected?: boolean,
   ) {
     super(vueComponent);
+
+    if (selected !== undefined) {
+      this.selected = selected;
+    }
 
     this.visible = false;
     this.name = (this.keyFigureInfo.templateName ||

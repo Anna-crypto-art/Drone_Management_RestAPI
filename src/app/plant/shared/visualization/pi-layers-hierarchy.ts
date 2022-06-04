@@ -201,7 +201,8 @@ export class PILayersHierarchy {
         keyFigureLayer.keyFigureId,
         keyFigureLayer.keyFigureInfo,
         keyFigureLayer.query,
-        keyFigureLayer.color
+        keyFigureLayer.color,
+        keyFigureLayer.selected
       );
     }
 
@@ -234,7 +235,8 @@ export class PILayersHierarchy {
           keyFigureLayer.keyFigureId,
           childKeyFigureInfo,
           childLayer.query,
-          childLayer.color
+          childLayer.color,
+          keyFigureLayer.selected,
         );
         groupKpiLayer.keyFigureLayers.push(kpiLayer);
         groupKpiLayer.groupLayer.childLayers.push(kpiLayer.toGeoLayer());

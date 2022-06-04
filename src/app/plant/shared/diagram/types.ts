@@ -34,7 +34,8 @@ export interface DiagramNumberBox extends DiagramNumberBoxNum {
   keyFigure: KeyFigureSchema;
   loaded: boolean;
   precision: number;
-  active: boolean;
+  historyActive: boolean;
+  areasActive: boolean;
   unit?: string;
   nums?: DiagramNumberBoxNum[];
 }

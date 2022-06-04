@@ -143,6 +143,14 @@ export default class AppVisualization
     this.showCouldNotBeMeasured = appLocalStorage.getItem(STORAGE_KEY_SHOWUNDEFINED) || false;
     this.satelliteView = appLocalStorage.getItem(STORAGE_KEY_SATELLITEVIEW) || false;
 
+    if (this.$route.query.pi) {
+      const keyFigureId: number = parseInt(this.$route.query.pi as string);
+      const keyFigureFigureLayer = this.keyFigureLayers.find(keyFigureLayer => keyFigureLayer.keyFigureId === keyFigureId);
+      if (keyFigureFigureLayer) {
+        keyFigureFigureLayer.selected = true;
+      }
+    }
+
     this.createLayers();    
   }
 
