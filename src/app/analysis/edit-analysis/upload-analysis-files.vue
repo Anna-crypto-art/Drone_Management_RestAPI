@@ -14,11 +14,9 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import AppAnalysisUpload from "@/app/analysis/shared/analysis-upload.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import { AnalysisEventService } from "@/app/analysis/shared/analysis-event-service";
 import { AnalysisEvent } from "@/app/analysis/shared/types";
 import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
-import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
 
 @Component({
   name: "app-upload-analysis-files",
@@ -40,7 +38,7 @@ export default class AppUploadAnalysisFiles extends BaseAuthComponent {
 
       done(this.analysis);
     } catch (e) {
-      AppContentEventService.showError(this.analysis.id, e as ApiException);
+      this.showError(e);
     }
   }
 
@@ -51,7 +49,7 @@ export default class AppUploadAnalysisFiles extends BaseAuthComponent {
 
       done(false);
     } catch (e) {
-      AppContentEventService.showError(this.analysis.id, e as ApiException);
+      this.showError(e);
 
       done(true);
     }

@@ -30,7 +30,7 @@ export default abstract class LayerLoader<T extends Layer<Source, LayerRenderer<
 
     this.loadingCallback && this.loadingCallback({ loading: true });
 
-    this.loadedLayer = await this.do_load();
+    this.loadedLayer = await this.doLoad();
 
     this.loadingCallback && this.loadingCallback({ loading: false });
 
@@ -55,5 +55,5 @@ export default abstract class LayerLoader<T extends Layer<Source, LayerRenderer<
     }
   }
 
-  abstract do_load(): Promise<T>;
+  abstract doLoad(): Promise<T>;
 }

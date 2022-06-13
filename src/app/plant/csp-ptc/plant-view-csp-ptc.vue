@@ -97,7 +97,11 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
   async created(): Promise<void> {
     await super.created();
 
-    this.analysisResults = await volateqApi.getAnalysisResults(this.plant.id);
+    try {
+      this.analysisResults = await volateqApi.getAnalysisResults(this.plant.id);
+    } catch (e) {
+      this.showError(e);
+    }
 
     this.isMobileQuery = window.matchMedia("screen and (max-width: 1000px)");
     this.isMobileQuery.addEventListener("change", this.isMobileListener);

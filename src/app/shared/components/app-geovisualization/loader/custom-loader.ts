@@ -9,7 +9,7 @@ export class CustomLoader extends LayerLoader<undefined> {
     super(layerType, map, loadingEvent);
   }
 
-  async do_load(): Promise<undefined> {
+  async doLoad(): Promise<undefined> {
     await this.layerType.customLoader();
 
     this.map.getLayers().forEach(layer => {

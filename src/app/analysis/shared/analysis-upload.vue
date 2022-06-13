@@ -128,9 +128,9 @@ export default class AppAnalysisUpload
 
         appLocalStorage.removeItem(this.storageKey);
 
-        appContentEventBus.showSuccessAlert(this.$t("upload-completed-successfully").toString());
+        this.showSuccess(this.$t("upload-completed-successfully").toString());
       } catch (e) {
-        appContentEventBus.showError(e as ApiException);
+        this.showError(e as ApiException);
       }
 
       if (this.isCreated) {
@@ -142,7 +142,7 @@ export default class AppAnalysisUpload
       }
     });
     this.uploadService!.on(UploadEvent.FAILED, async (message: string) => {
-      appContentEventBus.showErrorAlert(this.$t(apiStateNames[ApiStates.UPLOAD_FAILED]).toString());
+      this.showError(this.$t(apiStateNames[ApiStates.UPLOAD_FAILED]).toString());
       console.error(message);
 
       try {
@@ -273,7 +273,7 @@ export default class AppAnalysisUpload
 
       this.appFileUpload.upload<IAnalysisId>(volateqApi.getAnalysisFileUploadUrl(analysis.id), { id: analysis.id });
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      this.showError(e);
     }
   }
 
@@ -325,7 +325,7 @@ export default class AppAnalysisUpload
 
       AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS);
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      this.showError(e);
     }
   }
 

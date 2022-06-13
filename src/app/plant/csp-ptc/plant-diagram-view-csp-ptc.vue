@@ -56,29 +56,33 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
   }
 
   private updateMappings() {
-    for (const cspPtcMapping of allCspPtcMappings) {
-      const analysisResultMappingHelper = new AnalysisResultMappingHelper(
-          cspPtcMapping.resultMapping,
-          this.firstAnalysisResult!
-        );
-
-      analysisResultMappingHelper.setCompareAnalysisResult(this.compareAnalysisResult);
-
-      const columnsMapping = analysisResultMappingHelper.getColumnsMapping();
-      const diagramEntries = analysisResultMappingHelper.getDiagramEntries();
-            
-      const columnsSelection = this.getColumnsSelection(diagramEntries, columnsMapping);
-      cspPtcMapping.tableFilter = {
-        component_filter: { component_id: 0 /* plant */, grouped: true },
-        columns_selection: { columns: columnsSelection },
-      };
-
-      if (cspPtcMapping.componentId === ApiComponent.CSP_PTC_MIRROR) {
-        // Speeds up query for table analysis_result_csp_ptc_mirror
-        cspPtcMapping.tableFilter.filters = { is_missing: true };
+    try {
+      for (const cspPtcMapping of allCspPtcMappings) {
+        const analysisResultMappingHelper = new AnalysisResultMappingHelper(
+            cspPtcMapping.resultMapping,
+            this.firstAnalysisResult!
+          );
+  
+        analysisResultMappingHelper.setCompareAnalysisResult(this.compareAnalysisResult);
+  
+        const columnsMapping = analysisResultMappingHelper.getColumnsMapping();
+        const diagramEntries = analysisResultMappingHelper.getDiagramEntries();
+              
+        const columnsSelection = this.getColumnsSelection(diagramEntries, columnsMapping);
+        cspPtcMapping.tableFilter = {
+          component_filter: { component_id: 0 /* plant */, grouped: true },
+          columns_selection: { columns: columnsSelection },
+        };
+  
+        if (cspPtcMapping.componentId === ApiComponent.CSP_PTC_MIRROR) {
+          // Speeds up query for table analysis_result_csp_ptc_mirror
+          cspPtcMapping.tableFilter.filters = { is_missing: true };
+        }
+  
+        cspPtcMapping.numberBoxes = this.getNumberBoxes(diagramEntries, columnsMapping);
       }
-
-      cspPtcMapping.numberBoxes = this.getNumberBoxes(diagramEntries, columnsMapping);
+    } catch (e) {
+      this.showError(e);
     }
   }
 

@@ -13,7 +13,7 @@ export class OSMLoader extends LayerLoader<TileLayer<TileSource>> {
     super(layerType, map, loadingEvent);
   }
 
-  async do_load(): Promise<TileLayer<TileSource>> {
+  async doLoad(): Promise<TileLayer<TileSource>> {
     let mapLayer!: TileLayer<TileSource>;
 
     if (this.layerType.satellite) {

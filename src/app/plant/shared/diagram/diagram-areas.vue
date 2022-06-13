@@ -251,7 +251,7 @@ export default class AppDiagramAreas extends BaseAuthComponent {
         datasets: datasets,
       };
     } catch (e) {
-      console.error(e);
+      this.showError(e);
     } finally {
       this.loading = false;
     }

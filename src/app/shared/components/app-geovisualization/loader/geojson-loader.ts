@@ -20,7 +20,7 @@ export class GeoJSONLoader extends LayerLoader<
     super(layerType, map, loadingEvent);
   }
 
-  async do_load(): Promise<VectorLayer<VectorSource<Geometry>> | VectorImageLayer<VectorSource<Geometry>>> {
+  async doLoad(): Promise<VectorLayer<VectorSource<Geometry>> | VectorImageLayer<VectorSource<Geometry>>> {
     const features = await this.layerType.geoJSONLoader();
     const source = new VectorSource({
       features: new GeoJSON().readFeatures(features, {

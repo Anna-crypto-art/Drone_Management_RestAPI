@@ -2,13 +2,6 @@
   <div class="plant-view-csp-ptc-admin-panel">
     <b-container>
       <b-row>
-        <b-col>
-          <b-alert v-model="alert.show" :variant="alert.variant" dismissible fade>
-            <div v-html="alert.msg"></div>
-          </b-alert>
-        </b-col>
-      </b-row>
-      <b-row>
         <b-col sm="6">
           <app-box :title="$t('analysis-visibility-of', { analysisName: analysisResultName })">
             <b-form-checkbox
@@ -58,8 +51,6 @@ import AppBox from "@/app/shared/components/app-box/app-box.vue";
 export default class AppPlantAdminViewCspPtc extends BaseAuthComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ default: null }) selectedAnalysisResult: AnalysisResultDetailedSchema | null = null; 
-
-  alert: { show: boolean, variant?: "danger" | "success", msg?: string } = { show: false };
   
   editPlant: { inSetupPhase: boolean } = { inSetupPhase: true };
   editPlantLoading = false;
@@ -87,11 +78,10 @@ export default class AppPlantAdminViewCspPtc extends BaseAuthComponent {
           this.$t("analysis-result-released-success").toString() :
           this.$t("analysis-result-locked-success").toString()
 
-        this.showAlert("success", msg);
+        this.showSuccess(msg);
       }
     } catch (e) {
-      const ex = e as ApiException;
-      this.showAlert("danger", `${ex.error}<br><small>${ex.message}</small>`)
+      this.showError(e);
     }
   }
 
@@ -101,10 +91,9 @@ export default class AppPlantAdminViewCspPtc extends BaseAuthComponent {
 
       await volateqApi.updatePlant(this.plant.id, { in_setup_phase: this.editPlant.inSetupPhase });
 
-      this.showAlert("success", this.$t("plant-updated-successfully").toString());
+      this.showSuccess(this.$t("plant-updated-successfully").toString());
     } catch (e) {
-      const ex = e as ApiException;
-      this.showAlert("danger", `${ex.error}<br><small>${ex.message}</small>`)
+      this.showError(e);
     } finally {
       this.editPlantLoading = false;
     }
@@ -112,12 +101,6 @@ export default class AppPlantAdminViewCspPtc extends BaseAuthComponent {
 
   get analysisResultName(): string {
     return this.selectedAnalysisResult?.analysis.name || "";
-  }
-
-  private showAlert(variant: "danger" | "success", msg: string) {
-    this.alert.variant = variant;
-    this.alert.msg = msg;
-    this.alert.show = true;
   }
 }
 </script>

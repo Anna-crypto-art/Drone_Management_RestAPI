@@ -31,9 +31,7 @@
 
 <script lang="ts">
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
-import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { apiStateNames, ApiStates } from "@/app/shared/services/volateq-api/api-states";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
@@ -76,7 +74,7 @@ export default class AppUpdateAnalysisState extends BaseAuthComponent {
 
       this.setUpdateStateOptions();
     } catch (e) {
-      AppContentEventService.showError(this.analysis.id, e as ApiException);
+      this.showError(e);
     }
   }
 
@@ -96,9 +94,9 @@ export default class AppUpdateAnalysisState extends BaseAuthComponent {
 
       AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
 
-      AppContentEventService.showSuccess(this.analysis.id, this.$t("update-analysis-state-success").toString());
+      this.showSuccess(this.$t("update-analysis-state-success").toString());
     } catch (e) {
-      AppContentEventService.showError(this.analysis.id, e as ApiException);
+      this.showError(e);
     } finally {
       this.loading = false;
     }

@@ -158,7 +158,7 @@ export default class AppTablesComponent extends AnalysisSelectionBaseComponent {
 
         AppDownloader.download(await volateqApi.generateDownloadUrl(authCsvDownloadUrl), csvFileName);
       } catch (e) {
-        appContentEventBus.showError(e as ApiException);
+        this.showError(e);
       } finally {
         this.csvExportLoading = false;
       }

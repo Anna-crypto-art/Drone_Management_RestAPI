@@ -252,7 +252,7 @@ export default class AppPlants extends BaseAuthComponent {
         return 0;
       })
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      this.showError(e);
     } finally {
       this.tableLoading = false;
     }
@@ -274,10 +274,10 @@ export default class AppPlants extends BaseAuthComponent {
 
           if (task.state === "SUCCESS") {
             this.managePlantModal.hide();
-            appContentEventBus.showSuccessAlert(this.$t("dt-imported-successfully").toString());
+            this.showSuccess(this.$t("dt-imported-successfully").toString());
             await this.updatePlants();
           } else if (task.state === "FAILURE") {
-            this.managePlantModal.alertError({ error: "SOMETHING_WENT_WRONG", details: task.result });
+            this.showError({ error: "SOMETHING_WENT_WRONG", message: task.result });
           }
         },
         info => {
@@ -285,7 +285,7 @@ export default class AppPlants extends BaseAuthComponent {
         }
       );
     } catch (e) {
-      this.managePlantModal.alertError(e as ApiException);
+      this.showError(e);
     }
   }
 
@@ -303,7 +303,7 @@ export default class AppPlants extends BaseAuthComponent {
 
       AppDownloader.download(downloadUrl.url, fieldgeometry.file_name);
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      this.showError(e);
     }
   }
 
@@ -328,12 +328,12 @@ export default class AppPlants extends BaseAuthComponent {
 
       this.appCreatePlantModal.hide();
 
-      appContentEventBus.showSuccessAlert(this.$t("plant-created-success").toString());
+      this.showSuccess(this.$t("plant-created-success").toString());
       
       await this.updatePlants();
 
     } catch (e) {
-      this.appCreatePlantModal.alertError(e as ApiException);
+      this.showError(e);
     } finally {
       this.createPlantLoading = false;
     }
@@ -348,11 +348,11 @@ export default class AppPlants extends BaseAuthComponent {
 
       await volateqApi.deletePlant(plant.id);
 
-      appContentEventBus.showSuccessAlert(this.$t("plant-deleted-success", { plant: plant.name }).toString());
+      this.showSuccess(this.$t("plant-deleted-success", { plant: plant.name }).toString());
 
       await this.updatePlants();
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      this.showError(e);
     } finally {
       this.tableLoading = false;
     }
@@ -360,7 +360,6 @@ export default class AppPlants extends BaseAuthComponent {
 
   onEditPlantClick(plant: PlantItem) {
     this.editPlant = { id: plant.id, name: plant.name };
-    this.appEditPlantModal.hideAlert();
     this.appEditPlantModal.show();
   }
 
@@ -370,11 +369,12 @@ export default class AppPlants extends BaseAuthComponent {
       await volateqApi.updatePlant(this.editPlant!.id, { name: this.editPlant!.name });
 
       this.appEditPlantModal.hide();
-      appContentEventBus.showSuccessAlert(this.$t("plant-updated-success", { plant: this.editPlant!.name }).toString());
+
+      this.showSuccess(this.$t("plant-updated-success", { plant: this.editPlant!.name }).toString());
 
       await this.updatePlants();
     } catch (e) {
-      this.appEditPlantModal.alertError(e as ApiException);
+      this.showError(e);
     } finally {
       this.editPlantLoading = false;
     }

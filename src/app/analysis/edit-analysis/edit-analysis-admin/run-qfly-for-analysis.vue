@@ -33,8 +33,6 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
-import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
 import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 import { AnalysisEventService } from "../../shared/analysis-event-service";
 import { AnalysisEvent } from "../../shared/types";
@@ -70,13 +68,13 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
         this.loadingValidateFiles = false;
 
         if (task.state === "SUCCESS") {
-          AppContentEventService.showSuccess(this.analysis.id, this.$t("uploaded-data-complete-success").toString());
+          this.showSuccess(this.$t("uploaded-data-complete-success").toString());
         }
       } else if (task.name === ApiTasks.runQFlyWizard) {
         this.loadingRunQFlyWizard = false;
 
         if (task.state === "SUCCESS") {
-          AppContentEventService.showSuccess(this.analysis.id, this.$t("evaluation-finished-success").toString());
+          this.showSuccess(this.$t("evaluation-finished-success").toString());
         }
       }
     })
@@ -100,7 +98,7 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
         AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
       }
     } catch (e) {
-      AppContentEventService.showError(this.analysis.id, e as ApiException);
+      this.showError(e);
     }
   }
 
@@ -114,7 +112,7 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
         AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
       }
     } catch (e) {
-      AppContentEventService.showError(this.analysis.id, e as ApiException);
+      this.showError(e);
     }
   }
 }

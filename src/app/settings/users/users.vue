@@ -167,13 +167,11 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
 import { Component, Ref } from "vue-property-decorator";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { UserSchema, UserStateSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
-import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import { InviteUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
@@ -182,6 +180,7 @@ import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import { UserItem } from "@/app/settings/users/types";
 import { SelectPlant } from "@/app/settings/types";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 
 
 const MAX_USERS_PER_CUSTOMER = 10;
@@ -194,7 +193,7 @@ const MAX_USERS_PER_CUSTOMER = 10;
     AppModalForm,
   },
 })
-export default class AppSettingsUsers extends Vue {
+export default class AppSettingsUsers extends BaseAuthComponent {
   columns: BvTableFieldArray = [];
   rows: UserItem[] = [];
 
@@ -236,7 +235,7 @@ export default class AppSettingsUsers extends Vue {
 
       this.plants = await volateqApi.getPlants();
     } catch (e) {
-      this.appInviteModal.alertError((e as ApiException).error);
+      this.showError(e);
     }
   }
 
@@ -299,7 +298,7 @@ export default class AppSettingsUsers extends Vue {
         return 0;
       });
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      this.showError(e as ApiException);
     } finally {
       this.loading = false;
     }
@@ -314,13 +313,11 @@ export default class AppSettingsUsers extends Vue {
   async inviteUser() {
     const errMsg = this.getErrorInviteUserForm();
     if (errMsg) {
-      this.appInviteModal.alertError(errMsg);
+      this.showError(errMsg);
       this.inviteLoading = false;
 
       return;
     }
-
-    this.appInviteModal.hideAlert();
 
     this.inviteLoading = true;
     try {
@@ -330,11 +327,12 @@ export default class AppSettingsUsers extends Vue {
       await volateqApi.inviteUser(this.newUser);
 
       this.appInviteModal.hide();
-      appContentEventBus.showSuccessAlert(this.$t("user-invited-successfully").toString());
+
+      this.showSuccess(this.$t("user-invited-successfully").toString());
 
       await this.updateUserRows();
     } catch (e) {
-      this.appInviteModal.alertError((e as ApiException).error);
+      this.showError(e);
     } finally {
       this.inviteLoading = false;
     }
@@ -365,9 +363,9 @@ export default class AppSettingsUsers extends Vue {
     try {
       await volateqApi.resendUserInvitation(user.id);
 
-      appContentEventBus.showSuccessAlert(this.$t("user-invitation-sent-successfully").toString());
+      this.showSuccess(this.$t("user-invitation-sent-successfully").toString());
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      this.showError(e as ApiException);
     }
   }
 
@@ -382,13 +380,13 @@ export default class AppSettingsUsers extends Vue {
 
       await volateqApi.unLockUser(user.id, lock);
 
-      appContentEventBus.showSuccessAlert(
+      this.showSuccess(
         this.$t(lock ? "user-locked-successfully" : "user-unlocked-successfully").toString()
       );
 
       await this.updateUserRows();
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      this.showError(e as ApiException);
     }
   }
 
@@ -406,11 +404,11 @@ export default class AppSettingsUsers extends Vue {
 
       await volateqApi.deleteUser(user.id);
 
-      appContentEventBus.showSuccessAlert(this.$t("user-deleted-successfully", { user: user.name.email }).toString());
+      this.showSuccess(this.$t("user-deleted-successfully", { user: user.name.email }).toString());
 
       await this.updateUserRows();
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      this.showError(e as ApiException);
     } finally {
       this.loading = false;
     }
@@ -451,8 +449,6 @@ export default class AppSettingsUsers extends Vue {
   }
 
   async updateUser() {
-    this.appEditUserModal.hideAlert();
-
     this.editUserLoading = true;
     try {
       const plantIds = this.editUserCustomerPlants.filter(userPlant => userPlant.selected)
@@ -462,11 +458,11 @@ export default class AppSettingsUsers extends Vue {
 
       this.appEditUserModal.hide();
 
-      appContentEventBus.showSuccessAlert(this.$t("user-edited-successfully").toString());
+      this.showSuccess(this.$t("user-edited-successfully").toString());
 
       await this.updateUserRows();
     } catch (e) {
-      this.appInviteModal.alertError((e as ApiException).error);
+      this.showError(e);
     } finally {
       this.editUserLoading = false;
     }

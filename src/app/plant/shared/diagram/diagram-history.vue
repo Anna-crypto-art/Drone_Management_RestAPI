@@ -16,19 +16,10 @@
 </template>
 
 <script lang="ts">
-import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
-import { apiComponentNames } from "@/app/shared/services/volateq-api/api-components/api-components-name";
 import { TableFilterRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
-import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
-import {
-  AnalysisResultMappingEntry,
-  AnalysisResultMappings,
-} from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { BvSelectOption, BvSelectGroupOption } from "@/app/shared/types";
 import { Component, Prop, Watch } from "vue-property-decorator";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { Line as LineChart } from "vue-chartjs/legacy";
@@ -44,17 +35,31 @@ import {
   ChartData,
   ChartOptions,
   PointElement,
+  TimeScale,
+  TimeSeriesScale,
+  Decimation,
 } from "chart.js";
 import ChartDataLables from "chartjs-plugin-datalabels";
-import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
+import 'chartjs-adapter-date-fns';
 import { TableResultSchema } from "@/app/shared/services/volateq-api/api-schemas/table-result-schema";
 import { MathHelper } from "@/app/shared/services/helper/math-helper";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import AppLoading from "@/app/shared/components/app-loading/app-loading.vue";
 
-ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement, ChartDataLables);
+ChartJS.register(
+  Title,
+  Tooltip,
+  Legend,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  ChartDataLables,
+  TimeScale,
+  TimeSeriesScale,
+  Decimation,
+);
 
 @Component({
   name: "app-diagram-history",
@@ -86,12 +91,16 @@ export default class AppDiagramHistory extends BaseAuthComponent {
         display: false,
       },
       datalabels: {
-        // color: "#fff",
         align: "top",
       },
     },
     scales: {
       x: {
+        type: "time",
+        time: {
+          unit: "month",
+        },
+        bounds: "data",
         grid: {
           display: false,
         },
@@ -147,7 +156,7 @@ export default class AppDiagramHistory extends BaseAuthComponent {
       const nums: DiagramNumberBoxNum[] = this.numberBox.nums || [this.numberBox];
 
       this.lineChartData = {
-        labels: groupedResults.items.map(item => new Date(Date.parse(item.flown_at)).toLocaleDateString()),
+        labels: groupedResults.items.map(item => new Date(Date.parse(item.flown_at))),
         datasets: nums.map(num => ({
           data: groupedResults.items.map(item => item[num.columnName] as number),
           backgroundColor: num.color,
@@ -155,26 +164,16 @@ export default class AppDiagramHistory extends BaseAuthComponent {
         })),
       };
     } catch (e) {
-      console.error(e);
+      this.showError(e);
     } finally {
       this.loading = false;
     }
   }
 
-  private getLabelUnit(): string {
-    let labelUnit = this.numberBox.unit;
-
-    return labelUnit || "";
-  }
-
   private setBarChartOptions(): void {
-    const labelUnit: string = this.getLabelUnit();
-
-    // this.lineChartOptions["scales"]!["x"]!["title"]["text"] = labelUnit;
-    this.lineChartOptions["scales"]!["y"]!["title"]["text"] = labelUnit;
+    this.lineChartOptions["scales"]!["y"]!["title"]["text"] = this.numberBox.unit || "";
 
     this.lineChartOptions.plugins!.datalabels!.formatter = (val: number) => MathHelper.roundTo(val, this.numberBox.precision);
-     
   }
 }
 </script>

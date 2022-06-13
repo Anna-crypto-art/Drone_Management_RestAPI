@@ -140,50 +140,54 @@ export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
   
   private async updateNumberBoxes(): Promise<void> {
     this.loading = true;
+    
+    try {
+      const numberBoxes: DiagramNumberBox[] = [];
+      for (const resultMapping of this.resultMappings) {
+        const analysisResultMappingHelper = new AnalysisResultMappingHelper(
+          resultMapping.resultMapping,
+          this.firstAnalysisResult!
+        );
 
-    const numberBoxes: DiagramNumberBox[] = [];
-    for (const resultMapping of this.resultMappings) {
-      const analysisResultMappingHelper = new AnalysisResultMappingHelper(
-        resultMapping.resultMapping,
-        this.firstAnalysisResult!
-      );
+        analysisResultMappingHelper.setCompareAnalysisResult(this.compareAnalysisResult);
 
-      analysisResultMappingHelper.setCompareAnalysisResult(this.compareAnalysisResult);
+        const groupedResult: GroupedAnalysisResult = (this.compareAnalysisResult ?
+          await volateqApi.getSpecificAnalysisResultCompared<GroupedAnalysisResult>(
+            this.firstAnalysisResult!.id,
+            resultMapping.componentId,
+            this.compareAnalysisResult.id,
+            { limit: 1 },
+            resultMapping.tableFilter
+          ) :
+          await volateqApi.getSpecificAnalysisResult<GroupedAnalysisResult>(
+            this.firstAnalysisResult!.id,
+            resultMapping.componentId,
+            { limit: 1 },
+            resultMapping.tableFilter
+          )
+        ).items[0];
 
-      const groupedResult: GroupedAnalysisResult = (this.compareAnalysisResult ?
-        await volateqApi.getSpecificAnalysisResultCompared<GroupedAnalysisResult>(
-          this.firstAnalysisResult!.id,
-          resultMapping.componentId,
-          this.compareAnalysisResult.id,
-          { limit: 1 },
-          resultMapping.tableFilter
-        ) :
-        await volateqApi.getSpecificAnalysisResult<GroupedAnalysisResult>(
-          this.firstAnalysisResult!.id,
-          resultMapping.componentId,
-          { limit: 1 },
-          resultMapping.tableFilter
-        )
-      ).items[0];
-
-      for (const numberBox of resultMapping.numberBoxes!) {
-        if (numberBox.nums) {
-          for (const numberBoxNum of numberBox.nums) {
-            this.setNumberBoxNum(numberBox, numberBoxNum, groupedResult);
+        for (const numberBox of resultMapping.numberBoxes!) {
+          if (numberBox.nums) {
+            for (const numberBoxNum of numberBox.nums) {
+              this.setNumberBoxNum(numberBox, numberBoxNum, groupedResult);
+            }
+          } else {
+            this.setNumberBoxNum(numberBox, numberBox, groupedResult);
           }
-        } else {
-          this.setNumberBoxNum(numberBox, numberBox, groupedResult);
+          
+          numberBox.loaded = true;
         }
-        
-        numberBox.loaded = true;
+
+        numberBoxes.push(...resultMapping.numberBoxes!);
       }
 
-      numberBoxes.push(...resultMapping.numberBoxes!);
+      this.numberBoxes = numberBoxes;
+    } catch (e) {
+      this.showError(e);
+    } finally {
+      this.loading = false;
     }
-
-    this.numberBoxes = numberBoxes;
-
-    this.loading = false;
   }
 
   private setNumberBoxNum(

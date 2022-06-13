@@ -295,45 +295,49 @@ export default class AppVisualization
   }
 
   private createLayers(): void {
-    this.componentLayers = this.componentLayerTypes.map(componentType => new (componentType as any)(this));
-    this.piLayersHierarchy = new PILayersHierarchy(this, this.analysisResults, this.keyFigureLayers);
-
-    this.worldMapLayer = {
-      name: this.$t("world-map").toString(),
-      type: "osm",
-      selected: true,
-      satellite: this.satelliteView,
-    };
-
-    this.layers.push(
-      {
-        name: this.$t("performance-indicators").toString(),
-        type: "group",
-        childLayers: this.piLayersHierarchy.groupLayers,
-        singleSelection: true,
-      },
-      {
-        name: this.$t("components").toString(),
-        type: "group",
-        childLayers: this.componentLayers.map(compLayer => compLayer.toGeoLayer()),
-      },
-      {
-        name: "pcs",
-        type: "custom",
-        customLoader: () => {
-          return;
+    try {
+      this.componentLayers = this.componentLayerTypes.map(componentType => new (componentType as any)(this));
+      this.piLayersHierarchy = new PILayersHierarchy(this, this.analysisResults, this.keyFigureLayers);
+  
+      this.worldMapLayer = {
+        name: this.$t("world-map").toString(),
+        type: "osm",
+        selected: true,
+        satellite: this.satelliteView,
+      };
+  
+      this.layers.push(
+        {
+          name: this.$t("performance-indicators").toString(),
+          type: "group",
+          childLayers: this.piLayersHierarchy.groupLayers,
+          singleSelection: true,
         },
-        onSelected: (selected: boolean) => {
-          this.showPCS = selected;
-
-          this.piLayersHierarchy.getAllChildLayers().forEach(kpiLayer => kpiLayer.showPCS(selected));
-          this.componentLayers.forEach(compLayer => compLayer.showPCS(selected));
+        {
+          name: this.$t("components").toString(),
+          type: "group",
+          childLayers: this.componentLayers.map(compLayer => compLayer.toGeoLayer()),
         },
-        selected: false,
-        styleClass: "margin-top",
-      },
-      this.worldMapLayer
-    );
+        {
+          name: "pcs",
+          type: "custom",
+          customLoader: () => {
+            return;
+          },
+          onSelected: (selected: boolean) => {
+            this.showPCS = selected;
+  
+            this.piLayersHierarchy.getAllChildLayers().forEach(kpiLayer => kpiLayer.showPCS(selected));
+            this.componentLayers.forEach(compLayer => compLayer.showPCS(selected));
+          },
+          selected: false,
+          styleClass: "margin-top",
+        },
+        this.worldMapLayer
+      );
+    } catch (e) {
+      this.showError(e);
+    }
   }
 
   public hideToast() {

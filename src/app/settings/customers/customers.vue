@@ -96,7 +96,6 @@ import { Component, Ref } from "vue-property-decorator";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import { BvTableFieldArray } from "bootstrap-vue";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
@@ -104,6 +103,7 @@ import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant
 import { SelectPlant } from "../types";
 import { CustomerItem } from "./types";
 import { CustomerRole, CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 
 
 @Component({
@@ -113,7 +113,7 @@ import { CustomerRole, CustomerSchema } from "@/app/shared/services/volateq-api/
     AppModalForm,
   },
 })
-export default class AppSettingsCustomers extends Vue {
+export default class AppSettingsCustomers extends BaseAuthComponent {
   columns: BvTableFieldArray = [];
   rows: CustomerItem[] = [];
 
@@ -159,7 +159,7 @@ export default class AppSettingsCustomers extends Vue {
         return 0;
       });
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      this.showError(e);
     }
   }
 
@@ -185,7 +185,7 @@ export default class AppSettingsCustomers extends Vue {
         return 0;
       });
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      this.showError(e);
     } finally {
       this.loading = false;
     }
@@ -208,7 +208,6 @@ export default class AppSettingsCustomers extends Vue {
     this.customerModalTitle = this.$t("create-customer").toString();
     this.customerModalOkTitle = this.$t("create").toString();
 
-    this.appCustomerModal.hideAlert();
     this.appCustomerModal.show();
   }
 
@@ -225,7 +224,6 @@ export default class AppSettingsCustomers extends Vue {
     this.customerModalTitle = this.$t("edit-customer").toString() + ": " + customerItem.name;
     this.customerModalOkTitle = this.$t("apply").toString();
 
-    this.appCustomerModal.hideAlert();
     this.appCustomerModal.show();
   }
 
@@ -242,7 +240,7 @@ export default class AppSettingsCustomers extends Vue {
           plant_ids: selectedPlantIds,
         });
 
-        appContentEventBus.showSuccessAlert(this.$t("customer-created-success").toString());
+        this.showSuccess(this.$t("customer-created-success").toString());
       } else {
         await volateqApi.updateCustomer(this.currentCustomer!.id, {
           name: this.currentCustomer!.name,
@@ -250,14 +248,14 @@ export default class AppSettingsCustomers extends Vue {
           plant_ids: selectedPlantIds,
         });
 
-        appContentEventBus.showSuccessAlert(this.$t("customer-updated-success").toString());
+        this.showSuccess(this.$t("customer-updated-success").toString());
       }
 
       this.appCustomerModal.hide();
 
       await this.updateCustomerRows();
     } catch (e) {
-      this.appCustomerModal.alertError(e as ApiException);
+      this.showError(e);
     } finally {
       this.customerModalLoading = false;
     }
@@ -272,11 +270,11 @@ export default class AppSettingsCustomers extends Vue {
 
       await volateqApi.deleteCustomer(customerItem.id!);
 
-      appContentEventBus.showSuccessAlert(this.$t("customer-deleted-success", {customer: customerItem.name }).toString());
+      this.showSuccess(this.$t("customer-deleted-success", {customer: customerItem.name }).toString());
 
       await this.updateCustomerRows();
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      this.showError(e as ApiException);
     } finally {
       this.loading = false;
     }

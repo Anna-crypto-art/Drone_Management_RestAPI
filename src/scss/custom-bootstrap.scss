@@ -243,6 +243,27 @@ $theme-colors: (
   max-width: 500px;
 }
 
+.b-toaster .toast {
+  .base-toast-body {
+    display: none;
+  }
+  .base-toast-header {
+    padding: 0.5em 1em;
+    font-size: 1.5em;
+
+    strong {
+      font-weight: normal !important;
+    }
+
+    button.close {
+      position: absolute;
+      top: 0.5em;
+      right: 0.5em;
+    }
+  }
+}
+
+
 .card {
   border-radius: 0 !important;
 }

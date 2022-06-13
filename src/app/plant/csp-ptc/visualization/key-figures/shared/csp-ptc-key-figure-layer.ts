@@ -6,10 +6,11 @@ import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures"
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { cspPtcKeyFigureRainbowColors } from "../../../csp-ptc-key-figure-colors";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 
 export abstract class CspPtcKeyFigureLayer<T extends AnalysisResultSchemaBase> extends KeyFigureLayer<T> {
   constructor(
-    vueComponent: Vue & IPlantVisualization,
+    vueComponent: BaseAuthComponent & IPlantVisualization,
     public readonly analysisResult: AnalysisResultDetailedSchema,
     protected readonly keyFigureId: ApiKeyFigure,
     public readonly keyFigureInfo: KeyFigureInfo,

@@ -41,7 +41,6 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
 import AppCollapse from "@/app/shared/components/app-collapse/app-collapse.vue";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
@@ -56,6 +55,7 @@ import { apiComponentNames } from "@/app/shared/services/volateq-api/api-compone
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { TableFilterRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 
 @Component({
   name: "app-table-filter",
@@ -65,7 +65,7 @@ import { TableFilterRequest } from "@/app/shared/services/volateq-api/api-reques
     AppFilterFields,
   },
 })
-export default class AppTableFilter extends Vue {
+export default class AppTableFilter extends BaseAuthComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) analysisResult!: AnalysisResultDetailedSchema;
   @Prop({ required: true }) activeComponent!: IActiveComponent;
@@ -79,27 +79,31 @@ export default class AppTableFilter extends Vue {
 
   private mappingHelper!: AnalysisResultMappingHelper<AnalysisResultSchemaBase>;
 
-  created() {
-    this.mappingHelper = new AnalysisResultMappingHelper(this.activeComponent.mapping, this.analysisResult);
-
-    this.piFilterFields = this.mappingHelper.getFields()
-      .filter(field => field.filterType)
-      .map(field => ({
-        key: field.key,
-        name: this.$t(field.key).toString(),
-        type: field.filterType!
+  async created() {
+    try {
+      this.mappingHelper = new AnalysisResultMappingHelper(this.activeComponent.mapping, this.analysisResult);
+  
+      this.piFilterFields = this.mappingHelper.getFields()
+        .filter(field => field.filterType)
+        .map(field => ({
+          key: field.key,
+          name: this.$t(field.key).toString(),
+          type: field.filterType!
+        }));
+  
+      this.compFilterFields = apiComponentsFilter[this.activeComponent.componentId]!.map(compId => ({
+        key: compId,
+        name: this.$t(apiComponentNames[compId]).toString(),
+        type: FilterFieldType.ARRAY,
+        getValues: async () => {
+          return (await volateqApi.getFieldgeometryComponentCodes(this.plant.fieldgeometry!.id, compId))
+            .sort()
+            .map(code => ({ value: code, text: code }));
+        }
       }));
-
-    this.compFilterFields = apiComponentsFilter[this.activeComponent.componentId]!.map(compId => ({
-      key: compId,
-      name: this.$t(apiComponentNames[compId]).toString(),
-      type: FilterFieldType.ARRAY,
-      getValues: async () => {
-        return (await volateqApi.getFieldgeometryComponentCodes(this.plant.fieldgeometry!.id, compId))
-          .sort()
-          .map(code => ({ value: code, text: code }));
-      }
-    }));
+    } catch (e) {
+      this.showError(e);
+    }
   }
 
   onApplyFilter() {

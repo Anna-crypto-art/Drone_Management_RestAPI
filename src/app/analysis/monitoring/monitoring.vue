@@ -10,9 +10,7 @@
 import { Component } from "vue-property-decorator";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
-import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 
 @Component({
   name: "app-analysis-monitoring",
@@ -27,7 +25,7 @@ export default class AppAnalysisMonitoring extends BaseAuthComponent {
     try {
       this.monitoring_json = await volateqApi.getAnalysisMonitoring();
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      this.showError(e);
     }
   }
 }

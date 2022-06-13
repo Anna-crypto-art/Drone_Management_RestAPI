@@ -1,6 +1,6 @@
-import Vue from "vue";
+import { BaseComponent } from "../base-component/base-component";
 
-export abstract class BaseAuthComponent extends Vue {
+export abstract class BaseAuthComponent extends BaseComponent {
   isCreated = false;
 
   async created(): Promise<void> {

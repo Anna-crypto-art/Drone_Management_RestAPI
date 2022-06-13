@@ -1,9 +1,9 @@
-import Vue from "vue";
 import { FeatureLike } from "ol/Feature";
-import { Style, Stroke, Text, Fill } from "ol/style";
+import { Style, Stroke, Text } from "ol/style";
 import { asArray, asString } from "ol/color";
 import { IPlantVisualization } from "../types";
 import { GeoJSONLayer } from "@/app/shared/components/app-geovisualization/types/layers";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 
 export const GEO_JSON_OPTIONS = { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" };
 
@@ -23,7 +23,7 @@ export abstract class LayerBase {
   protected showPcsZoomLevel = 15;
   protected refreshLayer = false;
 
-  constructor(protected readonly vueComponent: Vue & IPlantVisualization) {}
+  constructor(protected readonly vueComponent: BaseAuthComponent & IPlantVisualization) {}
 
   protected abstract getPcs(feature: FeatureLike): string | undefined;
   protected abstract load(): Promise<Record<string, unknown>>;

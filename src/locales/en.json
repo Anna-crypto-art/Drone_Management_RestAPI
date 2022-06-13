@@ -315,6 +315,7 @@
   "component-area": "Area",
   "order-by": "Order by",
   "show-in-map": "Show in map",
+  "create": "Create",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",

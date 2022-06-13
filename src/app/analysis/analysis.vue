@@ -110,9 +110,7 @@ import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import { BvTableFieldArray } from "bootstrap-vue";
 import { Component } from "vue-property-decorator";
-import appContentEventBus from "../shared/components/app-content/app-content-event-bus";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
-import { ApiException } from "../shared/services/volateq-api/api-errors";
 import { AnalysisSchema } from "../shared/services/volateq-api/api-schemas/analysis-schema";
 import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
 import { ApiStates } from "../shared/services/volateq-api/api-states";
@@ -240,18 +238,22 @@ export default class AppAnalysis extends BaseAuthComponent {
         return row;
       });
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      this.showError(e);
     } finally {
       this.isLoading = false;
     }
   }
 
   private async getPlants() {
-    this.plants = await volateqApi.getPlants();
-    // Hide the filter if one plant is available
-    if (this.plants.length > 1) {
-      this.plantSelection = this.plants.map(plant => ({ value: plant.id, text: plant.name }));
-      this.plantSelection.unshift({ value: null, text: "" });
+    try {
+      this.plants = await volateqApi.getPlants();
+      // Hide the filter if one plant is available
+      if (this.plants.length > 1) {
+        this.plantSelection = this.plants.map(plant => ({ value: plant.id, text: plant.name }));
+        this.plantSelection.unshift({ value: null, text: "" });
+      }
+    } catch (e) {
+      this.showError(e);
     }
   }
 }

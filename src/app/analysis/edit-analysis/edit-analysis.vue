@@ -49,9 +49,8 @@
 
 <script lang="ts">
 import { Component } from "vue-property-decorator";
-import appContentEventBus from "../../shared/components/app-content/app-content-event-bus";
 import { BaseAuthComponent } from "../../shared/components/base-auth-component/base-auth-component";
-import { ApiErrors, ApiException } from "../../shared/services/volateq-api/api-errors";
+import { ApiErrors } from "../../shared/services/volateq-api/api-errors";
 import { AnalysisSchema } from "../../shared/services/volateq-api/api-schemas/analysis-schema";
 import volateqApi from "../../shared/services/volateq-api/volateq-api";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
@@ -100,7 +99,7 @@ export default class AppEditAnalysis extends BaseAuthComponent {
 
       this.watchAnalysisTask();
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      this.showError(e);
     }
   }
 
@@ -133,11 +132,11 @@ export default class AppEditAnalysis extends BaseAuthComponent {
 
       await volateqApi.updateAnalysis(this.analysis!.id, { flown_at: this.flownAt })
 
-      AppContentEventService.showSuccess(this.analysis!.id, this.$t("analysis-updated-successfully").toString());
+      this.showSuccess(this.$t("analysis-updated-successfully").toString());
 
       AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS);
     } catch (e) {
-      AppContentEventService.showError(this.analysis!.id, e as ApiException);
+      this.showError(e);
     } finally {
       this.loading = false;
     }

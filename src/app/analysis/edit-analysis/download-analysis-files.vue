@@ -57,10 +57,8 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { BvTableFieldArray } from "bootstrap-vue";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
-import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { getReadableFileSize } from "@/app/shared/services/helper/file-helper";
-import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
 
 @Component({
   name: "app-download-analysis-files",
@@ -125,7 +123,7 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
         AppDownloader.download(downloadUrl, archiveName);
       }
     } catch (e) {
-      AppContentEventService.showError(this.analysis.id, e as ApiException);
+      this.showError(e);
     } finally {
       this.downloadButtonLoading = false;
     }
@@ -151,7 +149,7 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
       
       fileItem!.size = fileInfos[filename] !== null ? getReadableFileSize(fileInfos[filename]!) : false;
     } catch (e) {
-      AppContentEventService.showError(this.analysis.id, e as ApiException);
+      this.showError(e);
     } finally {
       this.isFilesLoading = false;
     }

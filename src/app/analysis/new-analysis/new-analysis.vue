@@ -37,10 +37,8 @@
 import { Component } from "vue-property-decorator";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
-import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
-import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import AppAnalysisUpload from "@/app/analysis/shared/analysis-upload.vue";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
@@ -74,7 +72,7 @@ export default class AppNewAnalysis extends BaseAuthComponent {
         this.selectedPlantId = this.plants[0].id;
       }
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      this.showError(e);
     }
   }
 
@@ -105,7 +103,8 @@ export default class AppNewAnalysis extends BaseAuthComponent {
 
       done(this.analysis);
     } catch (e) {
-      appContentEventBus.showError(e as ApiException)
+      this.showError(e);
+
       done(null);
     }
   }
@@ -121,7 +120,7 @@ export default class AppNewAnalysis extends BaseAuthComponent {
 
       done(false);
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      this.showError(e);
 
       done(true);
     }

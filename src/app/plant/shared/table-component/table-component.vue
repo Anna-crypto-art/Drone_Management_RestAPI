@@ -41,7 +41,6 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
 import { Component, Prop, Ref, Watch } from "vue-property-decorator";
 import { BvTableCtxObject } from "bootstrap-vue";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
@@ -54,7 +53,6 @@ import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { AnalysisResultMappings, BvTableFieldExtArray } from "@/app/shared/services/volateq-api/api-results-mappings/types";
-import apiResultsLoader from "@/app/shared/services/volateq-api/api-results-loader";
 import { TableFilterRequest, TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
@@ -63,6 +61,7 @@ import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant
 import { MathHelper } from "@/app/shared/services/helper/math-helper";
 import { TableResultSchema } from "@/app/shared/services/volateq-api/api-schemas/table-result-schema";
 import { BvTableCellData } from "@/app/shared/types";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 
 @Component({
   name: "app-table-component",
@@ -72,7 +71,7 @@ import { BvTableCellData } from "@/app/shared/types";
     AppTableFilter,
   },
 })
-export default class AppTableComponent extends Vue implements ITableComponent {
+export default class AppTableComponent extends BaseAuthComponent implements ITableComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) analysisResult!: AnalysisResultDetailedSchema;
   @Prop({ required: true }) activeComponent!: IActiveComponent;
@@ -107,7 +106,7 @@ export default class AppTableComponent extends Vue implements ITableComponent {
     this.table.refresh();
   }
 
-  created() {
+  async created() {
     this.tableName = "table_" + this.analysisResult.id + "_" + this.activeComponent.componentId;
 
     this.mappingHelper = new AnalysisResultMappingHelper(this.activeComponent.mapping, this.analysisResult);
@@ -198,7 +197,7 @@ export default class AppTableComponent extends Vue implements ITableComponent {
 
       return tableItems;
     } catch (e) {
-      appContentEventBus.showError(e as ApiException);
+      this.showError(e);
     } finally {
       this.stopLoading();
     }

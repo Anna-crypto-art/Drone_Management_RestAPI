@@ -14,7 +14,13 @@ export abstract class ComponentLayer extends LayerBase {
     return this.vueComponent.$t(this.name).toString();
   }
 
-  public load(): Promise<Record<string, unknown>> {
-    return volateqApi.getComponentsGeoVisual(this.vueComponent.plant.id, [this.componentId]);
+  public async load(): Promise<Record<string, unknown>> {
+    try {
+      return volateqApi.getComponentsGeoVisual(this.vueComponent.plant.id, [this.componentId]);
+    } catch (e) {
+      this.vueComponent.showError(e);
+    }
+
+    return {};
   }
 }
