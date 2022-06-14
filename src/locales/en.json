@@ -316,6 +316,7 @@
   "order-by": "Order by",
   "show-in-map": "Show in map",
   "create": "Create",
+  "pi-not-found": "PI does not exist",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",

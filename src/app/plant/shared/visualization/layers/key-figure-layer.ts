@@ -40,17 +40,12 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   constructor(
     vueComponent: BaseAuthComponent & IPlantVisualization,
     public readonly analysisResult: AnalysisResultDetailedSchema,
-    protected readonly keyFigureId: ApiKeyFigure,
+    public readonly keyFigureId: ApiKeyFigure,
     public readonly keyFigureInfo: KeyFigureInfo,
     public readonly query?: GeoVisualQuery,
     protected readonly initColor?: KeyFigureColors,
-    selected?: boolean,
   ) {
     super(vueComponent);
-
-    if (selected !== undefined) {
-      this.selected = selected;
-    }
 
     this.visible = false;
     this.name = (this.keyFigureInfo.templateName ||
@@ -68,8 +63,6 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   }
 
   protected async onSelected(selected: boolean): Promise<void> {
-    super.onSelected(selected);
-
     this.vueComponent.onLayerSelected(selected, this.getLegend());
   }
 
@@ -196,6 +189,10 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     if (this.geoLayerObject) {
       this.geoLayerObject.visible = this.visible;
     }
+  }
+
+  public get isVisible(): boolean {
+    return this.visible;
   }
 
   public setColorScheme(colorScheme: KeyFigureColorScheme) {

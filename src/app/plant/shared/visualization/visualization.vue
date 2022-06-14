@@ -92,6 +92,8 @@ import { State } from "vuex-class";
 import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
 import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-dropdown-button.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
+import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
+import { waitFor } from "@/app/shared/services/helper/debounce-helper";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -135,6 +137,7 @@ export default class AppVisualization
   private worldMapLayer!: OSMLayer;
 
   private isMounted = false;
+  private firstLoad = true;
 
   async created() {
     await super.created();
@@ -142,14 +145,6 @@ export default class AppVisualization
     this.enableMultiSelection = appLocalStorage.getItem(STORAGE_KEY_MULTISELECTION) || false;
     this.showCouldNotBeMeasured = appLocalStorage.getItem(STORAGE_KEY_SHOWUNDEFINED) || false;
     this.satelliteView = appLocalStorage.getItem(STORAGE_KEY_SATELLITEVIEW) || false;
-
-    if (this.$route.query.pi) {
-      const keyFigureId: number = parseInt(this.$route.query.pi as string);
-      const keyFigureFigureLayer = this.keyFigureLayers.find(keyFigureLayer => keyFigureLayer.keyFigureId === keyFigureId);
-      if (keyFigureFigureLayer) {
-        keyFigureFigureLayer.selected = true;
-      }
-    }
 
     this.createLayers();    
   }
@@ -164,17 +159,32 @@ export default class AppVisualization
     this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
   }
 
-  protected onAnalysisSelected() {
+  protected async onAnalysisSelected() {
     this.piLayersHierarchy.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     this.piLayersHierarchy.setCompareAnalysisResult(null);
     this.piLayersHierarchy.toggleMultiSelection(true, true);
     this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
     this.piLayersHierarchy.updateVisibility();
 
+    if (this.firstLoad) {
+      this.firstLoad = false;
+
+      await this.$nextTick();
+
+      if (this.$route.query.pi) {
+        const keyFigureId: number = parseInt(this.$route.query.pi as string);
+        if (!Object.values(ApiKeyFigure).includes(keyFigureId)) {
+          this.showError({ error: "PI_NOT_FOUND", message: this.$t("pi-not-found").toString() });
+        } else {
+          this.piLayersHierarchy.selectKeyFigureLayer(keyFigureId);
+        }
+      }
+    }
+
     this.hideToast();
   }
 
-  protected onMultiAnalysesSelected() {
+  protected async onMultiAnalysesSelected() {
     this.piLayersHierarchy.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     this.piLayersHierarchy.setCompareAnalysisResult(this.compareAnalysisResult || null);
     this.piLayersHierarchy.toggleMultiSelection(false, true);

@@ -82,11 +82,11 @@ export default class AppTablesComponent extends AnalysisSelectionBaseComponent {
     await super.created();
   }
 
-  protected onAnalysisSelected() {
+  protected async onAnalysisSelected() {
     this.setActiveTabComponents();
   }
 
-  protected onMultiAnalysesSelected() {
+  protected async onMultiAnalysesSelected() {
     this.setActiveTabComponents();
   }
 

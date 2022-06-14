@@ -4,6 +4,7 @@ import { asArray, asString } from "ol/color";
 import { IPlantVisualization } from "../types";
 import { GeoJSONLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { EventEmitter } from "events";
 
 export const GEO_JSON_OPTIONS = { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" };
 
@@ -22,6 +23,7 @@ export abstract class LayerBase {
   protected zIndex?: number;
   protected showPcsZoomLevel = 15;
   protected refreshLayer = false;
+  protected readonly events = new EventEmitter();
 
   constructor(protected readonly vueComponent: BaseAuthComponent & IPlantVisualization) {}
 
@@ -34,9 +36,7 @@ export abstract class LayerBase {
     });
   }
 
-  protected onSelected(selected: boolean): void {
-    this.selected = selected;
-  }
+  protected onSelected(selected: boolean): void { /* overide me */ }
 
   protected getName(): string {
     return this.name;
@@ -72,11 +72,16 @@ export abstract class LayerBase {
         zIndex: this.zIndex,
         layerType: "VectorImageLayer",
         reloadLayer: this.refreshLayer,
-        id: this.id
+        id: this.id,
+        events: this.events,
       };
     }
 
     return this.geoLayerObject;
+  }
+
+  public setSelected(selected: boolean) {
+    this.events.emit("setSelected", selected);
   }
 
   protected showText(feature: FeatureLike, props: Record<string, unknown> = {}): Text | undefined {

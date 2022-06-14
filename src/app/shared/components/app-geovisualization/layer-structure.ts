@@ -3,14 +3,16 @@ import { EventEmitter } from "events";
 import { Layer } from "ol/layer";
 import Source from "ol/source/Source";
 import { VNode } from "vue/types/umd";
+import { Watch } from "vue-property-decorator";
 import LayerLoader from "./loader/layer-loader";
 import LayerRenderer from "ol/renderer/Layer";
 
 export class LayerStructure extends EventEmitter {
-  private _selected: boolean;
   private readonly childLayers: LayerStructure[];
 
   public parentLayer?: LayerStructure;
+
+  public ignoreSelectedWatcher = false;
 
   constructor(
     private readonly layerLoader?: LayerLoader<Layer<Source, LayerRenderer<any>> | undefined>,
@@ -19,28 +21,48 @@ export class LayerStructure extends EventEmitter {
   ) {
     super();
 
-    this._selected = this.layerLoader?.layerType.selected || false;
     this.childLayers = [];
 
     this.initializeEvents();
   }
 
   private initializeEvents(): void {
-    this.on("setSelected", async (selected: boolean) => {
-      await this.layerLoader?.setVisible(selected);
+    this.layerLoader?.layerType.events?.on("setSelected", (selected) => { this.emit("setSelected", selected); });
+    this.on("setSelected", async (selected) => { await this.selectLayer(selected) });
+  }
 
-      this.layerLoader?.layerType.onSelected && this.layerLoader?.layerType.onSelected(selected);
+  private async selectLayer(selected: boolean): Promise<void> {
+    if (selected) {
+      this.unselectParentLayers();
+    }
 
-      if (selected || (!selected && this.isGroup)) {
-        for (const childLayer of this.childLayers) {
-          childLayer.selected = selected;
-        }
+    await this.layerLoader?.setVisible(selected);
+
+    this.layerLoader?.layerType.onSelected && this.layerLoader?.layerType.onSelected(selected);
+
+    if (selected || (!selected && this.isGroup)) {
+      for (const childLayer of this.childLayers) {
+        childLayer.selected = selected;
       }
-    });
+    }
   }
 
   private getLayerType(): BaseLayerType | undefined {
     return this.layerLoader?.layerType || this.layerType;
+  }
+
+  private unselectParentLayers() {
+    if (this.parentLayer) {
+      if (this.parentLayer.singleSelection) {
+        this.parentLayer.getChildLayers().forEach(sibling => {
+          if (sibling.id !== this.id && (sibling.selected || sibling.isGroup)) {
+            sibling.selected = false;
+          }
+        });
+      }
+
+      this.parentLayer.unselectParentLayers();
+    }
   }
 
   /**
@@ -73,11 +95,13 @@ export class LayerStructure extends EventEmitter {
   }
 
   public get selected(): boolean {
-    return this._selected;
+    return this.layerLoader?.layerType.selected || false;
   }
 
   public set selected(newVal: boolean) {
-    this._selected = newVal;
+    if (this.layerLoader) {
+      this.layerLoader.layerType.selected = newVal;
+    }
 
     this.emit("setSelected", newVal);
   }
