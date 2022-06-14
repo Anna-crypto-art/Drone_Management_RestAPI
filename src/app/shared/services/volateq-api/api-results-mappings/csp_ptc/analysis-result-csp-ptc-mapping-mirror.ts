@@ -13,9 +13,7 @@ const analysisResultCspPtcMappingMirror: AnalysisResultMappings<
     keyFigureId: ApiKeyFigure.MISSING_MIRROR_ID,
     filterType: FilterFieldType.BOOLEAN,
     enableForDiagram: true,
-    unit: "Count",
     getDiffValue: r => r.is_missing__diff,
-    diffPositive: "negative",
   },
 ];
 

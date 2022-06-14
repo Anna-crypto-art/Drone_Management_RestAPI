@@ -41,8 +41,6 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
   numberBoxes: DiagramNumberBox[] | null = null;
   tableFilter: TableFilterRequest | null = null;
 
-  labelUnit = "";
-
   async created() {
     await super.created();
   }

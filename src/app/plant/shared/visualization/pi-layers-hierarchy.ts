@@ -72,6 +72,7 @@ export class PILayersHierarchy {
     for (const childLayer of this.getAllChildLayers()) {
       childLayer.setColorScheme(multiSelection ? KeyFigureColorScheme.RAINBOW : KeyFigureColorScheme.TRAFFIC_LIGHT);
       childLayer.reloadLayer();
+      childLayer.setSelected(false);
     }
   }
 

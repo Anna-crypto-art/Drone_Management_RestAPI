@@ -12,7 +12,7 @@ export interface AnalysisResultMappingEntry<T extends AnalysisResultSchemaBase, 
   enableForDiagram?: boolean;
   unit?: string;
   getDiffValue?: (result: C) => unknown;
-  diffPositive?: "negative" | "positive" | "neutral";
+  formatter?: (value: unknown) => string;
 }
 
 export type AnalysisResultMappings<T extends AnalysisResultSchemaBase, C = any> = AnalysisResultMappingEntry<T, C>[];

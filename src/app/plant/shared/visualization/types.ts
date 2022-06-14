@@ -57,6 +57,7 @@ export interface FeatureInfo {
   name: string;
   value: string;
   descr?: string;
+  unit?: string;
   bold?: boolean;
 }
 

@@ -9,27 +9,33 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
   {
     getValue: r => r.htf_temperature,
     transName: "absorber-temperature",
+    unit: "°C",
   },
   {
     getValue: r => r.ambient_temperature,
     transName: "ambient-temperature",
+    unit: "°C",
   },
   {
     getValue: r => r.wind_speed,
     transName: "wind-speed",
+    unit: "m/s",
   },
   {
     getValue: r => r.timestamp,
     transName: "time",
+    formatter: value => new Date(Date.parse(value as string)).toLocaleTimeString(), 
   },
   {
     getValue: r => r.position_in_loop,
     transName: "position-in-loop",
     filterType: FilterFieldType.NUMERIC_EXTENDED,
+    formatter: value => `${(value as Array<number>)[0]} of ${(value as Array<number>)[1]}`,
   },
   {
     getValue: r => r.sca_tracking_angle,
     transName: "sca-tracking-angle",
+    unit: "°",
   },
   {
     getValue: r => r.ir_intensity,
@@ -48,9 +54,8 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     transName: "glass-tube-temperature",
     keyFigureId: ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
-    unit: "μ in °C",
+    unit: "°C",
     getDiffValue: r => r.glass_tube_temperature__diff,
-    diffPositive: "negative",
   },
   {
     getValue: r => r.glass_tube_temperature_class,
@@ -59,9 +64,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
-    unit: "μ of count",
     getDiffValue: r => r.glass_tube_temperature_class__diff,
-    diffPositive: "negative",
   },
   {
     getValue: r => r.missing_glass_tube,
@@ -70,9 +73,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.MISSING_GLASS_TUBE_ID,
     filterType: FilterFieldType.BOOLEAN,
     enableForDiagram: true,
-    unit: "Count",
     getDiffValue: r => r.missing_glass_tube__diff,
-    diffPositive: "negative",
   },
   {
     getValue: r => r.oxygen_penetration,
@@ -81,9 +82,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.OXYGEN_PENETRATION_ID,
     filterType: FilterFieldType.BOOLEAN,
     enableForDiagram: true,
-    unit: "Count",
     getDiffValue: r => r.oxygen_penetration__diff,
-    diffPositive: "negative",
   },
   {
     getValue: r => r.h2_concentration,
@@ -92,9 +91,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID,
     filterType: FilterFieldType.BOOLEAN,
     enableForDiagram: true,
-    unit: "Count",
     getDiffValue: r => r.h2_concentration__diff,
-    diffPositive: "negative",
   },
   {
     getValue: r => r.coating_degraded,
@@ -110,9 +107,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
-    unit: "Count",
     getDiffValue: r => r.recommended_action_class__diff,
-    diffPositive: "negative",
   },
   {
     getValue: r => r.glass_tube_temperature_class_limits,
@@ -125,6 +120,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     transDescr: "hce-position-offset-descr",
     keyFigureId: ApiKeyFigure.HCE_POSITION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
+    unit: "°",
   },
   {
     getValue: r => r.hce_position_offset_class,
@@ -138,12 +134,14 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     transName: "hce-position-lateral-offset",
     keyFigureId: ApiKeyFigure.HCE_POSITION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
+    unit: "°",
   },
   {
     getValue: r => r.hce_position_vertical_offset,
     transName: "hce-position-vertical-offset",
     keyFigureId: ApiKeyFigure.HCE_POSITION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
+    unit: "°",
   },
 ];
 

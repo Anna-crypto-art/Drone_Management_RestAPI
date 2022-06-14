@@ -53,7 +53,12 @@
               <span v-html="$t(featureInfo.descr)"></span>
             </app-explanation>
           </b-col>
-          <b-col>{{ featureInfo.value }}</b-col>
+          <b-col>
+            {{ featureInfo.value }}
+            <span v-if="featureInfo.unit">
+              {{ featureInfo.unit }}
+            </span>
+          </b-col>
         </b-row>
       </div>
       <div v-if="piToastInfo.actions" class="toaster-actions">
@@ -93,7 +98,7 @@ import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/an
 import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-dropdown-button.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
-import { waitFor } from "@/app/shared/services/helper/debounce-helper";
+import { EventEmitter } from "events";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -154,9 +159,6 @@ export default class AppVisualization
 
     // wait for DOM before render OpenLayers
     this.isMounted = true;
-
-    this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
-    this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
   }
 
   protected async onAnalysisSelected() {
@@ -170,6 +172,9 @@ export default class AppVisualization
       this.firstLoad = false;
 
       await this.$nextTick();
+
+      this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
+      this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
 
       if (this.$route.query.pi) {
         const keyFigureId: number = parseInt(this.$route.query.pi as string);
@@ -216,21 +221,23 @@ export default class AppVisualization
 
   async onOpenLayersClick(features: FeatureLike[]) {
     try {
-      this.loading = false;
+      this.loading = true;
       
       let mergedFeatureInfos: FeatureInfos | undefined;
       for (const kpiLayer of this.piLayersHierarchy.getAllChildLayers()) {
-        const featureInfos = await kpiLayer.onClick(features);
-  
-        if (featureInfos) {
-          if (!mergedFeatureInfos) {
-            mergedFeatureInfos = featureInfos;
-          } else if (mergedFeatureInfos.title === featureInfos.title) {
-            mergedFeatureInfos.records.forEach((featureInfo, index) => {
-              if (!featureInfo.bold && featureInfos.records[index].bold) {
-                featureInfo.bold = true;
-              }
-            });
+        if (kpiLayer.isVisible) {
+          const featureInfos = await kpiLayer.onClick(features);
+    
+          if (featureInfos) {
+            if (!mergedFeatureInfos) {
+              mergedFeatureInfos = featureInfos;
+            } else if (mergedFeatureInfos.title === featureInfos.title) {
+              mergedFeatureInfos.records.forEach((featureInfo, index) => {
+                if (!featureInfo.bold && featureInfos.records[index].bold) {
+                  featureInfo.bold = true;
+                }
+              });
+            }
           }
         }
       }
@@ -287,6 +294,8 @@ export default class AppVisualization
 
     this.worldMapLayer.satellite = this.satelliteView;
     this.worldMapLayer.reloadLayer = true;
+    this.worldMapLayer.events!.emit("setSelected", false);
+    this.worldMapLayer.events!.emit("setSelected", true);
   }
 
   async onClickFeatureAction(actionName: string) {
@@ -314,6 +323,7 @@ export default class AppVisualization
         type: "osm",
         selected: true,
         satellite: this.satelliteView,
+        events: new EventEmitter(),
       };
   
       this.layers.push(

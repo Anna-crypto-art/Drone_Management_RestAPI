@@ -35,7 +35,8 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
   public getColumns(transFunc: (transName: string) => VueI18n.TranslateResult): BvTableFieldExtArray {
     return this.getEntries().map(mappingEntry => ({
       key: mappingEntry.transName,
-      label: transFunc(mappingEntry.transName).toString(),
+      label: transFunc(mappingEntry.transName).toString() + 
+        (mappingEntry.unit ? ` (${mappingEntry.unit})` : ""),
       sortable: true,
       labelExpl: mappingEntry.transDescr,
     }));
@@ -59,7 +60,12 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
     const item: Record<string, unknown> = {};
 
     for (const mappingEntry of this.getEntries()) {
-      item[mappingEntry.transName] = mappingEntry.getValue(result);
+      let entryValue = mappingEntry.getValue(result);
+      if (entryValue !== undefined && entryValue !== null && mappingEntry.formatter) {
+        entryValue = mappingEntry.formatter(entryValue);
+      }
+
+      item[mappingEntry.transName] = entryValue;
 
       if (this.compareAnalysisResult && mappingEntry.getDiffValue) {
         item[`${mappingEntry.transName}__diff`] = mappingEntry.getDiffValue(result as unknown);

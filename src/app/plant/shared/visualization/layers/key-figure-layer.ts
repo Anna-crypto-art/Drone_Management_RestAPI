@@ -63,36 +63,37 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   }
 
   protected async onSelected(selected: boolean): Promise<void> {
+    this.selected = selected;
     this.vueComponent.onLayerSelected(selected, this.getLegend());
-  }
-
-  protected mapRecordEntryToFeatureInfo(key: string, value: unknown, descr?: string): FeatureInfo | undefined {
-    const featureInfo = {
-      name: this.vueComponent.$t(key).toString(),
-      value: value === null || value === undefined ? "" : (value as any).toString(),
-      descr: descr,
-      bold: key == this.keyFigureInfo.keyName,
-    };
-
-    return featureInfo;
   }
 
   protected mapResultToFeatureInfos(result: T): FeatureInfos | undefined {
     const mappingHelper = new AnalysisResultMappingHelper(this.analysisResultMapping, this.analysisResult!);
-    const record = mappingHelper.getItem(result);
+    const resultItem = mappingHelper.getItem(result);
+
+    const recordFeatureInfos: FeatureInfo[] = [];
+    for (const entry of mappingHelper.getEntries()) {
+      if (entry.transName === "pcs") {
+        continue;
+      }
+
+      let recordValue: any = resultItem[entry.transName];
+      if (recordValue === undefined || recordValue === null) {
+        recordValue = "";
+      }
+      
+      recordFeatureInfos.push({
+        name: this.vueComponent.$t(entry.transName).toString(),
+        value: recordValue,
+        bold: entry.transName === this.keyFigureInfo.keyName,
+        descr: entry.transDescr,
+        unit: recordValue !== "" ? entry.unit : undefined,
+      });
+    }
 
     const featureInfos: FeatureInfos = {
       title: result.fieldgeometry_component.kks,
-      records: Object.keys(record)
-        .filter(k => k !== "pcs")
-        .map(k =>
-          this.mapRecordEntryToFeatureInfo(
-            k,
-            record[k]!,
-            this.analysisResultMapping.find(entry => entry.transName === k)?.transDescr
-          )
-        )
-        .filter(featureInfo => featureInfo !== undefined) as any,
+      records: recordFeatureInfos,
     };
 
     return featureInfos;
