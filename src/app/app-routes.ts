@@ -8,7 +8,6 @@ import plantRoutes from "@/app/plant/plant-routes";
 import AppPageNotFound from "@/app/shared/components/page-not-found/page-not-found.vue";
 import AppHome from "@/app/home.vue";
 import store from "@/app/app-state";
-import { ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
 
 Vue.use(Router);
 

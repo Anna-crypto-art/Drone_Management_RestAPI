@@ -1,1 +1,513 @@
-(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([[15],{392:function(t,e,n){"use strict";n.r(e);var a=function(){var t=this,e=t.$createElement,n=t._self._c||e;return n("app-content",{attrs:{title:t.$t("new-data-upload"),navback:!0,subtitle:t.$t("create-new-analysis_descr")}},[n("div",{staticClass:"app-new-analysis"},[n("app-analysis-upload",{attrs:{analysis:t.analysis},on:{startUpload:t.onStartUpload,cancelUpload:t.onCancelUpload,retryUpload:t.onRetryUpload},scopedSlots:t._u([{key:"uploadForm",fn:function(){return[n("b-row",{staticStyle:{"margin-bottom":"25px"}},[t.plantOptions.length>1?n("b-col",{attrs:{sm:"4"}},[n("b-form-group",{attrs:{"label-cols":"auto",label:t.$t("plant")}},[n("b-form-select",{attrs:{required:"",options:t.plantOptions},on:{change:t.onPlantSelectionChanged},model:{value:t.selectedPlantId,callback:function(e){t.selectedPlantId=e},expression:"selectedPlantId"}})],1)],1):t._e(),t.customerOptions.length>1?n("b-col",{attrs:{sm:"4"}},[n("b-form-group",{attrs:{"label-cols":"auto",label:t.$t("customer")}},[n("b-form-select",{attrs:{required:"",options:t.customerOptions},model:{value:t.selectedCustomerId,callback:function(e){t.selectedCustomerId=e},expression:"selectedCustomerId"}})],1)],1):t._e(),n("b-col",{attrs:{sm:"4"}},[n("b-form-group",{attrs:{"label-cols":"auto",label:t.$t("acquisition-date")}},[n("b-datepicker",{attrs:{required:""},model:{value:t.flownAt,callback:function(e){t.flownAt=e},expression:"flownAt"}})],1)],1)],1)]},proxy:!0},{key:"cancelButton",fn:function(){return[t._v(" "+t._s(t.$t("cancel-and-delete-all-files"))+" ")]},proxy:!0}])})],1)])},s=[];a._withStripped=!0;var r=n(11),l=n(15),o=n(21),c=n(22),i=n(31),u=n(30),p=n(40),d=(n(69),n(25),n(104),n(70),n(132),n(34)),f=n(85),h=n(86),b=n(84),y=n(254),m=n(292),v=function(t,e,n,a){var s,r=arguments.length,l=r<3?e:null===a?a=Object.getOwnPropertyDescriptor(e,n):a;if("object"===("undefined"===typeof Reflect?"undefined":Object(p["a"])(Reflect))&&"function"===typeof Reflect.decorate)l=Reflect.decorate(t,e,n,a);else for(var o=t.length-1;o>=0;o--)(s=t[o])&&(l=(r<3?s(l):r>3?s(e,n,l):s(e,n))||l);return r>3&&l&&Object.defineProperty(e,n,l),l},w=function(t){Object(i["a"])(n,t);var e=Object(u["a"])(n);function n(){var t;return Object(o["a"])(this,n),t=e.apply(this,arguments),t.selectedPlantId=null,t.plantOptions=[],t.selectedCustomerId=null,t.customerOptions=[],t.flownAt=null,t.analysis=null,t}return Object(c["a"])(n,[{key:"created",value:function(){var t=Object(l["a"])(Object(r["a"])().mark((function t(){return Object(r["a"])().wrap((function(t){while(1)switch(t.prev=t.next){case 0:return t.prev=0,t.next=3,b["a"].getPlants();case 3:this.plants=t.sent,this.plantOptions=this.plants.map((function(t){return{value:t.id,text:t.name}})),1===this.plants.length&&(this.selectedPlantId=this.plants[0].id),t.next=11;break;case 8:t.prev=8,t.t0=t["catch"](0),this.showError(t.t0);case 11:case"end":return t.stop()}}),t,this,[[0,8]])})));function e(){return t.apply(this,arguments)}return e}()},{key:"onPlantSelectionChanged",value:function(){var t=this,e=this.plants.find((function(e){return e.id===t.selectedPlantId}));e&&e.customers&&e.customers.length>1?this.customerOptions=e.customers.map((function(t){return{value:t.id,text:t.name}})):this.customerOptions=[]}},{key:"onStartUpload",value:function(){var t=Object(l["a"])(Object(r["a"])().mark((function t(e,n,a){var s;return Object(r["a"])().wrap((function(t){while(1)switch(t.prev=t.next){case 0:if(t.prev=0,!n){t.next=4;break}return a(this.analysis),t.abrupt("return");case 4:return t.next=6,b["a"].createAnalysis({plant_id:this.selectedPlantId,files:e,flown_at:this.flownAt,customer_id:this.selectedCustomerId||void 0});case 6:return s=t.sent,t.next=9,b["a"].getAnalysis(s.id);case 9:this.analysis=t.sent,a(this.analysis),t.next=17;break;case 13:t.prev=13,t.t0=t["catch"](0),this.showError(t.t0),a(null);case 17:case"end":return t.stop()}}),t,this,[[0,13]])})));function e(e,n,a){return t.apply(this,arguments)}return e}()},{key:"onCancelUpload",value:function(){var t=Object(l["a"])(Object(r["a"])().mark((function t(e){return Object(r["a"])().wrap((function(t){while(1)switch(t.prev=t.next){case 0:if(this.analysis){t.next=2;break}return t.abrupt("return");case 2:return t.prev=2,t.next=5,b["a"].cancelAnalysisUpload(this.analysis.id);case 5:return t.next=7,b["a"].deleteAnalysis(this.analysis.id);case 7:e(!1),t.next=14;break;case 10:t.prev=10,t.t0=t["catch"](2),this.showError(t.t0),e(!0);case 14:case"end":return t.stop()}}),t,this,[[2,10]])})));function e(e){return t.apply(this,arguments)}return e}()},{key:"onRetryUpload",value:function(){this.$router.push({name:"EditAnalysis",params:{id:this.analysis.id}})}}]),n}(f["a"]);w=v([Object(d["a"])({name:"app-new-analysis",components:{AppContent:h["a"],AppButton:y["a"],AppAnalysisUpload:m["a"]}})],w);var O=w,k=O,x=n(43),j=Object(x["a"])(k,a,s,!1,null,null,null);j.options.__file="src/app/analysis/new-analysis/new-analysis.vue";e["default"]=j.exports}}]);
+(window["webpackJsonp"] = window["webpackJsonp"] || []).push([[15],{
+
+/***/ 392:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+// ESM COMPAT FLAG
+__webpack_require__.r(__webpack_exports__);
+
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"1a28fa34-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/app/analysis/new-analysis/new-analysis.vue?vue&type=template&id=5d1639a3&
+var render = function () {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "app-content",
+    {
+      attrs: {
+        title: _vm.$t("new-data-upload"),
+        navback: true,
+        subtitle: _vm.$t("create-new-analysis_descr"),
+      },
+    },
+    [
+      _c(
+        "div",
+        { staticClass: "app-new-analysis" },
+        [
+          _c("app-analysis-upload", {
+            attrs: { analysis: _vm.analysis },
+            on: {
+              startUpload: _vm.onStartUpload,
+              cancelUpload: _vm.onCancelUpload,
+              retryUpload: _vm.onRetryUpload,
+            },
+            scopedSlots: _vm._u([
+              {
+                key: "uploadForm",
+                fn: function () {
+                  return [
+                    _c(
+                      "b-row",
+                      { staticStyle: { "margin-bottom": "25px" } },
+                      [
+                        _vm.plantOptions.length > 1
+                          ? _c(
+                              "b-col",
+                              { attrs: { sm: "4" } },
+                              [
+                                _c(
+                                  "b-form-group",
+                                  {
+                                    attrs: {
+                                      "label-cols": "auto",
+                                      label: _vm.$t("plant"),
+                                    },
+                                  },
+                                  [
+                                    _c("b-form-select", {
+                                      attrs: {
+                                        required: "",
+                                        options: _vm.plantOptions,
+                                      },
+                                      on: {
+                                        change: _vm.onPlantSelectionChanged,
+                                      },
+                                      model: {
+                                        value: _vm.selectedPlantId,
+                                        callback: function ($$v) {
+                                          _vm.selectedPlantId = $$v
+                                        },
+                                        expression: "selectedPlantId",
+                                      },
+                                    }),
+                                  ],
+                                  1
+                                ),
+                              ],
+                              1
+                            )
+                          : _vm._e(),
+                        _vm.customerOptions.length > 1
+                          ? _c(
+                              "b-col",
+                              { attrs: { sm: "4" } },
+                              [
+                                _c(
+                                  "b-form-group",
+                                  {
+                                    attrs: {
+                                      "label-cols": "auto",
+                                      label: _vm.$t("customer"),
+                                    },
+                                  },
+                                  [
+                                    _c("b-form-select", {
+                                      attrs: {
+                                        required: "",
+                                        options: _vm.customerOptions,
+                                      },
+                                      model: {
+                                        value: _vm.selectedCustomerId,
+                                        callback: function ($$v) {
+                                          _vm.selectedCustomerId = $$v
+                                        },
+                                        expression: "selectedCustomerId",
+                                      },
+                                    }),
+                                  ],
+                                  1
+                                ),
+                              ],
+                              1
+                            )
+                          : _vm._e(),
+                        _c(
+                          "b-col",
+                          { attrs: { sm: "4" } },
+                          [
+                            _c(
+                              "b-form-group",
+                              {
+                                attrs: {
+                                  "label-cols": "auto",
+                                  label: _vm.$t("acquisition-date"),
+                                },
+                              },
+                              [
+                                _c("b-datepicker", {
+                                  attrs: { required: "" },
+                                  model: {
+                                    value: _vm.flownAt,
+                                    callback: function ($$v) {
+                                      _vm.flownAt = $$v
+                                    },
+                                    expression: "flownAt",
+                                  },
+                                }),
+                              ],
+                              1
+                            ),
+                          ],
+                          1
+                        ),
+                      ],
+                      1
+                    ),
+                  ]
+                },
+                proxy: true,
+              },
+              {
+                key: "cancelButton",
+                fn: function () {
+                  return [
+                    _vm._v(
+                      " " + _vm._s(_vm.$t("cancel-and-delete-all-files")) + " "
+                    ),
+                  ]
+                },
+                proxy: true,
+              },
+            ]),
+          }),
+        ],
+        1
+      ),
+    ]
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+// CONCATENATED MODULE: ./src/app/analysis/new-analysis/new-analysis.vue?vue&type=template&id=5d1639a3&
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/regeneratorRuntime.js
+var regeneratorRuntime = __webpack_require__(11);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
+var asyncToGenerator = __webpack_require__(15);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/classCallCheck.js
+var classCallCheck = __webpack_require__(21);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/createClass.js
+var createClass = __webpack_require__(22);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/inherits.js + 1 modules
+var inherits = __webpack_require__(31);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/createSuper.js + 3 modules
+var createSuper = __webpack_require__(30);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/typeof.js
+var esm_typeof = __webpack_require__(40);
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.get-own-property-descriptor.js
+var es_object_get_own_property_descriptor = __webpack_require__(69);
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
+var es_object_to_string = __webpack_require__(25);
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.map.js
+var es_array_map = __webpack_require__(104);
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.function.name.js
+var es_function_name = __webpack_require__(70);
+
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.find.js
+var es_array_find = __webpack_require__(132);
+
+// EXTERNAL MODULE: ./node_modules/vue-property-decorator/lib/vue-property-decorator.js
+var vue_property_decorator = __webpack_require__(34);
+
+// EXTERNAL MODULE: ./src/app/shared/components/base-auth-component/base-auth-component.ts + 1 modules
+var base_auth_component = __webpack_require__(85);
+
+// EXTERNAL MODULE: ./src/app/shared/components/app-content/app-content.vue + 4 modules
+var app_content = __webpack_require__(86);
+
+// EXTERNAL MODULE: ./src/app/shared/services/volateq-api/volateq-api.ts + 2 modules
+var volateq_api = __webpack_require__(84);
+
+// EXTERNAL MODULE: ./src/app/shared/components/app-button/app-button.vue + 4 modules
+var app_button = __webpack_require__(254);
+
+// EXTERNAL MODULE: ./src/app/analysis/shared/analysis-upload.vue + 17 modules
+var analysis_upload = __webpack_require__(292);
+
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--15-0!./node_modules/babel-loader/lib!./node_modules/ts-loader??ref--15-2!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/app/analysis/new-analysis/new-analysis.vue?vue&type=script&lang=ts&
+
+
+
+
+
+
+
+
+
+
+
+
+
+var __decorate = undefined && undefined.__decorate || function (decorators, target, key, desc) {
+  var c = arguments.length,
+      r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc,
+      d;
+  if ((typeof Reflect === "undefined" ? "undefined" : Object(esm_typeof["a" /* default */])(Reflect)) === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);else for (var i = decorators.length - 1; i >= 0; i--) {
+    if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+  }
+  return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+
+
+
+
+
+
+
+
+var new_analysisvue_type_script_lang_ts_AppNewAnalysis = /*#__PURE__*/function (_BaseAuthComponent) {
+  Object(inherits["a" /* default */])(AppNewAnalysis, _BaseAuthComponent);
+
+  var _super = Object(createSuper["a" /* default */])(AppNewAnalysis);
+
+  function AppNewAnalysis() {
+    var _this;
+
+    Object(classCallCheck["a" /* default */])(this, AppNewAnalysis);
+
+    _this = _super.apply(this, arguments);
+    _this.selectedPlantId = null;
+    _this.plantOptions = [];
+    _this.selectedCustomerId = null;
+    _this.customerOptions = [];
+    _this.flownAt = null;
+    _this.analysis = null;
+    return _this;
+  }
+
+  Object(createClass["a" /* default */])(AppNewAnalysis, [{
+    key: "created",
+    value: function () {
+      var _created = Object(asyncToGenerator["a" /* default */])( /*#__PURE__*/Object(regeneratorRuntime["a" /* default */])().mark(function _callee() {
+        return Object(regeneratorRuntime["a" /* default */])().wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.prev = 0;
+                _context.next = 3;
+                return volateq_api["a" /* default */].getPlants();
+
+              case 3:
+                this.plants = _context.sent;
+                this.plantOptions = this.plants.map(function (plant) {
+                  return {
+                    value: plant.id,
+                    text: plant.name
+                  };
+                });
+
+                if (this.plants.length === 1) {
+                  this.selectedPlantId = this.plants[0].id;
+                }
+
+                _context.next = 11;
+                break;
+
+              case 8:
+                _context.prev = 8;
+                _context.t0 = _context["catch"](0);
+                this.showError(_context.t0);
+
+              case 11:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this, [[0, 8]]);
+      }));
+
+      function created() {
+        return _created.apply(this, arguments);
+      }
+
+      return created;
+    }()
+  }, {
+    key: "onPlantSelectionChanged",
+    value: function onPlantSelectionChanged() {
+      var _this2 = this;
+
+      var plant = this.plants.find(function (plant) {
+        return plant.id === _this2.selectedPlantId;
+      });
+
+      if (plant && plant.customers && plant.customers.length > 1) {
+        this.customerOptions = plant.customers.map(function (customer) {
+          return {
+            value: customer.id,
+            text: customer.name
+          };
+        });
+      } else {
+        this.customerOptions = [];
+      }
+    }
+  }, {
+    key: "onStartUpload",
+    value: function () {
+      var _onStartUpload = Object(asyncToGenerator["a" /* default */])( /*#__PURE__*/Object(regeneratorRuntime["a" /* default */])().mark(function _callee2(files, resume, done) {
+        var analysisIdObj;
+        return Object(regeneratorRuntime["a" /* default */])().wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.prev = 0;
+
+                if (!resume) {
+                  _context2.next = 4;
+                  break;
+                }
+
+                done(this.analysis);
+                return _context2.abrupt("return");
+
+              case 4:
+                _context2.next = 6;
+                return volateq_api["a" /* default */].createAnalysis({
+                  plant_id: this.selectedPlantId,
+                  files: files,
+                  flown_at: this.flownAt,
+                  customer_id: this.selectedCustomerId || undefined
+                });
+
+              case 6:
+                analysisIdObj = _context2.sent;
+                _context2.next = 9;
+                return volateq_api["a" /* default */].getAnalysis(analysisIdObj.id);
+
+              case 9:
+                this.analysis = _context2.sent;
+                done(this.analysis);
+                _context2.next = 17;
+                break;
+
+              case 13:
+                _context2.prev = 13;
+                _context2.t0 = _context2["catch"](0);
+                this.showError(_context2.t0);
+                done(null);
+
+              case 17:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this, [[0, 13]]);
+      }));
+
+      function onStartUpload(_x, _x2, _x3) {
+        return _onStartUpload.apply(this, arguments);
+      }
+
+      return onStartUpload;
+    }()
+  }, {
+    key: "onCancelUpload",
+    value: function () {
+      var _onCancelUpload = Object(asyncToGenerator["a" /* default */])( /*#__PURE__*/Object(regeneratorRuntime["a" /* default */])().mark(function _callee3(done) {
+        return Object(regeneratorRuntime["a" /* default */])().wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                if (this.analysis) {
+                  _context3.next = 2;
+                  break;
+                }
+
+                return _context3.abrupt("return");
+
+              case 2:
+                _context3.prev = 2;
+                _context3.next = 5;
+                return volateq_api["a" /* default */].cancelAnalysisUpload(this.analysis.id);
+
+              case 5:
+                _context3.next = 7;
+                return volateq_api["a" /* default */].deleteAnalysis(this.analysis.id);
+
+              case 7:
+                done(false);
+                _context3.next = 14;
+                break;
+
+              case 10:
+                _context3.prev = 10;
+                _context3.t0 = _context3["catch"](2);
+                this.showError(_context3.t0);
+                done(true);
+
+              case 14:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this, [[2, 10]]);
+      }));
+
+      function onCancelUpload(_x4) {
+        return _onCancelUpload.apply(this, arguments);
+      }
+
+      return onCancelUpload;
+    }()
+  }, {
+    key: "onRetryUpload",
+    value: function onRetryUpload() {
+      // Forward to existing analysis
+      this.$router.push({
+        name: "EditAnalysis",
+        params: {
+          id: this.analysis.id
+        }
+      });
+    }
+  }]);
+
+  return AppNewAnalysis;
+}(base_auth_component["a" /* BaseAuthComponent */]);
+
+new_analysisvue_type_script_lang_ts_AppNewAnalysis = __decorate([Object(vue_property_decorator["a" /* Component */])({
+  name: "app-new-analysis",
+  components: {
+    AppContent: app_content["a" /* default */],
+    AppButton: app_button["a" /* default */],
+    AppAnalysisUpload: analysis_upload["a" /* default */]
+  }
+})], new_analysisvue_type_script_lang_ts_AppNewAnalysis);
+/* harmony default export */ var new_analysisvue_type_script_lang_ts_ = (new_analysisvue_type_script_lang_ts_AppNewAnalysis);
+// CONCATENATED MODULE: ./src/app/analysis/new-analysis/new-analysis.vue?vue&type=script&lang=ts&
+ /* harmony default export */ var new_analysis_new_analysisvue_type_script_lang_ts_ = (new_analysisvue_type_script_lang_ts_); 
+// EXTERNAL MODULE: ./node_modules/vue-loader/lib/runtime/componentNormalizer.js
+var componentNormalizer = __webpack_require__(43);
+
+// CONCATENATED MODULE: ./src/app/analysis/new-analysis/new-analysis.vue
+
+
+
+
+
+/* normalize component */
+
+var component = Object(componentNormalizer["a" /* default */])(
+  new_analysis_new_analysisvue_type_script_lang_ts_,
+  render,
+  staticRenderFns,
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "src/app/analysis/new-analysis/new-analysis.vue"
+/* harmony default export */ var new_analysis = __webpack_exports__["default"] = (component.exports);
+
+/***/ })
+
+}]);
