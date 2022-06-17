@@ -20,11 +20,6 @@ const authStore = defineModule({
 
       return state.role === ApiRoles.SUPER_ADMIN;
     },
-    isCustomerAdmin(...args): boolean {
-      const { state } = moduleGetterContext(args, authStore);
-
-      return state.role === ApiRoles.CUSTOMER_ADMIN;
-    },
   },
   mutations: {
     updateToken(state, newState: AuthState) {

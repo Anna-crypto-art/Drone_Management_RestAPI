@@ -10,16 +10,25 @@ const anaylsisRoutes: RouteConfig[] = [
     name: "Analyses",
     path: "/analyses",
     component: AppAnalysis,
+    meta: {
+      role: [ApiRoles.CUSTOMER_ADMIN, ApiRoles.PILOT],
+    },
   },
   {
     name: "AnalysisNew",
     path: "/analysis/new",
     component: AppNewAnalysis,
+    meta: {
+      role: [ApiRoles.CUSTOMER_ADMIN, ApiRoles.PILOT],
+    },
   },
   {
     name: "EditAnalysis",
     path: "/analysis/:id",
     component: AppEditAnalysis,
+    meta: {
+      role: [ApiRoles.CUSTOMER_ADMIN, ApiRoles.PILOT],
+    }
   },
   {
     name: "AnalysisMonitoring",

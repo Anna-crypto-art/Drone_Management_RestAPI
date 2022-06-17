@@ -15,7 +15,7 @@
 
     <b-collapse class="app-header-menu" id="nav-collapse" is-nav>
       <b-navbar-nav>
-        <b-nav-item class="link" href="/plants" :active="isActiveRoute(['/plants', '/plant/*'])">
+        <b-nav-item v-if="!isPilot" class="link" href="/plants" :active="isActiveRoute(['/plants', '/plant/*'])">
           <span class="nav-item-text">{{ $t("plants") }}</span>
         </b-nav-item>
 

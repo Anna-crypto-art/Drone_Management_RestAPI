@@ -73,7 +73,7 @@ export class VolateqAPI extends HttpClientBase {
   public async logout(): Promise<void> {
     await this.post("/auth/logout");
 
-    await store.dispatch.auth.updateToken({ token: "", role: "", customer_id: undefined });
+    await store.dispatch.auth.updateToken({ token: "", role: undefined, customer_id: undefined });
   }
 
   public async getUsers(customerId?: string): Promise<UserSchema[]> {
@@ -88,6 +88,10 @@ export class VolateqAPI extends HttpClientBase {
 
   public async assignPlantsToUser(userId: string, plantIds: string[]): Promise<void> {
     await this.post(`/auth/user/${userId}/assign-plants`, { plant_ids: plantIds });
+  }
+
+  public async changeUserRole(userId: string, roleId: number): Promise<void> {
+    await this.post(`/auth/user/${userId}/change-role`, { role_id: roleId });
   }
 
   public async getInvitedUser(confirmKey: string): Promise<UserSchema> {

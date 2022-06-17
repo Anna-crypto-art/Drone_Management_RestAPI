@@ -46,15 +46,12 @@ router.beforeEach((to, from, next) => {
       return;
     }
 
-    if (
-      !store.getters.auth.isSuperAdmin &&
-      to.meta &&
-      to.meta.role &&
-      (to.meta.role === ApiRoles.SUPER_ADMIN ||
-        (to.meta.role === ApiRoles.CUSTOMER_ADMIN && !store.getters.auth.isCustomerAdmin))
-    ) {
-      next({ name: "page-not-found" });
-      return;
+    if (to.meta?.role && !store.getters.auth.isSuperAdmin) {
+      const roles: number[] = Array.isArray(to.meta.role) ? to.meta.role : [to.meta.role];
+      if (!roles.includes(store.state.auth.role!)) {
+        next({ name: "page-not-found" });
+        return;
+      }
     }
   }
 
