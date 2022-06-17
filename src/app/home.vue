@@ -6,9 +6,7 @@
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { Component } from "vue-property-decorator";
-import store from "./app-state";
 import { BaseAuthComponent } from "./shared/components/base-auth-component/base-auth-component";
-import { ApiRoles } from "./shared/services/volateq-api/api-roles";
 
 @Component({
   name: "app-home",

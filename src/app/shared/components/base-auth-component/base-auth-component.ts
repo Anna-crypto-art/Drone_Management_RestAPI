@@ -1,5 +1,3 @@
-import store from "@/app/app-state";
-import { ApiRoles } from "../../services/volateq-api/api-roles";
 import { BaseComponent } from "../base-component/base-component";
 
 export abstract class BaseAuthComponent extends BaseComponent {
@@ -13,7 +11,11 @@ export abstract class BaseAuthComponent extends BaseComponent {
     return this.$store.getters["auth/isSuperAdmin"];
   }
 
+  get isCustomerAdmin(): boolean {
+    return this.$store.getters["auth/isCustomerAdmin"];
+  }
+
   get isPilot(): boolean {
-    return store.state.auth.role === ApiRoles.PILOT;
+    return this.$store.getters["auth/isPilot"];
   }
 }
