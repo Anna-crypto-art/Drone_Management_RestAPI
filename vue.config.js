@@ -19,7 +19,7 @@ module.exports = {
     mode: inProduction ? "production" : "development",
     optimization: inProduction // Only apply when in production
       ? {
-          minimize: false,
+          minimize: true,
           usedExports: true,
           concatenateModules: true,
         }
