@@ -54,7 +54,6 @@ import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/a
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { AnalysisResultMappings, BvTableFieldExtArray } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { TableFilterRequest, TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
-import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import AppTableFilter from "@/app/plant/shared/table-component/table-filter.vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
@@ -232,14 +231,9 @@ export default class AppTableComponent extends BaseAuthComponent implements ITab
         if (mappingEntry) {
           const diffValue: number = data.item[diffKey];
           let textColorClass = "text-grey";
-          if (diffValue > 0 && mappingEntry.diffPositive === "positive" ||
-            diffValue < 0 && mappingEntry.diffPositive === "negative")
-          {
+          if (diffValue < 0) {
             textColorClass = "text-success";
-          } 
-          else if (diffValue > 0 && mappingEntry.diffPositive === "negative" ||
-            diffValue < 0 && mappingEntry.diffPositive === "positive") 
-          {
+          } else if (diffValue > 0) {
             textColorClass = "text-danger";
           }
           

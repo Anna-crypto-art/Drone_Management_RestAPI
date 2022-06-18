@@ -25,6 +25,11 @@ const authStore = defineModule({
 
       return state.role === ApiRoles.CUSTOMER_ADMIN;
     },
+    isPilot(...args): boolean {
+      const { state } = moduleGetterContext(args, authStore);
+
+      return state.role === ApiRoles.PILOT;
+    },
   },
   mutations: {
     updateToken(state, newState: AuthState) {

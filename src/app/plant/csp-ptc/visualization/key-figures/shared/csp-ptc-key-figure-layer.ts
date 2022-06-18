@@ -12,7 +12,7 @@ export abstract class CspPtcKeyFigureLayer<T extends AnalysisResultSchemaBase> e
   constructor(
     vueComponent: BaseAuthComponent & IPlantVisualization,
     public readonly analysisResult: AnalysisResultDetailedSchema,
-    protected readonly keyFigureId: ApiKeyFigure,
+    public readonly keyFigureId: ApiKeyFigure,
     public readonly keyFigureInfo: KeyFigureInfo,
     public readonly query?: GeoVisualQuery,
     protected readonly initColor?: KeyFigureColors,

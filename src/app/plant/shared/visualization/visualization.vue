@@ -53,7 +53,12 @@
               <span v-html="$t(featureInfo.descr)"></span>
             </app-explanation>
           </b-col>
-          <b-col>{{ featureInfo.value }}</b-col>
+          <b-col>
+            {{ featureInfo.value }}
+            <span v-if="featureInfo.unit">
+              {{ featureInfo.unit }}
+            </span>
+          </b-col>
         </b-row>
       </div>
       <div v-if="piToastInfo.actions" class="toaster-actions">
@@ -92,6 +97,8 @@ import { State } from "vuex-class";
 import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
 import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-dropdown-button.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
+import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
+import { EventEmitter } from "events";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -135,6 +142,7 @@ export default class AppVisualization
   private worldMapLayer!: OSMLayer;
 
   private isMounted = false;
+  private firstLoad = true;
 
   async created() {
     await super.created();
@@ -142,14 +150,6 @@ export default class AppVisualization
     this.enableMultiSelection = appLocalStorage.getItem(STORAGE_KEY_MULTISELECTION) || false;
     this.showCouldNotBeMeasured = appLocalStorage.getItem(STORAGE_KEY_SHOWUNDEFINED) || false;
     this.satelliteView = appLocalStorage.getItem(STORAGE_KEY_SATELLITEVIEW) || false;
-
-    if (this.$route.query.pi) {
-      const keyFigureId: number = parseInt(this.$route.query.pi as string);
-      const keyFigureFigureLayer = this.keyFigureLayers.find(keyFigureLayer => keyFigureLayer.keyFigureId === keyFigureId);
-      if (keyFigureFigureLayer) {
-        keyFigureFigureLayer.selected = true;
-      }
-    }
 
     this.createLayers();    
   }
@@ -159,22 +159,37 @@ export default class AppVisualization
 
     // wait for DOM before render OpenLayers
     this.isMounted = true;
-
-    this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
-    this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
   }
 
-  protected onAnalysisSelected() {
+  protected async onAnalysisSelected() {
     this.piLayersHierarchy.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     this.piLayersHierarchy.setCompareAnalysisResult(null);
     this.piLayersHierarchy.toggleMultiSelection(true, true);
     this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
     this.piLayersHierarchy.updateVisibility();
 
+    if (this.firstLoad) {
+      this.firstLoad = false;
+
+      await this.$nextTick();
+
+      this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
+      this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
+
+      if (this.$route.query.pi) {
+        const keyFigureId: number = parseInt(this.$route.query.pi as string);
+        if (!Object.values(ApiKeyFigure).includes(keyFigureId)) {
+          this.showError({ error: "PI_NOT_FOUND", message: this.$t("pi-not-found").toString() });
+        } else {
+          this.piLayersHierarchy.selectKeyFigureLayer(keyFigureId);
+        }
+      }
+    }
+
     this.hideToast();
   }
 
-  protected onMultiAnalysesSelected() {
+  protected async onMultiAnalysesSelected() {
     this.piLayersHierarchy.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     this.piLayersHierarchy.setCompareAnalysisResult(this.compareAnalysisResult || null);
     this.piLayersHierarchy.toggleMultiSelection(false, true);
@@ -206,21 +221,23 @@ export default class AppVisualization
 
   async onOpenLayersClick(features: FeatureLike[]) {
     try {
-      this.loading = false;
+      this.loading = true;
       
       let mergedFeatureInfos: FeatureInfos | undefined;
       for (const kpiLayer of this.piLayersHierarchy.getAllChildLayers()) {
-        const featureInfos = await kpiLayer.onClick(features);
-  
-        if (featureInfos) {
-          if (!mergedFeatureInfos) {
-            mergedFeatureInfos = featureInfos;
-          } else if (mergedFeatureInfos.title === featureInfos.title) {
-            mergedFeatureInfos.records.forEach((featureInfo, index) => {
-              if (!featureInfo.bold && featureInfos.records[index].bold) {
-                featureInfo.bold = true;
-              }
-            });
+        if (kpiLayer.isVisible) {
+          const featureInfos = await kpiLayer.onClick(features);
+    
+          if (featureInfos) {
+            if (!mergedFeatureInfos) {
+              mergedFeatureInfos = featureInfos;
+            } else if (mergedFeatureInfos.title === featureInfos.title) {
+              mergedFeatureInfos.records.forEach((featureInfo, index) => {
+                if (!featureInfo.bold && featureInfos.records[index].bold) {
+                  featureInfo.bold = true;
+                }
+              });
+            }
           }
         }
       }
@@ -277,6 +294,8 @@ export default class AppVisualization
 
     this.worldMapLayer.satellite = this.satelliteView;
     this.worldMapLayer.reloadLayer = true;
+    this.worldMapLayer.events!.emit("setSelected", false);
+    this.worldMapLayer.events!.emit("setSelected", true);
   }
 
   async onClickFeatureAction(actionName: string) {
@@ -304,6 +323,7 @@ export default class AppVisualization
         type: "osm",
         selected: true,
         satellite: this.satelliteView,
+        events: new EventEmitter(),
       };
   
       this.layers.push(

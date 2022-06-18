@@ -34,7 +34,7 @@ export class HttpClientBase {
             error.response.data.error === ApiErrors.INVALID_TOKEN ||
             error.response.data.error === ApiErrors.TOKEN_EXPIRED
           ) {
-            store.dispatch.auth.updateToken({ token: "", role: "", customer_id: undefined });
+            store.dispatch.auth.updateToken({ token: "", role: undefined, customer_id: undefined });
 
             location.reload();
           }

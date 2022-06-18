@@ -8,7 +8,7 @@
       layer.styleClass
     "
   >
-    <b-form-checkbox v-if="!layer.isGroup" :checked="layer.selected" @change="onChange">
+    <b-form-checkbox v-if="!layer.isGroup" :checked="selected" @change="onChange">
       <slot :name="layer.name">{{ layer.name }}</slot>
     </b-form-checkbox>
     <h3 v-if="layer.isGroup && layer.name" :class="'layer-display-group-level-' + layerGroupLevel">
@@ -44,19 +44,17 @@ export default class AppGeovisualLayerDisplay extends Vue {
   @Prop() layer!: LayerStructure;
   @Prop({ default: "root" }) level!: "root" | "subroot" | "other";
 
-  onChange(e: boolean): void {
-    const unselectRec = (layer: LayerStructure) => {
-      if (layer.parentLayer?.singleSelection) {
-        layer.parentLayer?.getChildLayers().forEach(sibling => {
-          if (sibling.name !== layer.name && (sibling.selected || sibling.isGroup)) {
-            sibling.selected = false;
-          }
-        });
-      }
-      layer.parentLayer && unselectRec(layer.parentLayer);
-    };
-    unselectRec(this.layer);
+  selected = false;
 
+  created() {
+    this.selected = this.layer.selected;
+
+    this.layer.on("setSelected", (selected) => {
+      this.selected = selected;
+    });
+  }
+
+  onChange(e: boolean): void {
     this.layer.selected = e;
   }
 

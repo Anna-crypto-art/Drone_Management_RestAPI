@@ -14,4 +14,8 @@ export abstract class BaseAuthComponent extends BaseComponent {
   get isCustomerAdmin(): boolean {
     return this.$store.getters["auth/isCustomerAdmin"];
   }
+
+  get isPilot(): boolean {
+    return this.$store.getters["auth/isPilot"];
+  }
 }

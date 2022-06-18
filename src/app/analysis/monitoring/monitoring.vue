@@ -7,7 +7,7 @@
       <b-button @click="loadAnalysisStatus()">{{ $t("Reload") }}</b-button>
       <div class="monitoring-toolbar-loading"><b-spinner v-if="loading" /></div>
       <b-checkbox switch v-model="autoReload" @change="changeAutoReload">
-        {{ $t("auto reload") }}
+        {{ $t("Auto reload") }}
       </b-checkbox>
     </div>
 

@@ -13,6 +13,7 @@ const analysisResultCspPtcMappingSce: AnalysisResultMappings<
     transDescr: "actual-angle_expl",
     keyFigureId: ApiKeyFigure.SCE_ORIENTATION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
+    unit: "°",
   },
   {
     getValue: r => r.alignment_deviation_to_drive,
@@ -21,9 +22,8 @@ const analysisResultCspPtcMappingSce: AnalysisResultMappings<
     keyFigureId: ApiKeyFigure.SCE_ALIGNMENT_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
-    unit: "μ in °",
     getDiffValue: r => r.alignment_deviation_to_drive__diff,
-    diffPositive: "negative",
+    unit: "°",
   },
   {
     getValue: r => r.orientation_uncertainty,
@@ -31,6 +31,7 @@ const analysisResultCspPtcMappingSce: AnalysisResultMappings<
     transDescr: "uncertainty_expl",
     keyFigureId: ApiKeyFigure.SCE_ORIENTATION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
+    unit: "°",
   },
   {
     getValue: r => r.sdx_rms_value,

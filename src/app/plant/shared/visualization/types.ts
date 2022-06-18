@@ -57,6 +57,7 @@ export interface FeatureInfo {
   name: string;
   value: string;
   descr?: string;
+  unit?: string;
   bold?: boolean;
 }
 
@@ -113,8 +114,10 @@ export enum ComparedFeatureType {
 
 export type KeyFigureTypeMap = {
   keyFigureId: ApiKeyFigure;
-  selected?: boolean;
-  layerType: any; // (typeof KeyFigureLayer) leads to: Type "T" is not assignable to type "AnalysisResultCspPtcHceSchema"
+  /**
+   * (typeof KeyFigureLayer) leads to: Type "T" is not assignable to type "AnalysisResultCspPtcHceSchema"
+   */
+  layerType: any; // 
   /**
    * applies to all subLayers if not overwritten
    */

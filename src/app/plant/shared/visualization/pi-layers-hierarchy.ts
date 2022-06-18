@@ -5,6 +5,7 @@ import { KeyFigureLayer } from "./layers/key-figure-layer";
 import { KeyFigureColorScheme, KeyFigureInfo } from "./layers/types";
 import { GroupKPILayer, KeyFigureTypeMap } from "./types";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
+import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 
 /**
  * Component -> PIGroup -> PICheckbox
@@ -71,6 +72,7 @@ export class PILayersHierarchy {
     for (const childLayer of this.getAllChildLayers()) {
       childLayer.setColorScheme(multiSelection ? KeyFigureColorScheme.RAINBOW : KeyFigureColorScheme.TRAFFIC_LIGHT);
       childLayer.reloadLayer();
+      childLayer.setSelected(false);
     }
   }
 
@@ -91,6 +93,14 @@ export class PILayersHierarchy {
       if (childLayer.isCompareEnabled) {
         childLayer.reloadLayer();
       }
+    }
+  }
+
+  public selectKeyFigureLayer(keyFigureId: ApiKeyFigure) {
+    const keyFigureLayer = this.getAllChildLayers().find(keyFigureLayer => 
+      keyFigureLayer.isVisible && keyFigureLayer.keyFigureId === keyFigureId);
+    if (keyFigureLayer) {
+      keyFigureLayer.setSelected(true);
     }
   }
 
@@ -202,7 +212,6 @@ export class PILayersHierarchy {
         keyFigureLayer.keyFigureInfo,
         keyFigureLayer.query,
         keyFigureLayer.color,
-        keyFigureLayer.selected
       );
     }
 
@@ -236,7 +245,6 @@ export class PILayersHierarchy {
           childKeyFigureInfo,
           childLayer.query,
           childLayer.color,
-          keyFigureLayer.selected,
         );
         groupKpiLayer.keyFigureLayers.push(kpiLayer);
         groupKpiLayer.groupLayer.childLayers.push(kpiLayer.toGeoLayer());

@@ -2,8 +2,8 @@ import { ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
 
 export interface InviteUser {
   email: string;
-  role: ApiRoles | "";
-  customer_id?: string;
+  role_id: ApiRoles | null;
+  customer_id: string | null;
   plant_ids?: string[];
 }
 

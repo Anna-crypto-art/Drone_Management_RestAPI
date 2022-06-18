@@ -3,6 +3,7 @@ import VectorLayer from "ol/layer/Vector";
 import VectorImageLayer from "ol/layer/VectorImage";
 import VectorSource from "ol/source/Vector";
 import { StyleFunction } from "ol/style/Style";
+import { EventEmitter } from "events";
 
 export interface BaseLayerType {
   name: string;
@@ -13,6 +14,7 @@ export interface BaseLayerType {
   styleClass?: string;
   reloadLayer?: boolean;
   id?: string;
+  events?: EventEmitter;
 }
 
 export interface GeoJSONLayer extends BaseLayerType {

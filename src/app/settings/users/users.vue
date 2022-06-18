@@ -35,7 +35,7 @@
           >
         </template>
         <template #cell(role)="row">
-          {{ row.item.role }}
+          {{ row.item.role.name }}
           <span v-if="row.item.customer.id"
             ><br /><small class="grayed">{{ row.item.customer.name }}</small></span
           >
@@ -108,9 +108,8 @@
           <b-form-group :label="$t('role')" label-for="role">
             <b-form-select
               id="role"
-              v-model="newUser.role"
+              v-model="newUser.role_id"
               :options="roles"
-              @change="onRoleSelectionChanged"
             ></b-form-select>
           </b-form-group>
         </b-col>
@@ -147,12 +146,21 @@
       @submit="updateUser"
     >
       <template #modal-title>
-        <h4>{{ $t("assign-plants-to-user", { user: editUser.name.email}) }}</h4>
+        <h4>{{ $t("update-user", { user: editUser && editUser.email || "" }) }}</h4>
       </template>
-      <b-row>
+      <b-row v-if="editUser">
+        <b-col>
+          <b-form-group :label="$t('role')" label-for="role">
+            <b-form-select
+              id="role"
+              v-model="editUser.roleId"
+              :options="roles"
+            ></b-form-select>
+          </b-form-group>
+        </b-col>
         <b-col>
           <div><b>{{ $t("plants") }}</b></div>
-          <div v-for="customerPlant in editUserCustomerPlants" :key="customerPlant.plant.id">
+          <div v-for="customerPlant in editUser.customerPlants" :key="customerPlant.plant.id">
             <b-checkbox 
               v-model="customerPlant.selected"
             >
@@ -174,10 +182,10 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { UserSchema, UserStateSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import { InviteUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
-import { ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
+import { apiRoleNames, ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
 import { BvTableFieldArray } from "bootstrap-vue";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
-import { UserItem } from "@/app/settings/users/types";
+import { EditUser, UserItem } from "@/app/settings/users/types";
 import { SelectPlant } from "@/app/settings/types";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
@@ -204,7 +212,8 @@ export default class AppSettingsUsers extends BaseAuthComponent {
   inviteLoading = false;
   customers: any[] = [];
   roles = [
-    { value: ApiRoles.CUSTOMER_ADMIN, text: ApiRoles.CUSTOMER_ADMIN },
+    { value: ApiRoles.CUSTOMER_ADMIN, text: apiRoleNames[ApiRoles.CUSTOMER_ADMIN] },
+    { value: ApiRoles.PILOT, text: apiRoleNames[ApiRoles.PILOT] },
   ];
   newUser: InviteUser = this.initialInviteUser();
   selectedCustomerId: string | null = null;
@@ -212,8 +221,7 @@ export default class AppSettingsUsers extends BaseAuthComponent {
 
   @Ref() appEditUserModal!: IAppModalForm;
   editUserLoading = false;
-  editUser: UserItem | null = null;
-  editUserCustomerPlants: SelectPlant[] = [];
+  editUser: EditUser | null = null;
 
   async created() {
     this.columns = [
@@ -273,15 +281,15 @@ export default class AppSettingsUsers extends BaseAuthComponent {
             name: user.customer ? user.customer.name : null,
             id: user.customer ? user.customer.id : null,
           },
-          role: user.role.name.toString(),
+          role: user.role,
           plants: user.plants || [],
         };
       }).sort((a, b) => {
         // SUPER_ADMINS at first
-        if (a.role === ApiRoles.SUPER_ADMIN && b.role !== ApiRoles.SUPER_ADMIN) {
+        if (a.role.id === ApiRoles.SUPER_ADMIN && b.role.id !== ApiRoles.SUPER_ADMIN) {
           return -1;
         }
-        if (b.role === ApiRoles.SUPER_ADMIN && a.role !== ApiRoles.SUPER_ADMIN) {
+        if (b.role.id === ApiRoles.SUPER_ADMIN && a.role.id !== ApiRoles.SUPER_ADMIN) {
           return 1;
         }
 
@@ -342,21 +350,16 @@ export default class AppSettingsUsers extends BaseAuthComponent {
     if (this.selectedCustomerId) {
       return {
         email: "",
-        role: ApiRoles.CUSTOMER_ADMIN,
+        role_id: null,
         customer_id: this.selectedCustomerId,
       }
     }
 
     return {
       email: "",
-      role: "",
+      role_id: null,
+      customer_id: null,
     };
-  }
-
-  onRoleSelectionChanged() {
-    if (this.newUser.role !== ApiRoles.CUSTOMER_ADMIN) {
-      this.newUser.customer_id = undefined;
-    }
   }
 
   async onResendInvitationClick(user: { id: string }) {
@@ -426,8 +429,12 @@ export default class AppSettingsUsers extends BaseAuthComponent {
   }
 
   onEditUserClick(user: UserItem) {
-    this.editUser = user;
-    this.setEditUserCustomerPlants();
+    this.editUser = {
+      id: user.id,
+      email: user.name.email,
+      roleId: user.role.id,
+      customerPlants: this.getEditUserCustomerPlants(user),
+    };
 
     this.appEditUserModal.hideAlert();
     this.appEditUserModal.show();
@@ -451,10 +458,11 @@ export default class AppSettingsUsers extends BaseAuthComponent {
   async updateUser() {
     this.editUserLoading = true;
     try {
-      const plantIds = this.editUserCustomerPlants.filter(userPlant => userPlant.selected)
+      const plantIds = this.editUser!.customerPlants.filter(userPlant => userPlant.selected)
         .map(userPlant => userPlant.plant.id);
 
       await volateqApi.assignPlantsToUser(this.editUser!.id, plantIds);
+      await volateqApi.changeUserRole(this.editUser!.id, this.editUser!.roleId);
 
       this.appEditUserModal.hide();
 
@@ -468,30 +476,30 @@ export default class AppSettingsUsers extends BaseAuthComponent {
     }
   }
 
-  setEditUserCustomerPlants() {
-    if (this.editUser?.customer.id) {
-      this.editUserCustomerPlants = this.plants
-          .filter(plant => plant.customers!.find(customer => customer.id === this.editUser!.customer.id))
+  private getEditUserCustomerPlants(user: UserItem) {
+    if (user?.customer.id) {
+      return this.plants
+          .filter(plant => plant.customers!.find(customer => customer.id === user!.customer.id))
           .map(plant => ({
             plant,
-            selected: !!this.editUser!.plants.find(userPlant => userPlant.id === plant.id),
-            otherCustomers: plant.customers!.filter(customer => customer.id !== this.editUser!.customer.id)
+            selected: !!user!.plants.find(userPlant => userPlant.id === plant.id),
+            otherCustomers: plant.customers!.filter(customer => customer.id !== user!.customer.id)
               .map(customer => customer.name).join(', ')
           }));
-    } else {
-      this.editUserCustomerPlants = [];
-    }
+    } 
+
+    return [];
   }
 
   getErrorInviteUserForm(): string {
     if (!/^\S+@\S+$/.test(this.newUser.email.trim())) {
       return "INVALID_OR_MISSING_EMAIL";
     }
-    if (Object.keys(ApiRoles).indexOf(this.newUser.role) === -1) {
+    if (this.newUser.role_id === null || !Object.values(ApiRoles).includes(this.newUser.role_id)) {
       return "INVALID_OR_MISSING_ROLE";
     }
-    if (this.newUser.role === ApiRoles.CUSTOMER_ADMIN && !this.newUser.customer_id) {
-      return "CUSOMTER_REQUIRED_FOR_CUSTOMER_ADMIN";
+    if (!this.newUser.customer_id) {
+      return "MISSING_CUSTOMER";
     }
 
     return "";

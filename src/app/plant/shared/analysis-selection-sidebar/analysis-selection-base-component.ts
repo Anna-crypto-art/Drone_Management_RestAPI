@@ -18,7 +18,7 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
     AnalysisSelectionService.on(
       this.plant.id,
       AnalysisSelectionEvent.ANALYSIS_SELECTED,
-      (selectedAnalysisResultId: string | undefined) => {
+      async (selectedAnalysisResultId: string | undefined) => {
         if (this.analysisResults) {
           this.selectedAnalysisResult = this.analysisResults
             .find(analysisResult => analysisResult.id === selectedAnalysisResultId) || null;
@@ -28,14 +28,14 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
           }
         }
 
-        this.onAnalysisSelected();
+        await this.onAnalysisSelected();
       }
     )
 
     AnalysisSelectionService.on(
       this.plant.id,
       AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED,
-      (selectedAnalysisResultIds: string[] | undefined) => {
+      async (selectedAnalysisResultIds: string[] | undefined) => {
         if (!selectedAnalysisResultIds) {
           this.selectedAnalysesResults = null;
         } else if (this.analysisResults) {
@@ -47,13 +47,13 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
             }
         }
 
-        this.onMultiAnalysesSelected();
+        await this.onMultiAnalysesSelected();
       }
     )
   }
 
-  protected onAnalysisSelected() { /* override me, if you need to */ }
-  protected onMultiAnalysesSelected() { /* override me, if you need to */ }
+  protected async onAnalysisSelected() { /* override me, if you need to */ }
+  protected async onMultiAnalysesSelected() { /* override me, if you need to */ }
 
   protected getKeyFigures(): KeyFigureSchema[] {
     if (this.selectedAnalysisResult) {

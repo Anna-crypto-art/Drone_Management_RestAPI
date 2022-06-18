@@ -13,12 +13,14 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
     transDescr: "angle-value_expl",
     keyFigureId: ApiKeyFigure.SCA_ORIENTATION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
+    unit: "°",
   },
   {
     getValue: r => r.orientation_at_drive,
     transName: "orientation-at-drive",
     keyFigureId: ApiKeyFigure.SCA_ORIENTATION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
+    unit: "°",
   },
   {
     getValue: r => r.uncertainty_at_drive,
@@ -26,6 +28,7 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
     transDescr: "uncertainty_expl",
     keyFigureId: ApiKeyFigure.SCA_ORIENTATION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
+    unit: "°",
   },
   {
     getValue: r => r.tracking_encoder_offset,
@@ -34,9 +37,7 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
     keyFigureId: ApiKeyFigure.SCA_TRACKING_DEVIATION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
-    unit: "μ in °",
-    getDiffValue: r => r.tracking_encoder_offset__diff,
-    diffPositive: "negative",
+    unit: "°",
   },
   {
     getValue: r => r.average_tracking_offset,
@@ -45,9 +46,8 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
     keyFigureId: ApiKeyFigure.SCA_TRACKING_DEVIATION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
-    unit: "μ in °",
+    unit: "°",
     getDiffValue: r => r.average_tracking_offset__diff,
-    diffPositive: "negative",
   },
   {
     getValue: r => r.torsion_caused_friction_mean,
@@ -57,7 +57,7 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
     getDiffValue: r => r.torsion_caused_friction_mean__diff,
-    diffPositive: "negative",
+    unit: "°",
   },
   {
     getValue: r => r.sdx_rms_value,
@@ -67,7 +67,7 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
     getDiffValue: r => r.sdx_rms_value__diff,
-    diffPositive: "negative",
+    unit: "Δ",
   },
 ];
 
