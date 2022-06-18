@@ -329,5 +329,8 @@
   "CSP_PTC_SCA": "SCA",
   "CSP_PTC_Mirror": "Mirrors",
   "CSP_PTC_SCE": "SCE",
-  "CSP_PTC_Loop": "Loop"
+  "CSP_PTC_Loop": "Loop",
+  
+  "Reload": "Reload",
+  "auto reload": "Auto reload"
 }

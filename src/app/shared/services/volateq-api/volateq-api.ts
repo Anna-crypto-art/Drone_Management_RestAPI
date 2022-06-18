@@ -22,6 +22,7 @@ import { TaskSchema } from "./api-schemas/task-schema";
 import { ApiStates } from "./api-states";
 import { CustomerRequest } from "./api-requests/customer-requests";
 import { TechnologySchema } from "./api-schemas/technology-schema";
+import { AnalysisMonitoring } from "./api-schemas/analysis-monitoring";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -112,7 +113,7 @@ export class VolateqAPI extends HttpClientBase {
     return this.post(`/auth/analysis`, newAnalyis);
   }
 
-  public async getAllAnalysis(queryParams?: { plant_id?: string, customer_id?: string }): Promise<AnalysisSchema[]> {
+  public async getAllAnalysis(queryParams?: { plant_id?: string; customer_id?: string }): Promise<AnalysisSchema[]> {
     return this.get(`/auth/analysis`, queryParams);
   }
 
@@ -233,21 +234,26 @@ export class VolateqAPI extends HttpClientBase {
         encodedFilterParams += `&component_filter=${encodeURIComponent(JSON.stringify(filterParams.component_filter))}`;
       }
       if (filterParams.columns_selection) {
-        encodedFilterParams += `&columns_selection=${encodeURIComponent(JSON.stringify(filterParams.columns_selection))}`;
+        encodedFilterParams += `&columns_selection=${encodeURIComponent(
+          JSON.stringify(filterParams.columns_selection)
+        )}`;
       }
     }
 
-    return encodedFilterParams
+    return encodedFilterParams;
   }
 
   public getSpecificAnalysisResult<T>(
     analysisResultId: string,
     componentId: number,
     params: TableRequest,
-    filterParams?: TableFilterRequest,
+    filterParams?: TableFilterRequest
   ): Promise<TableResultSchema<T>> {
-    return this.get(`/auth/analysis-result/${analysisResultId}/${componentId}${this.getQueryParams(
-      params)}${this.getEncodedAnalysisResultFilterParams(filterParams)}`);
+    return this.get(
+      `/auth/analysis-result/${analysisResultId}/${componentId}${this.getQueryParams(
+        params
+      )}${this.getEncodedAnalysisResultFilterParams(filterParams)}`
+    );
   }
 
   public getSpecificAnalysisResultCsvUrl(
@@ -270,17 +276,20 @@ export class VolateqAPI extends HttpClientBase {
     componentId: number,
     compareAnalysisResultId: string,
     params: TableRequest,
-    filterParams?: TableFilterRequest,
+    filterParams?: TableFilterRequest
   ): Promise<TableResultSchema<T>> {
-    return this.get(`/auth/analysis-result/compare/${analysisResultId}/${componentId}/${compareAnalysisResultId}${this.getQueryParams(
-      params)}${this.getEncodedAnalysisResultFilterParams(filterParams)}`);
+    return this.get(
+      `/auth/analysis-result/compare/${analysisResultId}/${componentId}/${compareAnalysisResultId}${this.getQueryParams(
+        params
+      )}${this.getEncodedAnalysisResultFilterParams(filterParams)}`
+    );
   }
 
   public getAnalysisResultHistory<T>(
     plantId: string,
     componentId: number,
     params: TableRequest,
-    filterParams?: TableFilterRequest,
+    filterParams?: TableFilterRequest
   ): Promise<TableResultSchema<T>> {
     return this.get(`/auth/analysis-results/history/${plantId}/${componentId}${this.getQueryParams(params)}
       ${this.getEncodedAnalysisResultFilterParams(filterParams)}`);
@@ -334,7 +343,10 @@ export class VolateqAPI extends HttpClientBase {
     keyFiguresId: ApiKeyFigure,
     query_params?: GeoVisualQuery
   ): Promise<any> {
-    return this.get(`/auth/geo-visual/compare/${plantId}/${analysisResultId}/${compareAnalysisResultId}/key-figure/${keyFiguresId}`, query_params);
+    return this.get(
+      `/auth/geo-visual/compare/${plantId}/${analysisResultId}/${compareAnalysisResultId}/key-figure/${keyFiguresId}`,
+      query_params
+    );
   }
 
   public async getAnalysisResults(plantId: string): Promise<AnalysisResultDetailedSchema[]> {
@@ -345,11 +357,7 @@ export class VolateqAPI extends HttpClientBase {
     return analysisResults;
   }
 
-  public importFieldgeometry(
-    file: File,
-    plantId: string,
-    clearBefore: boolean
-  ): Promise<TaskSchema> {
+  public importFieldgeometry(file: File, plantId: string, clearBefore: boolean): Promise<TaskSchema> {
     return this.postForm(`/auth/fieldgeometry/${plantId}?clear_before=${clearBefore}`, { file });
   }
 
@@ -393,9 +401,9 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public getPlants(withAnalysisResultsCount = false, customerId?: string): Promise<PlantSchema[]> {
-    return this.get(`/auth/plants`, { 
+    return this.get(`/auth/plants`, {
       with_analysis_results_count: withAnalysisResultsCount ? 1 : 0,
-      customer_id: customerId
+      customer_id: customerId,
     });
   }
 
@@ -431,14 +439,16 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/analysis/${analysisId}/run-qfly-wizard`, { start_server: startServer ? 1 : 0 });
   }
 
-  public getAnalysisMonitoring(): Promise<any> {
-    return this.get(`/auth/analysis-monitoring`);
+  public getAnalysisMonitoring(): Promise<AnalysisMonitoring> {
+    return this.get(`/auth/analysis-monitoring`).then(
+      response =>
+        typeof response == "string"
+          ? {}
+          : response /* The 204 (NO CONTENT) response from the backend causes response to be a string */
+    );
   }
 
-  public getFieldgeometryComponentCodes(
-    fieldgeometryId: string,
-    componentId: ApiComponent
-  ): Promise<string[]> {
+  public getFieldgeometryComponentCodes(fieldgeometryId: string, componentId: ApiComponent): Promise<string[]> {
     return this.get(`/auth/fieldgeometry/${fieldgeometryId}/${componentId}/component-codes`);
   }
 
