@@ -18,8 +18,9 @@ export const cspPtcKeyFigureRainbowColors: Record<ApiKeyFigure, KeyFigureColors>
   [ApiKeyFigure.SCA_FRICTION_ID]: KeyFigureColors.BLUE_gafaw,
   [ApiKeyFigure.SCA_SDX_ID]: KeyFigureColors.BLUE_berryLover,
   [ApiKeyFigure.SCA_ORTHO_IMAGES_SDX_ID]: KeyFigureColors.BLUE_berryLover,
-  [ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_ID]: KeyFigureColors.black,
+  [ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_ONLINE_ID]: KeyFigureColors.black,
   [ApiKeyFigure.SCA_ORTHO_IMAGES_IR_ID]: KeyFigureColors.black,
+  [ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_OFFLINE_ID]: KeyFigureColors.black,
 
   // SCE
   [ApiKeyFigure.SCE_ALIGNMENT_ID]: KeyFigureColors.GREEN_toxicCoconut,
