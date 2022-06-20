@@ -158,7 +158,7 @@
   "plant": "Plant",
   "analysis": "Analyses",
   "coating-degration": "Coating degradation",
-  "coating-degration_expl": "Coating degradation in percentage. Indicates oxygen penetration.",
+  "coating-degration_expl": "Coating degradation indicates oxygen penetration.",
   "oxygen-penetration": "Oxygen penetration",
   "oxygen-penetration_expl": "HCE shows degradation of the coating, indicating oxygen penetration.",
   "high-hydrogen-concentration": "High hydrogen concentration",
