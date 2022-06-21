@@ -46,7 +46,7 @@ var createSuper = __webpack_require__(30);
 var esm_typeof = __webpack_require__(40);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-var es_object_get_own_property_descriptor = __webpack_require__(69);
+var es_object_get_own_property_descriptor = __webpack_require__(71);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
 var es_object_to_string = __webpack_require__(25);

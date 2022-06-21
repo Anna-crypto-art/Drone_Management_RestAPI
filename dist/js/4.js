@@ -66,7 +66,7 @@ var createSuper = __webpack_require__(30);
 var esm_typeof = __webpack_require__(40);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-var es_object_get_own_property_descriptor = __webpack_require__(69);
+var es_object_get_own_property_descriptor = __webpack_require__(71);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
 var es_object_to_string = __webpack_require__(25);
@@ -260,7 +260,7 @@ var createSuper = __webpack_require__(30);
 var esm_typeof = __webpack_require__(40);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-var es_object_get_own_property_descriptor = __webpack_require__(69);
+var es_object_get_own_property_descriptor = __webpack_require__(71);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
 var es_object_to_string = __webpack_require__(25);
@@ -507,7 +507,7 @@ var createSuper = __webpack_require__(30);
 var esm_typeof = __webpack_require__(40);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-var es_object_get_own_property_descriptor = __webpack_require__(69);
+var es_object_get_own_property_descriptor = __webpack_require__(71);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
 var es_object_to_string = __webpack_require__(25);
@@ -696,7 +696,7 @@ $({ target: 'String', proto: true, forced: forcedStringTrimMethod('trim') }, {
 /***/ 274:
 /***/ (function(module, exports, __webpack_require__) {
 
-var requireObjectCoercible = __webpack_require__(72);
+var requireObjectCoercible = __webpack_require__(74);
 var whitespaces = __webpack_require__(270);
 
 var whitespace = '[' + whitespaces + ']';
@@ -1147,7 +1147,7 @@ render._withStripped = true
 // CONCATENATED MODULE: ./src/app/analysis/analysis.vue?vue&type=template&id=1b04f490&
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js + 3 modules
-var toConsumableArray = __webpack_require__(71);
+var toConsumableArray = __webpack_require__(73);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/regeneratorRuntime.js
 var regeneratorRuntime = __webpack_require__(11);
@@ -1171,7 +1171,7 @@ var createSuper = __webpack_require__(30);
 var esm_typeof = __webpack_require__(40);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-var es_object_get_own_property_descriptor = __webpack_require__(69);
+var es_object_get_own_property_descriptor = __webpack_require__(71);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
 var es_object_to_string = __webpack_require__(25);
@@ -1189,7 +1189,7 @@ var es_array_concat = __webpack_require__(105);
 var es_array_map = __webpack_require__(104);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.function.name.js
-var es_function_name = __webpack_require__(70);
+var es_function_name = __webpack_require__(72);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.string.trim.js
 var es_string_trim = __webpack_require__(273);
@@ -1300,13 +1300,13 @@ var app_modal_form = __webpack_require__(272);
 var app_table_container = __webpack_require__(262);
 
 // EXTERNAL MODULE: ./src/app/shared/components/base-auth-component/base-auth-component.ts + 1 modules
-var base_auth_component = __webpack_require__(85);
+var base_auth_component = __webpack_require__(62);
 
 // EXTERNAL MODULE: ./src/app/shared/services/volateq-api/api-states.ts
 var api_states = __webpack_require__(275);
 
 // EXTERNAL MODULE: ./src/app/shared/services/volateq-api/volateq-api.ts + 2 modules
-var volateq_api = __webpack_require__(84);
+var volateq_api = __webpack_require__(61);
 
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--15-0!./node_modules/babel-loader/lib!./node_modules/ts-loader??ref--15-2!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/app/analysis/analysis.vue?vue&type=script&lang=ts&
 

@@ -65,7 +65,7 @@ var createSuper = __webpack_require__(30);
 var esm_typeof = __webpack_require__(40);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-var es_object_get_own_property_descriptor = __webpack_require__(69);
+var es_object_get_own_property_descriptor = __webpack_require__(71);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
 var es_object_to_string = __webpack_require__(25);
@@ -219,7 +219,7 @@ var es_object_to_string = __webpack_require__(25);
 var es_reflect_get = __webpack_require__(285);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-var es_object_get_own_property_descriptor = __webpack_require__(69);
+var es_object_get_own_property_descriptor = __webpack_require__(71);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/getPrototypeOf.js
 var getPrototypeOf = __webpack_require__(106);
@@ -314,7 +314,7 @@ var createSuper = __webpack_require__(30);
 var esm_typeof = __webpack_require__(40);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-var es_object_get_own_property_descriptor = __webpack_require__(69);
+var es_object_get_own_property_descriptor = __webpack_require__(71);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
 var es_object_to_string = __webpack_require__(25);
@@ -470,7 +470,7 @@ var createSuper = __webpack_require__(30);
 var esm_typeof = __webpack_require__(40);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-var es_object_get_own_property_descriptor = __webpack_require__(69);
+var es_object_get_own_property_descriptor = __webpack_require__(71);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
 var es_object_to_string = __webpack_require__(25);
@@ -577,7 +577,7 @@ component.options.__file = "src/app/shared/components/app-box/app-box.vue"
 "use strict";
 
 var $ = __webpack_require__(19);
-var aFunction = __webpack_require__(62);
+var aFunction = __webpack_require__(64);
 var toObject = __webpack_require__(44);
 var fails = __webpack_require__(23);
 var arrayMethodIsStrict = __webpack_require__(134);
@@ -671,7 +671,7 @@ var createSuper = __webpack_require__(30);
 var esm_typeof = __webpack_require__(40);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-var es_object_get_own_property_descriptor = __webpack_require__(69);
+var es_object_get_own_property_descriptor = __webpack_require__(71);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
 var es_object_to_string = __webpack_require__(25);
@@ -789,7 +789,7 @@ $({ target: 'String', proto: true, forced: forcedStringTrimMethod('trim') }, {
 /* 274 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var requireObjectCoercible = __webpack_require__(72);
+var requireObjectCoercible = __webpack_require__(74);
 var whitespaces = __webpack_require__(270);
 
 var whitespace = '[' + whitespaces + ']';
@@ -888,7 +888,7 @@ var createSuper = __webpack_require__(30);
 var esm_typeof = __webpack_require__(40);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-var es_object_get_own_property_descriptor = __webpack_require__(69);
+var es_object_get_own_property_descriptor = __webpack_require__(71);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
 var es_object_to_string = __webpack_require__(25);
@@ -1039,7 +1039,7 @@ var $ = __webpack_require__(19);
 var isObject = __webpack_require__(32);
 var anObject = __webpack_require__(35);
 var has = __webpack_require__(38);
-var getOwnPropertyDescriptorModule = __webpack_require__(63);
+var getOwnPropertyDescriptorModule = __webpack_require__(65);
 var getPrototypeOf = __webpack_require__(109);
 
 // `Reflect.get` method
@@ -1659,7 +1659,7 @@ function eventTargetAgnosticAddListener(emitter, name, listener, flags) {
 
 var fixRegExpWellKnownSymbolLogic = __webpack_require__(194);
 var anObject = __webpack_require__(35);
-var requireObjectCoercible = __webpack_require__(72);
+var requireObjectCoercible = __webpack_require__(74);
 var sameValue = __webpack_require__(347);
 var regExpExec = __webpack_require__(195);
 
@@ -1714,8 +1714,8 @@ fixRegExpWellKnownSymbolLogic('search', 1, function (SEARCH, nativeSearch, maybe
 
 "use strict";
 
-var toInteger = __webpack_require__(74);
-var requireObjectCoercible = __webpack_require__(72);
+var toInteger = __webpack_require__(76);
+var requireObjectCoercible = __webpack_require__(74);
 
 // `String.prototype.repeat` method implementation
 // https://tc39.github.io/ecma262/#sec-string.prototype.repeat
@@ -1929,7 +1929,7 @@ module.exports = Object.is || function is(x, y) {
 var fixRegExpWellKnownSymbolLogic = __webpack_require__(194);
 var anObject = __webpack_require__(35);
 var toLength = __webpack_require__(54);
-var requireObjectCoercible = __webpack_require__(72);
+var requireObjectCoercible = __webpack_require__(74);
 var advanceStringIndex = __webpack_require__(199);
 var regExpExec = __webpack_require__(195);
 
@@ -1978,7 +1978,7 @@ fixRegExpWellKnownSymbolLogic('match', 1, function (MATCH, nativeMatch, maybeCal
 "use strict";
 
 var $ = __webpack_require__(19);
-var toInteger = __webpack_require__(74);
+var toInteger = __webpack_require__(76);
 var thisNumberValue = __webpack_require__(352);
 var repeat = __webpack_require__(306);
 var fails = __webpack_require__(23);
@@ -2166,7 +2166,7 @@ var toPrimitive = __webpack_require__(89);
 var fails = __webpack_require__(23);
 var create = __webpack_require__(90);
 var getOwnPropertyNames = __webpack_require__(110).f;
-var getOwnPropertyDescriptor = __webpack_require__(63).f;
+var getOwnPropertyDescriptor = __webpack_require__(65).f;
 var defineProperty = __webpack_require__(42).f;
 var trim = __webpack_require__(274).trim;
 
@@ -2310,7 +2310,7 @@ $({ target: 'String', proto: true, forced: forcedStringHTMLMethod('bold') }, {
 /* 361 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var requireObjectCoercible = __webpack_require__(72);
+var requireObjectCoercible = __webpack_require__(74);
 
 var quot = /"/g;
 
@@ -2434,7 +2434,7 @@ $({ target: 'String', proto: true, forced: WEBKIT_BUG }, {
 // https://github.com/tc39/proposal-string-pad-start-end
 var toLength = __webpack_require__(54);
 var repeat = __webpack_require__(306);
-var requireObjectCoercible = __webpack_require__(72);
+var requireObjectCoercible = __webpack_require__(74);
 
 var ceil = Math.ceil;
 
@@ -2610,13 +2610,13 @@ var createSuper = __webpack_require__(30);
 var esm_typeof = __webpack_require__(40);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-var es_object_get_own_property_descriptor = __webpack_require__(69);
+var es_object_get_own_property_descriptor = __webpack_require__(71);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
 var es_object_to_string = __webpack_require__(25);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.function.name.js
-var es_function_name = __webpack_require__(70);
+var es_function_name = __webpack_require__(72);
 
 // EXTERNAL MODULE: ./node_modules/vue-property-decorator/lib/vue-property-decorator.js
 var vue_property_decorator = __webpack_require__(34);
@@ -2628,7 +2628,7 @@ var app_content = __webpack_require__(86);
 var app_header = __webpack_require__(185);
 
 // EXTERNAL MODULE: ./src/app/shared/services/volateq-api/volateq-api.ts + 2 modules
-var volateq_api = __webpack_require__(84);
+var volateq_api = __webpack_require__(61);
 
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"499a4f47-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/app/plant/csp-ptc/plant-view-csp-ptc.vue?vue&type=template&id=453e9358&
 var plant_view_csp_ptcvue_type_template_id_453e9358_render = function () {
@@ -2976,7 +2976,7 @@ plant_admin_view_csp_ptcvue_type_template_id_2dd05b92_render._withStripped = tru
 var es_regexp_to_string = __webpack_require__(189);
 
 // EXTERNAL MODULE: ./src/app/shared/components/base-auth-component/base-auth-component.ts + 1 modules
-var base_auth_component = __webpack_require__(85);
+var base_auth_component = __webpack_require__(62);
 
 // EXTERNAL MODULE: ./src/app/shared/components/app-button/app-button.vue + 4 modules
 var app_button = __webpack_require__(254);
@@ -3252,7 +3252,7 @@ var ApiComponent;
   ApiComponent[ApiComponent["CSP_PTC_LOOP"] = 8] = "CSP_PTC_LOOP";
 })(ApiComponent || (ApiComponent = {}));
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js + 3 modules
-var toConsumableArray = __webpack_require__(71);
+var toConsumableArray = __webpack_require__(73);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.concat.js
 var es_array_concat = __webpack_require__(105);
@@ -3588,7 +3588,7 @@ var analysisResultCspPtcMappingSca = [].concat(Object(toConsumableArray["a" /* d
   getDiffValue: function getDiffValue(r) {
     return r.sdx_rms_value__diff;
   },
-  unit: "Δ"
+  unit: "[mrad]"
 }]);
 /* harmony default export */ var analysis_result_csp_ptc_mapping_sca = (analysisResultCspPtcMappingSca);
 // CONCATENATED MODULE: ./src/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-mirror.ts
@@ -3758,10 +3758,10 @@ tables_componentvue_type_template_id_561900d6_render._withStripped = true
 // CONCATENATED MODULE: ./src/app/plant/shared/table-component/tables-component.vue?vue&type=template&id=561900d6&
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/objectSpread2.js
-var objectSpread2 = __webpack_require__(73);
+var objectSpread2 = __webpack_require__(75);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/createForOfIteratorHelper.js
-var createForOfIteratorHelper = __webpack_require__(61);
+var createForOfIteratorHelper = __webpack_require__(63);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.find.js
 var es_array_find = __webpack_require__(132);
@@ -7872,7 +7872,7 @@ function _arrayWithHoles(arr) {
   if (Array.isArray(arr)) return arr;
 }
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.symbol.js
-var es_symbol = __webpack_require__(75);
+var es_symbol = __webpack_require__(77);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.symbol.description.js
 var es_symbol_description = __webpack_require__(91);
@@ -41424,7 +41424,7 @@ layer_switchervue_type_template_id_eb9bb308_render._withStripped = true
 var vue_class_component_esm = __webpack_require__(41);
 
 // EXTERNAL MODULE: ./node_modules/vuex/dist/vuex.esm.js
-var vuex_esm = __webpack_require__(67);
+var vuex_esm = __webpack_require__(69);
 
 // CONCATENATED MODULE: ./node_modules/vuex-class/lib/bindings.js
 
@@ -52093,8 +52093,6 @@ var sca_tracking_key_figure_layer_ScaTrackingKeyFigureLayer = /*#__PURE__*/funct
 
 
 
-
-
 var sca_sdx_key_figure_layer_ScaSdxKeyFigureLayer = /*#__PURE__*/function (_ScaKeyFigureLayer) {
   Object(inherits["a" /* default */])(ScaSdxKeyFigureLayer, _ScaKeyFigureLayer);
 
@@ -52129,20 +52127,6 @@ var sca_sdx_key_figure_layer_ScaSdxKeyFigureLayer = /*#__PURE__*/function (_ScaK
       return {
         key_figure_image_url: api_key_figures["a" /* ApiKeyFigure */].SCA_ORTHO_IMAGES_SDX_ID
       };
-    }
-  }, {
-    key: "mapResultToFeatureInfos",
-    value: function mapResultToFeatureInfos(result) {
-      var featureInfos = Object(esm_get["a" /* default */])(Object(getPrototypeOf["a" /* default */])(ScaSdxKeyFigureLayer.prototype), "mapResultToFeatureInfos", this).call(this, result);
-
-      if (result.ortho_image_sdx_url && featureInfos) {
-        featureInfos.images = [{
-          title: "SDX Image",
-          url: result.ortho_image_sdx_url
-        }];
-      }
-
-      return featureInfos;
     }
   }, {
     key: "getColor",

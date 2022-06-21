@@ -66,7 +66,7 @@ var createSuper = __webpack_require__(30);
 var esm_typeof = __webpack_require__(40);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-var es_object_get_own_property_descriptor = __webpack_require__(69);
+var es_object_get_own_property_descriptor = __webpack_require__(71);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
 var es_object_to_string = __webpack_require__(25);
@@ -338,7 +338,7 @@ var createSuper = __webpack_require__(30);
 var esm_typeof = __webpack_require__(40);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-var es_object_get_own_property_descriptor = __webpack_require__(69);
+var es_object_get_own_property_descriptor = __webpack_require__(71);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
 var es_object_to_string = __webpack_require__(25);
@@ -566,7 +566,7 @@ var createSuper = __webpack_require__(30);
 var esm_typeof = __webpack_require__(40);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-var es_object_get_own_property_descriptor = __webpack_require__(69);
+var es_object_get_own_property_descriptor = __webpack_require__(71);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
 var es_object_to_string = __webpack_require__(25);
@@ -590,7 +590,7 @@ var app_button = __webpack_require__(254);
 var auth_container_event_bus = __webpack_require__(259);
 
 // EXTERNAL MODULE: ./src/app/shared/services/volateq-api/volateq-api.ts + 2 modules
-var volateq_api = __webpack_require__(84);
+var volateq_api = __webpack_require__(61);
 
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--15-0!./node_modules/babel-loader/lib!./node_modules/ts-loader??ref--15-2!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/app/auth/reset-password/forgot-password.vue?vue&type=script&lang=ts&
 

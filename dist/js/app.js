@@ -735,7 +735,7 @@ var createSuper = __webpack_require__(30);
 var esm_typeof = __webpack_require__(40);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-var es_object_get_own_property_descriptor = __webpack_require__(69);
+var es_object_get_own_property_descriptor = __webpack_require__(71);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
 var es_object_to_string = __webpack_require__(25);
@@ -753,10 +753,10 @@ var es_string_replace = __webpack_require__(198);
 var vue_property_decorator = __webpack_require__(34);
 
 // EXTERNAL MODULE: ./src/app/shared/components/base-auth-component/base-auth-component.ts + 1 modules
-var base_auth_component = __webpack_require__(85);
+var base_auth_component = __webpack_require__(62);
 
 // EXTERNAL MODULE: ./src/app/shared/services/volateq-api/volateq-api.ts + 2 modules
-var volateq_api = __webpack_require__(84);
+var volateq_api = __webpack_require__(61);
 
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--15-0!./node_modules/babel-loader/lib!./node_modules/ts-loader??ref--15-2!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/app/shared/components/app-header/app-header.vue?vue&type=script&lang=ts&
 
@@ -959,7 +959,7 @@ module.exports = JSON.parse("{\"email\":\"E-Mail\",\"password\":\"Password\",\"l
 __webpack_require__.r(__webpack_exports__);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/objectSpread2.js
-var objectSpread2 = __webpack_require__(73);
+var objectSpread2 = __webpack_require__(75);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.iterator.js
 var es_array_iterator = __webpack_require__(154);
@@ -977,7 +977,7 @@ var es_promise_finally = __webpack_require__(219);
 var vue_runtime_esm = __webpack_require__(17);
 
 // EXTERNAL MODULE: ./node_modules/vuex/dist/vuex.esm.js
-var vuex_esm = __webpack_require__(67);
+var vuex_esm = __webpack_require__(69);
 
 // EXTERNAL MODULE: ./node_modules/vue-i18n/dist/vue-i18n.esm.js
 var vue_i18n_esm = __webpack_require__(131);
@@ -1043,7 +1043,7 @@ if (false) { var api; }
 component.options.__file = "src/app/app.vue"
 /* harmony default export */ var app = (component.exports);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js + 3 modules
-var toConsumableArray = __webpack_require__(71);
+var toConsumableArray = __webpack_require__(73);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.concat.js
 var es_array_concat = __webpack_require__(105);
@@ -1052,7 +1052,7 @@ var es_array_concat = __webpack_require__(105);
 var es_array_map = __webpack_require__(104);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.function.name.js
-var es_function_name = __webpack_require__(70);
+var es_function_name = __webpack_require__(72);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.includes.js
 var es_array_includes = __webpack_require__(191);
@@ -1281,6 +1281,12 @@ page_not_foundvue_type_template_id_a36f02ae_render._withStripped = true
 
 // CONCATENATED MODULE: ./src/app/shared/components/page-not-found/page-not-found.vue?vue&type=template&id=a36f02ae&
 
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/regeneratorRuntime.js
+var regeneratorRuntime = __webpack_require__(11);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
+var asyncToGenerator = __webpack_require__(15);
+
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/classCallCheck.js
 var classCallCheck = __webpack_require__(21);
 
@@ -1297,7 +1303,7 @@ var createSuper = __webpack_require__(30);
 var esm_typeof = __webpack_require__(40);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-var es_object_get_own_property_descriptor = __webpack_require__(69);
+var es_object_get_own_property_descriptor = __webpack_require__(71);
 
 // EXTERNAL MODULE: ./src/app/app-state.ts + 3 modules
 var app_state = __webpack_require__(33);
@@ -1308,7 +1314,15 @@ var vue_property_decorator = __webpack_require__(34);
 // EXTERNAL MODULE: ./src/app/shared/components/app-content/app-content.vue + 4 modules
 var app_content = __webpack_require__(86);
 
+// EXTERNAL MODULE: ./src/app/shared/components/base-auth-component/base-auth-component.ts + 1 modules
+var base_auth_component = __webpack_require__(62);
+
+// EXTERNAL MODULE: ./src/app/shared/services/volateq-api/volateq-api.ts + 2 modules
+var volateq_api = __webpack_require__(61);
+
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--15-0!./node_modules/babel-loader/lib!./node_modules/ts-loader??ref--15-2!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/app/shared/components/page-not-found/page-not-found.vue?vue&type=script&lang=ts&
+
+
 
 
 
@@ -1332,8 +1346,9 @@ var __decorate = undefined && undefined.__decorate || function (decorators, targ
 
 
 
-var page_not_foundvue_type_script_lang_ts_AppPageNotFound = /*#__PURE__*/function (_Vue) {
-  Object(inherits["a" /* default */])(AppPageNotFound, _Vue);
+
+var page_not_foundvue_type_script_lang_ts_AppPageNotFound = /*#__PURE__*/function (_BaseAuthComponent) {
+  Object(inherits["a" /* default */])(AppPageNotFound, _BaseAuthComponent);
 
   var _super = Object(createSuper["a" /* default */])(AppPageNotFound);
 
@@ -1344,6 +1359,31 @@ var page_not_foundvue_type_script_lang_ts_AppPageNotFound = /*#__PURE__*/functio
   }
 
   Object(createClass["a" /* default */])(AppPageNotFound, [{
+    key: "created",
+    value: function () {
+      var _created = Object(asyncToGenerator["a" /* default */])( /*#__PURE__*/Object(regeneratorRuntime["a" /* default */])().mark(function _callee() {
+        return Object(regeneratorRuntime["a" /* default */])().wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.next = 2;
+                return volateq_api["a" /* default */].isLoggedIn();
+
+              case 2:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee);
+      }));
+
+      function created() {
+        return _created.apply(this, arguments);
+      }
+
+      return created;
+    }()
+  }, {
     key: "isAuthenticated",
     get: function get() {
       return app_state["a" /* default */].getters.auth.isAuthenticated;
@@ -1351,7 +1391,7 @@ var page_not_foundvue_type_script_lang_ts_AppPageNotFound = /*#__PURE__*/functio
   }]);
 
   return AppPageNotFound;
-}(vue_runtime_esm["default"]);
+}(base_auth_component["a" /* BaseAuthComponent */]);
 
 page_not_foundvue_type_script_lang_ts_AppPageNotFound = __decorate([Object(vue_property_decorator["a" /* Component */])({
   name: "app-page-not-found",
@@ -1403,18 +1443,6 @@ homevue_type_template_id_19023b34_render._withStripped = true
 
 
 // CONCATENATED MODULE: ./src/app/home.vue?vue&type=template&id=19023b34&
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/regeneratorRuntime.js
-var regeneratorRuntime = __webpack_require__(11);
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
-var asyncToGenerator = __webpack_require__(15);
-
-// EXTERNAL MODULE: ./src/app/shared/services/volateq-api/volateq-api.ts + 2 modules
-var volateq_api = __webpack_require__(84);
-
-// EXTERNAL MODULE: ./src/app/shared/components/base-auth-component/base-auth-component.ts + 1 modules
-var base_auth_component = __webpack_require__(85);
 
 // CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--15-0!./node_modules/babel-loader/lib!./node_modules/ts-loader??ref--15-2!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/app/home.vue?vue&type=script&lang=ts&
 
@@ -1721,7 +1749,7 @@ __webpack_require__.d(__webpack_exports__, "c", function() { return /* binding *
 var vue_runtime_esm = __webpack_require__(17);
 
 // EXTERNAL MODULE: ./node_modules/vuex/dist/vuex.esm.js
-var vuex_esm = __webpack_require__(67);
+var vuex_esm = __webpack_require__(69);
 
 // EXTERNAL MODULE: ./node_modules/direct-vuex/dist/direct-vuex.esm.js
 var direct_vuex_esm = __webpack_require__(57);
@@ -1806,19 +1834,19 @@ var authStore = Object(direct_vuex_esm["b" /* defineModule */])({
 });
 /* harmony default export */ var auth_state = (authStore);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/createForOfIteratorHelper.js
-var createForOfIteratorHelper = __webpack_require__(61);
+var createForOfIteratorHelper = __webpack_require__(63);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/defineProperty.js
 var defineProperty = __webpack_require__(55);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/objectSpread2.js
-var objectSpread2 = __webpack_require__(73);
+var objectSpread2 = __webpack_require__(75);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
 var es_object_to_string = __webpack_require__(25);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.function.name.js
-var es_function_name = __webpack_require__(70);
+var es_function_name = __webpack_require__(72);
 
 // CONCATENATED MODULE: ./src/app/shared/stores/sidebar.ts
 
@@ -2084,7 +2112,7 @@ var AppAlertEventBus = /*#__PURE__*/function (_Vue) {
 
 /***/ }),
 
-/***/ 84:
+/***/ 61:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2092,7 +2120,7 @@ var AppAlertEventBus = /*#__PURE__*/function (_Vue) {
 // UNUSED EXPORTS: VolateqAPI
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/createForOfIteratorHelper.js
-var createForOfIteratorHelper = __webpack_require__(61);
+var createForOfIteratorHelper = __webpack_require__(63);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/regeneratorRuntime.js
 var regeneratorRuntime = __webpack_require__(11);
@@ -2119,7 +2147,7 @@ var es_array_concat = __webpack_require__(105);
 var es_array_map = __webpack_require__(104);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.function.name.js
-var es_function_name = __webpack_require__(70);
+var es_function_name = __webpack_require__(72);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.slice.js
 var es_array_slice = __webpack_require__(101);
@@ -3630,7 +3658,7 @@ var volateqApi = new volateq_api_VolateqAPI();
 
 /***/ }),
 
-/***/ 85:
+/***/ 62:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3950,7 +3978,7 @@ var createSuper = __webpack_require__(30);
 var esm_typeof = __webpack_require__(40);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.get-own-property-descriptor.js
-var es_object_get_own_property_descriptor = __webpack_require__(69);
+var es_object_get_own_property_descriptor = __webpack_require__(71);
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
 var es_object_to_string = __webpack_require__(25);
