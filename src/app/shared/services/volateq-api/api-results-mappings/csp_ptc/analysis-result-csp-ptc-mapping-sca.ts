@@ -67,7 +67,7 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
     getDiffValue: r => r.sdx_rms_value__diff,
-    unit: "Δ",
+    unit: "[mrad]",
   },
 ];
 

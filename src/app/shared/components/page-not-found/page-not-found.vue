@@ -8,9 +8,10 @@
 
 <script lang="ts">
 import store from "@/app/app-state";
-import Vue from "vue";
 import { Component } from "vue-property-decorator";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
+import { BaseAuthComponent } from "../base-auth-component/base-auth-component";
+import volateqApi from "../../services/volateq-api/volateq-api";
 
 @Component({
   name: "app-page-not-found",
@@ -18,7 +19,12 @@ import AppContent from "@/app/shared/components/app-content/app-content.vue";
     AppContent,
   },
 })
-export default class AppPageNotFound extends Vue {
+export default class AppPageNotFound extends BaseAuthComponent {
+  async created() {
+    // Redirects to login page is user is not loggedIn anymore
+    await volateqApi.isLoggedIn();
+  }
+
   get isAuthenticated() {
     return store.getters.auth.isAuthenticated;
   }
