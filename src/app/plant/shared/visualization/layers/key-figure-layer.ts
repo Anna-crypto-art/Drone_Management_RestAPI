@@ -326,12 +326,16 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
             ctx.drawImage(img, left, bottom, width, height);
             ctx.restore();
           },
-          zIndex: -1,
+          zIndex: this.getOrthoImageZIndex(),
         })
       );
     };
 
     img.src = feature.get("image");
+  }
+
+  protected getOrthoImageZIndex(): number {
+    return -1;
   }
 
   public removeOrthoImageFeatures() {

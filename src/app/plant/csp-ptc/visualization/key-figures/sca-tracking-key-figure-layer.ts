@@ -10,4 +10,8 @@ export class ScaTrackingKeyFigureLayer extends OrientationKeyFigureLayer<Analysi
   protected getOrientationOffsetClassLimits() {
     return this.analysisResult.csp_ptc.sca_tracking_encoder_offset_class_limits;
   }
+
+  protected getOrthoImageZIndex(): number {
+    return 10;
+  }
 }

@@ -62,4 +62,8 @@ export abstract class ScaKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisRes
   }
 
   protected abstract getColor(): string;
+
+  protected getOrthoImageZIndex(): number {
+    return 10;
+  }
 }

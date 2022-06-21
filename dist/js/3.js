@@ -22458,6 +22458,8 @@ var key_figure_layer_KeyFigureLayer = /*#__PURE__*/function (_LayerBase) {
   }, {
     key: "setImageFeatureStyle",
     value: function setImageFeatureStyle(feature) {
+      var _this7 = this;
+
       var img = new Image();
       img.crossOrigin = "Anonymous";
 
@@ -22481,11 +22483,16 @@ var key_figure_layer_KeyFigureLayer = /*#__PURE__*/function (_LayerBase) {
             ctx.drawImage(img, left, bottom, width, height);
             ctx.restore();
           },
-          zIndex: -1
+          zIndex: _this7.getOrthoImageZIndex()
         }));
       };
 
       img.src = feature.get("image");
+    }
+  }, {
+    key: "getOrthoImageZIndex",
+    value: function getOrthoImageZIndex() {
+      return -1;
     }
   }, {
     key: "removeOrthoImageFeatures",
@@ -51572,6 +51579,11 @@ var sca_key_figure_layer_ScaKeyFigureLayer = /*#__PURE__*/function (_CspPtcKeyFi
 
       return limitRange + this.vueComponent.$t(transClassName + "-" + currentClass).toString();
     }
+  }, {
+    key: "getOrthoImageZIndex",
+    value: function getOrthoImageZIndex() {
+      return 10;
+    }
   }]);
 
   return ScaKeyFigureLayer;
@@ -52080,6 +52092,11 @@ var sca_tracking_key_figure_layer_ScaTrackingKeyFigureLayer = /*#__PURE__*/funct
     value: function getOrientationOffsetClassLimits() {
       return this.analysisResult.csp_ptc.sca_tracking_encoder_offset_class_limits;
     }
+  }, {
+    key: "getOrthoImageZIndex",
+    value: function getOrthoImageZIndex() {
+      return 10;
+    }
   }]);
 
   return ScaTrackingKeyFigureLayer;
@@ -52553,6 +52570,11 @@ var sca_average_tracking_key_figure_layer_ScaAverageTrackingKeyFigureLayer = /*#
     key: "getOrientationOffsetClassLimits",
     value: function getOrientationOffsetClassLimits() {
       return this.analysisResult.csp_ptc.sca_average_tracking_offset_class_limits;
+    }
+  }, {
+    key: "getOrthoImageZIndex",
+    value: function getOrthoImageZIndex() {
+      return 10;
     }
   }]);
 
