@@ -300,6 +300,8 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   }
 
   protected setImageFeatureStyle(feature: Feature<Geometry>) {
+    const plantRotation = this.vueComponent.plant.fieldgeometry?.orientation;
+
     const img = new Image();
     img.crossOrigin = "Anonymous";
     img.onload = () => {
@@ -309,8 +311,11 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
             const ctx = state.context;
             const geometry = state.geometry.clone() as SimpleGeometry;
             geometry.setCoordinates(pixelCoordinates);
-            // image rotation will come in the future... may be
-            // geometry.rotate(-state.rotation - (feature.get("rotation") || 0), [0, 0]);
+            
+            if (plantRotation) {
+              geometry.rotate(-state.rotation - plantRotation, [0, 0]);
+            }
+
             const extent = geometry.getExtent();
 
             const width = ExtentFunctions.getWidth(extent);
@@ -319,10 +324,12 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
             const bottom = bottomLeft[1];
             const left = bottomLeft[0];
 
-            // const drawRotation = (feature.get("rotation") ?? 0) + state.rotation;
-
             ctx.save();
-            // ctx.rotate(drawRotation);
+
+            if (plantRotation) {
+              ctx.rotate(plantRotation + state.rotation);
+            }
+
             ctx.drawImage(img, left, bottom, width, height);
             ctx.restore();
           },

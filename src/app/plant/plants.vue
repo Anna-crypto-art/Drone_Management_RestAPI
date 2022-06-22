@@ -145,6 +145,14 @@
       <b-form-group :label="$t('name')" v-if="editPlant">
         <b-form-input id="edit-plant-name" v-model="editPlant.name" required :placeholder="$t('name')" />
       </b-form-group>
+      <b-form-group v-if="editPlant && editPlant.digitized" :label="$t('setup-phase')">
+        <b-form-checkbox v-model="editPlant.inSetupPhase" switch>
+          {{ $t("in-setup-phase") }}
+        </b-form-checkbox>
+      </b-form-group>
+      <b-form-group v-if="editPlant && editPlant.digitized" :label="$t('orientation-angle')">
+        <b-form-input type="number" step="0.01" min="-90" max="90" v-model="editPlant.orientation" />
+      </b-form-group>
     </app-modal-form>
   </app-content>
 </template>
@@ -155,15 +163,13 @@ import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import { BvTableFieldArray } from "bootstrap-vue";
 import { Component, Ref } from "vue-property-decorator";
-import appContentEventBus from "../shared/components/app-content/app-content-event-bus";
 import { IAppModalForm } from "../shared/components/app-modal/types";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
 import { AppDownloader } from "../shared/services/app-downloader/app-downloader";
-import { ApiException } from "../shared/services/volateq-api/api-errors";
 import { FieldgeometrySchema } from "../shared/services/volateq-api/api-schemas/fieldgeometry-schema";
 import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "../shared/services/volateq-api/volateq-api";
-import { PlantItem } from "./types";
+import { EditPlant, PlantItem } from "./types";
 
 @Component({
   name: "app-analysis",
@@ -199,7 +205,7 @@ export default class AppPlants extends BaseAuthComponent {
   
   @Ref() appEditPlantModal!: IAppModalForm;
   editPlantLoading = false;
-  editPlant: { id: string, name: string } | null = null
+  editPlant: EditPlant | null = null
 
   async created(): Promise<void> {
     this.columns = [
@@ -359,14 +365,24 @@ export default class AppPlants extends BaseAuthComponent {
   }
 
   onEditPlantClick(plant: PlantItem) {
-    this.editPlant = { id: plant.id, name: plant.name };
+    this.editPlant = { 
+      id: plant.id,
+      name: plant.name,
+      digitized: plant.digitized,
+      inSetupPhase: !plant.established,
+      orientation: plant.fieldgeometry?.orientation,
+    };
     this.appEditPlantModal.show();
   }
 
   async onSubmitEditPlant() {
     this.editPlantLoading = true;
     try {
-      await volateqApi.updatePlant(this.editPlant!.id, { name: this.editPlant!.name });
+      await volateqApi.updatePlant(this.editPlant!.id, { 
+        name: this.editPlant!.name,
+        in_setup_phase: this.editPlant!.inSetupPhase,
+        orientation: this.editPlant?.orientation
+      });
 
       this.appEditPlantModal.hide();
 

@@ -11,3 +11,11 @@ export interface PlantItem {
   customers?: string;
   fieldgeometry?: FieldgeometrySchema;
 }
+
+export interface EditPlant {
+  id: string;
+  name: string;
+  digitized: boolean;
+  inSetupPhase: boolean;
+  orientation?: number;
+}

@@ -1,6 +1,7 @@
 export interface UpdatePlantRequest {
     name?: string;
     in_setup_phase?: boolean;
+    orientation?: number;
 }
 
 export interface CreatePlantRequest {

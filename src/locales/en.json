@@ -318,6 +318,8 @@
   "show-in-map": "Show in map",
   "create": "Create",
   "pi-not-found": "PI does not exist",
+  "orientation-angle": "Orientation angle (°)",
+  "setup-phase": "Setup phase",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",
@@ -332,7 +334,7 @@
   "CSP_PTC_Mirror": "Mirrors",
   "CSP_PTC_SCE": "SCE",
   "CSP_PTC_Loop": "Loop",
-  
+
   "Reload": "Reload",
   "Auto reload": "Auto reload"
 }
