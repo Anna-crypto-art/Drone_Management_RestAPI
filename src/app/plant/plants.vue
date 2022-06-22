@@ -381,7 +381,7 @@ export default class AppPlants extends BaseAuthComponent {
       await volateqApi.updatePlant(this.editPlant!.id, { 
         name: this.editPlant!.name,
         in_setup_phase: this.editPlant!.inSetupPhase,
-        orientation: this.editPlant?.orientation
+        orientation: this.editPlant?.orientation || undefined,
       });
 
       this.appEditPlantModal.hide();

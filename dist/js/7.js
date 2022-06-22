@@ -1885,7 +1885,7 @@ var plantsvue_type_script_lang_ts_AppPlants = /*#__PURE__*/function (_BaseAuthCo
                 return volateq_api["a" /* default */].updatePlant(this.editPlant.id, {
                   name: this.editPlant.name,
                   in_setup_phase: this.editPlant.inSetupPhase,
-                  orientation: (_this$editPlant = this.editPlant) === null || _this$editPlant === void 0 ? void 0 : _this$editPlant.orientation
+                  orientation: ((_this$editPlant = this.editPlant) === null || _this$editPlant === void 0 ? void 0 : _this$editPlant.orientation) || undefined
                 });
 
               case 4:

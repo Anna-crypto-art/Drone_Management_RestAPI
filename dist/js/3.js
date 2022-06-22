@@ -22325,6 +22325,11 @@ var key_figure_layer_KeyFigureLayer = /*#__PURE__*/function (_LayerBase) {
           _this7 = this;
 
       var plantRotation = (_this$vueComponent$pl = this.vueComponent.plant.fieldgeometry) === null || _this$vueComponent$pl === void 0 ? void 0 : _this$vueComponent$pl.orientation;
+
+      if (plantRotation) {
+        plantRotation = Math.PI / plantRotation;
+      }
+
       var img = new Image();
       img.crossOrigin = "Anonymous";
 
