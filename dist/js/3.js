@@ -2891,71 +2891,6 @@ var plant_admin_view_csp_ptcvue_type_template_id_2dd05b92_render = function () {
                 ],
                 1
               ),
-              _c(
-                "b-col",
-                { attrs: { sm: "6" } },
-                [
-                  _c(
-                    "app-box",
-                    { attrs: { title: _vm.$t("edit-plant") } },
-                    [
-                      _c(
-                        "b-form",
-                        {
-                          on: {
-                            submit: function ($event) {
-                              $event.preventDefault()
-                              return _vm.onSubmitEditPlant($event)
-                            },
-                          },
-                        },
-                        [
-                          _c(
-                            "b-form-group",
-                            [
-                              _c(
-                                "b-form-checkbox",
-                                {
-                                  model: {
-                                    value: _vm.editPlant.inSetupPhase,
-                                    callback: function ($$v) {
-                                      _vm.$set(
-                                        _vm.editPlant,
-                                        "inSetupPhase",
-                                        $$v
-                                      )
-                                    },
-                                    expression: "editPlant.inSetupPhase",
-                                  },
-                                },
-                                [
-                                  _vm._v(
-                                    " " + _vm._s(_vm.$t("in-setup-phase")) + " "
-                                  ),
-                                ]
-                              ),
-                            ],
-                            1
-                          ),
-                          _c(
-                            "app-button",
-                            {
-                              attrs: {
-                                type: "submit",
-                                loading: _vm.editPlantLoading,
-                              },
-                            },
-                            [_vm._v(_vm._s(_vm.$t("apply")))]
-                          ),
-                        ],
-                        1
-                      ),
-                    ],
-                    1
-                  ),
-                ],
-                1
-              ),
             ],
             1
           ),
@@ -3025,39 +2960,11 @@ var plant_admin_view_csp_ptcvue_type_script_lang_ts_AppPlantAdminViewCspPtc = /*
 
     _this = _super.apply(this, arguments);
     _this.selectedAnalysisResult = null;
-    _this.editPlant = {
-      inSetupPhase: true
-    };
-    _this.editPlantLoading = false;
     _this.analysisResultReleased = null;
     return _this;
   }
 
   Object(createClass["a" /* default */])(AppPlantAdminViewCspPtc, [{
-    key: "created",
-    value: function () {
-      var _created = Object(asyncToGenerator["a" /* default */])( /*#__PURE__*/Object(regeneratorRuntime["a" /* default */])().mark(function _callee() {
-        return Object(regeneratorRuntime["a" /* default */])().wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                this.editPlant.inSetupPhase = this.plant.in_setup_phase;
-
-              case 1:
-              case "end":
-                return _context.stop();
-            }
-          }
-        }, _callee, this);
-      }));
-
-      function created() {
-        return _created.apply(this, arguments);
-      }
-
-      return created;
-    }()
-  }, {
     key: "selectedAnalysisResultChanged",
     value: function selectedAnalysisResultChanged() {
       if (this.selectedAnalysisResult) {
@@ -3067,20 +2974,20 @@ var plant_admin_view_csp_ptcvue_type_script_lang_ts_AppPlantAdminViewCspPtc = /*
   }, {
     key: "onReleaseChanged",
     value: function () {
-      var _onReleaseChanged = Object(asyncToGenerator["a" /* default */])( /*#__PURE__*/Object(regeneratorRuntime["a" /* default */])().mark(function _callee2() {
+      var _onReleaseChanged = Object(asyncToGenerator["a" /* default */])( /*#__PURE__*/Object(regeneratorRuntime["a" /* default */])().mark(function _callee() {
         var msg;
-        return Object(regeneratorRuntime["a" /* default */])().wrap(function _callee2$(_context2) {
+        return Object(regeneratorRuntime["a" /* default */])().wrap(function _callee$(_context) {
           while (1) {
-            switch (_context2.prev = _context2.next) {
+            switch (_context.prev = _context.next) {
               case 0:
-                _context2.prev = 0;
+                _context.prev = 0;
 
                 if (!this.selectedAnalysisResult) {
-                  _context2.next = 6;
+                  _context.next = 6;
                   break;
                 }
 
-                _context2.next = 4;
+                _context.next = 4;
                 return volateq_api["a" /* default */].updateAnalysisResult(this.selectedAnalysisResult.id, {
                   release: this.analysisResultReleased
                 });
@@ -3090,20 +2997,20 @@ var plant_admin_view_csp_ptcvue_type_script_lang_ts_AppPlantAdminViewCspPtc = /*
                 this.showSuccess(msg);
 
               case 6:
-                _context2.next = 11;
+                _context.next = 11;
                 break;
 
               case 8:
-                _context2.prev = 8;
-                _context2.t0 = _context2["catch"](0);
-                this.showError(_context2.t0);
+                _context.prev = 8;
+                _context.t0 = _context["catch"](0);
+                this.showError(_context.t0);
 
               case 11:
               case "end":
-                return _context2.stop();
+                return _context.stop();
             }
           }
-        }, _callee2, this, [[0, 8]]);
+        }, _callee, this, [[0, 8]]);
       }));
 
       function onReleaseChanged() {
@@ -3111,50 +3018,6 @@ var plant_admin_view_csp_ptcvue_type_script_lang_ts_AppPlantAdminViewCspPtc = /*
       }
 
       return onReleaseChanged;
-    }()
-  }, {
-    key: "onSubmitEditPlant",
-    value: function () {
-      var _onSubmitEditPlant = Object(asyncToGenerator["a" /* default */])( /*#__PURE__*/Object(regeneratorRuntime["a" /* default */])().mark(function _callee3() {
-        return Object(regeneratorRuntime["a" /* default */])().wrap(function _callee3$(_context3) {
-          while (1) {
-            switch (_context3.prev = _context3.next) {
-              case 0:
-                _context3.prev = 0;
-                this.editPlantLoading = true;
-                _context3.next = 4;
-                return volateq_api["a" /* default */].updatePlant(this.plant.id, {
-                  in_setup_phase: this.editPlant.inSetupPhase
-                });
-
-              case 4:
-                this.showSuccess(this.$t("plant-updated-successfully").toString());
-                _context3.next = 10;
-                break;
-
-              case 7:
-                _context3.prev = 7;
-                _context3.t0 = _context3["catch"](0);
-                this.showError(_context3.t0);
-
-              case 10:
-                _context3.prev = 10;
-                this.editPlantLoading = false;
-                return _context3.finish(10);
-
-              case 13:
-              case "end":
-                return _context3.stop();
-            }
-          }
-        }, _callee3, this, [[0, 7, 10, 13]]);
-      }));
-
-      function onSubmitEditPlant() {
-        return _onSubmitEditPlant.apply(this, arguments);
-      }
-
-      return onSubmitEditPlant;
     }()
   }, {
     key: "analysisResultName",
@@ -22458,8 +22321,10 @@ var key_figure_layer_KeyFigureLayer = /*#__PURE__*/function (_LayerBase) {
   }, {
     key: "setImageFeatureStyle",
     value: function setImageFeatureStyle(feature) {
-      var _this7 = this;
+      var _this$vueComponent$pl,
+          _this7 = this;
 
+      var plantRotation = (_this$vueComponent$pl = this.vueComponent.plant.fieldgeometry) === null || _this$vueComponent$pl === void 0 ? void 0 : _this$vueComponent$pl.orientation;
       var img = new Image();
       img.crossOrigin = "Anonymous";
 
@@ -22468,17 +22333,23 @@ var key_figure_layer_KeyFigureLayer = /*#__PURE__*/function (_LayerBase) {
           renderer: function renderer(pixelCoordinates, state) {
             var ctx = state.context;
             var geometry = state.geometry.clone();
-            geometry.setCoordinates(pixelCoordinates); // image rotation will come in the future... may be
-            // geometry.rotate(-state.rotation - (feature.get("rotation") || 0), [0, 0]);
+            geometry.setCoordinates(pixelCoordinates);
+
+            if (plantRotation) {
+              geometry.rotate(-state.rotation - plantRotation, [0, 0]);
+            }
 
             var extent = geometry.getExtent();
             var width = getWidth(extent);
             var height = getHeight(extent);
             var bottomLeft = getBottomLeft(extent);
             var bottom = bottomLeft[1];
-            var left = bottomLeft[0]; // const drawRotation = (feature.get("rotation") ?? 0) + state.rotation;
+            var left = bottomLeft[0];
+            ctx.save();
 
-            ctx.save(); // ctx.rotate(drawRotation);
+            if (plantRotation) {
+              ctx.rotate(plantRotation + state.rotation);
+            }
 
             ctx.drawImage(img, left, bottom, width, height);
             ctx.restore();

@@ -1223,6 +1223,53 @@ var render = function () {
                 1
               )
             : _vm._e(),
+          _vm.editPlant && _vm.editPlant.digitized
+            ? _c(
+                "b-form-group",
+                { attrs: { label: _vm.$t("setup-phase") } },
+                [
+                  _c(
+                    "b-form-checkbox",
+                    {
+                      attrs: { switch: "" },
+                      model: {
+                        value: _vm.editPlant.inSetupPhase,
+                        callback: function ($$v) {
+                          _vm.$set(_vm.editPlant, "inSetupPhase", $$v)
+                        },
+                        expression: "editPlant.inSetupPhase",
+                      },
+                    },
+                    [_vm._v(" " + _vm._s(_vm.$t("in-setup-phase")) + " ")]
+                  ),
+                ],
+                1
+              )
+            : _vm._e(),
+          _vm.editPlant && _vm.editPlant.digitized
+            ? _c(
+                "b-form-group",
+                { attrs: { label: _vm.$t("orientation-angle") } },
+                [
+                  _c("b-form-input", {
+                    attrs: {
+                      type: "number",
+                      step: "0.01",
+                      min: "-90",
+                      max: "90",
+                    },
+                    model: {
+                      value: _vm.editPlant.orientation,
+                      callback: function ($$v) {
+                        _vm.$set(_vm.editPlant, "orientation", $$v)
+                      },
+                      expression: "editPlant.orientation",
+                    },
+                  }),
+                ],
+                1
+              )
+            : _vm._e(),
         ],
         1
       ),
@@ -1811,9 +1858,14 @@ var plantsvue_type_script_lang_ts_AppPlants = /*#__PURE__*/function (_BaseAuthCo
   }, {
     key: "onEditPlantClick",
     value: function onEditPlantClick(plant) {
+      var _plant$fieldgeometry;
+
       this.editPlant = {
         id: plant.id,
-        name: plant.name
+        name: plant.name,
+        digitized: plant.digitized,
+        inSetupPhase: !plant.established,
+        orientation: (_plant$fieldgeometry = plant.fieldgeometry) === null || _plant$fieldgeometry === void 0 ? void 0 : _plant$fieldgeometry.orientation
       };
       this.appEditPlantModal.show();
     }
@@ -1821,6 +1873,8 @@ var plantsvue_type_script_lang_ts_AppPlants = /*#__PURE__*/function (_BaseAuthCo
     key: "onSubmitEditPlant",
     value: function () {
       var _onSubmitEditPlant = Object(asyncToGenerator["a" /* default */])( /*#__PURE__*/Object(regeneratorRuntime["a" /* default */])().mark(function _callee9() {
+        var _this$editPlant;
+
         return Object(regeneratorRuntime["a" /* default */])().wrap(function _callee9$(_context9) {
           while (1) {
             switch (_context9.prev = _context9.next) {
@@ -1829,7 +1883,9 @@ var plantsvue_type_script_lang_ts_AppPlants = /*#__PURE__*/function (_BaseAuthCo
                 _context9.prev = 1;
                 _context9.next = 4;
                 return volateq_api["a" /* default */].updatePlant(this.editPlant.id, {
-                  name: this.editPlant.name
+                  name: this.editPlant.name,
+                  in_setup_phase: this.editPlant.inSetupPhase,
+                  orientation: (_this$editPlant = this.editPlant) === null || _this$editPlant === void 0 ? void 0 : _this$editPlant.orientation
                 });
 
               case 4:
