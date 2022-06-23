@@ -1,5 +1,5 @@
 import { KeyFigureColors, KeyFigureColorScheme } from "@/app/plant/shared/visualization/layers/types";
-import { ComparedFeatureType, FeatureProperties, Legend, LegendEntry, PropsFeature } from "@/app/plant/shared/visualization/types";
+import { FeatureProperties, Legend, LegendEntry } from "@/app/plant/shared/visualization/types";
 import { ClassHceKeyFigureLayer } from "./shared/class-hce-key-figure-layer";
 
 export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer {
@@ -7,6 +7,10 @@ export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer {
     super.created();
 
     this.enableCompare = this.query!.glass_tube_temperature_class! > 1;
+  }
+
+  protected getQueryClass(): number | undefined {
+    return this.query?.glass_tube_temperature_class;
   }
 
   protected getDiffColor(featureProperties: FeatureProperties): string {

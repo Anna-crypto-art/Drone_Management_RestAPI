@@ -26,8 +26,8 @@ module.exports = {
       : undefined,
     output: {
       hashFunction: "sha256",
-      filename: '[name].[contenthash].js',
-      chunkFilename: '[name].[contenthash].js',
+      filename: '[name].[hash].js',
+      chunkFilename: '[name].[hash].js',
     },
   },
   pluginOptions: {

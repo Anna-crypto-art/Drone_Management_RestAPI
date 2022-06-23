@@ -104,17 +104,17 @@
         {{ $t("slope-deviation") }}
         <app-explanation><span v-html="$t('slope-deviation_expl')"></span></app-explanation>
       </template>
-      <template #hcePosition>
-        {{ $t("hce-position-total-offset") }}
-        <app-explanation><span v-html="$t('hce-position-offset_expl')"></span></app-explanation>
+      <template #hcePositionSupport>
+        {{ $t("hce-position-support-total-offset") }}
+        <app-explanation><span v-html="$t('hce-position-support-offset_expl')"></span></app-explanation>
       </template>
-      <template #hcePositionOffsetClass3>
+      <template #hcePositionSupportOffsetClass3>
         {{ getTransAlignmentOffsetClassLimit("hce", 3) }}
       </template>
-      <template #hcePositionOffsetClass2>
+      <template #hcePositionSupportOffsetClass2>
         {{ getTransAlignmentOffsetClassLimit("hce", 2) }}
       </template>
-      <template #hcePositionOffsetClass1>
+      <template #hcePositionSupportOffsetClass1>
         {{ getTransAlignmentOffsetClassLimit("hce", 1) }}
       </template>
     </app-visualization>

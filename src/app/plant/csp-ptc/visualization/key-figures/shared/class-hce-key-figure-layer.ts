@@ -1,7 +1,9 @@
 import { Legend } from "@/app/plant/shared/visualization/types";
 import { HceKeyFigureLayer } from "./hce-key-figure-layer";
 
-export class ClassHceKeyFigureLayer extends HceKeyFigureLayer {
+export abstract class ClassHceKeyFigureLayer extends HceKeyFigureLayer {
+  protected abstract getQueryClass(): number | undefined;
+  
   protected getLegend(): Legend | undefined {
     if (!this.geoJSON) {
       return undefined;
@@ -19,17 +21,10 @@ export class ClassHceKeyFigureLayer extends HceKeyFigureLayer {
   }
 
   protected getColor(): string {
-    const classValue =
-      this.query?.glass_tube_temperature_class ||
-      this.query?.ir_intensity_class ||
-      this.query?.recommended_action_class;
-
-    return this.getClassColor(classValue);
+    return this.getClassColor(this.getQueryClass());
   }
 
   protected getLegendName(): string {
     return (this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!;
   }
-
-  
 }

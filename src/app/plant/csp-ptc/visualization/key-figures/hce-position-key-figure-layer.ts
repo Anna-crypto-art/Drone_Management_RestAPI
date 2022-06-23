@@ -1,15 +1,13 @@
-import analysisResultCspPtcMappingHce from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-hce";
-import { AnalysisResultCspPtcHceSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-hce-schema";
-import { OffsetClassKeyFigureLayer } from "./shared/offset-class-key-figure-layer";
+import { ClassHceKeyFigureLayer } from "./shared/class-hce-key-figure-layer";
 
-export class HcePositionKeyFigureLayer extends OffsetClassKeyFigureLayer<AnalysisResultCspPtcHceSchema> {
-  protected analysisResultMapping = analysisResultCspPtcMappingHce;
-
-  protected getOffsetClassLimits(): number[] {
-    return this.analysisResult.csp_ptc.hce_position_total_class_limits;
+export class HcePositionSupportKeyFigureLayer extends ClassHceKeyFigureLayer {
+  protected getQueryClass(): number | undefined {
+    return this.query?.hce_position_support_offset_class
   }
+}
 
-  protected getQueryOffsetClass(): number | undefined {
-    return this.query?.hce_position_offset_class;
+export class HcePositionCenterKeyFigureLayer extends ClassHceKeyFigureLayer {
+  protected getQueryClass(): number | undefined {
+    return this.query?.hce_position_center_offset_class
   }
 }

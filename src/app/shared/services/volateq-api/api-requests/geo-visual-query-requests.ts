@@ -1,6 +1,5 @@
 export interface GeoVisualQuery {
   undefined?: 1 | 0;
-  ir_intensity_class?: 1 | 2 | 3;
   glass_tube_temperature_class?: 1 | 2 | 3 | 4;
   missing_glass_tube?: 0 | 1;
   coating_degraded?: 0 | 1;
@@ -16,7 +15,8 @@ export interface GeoVisualQuery {
    * But you need to now the python class name of the key figure.
    */
   key_figure_class_name?: string;
-  hce_position_offset_class?: 1 | 2 | 3;
+  hce_position_support_offset_class?: 1 | 2 | 3;
+  hce_position_center_offset_class?: 1 | 2 | 3;
 
   /**
    * Parameters for load ortho images

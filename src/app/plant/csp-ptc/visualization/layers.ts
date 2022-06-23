@@ -13,11 +13,10 @@ import { SceAlignmentKeyFigureLayer } from "./key-figures/sce-alignment-key-figu
 import { BoolUndefinedHceKeyFigureLayer } from "./key-figures/shared/bool-hce-key-figure-layer";
 import { KeyFigureTypeMap } from "../../shared/visualization/types";
 import { KeyFigureColors } from "../../shared/visualization/layers/types";
-import { ClassHceKeyFigureLayer } from "./key-figures/shared/class-hce-key-figure-layer";
 import { GlassTemperatureKeyFigureLayer } from "./key-figures/glass-temperature-key-figure-layer";
 import { ScaAverageTrackingKeyFigureLayer } from "./key-figures/sca-average-tracking-key-figure-layer";
 import { RecommendedActionKeyFigureLayer } from "./key-figures/recommended-action-key-figure-layer";
-import { HcePositionKeyFigureLayer } from "./key-figures/hce-position-key-figure-layer";
+import { HcePositionCenterKeyFigureLayer, HcePositionSupportKeyFigureLayer } from "./key-figures/hce-position-key-figure-layer";
 
 export const COMPONENT_LAYERS: typeof ComponentLayer[] = [
   AbsorberComponentLayer,
@@ -117,20 +116,44 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
   },
   {
     keyFigureId: ApiKeyFigure.HCE_POSITION_ID,
-    layerType: HcePositionKeyFigureLayer,
-    keyFigureInfo: { templateName: "hcePosition", keyName: "hce-position-offset" },
+    layerType: HcePositionSupportKeyFigureLayer,
+    keyFigureInfo: { templateName: "hcePositionSupport", keyName: "hce-position-support-offset" },
     subLayers: [
       {
-        keyFigureInfo: { templateName: "hcePositionOffsetClass3", displayName: "hce-position-offset-class-3", zIndex: 13 },
-        query: { hce_position_offset_class: 3 },
+        keyFigureInfo: { templateName: "hcePositionSupportOffsetClass3", displayName: "hce-position-support-offset-class-3", zIndex: 13 },
+        query: { key_figure_class_name: "HcePositionSupportKeyFigure", hce_position_support_offset_class: 3 },
       },
       {
-        keyFigureInfo: { templateName: "hcePositionOffsetClass2", displayName: "hce-position-offset-class-2", zIndex: 12 },
-        query: { hce_position_offset_class: 2 },
+        keyFigureInfo: { templateName: "hcePositionSupportOffsetClass2", displayName: "hce-position-support-offset-class-2", zIndex: 12 },
+        query: { key_figure_class_name: "HcePositionSupportKeyFigure", hce_position_support_offset_class: 2 },
       },
       {
-        keyFigureInfo: { templateName: "hcePositionOffsetClass1", displayName: "hce-position-offset-class-1", zIndex: 11 },
-        query: { hce_position_offset_class: 1 },
+        keyFigureInfo: { templateName: "hcePositionSupportOffsetClass1", displayName: "hce-position-support-offset-class-1", zIndex: 11 },
+        query: { key_figure_class_name: "HcePositionSupportKeyFigure", hce_position_support_offset_class: 1 },
+      },
+      {
+        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
+        query: { undefined: 1 },
+        color: KeyFigureColors.grey,
+      },
+    ]
+  },
+  {
+    keyFigureId: ApiKeyFigure.HCE_POSITION_ID,
+    layerType: HcePositionCenterKeyFigureLayer,
+    keyFigureInfo: { templateName: "hcePositionCenter", keyName: "hce-position-center-offset" },
+    subLayers: [
+      {
+        keyFigureInfo: { templateName: "hcePositionCenterOffsetClass3", displayName: "hce-position-center-offset-class-3", zIndex: 13 },
+        query: { key_figure_class_name: "HcePositionCenterKeyFigure", hce_position_center_offset_class: 3 },
+      },
+      {
+        keyFigureInfo: { templateName: "hcePositionCenterOffsetClass2", displayName: "hce-position-center-offset-class-2", zIndex: 12 },
+        query: { key_figure_class_name: "HcePositionCenterKeyFigure", hce_position_center_offset_class: 2 },
+      },
+      {
+        keyFigureInfo: { templateName: "hcePositionCenterOffsetClass1", displayName: "hce-position-center-offset-class-1", zIndex: 11 },
+        query: { key_figure_class_name: "HcePositionCenterKeyFigure", hce_position_center_offset_class: 1 },
       },
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
