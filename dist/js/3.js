@@ -22324,11 +22324,9 @@ var key_figure_layer_KeyFigureLayer = /*#__PURE__*/function (_LayerBase) {
       var _this$vueComponent$pl,
           _this7 = this;
 
-      var plantRotation = (_this$vueComponent$pl = this.vueComponent.plant.fieldgeometry) === null || _this$vueComponent$pl === void 0 ? void 0 : _this$vueComponent$pl.orientation;
-
-      if (plantRotation) {
-        plantRotation = Math.PI / plantRotation;
-      }
+      var plantRotation = (_this$vueComponent$pl = this.vueComponent.plant.fieldgeometry) === null || _this$vueComponent$pl === void 0 ? void 0 : _this$vueComponent$pl.orientation; // if (plantRotation) {
+      //   plantRotation = Math.PI / plantRotation;
+      // }
 
       var img = new Image();
       img.crossOrigin = "Anonymous";
@@ -22350,11 +22348,9 @@ var key_figure_layer_KeyFigureLayer = /*#__PURE__*/function (_LayerBase) {
             var bottomLeft = getBottomLeft(extent);
             var bottom = bottomLeft[1];
             var left = bottomLeft[0];
-            ctx.save();
-
-            if (plantRotation) {
-              ctx.rotate(plantRotation + state.rotation);
-            }
+            ctx.save(); // if (plantRotation) {
+            //   ctx.rotate(plantRotation + state.rotation);
+            // }
 
             ctx.drawImage(img, left, bottom, width, height);
             ctx.restore();

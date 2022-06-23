@@ -300,10 +300,10 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   }
 
   protected setImageFeatureStyle(feature: Feature<Geometry>) {
-    let plantRotation = this.vueComponent.plant.fieldgeometry?.orientation;
-    if (plantRotation) {
-      plantRotation = Math.PI / plantRotation;
-    }
+    const plantRotation = this.vueComponent.plant.fieldgeometry?.orientation;
+    // if (plantRotation) {
+    //   plantRotation = Math.PI / plantRotation;
+    // }
 
     const img = new Image();
     img.crossOrigin = "Anonymous";
@@ -329,9 +329,9 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
 
             ctx.save();
 
-            if (plantRotation) {
-              ctx.rotate(plantRotation + state.rotation);
-            }
+            // if (plantRotation) {
+            //   ctx.rotate(plantRotation + state.rotation);
+            // }
 
             ctx.drawImage(img, left, bottom, width, height);
             ctx.restore();
