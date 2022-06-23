@@ -19,13 +19,15 @@ module.exports = {
     mode: inProduction ? "production" : "development",
     optimization: inProduction // Only apply when in production
       ? {
-          minimize: false,
+          minimize: true,
           usedExports: true,
           concatenateModules: true,
         }
       : undefined,
     output: {
       hashFunction: "sha256",
+      filename: '[name].[contenthash].js',
+      chunkFilename: '[name].[contenthash].js',
     },
   },
   pluginOptions: {

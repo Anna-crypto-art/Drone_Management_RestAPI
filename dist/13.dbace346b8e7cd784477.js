@@ -1,11 +1,11 @@
-(window["webpackJsonp"] = window["webpackJsonp"] || []).push([[10],{
+(window["webpackJsonp"] = window["webpackJsonp"] || []).push([[13],{
 
 /***/ 254:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"499a4f47-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/app/shared/components/app-button/app-button.vue?vue&type=template&id=435cb2ae&
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"67b56802-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/app/shared/components/app-button/app-button.vue?vue&type=template&id=435cb2ae&
 var render = function () {
   var _vm = this
   var _h = _vm.$createElement
@@ -244,7 +244,7 @@ var authContainerEventBus = new _app_shared_services_app_alert_app_alert__WEBPAC
 
 "use strict";
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"499a4f47-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/app/auth/shared/components/auth-container.vue?vue&type=template&id=623e9bca&
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"67b56802-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/app/auth/shared/components/auth-container.vue?vue&type=template&id=623e9bca&
 var render = function () {
   var _vm = this
   var _h = _vm.$createElement
@@ -459,25 +459,25 @@ component.options.__file = "src/app/auth/shared/components/auth-container.vue"
 
 /***/ }),
 
-/***/ 389:
+/***/ 392:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 // ESM COMPAT FLAG
 __webpack_require__.r(__webpack_exports__);
 
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"499a4f47-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/app/auth/login/login.vue?vue&type=template&id=a23c303a&
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":"node_modules/.cache/vue-loader","cacheIdentifier":"67b56802-vue-loader-template"}!./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/app/auth/reset-password/reset-password.vue?vue&type=template&id=1334c36f&
 var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c(
     "div",
-    { staticClass: "app-auth-login" },
+    { staticClass: "app-auth-reset-password" },
     [
       _c(
         "app-auth-container",
-        { attrs: { title: "" } },
+        { attrs: { title: _vm.$t("reset-password") } },
         [
           _c(
             "b-form",
@@ -492,28 +492,6 @@ var render = function () {
             [
               _c(
                 "b-form-group",
-                { attrs: { label: _vm.$t("email"), "label-for": "email" } },
-                [
-                  _c("b-form-input", {
-                    attrs: {
-                      id: "email",
-                      type: "email",
-                      placeholder: _vm.$t("email"),
-                      required: "",
-                    },
-                    model: {
-                      value: _vm.email,
-                      callback: function ($$v) {
-                        _vm.email = $$v
-                      },
-                      expression: "email",
-                    },
-                  }),
-                ],
-                1
-              ),
-              _c(
-                "b-form-group",
                 {
                   attrs: { label: _vm.$t("password"), "label-for": "password" },
                 },
@@ -522,8 +500,8 @@ var render = function () {
                     attrs: {
                       id: "password",
                       type: "password",
-                      placeholder: _vm.$t("password"),
                       required: "",
+                      placeholder: _vm.$t("password"),
                     },
                     model: {
                       value: _vm.password,
@@ -533,14 +511,33 @@ var render = function () {
                       expression: "password",
                     },
                   }),
-                  _c(
-                    "router-link",
-                    {
-                      staticClass: "input-info-link",
-                      attrs: { to: { name: "ForgotPassword" } },
+                ],
+                1
+              ),
+              _c(
+                "b-form-group",
+                {
+                  attrs: {
+                    label: _vm.$t("repeat-password"),
+                    "label-for": "repeat-password",
+                  },
+                },
+                [
+                  _c("b-form-input", {
+                    attrs: {
+                      id: "repeat-password",
+                      type: "password",
+                      required: "",
+                      placeholder: _vm.$t("repeat-password"),
                     },
-                    [_vm._v(_vm._s(_vm.$t("forgot-password")))]
-                  ),
+                    model: {
+                      value: _vm.repeatPassword,
+                      callback: function ($$v) {
+                        _vm.repeatPassword = $$v
+                      },
+                      expression: "repeatPassword",
+                    },
+                  }),
                 ],
                 1
               ),
@@ -553,7 +550,7 @@ var render = function () {
                     loading: _vm.loading,
                   },
                 },
-                [_vm._v(_vm._s(_vm.$t("login")))]
+                [_vm._v(_vm._s(_vm.$t("apply")))]
               ),
             ],
             1
@@ -569,7 +566,7 @@ var staticRenderFns = []
 render._withStripped = true
 
 
-// CONCATENATED MODULE: ./src/app/auth/login/login.vue?vue&type=template&id=a23c303a&
+// CONCATENATED MODULE: ./src/app/auth/reset-password/reset-password.vue?vue&type=template&id=1334c36f&
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/regeneratorRuntime.js
 var regeneratorRuntime = __webpack_require__(11);
@@ -598,8 +595,11 @@ var es_object_get_own_property_descriptor = __webpack_require__(71);
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.to-string.js
 var es_object_to_string = __webpack_require__(25);
 
-// EXTERNAL MODULE: ./src/app/auth/shared/components/auth-container-event-bus.ts
-var auth_container_event_bus = __webpack_require__(259);
+// EXTERNAL MODULE: ./node_modules/vue/dist/vue.runtime.esm.js
+var vue_runtime_esm = __webpack_require__(17);
+
+// EXTERNAL MODULE: ./node_modules/vue-property-decorator/lib/vue-property-decorator.js
+var vue_property_decorator = __webpack_require__(34);
 
 // EXTERNAL MODULE: ./src/app/auth/shared/components/auth-container.vue + 4 modules
 var auth_container = __webpack_require__(268);
@@ -607,16 +607,16 @@ var auth_container = __webpack_require__(268);
 // EXTERNAL MODULE: ./src/app/shared/components/app-button/app-button.vue + 4 modules
 var app_button = __webpack_require__(254);
 
+// EXTERNAL MODULE: ./src/app/auth/shared/components/auth-container-event-bus.ts
+var auth_container_event_bus = __webpack_require__(259);
+
 // EXTERNAL MODULE: ./src/app/shared/services/volateq-api/volateq-api.ts + 2 modules
 var volateq_api = __webpack_require__(61);
 
-// EXTERNAL MODULE: ./node_modules/vue/dist/vue.runtime.esm.js
-var vue_runtime_esm = __webpack_require__(17);
+// EXTERNAL MODULE: ./src/app/shared/services/volateq-api/api-errors.ts
+var api_errors = __webpack_require__(47);
 
-// EXTERNAL MODULE: ./node_modules/vue-property-decorator/lib/vue-property-decorator.js
-var vue_property_decorator = __webpack_require__(34);
-
-// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--15-0!./node_modules/babel-loader/lib!./node_modules/ts-loader??ref--15-2!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/app/auth/login/login.vue?vue&type=script&lang=ts&
+// CONCATENATED MODULE: ./node_modules/cache-loader/dist/cjs.js??ref--15-0!./node_modules/babel-loader/lib!./node_modules/ts-loader??ref--15-2!./node_modules/cache-loader/dist/cjs.js??ref--1-0!./node_modules/vue-loader/lib??vue-loader-options!./src/app/auth/reset-password/reset-password.vue?vue&type=script&lang=ts&
 
 
 
@@ -644,60 +644,98 @@ var __decorate = undefined && undefined.__decorate || function (decorators, targ
 
 
 
-var loginvue_type_script_lang_ts_AppAuthLogin = /*#__PURE__*/function (_Vue) {
-  Object(inherits["a" /* default */])(AppAuthLogin, _Vue);
 
-  var _super = Object(createSuper["a" /* default */])(AppAuthLogin);
+var reset_passwordvue_type_script_lang_ts_AppAuthResetPassword = /*#__PURE__*/function (_Vue) {
+  Object(inherits["a" /* default */])(AppAuthResetPassword, _Vue);
 
-  function AppAuthLogin() {
+  var _super = Object(createSuper["a" /* default */])(AppAuthResetPassword);
+
+  function AppAuthResetPassword() {
     var _this;
 
-    Object(classCallCheck["a" /* default */])(this, AppAuthLogin);
+    Object(classCallCheck["a" /* default */])(this, AppAuthResetPassword);
 
     _this = _super.apply(this, arguments);
-    _this.email = "";
     _this.password = "";
+    _this.repeatPassword = "";
     _this.loading = false;
     return _this;
   }
 
-  Object(createClass["a" /* default */])(AppAuthLogin, [{
-    key: "onSubmit",
+  Object(createClass["a" /* default */])(AppAuthResetPassword, [{
+    key: "created",
     value: function () {
-      var _onSubmit = Object(asyncToGenerator["a" /* default */])( /*#__PURE__*/Object(regeneratorRuntime["a" /* default */])().mark(function _callee() {
-        var confirmationKey;
+      var _created = Object(asyncToGenerator["a" /* default */])( /*#__PURE__*/Object(regeneratorRuntime["a" /* default */])().mark(function _callee() {
         return Object(regeneratorRuntime["a" /* default */])().wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
                 _context.prev = 0;
-                this.loading = true;
-                _context.next = 4;
-                return volateq_api["a" /* default */].login(this.email, this.password);
+                _context.next = 3;
+                return volateq_api["a" /* default */].confirmPasswordReset(this.$route.params.confirmKey);
 
-              case 4:
-                confirmationKey = _context.sent;
-                this.$router.push({
-                  name: "ConfirmLogin",
-                  params: {
-                    confirmKey: confirmationKey
-                  }
-                });
-                _context.next = 12;
+              case 3:
+                _context.next = 9;
                 break;
 
-              case 8:
-                _context.prev = 8;
+              case 5:
+                _context.prev = 5;
                 _context.t0 = _context["catch"](0);
-                auth_container_event_bus["a" /* default */].showErrorAlert(_context.t0.message);
-                this.loading = false;
 
-              case 12:
+                if (_context.t0.error === api_errors["a" /* ApiErrors */].RESOURCE_NOT_FOUND) {
+                  this.$router.push({
+                    name: "Login"
+                  });
+                }
+
+                auth_container_event_bus["a" /* default */].showErrorAlert(_context.t0.error);
+
+              case 9:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, this, [[0, 8]]);
+        }, _callee, this, [[0, 5]]);
+      }));
+
+      function created() {
+        return _created.apply(this, arguments);
+      }
+
+      return created;
+    }()
+  }, {
+    key: "onSubmit",
+    value: function () {
+      var _onSubmit = Object(asyncToGenerator["a" /* default */])( /*#__PURE__*/Object(regeneratorRuntime["a" /* default */])().mark(function _callee2() {
+        return Object(regeneratorRuntime["a" /* default */])().wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.prev = 0;
+                this.loading = true;
+                _context2.next = 4;
+                return volateq_api["a" /* default */].resetPassword(this.$route.params.confirmKey, this.password, this.repeatPassword);
+
+              case 4:
+                this.$router.push({
+                  name: "Login"
+                });
+                _context2.next = 11;
+                break;
+
+              case 7:
+                _context2.prev = 7;
+                _context2.t0 = _context2["catch"](0);
+                auth_container_event_bus["a" /* default */].showErrorAlert(_context2.t0.message);
+                this.loading = false;
+
+              case 11:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this, [[0, 7]]);
       }));
 
       function onSubmit() {
@@ -708,23 +746,23 @@ var loginvue_type_script_lang_ts_AppAuthLogin = /*#__PURE__*/function (_Vue) {
     }()
   }]);
 
-  return AppAuthLogin;
+  return AppAuthResetPassword;
 }(vue_runtime_esm["default"]);
 
-loginvue_type_script_lang_ts_AppAuthLogin = __decorate([Object(vue_property_decorator["a" /* Component */])({
-  name: "app-auth-login",
+reset_passwordvue_type_script_lang_ts_AppAuthResetPassword = __decorate([Object(vue_property_decorator["a" /* Component */])({
+  name: "app-auth-reset-password",
   components: {
     AppAuthContainer: auth_container["a" /* default */],
     AppButton: app_button["a" /* default */]
   }
-})], loginvue_type_script_lang_ts_AppAuthLogin);
-/* harmony default export */ var loginvue_type_script_lang_ts_ = (loginvue_type_script_lang_ts_AppAuthLogin);
-// CONCATENATED MODULE: ./src/app/auth/login/login.vue?vue&type=script&lang=ts&
- /* harmony default export */ var login_loginvue_type_script_lang_ts_ = (loginvue_type_script_lang_ts_); 
+})], reset_passwordvue_type_script_lang_ts_AppAuthResetPassword);
+/* harmony default export */ var reset_passwordvue_type_script_lang_ts_ = (reset_passwordvue_type_script_lang_ts_AppAuthResetPassword);
+// CONCATENATED MODULE: ./src/app/auth/reset-password/reset-password.vue?vue&type=script&lang=ts&
+ /* harmony default export */ var reset_password_reset_passwordvue_type_script_lang_ts_ = (reset_passwordvue_type_script_lang_ts_); 
 // EXTERNAL MODULE: ./node_modules/vue-loader/lib/runtime/componentNormalizer.js
 var componentNormalizer = __webpack_require__(43);
 
-// CONCATENATED MODULE: ./src/app/auth/login/login.vue
+// CONCATENATED MODULE: ./src/app/auth/reset-password/reset-password.vue
 
 
 
@@ -733,7 +771,7 @@ var componentNormalizer = __webpack_require__(43);
 /* normalize component */
 
 var component = Object(componentNormalizer["a" /* default */])(
-  login_loginvue_type_script_lang_ts_,
+  reset_password_reset_passwordvue_type_script_lang_ts_,
   render,
   staticRenderFns,
   false,
@@ -745,8 +783,8 @@ var component = Object(componentNormalizer["a" /* default */])(
 
 /* hot reload */
 if (false) { var api; }
-component.options.__file = "src/app/auth/login/login.vue"
-/* harmony default export */ var login = __webpack_exports__["default"] = (component.exports);
+component.options.__file = "src/app/auth/reset-password/reset-password.vue"
+/* harmony default export */ var reset_password = __webpack_exports__["default"] = (component.exports);
 
 /***/ })
 
