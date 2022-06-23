@@ -156,29 +156,26 @@ export class VolateqAPI extends HttpClientBase {
   public async importAnalysisResult(
     jsonFile: File,
     analysisId: string,
-    imageFiles?: File[],
-    uploadProgressCallback?: (progress: number) => void
+    imageFilesZipName?: string,
   ): Promise<TaskSchema> {
-    const fileData = { json_file: jsonFile };
-    if (imageFiles) {
-      fileData["image_filenames"] = imageFiles.map(file => file.name);
+    const formData = { json_file: jsonFile };
+    if (imageFilesZipName) {
+      formData["images_zip_filename"] = imageFilesZipName;
     }
 
-    const task = await this.postForm(`/auth/import-analysis-result/${analysisId}`, fileData);
+    return await this.postForm(`/auth/import-analysis-result/${analysisId}`, formData);
+  }
 
-    if (imageFiles) {
-      try {
-        await this.uploadImportAnalysisResultImageFiles(analysisId, imageFiles, uploadProgressCallback);
-      } catch (e) {
-        if (!(e as ApiException).error || (e as ApiException).error !== ApiErrors.BAD_REQUEST) {
-          // Ignore Bad request error (='An import is running for this analysis, already.')
-          // to avoid overwriting of actual task error
-          throw e;
-        }
-      }
-    }
-
-    return task;
+  public async uploadImportAnalysisResultImageFiles(
+    analysisId: string,
+    imageFilesZip: File,
+    onUploadProgress?: (progressEvent: ProgressEvent) => void,
+  ): Promise<void> {
+    await this.postForm(
+      `/auth/import-analysis-result/${analysisId}/upload-images`, 
+      { image_files_zip: imageFilesZip },
+      onUploadProgress
+    );
   }
 
   public async prepareAnalysisUpload(analysisId: string, fileNames: string[]): Promise<void> {
@@ -194,26 +191,6 @@ export class VolateqAPI extends HttpClientBase {
     updateData: { data_complete?: boolean; flown_at?: string }
   ): Promise<void> {
     await this.post(`/auth/analysis/${analysisId}`, updateData);
-  }
-
-  private async uploadImportAnalysisResultImageFiles(
-    analysisId: string,
-    imageFiles: File[],
-    uploadProgressCallback?: (progress: number) => void
-  ): Promise<void> {
-    const imagesFilesToUpload = imageFiles.slice();
-
-    while (imagesFilesToUpload.length > 0) {
-      await this.postForm(`/auth/import-analysis-result/${analysisId}/upload-images`, {
-        // Only upload 50 files simultaneously to avoid 504 (Gateway timout)
-        image_files: imagesFilesToUpload.splice(0, 50),
-      });
-
-      uploadProgressCallback &&
-        uploadProgressCallback(
-          Math.round(((imageFiles.length - imagesFilesToUpload.length) / imageFiles.length) * 100)
-        );
-    }
   }
 
   public async getAnalysisResult(analysisResultId: string): Promise<AnalysisResultDetailedSchema> {

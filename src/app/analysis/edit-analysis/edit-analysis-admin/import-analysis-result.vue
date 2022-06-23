@@ -20,7 +20,12 @@
         <b-form-file v-model="jsonFile" accept=".json"></b-form-file>
       </b-form-group>
       <b-form-group :label="$t('select-result-image-files')">
-        <b-form-file v-model="imageFiles" accept="image/png, image/jpeg" multiple></b-form-file>
+        <b-form-file v-model="imageFilesZip" accept="*.zip"></b-form-file>
+        <div v-if="uploadProgress">
+          <b-progress :max="uploadProgress.total">
+            <b-progress-bar :value="uploadProgress.loaded" variant="success" :label="`${uploadProgress.loaded} / ${uploadProgress.total}`" />
+          </b-progress>
+        </div>
       </b-form-group>
       <app-button type="submit" :loading="loading">{{ $t("apply") }}</app-button>
     </b-form>
@@ -35,7 +40,6 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { AnalysisResultFileSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-file-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
-import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import { AnalysisEventService } from "../../shared/analysis-event-service";
 import { AnalysisEvent } from "../../shared/types";
 import { TaskSchema } from "@/app/shared/services/volateq-api/api-schemas/task-schema";
@@ -57,7 +61,9 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
   importedResultFiles: AnalysisResultFileSchema[] = [];
   removeAllAnalysisResultFiles = false;
   jsonFile: File | null = null;
-  imageFiles: File[] | null = null;
+  imageFilesZip: File | null = null;
+
+  uploadProgress: { total: number, loaded: number } | null = null;
 
   async created() {
     await this.setManageImportFiles();
@@ -107,24 +113,33 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
       }
 
       if (this.jsonFile) {
-        AppContentEventService.showInfo(this.analysis.id, "Uploading...");
+        AppContentEventService.showInfo(this.analysis.id, "Uploading result file...");
 
         await volateqApi.importAnalysisResult(
           this.jsonFile,
           this.analysis!.id,
-          this.imageFiles || undefined,
-          progress => {
-            appContentEventBus.showInfoAlert("Uploading... " + progress + "%");
-          }
+          this.imageFilesZip?.name,
         );
 
         AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS);
+
+        if (this.imageFilesZip) {
+          await volateqApi.uploadImportAnalysisResultImageFiles(
+            this.analysis!.id,
+            this.imageFilesZip,
+            (progressEvent) => {
+              this.uploadProgress = { total: progressEvent.total, loaded: progressEvent.loaded };
+            }
+          );
+        }
       } else {
         this.successfullyFinished();
       }
     } catch (e) {
       this.showError(e);
       this.loading = false;
+    } finally {
+      this.uploadProgress = null;
     }
   }
 

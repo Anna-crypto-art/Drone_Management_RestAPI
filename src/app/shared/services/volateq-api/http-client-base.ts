@@ -53,7 +53,11 @@ export class HttpClientBase {
     );
   }
 
-  protected async postForm(url: string, data: Record<string, string | File | File[]>): Promise<any> {
+  protected async postForm(
+    url: string,
+    data: Record<string, string | File | File[]>,
+    onUploadProgressEvent?: (progressEvent: ProgressEvent) => void
+  ): Promise<any> {
     const formData = new FormData();
 
     for (const key in data) {
@@ -68,7 +72,12 @@ export class HttpClientBase {
       }
     }
 
-    return this.httpClient.post(url, formData, { headers: { "Content-Type": "multipart/form-data" } });
+    return this.httpClient.post(url, formData, { 
+      headers: { "Content-Type": "multipart/form-data" }, 
+      onUploadProgress: onUploadProgressEvent !== undefined ? (progressEvent: ProgressEvent) => {
+        onUploadProgressEvent(progressEvent);
+      } : undefined
+    });
   }
 
   protected async post(url: string, data?: any, config?: AxiosRequestConfig | undefined, params?: any): Promise<any> {
