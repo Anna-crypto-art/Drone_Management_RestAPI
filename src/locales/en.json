@@ -165,7 +165,7 @@
   "high-hydrogen-concentration_expl": "Increased probability of high hydrogen concentration. Indicators are intact coating and intact glass tube, but very high infrared intensity.",
   "no-analysis-result-selected": "Select an analysis to see table data",
   "show-results": "Show results",
-  "select-result-image-files": "Select images files related to result file (optional)",
+  "select-result-image-files-zip": "Select zip file with all images related to result file (optional)",
   "locked": "Locked",
   "resend-invitation": "Resend invitation",
   "user-invitation-sent-successfully": "User invitation sent successfully",
@@ -324,6 +324,8 @@
   "pi-not-found": "PI does not exist",
   "orientation-angle": "Orientation angle (°)",
   "setup-phase": "Setup phase",
+  "upload-success-filename": "Successfully uploaded {filename}",
+  "uploading": "Uploading...",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",

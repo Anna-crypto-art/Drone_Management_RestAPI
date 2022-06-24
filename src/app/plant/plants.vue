@@ -275,19 +275,19 @@ export default class AppPlants extends BaseAuthComponent {
       );
       volateqApi.waitForTask(
         task.id,
-        async task => {
+        async (task, failed) => {
           this.plantModalLoading = false;
 
-          if (task.state === "SUCCESS") {
+          if (failed) {
+            this.showError({ error: "SOMETHING_WENT_WRONG", message: task.result });
+          } else {
             this.managePlantModal.hide();
             this.showSuccess(this.$t("dt-imported-successfully").toString());
             await this.updatePlants();
-          } else if (task.state === "FAILURE") {
-            this.showError({ error: "SOMETHING_WENT_WRONG", message: task.result });
           }
         },
-        info => {
-          this.managePlantModal.alertInfo(info);
+        task => {
+          this.managePlantModal.alertInfo(volateqApi.getTaskInfoAsMessage(task));
         }
       );
     } catch (e) {

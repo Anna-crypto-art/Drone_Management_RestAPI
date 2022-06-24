@@ -263,7 +263,10 @@ $theme-colors: (
   }
 }
 
-
 .card {
+  border-radius: 0 !important;
+}
+
+.progress {
   border-radius: 0 !important;
 }

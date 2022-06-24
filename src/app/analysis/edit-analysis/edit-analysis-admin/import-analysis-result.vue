@@ -19,11 +19,19 @@
       <b-form-group :label="$t('select-json-result-file-import')">
         <b-form-file v-model="jsonFile" accept=".json"></b-form-file>
       </b-form-group>
-      <b-form-group :label="$t('select-result-image-files')">
-        <b-form-file v-model="imageFilesZip" accept="*.zip"></b-form-file>
-        <div v-if="uploadProgress">
+      <b-form-group :label="$t('select-result-image-files-zip')">
+        <b-form-file v-model="imageFilesZip" accept=".zip"></b-form-file>
+        <div v-if="uploadProgress" class="mar-top">
+          {{ $t('uploading') }}
           <b-progress :max="uploadProgress.total">
-            <b-progress-bar :value="uploadProgress.loaded" variant="success" :label="`${uploadProgress.loaded} / ${uploadProgress.total}`" />
+            <b-progress-bar :value="uploadProgress.loaded" variant="success">
+              <span v-if="uploadProgress.loaded === uploadProgress.total">
+                {{ $t("upload-succes-filename", { filename: imageFilesZip.name }) }}
+              </span>
+              <span v-if="uploadProgress.loaded < uploadProgress.total">
+                 {{ Math.round(uploadProgress.loaded / uploadProgress.total * 100) }}%
+              </span>
+            </b-progress-bar>
           </b-progress>
         </div>
       </b-form-group>

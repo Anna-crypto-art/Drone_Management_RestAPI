@@ -344,29 +344,28 @@ export class VolateqAPI extends HttpClientBase {
 
   public waitForTask(
     taskId: string,
-    finished: (task: TaskSchema) => void,
-    info?: (infoMessage: string, task: TaskSchema) => void
+    onFinished: (task: TaskSchema, failed: boolean) => void,
+    onProgress?: (task: TaskSchema) => void,
   ): void {
     const interval = setInterval(async () => {
       const task = await this.getTask(taskId);
       if (task.state === "SUCCESS" || task.state === "FAILURE") {
         clearInterval(interval);
-        finished(task);
-      } else {
-        if (info) {
-          if (task.info && task.info.infos && task.info.infos.length > 0) {
-            const infoMessage =
-              ">" +
-              task.info.infos.join("<br>>") +
-              ((task.info.max_steps && `... (${task.info.current_step}/${task.info.max_steps})`) || "...");
-
-            info(infoMessage, task);
-          } else {
-            info("Wait for start...", task);
-          }
-        }
+        onFinished(task, task.state !== "SUCCESS");
+      } else if (onProgress) {
+        onProgress(task);
       }
     }, 3000);
+  }
+
+  public getTaskInfoAsMessage(task: TaskSchema) {
+    if (task.info && task.info.infos && task.info.infos.length > 0) {
+      return ">" +
+        task.info.infos.join("<br>>") +
+        ((task.info.max_steps && `... (${task.info.current_step}/${task.info.max_steps})`) || "...");
+    } else {
+      return "Wait for start...";
+    }
   }
 
   public resendUserInvitation(userId: string): Promise<void> {

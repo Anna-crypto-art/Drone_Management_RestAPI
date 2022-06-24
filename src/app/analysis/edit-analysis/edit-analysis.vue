@@ -107,18 +107,20 @@ export default class AppEditAnalysis extends BaseAuthComponent {
     if (this.analysis!.task_id) {
       volateqApi.waitForTask(
         this.analysis!.task_id,
-        (task: TaskSchema) => {
-          if (task.state === "FAILURE") {
+        (task: TaskSchema, failed: boolean) => {
+          if (failed) {
             AppContentEventService.showError(this.analysis!.id, {
               error: ApiErrors.SOMETHING_WENT_WRONG,
               message: task.result,
             });
+          } else {
+            AppContentEventService.showSuccess(this.analysis!.id, task.result);
           }
 
           AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.FINISHED_ANALYSIS_TASK, task);
         },
-        (infoMessage: string, task: TaskSchema) => {
-          AppContentEventService.showInfo(this.analysis!.id, infoMessage);
+        (task: TaskSchema) => {
+          AppContentEventService.showInfo(this.analysis!.id, volateqApi.getTaskInfoAsMessage(task));
 
           AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.RUN_ANALYSIS_TASK, task)
         }
