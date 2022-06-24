@@ -24,7 +24,7 @@
           />
         </b-card>
         <b-collapse v-model="collapsed_states[analysisName]">
-          <div v-if="typeof state === 'object'">
+          <div v-if="typeof states === 'object'">
             <div v-for="(state, name) in states" v-bind:key="name" class="app-analysis-monitoring-states">
               <b-card no-body>
                 <div
