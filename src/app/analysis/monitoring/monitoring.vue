@@ -38,14 +38,14 @@
               </b-card>
             </div>
           </div>
-          <div v-if="typeof state === 'string'">
+          <div v-if="typeof states === 'string'">
             <div class="app-analysis-monitoring-states">
               <b-card no-body>
                 <div
                   :class="`app-analysis-monitoring-state app-analysis-monitoring-state-crashed`"
                   title="CRASHED"
                 >
-                  {{ state }}
+                  {{ states }}
                 </div>
               </b-card>
             </div>
