@@ -3,9 +3,9 @@ import analysisResultCspPtcMappingHce from "@/app/shared/services/volateq-api/ap
 import { AnalysisResultCspPtcHceSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-hce-schema";
 import { FeatureLike } from "ol/Feature";
 import { Stroke, Style } from "ol/style";
-import { CspPtcKeyFigureLayer } from "./csp-ptc-key-figure-layer";
+import { CspPtcKeyFigureLayer } from "../../csp-ptc-key-figure-layer";
 
-export class HceKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisResultCspPtcHceSchema> {
+export abstract class HceKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisResultCspPtcHceSchema> {
   protected readonly analysisResultMapping = analysisResultCspPtcMappingHce;
 
   protected readonly stokeWidth = 5;

@@ -105,7 +105,7 @@
         <app-explanation><span v-html="$t('slope-deviation_expl')"></span></app-explanation>
       </template>
       <template #hcePositionSupport>
-        {{ $t("hce-position-support-total-offset") }}
+        {{ $t("hce-position-support-offset") }}
         <app-explanation><span v-html="$t('hce-position-support-offset_expl')"></span></app-explanation>
       </template>
       <template #hcePositionSupportOffsetClass3>
@@ -168,12 +168,16 @@ export default class AppVisualCspPtc
     }
 
     let offsetClassLimits: number[] | null = null;
+    let unit = "";
     if (componentType === "sce") {
       offsetClassLimits = this.firstAnalysisResult.csp_ptc.sce_alignment_deviation_to_drive_class_limits;
+      unit = "°";
     } else if (componentType === "sca") {
       offsetClassLimits = this.firstAnalysisResult.csp_ptc.sca_tracking_encoder_offset_class_limits;
+      unit = "°";
     } else if (componentType === "hce") {
       offsetClassLimits = this.firstAnalysisResult.csp_ptc.hce_position_total_class_limits;
+      unit = "[mm]";
     }
 
     if (offsetClassLimits === null) {
@@ -181,17 +185,19 @@ export default class AppVisualCspPtc
     }
 
     if (classLimit === 1) {
-      return this.$t("alignment-offset-class-1", { limit0: offsetClassLimits[0] }).toString();
+      return this.$t("alignment-offset-class-1", { limit0: offsetClassLimits[0], unit }).toString();
     }
     if (classLimit === 2) {
       return this.$t("alignment-offset-class-2", {
         limit1: offsetClassLimits[1],
         limit0: offsetClassLimits[0],
+        unit,
       }).toString();
     }
     if (classLimit === 3) {
       return this.$t("alignment-offset-class-3", {
         limit1: offsetClassLimits[1],
+        unit,
       }).toString();
     }
 

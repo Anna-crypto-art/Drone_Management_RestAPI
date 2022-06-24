@@ -4,7 +4,7 @@ import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-
 import { KeyFigureColors, KeyFigureColorScheme, KeyFigureInfo } from "@/app/plant/shared/visualization/layers/types";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-import { cspPtcKeyFigureRainbowColors } from "../../../csp-ptc-key-figure-colors";
+import { cspPtcKeyFigureRainbowColors } from "../../csp-ptc-key-figure-colors";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 
@@ -49,7 +49,7 @@ export abstract class CspPtcKeyFigureLayer<T extends AnalysisResultSchemaBase> e
     throw new Error("Unexpected colorScheme: " + this.colorScheme);
   }
 
-  protected getClassColor(classValue: number | undefined): string {
+  public getClassColor(classValue: number | undefined): string {
     if (this.colorScheme === KeyFigureColorScheme.RAINBOW) {
       if (classValue === 1) {
         return this.getColorWithAlpha(KeyFigureColors.green, 0.3);
@@ -73,7 +73,7 @@ export abstract class CspPtcKeyFigureLayer<T extends AnalysisResultSchemaBase> e
     return this.color!;
   }
 
-  protected getDiffColorByComparedFeatureType(comparedFeatureType: ComparedFeatureType): string {
+  public getDiffColorByComparedFeatureType(comparedFeatureType: ComparedFeatureType): string {
     switch (comparedFeatureType) {
       case ComparedFeatureType.GONE_FIXED:
         return KeyFigureColors.green;
@@ -95,7 +95,7 @@ export abstract class CspPtcKeyFigureLayer<T extends AnalysisResultSchemaBase> e
     }
   }
 
-  protected getComparedFeatures(currentClass: number): ComparedFeatures {
+  public getComparedFeatures(currentClass: number): ComparedFeatures {
     const comparedFeatures: ComparedFeatures = {
       goneFeatures: [],
       goneFixedFeatures: [],
@@ -131,7 +131,7 @@ export abstract class CspPtcKeyFigureLayer<T extends AnalysisResultSchemaBase> e
     return comparedFeatures;
   }
 
-  protected getComparedFeatureType(properties: FeatureProperties, currentClass: number): ComparedFeatureType {
+  public getComparedFeatureType(properties: FeatureProperties, currentClass: number): ComparedFeatureType {
     const featureValue: number = properties.value! as number;
     const featureDiffValue: number = properties.diff_value! as number;
 

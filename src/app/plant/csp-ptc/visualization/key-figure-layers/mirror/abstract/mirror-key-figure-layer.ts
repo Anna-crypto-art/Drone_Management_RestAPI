@@ -3,7 +3,7 @@ import analysisResultCspPtcMappingMirror from "@/app/shared/services/volateq-api
 import { AnalysisResultCspPtcMirrorSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-mirror-schema";
 import { FeatureLike } from "ol/Feature";
 import { Fill, Stroke, Style } from "ol/style";
-import { CspPtcKeyFigureLayer } from "./csp-ptc-key-figure-layer";
+import { CspPtcKeyFigureLayer } from "../../csp-ptc-key-figure-layer";
 
 export class MirrorKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisResultCspPtcMirrorSchema> {
   protected readonly analysisResultMapping = analysisResultCspPtcMappingMirror;

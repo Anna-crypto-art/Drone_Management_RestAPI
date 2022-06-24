@@ -5,7 +5,7 @@ import { FeatureLike } from "ol/Feature";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { KeyFigureColors, KeyFigureColorScheme, KeyFigureInfo, OrthoImage } from "./types";
 import { FeatureInfo, FeatureInfos, FeatureProperties, Legend, IPlantVisualization, FeatureAction, PropsFeature } from "../types";
-import { AnalysisResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
+import { AnalysisResultMappingEntry, AnalysisResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
@@ -25,13 +25,13 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   protected readonly name: string;
 
   protected abstract get color(): string;
-  protected colorScheme = KeyFigureColorScheme.TRAFFIC_LIGHT;
-  protected enableCompare = false;
-  protected compareAnalysisResult: AnalysisResultDetailedSchema | null = null;
+  public colorScheme = KeyFigureColorScheme.TRAFFIC_LIGHT;
+  public enableCompare = false;
+  public compareAnalysisResult: AnalysisResultDetailedSchema | null = null;
 
   protected orthoImages: OrthoImage[] | null = null;
 
-  protected geoJSON?: {
+  public geoJSON?: {
     type: string;
     features: PropsFeature[];
     custom: { components_total_count: number; mirrors_per_sce?: number };
@@ -99,7 +99,16 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     return featureInfos;
   }
 
-  protected getProperties(feature: FeatureLike): FeatureProperties {
+  protected getMappingEntry(): AnalysisResultMappingEntry<T> | undefined {
+    const mappingHelper = new AnalysisResultMappingHelper(this.analysisResultMapping, this.analysisResult!);
+    return mappingHelper.getEntries().find(entry => entry.transName === this.keyFigureInfo.keyName);
+  }
+
+  public getUnit(): string {
+    return this.getMappingEntry()?.unit || "";
+  }
+
+  public getProperties(feature: FeatureLike): FeatureProperties {
     return feature.getProperties() as FeatureProperties;
   }
 
@@ -228,7 +237,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     return this.analysisResult.key_figures.find(keyFigure => keyFigure.id === this.keyFigureId)!;
   }
 
-  protected getLegendEntryCount(featureCount?: number, precision = 10): string {
+  public getLegendEntryCount(featureCount?: number, precision = 10): string {
     featureCount = featureCount !== undefined ? featureCount : this.geoJSON!.features.length;
     const totalCount = this.geoJSON!.custom.components_total_count;
 

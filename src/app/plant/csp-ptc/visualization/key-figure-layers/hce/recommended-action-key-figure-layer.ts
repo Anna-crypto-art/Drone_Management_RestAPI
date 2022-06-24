@@ -1,11 +1,11 @@
-import { ClassHceKeyFigureLayer } from "./shared/class-hce-key-figure-layer";
+import { ClassHceKeyFigureLayer } from "./abstract/class-hce-key-figure-layer";
 
 export class RecommendedActionKeyFigureLayer extends ClassHceKeyFigureLayer {
-  protected getQueryClass(): number | undefined {
+  public getQueryClass(): number | undefined {
     return this.query?.recommended_action_class;
   }
 
-  protected getClassColor(classValue: number | undefined): string {
+  public getClassColor(classValue: number | undefined): string {
     if (classValue === 2) {
       return this.getColorWithAlpha(this.color!, 0.3);
     }

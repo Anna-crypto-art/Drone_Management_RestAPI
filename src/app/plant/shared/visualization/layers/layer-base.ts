@@ -25,7 +25,7 @@ export abstract class LayerBase {
   protected refreshLayer = false;
   protected readonly events = new EventEmitter();
 
-  constructor(protected readonly vueComponent: BaseAuthComponent & IPlantVisualization) {}
+  constructor(public readonly vueComponent: BaseAuthComponent & IPlantVisualization) {}
 
   protected abstract getPcs(feature: FeatureLike): string | undefined;
   protected abstract load(): Promise<Record<string, unknown>>;
@@ -107,7 +107,7 @@ export abstract class LayerBase {
     return "#" + (0xffffff ^ parseInt(color.replace("#", "0x"))).toString(16);
   }
 
-  protected getColorWithAlpha(color: string, alpha: number): string {
+  public getColorWithAlpha(color: string, alpha: number): string {
     const [r, g, b] = Array.from(asArray(color));
     return asString([r, g, b, alpha]);
   }

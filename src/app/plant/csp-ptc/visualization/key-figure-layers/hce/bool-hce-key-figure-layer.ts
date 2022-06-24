@@ -2,10 +2,10 @@ import { KeyFigureColors } from "@/app/plant/shared/visualization/layers/types";
 import { FeatureProperties, Legend, LegendEntry, PropsFeature } from "@/app/plant/shared/visualization/types";
 import { FeatureLike } from "ol/Feature";
 import { Stroke, Style } from "ol/style";
-import { HceKeyFigureLayer } from "./hce-key-figure-layer";
+import { HceKeyFigureLayer } from "./abstract/hce-key-figure-layer";
 
 export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
-  protected enableCompare = true;
+  public enableCompare = true;
 
   public getStyle(feature: FeatureLike): Style {
     const featureValue: boolean | null | undefined = this.getPropertyValue<boolean | null>(feature);

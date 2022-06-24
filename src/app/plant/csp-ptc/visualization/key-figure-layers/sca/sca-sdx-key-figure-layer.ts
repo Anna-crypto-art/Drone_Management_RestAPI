@@ -1,7 +1,7 @@
 import { Legend } from "@/app/plant/shared/visualization/types";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
-import { ScaKeyFigureLayer } from "./shared/sca-key-figure-layer";
+import { ScaKeyFigureLayer } from "./abstract/sca-key-figure-layer";
 
 export class ScaSdxKeyFigureLayer extends ScaKeyFigureLayer {
   protected getLegend(): Legend | undefined {

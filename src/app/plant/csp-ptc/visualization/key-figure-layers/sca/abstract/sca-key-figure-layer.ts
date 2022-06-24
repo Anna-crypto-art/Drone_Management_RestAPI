@@ -3,7 +3,7 @@ import analysisResultCspPtcMappingSca from "@/app/shared/services/volateq-api/ap
 import { FeatureLike } from "ol/Feature";
 import { Fill, Style } from "ol/style";
 import { Legend } from "@/app/plant/shared/visualization/types";
-import { CspPtcKeyFigureLayer } from "./csp-ptc-key-figure-layer";
+import { CspPtcKeyFigureLayer } from "../../csp-ptc-key-figure-layer";
 
 export abstract class ScaKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisResultCspPtcScaSchema> {
   protected readonly analysisResultMapping = analysisResultCspPtcMappingSca;

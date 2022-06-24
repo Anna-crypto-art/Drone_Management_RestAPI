@@ -1,7 +1,7 @@
 import { FeatureInfos, Legend } from "@/app/plant/shared/visualization/types";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { AnalysisResultCspPtcScaSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-sca-schema";
-import { ScaKeyFigureLayer } from "./shared/sca-key-figure-layer";
+import { ScaKeyFigureLayer } from "./abstract/sca-key-figure-layer";
 
 export class ScaFrictionKeyFigureLayer extends ScaKeyFigureLayer {
   protected getLegend(): Legend | undefined {

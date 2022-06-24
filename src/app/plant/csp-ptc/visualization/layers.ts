@@ -1,22 +1,22 @@
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
-import { AbsorberComponentLayer } from "./components/absorber-component-layer";
-import { LoopComponentLayer } from "./components/loop-component-layer";
-import { MirrorComponentLayer } from "./components/mirror-component-layer";
-import { ScaComponentLayer } from "./components/sca-component-layer";
-import { SceComponentLayer } from "./components/sce-component-layer";
+import { AbsorberComponentLayer } from "./component-layers/absorber-component-layer";
+import { LoopComponentLayer } from "./component-layers/loop-component-layer";
+import { MirrorComponentLayer } from "./component-layers/mirror-component-layer";
+import { ScaComponentLayer } from "./component-layers/sca-component-layer";
+import { SceComponentLayer } from "./component-layers/sce-component-layer";
 import { ComponentLayer } from "../../shared/visualization/layers/component-layer";
-import { MissingMirrorKeyFigureLayer } from "./key-figures/missing-mirror-key-figure-layer";
-import { ScaFrictionKeyFigureLayer } from "./key-figures/sca-friction-key-figure";
-import { ScaTrackingKeyFigureLayer } from "./key-figures/sca-tracking-key-figure-layer";
-import { ScaSdxKeyFigureLayer } from "./key-figures/sca-sdx-key-figure-layer";
-import { SceAlignmentKeyFigureLayer } from "./key-figures/sce-alignment-key-figure-layer";
-import { BoolUndefinedHceKeyFigureLayer } from "./key-figures/shared/bool-hce-key-figure-layer";
+import { MissingMirrorKeyFigureLayer } from "./key-figure-layers/mirror/missing-mirror-key-figure-layer";
+import { ScaFrictionKeyFigureLayer } from "./key-figure-layers/sca/sca-friction-key-figure";
+import { ScaTrackingKeyFigureLayer } from "./key-figure-layers/sca/sca-tracking-key-figure-layer";
+import { ScaSdxKeyFigureLayer } from "./key-figure-layers/sca/sca-sdx-key-figure-layer";
+import { SceAlignmentKeyFigureLayer } from "./key-figure-layers/sce/sce-alignment-key-figure-layer";
+import { BoolUndefinedHceKeyFigureLayer } from "./key-figure-layers/hce/bool-hce-key-figure-layer";
 import { KeyFigureTypeMap } from "../../shared/visualization/types";
 import { KeyFigureColors } from "../../shared/visualization/layers/types";
-import { GlassTemperatureKeyFigureLayer } from "./key-figures/glass-temperature-key-figure-layer";
-import { ScaAverageTrackingKeyFigureLayer } from "./key-figures/sca-average-tracking-key-figure-layer";
-import { RecommendedActionKeyFigureLayer } from "./key-figures/recommended-action-key-figure-layer";
-import { HcePositionCenterKeyFigureLayer, HcePositionSupportKeyFigureLayer } from "./key-figures/hce-position-key-figure-layer";
+import { GlassTemperatureKeyFigureLayer } from "./key-figure-layers/hce/glass-temperature-key-figure-layer";
+import { ScaAverageTrackingKeyFigureLayer } from "./key-figure-layers/sca/sca-average-tracking-key-figure-layer";
+import { RecommendedActionKeyFigureLayer } from "./key-figure-layers/hce/recommended-action-key-figure-layer";
+import { HcePositionCenterKeyFigureLayer, HcePositionSupportKeyFigureLayer } from "./key-figure-layers/hce/hce-position-key-figure-layer";
 
 export const COMPONENT_LAYERS: typeof ComponentLayer[] = [
   AbsorberComponentLayer,
@@ -117,7 +117,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
   {
     keyFigureId: ApiKeyFigure.HCE_POSITION_ID,
     layerType: HcePositionSupportKeyFigureLayer,
-    keyFigureInfo: { templateName: "hcePositionSupport", keyName: "hce-position-support-offset" },
+    keyFigureInfo: { templateName: "hcePositionSupport", keyName: "hce-position-support-offset-class" },
     subLayers: [
       {
         keyFigureInfo: { templateName: "hcePositionSupportOffsetClass3", displayName: "hce-position-support-offset-class-3", zIndex: 13 },

@@ -1,6 +1,6 @@
 import { KeyFigureColors, KeyFigureColorScheme } from "@/app/plant/shared/visualization/layers/types";
 import { FeatureProperties, Legend, LegendEntry } from "@/app/plant/shared/visualization/types";
-import { ClassHceKeyFigureLayer } from "./shared/class-hce-key-figure-layer";
+import { ClassHceKeyFigureLayer } from "./abstract/class-hce-key-figure-layer";
 
 export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer {
   protected created(): void {
@@ -18,7 +18,7 @@ export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer {
     return this.getDiffColorByComparedFeatureType(comparedFeatureType);
   }
 
-  protected getClassColor(classValue: number | undefined): string {
+  public getClassColor(classValue: number | undefined): string {
     if (this.colorScheme === KeyFigureColorScheme.RAINBOW) {
       if (this.analysisResult.csp_ptc.glass_tube_temperature_class_count === 4 && classValue === 3) {
         return this.getColorWithAlpha(this.color!, 0.7);

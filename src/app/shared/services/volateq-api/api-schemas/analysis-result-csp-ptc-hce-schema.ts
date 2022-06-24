@@ -19,11 +19,9 @@ export interface AnalysisResultCspPtcHceSchema extends AnalysisResultSchemaBase 
   position_in_loop: number[];
   hce_position_support_vertical_offset: number;
   hce_position_support_lateral_offset: number;
-  hce_position_support_total_offset: number;
   hce_position_support_offset_class: number;
   hce_position_center_vertical_offset: number;
   hce_position_center_lateral_offset: number;
-  hce_position_center_total_offset: number;
   hce_position_center_offset_class: number;
 }
 
