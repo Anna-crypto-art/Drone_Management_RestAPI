@@ -24,17 +24,31 @@
           />
         </b-card>
         <b-collapse v-model="collapsed_states[analysisName]">
-          <div v-for="(state, name) in states" v-bind:key="name" class="app-analysis-monitoring-states">
-            <b-card no-body>
-              <div
-                :class="`app-analysis-monitoring-state app-analysis-monitoring-state-${state.state.toLowerCase()}`"
-                :title="state.state"
-              >
-                <span class="monitoring-project">{{ name }}</span>
-                <span class="monitoring-state grayed">{{ state.state }}</span>
-                <span class="monitoring-action grayed">{{ state.current_action }}</span>
-              </div>
-            </b-card>
+          <div v-if="typeof state === 'object'">
+            <div v-for="(state, name) in states" v-bind:key="name" class="app-analysis-monitoring-states">
+              <b-card no-body>
+                <div
+                  :class="`app-analysis-monitoring-state app-analysis-monitoring-state-${state.state.toLowerCase()}`"
+                  :title="state.state"
+                >
+                  <span class="monitoring-project">{{ name }}</span>
+                  <span class="monitoring-state grayed">{{ state.state }}</span>
+                  <span class="monitoring-action grayed">{{ state.current_action }}</span>
+                </div>
+              </b-card>
+            </div>
+          </div>
+          <div v-if="typeof state === 'string'">
+            <div class="app-analysis-monitoring-states">
+              <b-card no-body>
+                <div
+                  :class="`app-analysis-monitoring-state app-analysis-monitoring-state-crashed`"
+                  title="CRASHED"
+                >
+                  {{ state }}
+                </div>
+              </b-card>
+            </div>
           </div>
         </b-collapse>
       </div>
