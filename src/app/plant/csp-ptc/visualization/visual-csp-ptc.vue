@@ -117,6 +117,19 @@
       <template #hcePositionSupportOffsetClass1>
         {{ getTransAlignmentOffsetClassLimit("hce", 1) }}
       </template>
+      <template #hcePositionCenter>
+        {{ $t("hce-position-center-offset") }}
+        <app-explanation><span v-html="$t('hce-position-center-offset_expl')"></span></app-explanation>
+      </template>
+      <template #hcePositionCenterOffsetClass3>
+        {{ getTransAlignmentOffsetClassLimit("hce", 3) }}
+      </template>
+      <template #hcePositionCenterOffsetClass2>
+        {{ getTransAlignmentOffsetClassLimit("hce", 2) }}
+      </template>
+      <template #hcePositionCenterOffsetClass1>
+        {{ getTransAlignmentOffsetClassLimit("hce", 1) }}
+      </template>
     </app-visualization>
   </div>
 </template>

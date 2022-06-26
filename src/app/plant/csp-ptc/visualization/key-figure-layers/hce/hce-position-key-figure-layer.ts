@@ -40,6 +40,10 @@ abstract class HcePositionKeyFigureLayer extends HceKeyFigureLayer implements IO
       currentClass
     );
   }
+
+  public getUnit(): string {
+    return "[mm]";
+  }
 }
 
 export class HcePositionSupportKeyFigureLayer extends HcePositionKeyFigureLayer {

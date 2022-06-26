@@ -1,7 +1,6 @@
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { AbsorberComponentLayer } from "./component-layers/absorber-component-layer";
 import { LoopComponentLayer } from "./component-layers/loop-component-layer";
-import { MirrorComponentLayer } from "./component-layers/mirror-component-layer";
 import { ScaComponentLayer } from "./component-layers/sca-component-layer";
 import { SceComponentLayer } from "./component-layers/sce-component-layer";
 import { ComponentLayer } from "../../shared/visualization/layers/component-layer";
@@ -141,7 +140,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
   {
     keyFigureId: ApiKeyFigure.HCE_POSITION_ID,
     layerType: HcePositionCenterKeyFigureLayer,
-    keyFigureInfo: { templateName: "hcePositionCenter", keyName: "hce-position-center-offset" },
+    keyFigureInfo: { templateName: "hcePositionCenter", keyName: "hce-position-center-offset-class" },
     subLayers: [
       {
         keyFigureInfo: { templateName: "hcePositionCenterOffsetClass3", displayName: "hce-position-center-offset-class-3", zIndex: 13 },
