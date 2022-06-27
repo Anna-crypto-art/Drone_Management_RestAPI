@@ -19,6 +19,7 @@ import { State } from "ol/render";
 import * as ExtentFunctions from "ol/extent";
 import { Style } from "ol/style";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { layerEvents } from "../layer-events";
 
 export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends LayerBase {
   protected abstract readonly analysisResultMapping: AnalysisResultMappings<T>;
@@ -246,10 +247,6 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     ).toString()}%</b> - <small>${featureCount}</small>)`;
   }
 
-  protected getVectorGeoLayer(): VectorGeoLayer {
-    return this.vueComponent.openLayers!.getMap().getAllLayers().find(layer => layer.getProperties()['id'] === this.id) as VectorGeoLayer;
-  }
-
   protected setOrthoImageAvailable() {
     if (this.orthoImages !== null) {
       for (const orthoImage of this.orthoImages) {
@@ -263,9 +260,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
       const actions: FeatureAction[] = this.orthoImages.filter(orthoImage => orthoImage.available)
         .map(orthoImage => ({
           name: orthoImage.name,
-          action: async () => {
-            await this.loadOrthoImage(orthoImage, featureInfos);
-          }
+          action: async () => { await this.loadOrthoImage(orthoImage, featureInfos); }
         }));
       
       if (actions.length > 0) {
@@ -281,31 +276,38 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   }
 
   protected async loadOrthoImage(orthoImage: OrthoImage, featureInfos: FeatureInfos): Promise<void> {
-    const geoJSON = await volateqApi.getKeyFiguresGeoVisual(
-      this.vueComponent.plant.id,
-      this.analysisResult.id,
-      orthoImage.keyFigureId,
-      {
-        child_component_id: this.keyFigure.component_id,
-        child_pcs: featureInfos.title
+    try {
+      const geoJSON = await volateqApi.getKeyFiguresGeoVisual(
+        this.vueComponent.plant.id,
+        this.analysisResult.id,
+        orthoImage.keyFigureId,
+        {
+          child_component_id: this.keyFigure.component_id,
+          child_pcs: featureInfos.title
+        }
+      );
+
+      const features: Feature<Geometry>[] = new GeoJSON(GEO_JSON_OPTIONS).readFeatures(geoJSON)
+      if (!features || features.length === 0) {
+        throw { error: "NOT_FOUND", message: "Ortho image not found" };
       }
-    );
 
-    const features: Feature<Geometry>[] = new GeoJSON(GEO_JSON_OPTIONS).readFeatures(geoJSON)
+      if (!orthoImage.features) {
+        orthoImage.features = [];
+      }
+      orthoImage.features.push(...features);
 
-    if (!orthoImage.features) {
-      orthoImage.features = [];
+      for (const feature of features) {
+        this.setImageFeatureStyle(feature);
+      }
+
+      // Ortho images will be added into the SCA component layer
+      layerEvents.emitOrthoImageLoaded(features);
+
+      this.vueComponent.hideToast();
+    } catch (e) {
+      this.vueComponent.showError(e);
     }
-    orthoImage.features.push(...features);
-
-    for (const feature of features) {
-      this.setImageFeatureStyle(feature);
-    }
-    
-    const vectorGeoLayer = this.getVectorGeoLayer();
-    vectorGeoLayer.getSource()!.addFeatures(features);
-
-    this.vueComponent.hideToast();
   }
 
   protected setImageFeatureStyle(feature: Feature<Geometry>) {
@@ -351,9 +353,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     if (this.orthoImages) {
       for (const orthoImage of this.orthoImages) {
         if (orthoImage.features) {
-          for (const feature of orthoImage.features) {
-            this.getVectorGeoLayer().getSource()!.removeFeature(feature);
-          }
+          layerEvents.emitRemoveOrthoImages(orthoImage.features);
 
           orthoImage.features = undefined;
         }

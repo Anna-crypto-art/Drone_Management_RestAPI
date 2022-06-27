@@ -2,7 +2,7 @@ import { FeatureLike } from "ol/Feature";
 import { Style, Stroke, Text } from "ol/style";
 import { asArray, asString } from "ol/color";
 import { IPlantVisualization } from "../types";
-import { GeoJSONLayer } from "@/app/shared/components/app-geovisualization/types/layers";
+import { GeoJSONLayer, VectorGeoLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { EventEmitter } from "events";
 
@@ -29,6 +29,7 @@ export abstract class LayerBase {
 
   protected abstract getPcs(feature: FeatureLike): string | undefined;
   protected abstract load(): Promise<Record<string, unknown>>;
+  protected abstract get id(): string | undefined;
 
   protected getStyle(feature: FeatureLike): Style {
     return new Style({
@@ -40,10 +41,6 @@ export abstract class LayerBase {
 
   protected getName(): string {
     return this.name;
-  }
-
-  protected get id(): string | undefined {
-    return undefined
   }
 
   public showPCS(show: boolean): void {
@@ -110,5 +107,9 @@ export abstract class LayerBase {
   public getColorWithAlpha(color: string, alpha: number): string {
     const [r, g, b] = Array.from(asArray(color));
     return asString([r, g, b, alpha]);
+  }
+
+  protected getVectorGeoLayer(): VectorGeoLayer {
+    return this.vueComponent.openLayers!.getMap().getAllLayers().find(layer => layer.getProperties()['id'] === this.id) as VectorGeoLayer;
   }
 }
