@@ -10,6 +10,8 @@ export class SceAlignmentKeyFigureLayer extends SceKeyFigureLayer implements IOf
   private offsetClassKeyFigureMixin!: OffsetClassKeyFigureMixin;
 
   protected created(): void {
+    super.created();
+
     this.offsetClassKeyFigureMixin = new OffsetClassKeyFigureMixin(this);
   }
 

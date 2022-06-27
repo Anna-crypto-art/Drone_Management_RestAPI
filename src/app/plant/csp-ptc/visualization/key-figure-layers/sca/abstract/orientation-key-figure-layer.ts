@@ -9,6 +9,8 @@ export abstract class OrientationKeyFigureLayer extends ScaKeyFigureLayer implem
   private offsetClassKeyFigureMixin!: OffsetClassKeyFigureMixin;
 
   protected created(): void {
+    super.created();
+
     this.offsetClassKeyFigureMixin = new OffsetClassKeyFigureMixin(this);
   }
 

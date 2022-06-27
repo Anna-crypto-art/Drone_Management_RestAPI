@@ -11,6 +11,8 @@ abstract class HcePositionKeyFigureLayer extends HceKeyFigureLayer implements IO
   protected abstract getHcePositionOffsetClass(): number | undefined;
 
   protected created(): void {
+    super.created();
+
     this.offsetClassKeyFigureMixin = new OffsetClassKeyFigureMixin(this);
   }
 
