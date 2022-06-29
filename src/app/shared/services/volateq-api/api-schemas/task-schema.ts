@@ -1,12 +1,12 @@
 export interface TaskSchema {
   id: string;
   name: string;
-  // https://docs.celeryproject.org/en/latest/userguide/tasks.html?highlight=Pending#std-state-PENDING
-  state: "PENDING" | "STARTED" | "PROGRESS" | "SUCCESS" | "RETRY" | "REVOKED" | "FAILURE";
-  result: string;
-  info: {
-    current_step: number;
-    max_steps: number;
-    infos: string[];
+  state: "READY" | "RUNNING" | "FAILED" | "SUCCESSFUL";
+  output?: {
+    step?: number;
+    max_steps?: number;
+    infos?: string[];
+    error?: string;
   };
+  analysis_id?: string;
 }

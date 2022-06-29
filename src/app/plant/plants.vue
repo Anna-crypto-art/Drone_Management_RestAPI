@@ -279,7 +279,7 @@ export default class AppPlants extends BaseAuthComponent {
           this.plantModalLoading = false;
 
           if (failed) {
-            this.showError({ error: "SOMETHING_WENT_WRONG", message: task.result });
+            this.showError({ error: "SOMETHING_WENT_WRONG", message: task.output!.error });
           } else {
             this.managePlantModal.hide();
             this.showSuccess(this.$t("dt-imported-successfully").toString());
@@ -287,7 +287,7 @@ export default class AppPlants extends BaseAuthComponent {
           }
         },
         task => {
-          this.managePlantModal.alertInfo(volateqApi.getTaskInfoAsMessage(task));
+          this.managePlantModal.alertInfo(volateqApi.getTaskOutputAsMessage(task, this.$t("wait-for-start").toString()));
         }
       );
     } catch (e) {

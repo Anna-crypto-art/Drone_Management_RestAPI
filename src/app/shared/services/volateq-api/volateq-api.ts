@@ -5,7 +5,6 @@ import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/cu
 import { UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 import { HttpClientBase } from "@/app/shared/services/volateq-api/http-client-base";
 import { apiBaseUrl, baseUrl } from "@/environment/environment";
-import { ApiErrors, ApiException } from "./api-errors";
 import { NewAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
 import { CreatePlantRequest, UpdatePlantRequest } from "./api-requests/plant-requests";
 import { AnalysisSchema } from "./api-schemas/analysis-schema";
@@ -349,23 +348,34 @@ export class VolateqAPI extends HttpClientBase {
   ): void {
     const interval = setInterval(async () => {
       const task = await this.getTask(taskId);
-      if (task.state === "SUCCESS" || task.state === "FAILURE") {
+      if (task.state === "SUCCESSFUL" || task.state === "FAILED") {
         clearInterval(interval);
-        onFinished(task, task.state !== "SUCCESS");
+
+        const failed = task.state !== "SUCCESSFUL";
+        if (failed) {
+          if (!task.output) {
+            task.output = {};
+          }
+          if (!task.output.error) {
+            task.output.error = "No error message provided. Check server logs for details";
+          }
+        }
+
+        onFinished(task, failed);
       } else if (onProgress) {
         onProgress(task);
       }
     }, 3000);
   }
 
-  public getTaskInfoAsMessage(task: TaskSchema) {
-    if (task.info && task.info.infos && task.info.infos.length > 0) {
-      return ">" +
-        task.info.infos.join("<br>>") +
-        ((task.info.max_steps && `... (${task.info.current_step}/${task.info.max_steps})`) || "...");
-    } else {
-      return "Wait for start...";
+  public getTaskOutputAsMessage(task: TaskSchema, defaultMsg = "") {
+    if (task.output?.infos && task.output.infos.length > 0) {
+      return "> " +
+        task.output.infos.join("<br>> ") +
+        ((task.output.max_steps && `... (${task.output.step}/${task.output.max_steps})`) || "...");
     }
+
+    return defaultMsg;
   }
 
   public resendUserInvitation(userId: string): Promise<void> {

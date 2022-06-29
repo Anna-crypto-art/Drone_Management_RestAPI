@@ -85,7 +85,7 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
       if (task.name === ApiTasks.importAnalysisResult) {
         this.loading = false;
 
-        if (task.state === "SUCCESS") {
+        if (task.state === "SUCCESSFUL") {
           this.successfullyFinished();
         }
       }

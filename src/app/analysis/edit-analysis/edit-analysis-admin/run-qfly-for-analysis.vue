@@ -67,13 +67,13 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
       if (task.name === ApiTasks.validatePlantMetadata) {
         this.loadingValidateFiles = false;
 
-        if (task.state === "SUCCESS") {
+        if (task.state === "SUCCESSFUL") {
           this.showSuccess(this.$t("uploaded-data-complete-success").toString());
         }
       } else if (task.name === ApiTasks.runQFlyWizard) {
         this.loadingRunQFlyWizard = false;
 
-        if (task.state === "SUCCESS") {
+        if (task.state === "SUCCESSFUL") {
           this.showSuccess(this.$t("evaluation-finished-success").toString());
         }
       }

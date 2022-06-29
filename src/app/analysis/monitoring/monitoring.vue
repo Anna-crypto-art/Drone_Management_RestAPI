@@ -12,7 +12,7 @@
     </div>
 
     <div class="app-analysis-monitoring">
-      <div v-for="(states, analysisName) in monitoring_json" v-bind:key="analysisName">
+      <div v-for="(analysisState, analysisName) in monitoring_json" v-bind:key="analysisName">
         <b-card :class="{ 'app-analysis-monitoring-title': true, closed: !collapsed_states[analysisName] }">
           <span>{{ analysisName }}</span>
           <b-icon
@@ -24,28 +24,40 @@
           />
         </b-card>
         <b-collapse v-model="collapsed_states[analysisName]">
-          <div v-if="typeof states === 'object'">
-            <div v-for="(state, name) in states" v-bind:key="name" class="app-analysis-monitoring-states">
-              <b-card no-body>
-                <div
-                  :class="`app-analysis-monitoring-state app-analysis-monitoring-state-${state.state.toLowerCase()}`"
-                  :title="state.state"
-                >
-                  <span class="monitoring-project">{{ name }}</span>
-                  <span class="monitoring-state grayed">{{ state.state }}</span>
-                  <span class="monitoring-action grayed">{{ state.current_action }}</span>
-                </div>
-              </b-card>
-            </div>
-          </div>
-          <div v-if="typeof states === 'string'">
+          <div v-if="hasError(analysisState)">
             <div class="app-analysis-monitoring-states">
               <b-card no-body>
                 <div
                   :class="`app-analysis-monitoring-state app-analysis-monitoring-state-crashed`"
                   title="CRASHED"
                 >
-                  {{ states }}
+                  {{ analysisState.error }}
+                </div>
+              </b-card>
+            </div>
+          </div>          
+          <div v-if="!hasError(analysisState) && 'projects' in analysisState">
+            <div v-for="(projectState, projectName) in analysisState.projects" v-bind:key="projectName" class="app-analysis-monitoring-states">
+              <b-card no-body>
+                <div
+                  :class="`app-analysis-monitoring-state app-analysis-monitoring-state-${projectState.state.toLowerCase()}`"
+                  :title="projectState.state"
+                >
+                  <span class="monitoring-project">{{ projectName }}</span>
+                  <span class="monitoring-state grayed">{{ projectState.state }}</span>
+                  <span class="monitoring-action grayed">{{ projectState.current_action }}</span>
+                </div>
+              </b-card>
+            </div>
+          </div>          
+          <div v-if="!hasError(analysisState) && hasInfo(analysisState)">
+            <div class="app-analysis-monitoring-states">
+              <b-card no-body>
+                <div
+                  :class="`app-analysis-monitoring-state app-analysis-monitoring-state-running`"
+                  :title="analysisState.name"
+                >
+                  {{ getAnalysisStateInfos(analysisState) }}
                 </div>
               </b-card>
             </div>
@@ -62,6 +74,7 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { AnalysisMonitoring } from "@/app/shared/services/volateq-api/api-schemas/analysis-monitoring";
+import { TaskSchema } from "@/app/shared/services/volateq-api/api-schemas/task-schema";
 
 const AUTORELOAD_INTERVAL = 10e3;
 
@@ -111,6 +124,18 @@ export default class AppAnalysisMonitoring extends BaseAuthComponent {
 
   async created() {
     this.loadAnalysisStatus();
+  }
+
+  hasError(analysisState: TaskSchema): boolean {
+    return !!analysisState.output?.error;
+  }
+
+  hasInfo(analysisState: TaskSchema): boolean {
+    return !!(analysisState.output?.infos && analysisState.output.infos.length > 0);
+  }
+
+  getAnalysisStateInfos(analysisState: TaskSchema): string {
+    return volateqApi.getTaskOutputAsMessage(analysisState);
   }
 }
 </script>

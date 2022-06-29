@@ -326,6 +326,7 @@
   "setup-phase": "Setup phase",
   "upload-success-filename": "Successfully uploaded {filename}",
   "uploading": "Uploading...",
+  "wait-for-start": "Wait for start...",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",
