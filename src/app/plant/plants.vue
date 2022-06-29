@@ -85,7 +85,7 @@
       id="manage-plant-modal"
       ref="managePlantModal"
       :title="$t('upload-dt')"
-      :subtitle="$t('upload-dt_descr')"
+      :subtitle="managePlantModel.plant && managePlantModel.plant.name || ''"
       :ok-title="$t('apply')"
       :modalLoading="plantModalLoading"
       @submit="saveManagePlant"
@@ -138,6 +138,7 @@
       id="edit-plant-modal"
       ref="appEditPlantModal"
       :title="$t('edit-plant')"
+      :subtitle="managePlantModel.plant && managePlantModel.plant.name || ''"
       :okTitle="$t('apply')"
       :modalLoading="editPlantLoading"
       @submit="onSubmitEditPlant"
@@ -291,6 +292,7 @@ export default class AppPlants extends BaseAuthComponent {
         }
       );
     } catch (e) {
+      this.plantModalLoading = false;
       this.showError(e);
     }
   }

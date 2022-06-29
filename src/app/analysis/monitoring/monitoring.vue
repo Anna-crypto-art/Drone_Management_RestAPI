@@ -36,8 +36,8 @@
               </b-card>
             </div>
           </div>          
-          <div v-if="!hasError(analysisState) && 'projects' in analysisState">
-            <div v-for="(projectState, projectName) in analysisState.projects" v-bind:key="projectName" class="app-analysis-monitoring-states">
+          <div v-if="!hasError(analysisState) && hasProjects(analysisState)">
+            <div v-for="(projectState, projectName) in analysisState.output.projects" v-bind:key="projectName" class="app-analysis-monitoring-states">
               <b-card no-body>
                 <div
                   :class="`app-analysis-monitoring-state app-analysis-monitoring-state-${projectState.state.toLowerCase()}`"
@@ -57,7 +57,7 @@
                   :class="`app-analysis-monitoring-state app-analysis-monitoring-state-running`"
                   :title="analysisState.name"
                 >
-                  {{ getAnalysisStateInfos(analysisState) }}
+                  <span v-html="getAnalysisStateInfos(analysisState)"></span>
                 </div>
               </b-card>
             </div>
@@ -132,6 +132,10 @@ export default class AppAnalysisMonitoring extends BaseAuthComponent {
 
   hasInfo(analysisState: TaskSchema): boolean {
     return !!(analysisState.output?.infos && analysisState.output.infos.length > 0);
+  }
+
+  hasProjects(analysisState: TaskSchema): boolean {
+    return !!(analysisState.output?.projects)
   }
 
   getAnalysisStateInfos(analysisState: TaskSchema): string {
