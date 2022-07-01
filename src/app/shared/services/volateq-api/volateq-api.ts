@@ -22,6 +22,8 @@ import { ApiStates } from "./api-states";
 import { CustomerRequest } from "./api-requests/customer-requests";
 import { TechnologySchema } from "./api-schemas/technology-schema";
 import { AnalysisMonitoring } from "./api-schemas/analysis-monitoring";
+import { QFlyServerSchema } from "./api-schemas/server-schemas";
+import { QFlyServerActionRequest } from "./api-requests/server-requests";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -421,14 +423,6 @@ export class VolateqAPI extends HttpClientBase {
     return this.post(`/auth/plant/${plantId}`, updatePlantRequest);
   }
 
-  public validatePlantMetadata(analysisId: string, startServer = true): Promise<TaskSchema> {
-    return this.get(`/auth/analysis/${analysisId}/validate-plant-metadata`, { start_server: startServer ? 1 : 0 });
-  }
-
-  public runQFlyWizard(analysisId: string, startServer = true): Promise<TaskSchema> {
-    return this.get(`/auth/analysis/${analysisId}/run-qfly-wizard`, { start_server: startServer ? 1 : 0 });
-  }
-
   public getAnalysisMonitoring(): Promise<AnalysisMonitoring> {
     return this.get(`/auth/analysis-monitoring`).then(
       response =>
@@ -468,6 +462,14 @@ export class VolateqAPI extends HttpClientBase {
 
   public async deletePlant(plantId: string): Promise<void> {
     await this.delete(`/auth/plant/${plantId}`);
+  }
+
+  public async getQFlyServer(analysisId: string): Promise<QFlyServerSchema> {
+    return this.get(`/auth/analysis/${analysisId}/qfly-server`);
+  }
+
+  public async runQFlyServerAction(analysisId: string, qFlyServerAction: QFlyServerActionRequest): Promise<void> {
+    await this.post(`/auth/analysis/${analysisId}/qfly-server`, qFlyServerAction);
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {

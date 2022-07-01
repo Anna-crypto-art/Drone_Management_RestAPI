@@ -3,15 +3,11 @@
     <template #title>
       <h4 style="margin-bottom: 1em">
         {{ $t("update-analysis-state") }}
-        <br />
-        <small
-          v-if="!analysis.plant.in_setup_phase"
-          class="grayed"
-          v-html="$t('attention-state-update-starts-evaulation_expl')"
-        >
-        </small>
       </h4>
     </template>
+    <b-alert variant="warning" v-if="!analysis.plant.in_setup_phase" show>
+      <span v-html="$t('attention-state-update-starts-evaulation_expl')"></span>
+    </b-alert>
     <b-form @submit.prevent="onSubmitUpdateState">
       <b-form-group>
         <b-form-checkbox v-model="sendNotification">

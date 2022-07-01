@@ -1,5 +1,8 @@
 <template>
   <app-box :title="$t('manage-result-files')">
+    <b-alert v-model="showAlertInfo" variant="info">
+      {{ $t('import-task-running-on-qfly-server') }}
+    </b-alert>
     <b-form @submit.prevent="saveManageResultFiles">
       <b-form-group v-show="analysis.analysis_result" :label="$t('download-existing-result-files')">
         <a
@@ -54,6 +57,7 @@ import { TaskSchema } from "@/app/shared/services/volateq-api/api-schemas/task-s
 import { ApiTasks } from "@/app/shared/services/volateq-api/api-tasks";
 import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
+import { QFlyServerState } from "@/app/shared/services/volateq-api/api-schemas/server-schemas";
 
 @Component({
   name: "app-import-analysis-result",
@@ -73,6 +77,8 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
 
   uploadProgress: { total: number, loaded: number } | null = null;
 
+  showAlertInfo = false;
+
   async created() {
     await this.setManageImportFiles();
 
@@ -90,6 +96,9 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
         }
       }
     });
+    AnalysisEventService.on(this.analysis.id, AnalysisEvent.QFLY_SERVER_STATE_CHANGED, (state: QFlyServerState) => {
+      this.showAlertInfo = state === QFlyServerState.RUNNING;
+    })
   }
 
   @Watch("analysis") async onUpdateAnalysis() {

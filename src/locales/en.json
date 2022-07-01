@@ -327,6 +327,12 @@
   "upload-success-filename": "Successfully uploaded {filename}",
   "uploading": "Uploading...",
   "wait-for-start": "Wait for start...",
+  "server-tags": "Server tags",
+  "run-server-action": "Run server action",
+  "run-task": "Run task",
+  "servers-available": "<b>{count}</b> servers avaiable",
+  "validate-file-completenes": "Validate file completenes",
+  "import-task-running-on-qfly-server": "The import results task will run on the allocated QFly server",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",
@@ -341,6 +347,15 @@
   "CSP_PTC_Mirror": "Mirrors",
   "CSP_PTC_SCE": "SCE",
   "CSP_PTC_Loop": "Loop",
+
+  "SERVER_STATE_UNALLOCATED": "No server allocated",
+  "SERVER_STATE_STOPPED": "<b>{server}</b> is stopped",
+  "SERVER_STATE_RUNNING": "<b>{server}</b> is running",
+  "SERVER_ACTION_ALLOCATE_AND_START": "Allocate and start a server",
+  "SERVER_ACTION_START": "Start server",
+  "SERVER_ACTION_STOP": "Stop server",
+  "SERVER_ACTION_RELEASE": "Release server",
+  "SERVER_ACTION_STOP_AND_RELEASE": "Stop and release server",
 
   "Reload": "Reload",
   "Auto reload": "Auto reload"
