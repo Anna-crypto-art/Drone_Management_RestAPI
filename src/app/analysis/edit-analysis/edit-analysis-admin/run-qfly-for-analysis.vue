@@ -72,9 +72,9 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
       this.taskSelectionDisabled = false;
 
       if (task.state === "SUCCESSFUL") {
-        if (task.name === ApiTasks.validatePlantMetadata) {
+        if (task.name === ApiTasks.validate_plant_metadata) {
           this.showSuccess(this.$t("uploaded-data-complete-success").toString());
-        } else if (task.name === ApiTasks.runQFlyWizard) {
+        } else if (task.name === ApiTasks.run_qfly_wizard) {
           this.showSuccess(this.$t("evaluation-finished-success").toString());
         }
       }
@@ -120,13 +120,13 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
       if (this.analysis.current_state.state.id === ApiStates.DATA_COMPLETE) {
         this.runTaskSelection.push({
           text: this.$t('validate-file-completenes').toString(),
-          value: ApiTasks.validatePlantMetadata,
+          value: ApiTasks.validate_plant_metadata,
         });
       }
       if ([ApiStates.DATA_COMPLETE_VERIFIED, ApiStates.PROCESSING].includes(this.analysis.current_state.state.id)) {
         this.runTaskSelection.push({
           text: this.$t('run-qfly-wizard').toString(),
-          value: ApiTasks.runQFlyWizard,
+          value: ApiTasks.run_qfly_wizard,
         });
       }
     } catch (e) {
@@ -161,6 +161,10 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
   async runServerAction() {
     this.loading = true;
     try {
+      console.log("this.selectedTask");
+      console.log(this.selectedTask);
+      console.log(ApiTasks[this.selectedTask!]);
+
       if (confirm("Are you sure?")) {
         await volateqApi.runQFlyServerAction(this.analysis.id, {
           action: this.selectedServerAction && QFlyServerAction[this.selectedServerAction] || undefined,

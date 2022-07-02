@@ -472,6 +472,10 @@ export class VolateqAPI extends HttpClientBase {
     await this.post(`/auth/analysis/${analysisId}/qfly-server`, qFlyServerAction);
   }
 
+  public async finishRunningTask(analysisId: string): Promise<void> {
+    await this.post(`/auth/analysis/${analysisId}/finish-running-task`);
+  }
+
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {
     // Temporary special case for IR_INTENSITY: Replaced by GLASS_TUBE_TEMPERATURE
     for (const analysisResult of analysisResults) {

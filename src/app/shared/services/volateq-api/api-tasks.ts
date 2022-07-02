@@ -1,5 +1,5 @@
 export enum ApiTasks {
-  importAnalysisResult = "import_analysis_results",
-  validatePlantMetadata = "validate_plant_metadata",
-  runQFlyWizard = "run_qfly_wizard",
+  import_analysis_results = "import_analysis_results",
+  validate_plant_metadata = "validate_plant_metadata",
+  run_qfly_wizard = "run_qfly_wizard",
 }

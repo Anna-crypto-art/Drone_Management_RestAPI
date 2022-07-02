@@ -83,12 +83,12 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
     await this.setManageImportFiles();
 
     AnalysisEventService.on(this.analysis.id, AnalysisEvent.RUN_ANALYSIS_TASK, (task: TaskSchema) => {
-      if (task.name === ApiTasks.importAnalysisResult) {
+      if (task.name === ApiTasks.import_analysis_results) {
         this.loading = true;
       }
     });
     AnalysisEventService.on(this.analysis.id, AnalysisEvent.FINISHED_ANALYSIS_TASK, (task: TaskSchema) => {
-      if (task.name === ApiTasks.importAnalysisResult) {
+      if (task.name === ApiTasks.import_analysis_results) {
         this.loading = false;
 
         if (task.state === "SUCCESSFUL") {

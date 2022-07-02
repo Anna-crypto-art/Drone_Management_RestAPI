@@ -3,6 +3,6 @@ import { ApiTasks } from "../api-tasks";
 
 export interface QFlyServerActionRequest {
   action?: QFlyServerAction;
-  start_task?: ApiTasks.runQFlyWizard | ApiTasks.validatePlantMetadata;
+  start_task?: ApiTasks.run_qfly_wizard | ApiTasks.validate_plant_metadata;
   tags?: ServerTag[];
 }
