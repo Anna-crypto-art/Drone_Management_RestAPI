@@ -336,6 +336,10 @@
   "danger-zone": "Danger zone",
   "finish-running-task": "Finish running task",
   "successfully-finished-running-task": "Successfully finished running task",
+  "uploaded-at": "Uploaded at",
+  "state-uploading-without-uploading-user": "Analysis has state UPLOADING, but no user is uploading any data to this analysis, currently",
+  "user-is-uploading": "<b>{user}</b> is uploading data to this analysis. <b>{current_files}</b> of <b>{max_files}</b> files uploaded...",
+  "upload-data-for-analysis": "Upload data for {analysis}",
 
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",

@@ -29,3 +29,7 @@ export interface AnalysisSchema extends SimpleAnalysisSchema {
   has_plant_metadata: boolean;
   task_id: string;
 }
+
+export interface AnalysisFileInfoSchema {
+  [filename: string]: { size: number, uploaded_at: string } | undefined;
+}

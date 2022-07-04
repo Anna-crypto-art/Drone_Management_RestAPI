@@ -40,7 +40,6 @@ export interface UserSchema {
 }
 
 export interface UserInfoSchema {
-  id: string;
   email: string;
   first_name: string;
   last_name: string;

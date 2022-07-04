@@ -2,12 +2,12 @@ import store from "@/app/app-state";
 import { InviteUser, RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { ConfirmLoginResult, TokenResult } from "@/app/shared/services/volateq-api/api-schemas/auth-schema";
 import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
-import { UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
+import { UserInfoSchema, UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 import { HttpClientBase } from "@/app/shared/services/volateq-api/http-client-base";
 import { apiBaseUrl, baseUrl } from "@/environment/environment";
 import { NewAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
 import { CreatePlantRequest, UpdatePlantRequest } from "./api-requests/plant-requests";
-import { AnalysisSchema } from "./api-schemas/analysis-schema";
+import { AnalysisFileInfoSchema, AnalysisSchema } from "./api-schemas/analysis-schema";
 import { PlantSchema } from "./api-schemas/plant-schema";
 import { AnalysisResultDetailedSchema } from "./api-schemas/analysis-result-schema";
 import { TableFilterRequest, TableRequest } from "./api-requests/common/table-requests";
@@ -76,6 +76,10 @@ export class VolateqAPI extends HttpClientBase {
     await this.post("/auth/logout");
 
     await store.dispatch.auth.updateToken({ token: "", role: undefined, customer_id: undefined });
+  }
+
+  public async getMe(): Promise<UserSchema> {
+    return await this.get("/auth/user/me");
   }
 
   public async getUsers(customerId?: string): Promise<UserSchema[]> {
@@ -411,7 +415,7 @@ export class VolateqAPI extends HttpClientBase {
     return this.getUrl(`${apiBaseUrl}/auth/analysis/${analysisId}/files-download`, { filenames: filenames });
   }
 
-  public getAnalysisFilesInfo(analysisId: string, filenames: string[]): Promise<Record<string, number | null>> {
+  public getAnalysisFilesInfo(analysisId: string, filenames: string[]): Promise<AnalysisFileInfoSchema> {
     return this.get(`/auth/analysis/${analysisId}/files-info`, { filenames });
   }
 
@@ -474,6 +478,10 @@ export class VolateqAPI extends HttpClientBase {
 
   public async finishRunningTask(analysisId: string): Promise<void> {
     await this.post(`/auth/analysis/${analysisId}/finish-running-task`);
+  }
+
+  public async getUploadingUsers(analysisId: string): Promise<UserInfoSchema[]> {
+    return this.get(`/auth/analysis/${analysisId}/uploading-users`);
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {

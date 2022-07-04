@@ -30,19 +30,8 @@
         <template #cell(selected)="{ rowSelected }">
           <b-checkbox :checked="rowSelected" disabled class="b-table-selectable-checkbox"> </b-checkbox>
         </template>
-        <template #cell(size)="row">
-          <div v-if="row.item.size === null" class="hover-cell pull-right">
-            <b-button
-              @click="onLoadFileSizeClick(row.item.name)"
-              variant="secondary"
-              size="sm"
-              :title="$t('load-file-size')"
-            >
-              {{ $t("load-file-size") }}
-            </b-button>
-          </div>
-          <span v-if="row.item.size">{{ row.item.size }}</span>
-          <span v-if="row.item.size === false">{{ $t("not-found") }}</span>
+        <template #cell(uploadedAt)="row">
+          {{ (new Date(row.item.uploadedAt)).toLocalString() }}
         </template>
       </b-table>
     </app-table-container>
@@ -59,6 +48,8 @@ import { BvTableFieldArray } from "bootstrap-vue";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { getReadableFileSize } from "@/app/shared/services/helper/file-helper";
+import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
+import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
 
 @Component({
   name: "app-download-analysis-files",
@@ -78,8 +69,9 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
     { key: "selected", label: "" },
     { key: "name", label: this.$t("name").toString() },
     { key: "size", label: this.$t("size").toString() },
+    { key: "uploadedAt", label: this.$t("uploaded-at").toString() },
   ];
-  downloadFilesTableItems: { name: string, size: null | false | string }[] = [];
+  downloadFilesTableItems: { name: string, size: string | null, uploadedAt: number | null }[] = [];
 
   allDownloadFilesSelected = false;
   private selectedDonwloadFiles: { name: string }[] = [];
@@ -87,11 +79,11 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
   isFilesLoading = false;
 
   async created() {
-    this.setDownloadFilesTableItems();
+    this.loadFiles();
   }
 
   @Watch('analysis') onAnalysisChanged() {
-    this.setDownloadFilesTableItems();
+    this.loadFiles();
   }
 
   onDownloadFilesSelected(selectedDownloadFiles: { name: string }[]) {
@@ -141,28 +133,68 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
     }
   }
 
-  async onLoadFileSizeClick(filename: string) {
+  private async loadFiles() {
     this.isFilesLoading = true;
     try {
-      const fileInfos = await volateqApi.getAnalysisFilesInfo(this.analysis.id, [filename]);
-      const fileItem = this.downloadFilesTableItems.find(item => item.name === filename);
-      
-      fileItem!.size = fileInfos[filename] !== null ? getReadableFileSize(fileInfos[filename]!) : false;
+      let files: string[] = [];
+      for (const key of Object.keys(this.analysis.files)) {
+        files = files.concat(this.analysis!.files[key]);
+      }
+
+      this.downloadFilesTableItems = [];
+
+      const fileInfos = await volateqApi.getAnalysisFilesInfo(this.analysis.id, files);
+      for (const fileName of Object.keys(fileInfos)) {
+        const fileInfo = fileInfos[fileName];
+        
+        if (!fileInfo) {
+          this.downloadFilesTableItems.push({ name: fileName, size: null, uploadedAt: null });
+        } else {
+          this.downloadFilesTableItems.push({ 
+            name: fileName, 
+            size: getReadableFileSize(fileInfo.size),
+            uploadedAt: Date.parse(fileInfo.uploaded_at),
+          });
+        }
+      }
+
+      this.downloadFilesTableItems.sort((a, b) => {
+        const uploadedAtA = a.uploadedAt || 1;
+        const uploadedAtB = b.uploadedAt || 1;
+
+        if (uploadedAtA < uploadedAtB) {
+          return 1;
+        } else if (uploadedAtA > uploadedAtB) {
+          return -1;
+        }
+        return 0;
+      });
+
+      if (this.analysis.current_state.state.id === ApiStates.UPLOADING) {
+        let uploadingUsers = await volateqApi.getUploadingUsers(this.analysis.id);
+        if (uploadingUsers.length === 0) {
+          AppContentEventService.showWarning(this.analysis.id, this.$t("state-uploading-without-uploading-user").toString())
+        } else {
+          const me = await volateqApi.getMe();
+
+          uploadingUsers = uploadingUsers.filter(userInfo => userInfo.email != me.email);
+          const uploadingUsersMessages: string[] = [];
+          for (const userInfo of uploadingUsers) {
+            uploadingUsersMessages.push(this.$t("user-is-uploading", {
+              user: ((userInfo.first_name || "") + " " + (userInfo.last_name || "")).trim() || userInfo.email,
+              current_files: Object.keys(fileInfos).filter(fileName => !!fileInfos[fileName]).length,
+              max_files: Object.keys(fileInfos).length,
+            }).toString());
+          }
+
+          AppContentEventService.showInfo(this.analysis.id, uploadingUsersMessages.join('<br>'));
+        }
+      }
     } catch (e) {
       this.showError(e);
     } finally {
       this.isFilesLoading = false;
     }
-  }
-
-  private async setDownloadFilesTableItems() {
-    let files: string[] = [];
-    for (const key of Object.keys(this.analysis.files)) {
-      files = files.concat(this.analysis!.files[key]);
-    }
-    files.sort();
-
-    this.downloadFilesTableItems = files.map(file => ({ name: file, size: null }));
   }
 }
 </script>

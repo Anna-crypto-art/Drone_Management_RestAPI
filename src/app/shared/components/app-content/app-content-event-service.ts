@@ -31,4 +31,8 @@ export class AppContentEventService {
   public static showSuccess(id: string, msg: string) {
     AppContentEventService.getAppContentEventBus(id).showSuccessAlert(msg);
   }
+
+  public static showWarning(id: string, msg: string) {
+    AppContentEventService.getAppContentEventBus(id).showWarningAlert(msg);
+  }
 }

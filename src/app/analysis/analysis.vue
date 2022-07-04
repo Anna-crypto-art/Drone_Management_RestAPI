@@ -1,13 +1,14 @@
 <template>
   <app-content :title="$t('analysis-overview')" :subtitle="$t('analysis-overview_descr')">
     <div class="app-analysis">
-      <router-link :to="{ name: 'AnalysisNew' }">
-        <b-button
-          variant="primary"
-          :disabled="!!incompleteAnalysisName"
-          :title="(incompleteAnalysisName && $t('no-new-upload-allowed', { name: incompleteAnalysisName })) || ''"
-        >
-          {{ createNewAnalysisBtnText }}
+      <router-link :to="{ name: 'AnalysisNew' }" v-if="!hasIncompleteAnalysis">
+        <b-button variant="primary">
+          {{ $t("new-data-upload") }}
+        </b-button>
+      </router-link>
+      <router-link v-if="incompleteAnalysis" :to="{ name: 'EditAnalysis', params: { id: incompleteAnalysis.id } }"> 
+        <b-button variant="primary">
+          {{ $t("upload-data-for-analysis", { analysis: incompleteAnalysis.name }) }}
         </b-button>
       </router-link>
       <div class="app-analysis-plants-filter pull-right" v-show="plantSelection">
@@ -194,12 +195,22 @@ export default class AppAnalysis extends BaseAuthComponent {
     await this.updateAnalysisRows();
   }
 
-  get incompleteAnalysisName(): string | null {
-    const analysisName = this.analysisRows?.find(
+  get hasIncompleteAnalysis(): boolean {
+    return !!this.analysisRows?.find(
       analysis => analysis.state && analysis.state.state.id <= ApiStates.DATA_INCOMPLETE
-    )?.name;
+    );
+  }
 
-    return analysisName || null;
+  get incompleteAnalysis(): any | null {
+    const incompleteAnalyses = this.analysisRows?.filter(
+      analysis => analysis.state && analysis.state.state.id <= ApiStates.DATA_INCOMPLETE
+    );
+
+    if (!incompleteAnalyses || incompleteAnalyses.length > 1) {
+      return null;
+    }
+
+    return incompleteAnalyses[0];
   }
 
   private async updateAnalysisRows() {
