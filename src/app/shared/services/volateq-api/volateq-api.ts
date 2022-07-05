@@ -416,7 +416,7 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public getAnalysisFilesInfo(analysisId: string, filenames: string[]): Promise<AnalysisFileInfoSchema> {
-    return this.get(`/auth/analysis/${analysisId}/files-info`, { filenames });
+    return this.post(`/auth/analysis/${analysisId}/files-info`, { file_names: filenames });
   }
 
   public getStates(): Promise<Record<ApiStates, ApiStates[]>> {
