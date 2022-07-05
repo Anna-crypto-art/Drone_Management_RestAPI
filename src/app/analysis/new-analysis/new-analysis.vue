@@ -92,6 +92,20 @@ export default class AppNewAnalysis extends BaseAuthComponent {
         return;
       }
 
+      if (!this.flownAt) {
+        throw { 
+          error: 'INVALID_OR_MISSING_PARAMS', 
+          message: this.$t('missing').toString() + " " + this.$t('acquisition-date').toString() 
+        };
+      }
+
+      if (!files || files.length === 0) {
+        throw { 
+          error: 'INVALID_OR_MISSING_PARAMS',
+          message: this.$t("no-files-for-uploaded-selected").toString(),
+        };
+      }
+
       const analysisIdObj = await volateqApi.createAnalysis({
         plant_id: this.selectedPlantId!,
         files: files,

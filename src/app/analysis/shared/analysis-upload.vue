@@ -113,6 +113,12 @@ export default class AppAnalysisUpload
 
   registerUploadEvents() {
     this.uploadService!.on(UploadEvent.COMPLETED, async (metadata: IAnalysisId) => {
+      // sometimes old registered events are ghosting around without any DOM
+      if (!metadata || !this.analysis) {
+        // ignore them. So they cannot throw confusing error messages
+        return;
+      }
+      
       try {
         const analysis = await volateqApi.getAnalysis(this.analysis!.id);
         const dataComplete = analysis.data_complete;

@@ -31,7 +31,7 @@
           <b-checkbox :checked="rowSelected" disabled class="b-table-selectable-checkbox"> </b-checkbox>
         </template>
         <template #cell(uploadedAt)="row">
-          {{ (new Date(row.item.uploadedAt)).toLocalString() }}
+          {{ getReadableDate(row.item.uploadedAt) }}
         </template>
       </b-table>
     </app-table-container>
@@ -133,6 +133,10 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
     }
   }
 
+  getReadableDate(date: number | null): string {
+    return date && (new Date(date)).toLocaleString() || "";
+  }
+
   private async loadFiles() {
     this.isFilesLoading = true;
     try {
@@ -178,16 +182,21 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
           const me = await volateqApi.getMe();
 
           uploadingUsers = uploadingUsers.filter(userInfo => userInfo.email != me.email);
-          const uploadingUsersMessages: string[] = [];
-          for (const userInfo of uploadingUsers) {
-            uploadingUsersMessages.push(this.$t("user-is-uploading", {
-              user: ((userInfo.first_name || "") + " " + (userInfo.last_name || "")).trim() || userInfo.email,
+
+          if (uploadingUsers.length > 0) {
+            const uploadingUsersMessages: string[] = [];
+            for (const userInfo of uploadingUsers) {
+              uploadingUsersMessages.push(this.$t("user-is-uploading", {
+                user: ((userInfo.first_name || "") + " " + (userInfo.last_name || "")).trim() || userInfo.email,
+              }).toString());
+            }
+            uploadingUsersMessages.push(this.$t("files-of-files-uploaded", {
               current_files: Object.keys(fileInfos).filter(fileName => !!fileInfos[fileName]).length,
               max_files: Object.keys(fileInfos).length,
             }).toString());
-          }
 
-          AppContentEventService.showInfo(this.analysis.id, uploadingUsersMessages.join('<br>'));
+            AppContentEventService.showInfo(this.analysis.id, uploadingUsersMessages.join('<br>'));
+          }
         }
       }
     } catch (e) {

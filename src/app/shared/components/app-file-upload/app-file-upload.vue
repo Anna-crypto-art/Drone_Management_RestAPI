@@ -116,8 +116,8 @@ export default class AppFileUpload extends Vue implements IAppFileUpload, IUploa
     this.keyResumFiles -= 100;
   }
 
-  getFileUploadFile(file: IResumableFile): IAppFileUploadFile {
-    return this.uploadFiles.find(uploadFile => uploadFile.uniqueIdentifier === file.uniqueIdentifier)!;
+  getFileUploadFile(file: IResumableFile): IAppFileUploadFile | undefined {
+    return this.uploadFiles?.find(uploadFile => uploadFile.uniqueIdentifier === file.uniqueIdentifier);
   }
 }
 </script>
