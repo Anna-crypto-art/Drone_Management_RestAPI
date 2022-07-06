@@ -132,7 +132,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
       },
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
-        query: { undefined: 1 },
+        query: { key_figure_class_name: "HcePositionSupportKeyFigure", undefined: 1 },
         color: KeyFigureColors.grey,
       },
     ]
@@ -156,7 +156,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
       },
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
-        query: { undefined: 1 },
+        query: { key_figure_class_name: "HcePositionCenterKeyFigure", undefined: 1 },
         color: KeyFigureColors.grey,
       },
     ]
@@ -204,7 +204,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
       },
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
-        query: { undefined: 1 },
+        query: { key_figure_class_name: "ScaTrackingKeyFigure", undefined: 1 },
         color: KeyFigureColors.grey,
       },
     ],
@@ -228,7 +228,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
       },
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
-        query: { undefined: 1 },
+        query: { key_figure_class_name: "ScaAverageTrackingKeyFigure", undefined: 1 },
         color: KeyFigureColors.grey,
       },
     ],
