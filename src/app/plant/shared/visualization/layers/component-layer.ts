@@ -15,11 +15,11 @@ export abstract class ComponentLayer extends LayerBase {
   }
 
   protected created(): void {/* override me */}
-  protected get id(): string | undefined {
+  public get id(): string | undefined {
     return this.name;
   }
 
-  protected getPcs(feature: FeatureLike): string {
+  protected getPcs(feature: FeatureLike): string | undefined {
     return feature.get("name");
   }
 
@@ -36,4 +36,6 @@ export abstract class ComponentLayer extends LayerBase {
 
     return {};
   }
+
+  public async onClick(features: FeatureLike[]): Promise<void> { /* override me */ }
 }

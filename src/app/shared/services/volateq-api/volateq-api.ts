@@ -5,7 +5,7 @@ import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/cu
 import { UserInfoSchema, UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 import { HttpClientBase } from "@/app/shared/services/volateq-api/http-client-base";
 import { apiBaseUrl, baseUrl } from "@/environment/environment";
-import { NewAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
+import { AddReferenceMeasurmentValue, CreateReferenceMeasurement, NewAnalysis, NewEmptyAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
 import { CreatePlantRequest, UpdatePlantRequest } from "./api-requests/plant-requests";
 import { AnalysisFileInfoSchema, AnalysisSchema } from "./api-schemas/analysis-schema";
 import { PlantSchema } from "./api-schemas/plant-schema";
@@ -24,6 +24,7 @@ import { TechnologySchema } from "./api-schemas/technology-schema";
 import { AnalysisMonitoring } from "./api-schemas/analysis-monitoring";
 import { QFlyServerSchema } from "./api-schemas/server-schemas";
 import { QFlyServerActionRequest } from "./api-requests/server-requests";
+import { ReferenceMeasurementValueSchema } from "./api-schemas/reference-measurement-schema";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -120,6 +121,10 @@ export class VolateqAPI extends HttpClientBase {
 
   public async createAnalysis(newAnalyis: NewAnalysis): Promise<{ id: string }> {
     return this.post(`/auth/analysis`, newAnalyis);
+  }
+
+  public async createEmptyAnalysis(newEmptyAnalyis: NewEmptyAnalysis): Promise<{ id: string }> {
+    return this.post(`/auth/analysis/create-empty`, newEmptyAnalyis);
   }
 
   public async getAllAnalysis(queryParams?: { plant_id?: string; customer_id?: string }): Promise<AnalysisSchema[]> {
@@ -482,6 +487,22 @@ export class VolateqAPI extends HttpClientBase {
 
   public async getUploadingUsers(analysisId: string): Promise<UserInfoSchema[]> {
     return this.get(`/auth/analysis/${analysisId}/uploading-users`);
+  }
+
+  public async createReferenceMeasurement(analysisId: string, createReferenceMeasurement: CreateReferenceMeasurement): Promise<{ id: string }> {
+    return this.post(`/auth/analysis/${analysisId}/reference-measurement`, createReferenceMeasurement);
+  }
+
+  public async addReferencMeasurementValue(analysisId: string, addReferenceMeasurmentValue: AddReferenceMeasurmentValue): Promise<void> {
+    await this.post(`/auth/analysis/${analysisId}/reference-measurement-value`, addReferenceMeasurmentValue);
+  }
+
+  public async getReferencMeasurementValue(
+    analysisId: string,
+    referenceMeasurementId: string,
+    pcs: string
+  ): Promise<ReferenceMeasurementValueSchema | undefined> {
+    return await this.get(`/auth/analysis/${analysisId}/reference-measurement-value/${referenceMeasurementId}`, { pcs });
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {

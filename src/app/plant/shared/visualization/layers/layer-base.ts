@@ -1,10 +1,13 @@
 import { FeatureLike } from "ol/Feature";
-import { Style, Stroke, Text } from "ol/style";
+import { Style, Stroke, Text, Fill } from "ol/style";
 import { asArray, asString } from "ol/color";
-import { IPlantVisualization } from "../types";
+import { FeatureProperties, IPlantVisualization } from "../types";
 import { GeoJSONLayer, VectorGeoLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { EventEmitter } from "events";
+import { Geolocation, Feature } from "ol";
+import CircleStyle from "ol/style/Circle";
+import { Point } from "ol/geom";
 
 export const GEO_JSON_OPTIONS = { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" };
 
@@ -13,6 +16,10 @@ export const GEO_JSON_OPTIONS = { dataProjection: "EPSG:4326", featureProjection
  */
 export abstract class LayerBase {
   private _showPCS = false;
+
+  private accuracyFeature?: Feature;
+  private positionFeature?: Feature;
+  private geolocation?: Geolocation;
 
   protected geoLayerObject?: GeoJSONLayer;
 
@@ -29,7 +36,7 @@ export abstract class LayerBase {
 
   protected abstract getPcs(feature: FeatureLike): string | undefined;
   protected abstract load(): Promise<Record<string, unknown>>;
-  protected abstract get id(): string | undefined;
+  public abstract get id(): string | undefined;
 
   protected getStyle(feature: FeatureLike): Style {
     return new Style({
@@ -45,6 +52,10 @@ export abstract class LayerBase {
 
   public showPCS(show: boolean): void {
     this._showPCS = show;
+  }
+
+  public get isVisible(): boolean {
+    return this.visible;
   }
 
   public reloadLayer(): void {
@@ -81,6 +92,10 @@ export abstract class LayerBase {
     this.events.emit("setSelected", selected);
   }
 
+  public getSelected(): boolean {
+    return this.selected;
+  }
+
   protected showText(feature: FeatureLike, props: Record<string, unknown> = {}): Text | undefined {
     return new Text({
       text: (this._showPCS && this.hasZoomLevelForPcs() && this.getPcs(feature)) || "",
@@ -111,5 +126,69 @@ export abstract class LayerBase {
 
   protected getVectorGeoLayer(): VectorGeoLayer {
     return this.vueComponent.openLayers!.getMap().getAllLayers().find(layer => layer.getProperties()['id'] === this.id) as VectorGeoLayer;
+  }
+
+  public addGeolocationFeature(): void {
+    // Code stolen and adapted from https://openlayers.org/en/latest/examples/geolocation.html
+
+    this.geolocation = new Geolocation({
+      // enableHighAccuracy must be set to true to have the heading value.
+      trackingOptions: {
+        enableHighAccuracy: true,
+      },
+      projection: this.vueComponent.openLayers!.getMap().getView().getProjection(),
+    });
+    
+    this.geolocation.on('error', function (error) {
+      console.error("Geolocation error...");
+      console.error(error);
+    });
+    
+    this.accuracyFeature = new Feature();
+    this.geolocation.on('change:accuracyGeometry', () => {
+      this.accuracyFeature!.setGeometry(this.geolocation!.getAccuracyGeometry() || undefined);
+    });
+    
+    this.positionFeature = new Feature();
+    this.positionFeature.setStyle(
+      new Style({
+        image: new CircleStyle({
+          radius: 6,
+          fill: new Fill({
+            color: '#3399CC',
+          }),
+          stroke: new Stroke({
+            color: '#fff',
+            width: 2,
+          }),
+        }),
+      })
+    );
+    
+    this.geolocation.on('change:position', () => {
+      const coordinates = this.geolocation!.getPosition();
+      this.positionFeature!.setGeometry(coordinates ? new Point(coordinates) : undefined);
+    });
+    
+    this.getVectorGeoLayer().getSource()?.addFeatures([this.accuracyFeature, this.positionFeature]);
+
+    this.geolocation.setTracking(true);
+  }
+
+  public removeGeolocationFeature(): void {
+    if (this.geolocation) {
+      this.geolocation!.setTracking(false);
+      this.geolocation = undefined;
+    }
+
+    if (this.positionFeature) {
+      this.getVectorGeoLayer().getSource()?.removeFeature(this.positionFeature);
+      this.positionFeature = undefined;
+    }
+
+    if (this.accuracyFeature) {
+      this.getVectorGeoLayer().getSource()?.removeFeature(this.accuracyFeature);
+      this.accuracyFeature = undefined;
+    }
   }
 }

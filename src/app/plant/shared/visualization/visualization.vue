@@ -34,6 +34,26 @@
         <div class="visualization-legend-entry-name" v-html="entry.name"></div>
       </div>
     </div>
+    <div v-if="!hasLegend" :class="'visualization-actions' + (sidebarOpen ? ' sidebar-open' : '')">
+      <app-button 
+        v-show="!refMeasureId"
+        variant="secondary"
+        icon="clipboard-check"
+        :hideText="true"
+        @click="onRefMeasureClick"
+        :loading="refMeasureButtonLoading"
+      >
+        {{ $t("acquire-reference-measurement") }}
+      </app-button>
+      <app-button 
+        v-show="refMeasureId"
+        variant="primary"
+        icon="clipboard-check"
+        @click="onRefMeasureFinishClick"
+      >
+        {{ $t("finish-reference-measurement") }}
+      </app-button>
+    </div>
     <b-toast id="piInfoToast" no-auto-hide solid toaster="b-toaster-bottom-center">
       <template #toast-title>
         <h5>{{ piToastInfo.title }}</h5>
@@ -76,12 +96,39 @@
         </app-dropdown-button>
       </div>
     </b-toast>
+
+    <app-modal-form
+      id="reference-measurement-modal"
+      ref="refMeasureModal"
+      :title="$t('acquire-reference-measurement')"
+      :ok-title="$t('start')"
+      :modalLoading="refMeasureModalLoading"
+      @submit="onStartRefMeasure"
+    >
+      <div v-if="refMeasure">
+        <b-form-group :label="$t('select-analysis')">
+          <b-form-select v-model="refMeasure.analysisId" :options="refMeasurueAnalysesSelection" required />
+        </b-form-group>
+        <b-form-group v-if="refMeasureCusomterSelection">
+          <b-form-select v-model="refMeasure.customerId" :options="refMeasureCusomterSelection" required />
+        </b-form-group>
+        <b-form-group :label="$t('measure-date')">
+          <b-datepicker v-model="refMeasure.measureDate" required />
+        </b-form-group>
+        <b-form-group :label="$t('notes')">
+          <b-textarea v-model="refMeasure.notes" />
+        </b-form-group>
+        <b-form-group>
+          <b-form-checkbox v-model="refMeasure.gps" switch>{{ $t("use-gps") }}</b-form-checkbox>
+        </b-form-group>
+      </div>
+    </app-modal-form>
   </div>
 </template>
 
 <script lang="ts">
 import { PILayersHierarchy } from "@/app/plant/shared/visualization/pi-layers-hierarchy";
-import { FeatureInfos, IPlantVisualization, KeyFigureTypeMap, Legend } from "@/app/plant/shared/visualization/types";
+import { FeatureInfos, IPlantVisualization, KeyFigureTypeMap, Legend, ReferenceMeasurementEventObject, ReferenceMeasurementOptions } from "@/app/plant/shared/visualization/types";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppGeovisualization from "@/app/shared/components/app-geovisualization/app-geovisualization.vue";
 import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualization/types/components";
@@ -99,6 +146,11 @@ import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-d
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { EventEmitter } from "events";
+import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
+import { IAppModalForm } from "@/app/shared/components/app-modal/types";
+import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import { AnalysisSelectionService } from "../analysis-selection-sidebar/analysis-selection-service";
+import { AnalysisSelectionEvent } from "../analysis-selection-sidebar/types";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -112,6 +164,7 @@ const STORAGE_KEY_SATELLITEVIEW = "storage-key-satelliteview";
     AppCollapse,
     AppDropdownButton,
     AppButton,
+    AppModalForm,
   },
 })
 export default class AppVisualization
@@ -123,8 +176,10 @@ export default class AppVisualization
   @Prop() componentLayerTypes!: typeof ComponentLayer[];
   @Prop() keyFigureLayers!: KeyFigureTypeMap[];
   @State(state => state.sidebar["analysis"]) sidebarOpen!: boolean;
+  @State(state => state.sidebar["layer-switcher"]) layersSidebarOpen!: boolean;
 
   @Ref() openLayers!: IOpenLayersComponent;
+  @Ref() refMeasureModal!: IAppModalForm;
 
   piLayersHierarchy!: PILayersHierarchy;
   componentLayers: ComponentLayer[] = [];
@@ -138,6 +193,12 @@ export default class AppVisualization
   enableMultiSelection = false;
   showCouldNotBeMeasured = true;
   satelliteView = false;
+
+  refMeasureId: string | null = null;
+  refMeasureButtonLoading = false;
+  refMeasureModalLoading = false;
+  refMeasurueAnalysesSelection: { html?: string, disabled?: boolean, text?: string, value: string }[] = [];
+  refMeasure: ReferenceMeasurementOptions | null = null;
 
   private worldMapLayer!: OSMLayer;
 
@@ -244,12 +305,15 @@ export default class AppVisualization
   
       if (mergedFeatureInfos) {
         this.piToastInfo = mergedFeatureInfos;
-      }
-  
-      if (mergedFeatureInfos) {
         this.$bvToast.show("piInfoToast");
       } else {
         this.hideToast();
+
+        for (const componentLayer of this.componentLayers) {
+          if (componentLayer.isVisible) {
+            await componentLayer.onClick(features);
+          }
+        }
       }
     } finally {
       this.loading = false;
@@ -363,6 +427,112 @@ export default class AppVisualization
   public hideToast() {
     this.$bvToast.hide("piInfoToast");
   }
+
+  async onRefMeasureClick() {
+    this.refMeasureButtonLoading = true;
+    try {
+      this.refMeasure = {
+        analysisId: null,
+        customerId: null,
+        measureDate: null,
+        notes: null,
+        gps: true,
+      }
+
+      this.refMeasurueAnalysesSelection = [
+        ...(await volateqApi.getAllAnalysis({ plant_id: this.plant.id })).map(analysis => ({
+          value: analysis.id,
+          text: analysis.name,
+        })),
+        { text: "-----------------", value: "", disabled: true },
+        { text: this.$t('create-empty-analysis').toString(), value: "--" },
+      ]
+
+      this.refMeasureModal.show();
+      
+    } catch (e) {
+      this.showError(e)
+    } finally {
+      this.refMeasureButtonLoading = false;
+    }
+  }
+
+  async onStartRefMeasure() {
+    this.refMeasureModalLoading = true;
+    try {
+      if (this.refMeasure!.analysisId === null) {
+        throw { error: "MISSING_ANALYSIS", message: "Please select an analysis" }
+      }
+
+      if (this.refMeasure!.measureDate === null) {
+        throw { error: "MISSING_MEASURE_DATE", message: "Please select a measurement date" }
+      }
+      
+      let analysisId = this.refMeasure!.analysisId
+      if (analysisId === "--") {
+        analysisId = (await volateqApi.createEmptyAnalysis({
+          plant_id: this.plant.id,
+          flown_at: this.refMeasure!.measureDate.toISOString(),
+          customer_id: this.refMeasure!.customerId || undefined
+        })).id;
+      }
+
+      this.refMeasureId = (await volateqApi.createReferenceMeasurement(analysisId, { 
+        measure_date: this.refMeasure!.measureDate.toISOString(),
+        notes: this.refMeasure!.notes || undefined,
+      })).id;
+
+      AnalysisSelectionService.emit(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL);
+      if (this.sidebarOpen) {
+        this.$store.direct.commit.sidebar.toggle({ name: "analysis" });
+      }
+      if (this.layersSidebarOpen) {
+        this.$store.direct.commit.sidebar.toggle({ name: "layer-switcher" });
+      }
+
+      this.$emit("startReferenceMeasurement", {
+          options: this.refMeasure,
+          componentLayers: this.componentLayers,
+          piLayersHierarchy: this.piLayersHierarchy,
+          refMeasureId: this.refMeasureId,
+        } as ReferenceMeasurementEventObject);
+
+    } catch (e) {
+      this.showError(e);
+    } finally {
+      this.refMeasureModalLoading = false;
+    }
+  }
+
+  get refMeasureCusomterSelection(): { value: string, text: string }[] | null {
+    if (this.refMeasure?.analysisId === "--" && this.plant.customers && this.plant.customers.length > 0) {
+      return this.plant.customers.map(customer => ({ value: customer.id, text: customer.name }));
+    }
+
+    return null;
+  }
+
+  onRefMeasureFinishClick() {
+    if (confirm(this.$t('finish-reference-measurement-are-you-sure').toString())) {
+      this.$emit("finishReferenceMeasurement", {
+          options: this.refMeasure,
+          componentLayers: this.componentLayers,
+          piLayersHierarchy: this.piLayersHierarchy,
+          refMeasureId: this.refMeasureId,
+        } as ReferenceMeasurementEventObject);
+
+      this.refMeasureId = null;
+      this.refMeasure = null;
+
+      AnalysisSelectionService.emit(this.plant.id, AnalysisSelectionEvent.SELECT_FIRST);
+      if (!this.sidebarOpen) {
+        this.$store.direct.commit.sidebar.toggle({ name: "analysis" });
+      }
+      if (!this.layersSidebarOpen) {
+        this.$store.direct.commit.sidebar.toggle({ name: "layer-switcher" });
+      }
+    }
+  }
 }
 </script>
 
@@ -382,6 +552,17 @@ export default class AppVisualization
   position: relative;
   height: calc(100vh - $header-height - $tab-height);
   width: 100%;
+
+  &-actions {
+    transition: left 0.3s ease-in-out;
+    position: absolute;
+    bottom: 0.5em;
+    left: 0.5em;
+
+    &.sidebar-open {
+      left: calc($sidebar-width + 0.5em);
+    }
+  }
 
   &-legend {
     @supports (backdrop-filter: blur(5px)) {

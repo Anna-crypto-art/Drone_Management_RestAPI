@@ -202,10 +202,6 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     }
   }
 
-  public get isVisible(): boolean {
-    return this.visible;
-  }
-
   public setColorScheme(colorScheme: KeyFigureColorScheme) {
     this.colorScheme = colorScheme;
   }
@@ -229,7 +225,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     return false;
   }
 
-  protected get id() {
+  public get id() {
     return `${this.analysisResult.id}__
       ${this.keyFigureInfo.displayName || this.keyFigureInfo.keyName || this.keyFigureInfo.templateName}`;
   }

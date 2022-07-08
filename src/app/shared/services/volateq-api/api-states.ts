@@ -1,4 +1,5 @@
 export enum ApiStates {
+  EMPTY = 0,
   UPLOADING = 1,
   UPLOAD_FAILED = 2,
   DATA_INCOMPLETE = 3,
@@ -9,6 +10,7 @@ export enum ApiStates {
 }
 
 export const apiStateNames: Record<ApiStates, string> = {
+  [ApiStates.EMPTY]: "EMPTY",
   [ApiStates.UPLOADING]: "UPLOADING",
   [ApiStates.UPLOAD_FAILED]: "UPLOAD_FAILED",
   [ApiStates.DATA_INCOMPLETE]: "DATA_INCOMPLETE",

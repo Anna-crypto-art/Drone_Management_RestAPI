@@ -7,8 +7,10 @@ import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { FeatureLike } from "ol/Feature";
+import { ComponentLayer } from "./layers/component-layer";
 import { KeyFigureLayer } from "./layers/key-figure-layer";
 import { KeyFigureColors, KeyFigureInfo, SubKeyFigureInfo } from "./layers/types";
+import { PILayersHierarchy } from "./pi-layers-hierarchy";
 
 export interface LegendEntry {
   color: string;
@@ -149,3 +151,18 @@ export type KeyFigureTypeMap = {
     displayCondition?: (anaysisResult: AnalysisResultDetailedSchema) => boolean;
   }[];
 };
+
+export interface ReferenceMeasurementOptions { 
+  analysisId: string | null;
+  customerId: string | null;
+  measureDate: Date | null;
+  notes: string | null;
+  gps: boolean;
+}
+
+export interface ReferenceMeasurementEventObject {
+  options: ReferenceMeasurementOptions,
+  componentLayers: ComponentLayer[],
+  piLayersHierarchy: PILayersHierarchy,
+  refMeasureId: string,
+}

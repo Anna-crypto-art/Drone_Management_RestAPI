@@ -88,17 +88,16 @@ export default class AppAnalysisSelectionSidebar extends Vue {
       });
     }
 
-    if (this.analysisResults.length > 0) {
-      let tableRowIndex = 0;
-      const analysisResultId = this.$route.query.result;
+    await this.selectFirstAnalysis();
 
-      if (analysisResultId && typeof analysisResultId === "string") {
-        tableRowIndex = this.analysisResults.findIndex(analysisResult => analysisResult.id === analysisResultId);
-      }
+    AnalysisSelectionService.on(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL, () => {
+      this.analysisResultsTable.clearSelected();
+    });
 
-      await this.$nextTick();
-      this.analysisResultsTable.selectRow(tableRowIndex);
-    }
+    AnalysisSelectionService.on(this.plant.id, AnalysisSelectionEvent.SELECT_FIRST, async () => {
+      this.selectFirstAnalysis();
+    })
+
   }
 
   onAnalysisResultSelected(selectedAnalysisResult: { id: string }[]): void {
@@ -152,6 +151,20 @@ export default class AppAnalysisSelectionSidebar extends Vue {
 
   getKpiColor(keyFigure: KeyFigureSchema): string {
     return this.getPIColor(keyFigure);
+  }
+
+  private async selectFirstAnalysis(): Promise<void> {
+    if (this.analysisResults.length > 0) {
+      let tableRowIndex = 0;
+      const analysisResultId = this.$route.query.result;
+
+      if (analysisResultId && typeof analysisResultId === "string") {
+        tableRowIndex = this.analysisResults.findIndex(analysisResult => analysisResult.id === analysisResultId);
+      }
+
+      await this.$nextTick();
+      this.analysisResultsTable.selectRow(tableRowIndex);
+    }
   }
 }
 </script>

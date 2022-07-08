@@ -6,6 +6,8 @@
       :analysisResults="analysisResults"
       :componentLayerTypes="componentLayerTypes"
       :keyFigureLayers="keyFigureLayers"
+      @startReferenceMeasurement="onStartReferenceMeasurement"
+      @finishReferenceMeasurement="onFinishReferenceMeasurement"
     >
       <template #pcs>
         {{ $t("pcs") }} <app-explanation>{{ $t("pcs_expl") }}</app-explanation>
@@ -131,11 +133,33 @@
         {{ getTransAlignmentOffsetClassLimit("hce", 1) }}
       </template>
     </app-visualization>
+
+    <app-modal-form
+      id="reference-measurement-value-modal"
+      ref="refMeasureValueModal"
+      :title="$t('add-reference-measurement-value')"
+      :subtitle="(refMeasureValue ? refMeasureValue.pcs : '')"
+      :ok-title="$t('apply')"
+      :modalLoading="refMeasureValueModalLoading"
+      @submit="onAddRefMeasureValue"
+    >
+      <div v-if="refMeasureValue">
+        <b-form-group :label="$t('glass-tube-temperature')">
+          <b-form-input type="number" v-model="refMeasureValue.hceTemperature" />
+        </b-form-group>
+        <b-form-group>
+          <b-form-checkbox v-model="refMeasureValue.hceBrokenGlass">{{ $t("missing-gct") }}</b-form-checkbox>
+        </b-form-group>
+        <b-form-group :label="$t('notes')">
+          <b-textarea v-model="refMeasure.notes" />
+        </b-form-group>
+      </div>
+    </app-modal-form>
   </div>
 </template>
 
 <script lang="ts">
-import { IPlantVisualization, Legend } from "@/app/plant/shared/visualization/types";
+import { IPlantVisualization, Legend, ReferenceMeasurementEventObject } from "@/app/plant/shared/visualization/types";
 import AppVisualization from "@/app/plant/shared/visualization/visualization.vue";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualization/types/components";
@@ -143,13 +167,19 @@ import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Component, Prop, Ref } from "vue-property-decorator";
 import { AnalysisSelectionBaseComponent } from "../../shared/analysis-selection-sidebar/analysis-selection-base-component";
+import { LoopComponentLayer } from "./component-layers/loop-component-layer";
 import { COMPONENT_LAYERS, KEY_FIGURE_LAYERS } from "./layers";
+import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue"
+import { IAppModalForm } from "@/app/shared/components/app-modal/types";
+import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import { ReferenceMeasurementValueSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
 
 @Component({
   name: "app-visual-csp-ptc",
   components: {
     AppVisualization,
     AppExplanation,
+    AppModalForm,
   },
 })
 export default class AppVisualCspPtc
@@ -162,6 +192,11 @@ export default class AppVisualCspPtc
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
   @Ref() visualization: IPlantVisualization | undefined;
+  @Ref() refMeasureValueModal!: IAppModalForm;
+
+  refMeasureEventObject: ReferenceMeasurementEventObject | null = null;
+  refMeasureValueModalLoading = false;
+  refMeasureValue: { pcs: string, hceTemperature: number | null, hceBrokenGlass: boolean | null, notes: string | null } | null = null;
 
   async created() {
     await super.created();
@@ -219,6 +254,81 @@ export default class AppVisualCspPtc
 
   public hideToast(): void {
     this.visualization?.hideToast();
+  }
+
+  onStartReferenceMeasurement(event: ReferenceMeasurementEventObject) {
+    try {
+      for (const componentLayer of event.componentLayers) {
+        if (componentLayer.id === "solar-collector-assembly") {
+          if (!componentLayer.getSelected()) {
+            componentLayer.setSelected(true);
+          }
+
+          componentLayer.addGeolocationFeature();
+        } else if (componentLayer.id === "loop") {
+          (componentLayer as LoopComponentLayer).startReferenceMeasurement(async (pcs) => {
+            try {
+              const refMeasureValue: ReferenceMeasurementValueSchema | undefined = 
+                await volateqApi.getReferencMeasurementValue(event.options.analysisId!, event.refMeasureId, pcs);
+              if (refMeasureValue) {
+                this.refMeasureValue = {
+                  pcs: pcs,
+                  hceTemperature: refMeasureValue.hce_temperature || null,
+                  hceBrokenGlass: refMeasureValue.hce_broken_glass || null,
+                  notes: refMeasureValue.notes || null,
+                };
+              } else {
+                this.refMeasureValue = {
+                  pcs: pcs,
+                  hceTemperature: null,
+                  hceBrokenGlass: null,
+                  notes: null,
+                };
+              }
+
+              this.refMeasureValueModal.show();
+            } catch (e) {
+              this.showError(e);
+            }
+          });
+        }
+      }
+
+      this.refMeasureEventObject = event;
+    } catch (e) {
+      this.showError(e);
+    }
+  }
+
+  onFinishReferenceMeasurement(event: ReferenceMeasurementEventObject) {
+    try {
+      for (const componentLayer of event.componentLayers) {
+        if (componentLayer.id === "solar-collector-assembly") {
+          componentLayer.removeGeolocationFeature();
+        } else if (componentLayer.id === "loop") {
+          (componentLayer as LoopComponentLayer).finishReferenceMeasurement();
+          this.refMeasureValue = null;
+        }
+      }
+
+      this.refMeasureEventObject = null;
+    } catch (e) {
+      this.showError(e);
+    }
+  }
+
+  async onAddRefMeasureValue() {
+    try {
+      await volateqApi.addReferencMeasurementValue(this.refMeasureEventObject!.options.analysisId!, {
+        reference_measurement_id: this.refMeasureEventObject!.refMeasureId,
+        pcs: this.refMeasureValue!.pcs,
+        notes: this.refMeasureValue!.notes || undefined,
+        hce_temperature: this.refMeasureValue!.hceTemperature || undefined,
+        hce_broken_glass: this.refMeasureValue!.hceBrokenGlass || undefined,
+      });
+    } catch (e) {
+      this.showError(e);
+    }
   }
 }
 </script>
