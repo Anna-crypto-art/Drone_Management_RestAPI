@@ -24,11 +24,15 @@ module.exports = {
           concatenateModules: true,
         }
       : undefined,
-    output: {
-      hashFunction: "sha256",
-      filename: '[name].[hash].js',
-      chunkFilename: '[name].[hash].js',
-    },
+    output: inProduction 
+      ? {
+          hashFunction: "sha256",
+          filename: '[name].[hash].js',
+          chunkFilename: '[name].[hash].js',
+        } 
+      : {
+          hashFunction: "sha256",
+        },
   },
   pluginOptions: {
     i18n: {
