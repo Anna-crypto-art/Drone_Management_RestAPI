@@ -86,8 +86,8 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
   },
   {
     getValue: r => r.h2_concentration,
-    transName: "high-hydrogen-concentration",
-    transDescr: "high-hydrogen-concentration_expl",
+    transName: "hydrogen-penetration",
+    transDescr: "hydrogen-penetration_expl",
     keyFigureId: ApiKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID,
     filterType: FilterFieldType.BOOLEAN,
     enableForDiagram: true,
