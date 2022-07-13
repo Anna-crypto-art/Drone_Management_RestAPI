@@ -24,7 +24,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
   {
     getValue: r => r.timestamp,
     transName: "time",
-    formatter: value => new Date(Date.parse(value as string)).toLocaleTimeString(), 
+    formatter: value => new Date(Date.parse(value as string)).toLocaleString(undefined, { timeZone: "UTC" }),
   },
   {
     getValue: r => r.position_in_loop,
@@ -128,14 +128,6 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     unit: "[mm]",
   },
-  // {
-  //   getValue: r => r.hce_position_support_total_offset,
-  //   transName: "hce-position-support-total-offset",
-  //   transDescr: "hce-position-support-offset-descr",
-  //   keyFigureId: ApiKeyFigure.HCE_POSITION_ID,
-  //   filterType: FilterFieldType.NUMERIC_EXTENDED,
-  //   unit: "[mm]",
-  // },
   {
     getValue: r => r.hce_position_support_offset_class,
     transName: "hce-position-support-offset-class",
@@ -157,14 +149,6 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     unit: "[mm]",
   },
-  // {
-  //   getValue: r => r.hce_position_center_total_offset,
-  //   transName: "hce-position-center-total-offset",
-  //   transDescr: "hce-position-center-offset-descr",
-  //   keyFigureId: ApiKeyFigure.HCE_POSITION_ID,
-  //   filterType: FilterFieldType.NUMERIC_EXTENDED,
-  //   unit: "[mm]",
-  // },
   {
     getValue: r => r.hce_position_center_offset_class,
     transName: "hce-position-center-offset-class",
