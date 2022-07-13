@@ -21,7 +21,7 @@ export interface AnalysisSchema extends SimpleAnalysisSchema {
   current_state: AnalysisStateSchema;
   plant: PlantSchema;
   customer: CustomerSchema;
-  files: AnalysisFilesSchema;
+  files?: AnalysisFilesSchema;
   user: UserInfoSchema;
   data_complete: boolean;
   flown_at: string;

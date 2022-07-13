@@ -151,7 +151,7 @@
           <b-form-checkbox v-model="refMeasureValue.hceBrokenGlass">{{ $t("missing-gct") }}</b-form-checkbox>
         </b-form-group>
         <b-form-group :label="$t('notes')">
-          <b-textarea v-model="refMeasure.notes" />
+          <b-textarea v-model="refMeasureValue.notes" />
         </b-form-group>
       </div>
     </app-modal-form>
@@ -173,6 +173,10 @@ import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue"
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { ReferenceMeasurementValueSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
+import { AbsorberComponentLayer } from "./component-layers/absorber-component-layer";
+import { ScaComponentLayer } from "./component-layers/sca-component-layer";
+import { KeyFigureColors } from "../../shared/visualization/layers/types";
+import { SceComponentLayer } from "./component-layers/sce-component-layer";
 
 @Component({
   name: "app-visual-csp-ptc",
@@ -259,17 +263,23 @@ export default class AppVisualCspPtc
   onStartReferenceMeasurement(event: ReferenceMeasurementEventObject) {
     try {
       for (const componentLayer of event.componentLayers) {
-        if (componentLayer.id === "solar-collector-assembly") {
+        if (componentLayer instanceof SceComponentLayer) {
+          if (!componentLayer.getSelected()) {
+            componentLayer.setSelected(true);
+          }
+        } else if (componentLayer instanceof ScaComponentLayer) {
           if (!componentLayer.getSelected()) {
             componentLayer.setSelected(true);
           }
 
           componentLayer.addGeolocationFeature();
-        } else if (componentLayer.id === "loop") {
-          (componentLayer as LoopComponentLayer).startReferenceMeasurement(async (pcs) => {
+        } else if (componentLayer instanceof AbsorberComponentLayer) {
+          const existingPcsCodes = event.refMeasureValues.map(val => val.fieldgeometry_component!.kks) || [];
+          componentLayer.startReferenceMeasurement(existingPcsCodes, async (pcs) => {
             try {
               const refMeasureValue: ReferenceMeasurementValueSchema | undefined = 
                 await volateqApi.getReferencMeasurementValue(event.options.analysisId!, event.refMeasureId, pcs);
+              
               if (refMeasureValue) {
                 this.refMeasureValue = {
                   pcs: pcs,
@@ -303,10 +313,10 @@ export default class AppVisualCspPtc
   onFinishReferenceMeasurement(event: ReferenceMeasurementEventObject) {
     try {
       for (const componentLayer of event.componentLayers) {
-        if (componentLayer.id === "solar-collector-assembly") {
+        if (componentLayer instanceof ScaComponentLayer) {
           componentLayer.removeGeolocationFeature();
-        } else if (componentLayer.id === "loop") {
-          (componentLayer as LoopComponentLayer).finishReferenceMeasurement();
+        } else if (componentLayer instanceof AbsorberComponentLayer) {
+          componentLayer.finishReferenceMeasurement();
           this.refMeasureValue = null;
         }
       }
@@ -318,6 +328,7 @@ export default class AppVisualCspPtc
   }
 
   async onAddRefMeasureValue() {
+    this.refMeasureValueModalLoading = true;
     try {
       await volateqApi.addReferencMeasurementValue(this.refMeasureEventObject!.options.analysisId!, {
         reference_measurement_id: this.refMeasureEventObject!.refMeasureId,
@@ -326,8 +337,18 @@ export default class AppVisualCspPtc
         hce_temperature: this.refMeasureValue!.hceTemperature || undefined,
         hce_broken_glass: this.refMeasureValue!.hceBrokenGlass || undefined,
       });
+
+      const absorberComponentLayer = this.refMeasureEventObject!.componentLayers
+        .find(compLayer => compLayer instanceof AbsorberComponentLayer) as AbsorberComponentLayer | undefined;
+      if (absorberComponentLayer) {
+        absorberComponentLayer.changeColor(this.refMeasureValue!.pcs);
+      }
+
+      this.refMeasureValueModal.hide();
     } catch (e) {
       this.showError(e);
+    } finally {
+      this.refMeasureValueModalLoading = false;
     }
   }
 }

@@ -6,6 +6,7 @@ import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/g
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import { ReferenceMeasurementValueSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
 import { FeatureLike } from "ol/Feature";
 import { ComponentLayer } from "./layers/component-layer";
 import { KeyFigureLayer } from "./layers/key-figure-layer";
@@ -153,9 +154,12 @@ export type KeyFigureTypeMap = {
 };
 
 export interface ReferenceMeasurementOptions { 
+  analysisLoaded: boolean;
   analysisId: string | null;
+  analysisName: string | null;
   customerId: string | null;
-  measureDate: Date | null;
+  oldMeasureId: string | null;
+  measureDate: string | null;
   notes: string | null;
   gps: boolean;
 }
@@ -165,4 +169,5 @@ export interface ReferenceMeasurementEventObject {
   componentLayers: ComponentLayer[],
   piLayersHierarchy: PILayersHierarchy,
   refMeasureId: string,
+  refMeasureValues: ReferenceMeasurementValueSchema[];
 }

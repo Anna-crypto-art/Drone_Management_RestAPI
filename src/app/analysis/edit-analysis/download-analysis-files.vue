@@ -141,6 +141,12 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
     this.isFilesLoading = true;
     try {
       let files: string[] = [];
+      this.downloadFilesTableItems = [];
+
+      if (!this.analysis.files){
+        return;
+      }
+
       for (const key of Object.keys(this.analysis.files)) {
         files = files.concat(this.analysis!.files[key]);
       }

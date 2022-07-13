@@ -106,21 +106,33 @@
       @submit="onStartRefMeasure"
     >
       <div v-if="refMeasure">
-        <b-form-group :label="$t('select-analysis')">
-          <b-form-select v-model="refMeasure.analysisId" :options="refMeasurueAnalysesSelection" required />
-        </b-form-group>
+        <b-alert variant="secondary" v-model="refMeasure.analysisLoaded">
+          <span v-if="refMeasure.analysisId !== null" 
+          v-html="$t('acquire-reference-measurement-for-analyis', { analysis: refMeasure.analysisName })">
+          </span>
+          <span v-if="refMeasure.analysisId === null">
+            {{ $t("acquire-reference-measurement-and-create-analyis") }}
+          </span>
+        </b-alert>
         <b-form-group v-if="refMeasureCusomterSelection">
-          <b-form-select v-model="refMeasure.customerId" :options="refMeasureCusomterSelection" required />
+          <b-form-select v-model="refMeasure.customerId" :options="refMeasureCusomterSelection" required @change="onRefMeasureCustomerSelected" />
         </b-form-group>
-        <b-form-group :label="$t('measure-date')">
-          <b-datepicker v-model="refMeasure.measureDate" required />
+
+        <b-form-group v-show="oldRefMeasures" :label="$t('continue-reference-measurement')">
+          <b-form-select v-model="refMeasure.oldMeasureId" :options="oldRefMeasures" />
         </b-form-group>
-        <b-form-group :label="$t('notes')">
-          <b-textarea v-model="refMeasure.notes" />
-        </b-form-group>
-        <b-form-group>
-          <b-form-checkbox v-model="refMeasure.gps" switch>{{ $t("use-gps") }}</b-form-checkbox>
-        </b-form-group>
+
+        <div v-show="refMeasure.oldMeasureId === null">
+          <b-form-group :label="$t('measure-date')">
+            <b-datepicker v-model="refMeasure.measureDate" required />
+          </b-form-group>
+          <b-form-group :label="$t('notes')">
+            <b-textarea v-model="refMeasure.notes" />
+          </b-form-group>
+          <b-form-group>
+            <b-form-checkbox v-model="refMeasure.gps" switch>{{ $t("use-gps") }}</b-form-checkbox>
+          </b-form-group>
+        </div>
       </div>
     </app-modal-form>
   </div>
@@ -151,6 +163,7 @@ import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { AnalysisSelectionService } from "../analysis-selection-sidebar/analysis-selection-service";
 import { AnalysisSelectionEvent } from "../analysis-selection-sidebar/types";
+import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -197,8 +210,9 @@ export default class AppVisualization
   refMeasureId: string | null = null;
   refMeasureButtonLoading = false;
   refMeasureModalLoading = false;
-  refMeasurueAnalysesSelection: { html?: string, disabled?: boolean, text?: string, value: string }[] = [];
   refMeasure: ReferenceMeasurementOptions | null = null;
+  refMeasureCusomterSelection: { value: string, text: string }[] | null = null;
+  oldRefMeasures: { value: string | null, text: string }[] | null = null; 
 
   private worldMapLayer!: OSMLayer;
 
@@ -311,7 +325,14 @@ export default class AppVisualization
 
         for (const componentLayer of this.componentLayers) {
           if (componentLayer.isVisible) {
-            await componentLayer.onClick(features);
+            const layer = componentLayer.getVectorGeoLayer();
+            if (layer) {
+              const feature = features.find(feature => 
+                layer.getSource()?.getFeatures().find(layerFeature => layerFeature.get('name') === feature.get('name')));
+              if (feature) {
+                await componentLayer.onClick(feature);
+              }
+            }
           }
         }
       }
@@ -432,24 +453,45 @@ export default class AppVisualization
     this.refMeasureButtonLoading = true;
     try {
       this.refMeasure = {
+        analysisLoaded: false,
         analysisId: null,
+        analysisName: null,
         customerId: null,
+        oldMeasureId: null,
         measureDate: null,
         notes: null,
         gps: true,
       }
 
-      this.refMeasurueAnalysesSelection = [
-        ...(await volateqApi.getAllAnalysis({ plant_id: this.plant.id })).map(analysis => ({
-          value: analysis.id,
-          text: analysis.name,
-        })),
-        { text: "-----------------", value: "", disabled: true },
-        { text: this.$t('create-empty-analysis').toString(), value: "--" },
-      ]
+      if (this.plant.customers && this.plant.customers.length > 1) {
+        this.refMeasureCusomterSelection = this.plant.customers.map(customer => ({ value: customer.id, text: customer.name }));
+      } else {
+        this.refMeasureCusomterSelection = null;
+
+        await this.loadAnalysisForReferenceMeasurement();
+      }
+
+      if (this.refMeasure.analysisId) {
+        const me = await volateqApi.getMe();
+
+        const myReferenceMeasurements = (await volateqApi.getReferenceMeasurements(this.refMeasure.analysisId))
+          .filter(referenceMeasurement => referenceMeasurement.user_id === me.id);
+
+        if (myReferenceMeasurements.length > 0) {
+          this.oldRefMeasures = [
+            { value: null, text: "" },
+            ...myReferenceMeasurements.map(referenceMeasurement => ({
+              value: referenceMeasurement.id,
+              text: (new Date(Date.parse(referenceMeasurement.measure_date))).toLocaleDateString() + " - " 
+                + (referenceMeasurement.notes || ""),
+            }))
+          ];
+        } else {
+          this.oldRefMeasures = null;
+        }
+      }
 
       this.refMeasureModal.show();
-      
     } catch (e) {
       this.showError(e)
     } finally {
@@ -457,30 +499,49 @@ export default class AppVisualization
     }
   }
 
+  async onRefMeasureCustomerSelected() {
+    this.loadAnalysisForReferenceMeasurement();
+  }
+
+  async loadAnalysisForReferenceMeasurement() {
+    const incompleteAnalysis = (await volateqApi.getAllAnalysis({
+      plant_id: this.plant.id, 
+      customer_id: this.refMeasure?.customerId || undefined,
+    })).find(analysis => analysis.current_state.state.id < ApiStates.DATA_COMPLETE);
+
+    if (incompleteAnalysis) {
+      this.refMeasure!.analysisId = incompleteAnalysis.id;
+      this.refMeasure!.analysisName = incompleteAnalysis.name;
+    }
+
+    this.refMeasure!.analysisLoaded = true;
+  }
+
   async onStartRefMeasure() {
     this.refMeasureModalLoading = true;
     try {
-      if (this.refMeasure!.analysisId === null) {
-        throw { error: "MISSING_ANALYSIS", message: "Please select an analysis" }
-      }
-
-      if (this.refMeasure!.measureDate === null) {
+      if ((this.refMeasure!.analysisId === null || this.refMeasure!.oldMeasureId === null) && this.refMeasure!.measureDate === null) {
         throw { error: "MISSING_MEASURE_DATE", message: "Please select a measurement date" }
       }
-      
+
       let analysisId = this.refMeasure!.analysisId
-      if (analysisId === "--") {
+      if (analysisId === null) {
         analysisId = (await volateqApi.createEmptyAnalysis({
           plant_id: this.plant.id,
-          flown_at: this.refMeasure!.measureDate.toISOString(),
+          flown_at: this.refMeasure!.measureDate!,
           customer_id: this.refMeasure!.customerId || undefined
         })).id;
       }
 
-      this.refMeasureId = (await volateqApi.createReferenceMeasurement(analysisId, { 
-        measure_date: this.refMeasure!.measureDate.toISOString(),
-        notes: this.refMeasure!.notes || undefined,
-      })).id;
+      this.refMeasureId = this.refMeasure!.oldMeasureId
+      if (this.refMeasureId === null) {
+        this.refMeasureId = (await volateqApi.createReferenceMeasurement(analysisId, { 
+          measure_date: this.refMeasure!.measureDate!,
+          notes: this.refMeasure!.notes || undefined,
+        })).id;
+      }
+
+      const refMeasureValues = await volateqApi.getReferencMeasurementValues(analysisId, this.refMeasureId);
 
       AnalysisSelectionService.emit(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL);
       if (this.sidebarOpen) {
@@ -495,21 +556,16 @@ export default class AppVisualization
           componentLayers: this.componentLayers,
           piLayersHierarchy: this.piLayersHierarchy,
           refMeasureId: this.refMeasureId,
+          refMeasureValues: refMeasureValues,
         } as ReferenceMeasurementEventObject);
+
+      this.refMeasureModal.hide();
 
     } catch (e) {
       this.showError(e);
     } finally {
       this.refMeasureModalLoading = false;
     }
-  }
-
-  get refMeasureCusomterSelection(): { value: string, text: string }[] | null {
-    if (this.refMeasure?.analysisId === "--" && this.plant.customers && this.plant.customers.length > 0) {
-      return this.plant.customers.map(customer => ({ value: customer.id, text: customer.name }));
-    }
-
-    return null;
   }
 
   onRefMeasureFinishClick() {
@@ -542,10 +598,7 @@ export default class AppVisualization
 
 // Fix that toaster overlays popover
 .b-popover {
-  z-index: 1;
-}
-.b-toaster {
-  z-index: 0;
+  z-index: 1101;
 }
 
 .visualization {

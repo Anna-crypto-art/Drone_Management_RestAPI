@@ -124,7 +124,7 @@ export abstract class LayerBase {
     return asString([r, g, b, alpha]);
   }
 
-  protected getVectorGeoLayer(): VectorGeoLayer {
+  public getVectorGeoLayer(): VectorGeoLayer {
     return this.vueComponent.openLayers!.getMap().getAllLayers().find(layer => layer.getProperties()['id'] === this.id) as VectorGeoLayer;
   }
 
@@ -190,5 +190,18 @@ export abstract class LayerBase {
       this.getVectorGeoLayer().getSource()?.removeFeature(this.accuracyFeature);
       this.accuracyFeature = undefined;
     }
+  }
+
+  public rerender() {
+    if (this.selected) {
+      this.setSelected(false);
+    }
+    this.setSelected(true);
+
+    this.rerenderMap();
+  }
+
+  public rerenderMap() {
+    this.getVectorGeoLayer()?.changed();
   }
 }

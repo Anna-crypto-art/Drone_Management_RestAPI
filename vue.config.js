@@ -30,9 +30,7 @@ module.exports = {
           filename: '[name].[hash].js',
           chunkFilename: '[name].[hash].js',
         } 
-      : {
-          hashFunction: "sha256",
-        },
+      : undefined,
   },
   pluginOptions: {
     i18n: {

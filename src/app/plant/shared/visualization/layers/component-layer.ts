@@ -37,5 +37,5 @@ export abstract class ComponentLayer extends LayerBase {
     return {};
   }
 
-  public async onClick(features: FeatureLike[]): Promise<void> { /* override me */ }
+  public async onClick(features: FeatureLike): Promise<void> { /* override me */ }
 }

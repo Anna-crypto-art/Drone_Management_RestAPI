@@ -352,7 +352,11 @@
   "finish-reference-measurement": "Finish reference measurement",
   "finish-reference-measurement-are-you-sure": "Are you sure to finish the reference measurement?",
   "add-reference-measurement-value": "Add reference measurement value",
+  "acquire-reference-measurement-for-analyis": "The reference measurement will be allocated to analysis <b>{analysis}</b>",
+  "acquire-reference-measurement-and-create-analyis": "A new and empty analysis will be created for the reference measurement",
+  "continue-reference-measurement": "Continue reference measurement",
 
+  "EMPTY": "Empty",
   "UPLOADING": "Uploading...",
   "UPLOAD_FAILED": "Upload failed",
   "DATA_INCOMPLETE": "Data incomplete",

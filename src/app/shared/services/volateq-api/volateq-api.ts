@@ -24,7 +24,7 @@ import { TechnologySchema } from "./api-schemas/technology-schema";
 import { AnalysisMonitoring } from "./api-schemas/analysis-monitoring";
 import { QFlyServerSchema } from "./api-schemas/server-schemas";
 import { QFlyServerActionRequest } from "./api-requests/server-requests";
-import { ReferenceMeasurementValueSchema } from "./api-schemas/reference-measurement-schema";
+import { ReferenceMeasurementSchema, ReferenceMeasurementValueSchema } from "./api-schemas/reference-measurement-schema";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -493,6 +493,10 @@ export class VolateqAPI extends HttpClientBase {
     return this.post(`/auth/analysis/${analysisId}/reference-measurement`, createReferenceMeasurement);
   }
 
+  public async getReferenceMeasurements(analysisId: string): Promise<ReferenceMeasurementSchema[]> {
+    return await this.get(`/auth/analysis/${analysisId}/reference-measurement`);
+  }
+
   public async addReferencMeasurementValue(analysisId: string, addReferenceMeasurmentValue: AddReferenceMeasurmentValue): Promise<void> {
     await this.post(`/auth/analysis/${analysisId}/reference-measurement-value`, addReferenceMeasurmentValue);
   }
@@ -503,6 +507,13 @@ export class VolateqAPI extends HttpClientBase {
     pcs: string
   ): Promise<ReferenceMeasurementValueSchema | undefined> {
     return await this.get(`/auth/analysis/${analysisId}/reference-measurement-value/${referenceMeasurementId}`, { pcs });
+  }
+
+  public async getReferencMeasurementValues(
+    analysisId: string,
+    referenceMeasurementId: string
+  ): Promise<ReferenceMeasurementValueSchema[]> {
+    return await this.get(`/auth/analysis/${analysisId}/reference-measurement-value/${referenceMeasurementId}`);
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {
