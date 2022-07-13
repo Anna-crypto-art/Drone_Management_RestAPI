@@ -29,8 +29,8 @@
         <app-explanation><span v-html="$t('oxygen-penetration_expl')"></span></app-explanation>
       </template>
       <template #H2Concentration>
-        {{ $t("high-hydrogen-concentration") }}
-        <app-explanation><span v-html="$t('high-hydrogen-concentration_expl')"></span></app-explanation>
+        {{ $t("hydrogen-penetration") }}
+        <app-explanation><span v-html="$t('hydrogen-penetration_expl')"></span></app-explanation>
       </template>
       <template #glassTubeTemperatureClass3>
         {{

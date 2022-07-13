@@ -41,7 +41,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
   {
     keyFigureId: ApiKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID,
     layerType: BoolUndefinedHceKeyFigureLayer,
-    keyFigureInfo: { templateName: "H2Concentration", keyName: "high-hydrogen-concentration", zIndex: 11 },
+    keyFigureInfo: { templateName: "H2Concentration", keyName: "hydrogen-penetration", zIndex: 11 },
     query: { h2_concentration: 1, undefined: 1 },
   },
   {

@@ -55,10 +55,14 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
 
   private updateMappings() {
     try {
+      if (!this.firstAnalysisResult) {
+        return;
+      }
+
       for (const cspPtcMapping of allCspPtcMappings) {
         const analysisResultMappingHelper = new AnalysisResultMappingHelper(
             cspPtcMapping.resultMapping,
-            this.firstAnalysisResult!
+            this.firstAnalysisResult,
           );
   
         analysisResultMappingHelper.setCompareAnalysisResult(this.compareAnalysisResult);
