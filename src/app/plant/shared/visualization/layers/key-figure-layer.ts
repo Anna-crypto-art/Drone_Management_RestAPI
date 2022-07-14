@@ -1,6 +1,6 @@
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { GEO_JSON_OPTIONS, LayerBase } from "./layer-base";
+import { LayerBase } from "./layer-base";
 import { FeatureLike } from "ol/Feature";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { KeyFigureColors, KeyFigureColorScheme, KeyFigureInfo, OrthoImage } from "./types";
@@ -11,17 +11,11 @@ import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/k
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
-import { VectorGeoLayer } from "@/app/shared/components/app-geovisualization/types/layers";
-import { Geometry, SimpleGeometry } from "ol/geom";
-import Feature from "ol/Feature";
-import GeoJSON from "ol/format/GeoJSON";
-import { State } from "ol/render";
-import * as ExtentFunctions from "ol/extent";
-import { Style } from "ol/style";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { layerEvents } from "../layer-events";
+import { OrhtoImageMixin } from "../mixins/ortho-image-mixin";
+import { IOrthoImageMixin } from "../mixins/types";
 
-export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends LayerBase {
+export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends LayerBase implements IOrthoImageMixin {
   protected abstract readonly analysisResultMapping: AnalysisResultMappings<T>;
   protected readonly name: string;
 
@@ -30,7 +24,8 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   public enableCompare = false;
   public compareAnalysisResult: AnalysisResultDetailedSchema | null = null;
 
-  protected orthoImages: OrthoImage[] | null = null;
+  protected readonly orhtoImageMixin: OrhtoImageMixin;
+  public orthoImages: OrthoImage[] | null = null;
 
   public geoJSON?: {
     type: string;
@@ -53,6 +48,8 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
       (this.keyFigureInfo.displayName && this.vueComponent.$t(this.keyFigureInfo.displayName).toString()) ||
       (this.keyFigureInfo.keyName && this.vueComponent.$t(this.keyFigureInfo.keyName).toString()))!;
     this.zIndex = this.keyFigureInfo.zIndex || 9; // 9 - to make sure PIs overlay components, always
+
+    this.orhtoImageMixin = new OrhtoImageMixin(this);
 
     this.created();
   }
@@ -184,7 +181,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
           if (fieldgeo_component && fieldgeo_component.component_id === this.keyFigure.component.id) {
             const featureInfos = this.mapResultToFeatureInfos(result);
 
-            this.addShowOrthoImageActions(featureInfos);
+            this.orhtoImageMixin.addShowOrthoImageActions(featureInfos);
 
             return featureInfos;
           }
@@ -193,13 +190,6 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     }
 
     return undefined;
-  }
-
-  public setVisible(visible: boolean) {
-    this.visible = visible;
-    if (this.geoLayerObject) {
-      this.geoLayerObject.visible = this.visible;
-    }
   }
 
   public setColorScheme(colorScheme: KeyFigureColorScheme) {
@@ -243,117 +233,15 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     ).toString()}%</b> - <small>${featureCount}</small>)`;
   }
 
-  protected setOrthoImageAvailable() {
-    if (this.orthoImages !== null) {
-      for (const orthoImage of this.orthoImages) {
-        orthoImage.available = !!this.analysisResult.key_figures.find(keyFigure => keyFigure.id === orthoImage.keyFigureId);
-      }
-    }
+  public removeOrthoImageFeatures() {
+    this.orhtoImageMixin.removeOrthoImageFeatures();
   }
 
-  protected addShowOrthoImageActions(featureInfos: FeatureInfos | undefined) {
-    if (featureInfos && this.orthoImages) {
-      const actions: FeatureAction[] = this.orthoImages.filter(orthoImage => orthoImage.available)
-        .map(orthoImage => ({
-          name: orthoImage.name,
-          action: async () => { await this.loadOrthoImage(orthoImage, featureInfos); }
-        }));
-      
-      if (actions.length > 0) {
-        featureInfos.actions = {
-          name: this.vueComponent.$t("show-ortho-image").toString(),
-          buttonVariant: 'secondary',
-          actions: actions,
-        };
-      }
-    }
-
-    return featureInfos;
-  }
-
-  protected async loadOrthoImage(orthoImage: OrthoImage, featureInfos: FeatureInfos): Promise<void> {
-    try {
-      const geoJSON = await volateqApi.getKeyFiguresGeoVisual(
-        this.vueComponent.plant.id,
-        this.analysisResult.id,
-        orthoImage.keyFigureId,
-        {
-          child_component_id: this.keyFigure.component_id,
-          child_pcs: featureInfos.title
-        }
-      );
-
-      const features: Feature<Geometry>[] = new GeoJSON(GEO_JSON_OPTIONS).readFeatures(geoJSON)
-      if (!features || features.length === 0) {
-        throw { error: "NOT_FOUND", message: "Ortho image not found" };
-      }
-
-      if (!orthoImage.features) {
-        orthoImage.features = [];
-      }
-      orthoImage.features.push(...features);
-
-      for (const feature of features) {
-        this.setImageFeatureStyle(feature);
-      }
-
-      // Ortho images will be added into the SCA component layer
-      layerEvents.emitOrthoImageLoaded(features);
-
-      this.vueComponent.hideToast();
-    } catch (e) {
-      this.vueComponent.showError(e);
-    }
-  }
-
-  protected setImageFeatureStyle(feature: Feature<Geometry>) {
-    const plantRotation = (Math.PI / 180) * (this.vueComponent.plant.fieldgeometry?.orientation || 0);
-
-    const img = new Image();
-    img.crossOrigin = "Anonymous";
-    img.onload = () => {
-      feature.setStyle(
-        new Style({
-          renderer: (pixelCoordinates, state: State): void => {
-            const ctx = state.context;
-            const geometry = state.geometry.clone() as SimpleGeometry;
-            geometry.setCoordinates(pixelCoordinates);
-            geometry.rotate(-state.rotation - plantRotation, [0, 0]);
-
-            const extent = geometry.getExtent();
-
-            const width = ExtentFunctions.getWidth(extent);
-            const height = ExtentFunctions.getHeight(extent);
-            const bottomLeft = ExtentFunctions.getBottomLeft(extent);
-            const bottom = bottomLeft[1];
-            const left = bottomLeft[0];
-
-            ctx.save();
-            ctx.rotate(plantRotation + state.rotation);
-            ctx.drawImage(img, left, bottom, width, height);
-            ctx.restore();
-          },
-          zIndex: this.getOrthoImageZIndex(),
-        })
-      );
-    };
-
-    img.src = feature.get("image");
-  }
-
-  protected getOrthoImageZIndex(): number {
+  public getOrthoImageZIndex(): number {
     return -1;
   }
 
-  public removeOrthoImageFeatures() {
-    if (this.orthoImages) {
-      for (const orthoImage of this.orthoImages) {
-        if (orthoImage.features) {
-          layerEvents.emitRemoveOrthoImages(orthoImage.features);
-
-          orthoImage.features = undefined;
-        }
-      }
-    }
+  public getComponentId() {
+    return this.keyFigure.component_id;
   }
 }

@@ -355,6 +355,7 @@
   "acquire-reference-measurement-for-analyis": "The reference measurement will be allocated to analysis <b>{analysis}</b>",
   "acquire-reference-measurement-and-create-analyis": "A new and empty analysis will be created for the reference measurement",
   "continue-reference-measurement": "Continue reference measurement",
+  "reference-measurements": "Reference measurements",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

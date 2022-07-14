@@ -164,6 +164,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { AnalysisSelectionService } from "../analysis-selection-sidebar/analysis-selection-service";
 import { AnalysisSelectionEvent } from "../analysis-selection-sidebar/types";
 import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
+import { RefMeasureLayers } from "./ref-measure-layers";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -196,6 +197,7 @@ export default class AppVisualization
 
   piLayersHierarchy!: PILayersHierarchy;
   componentLayers: ComponentLayer[] = [];
+  refMeasureLayers!: RefMeasureLayers;
   layers: LayerType[] = [];
   showPCS = false;
   legends: Legend[] = [];
@@ -244,6 +246,9 @@ export default class AppVisualization
     this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
     this.piLayersHierarchy.updateVisibility();
 
+    this.refMeasureLayers.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
+    this.refMeasureLayers.updateVisibility();
+
     if (this.firstLoad) {
       this.firstLoad = false;
 
@@ -273,6 +278,9 @@ export default class AppVisualization
     this.piLayersHierarchy.toggleMultiSelection(false, true);
     this.piLayersHierarchy.updateVisibility();
 
+    this.refMeasureLayers.addAndSelectAnalysisResult(undefined);
+    this.refMeasureLayers.updateVisibility();
+
     this.hideToast();
   }
 
@@ -301,24 +309,8 @@ export default class AppVisualization
     try {
       this.loading = true;
       
-      let mergedFeatureInfos: FeatureInfos | undefined;
-      for (const kpiLayer of this.piLayersHierarchy.getAllChildLayers()) {
-        if (kpiLayer.isVisible) {
-          const featureInfos = await kpiLayer.onClick(features);
-    
-          if (featureInfos) {
-            if (!mergedFeatureInfos) {
-              mergedFeatureInfos = featureInfos;
-            } else if (mergedFeatureInfos.title === featureInfos.title) {
-              mergedFeatureInfos.records.forEach((featureInfo, index) => {
-                if (!featureInfo.bold && featureInfos.records[index].bold) {
-                  featureInfo.bold = true;
-                }
-              });
-            }
-          }
-        }
-      }
+      let mergedFeatureInfos = await this.clickKeyFigureLayers(features);
+      mergedFeatureInfos = await this.clickRefMeasureLayers(features, mergedFeatureInfos);
   
       if (mergedFeatureInfos) {
         this.piToastInfo = mergedFeatureInfos;
@@ -326,21 +318,69 @@ export default class AppVisualization
       } else {
         this.hideToast();
 
-        for (const componentLayer of this.componentLayers) {
-          if (componentLayer.isVisible) {
-            const layer = componentLayer.getVectorGeoLayer();
-            if (layer) {
-              const feature = features.find(feature => 
-                layer.getSource()?.getFeatures().find(layerFeature => layerFeature.get('name') === feature.get('name')));
-              if (feature) {
-                await componentLayer.onClick(feature);
-              }
-            }
-          }
-        }
+        this.clickComponentLayers(features);
       }
     } finally {
       this.loading = false;
+    }
+  }
+
+  private async clickKeyFigureLayers(
+    features: FeatureLike[]
+  ): Promise<FeatureInfos | undefined> {
+    let mergedFeatureInfos: FeatureInfos | undefined;
+    for (const kpiLayer of this.piLayersHierarchy.getAllChildLayers()) {
+      if (kpiLayer.isVisible) {
+        const featureInfos = await kpiLayer.onClick(features);
+
+        mergedFeatureInfos = this.mergeFeatureInfos(mergedFeatureInfos, featureInfos);
+      }
+    }
+
+    return mergedFeatureInfos;
+  }
+
+  private async clickRefMeasureLayers(
+    features: FeatureLike[],
+    mergedFeatureInfos: FeatureInfos | undefined
+  ): Promise<FeatureInfos | undefined> {
+    for (const refMeasurerLayer of this.refMeasureLayers.referenceMeasurementLayers) {
+      const featureInfos = await refMeasurerLayer.onClick(features)
+
+      mergedFeatureInfos = this.mergeFeatureInfos(mergedFeatureInfos, featureInfos);
+    }
+
+    return mergedFeatureInfos;
+  }
+
+  private mergeFeatureInfos(mergedFeatureInfos: FeatureInfos | undefined, featureInfos: FeatureInfos | undefined): FeatureInfos | undefined {
+    if (featureInfos) {
+      if (!mergedFeatureInfos) {
+        mergedFeatureInfos = featureInfos;
+      } else if (mergedFeatureInfos.title === featureInfos.title) {
+        mergedFeatureInfos.records.forEach((featureInfo, index) => {
+          if (!featureInfo.bold && featureInfos.records[index].bold) {
+            featureInfo.bold = true;
+          }
+        });
+      }
+    }
+
+    return mergedFeatureInfos;
+  }
+
+  private async clickComponentLayers(features: FeatureLike[]): Promise<void> {
+    for (const componentLayer of this.componentLayers) {
+      if (componentLayer.isVisible) {
+        const layer = componentLayer.getVectorGeoLayer();
+        if (layer) {
+          const feature = features.find(feature => 
+            layer.getSource()?.getFeatures().find(layerFeature => layerFeature.get('name') === feature.get('name')));
+          if (feature) {
+            await componentLayer.onClick(feature);
+          }
+        }
+      }
     }
   }
 
@@ -405,6 +445,7 @@ export default class AppVisualization
     try {
       this.componentLayers = this.componentLayerTypes.map(componentType => new (componentType as any)(this));
       this.piLayersHierarchy = new PILayersHierarchy(this, this.analysisResults, this.keyFigureLayers);
+      this.refMeasureLayers = new RefMeasureLayers(this, this.analysisResults);
   
       this.worldMapLayer = {
         name: this.$t("world-map").toString(),
@@ -424,6 +465,7 @@ export default class AppVisualization
 
       this.layers.push(
         this.piHeadGroup,
+        this.refMeasureLayers.groupLayer,
         {
           name: this.$t("components").toString(),
           type: "group",
@@ -446,8 +488,6 @@ export default class AppVisualization
               compLayer.showPCS(selected),
               compLayer.rerenderMap();
             });
-
-            
           },
           selected: false,
           styleClass: "margin-top",

@@ -109,6 +109,13 @@ export abstract class LayerBase {
     return this.selected;
   }
 
+  public setVisible(visible: boolean) {
+    this.visible = visible;
+    if (this.geoLayerObject) {
+      this.geoLayerObject.visible = this.visible;
+    }
+  }
+
   protected showText(feature: FeatureLike, props: Record<string, unknown> = {}): Text | undefined {
     return new Text({
       text: (this._showPCS && this.hasZoomLevelForPcs() && this.getPcs(feature)) || "",

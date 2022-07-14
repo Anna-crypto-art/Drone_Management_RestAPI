@@ -516,6 +516,10 @@ export class VolateqAPI extends HttpClientBase {
     return await this.get(`/auth/analysis/${analysisId}/reference-measurement-value/${referenceMeasurementId}`);
   }
 
+  public async getReferenceMeasurementValuesGeoVisual(referenceMeasurementId: string): Promise<any> {
+    return this.get(`/auth/geo-visual/${referenceMeasurementId}/reference-measuurement-values`);
+  }
+
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {
     // Temporary special case for IR_INTENSITY: Replaced by GLASS_TUBE_TEMPERATURE
     for (const analysisResult of analysisResults) {
