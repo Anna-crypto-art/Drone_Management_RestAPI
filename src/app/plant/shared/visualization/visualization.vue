@@ -202,6 +202,7 @@ export default class AppVisualization
   piToastInfo: FeatureInfos = { title: "", records: [{ name: "", descr: "", value: "" }] };
   loading = false;
   toastDropdownButtonLoading = false;
+  piHeadGroup: GroupLayer | null = null;
 
   enableMultiSelection = false;
   showCouldNotBeMeasured = true;
@@ -260,6 +261,8 @@ export default class AppVisualization
         }
       }
     }
+
+    this.piHeadGroup!.visible = !!this.firstAnalysisResult;
 
     this.hideToast();
   }
@@ -411,13 +414,16 @@ export default class AppVisualization
         events: new EventEmitter(),
       };
   
+      this.piHeadGroup = {
+        name: this.$t("performance-indicators").toString(),
+        type: "group",
+        childLayers: this.piLayersHierarchy.groupLayers,
+        singleSelection: true,
+        visible: true,
+      },
+
       this.layers.push(
-        {
-          name: this.$t("performance-indicators").toString(),
-          type: "group",
-          childLayers: this.piLayersHierarchy.groupLayers,
-          singleSelection: true,
-        },
+        this.piHeadGroup,
         {
           name: this.$t("components").toString(),
           type: "group",
@@ -432,8 +438,16 @@ export default class AppVisualization
           onSelected: (selected: boolean) => {
             this.showPCS = selected;
   
-            this.piLayersHierarchy.getAllChildLayers().forEach(kpiLayer => kpiLayer.showPCS(selected));
-            this.componentLayers.forEach(compLayer => compLayer.showPCS(selected));
+            this.piLayersHierarchy.getAllChildLayers().forEach(kpiLayer => {
+              kpiLayer.showPCS(selected);
+              kpiLayer.rerenderMap();
+            });
+            this.componentLayers.forEach(compLayer => {
+              compLayer.showPCS(selected),
+              compLayer.rerenderMap();
+            });
+
+            
           },
           selected: false,
           styleClass: "margin-top",
@@ -512,7 +526,7 @@ export default class AppVisualization
     if (incompleteAnalysis) {
       this.refMeasure!.analysisId = incompleteAnalysis.id;
       this.refMeasure!.analysisName = incompleteAnalysis.name;
-    }
+    } 
 
     this.refMeasure!.analysisLoaded = true;
   }
@@ -524,9 +538,8 @@ export default class AppVisualization
         throw { error: "MISSING_MEASURE_DATE", message: "Please select a measurement date" }
       }
 
-      let analysisId = this.refMeasure!.analysisId
-      if (analysisId === null) {
-        analysisId = (await volateqApi.createEmptyAnalysis({
+      if (this.refMeasure!.analysisId === null) {
+        this.refMeasure!.analysisId = (await volateqApi.createEmptyAnalysis({
           plant_id: this.plant.id,
           flown_at: this.refMeasure!.measureDate!,
           customer_id: this.refMeasure!.customerId || undefined
@@ -535,13 +548,13 @@ export default class AppVisualization
 
       this.refMeasureId = this.refMeasure!.oldMeasureId
       if (this.refMeasureId === null) {
-        this.refMeasureId = (await volateqApi.createReferenceMeasurement(analysisId, { 
+        this.refMeasureId = (await volateqApi.createReferenceMeasurement(this.refMeasure!.analysisId, { 
           measure_date: this.refMeasure!.measureDate!,
           notes: this.refMeasure!.notes || undefined,
         })).id;
       }
 
-      const refMeasureValues = await volateqApi.getReferencMeasurementValues(analysisId, this.refMeasureId);
+      const refMeasureValues = await volateqApi.getReferencMeasurementValues(this.refMeasure!.analysisId, this.refMeasureId);
 
       AnalysisSelectionService.emit(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL);
       if (this.sidebarOpen) {
@@ -675,5 +688,9 @@ export default class AppVisualization
 }
 .toaster-actions {
   margin-top: 15px;
+}
+
+.visualization-actions .app-button:hover {
+  background-color: $hover-light-blue;
 }
 </style>

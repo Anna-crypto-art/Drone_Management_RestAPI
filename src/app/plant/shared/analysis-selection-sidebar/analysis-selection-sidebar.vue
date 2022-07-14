@@ -175,7 +175,7 @@ export default class AppAnalysisSelectionSidebar extends Vue {
 
 // Fix sidebar overlays toaster
 .b-popover {
-  z-index: 10;
+  z-index: 1101;
 }
 
 .analysis-selection-sidebar {

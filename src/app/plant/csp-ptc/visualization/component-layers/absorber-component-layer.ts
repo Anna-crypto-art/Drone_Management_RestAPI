@@ -18,6 +18,26 @@ export class AbsorberComponentLayer extends ComponentLayer {
 
   private coloredPcsCodes: string[] | null = null;
 
+  public load(): Promise<Record<string, unknown>> {
+    this.onZoom((zoomlevel) => {
+      console.log(zoomlevel)
+
+      if (this.refMeasureRunning && zoomlevel) {
+        if (zoomlevel < 18) {
+          this.width = 5;
+        } else if (zoomlevel >= 18 && zoomlevel < 19) {
+          this.width = 10;
+        } else if (zoomlevel >= 19 && zoomlevel < 20) {
+          this.width = 20;
+        } else if (zoomlevel >= 20) {
+          this.width = 30;
+        }
+      }
+    });
+
+    return super.load();
+  }
+
   public getStyle(feature: FeatureLike): Style {
     const color = this.coloredPcsCodes && this.coloredPcsCodes.find(pcs => pcs === this.getPcs(feature)) ? 
       KeyFigureColors.volateqBlue :
