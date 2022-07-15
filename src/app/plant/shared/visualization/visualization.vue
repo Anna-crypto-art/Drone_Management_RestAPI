@@ -249,23 +249,7 @@ export default class AppVisualization
     await this.refMeasureLayers.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     this.refMeasureLayers.updateVisibility();
 
-    if (this.firstLoad) {
-      this.firstLoad = false;
-
-      await this.$nextTick();
-
-      this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
-      this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
-
-      if (this.$route.query.pi) {
-        const keyFigureId: number = parseInt(this.$route.query.pi as string);
-        if (!Object.values(ApiKeyFigure).includes(keyFigureId)) {
-          this.showError({ error: "PI_NOT_FOUND", message: this.$t("pi-not-found").toString() });
-        } else {
-          this.piLayersHierarchy.selectKeyFigureLayer(keyFigureId);
-        }
-      }
-    }
+    await this.onFirstLoad();
 
     this.piHeadGroup!.visible = !!this.firstAnalysisResult;
 
@@ -281,7 +265,33 @@ export default class AppVisualization
     await this.refMeasureLayers.addAndSelectAnalysisResult(undefined);
     this.refMeasureLayers.updateVisibility();
 
+    await this.onFirstLoad();
+
+    this.piHeadGroup!.visible = !!this.firstAnalysisResult;
+
     this.hideToast();
+  }
+
+  private async onFirstLoad() {
+    if (this.firstLoad) {
+      this.firstLoad = false;
+    } else {
+      return;
+    }
+
+    await this.$nextTick();
+
+    this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
+    this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
+
+    if (this.$route.query.pi) {
+      const keyFigureId: number = parseInt(this.$route.query.pi as string);
+      if (!Object.values(ApiKeyFigure).includes(keyFigureId)) {
+        this.showError({ error: "PI_NOT_FOUND", message: this.$t("pi-not-found").toString() });
+      } else {
+        this.piLayersHierarchy.selectKeyFigureLayer(keyFigureId);
+      }
+    }
   }
 
   get hasLayers(): boolean {

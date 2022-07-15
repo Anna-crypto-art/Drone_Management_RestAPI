@@ -103,7 +103,12 @@ export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
   onViewMapButtonClick(numberBoxId: string) {
     const numberBox = this.numberBoxes!.find(numberBox => numberBox.id === numberBoxId)!;
 
-    this.$router.push({ name: "Plant", params: { id: this.plant.id }, query: { pi: numberBox.keyFigure.id + "" }})
+    this.$router.push({ name: "Plant", params: { id: this.plant.id }, query: { 
+      pi: numberBox.keyFigure.id + "",
+      result: this.compareAnalysisResult ? 
+        [this.firstAnalysisResult!.id, this.compareAnalysisResult.id] :
+        (this.firstAnalysisResult ? this.firstAnalysisResult!.id : undefined)
+    }})
     this.$router.go(0);
   }
 

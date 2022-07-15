@@ -88,16 +88,15 @@ export default class AppAnalysisSelectionSidebar extends Vue {
       });
     }
 
-    await this.selectFirstAnalysis();
+    await this.selectAnalysis();
 
     AnalysisSelectionService.on(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL, () => {
       this.analysisResultsTable.clearSelected();
     });
 
     AnalysisSelectionService.on(this.plant.id, AnalysisSelectionEvent.SELECT_FIRST, async () => {
-      this.selectFirstAnalysis();
-    })
-
+      await this.selectAnalysis(true);
+    });
   }
 
   onAnalysisResultSelected(selectedAnalysisResult: { id: string }[]): void {
@@ -153,13 +152,33 @@ export default class AppAnalysisSelectionSidebar extends Vue {
     return this.getPIColor(keyFigure);
   }
 
-  private async selectFirstAnalysis(): Promise<void> {
+  private async selectAnalysis(selectFirst = false): Promise<void> {
     if (this.analysisResults.length > 0) {
       let tableRowIndex = 0;
       const analysisResultId = this.$route.query.result;
 
-      if (analysisResultId && typeof analysisResultId === "string") {
-        tableRowIndex = this.analysisResults.findIndex(analysisResult => analysisResult.id === analysisResultId);
+      if (analysisResultId && !selectFirst) {
+        if (typeof analysisResultId === "string") {
+          console.log("analysisResultId")
+          console.log(analysisResultId)
+          console.log(this.analysisResults)
+
+          tableRowIndex = this.analysisResults.findIndex(analysisResult => analysisResult.id === analysisResultId);
+        } else if (Array.isArray(analysisResultId) && analysisResultId.length === 2) {
+          const firstAnalysisId = analysisResultId[0];
+          const seconedAnalysisId = analysisResultId[1];
+          const firstTableRowIndex = this.analysisResults.findIndex(analysisResult => analysisResult.id === firstAnalysisId);
+          const secondTableRowIndex = this.analysisResults.findIndex(analysisResult => analysisResult.id === seconedAnalysisId);
+
+          if (firstTableRowIndex >= 0 && secondTableRowIndex >= 0) {
+            this.compareMode = true;
+            await this.onCompareModeChanged();
+            await this.$nextTick();
+            this.analysisResultsTable.selectRow(firstTableRowIndex);
+
+            tableRowIndex = secondTableRowIndex;
+          }
+        }        
       }
 
       await this.$nextTick();
