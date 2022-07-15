@@ -18,7 +18,7 @@ export class AbsorberComponentLayer extends ComponentLayer {
 
   private coloredPcsCodes: string[] | null = null;
 
-  public load(): Promise<Record<string, unknown>> {
+  public load(): Promise<Record<string, unknown> | undefined> {
     this.onZoom((zoomlevel) => {
       console.log(zoomlevel)
 

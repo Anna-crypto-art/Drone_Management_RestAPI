@@ -94,7 +94,7 @@ export enum KeyFigureColors {
   diagramBad = "#dc3545",
   diagramGood = "#28a745",
 
-  volateqBlue = "rgba(6, 107, 226, 0.8)",
+  volateqBlue = "#066be2",
 }
 
 export interface OrthoImage {

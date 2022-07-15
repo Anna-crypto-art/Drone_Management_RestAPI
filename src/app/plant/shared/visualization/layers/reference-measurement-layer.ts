@@ -39,7 +39,7 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
 
   protected get name(): string {
     let notes = this.referenceMeasurement.notes || "";
-    if (notes.length > 30) {
+    if (notes.length > 20) {
       notes = notes.substring(0, 30) + "...";
     }
 
@@ -47,8 +47,14 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
       (notes ? " - " + notes : "")
   }
 
-  protected async load(): Promise<Record<string, unknown>> {
-    return await volateqApi.getReferenceMeasurementValuesGeoVisual(this.referenceMeasurement.id);
+  protected async load(): Promise<Record<string, unknown> | undefined> {
+    try {
+      return await volateqApi.getReferenceMeasurementValuesGeoVisual(this.referenceMeasurement.id);
+    } catch (e) {
+      this.vueComponent.showError(e);
+    }
+
+    return undefined;
   }
 
   public getStyle(feature: FeatureLike): Style {
@@ -111,5 +117,9 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
 
   public getOrthoImageZIndex(): number {
     return -1;
+  }
+
+  protected getDescription(): string | undefined {
+    return this.referenceMeasurement.notes;
   }
 }

@@ -15,11 +15,12 @@ export interface BaseLayerType {
   reloadLayer?: boolean;
   id?: string;
   events?: EventEmitter;
+  description?: string;
 }
 
 export interface GeoJSONLayer extends BaseLayerType {
   type: "geojson";
-  geoJSONLoader: () => Record<string, unknown> | Promise<Record<string, unknown>>;
+  geoJSONLoader: () => Record<string, unknown> | undefined | Promise<Record<string, unknown> | undefined>;
   geoJSONOptions?: {
     dataProjection: string;
     featureProjection: string;

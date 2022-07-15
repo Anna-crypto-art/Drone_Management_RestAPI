@@ -35,7 +35,7 @@ export abstract class LayerBase {
   constructor(public readonly vueComponent: BaseAuthComponent & IPlantVisualization) {}
 
   protected abstract getPcs(feature: FeatureLike): string | undefined;
-  protected abstract load(): Promise<Record<string, unknown>>;
+  protected abstract load(): Promise<Record<string, unknown> | undefined>;
   public abstract get id(): string | undefined;
 
   protected getStyle(feature: FeatureLike): Style {
@@ -44,7 +44,9 @@ export abstract class LayerBase {
     });
   }
 
-  protected onSelected(selected: boolean): void { /* overide me */ }
+  protected onSelected(selected: boolean): void { 
+    this.selected = selected;
+  }
 
   protected onZoom(onZoomCallback: (zoomLevel: number | undefined) => void): void {
     const view = this.vueComponent.openLayers?.getMap().getView();
@@ -61,6 +63,10 @@ export abstract class LayerBase {
 
   protected getName(): string {
     return this.name;
+  }
+
+  protected getDescription(): string | undefined {
+    return undefined;
   }
 
   public showPCS(show: boolean): void {
@@ -83,6 +89,7 @@ export abstract class LayerBase {
       this.geoLayerObject = {
         type: "geojson",
         name: this.getName(),
+        description: this.getDescription(),
         selected: this.selected,
         autoZoom: this.autoZoom,
         geoJSONLoader: () => this.load(),

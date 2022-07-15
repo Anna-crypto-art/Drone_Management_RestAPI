@@ -61,8 +61,6 @@ export class RefMeasureLayers {
       }
     }
 
-    if (allInvisble) {
-      this.groupLayer.visible = false;
-    }
+    this.groupLayer.visible = !allInvisble;
   }
 }

@@ -9,10 +9,16 @@
     "
   >
     <b-form-checkbox v-if="!layer.isGroup" :checked="selected" @change="onChange">
-      <slot :name="layer.name">{{ layer.name }}</slot>
+      <slot :name="layer.name">
+        {{ layer.name }}
+        <app-explanation v-if="layer.description"><span v-html="layer.description"></span></app-explanation>
+      </slot>
     </b-form-checkbox>
     <h3 v-if="layer.isGroup && layer.name" :class="'layer-display-group-level-' + layerGroupLevel">
-      <slot :name="layer.name">{{ layer.name }}</slot>
+      <slot :name="layer.name">
+        {{ layer.name }}
+        <app-explanation v-if="layer.description"><span v-html="layer.description"></span></app-explanation>
+      </slot>
     </h3>
     <div v-if="layer.hasChildrens" class="layer-sublayers">
       <app-geovisual-layer-display
@@ -36,9 +42,13 @@
 import Vue from "vue";
 import { Component, Prop, Watch } from "vue-property-decorator";
 import { LayerStructure } from "../layer-structure";
+import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 
 @Component({
   name: "app-geovisual-layer-display",
+  components: {
+    AppExplanation
+  }
 })
 export default class AppGeovisualLayerDisplay extends Vue {
   @Prop() layer!: LayerStructure;

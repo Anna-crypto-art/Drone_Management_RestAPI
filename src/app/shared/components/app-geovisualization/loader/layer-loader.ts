@@ -55,5 +55,5 @@ export default abstract class LayerLoader<T extends Layer<Source, LayerRenderer<
     }
   }
 
-  abstract doLoad(): Promise<T>;
+  abstract doLoad(): Promise<T | undefined>;
 }

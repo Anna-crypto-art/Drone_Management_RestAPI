@@ -80,6 +80,10 @@ export class LayerStructure extends EventEmitter {
     return this.getLayerType()?.id || this.name;
   }
 
+  public get description(): string | undefined {
+    return this.getLayerType()?.description;
+  }
+
   public addChildLayer(childLayer: LayerStructure): void {
     this.childLayers.push(childLayer);
 

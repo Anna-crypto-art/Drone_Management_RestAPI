@@ -61,7 +61,8 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   }
 
   protected async onSelected(selected: boolean): Promise<void> {
-    this.selected = selected;
+    super.onSelected(selected);
+
     this.vueComponent.onLayerSelected(selected, this.getLegend());
   }
 
@@ -147,7 +148,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     return undefined;
   }
 
-  public async load(): Promise<Record<string, unknown>> {
+  public async load(): Promise<Record<string, unknown> | undefined> {
     try {
       if (this.enableCompare && this.compareAnalysisResult) {
         this.geoJSON = await volateqApi.getKeyFiguresGeoVisualCompare(
@@ -164,12 +165,12 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
           this.keyFigure.id,
           this.query
         );
-      }
+      }      
     } catch (e) {
       this.vueComponent.showError(e);
     }
 
-    return this.geoJSON as Record<string, unknown>;
+    return this.geoJSON;
   }
 
   public async onClick(features: FeatureLike[]): Promise<FeatureInfos | undefined> {

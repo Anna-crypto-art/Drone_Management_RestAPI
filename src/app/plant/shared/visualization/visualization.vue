@@ -101,7 +101,7 @@
       id="reference-measurement-modal"
       ref="refMeasureModal"
       :title="$t('acquire-reference-measurement')"
-      :ok-title="$t('start')"
+      :ok-title="refMeasure && refMeasure.oldMeasureId ? $t('continue') : $t('start')"
       :modalLoading="refMeasureModalLoading"
       @submit="onStartRefMeasure"
     >
@@ -246,7 +246,7 @@ export default class AppVisualization
     this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
     this.piLayersHierarchy.updateVisibility();
 
-    this.refMeasureLayers.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
+    await this.refMeasureLayers.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     this.refMeasureLayers.updateVisibility();
 
     if (this.firstLoad) {
@@ -278,7 +278,7 @@ export default class AppVisualization
     this.piLayersHierarchy.toggleMultiSelection(false, true);
     this.piLayersHierarchy.updateVisibility();
 
-    this.refMeasureLayers.addAndSelectAnalysisResult(undefined);
+    await this.refMeasureLayers.addAndSelectAnalysisResult(undefined);
     this.refMeasureLayers.updateVisibility();
 
     this.hideToast();

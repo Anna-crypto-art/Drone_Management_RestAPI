@@ -27,14 +27,14 @@ export abstract class ComponentLayer extends LayerBase {
     return this.vueComponent.$t(this.name).toString();
   }
 
-  public async load(): Promise<Record<string, unknown>> {
+  public async load(): Promise<Record<string, unknown> | undefined> {
     try {
       return volateqApi.getComponentsGeoVisual(this.vueComponent.plant.id, [this.componentId]);
     } catch (e) {
       this.vueComponent.showError(e);
     }
 
-    return {};
+    return undefined;
   }
 
   public async onClick(features: FeatureLike): Promise<void> { /* override me */ }
