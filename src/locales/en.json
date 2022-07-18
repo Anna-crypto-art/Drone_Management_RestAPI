@@ -357,6 +357,11 @@
   "continue-reference-measurement": "Continue reference measurement",
   "reference-measurements": "Reference measurements",
   "continue": "Continue",
+  "move-to-another-analysis": "Move to another analysis",
+  "move": "Move",
+  "reference-measurement-moved-success": "Rerefence measurement has been moved, successfully",
+  "reference-measurement-delete-success": "Rerefence measurement has been deleted, successfully",
+  "reference-measurement-delete-are-you-sure": "Delete reference measurement. Are you sure?",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

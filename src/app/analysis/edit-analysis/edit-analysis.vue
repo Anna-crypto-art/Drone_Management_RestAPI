@@ -36,6 +36,12 @@
             </b-col>
           </b-row>
         </b-tab>
+        <b-tab class="app-edit-analysis-ref-measures" v-if="hasReferenceMeasurements">
+          <template #title>
+            <b-icon icon="clipboard-check" /><span class="pad-left">{{ $t("reference-measurements") }}</span>
+          </template>
+          <app-upload-analysis-files :analysis="analysis" />
+        </b-tab>
         <b-tab v-if="isSuperAdmin" class="app-edit-analysis-admin-tab">
           <template #title>
             <b-icon icon="braces" /><span class="pad-left">{{ $t("admin-panel") }}</span>
@@ -83,6 +89,7 @@ export default class AppEditAnalysis extends BaseAuthComponent {
 
   flownAt = "";
   loading = false;
+  hasReferenceMeasurements = false;
 
   async created() {
     await this.updateAnalysis(this.$route.params.id);
@@ -101,6 +108,8 @@ export default class AppEditAnalysis extends BaseAuthComponent {
       this.analysis = await volateqApi.getAnalysis(analysisId);
 
       this.flownAt = this.analysis.flown_at;
+
+      this.hasReferenceMeasurements = (await volateqApi.getReferenceMeasurements(this.analysis.id)).length > 0;
 
       this.watchAnalysisTask();
     } catch (e) {

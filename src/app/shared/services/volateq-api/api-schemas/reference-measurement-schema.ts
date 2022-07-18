@@ -1,4 +1,5 @@
 import { FieldgeometryComponentSchema } from "./fieldgeometry-component-schema";
+import { UserInfoSchema } from "./user-schemas";
 
 export interface ReferenceMeasurementSchema {
   id: string;
@@ -7,6 +8,7 @@ export interface ReferenceMeasurementSchema {
   measure_date: string;
   notes?: string;
   created_at: string;
+  user: UserInfoSchema;
 }
 
 export interface ReferenceMeasurementValueSchema {
