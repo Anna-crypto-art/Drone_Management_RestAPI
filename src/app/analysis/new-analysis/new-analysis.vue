@@ -8,17 +8,17 @@
       @retryUpload="onRetryUpload">
         <template #uploadForm>
           <b-row style="margin-bottom: 25px">
-            <b-col sm="4" v-if="plantOptions.length > 1">
+            <b-col lg="4" v-if="plantOptions.length > 1">
               <b-form-group label-cols="auto" :label="$t('plant')">
                 <b-form-select required v-model="selectedPlantId" :options="plantOptions" @change="onPlantSelectionChanged"></b-form-select>
               </b-form-group>
             </b-col>
-            <b-col sm="4" v-if="customerOptions.length > 1">
+            <b-col lg="4" v-if="customerOptions.length > 1">
               <b-form-group label-cols="auto" :label="$t('customer')">
                 <b-form-select required v-model="selectedCustomerId" :options="customerOptions"></b-form-select>
               </b-form-group>
             </b-col>
-            <b-col sm="4">
+            <b-col lg="4">
               <b-form-group label-cols="auto" :label="$t('acquisition-date')">
                 <b-datepicker v-model="flownAt" required /> 
               </b-form-group>

@@ -52,6 +52,8 @@ export default class AppDeleteAnalysis extends BaseAuthComponent {
       }
     } catch (e) {
       this.showError(e);
+    } finally {
+      this.loading = false;
     }
   }
 

@@ -730,6 +730,11 @@ export default class AppVisualization
   }
 }
 
+#piInfoToast.toast {
+  /* Fix ortho images dropdown visibility */
+  overflow: visible;
+}
+
 .toaster-images {
   img {
     max-width: calc(500px - 1.5rem);

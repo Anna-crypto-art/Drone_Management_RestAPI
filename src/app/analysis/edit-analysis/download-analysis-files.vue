@@ -50,6 +50,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { getReadableFileSize } from "@/app/shared/services/helper/file-helper";
 import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
+import { waitFor } from "@/app/shared/services/helper/debounce-helper";
 
 @Component({
   name: "app-download-analysis-files",
@@ -83,7 +84,7 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
   }
 
   @Watch('analysis') onAnalysisChanged() {
-    this.loadFiles();
+    this.loadFiles(true);
   }
 
   onDownloadFilesSelected(selectedDownloadFiles: { name: string }[]) {
@@ -137,7 +138,7 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
     return date && (new Date(date)).toLocaleString() || "";
   }
 
-  private async loadFiles() {
+  private async loadFiles(analysisHasChanged = false) {
     this.isFilesLoading = true;
     try {
       let files: string[] = [];
@@ -181,12 +182,17 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
       });
 
       if (this.analysis.current_state.state.id === ApiStates.UPLOADING) {
+        const me = await volateqApi.getMe();
+
+        if (analysisHasChanged) {
+          // Wait for uploaded to start...
+          await waitFor(3000);          
+        }
+
         let uploadingUsers = await volateqApi.getUploadingUsers(this.analysis.id);
         if (uploadingUsers.length === 0) {
           AppContentEventService.showWarning(this.analysis.id, this.$t("state-uploading-without-uploading-user").toString())
         } else {
-          const me = await volateqApi.getMe();
-
           uploadingUsers = uploadingUsers.filter(userInfo => userInfo.email != me.email);
 
           if (uploadingUsers.length > 0) {

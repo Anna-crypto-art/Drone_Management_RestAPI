@@ -13,7 +13,7 @@
           </template>
           <app-download-analysis-files :analysis="analysis" />
         </b-tab>
-        <b-tab class="app-edit-analysis-upload-tab">
+        <b-tab class="app-edit-analysis-upload-tab" v-if="uploadAllowed">
           <template #title>
             <b-icon icon="upload" /><span class="pad-left">{{ $t("upload") }}</span>
           </template>
@@ -64,6 +64,7 @@ import { AnalysisEvent } from "../shared/types";
 import { TaskSchema } from "@/app/shared/services/volateq-api/api-schemas/task-schema";
 import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
+import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 
 @Component({
   name: "app-edit-analysis",
@@ -89,6 +90,10 @@ export default class AppEditAnalysis extends BaseAuthComponent {
     AnalysisEventService.on(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS, () => {
       this.updateAnalysis(this.analysis!.id)
     });
+  }
+
+  get uploadAllowed(): boolean {
+    return this.analysis && this.analysis.current_state.state.id < ApiStates.DATA_COMPLETE_VERIFIED || false;
   }
 
   private async updateAnalysis(analysisId: string) {

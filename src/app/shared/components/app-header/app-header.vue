@@ -157,6 +157,7 @@ export default class AppHeader extends BaseAuthComponent {
 
     &-menu {
       line-height: 20px;
+      margin-top: -1px;
 
       .dropdown-item {
         text-align: right;

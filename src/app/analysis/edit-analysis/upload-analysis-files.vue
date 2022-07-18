@@ -27,8 +27,12 @@ import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 export default class AppUploadAnalysisFiles extends BaseAuthComponent {
   @Prop({ required: true }) analysis!: AnalysisSchema;
 
-  async onStartUpload(files: string[], resume: boolean, done: (analysis: AnalysisSchema) => void) {
+  async onStartUpload(files: string[], resume: boolean, done: (analysis: AnalysisSchema | undefined) => void) {
     try {
+      if (this.analysis.current_state.state.id >= ApiStates.DATA_COMPLETE) {
+        throw { error: "INVALID_STATE_FOR_UPLOAD", message: "State DATA_INCOMPLETE (or less) required to upload further files." }
+      }
+
       // If the upload resumes, we don't want to delete the already uploaded files
       const filenames = resume ? [] : files;
 
@@ -39,6 +43,8 @@ export default class AppUploadAnalysisFiles extends BaseAuthComponent {
       done(this.analysis);
     } catch (e) {
       this.showError(e);
+
+      done(undefined);
     }
   }
 
