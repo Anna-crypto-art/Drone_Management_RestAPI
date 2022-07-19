@@ -31,7 +31,7 @@
             <b-button
               v-show="isSuperAdmin"
               @click="onDeleteClick(row.item)"
-              variant="danger"
+              variant="outline-danger"
               size="sm"
               :title="$t('delete')"
             >
@@ -51,7 +51,7 @@
       @submit="onMove"
     >
       <b-form-group :label="$t('select-analysis')">
-        <b-form-select v-model="moveTargetAnalysisId" :options="moveToAnalyses" />
+        <b-form-select v-model="moveTargetAnalysisId" :options="moveToAnalyses" required />
       </b-form-group>
     </app-modal-form>
   </div>
@@ -88,9 +88,11 @@ export default class AppAnalysisReferenceMeasurements extends BaseAuthComponent 
   refMeasureColumns: BvTableFieldArray = [
     { key: "measureDate", label: this.$t("measure-date").toString() },
     { key: "measureNotes", label: this.$t("notes").toString() },
-    { key: "user", label: this.$t("user").toString() },
+    { key: "user", label: this.$t("acquired-by").toString() },
+    { key: "actions", label: "" },
   ];
 
+  moveRefMeasureId: string | null = null;
   moveTargetAnalysisId: string | null = null;
   moveToAnalyses: { value: string, text: string }[] = [];
   moveModalLoading = false;
@@ -100,9 +102,11 @@ export default class AppAnalysisReferenceMeasurements extends BaseAuthComponent 
     this.updateRefMeasurements();
   }
 
-  async onMoveClick() {
+  async onMoveClick(refMeasureItem: any) {
     try {
       this.loading = true;
+
+      this.moveRefMeasureId = refMeasureItem.id;
 
       this.moveToAnalyses = (await volateqApi.getAllAnalysis({ plant_id: this.analysis.plant.id }))
         .filter(analysis => analysis.id !== this.analysis.id)
@@ -124,13 +128,19 @@ export default class AppAnalysisReferenceMeasurements extends BaseAuthComponent 
     try {
       this.moveModalLoading = true;
 
-      // do the move
+      if (!this.moveTargetAnalysisId) {
+        throw { error: "MISSING_TARGET_ANALYSIS", message: "Please select an analysis" }
+      }
+
+      await volateqApi.moveReferenceMeasurement(this.moveRefMeasureId!, this.moveTargetAnalysisId);
 
       this.showSuccess(this.$t("reference-measurement-moved-success").toString())
 
       await this.updateRefMeasurements();
 
       AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
+
+      this.moveModal.hide();
     } catch (e) {
       this.showError(e);
     } finally {
@@ -138,7 +148,7 @@ export default class AppAnalysisReferenceMeasurements extends BaseAuthComponent 
     }
   }
 
-  async onDeleteClick() {
+  async onDeleteClick(refMeasureItem: any) {
     try {
       if (!confirm(this.$t("reference-measurement-delete-are-you-sure").toString())) {
         return;
@@ -146,7 +156,7 @@ export default class AppAnalysisReferenceMeasurements extends BaseAuthComponent 
 
       this.loading = true;
 
-      // do the delete
+      await volateqApi.deleteRerefenceMeasurement(refMeasureItem.id);
 
       this.showSuccess(this.$t("reference-measurement-delete-success").toString())
       

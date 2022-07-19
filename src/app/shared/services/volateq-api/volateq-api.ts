@@ -494,26 +494,38 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public async getReferenceMeasurements(analysisId: string): Promise<ReferenceMeasurementSchema[]> {
-    return await this.get(`/auth/analysis/${analysisId}/reference-measurement`);
+    return await this.get(`/auth/analysis/${analysisId}/reference-measurements`);
   }
 
-  public async addReferencMeasurementValue(analysisId: string, addReferenceMeasurmentValue: AddReferenceMeasurmentValue): Promise<void> {
-    await this.post(`/auth/analysis/${analysisId}/reference-measurement-value`, addReferenceMeasurmentValue);
+  public async addReferencMeasurementValue(referenceMeasurementId: string, addReferenceMeasurmentValue: AddReferenceMeasurmentValue): Promise<void> {
+    await this.post(`/auth/reference-measurement/${referenceMeasurementId}/value`, addReferenceMeasurmentValue);
   }
 
   public async getReferencMeasurementValue(
-    analysisId: string,
     referenceMeasurementId: string,
     pcs: string
   ): Promise<ReferenceMeasurementValueSchema | undefined> {
-    return await this.get(`/auth/analysis/${analysisId}/reference-measurement-value/${referenceMeasurementId}`, { pcs });
+    const refMeasureValues: ReferenceMeasurementValueSchema[] = await this.get(`/auth/reference-measurement/${referenceMeasurementId}/values`, { pcs });
+    if (refMeasureValues.length > 0) {
+      return refMeasureValues[0];
+    }
+
+    return undefined;
   }
 
   public async getReferencMeasurementValues(
-    analysisId: string,
     referenceMeasurementId: string
   ): Promise<ReferenceMeasurementValueSchema[]> {
-    return await this.get(`/auth/analysis/${analysisId}/reference-measurement-value/${referenceMeasurementId}`);
+    return await this.get(`/auth/reference-measurement/${referenceMeasurementId}/values`);
+  }
+
+  public async moveReferenceMeasurement(referenceMeasurementId: string, targetAnalysisId: string): Promise<void> {
+    await this.post(`/auth/reference-measurement/${referenceMeasurementId}/move`, 
+      { target_analysis_id: targetAnalysisId });
+  }
+
+  public async deleteRerefenceMeasurement(referenceMeasurementId: string): Promise<void> {
+    await this.delete(`/auth/reference-measurement/${referenceMeasurementId}`);
   }
 
   public async getReferenceMeasurementValuesGeoVisual(referenceMeasurementId: string): Promise<any> {

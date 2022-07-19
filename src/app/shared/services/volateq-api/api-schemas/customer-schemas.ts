@@ -13,10 +13,14 @@ export enum CustomerRole {
   OPERATOR = 'Operator',
 }
 
-export interface CustomerSchema {
+export interface SimpleCustomerSchema {
   id: string;
   name: string;
   role: CustomerRole;
+}
+
+export interface CustomerSchema extends SimpleCustomerSchema {
   profile: AddressSchema;
   plants: PlantSchema[];
 }
+

@@ -40,7 +40,7 @@
           <template #title>
             <b-icon icon="clipboard-check" /><span class="pad-left">{{ $t("reference-measurements") }}</span>
           </template>
-          <app-upload-analysis-files :analysis="analysis" />
+          <app-analysis-reference-measurements :analysis="analysis" />
         </b-tab>
         <b-tab v-if="isSuperAdmin" class="app-edit-analysis-admin-tab">
           <template #title>
@@ -71,6 +71,7 @@ import { TaskSchema } from "@/app/shared/services/volateq-api/api-schemas/task-s
 import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
+import AppAnalysisReferenceMeasurements from "@/app/analysis/edit-analysis/analysis-reference-measurements.vue";
 
 @Component({
   name: "app-edit-analysis",
@@ -82,6 +83,7 @@ import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
     AppEditAnalysisAdmin,
     AppUploadAnalysisFiles,
     AppBox,
+    AppAnalysisReferenceMeasurements,
   },
 })
 export default class AppEditAnalysis extends BaseAuthComponent {

@@ -114,7 +114,7 @@
             {{ $t("acquire-reference-measurement-and-create-analyis") }}
           </span>
         </b-alert>
-        <b-form-group v-if="refMeasureCusomterSelection">
+        <b-form-group v-if="refMeasureCusomterSelection" :label="$t('customer')">
           <b-form-select v-model="refMeasure.customerId" :options="refMeasureCusomterSelection" required @change="onRefMeasureCustomerSelected" />
         </b-form-group>
 
@@ -604,7 +604,7 @@ export default class AppVisualization
         })).id;
       }
 
-      const refMeasureValues = await volateqApi.getReferencMeasurementValues(this.refMeasure!.analysisId, this.refMeasureId);
+      const refMeasureValues = await volateqApi.getReferencMeasurementValues(this.refMeasureId);
 
       AnalysisSelectionService.emit(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL);
       if (this.sidebarOpen) {

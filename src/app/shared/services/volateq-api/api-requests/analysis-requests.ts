@@ -22,7 +22,6 @@ export interface CreateReferenceMeasurement {
 }
 
 export interface AddReferenceMeasurmentValue {
-  reference_measurement_id: string;
   pcs: string;
   notes?: string;
   hce_temperature?: number;

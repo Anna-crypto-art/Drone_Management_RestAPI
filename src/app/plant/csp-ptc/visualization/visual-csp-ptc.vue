@@ -278,7 +278,7 @@ export default class AppVisualCspPtc
           componentLayer.startReferenceMeasurement(existingPcsCodes, async (pcs) => {
             try {
               const refMeasureValue: ReferenceMeasurementValueSchema | undefined = 
-                await volateqApi.getReferencMeasurementValue(event.options.analysisId!, event.refMeasureId, pcs);
+                await volateqApi.getReferencMeasurementValue(event.refMeasureId, pcs);
               
               if (refMeasureValue) {
                 this.refMeasureValue = {
@@ -330,8 +330,7 @@ export default class AppVisualCspPtc
   async onAddRefMeasureValue() {
     this.refMeasureValueModalLoading = true;
     try {
-      await volateqApi.addReferencMeasurementValue(this.refMeasureEventObject!.options.analysisId!, {
-        reference_measurement_id: this.refMeasureEventObject!.refMeasureId,
+      await volateqApi.addReferencMeasurementValue(this.refMeasureEventObject!.refMeasureId, {
         pcs: this.refMeasureValue!.pcs,
         notes: this.refMeasureValue!.notes || undefined,
         hce_temperature: this.refMeasureValue!.hceTemperature || undefined,
