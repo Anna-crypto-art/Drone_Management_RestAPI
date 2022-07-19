@@ -363,6 +363,10 @@
   "reference-measurement-delete-success": "Rerefence measurement has been deleted, successfully",
   "reference-measurement-delete-are-you-sure": "Delete reference measurement. Are you sure?",
   "acquired-by": "Acquired by",
+  "ignore-value": "Ignore value",
+  "ignore-value-undo": "Undo ignoring value",
+  "ignored": "Ignored",
+  "reference-measurement-value-change-success": "Reference measurement value changed, successfully",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

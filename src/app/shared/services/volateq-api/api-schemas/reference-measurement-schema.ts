@@ -19,4 +19,5 @@ export interface ReferenceMeasurementValueSchema {
   hce_temperature?: number;
   hce_broken_glass?: boolean;  
   fieldgeometry_component?: FieldgeometryComponentSchema;
+  ignore: boolean;
 }

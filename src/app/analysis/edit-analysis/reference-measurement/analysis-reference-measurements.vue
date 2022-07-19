@@ -2,20 +2,19 @@
   <div>
     <app-table-container>
       <b-table
-        ref="refMeasuresTable"
         :items="refMeasureItems"
         :fields="refMeasureColumns"
+        select-mode="single"
+        selectable
         hover
         head-variant="light"
         :busy="loading"
+        @row-selected="onRefMeasureSelected"
       >
         <template #table-busy>
           <div class="text-center">
             <b-spinner class="align-middle"></b-spinner>
           </div>
-        </template>
-        <template #cell(selected)="{ rowSelected }">
-          <b-checkbox :checked="rowSelected" disabled class="b-table-selectable-checkbox"> </b-checkbox>
         </template>
         <template #cell(actions)="row">
           <div class="hover-cell pull-right">
@@ -42,6 +41,8 @@
       </b-table>
     </app-table-container>
 
+    <app-reference-measurement-values :refMeasureId="selectedRefMeasureId" />
+
     <app-modal-form
       id="move-modal"
       ref="moveModal"
@@ -66,20 +67,21 @@ import { BvTableFieldArray } from "bootstrap-vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
-import { AnalysisEventService } from "../shared/analysis-event-service";
-import { AnalysisEvent } from "../shared/types";
+import { AnalysisEventService } from "../../shared/analysis-event-service";
+import { AnalysisEvent } from "../../shared/types";
+import AppReferenceMeasurementValues from "./reference-measurement-values.vue";
 
 @Component({
   name: "app-analysis-reference-measurements",
   components: {
     AppTableContainer,
     AppModalForm,
+    AppReferenceMeasurementValues,
   }
 })
 export default class AppAnalysisReferenceMeasurements extends BaseAuthComponent {
   @Prop({ required: true }) analysis!: AnalysisSchema;
 
-  @Ref() refMeasuresTable: any; // b-table
   @Ref() moveModal!: IAppModalForm;
 
   loading = false;
@@ -91,6 +93,7 @@ export default class AppAnalysisReferenceMeasurements extends BaseAuthComponent 
     { key: "user", label: this.$t("acquired-by").toString() },
     { key: "actions", label: "" },
   ];
+  selectedRefMeasureId: string | null = null;
 
   moveRefMeasureId: string | null = null;
   moveTargetAnalysisId: string | null = null;
@@ -167,6 +170,14 @@ export default class AppAnalysisReferenceMeasurements extends BaseAuthComponent 
       this.showError(e);
     } finally {
       this.loading = false;
+    }
+  }
+
+  onRefMeasureSelected(refMeasureItems: { id: string }[]) {
+    if (refMeasureItems.length > 0) {
+      this.selectedRefMeasureId = refMeasureItems[0].id;
+    } else {
+      this.selectedRefMeasureId = null;
     }
   }
 

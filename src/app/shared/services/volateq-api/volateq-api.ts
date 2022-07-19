@@ -528,6 +528,10 @@ export class VolateqAPI extends HttpClientBase {
     await this.delete(`/auth/reference-measurement/${referenceMeasurementId}`);
   }
 
+  public async ignoreReferenceMeasurementValue(referenceMeasurementValueId: string, ignore: boolean): Promise<void> {
+    await this.post(`/auth/reference-measurement/value/${referenceMeasurementValueId}/ignore`, { ignore });
+  }
+
   public async getReferenceMeasurementValuesGeoVisual(referenceMeasurementId: string): Promise<any> {
     return this.get(`/auth/geo-visual/${referenceMeasurementId}/reference-measuurement-values`);
   }

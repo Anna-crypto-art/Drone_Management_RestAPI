@@ -71,7 +71,7 @@ import { TaskSchema } from "@/app/shared/services/volateq-api/api-schemas/task-s
 import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
-import AppAnalysisReferenceMeasurements from "@/app/analysis/edit-analysis/analysis-reference-measurements.vue";
+import AppAnalysisReferenceMeasurements from "@/app/analysis/edit-analysis/reference-measurement/analysis-reference-measurements.vue";
 
 @Component({
   name: "app-edit-analysis",
