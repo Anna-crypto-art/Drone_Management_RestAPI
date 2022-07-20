@@ -1,11 +1,9 @@
 <template>
   <app-content :title="$t('analysis-overview')" :subtitle="$t('analysis-overview_descr')">
     <div class="app-analysis">
-      <router-link :to="{ name: 'AnalysisNew' }" v-if="!hasIncompleteAnalysis">
-        <b-button variant="primary">
-          {{ $t("new-data-upload") }}
-        </b-button>
-      </router-link>
+      <b-button variant="primary" v-if="!hasIncompleteAnalysis" @click="onNewDataUploadClick">
+        {{ $t("new-data-upload") }}
+      </b-button>
       <router-link v-if="incompleteAnalysis" :to="{ name: 'EditAnalysis', params: { id: incompleteAnalysis.id } }"> 
         <b-button variant="primary">
           {{ $t("upload-data-for-analysis", { analysis: incompleteAnalysis.name }) }}
@@ -225,6 +223,14 @@ export default class AppAnalysis extends BaseAuthComponent {
 
   hasReadableResult(analysisItem: any): boolean {
     return this.hasReleasedResult(analysisItem) || (this.isSuperAdmin && this.hasResult(analysisItem));
+  }
+
+  onNewDataUploadClick() {
+    if (!this.hasIncompleteAnalysis) {
+      const query = this.selectedPlantId ? { plantId: this.selectedPlantId } : undefined;
+
+      this.$router.push({ name: "AnalysisNew", query });
+    }
   }
 
   private async updateAnalysisRows() {

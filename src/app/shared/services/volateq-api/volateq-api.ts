@@ -417,11 +417,22 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public downloadMultipleAnalysisFilesUrl(analysisId: string, filenames: string[]) {
-    return this.getUrl(`${apiBaseUrl}/auth/analysis/${analysisId}/files-download`, { filenames: filenames });
+    return this.getUrl(`${apiBaseUrl}/auth/analysis/${analysisId}/files/download`, { filenames: filenames });
   }
 
-  public getAnalysisFilesInfo(analysisId: string, filenames: string[]): Promise<AnalysisFileInfoSchema> {
-    return this.post(`/auth/analysis/${analysisId}/files-info`, { file_names: filenames });
+  public getAnalysisFiles(analysisId: string, filenames: string[]): Promise<AnalysisFileInfoSchema> {
+    return this.post(`/auth/analysis/${analysisId}/files`, { file_names: filenames });
+  }
+
+  public async deleteAnalysisFiles(analysisId: string, filenames: string[]): Promise<void> {
+    await this.post(`/auth/analysis/${analysisId}/files/delete`, { file_names: filenames });
+  }
+
+  public async moveAnalysisFiles(analysisId: string, targetAnalysisId: string, filenames: string[]): Promise<void> {
+    await this.post(`/auth/analysis/${analysisId}/files/move`, {
+      file_names: filenames,
+      target_analysis_id: targetAnalysisId,
+    });
   }
 
   public getStates(): Promise<Record<ApiStates, ApiStates[]>> {

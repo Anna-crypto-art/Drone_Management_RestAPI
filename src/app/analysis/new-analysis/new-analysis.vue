@@ -1,5 +1,5 @@
 <template>
-  <app-content :title="$t('new-data-upload')" :navback="true" :subtitle="$t('create-new-analysis_descr')">
+  <app-content :title="$t('new-data-upload')" :navback="true" :subtitle="plantName">
     <div class="app-new-analysis">
       <app-analysis-upload
       :analysis="analysis"
@@ -42,6 +42,7 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppAnalysisUpload from "@/app/analysis/shared/analysis-upload.vue";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 
 @Component({
   name: "app-new-analysis",
@@ -66,11 +67,7 @@ export default class AppNewAnalysis extends BaseAuthComponent {
 
   async created() {
     try {
-      this.plants = await volateqApi.getPlants();
-      this.plantOptions = this.plants.map(plant => ({ value: plant.id, text: plant.name }));
-      if (this.plants.length === 1) {
-        this.selectedPlantId = this.plants[0].id;
-      }
+      this.preparePlantSelection();
     } catch (e) {
       this.showError(e);
     }
@@ -143,6 +140,48 @@ export default class AppNewAnalysis extends BaseAuthComponent {
   onRetryUpload() {
     // Forward to existing analysis
     this.$router.push({ name: "EditAnalysis", params: { id: this.analysis!.id } });
+  }
+
+  get plantName(): string {
+    this.selectedPlantId; // keep this, to make vue reaction working....
+
+    if (this.plants) {
+      const plant = this.plants.find(plant => plant.id === this.selectedPlantId);
+      if (plant) {
+        return plant.name;
+      }
+    }
+
+    return "";
+  }
+
+  private async preparePlantSelection() {
+    this.plants = await volateqApi.getPlants();
+
+    let plantId: string | (string | null)[] | undefined = this.$route.query.plantId;
+    if (plantId && !Array.isArray(plantId)) {      
+      this.plants = this.plants.filter(plant => plant.id === plantId);      
+    } else {
+      plantId = undefined;
+    }
+
+    const analyses = await volateqApi.getAllAnalysis({ plant_id: plantId });
+    this.plants = this.plants.filter(plant => {
+      return !analyses.find(analysis => analysis.plant.id === plant.id && 
+        analysis.current_state.state.id <= ApiStates.DATA_INCOMPLETE);
+    });
+
+    if (this.plants.length === 0) {
+      this.$router.push({ name: "Analyses"});
+      return;
+    }
+
+    this.plantOptions = this.plants.map(plant => ({ value: plant.id, text: plant.name }));
+    if (this.plants.length === 1) {
+      this.selectedPlantId = this.plants[0].id;
+    }
+
+    this.onPlantSelectionChanged();
   }
 }
 </script>

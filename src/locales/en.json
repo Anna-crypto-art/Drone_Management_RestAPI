@@ -369,6 +369,11 @@
   "ignore-value-undo": "Undo ignoring value",
   "ignored": "Ignored",
   "reference-measurement-value-change-success": "Reference measurement value changed, successfully",
+  "move-selected-files": "Move selected files",
+  "selected-files-moved-success": "Selected files moved, successfully",
+  "delete-selected-files": "Delete selected files",
+  "delete-selected-files-sure": "Are you sure, that you like to delete the selected files? This cannot undone.",
+  "selected-files-deleted-success": "Selected files successfully deleted",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

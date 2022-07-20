@@ -7,6 +7,23 @@
     >
       {{ $t("download-selected-files") }}
     </app-button>
+    <app-button v-if="isSuperAdmin"
+      cls="mar-left"
+      variant="secondary"
+      :disabled="isDownloadButtonDisabled"
+      @click="onMoveSelectedFilesClick"
+    >
+      {{ $t("move-selected-files") }}
+    </app-button>
+    <app-button v-if="isSuperAdmin"
+      cls="mar-left"
+      variant="outline-danger"
+      :disabled="isDownloadButtonDisabled"
+      :loading="deleteSelectedFilesLoading"
+      @click="onDeleteSelectedFilesClick"
+    >
+      {{ $t("delete-selected-files") }}
+    </app-button>
     <app-table-container>
       <b-table
         ref="downloadFilesTable"
@@ -35,6 +52,18 @@
         </template>
       </b-table>
     </app-table-container>
+
+    <app-modal-form id="moveSelectedFilesModal"
+      ref="moveSelectedFilesModal"
+      :modalLoading="moveSelectedFilesLoading"
+      :okTitle="$t('move')"
+      :title="$t('move-selected-files')"
+      @submit="onMoveSelectedFiles"
+    >
+      <b-form-group :label="$t('select-analysis')">
+        <b-form-select v-model="targetAnalysisId" :options="moveAnalysisSelection" required />
+      </b-form-group>
+    </app-modal-form>
   </div>
 </template>
 
@@ -50,20 +79,26 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { getReadableFileSize } from "@/app/shared/services/helper/file-helper";
 import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
-import { waitFor } from "@/app/shared/services/helper/debounce-helper";
 import dateHelper from "@/app/shared/services/helper/date-helper";
+import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
+import { IAppModalForm } from "@/app/shared/components/app-modal/types";
+import { AnalysisEventService } from "../shared/analysis-event-service";
+import { AnalysisEvent } from "../shared/types";
 
 @Component({
   name: "app-download-analysis-files",
   components: {
     AppTableContainer,
     AppButton,
+    AppModalForm,
   },
 })
 export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
   @Prop({ required: true }) analysis!: AnalysisSchema;
 
   @Ref() downloadFilesTable!: any; // b-table
+  @Ref() moveSelectedFilesModal!: IAppModalForm;
+
   isDownloadButtonDisabled = true;
   downloadButtonLoading = false;
 
@@ -79,6 +114,12 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
   private selectedDonwloadFiles: { name: string }[] = [];
 
   isFilesLoading = false;
+
+  moveSelectedFilesLoading = false;
+  targetAnalysisId: string | null = null;
+  moveAnalysisSelection: { value: string, text: string }[] = [];
+
+  deleteSelectedFilesLoading = false;
 
   async created() {
     this.loadFiles();
@@ -139,6 +180,63 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
     return date && dateHelper.toDateTime(date) || "";
   }
 
+  async onMoveSelectedFilesClick() {
+    try {
+      this.moveAnalysisSelection = (await volateqApi.getAllAnalysis({ plant_id: this.analysis.plant.id }))
+        .filter(analysis => analysis.id !== this.analysis.id)
+        .map(analysis => ({ value: analysis.id, text: analysis.name }));
+  
+      this.moveSelectedFilesModal.show();
+    } catch (e) {
+      this.showError(e);
+    }
+  }
+
+  async onMoveSelectedFiles() {
+    try {
+      this.moveSelectedFilesLoading = true;
+
+      await volateqApi.moveAnalysisFiles(
+        this.analysis.id, 
+        this.targetAnalysisId!,
+        this.selectedDonwloadFiles.map(downloadFile => downloadFile.name)
+      );
+
+      this.moveSelectedFilesModal.hide();
+
+      this.showSuccess(this.$t("selected-files-moved-success").toString())
+
+      AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
+    } catch (e) {
+      this.showError(e);
+    } finally {
+      this.moveSelectedFilesLoading = false;
+    }
+  }
+
+  async onDeleteSelectedFilesClick() {
+    try {
+      if (!confirm(this.$t("delete-selected-files-sure").toString())) {
+        return;
+      }
+
+      this.deleteSelectedFilesLoading = true;
+
+      await volateqApi.deleteAnalysisFiles(
+        this.analysis.id, 
+        this.selectedDonwloadFiles.map(downloadFile => downloadFile.name)
+      );
+
+      this.showSuccess(this.$t("selected-files-deleted-success").toString())
+
+      AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
+    } catch (e) {
+      this.showError(e);
+    } finally {
+      this.deleteSelectedFilesLoading = false;
+    }
+  }
+
   private async loadFiles() {
     this.isFilesLoading = true;
     try {
@@ -155,7 +253,7 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
 
       this.downloadFilesTableItems = [];
 
-      const fileInfos = await volateqApi.getAnalysisFilesInfo(this.analysis.id, files);
+      const fileInfos = await volateqApi.getAnalysisFiles(this.analysis.id, files);
       for (const fileName of Object.keys(fileInfos)) {
         const fileInfo = fileInfos[fileName];
         
