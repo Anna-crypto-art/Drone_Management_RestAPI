@@ -80,17 +80,18 @@
             <div v-else>UNKNOWN</div>
           </template>
           <template #cell(hasResults)="row">
-            <b-icon v-show="row.item.analysisResultId" icon="check" class="font-xl text-success" />
+            <b-icon v-show="hasResult(row.item) && !hasReleasedResult(row.item)" icon="check" class="font-xl text-success" />
+            <b-icon v-show="hasReleasedResult(row.item)" icon="check-all" class="font-xl text-success" />
           </template>
           <template #cell(actions)="row">
             <div class="hover-cell pull-right">
               <router-link
-                v-if="row.item.analysisResultId"
+                v-if="hasReadableResult(row.item)"
                 :title="$t('show-results')"
                 :to="{
                   name: 'Plant',
                   params: { id: row.item.plantId },
-                  query: { view: 'table', result: row.item.analysisResultId },
+                  query: { view: 'table', result: row.item.analysisResult.id },
                 }"
               >
                 <b-button variant="primary" size="sm"><b-icon icon="graph-up"></b-icon></b-button>
@@ -112,6 +113,7 @@ import AppTableContainer from "@/app/shared/components/app-table-container/app-t
 import { BvTableFieldArray } from "bootstrap-vue";
 import { Component } from "vue-property-decorator";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
+import dateHelper from "../shared/services/helper/date-helper";
 import { AnalysisSchema } from "../shared/services/volateq-api/api-schemas/analysis-schema";
 import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
 import { ApiStates } from "../shared/services/volateq-api/api-states";
@@ -153,12 +155,12 @@ export default class AppAnalysis extends BaseAuthComponent {
         label: this.$t("acquisition-date").toString(),
         sortable: true,
         formatter: (flownAt: string) => {
-          return new Date(Date.parse(flownAt)).toLocaleDateString();
+          return dateHelper.toDate(flownAt);
         },
       },
       { key: "user", label: this.$t("created-by").toString(), sortable: true },
       { key: "state", label: this.$t("state").toString(), sortable: true },
-      { key: "hasResults", label: this.$t("has-results").toString() },
+      { key: "hasResults", label: this.$t("has-results-released").toString() },
       { key: "actions" },
     ];
 
@@ -213,6 +215,18 @@ export default class AppAnalysis extends BaseAuthComponent {
     return incompleteAnalyses[0];
   }
 
+  hasResult(analysisItem: any): boolean {
+    return !!analysisItem.analysisResult
+  }
+
+  hasReleasedResult(analysisItem: any): boolean {
+    return analysisItem.analysisResult?.released || false;
+  }
+
+  hasReadableResult(analysisItem: any): boolean {
+    return this.hasReleasedResult(analysisItem) || (this.isSuperAdmin && this.hasResult(analysisItem));
+  }
+
   private async updateAnalysisRows() {
     this.isLoading = true;
 
@@ -236,9 +250,7 @@ export default class AppAnalysis extends BaseAuthComponent {
               email: a.user.email,
             }) ||
             "",
-          analysisResultId:
-            (a.analysis_result && (this.isSuperAdmin || a.analysis_result.released) && a.analysis_result.id) ||
-            undefined,
+          analysisResult: a.analysis_result,
           state: a.current_state,
           files: a.files,
           plantId: a.plant.id,

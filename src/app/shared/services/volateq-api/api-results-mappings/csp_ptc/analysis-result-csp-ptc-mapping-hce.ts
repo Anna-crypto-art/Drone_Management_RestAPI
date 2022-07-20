@@ -1,4 +1,5 @@
 import { FilterFieldType } from "@/app/plant/shared/filter-fields/types";
+import dateHelper from "../../../helper/date-helper";
 import { ApiKeyFigure } from "../../api-key-figures";
 import { AnalysisResultCspPtcHceComparedSchema, AnalysisResultCspPtcHceSchema } from "../../api-schemas/analysis-result-csp-ptc-hce-schema";
 import analysisResultMappingBase from "../analysis-result-mapping-base";
@@ -24,7 +25,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
   {
     getValue: r => r.timestamp,
     transName: "time",
-    formatter: value => new Date(Date.parse(value as string)).toLocaleString(undefined, { timeZone: "UTC" }),
+    formatter: value => dateHelper.toDateTime(value as string),
   },
   {
     getValue: r => r.position_in_loop,

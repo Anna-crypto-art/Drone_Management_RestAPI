@@ -48,6 +48,7 @@ import { Component, Prop, Ref } from "vue-property-decorator";
 import { State } from "vuex-class";
 import { AnalysisSelectionService } from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-service";
 import { AnalysisSelectionEvent } from "./types";
+import dateHelper from "@/app/shared/services/helper/date-helper";
 
 @Component({
   name: "app-analysis-selection-sidebar",
@@ -81,7 +82,7 @@ export default class AppAnalysisSelectionSidebar extends Vue {
       this.analysisResultsTableItems.push({
         id: analysisResult.id,
         name: analysisResult.analysis.name,
-        date: new Date(Date.parse(analysisResult.analysis.flown_at)).toLocaleDateString(),
+        date: dateHelper.toDate(analysisResult.analysis.flown_at),
         kpis: analysisResult.key_figures,
         // only show details for history mode .. that will be implemented in near future
         _showDetails: false,

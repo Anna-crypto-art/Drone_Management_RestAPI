@@ -147,11 +147,11 @@ export default class AppTablesComponent extends AnalysisSelectionBaseComponent {
         );
 
         const csvFileName =
-          dateHelper.toDateTime(new Date()) +
+          dateHelper.toNumericDateTime(new Date()) +
           "_" +
           this.plant.name +
           "_" +
-          new Date(Date.parse(this.selectedAnalysisResult!.csp_ptc.created_at)).toLocaleDateString() +
+          dateHelper.toDate(this.selectedAnalysisResult!.csp_ptc.created_at) +
           "_" +
           activeComponent.label +
           ".csv";

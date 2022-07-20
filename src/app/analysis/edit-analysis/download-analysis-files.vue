@@ -51,6 +51,7 @@ import { getReadableFileSize } from "@/app/shared/services/helper/file-helper";
 import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
 import { waitFor } from "@/app/shared/services/helper/debounce-helper";
+import dateHelper from "@/app/shared/services/helper/date-helper";
 
 @Component({
   name: "app-download-analysis-files",
@@ -84,7 +85,7 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
   }
 
   @Watch('analysis') onAnalysisChanged() {
-    this.loadFiles(true);
+    this.loadFiles();
   }
 
   onDownloadFilesSelected(selectedDownloadFiles: { name: string }[]) {
@@ -135,10 +136,10 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
   }
 
   getReadableDate(date: number | null): string {
-    return date && (new Date(date)).toLocaleString() || "";
+    return date && dateHelper.toDateTime(date) || "";
   }
 
-  private async loadFiles(analysisHasChanged = false) {
+  private async loadFiles() {
     this.isFilesLoading = true;
     try {
       let files: string[] = [];
@@ -181,18 +182,10 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
         return 0;
       });
 
-      if (this.analysis.current_state.state.id === ApiStates.UPLOADING) {
-        const me = await volateqApi.getMe();
-
-        if (analysisHasChanged) {
-          // Wait for uploaded to start...
-          await waitFor(3000);          
-        }
-
+      if (this.analysis.current_state.state.id === ApiStates.UPLOADING) {        
         let uploadingUsers = await volateqApi.getUploadingUsers(this.analysis.id);
-        if (uploadingUsers.length === 0) {
-          AppContentEventService.showWarning(this.analysis.id, this.$t("state-uploading-without-uploading-user").toString())
-        } else {
+        if (uploadingUsers.length > 0) {
+          const me = await volateqApi.getMe();
           uploadingUsers = uploadingUsers.filter(userInfo => userInfo.email != me.email);
 
           if (uploadingUsers.length > 0) {

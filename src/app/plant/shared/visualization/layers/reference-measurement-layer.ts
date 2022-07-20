@@ -1,4 +1,5 @@
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import dateHelper from "@/app/shared/services/helper/date-helper";
 import { MathHelper } from "@/app/shared/services/helper/math-helper";
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
@@ -43,7 +44,7 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
       notes = notes.substring(0, 30) + "...";
     }
 
-    return (new Date(Date.parse(this.referenceMeasurement.measure_date))).toLocaleDateString() + 
+    return dateHelper.toDate(this.referenceMeasurement.measure_date) + 
       (notes ? " - " + notes : "")
   }
 

@@ -46,6 +46,7 @@ import { MathHelper } from "@/app/shared/services/helper/math-helper";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppLoading from "@/app/shared/components/app-loading/app-loading.vue";
+import dateHelper from "@/app/shared/services/helper/date-helper";
 
 ChartJS.register(
   Title,
@@ -156,7 +157,7 @@ export default class AppDiagramHistory extends BaseAuthComponent {
       const nums: DiagramNumberBoxNum[] = this.numberBox.nums || [this.numberBox];
 
       this.lineChartData = {
-        labels: groupedResults.items.map(item => new Date(Date.parse(item.flown_at))),
+        labels: groupedResults.items.map(item => dateHelper.getDate(item.flown_at)),
         datasets: nums.map(num => ({
           data: groupedResults.items.map(item => item[num.columnName] as number),
           backgroundColor: num.color,

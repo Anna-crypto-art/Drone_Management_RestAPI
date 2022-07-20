@@ -189,6 +189,7 @@ import { EditUser, UserItem } from "@/app/settings/users/types";
 import { SelectPlant } from "@/app/settings/types";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import dateHelper from "@/app/shared/services/helper/date-helper";
 
 
 const MAX_USERS_PER_CUSTOMER = 10;
@@ -261,9 +262,9 @@ export default class AppSettingsUsers extends BaseAuthComponent {
         } else {
           if (user.state === UserStateSchema.REGISTERED) {
             stateDate =
-              this.$t("registered-at").toString() + " " + new Date(Date.parse(user.registered_at)).toLocaleString();
+              this.$t("registered-at").toString() + " " + dateHelper.toDateTime(user.registered_at);
           } else if (user.state === UserStateSchema.PENDING) {
-            stateDate = this.$t("invited-at").toString() + " " + new Date(Date.parse(user.invited_at)).toLocaleString();
+            stateDate = this.$t("invited-at").toString() + " " + dateHelper.toDateTime(user.invited_at);
           }
         }
 

@@ -34,7 +34,7 @@ export default {
     return [txt, { time }];
   },
 
-  toDateTime: function (d: Date): string {
+  toNumericDateTime: function (d: Date): string {
     return (
       ("0" + d.getDate()).slice(-2) +
       ("0" + (d.getMonth() + 1)).slice(-2) +
@@ -43,4 +43,26 @@ export default {
       ("0" + d.getMinutes()).slice(-2)
     );
   },
+
+  getDate(date: string | number | Date): Date {
+    if (typeof date === "string") {
+      return new Date(Date.parse(date));
+    }
+
+    if (typeof date === "number") {
+      return new Date(date);
+    }
+
+    return date;
+  },
+
+  toDate(date: string | number | Date): string {
+    return this.getDate(date).toISOString().substring(0, 10);
+  },
+  toTime(date: string | number | Date): string {
+    return this.getDate(date).toISOString().substring(11, 16);
+  },
+  toDateTime(date: string | number | Date): string {
+    return this.toDate(date) + " " + this.toTime(date);
+  }
 };

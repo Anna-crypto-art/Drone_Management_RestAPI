@@ -165,6 +165,7 @@ import { AnalysisSelectionService } from "../analysis-selection-sidebar/analysis
 import { AnalysisSelectionEvent } from "../analysis-selection-sidebar/types";
 import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 import { RefMeasureLayers } from "./ref-measure-layers";
+import dateHelper from "@/app/shared/services/helper/date-helper";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -546,7 +547,7 @@ export default class AppVisualization
             { value: null, text: "" },
             ...myReferenceMeasurements.map(referenceMeasurement => ({
               value: referenceMeasurement.id,
-              text: (new Date(Date.parse(referenceMeasurement.measure_date))).toLocaleDateString() + " - " 
+              text: dateHelper.toDate(referenceMeasurement.measure_date) + " - " 
                 + (referenceMeasurement.notes || ""),
             }))
           ];

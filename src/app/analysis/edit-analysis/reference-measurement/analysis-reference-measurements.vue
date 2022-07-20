@@ -70,6 +70,7 @@ import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import { AnalysisEventService } from "../../shared/analysis-event-service";
 import { AnalysisEvent } from "../../shared/types";
 import AppReferenceMeasurementValues from "./reference-measurement-values.vue";
+import dateHelper from "@/app/shared/services/helper/date-helper";
 
 @Component({
   name: "app-analysis-reference-measurements",
@@ -187,7 +188,7 @@ export default class AppAnalysisReferenceMeasurements extends BaseAuthComponent 
       
       this.refMeasureItems = (await volateqApi.getReferenceMeasurements(this.analysis.id)).map(refMeasure => ({
         id: refMeasure.id,
-        measureDate: (new Date(Date.parse(refMeasure.measure_date))).toLocaleDateString(),
+        measureDate: dateHelper.toDate(refMeasure.measure_date),
         measureNotes: refMeasure.notes,
         user: (refMeasure.user.first_name + " " + refMeasure.user.last_name).trim() || refMeasure.user.email,
       }));
