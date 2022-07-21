@@ -148,10 +148,6 @@ export class OrhtoImageMixin {
     }
   }
 
-  protected getOrthoImageZIndex(): number {
-    return -1;
-  }
-
   public removeOrthoImageFeatures() {
     if (this.layer.orthoImages) {
       for (const orthoImage of this.layer.orthoImages) {

@@ -116,10 +116,6 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
     return ApiComponent.CSP_PTC_ABSORBER;
   }
 
-  public getOrthoImageZIndex(): number {
-    return -1;
-  }
-
   protected getDescription(): string | undefined {
     return this.referenceMeasurement.notes;
   }
