@@ -374,6 +374,8 @@
   "delete-selected-files": "Delete selected files",
   "delete-selected-files-sure": "Are you sure, that you like to delete the selected files? This cannot undone.",
   "selected-files-deleted-success": "Selected files successfully deleted",
+  "load-all-ortho-images": "Load all ortho images",
+  "load-all-ortho-images-sure": "Are you sure, that you like to load all ortho images? This may take a while... ",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

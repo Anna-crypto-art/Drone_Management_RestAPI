@@ -15,8 +15,28 @@
           <b-form-checkbox v-model="satelliteView" switch @change="onSatelliteViewChanged">
             {{ $t("satellite-view") }}
           </b-form-checkbox>
-          <br>
-          <app-button variant="secondary" size="sm" @click="onClearOrthoImagesClick">{{ $t('clear-ortho-images') }}</app-button>
+          <hr v-show="hasLoadedOrthoImages">
+          <app-button v-show="hasLoadedOrthoImages"
+            variant="secondary"
+            size="sm"
+            @click="onClearOrthoImagesClick"
+          >
+            {{ $t('clear-ortho-images') }}
+          </app-button>
+          <hr v-show="availableOrthoImages.length > 0">
+          <app-dropdown-button 
+            v-show="availableOrthoImages.length > 0"
+            variant="secondary"
+            :title="$t('load-all-ortho-images')"
+            :loading="loadAllOrhtoImagesLoading"
+            size="sm"
+          >
+            <b-dropdown-item-button v-for="orthoImage in availableOrthoImages" :key="orthoImage.name"
+              @click="onLoadAllOrhtoImagesClick(orthoImage)"
+            >
+              {{ orthoImage.name }}
+            </b-dropdown-item-button>
+          </app-dropdown-button>
         </app-collapse>
       </template>
 
@@ -166,6 +186,10 @@ import { AnalysisSelectionEvent } from "../analysis-selection-sidebar/types";
 import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 import { RefMeasureLayers } from "./ref-measure-layers";
 import dateHelper from "@/app/shared/services/helper/date-helper";
+import { layerEvents } from "./layer-events";
+import { OrthoImage } from "./layers/types";
+import { ScaComponentLayer } from "../../csp-ptc/visualization/component-layers/sca-component-layer";
+import { OrhtoImageMixin } from "./mixins/ortho-image-mixin";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -216,7 +240,11 @@ export default class AppVisualization
   refMeasureModalLoading = false;
   refMeasure: ReferenceMeasurementOptions | null = null;
   refMeasureCusomterSelection: { value: string, text: string }[] | null = null;
-  oldRefMeasures: { value: string | null, text: string }[] | null = null; 
+  oldRefMeasures: { value: string | null, text: string }[] | null = null;
+
+  hasLoadedOrthoImages = false;
+  availableOrthoImages: OrthoImage[] = [];
+  loadAllOrhtoImagesLoading = false;
 
   private worldMapLayer!: OSMLayer;
 
@@ -230,7 +258,14 @@ export default class AppVisualization
     this.showCouldNotBeMeasured = appLocalStorage.getItem(STORAGE_KEY_SHOWUNDEFINED) || false;
     this.satelliteView = appLocalStorage.getItem(STORAGE_KEY_SATELLITEVIEW) || false;
 
-    this.createLayers();    
+    this.createLayers();
+
+    layerEvents.onOrthoImageLoaded(() => {
+      this.hasLoadedOrthoImages = true;
+    });
+    layerEvents.onRemoveOrthoImages(() => {
+      this.hasLoadedOrthoImages = false;
+    });
   }
 
   async mounted() {
@@ -246,6 +281,7 @@ export default class AppVisualization
     this.piLayersHierarchy.toggleMultiSelection(true, true);
     this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
     this.piLayersHierarchy.updateVisibility();
+    this.availableOrthoImages = this.piLayersHierarchy.getAvailableOrthoImages();
 
     await this.refMeasureLayers.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     this.refMeasureLayers.updateVisibility();
@@ -262,6 +298,7 @@ export default class AppVisualization
     this.piLayersHierarchy.setCompareAnalysisResult(this.compareAnalysisResult || null);
     this.piLayersHierarchy.toggleMultiSelection(false, true);
     this.piLayersHierarchy.updateVisibility();
+    this.availableOrthoImages = this.piLayersHierarchy.getAvailableOrthoImages();
 
     await this.refMeasureLayers.addAndSelectAnalysisResult(undefined);
     this.refMeasureLayers.updateVisibility();
@@ -450,6 +487,26 @@ export default class AppVisualization
 
   onClearOrthoImagesClick() {
     this.piLayersHierarchy.clearOrthoImages();
+  }
+
+  async onLoadAllOrhtoImagesClick(orthoImage: OrthoImage) {
+    try {
+      if (!confirm(this.$t('load-all-ortho-images-sure').toString())) {
+        return;
+      }
+
+      this.loadAllOrhtoImagesLoading = true;
+
+      await OrhtoImageMixin.loadOrthoImage(
+        orthoImage,
+        this.plant,
+        this.firstAnalysisResult!.id,
+      );
+    } catch (e) {
+      this.showError(e);
+    } finally {
+      this.loadAllOrhtoImagesLoading = false;
+    }
   }
 
   private createLayers(): void {

@@ -6,9 +6,4 @@ export interface IOrthoImageMixin {
   orthoImages: OrthoImage[] | null;
   analysisResult: AnalysisResultDetailedSchema;
   getComponentId(): ApiComponent;
-  getOrthoImageZIndex(): number;
-
-
-
-  
 }

@@ -2,7 +2,7 @@ import { GroupLayer, LayerType } from "@/app/shared/components/app-geovisualizat
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { KeyFigureLayer } from "./layers/key-figure-layer";
-import { KeyFigureColorScheme, KeyFigureInfo } from "./layers/types";
+import { KeyFigureColorScheme, KeyFigureInfo, OrthoImage } from "./layers/types";
 import { GroupKPILayer, KeyFigureTypeMap } from "./types";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
@@ -173,6 +173,19 @@ export class PILayersHierarchy {
     for (const layer of this.getAllChildLayers()) {
       layer.removeOrthoImageFeatures();
     }
+  }
+
+  public getAvailableOrthoImages(): OrthoImage[] {
+    for (const layer of this.getAllChildLayers()) {
+      if (layer.isVisible) {
+        const orthoImages = layer.orthoImages?.filter(orthoImage => orthoImage.available);
+        if (orthoImages && orthoImages.length > 0) {
+          return orthoImages;
+        }
+      }
+    }
+
+    return [];
   }
 
   private getOrCreateParentComponentLayer(keyFigure: KeyFigureSchema): GroupKPILayer {

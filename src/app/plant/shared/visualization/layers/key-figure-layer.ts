@@ -237,11 +237,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   public removeOrthoImageFeatures() {
     this.orhtoImageMixin.removeOrthoImageFeatures();
   }
-
-  public getOrthoImageZIndex(): number {
-    return -1;
-  }
-
+  
   public getComponentId() {
     return this.keyFigure.component_id;
   }

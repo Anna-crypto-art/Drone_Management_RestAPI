@@ -11,6 +11,8 @@ import { OrthoImage } from "../layers/types";
 import { FeatureAction, FeatureInfos } from "../types";
 import { IOrthoImageMixin } from "./types";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
+import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
+import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 
 export class OrhtoImageMixin {
   constructor(
@@ -54,43 +56,50 @@ export class OrhtoImageMixin {
     return featureInfos;
   }
 
-  protected async loadOrthoImage(orthoImage: OrthoImage, featureInfos: FeatureInfos): Promise<void> {
-    try {
-      const geoJSON = await volateqApi.getKeyFiguresGeoVisual(
-        this.layer.vueComponent.plant.id,
-        this.layer.analysisResult.id,
-        orthoImage.keyFigureId,
+  public static async loadOrthoImage(
+    orthoImage: OrthoImage,
+    plant: PlantSchema,
+    analysisResultId: string,
+    componentId?: ApiComponent,
+    pcs?: string,
+  ): Promise<void> {
+    const geoJSON = await volateqApi.getKeyFiguresGeoVisual(
+      plant.id,
+      analysisResultId,
+      orthoImage.keyFigureId,
+      (
+        componentId && pcs ? 
         {
-          child_component_id: this.layer.getComponentId(),
-          child_pcs: featureInfos.title
-        }
-      );
+          child_component_id: componentId,
+          child_pcs: pcs,
+        } :
+        undefined
+      )
+    );
 
-      const features: Feature<Geometry>[] = new GeoJSON(GEO_JSON_OPTIONS).readFeatures(geoJSON)
-      if (!features || features.length === 0) {
-        throw { error: "NOT_FOUND", message: "Ortho image not found" };
-      }
-
-      if (!orthoImage.features) {
-        orthoImage.features = [];
-      }
-      orthoImage.features.push(...features);
-
-      for (const feature of features) {
-        this.setImageFeatureStyle(feature);
-      }
-
-      // Ortho images will be added into the SCA component layer
-      layerEvents.emitOrthoImageLoaded(features);
-
-      this.layer.vueComponent.hideToast();
-    } catch (e) {
-      this.layer.vueComponent.showError(e);
+    const features: Feature<Geometry>[] = new GeoJSON(GEO_JSON_OPTIONS).readFeatures(geoJSON)
+    if (!features || features.length === 0) {
+      throw { error: "NOT_FOUND", message: "Ortho image not found" };
     }
+
+    if (!orthoImage.features) {
+      orthoImage.features = [];
+    }
+    orthoImage.features.push(...features);
+
+    for (const feature of features) {
+      OrhtoImageMixin.setImageFeatureStyle(feature, plant);
+    }
+
+    // Ortho images will be added into the SCA component layer
+    layerEvents.emitOrthoImageLoaded(features);
   }
 
-  protected setImageFeatureStyle(feature: Feature<Geometry>) {
-    const plantRotation = (Math.PI / 180) * (this.layer.vueComponent.plant.fieldgeometry?.orientation || 0);
+  private static setImageFeatureStyle(
+    feature: Feature<Geometry>,
+    plant: PlantSchema,
+  ) {
+    const plantRotation = (Math.PI / 180) * (plant.fieldgeometry?.orientation || 0);
 
     const img = new Image();
     img.crossOrigin = "Anonymous";
@@ -116,12 +125,27 @@ export class OrhtoImageMixin {
             ctx.drawImage(img, left, bottom, width, height);
             ctx.restore();
           },
-          zIndex: this.layer.getOrthoImageZIndex(),
         })
       );
     };
 
     img.src = feature.get("image");
+  }
+
+  protected async loadOrthoImage(orthoImage: OrthoImage, featureInfos: FeatureInfos): Promise<void> {
+    try {
+      await OrhtoImageMixin.loadOrthoImage(
+        orthoImage,
+        this.layer.vueComponent.plant,
+        this.layer.analysisResult.id,
+        this.layer.getComponentId(),
+        featureInfos.title,
+      );
+
+      this.layer.vueComponent.hideToast();
+    } catch (e) {
+      this.layer.vueComponent.showError(e);
+    }
   }
 
   protected getOrthoImageZIndex(): number {
