@@ -86,6 +86,7 @@ export default class AppUpdateAnalysisState extends BaseAuthComponent {
         state_id: this.selectedUpdateState!,
         message: this.selectedUpdateStateMessage,
         do_send_mail: this.sendNotification,
+        force: true,
       });
 
       AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);

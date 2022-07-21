@@ -14,6 +14,9 @@ export interface UpdateAnalysisState {
   state_id: ApiStates;
   message?: string;
   do_send_mail?: boolean;
+
+  /* Only for SUPER_ADMINs. Allows to set to data_complete, even if analysis.data_complete is false. */
+  force?: boolean;
 }
 
 export interface CreateReferenceMeasurement {
