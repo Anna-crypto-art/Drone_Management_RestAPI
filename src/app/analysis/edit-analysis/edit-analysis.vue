@@ -120,7 +120,7 @@ export default class AppEditAnalysis extends BaseAuthComponent {
   }
 
   private watchAnalysisTask() {
-    if (this.analysis!.task_id) {
+    if (this.analysis!.task_id && this.isSuperAdmin) {
       volateqApi.waitForTask(
         this.analysis!.task_id,
         (task: TaskSchema, failed: boolean) => {
