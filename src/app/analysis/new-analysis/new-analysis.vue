@@ -168,7 +168,7 @@ export default class AppNewAnalysis extends BaseAuthComponent {
     const analyses = await volateqApi.getAllAnalysis({ plant_id: plantId });
     this.plants = this.plants.filter(plant => {
       return !analyses.find(analysis => analysis.plant.id === plant.id && 
-        analysis.current_state.state.id <= ApiStates.DATA_INCOMPLETE);
+        (!analysis.current_state || analysis.current_state.state.id <= ApiStates.DATA_INCOMPLETE));
     });
 
     if (this.plants.length === 0) {
