@@ -18,6 +18,7 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
   {
     getValue: r => r.orientation_at_drive,
     transName: "orientation-at-drive",
+    transDescr: "orientation-at-drive_expl",
     keyFigureId: ApiKeyFigure.SCA_ORIENTATION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     unit: "°",
