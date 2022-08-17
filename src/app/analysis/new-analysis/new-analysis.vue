@@ -1,5 +1,5 @@
 <template>
-  <app-content :title="$t('new-data-upload')" :navback="true" :subtitle="plantName">
+  <app-content :title="$t('new-data-upload')" :navback="true" :subtitle="plantName" eventId="newAnalysis">
     <div class="app-new-analysis">
       <app-analysis-upload
       :analysis="analysis"

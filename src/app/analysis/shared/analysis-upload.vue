@@ -34,6 +34,7 @@
 import { IAnalysisId, IAppNewAnalysisFetched } from "@/app/analysis/new-analysis/types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
+import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppFileUpload from "@/app/shared/components/app-file-upload/app-file-upload.vue";
@@ -82,6 +83,8 @@ export default class AppAnalysisUpload
   showCancelButton = false;
   cancelButtonLoading = false;
 
+  private appContentEventId = "newAnalysis";
+
   async mounted() {
     this.uploadService = UploadService.findOrCreate(this.analysis?.id);
 
@@ -100,6 +103,10 @@ export default class AppAnalysisUpload
     const data = this.fetchData();
     if (data) {
       this.waitForFiles = data.fileNames;
+    }
+
+    if (this.analysis) {
+      this.appContentEventId = this.analysis.id;
     }
   }
 
@@ -121,6 +128,14 @@ export default class AppAnalysisUpload
       
       try {
         const analysis = await volateqApi.getAnalysis(this.analysis!.id);
+
+        console.log("const analysis");
+        console.log(analysis);
+
+        if (analysis.has_plant_metadata && !analysis.data_complete) {
+          AppContentEventService.showInfo(this.appContentEventId, this.$t("analysis-with-metdata-data-complete_quest").toString());
+        }
+
         const dataComplete = analysis.data_complete;
 
         this.waitForFiles = null;
