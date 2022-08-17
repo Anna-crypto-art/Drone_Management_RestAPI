@@ -416,7 +416,7 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/fieldgeometry/${fieldgeometryId}/file-url`);
   }
 
-  public downloadMultipleAnalysisFilesUrl(analysisId: string, filenames: string[]) {
+  public downloadMultipleAnalysisFilesUrl(analysisId: string, filenames: string[] | "all") {
     return this.getUrl(`${apiBaseUrl}/auth/analysis/${analysisId}/files/download`, { filenames: filenames });
   }
 

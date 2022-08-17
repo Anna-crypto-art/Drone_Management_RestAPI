@@ -148,10 +148,16 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
         AppDownloader.download(downloadUrl.url, this.selectedDonwloadFiles[0].name);
       } else {
         const archiveName = `analysis-${this.analysis.name}-selected-files.zip`;
+
+        // If the analysis has a lot of files we get HTTP ERROR 413 (request header too large)
+        // To allow to download all files anyway, we set filenames to "all"
+        const filenames: string[] | "all" = this.downloadFilesTableItems.length === this.selectedDonwloadFiles.length ?
+          "all" : this.selectedDonwloadFiles.map(downloadFile => downloadFile.name);
+
         const downloadUrl = await volateqApi.generateDownloadUrl(
           volateqApi.downloadMultipleAnalysisFilesUrl(
             this.analysis.id,
-            this.selectedDonwloadFiles.map(downloadFile => downloadFile.name)
+            filenames
           )
         );
 
