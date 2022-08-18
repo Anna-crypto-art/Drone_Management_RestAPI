@@ -51,7 +51,7 @@
       <b-form-group :label="$t('file')">
         <b-form-input
           id="docFile"
-          v-model="currentDocFile.file"
+          v-model="currentDocFile.fileName"
           :placeholder="$t('name')"
           required
         ></b-form-input>
@@ -67,7 +67,6 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
 import { Component, Ref } from "vue-property-decorator";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
@@ -75,7 +74,6 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import { BvTableFieldArray } from "bootstrap-vue";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
-import { CustomerRole, CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { DocFileItem } from "@/app/doc/types";
 
@@ -102,59 +100,19 @@ export default class AppSettingsCustomers extends BaseAuthComponent {
 
   async created() {
     this.columns = [
-      { key: "name", label: this.$t("name").toString() },
-      { key: "role", label: this.$t("role").toString() },
-      { key: "plants", label: this.$t("plants").toString() },
+      { key: "fileName", label: this.$t("file-name").toString() },
+      { key: "updatedAtBy", label: this.$t("").toString() },
+      { key: "size", label: this.$t("plants").toString() },
       { key: "actions", label: "" },
     ];
 
-    this.roles = [
-      { value: null, text: "" },
-      ...Object.keys(CustomerRole).map(roleKey => ({ value: CustomerRole[roleKey], text: CustomerRole[roleKey] })),
-    ]
-
-    await this.updateCustomerRows();
-
-    try {
-      this.plants = (await volateqApi.getPlants()).sort((a, b) => {
-        const nameA = a.name.toLowerCase();
-        const nameB = b.name.toLowerCase();
-
-        if (nameA < nameB) {
-          return -1;
-        }
-        if (nameA > nameB) {
-          return 1;
-        }
-
-        return 0;
-      });
-    } catch (e) {
-      this.showError(e);
-    }
+    await this.updateDocFileRows();
   }
 
-  async updateCustomerRows() {
+  async updateDocFileRows() {
     this.loading = true;
     try {
-      this.rows = (await volateqApi.getCustomers()).map((customer: CustomerSchema) => ({
-        id: customer.id,
-        name: customer.name,
-        role: customer.role,
-        plants: customer.plants,
-      })).sort((a, b) => {
-        const nameA = a.name.toLowerCase();
-        const nameB = b.name.toLowerCase();
-
-        if (nameA < nameB) {
-          return -1;
-        }
-        if (nameA > nameB) {
-          return 1;
-        }
-
-        return 0;
-      });
+      // blub
     } catch (e) {
       this.showError(e);
     } finally {
@@ -162,88 +120,56 @@ export default class AppSettingsCustomers extends BaseAuthComponent {
     }
   }
 
-  onCreateCustomerClick() {
-    this.currentCustomer = {
-      id: null,
-      name: "",
-      role: null,
-      plants: [],
+  onCreateDocFileClick() {
+    this.currentDocFile = {
+      fileName: null,
+      description: null,
     }
 
-    this.selectPlants = this.plants.map(plant => ({
-      plant: plant,
-      selected: false,
-      otherCustomers: plant.customers!.map(customer => customer.name).join(", "),
-    }));
+    this.docFileModalTitle = this.$t("upload-new-doc-file").toString();
+    this.docFileModalOkTitle = this.$t("create").toString();
 
-    this.customerModalTitle = this.$t("create-customer").toString();
-    this.customerModalOkTitle = this.$t("create").toString();
-
-    this.appCustomerModal.show();
+    this.appDocFileModal.show();
   }
 
-  onEditCustomerClick(customerItem: CustomerItem) {
-    this.currentCustomer = customerItem;
+  onEditDocFileClick(docFileItem: DocFileItem) {
+    this.currentDocFile = docFileItem;
 
-    this.selectPlants = this.plants.map(plant => ({
-      plant: plant,
-      selected: !!customerItem.plants.find(customerPlant => customerPlant.id === plant.id),
-      otherCustomers: plant.customers!.filter(customer => customer.id !== customerItem.id)
-        .map(customer => customer.name).join(", "),
-    }));
+    this.docFileModalTitle = this.$t("edit-doc-file").toString() + ": " + docFileItem.fileName;
+    this.docFileModalOkTitle = this.$t("apply").toString();
 
-    this.customerModalTitle = this.$t("edit-customer").toString() + ": " + customerItem.name;
-    this.customerModalOkTitle = this.$t("apply").toString();
-
-    this.appCustomerModal.show();
+    this.appDocFileModal.show();
   }
 
-  async onSubmitCustomer() {
-    this.customerModalLoading = true;
+  async onSubmitDocFile() {
+    this.docFileModalLoading = true;
     try {
-      const selectedPlantIds: string[] = this.selectPlants.filter(selectPlant => selectPlant.selected)
-        .map(selectPlant => selectPlant.plant.id);
+      // blub
 
-      if (this.currentCustomer!.id === null) {
-        await volateqApi.createCustomer({
-          name: this.currentCustomer!.name,
-          role: this.currentCustomer!.role || undefined,
-          plant_ids: selectedPlantIds,
-        });
+      this.showSuccess(this.$t("doc-file-updated-success").toString());
 
-        this.showSuccess(this.$t("customer-created-success").toString());
-      } else {
-        await volateqApi.updateCustomer(this.currentCustomer!.id, {
-          name: this.currentCustomer!.name,
-          role: this.currentCustomer!.role || undefined,
-          plant_ids: selectedPlantIds,
-        });
+      this.appDocFileModal.hide();
 
-        this.showSuccess(this.$t("customer-updated-success").toString());
-      }
-
-      this.appCustomerModal.hide();
-
-      await this.updateCustomerRows();
+      await this.updateDocFileRows();
     } catch (e) {
       this.showError(e);
     } finally {
-      this.customerModalLoading = false;
+      this.docFileModalLoading = false;
     }
   }
 
-  async onDeleteCustomerClick(customerItem: CustomerItem) {
+  async onDeleteCustomerClick(docFileItem: DocFileItem) {
     this.loading = true;
     try {
-      if (!confirm(this.$t("sure-delete-customer", { customer: customerItem.name }).toString())) {
+      if (!confirm(this.$t("sure-delete-doc-file", { fileName: docFileItem.fileName }).toString())) {
         return;
       }
 
-      await volateqApi.deleteCustomer(customerItem.id!);
+      // blub
 
-      this.showSuccess(this.$t("customer-deleted-success", {customer: customerItem.name }).toString());
+      this.showSuccess(this.$t("doc-file-deleted-success", { fileName: docFileItem.fileName }).toString());
 
-      await this.updateCustomerRows();
+      await this.updateDocFileRows();
     } catch (e) {
       this.showError(e as ApiException);
     } finally {
