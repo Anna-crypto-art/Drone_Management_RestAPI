@@ -142,7 +142,9 @@ export default class AppDocFiles extends BaseAuthComponent {
     try {
       const docFileUrl = await volateqApi.getDocFileUrl(docFileItem.id!);
 
-      AppDownloader.download(docFileUrl.url, docFileItem.fileName!)
+      console.log(docFileUrl.url);
+
+      AppDownloader.open(docFileUrl.url);
     } catch (e) {
       this.showError(e);
     }

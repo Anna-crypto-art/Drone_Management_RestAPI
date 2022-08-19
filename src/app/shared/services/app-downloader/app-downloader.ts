@@ -10,4 +10,8 @@ export class AppDownloader {
 
     document.body.removeChild(fileLink);
   }
+
+  public static open(url: string): void {
+    window.open(url, "_blank")?.focus();
+  }
 }

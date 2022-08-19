@@ -6,6 +6,7 @@ import { KeyFigureColorScheme, KeyFigureInfo, OrthoImage } from "./layers/types"
 import { GroupKPILayer, KeyFigureTypeMap } from "./types";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
+import { apiComponentNames } from "@/app/shared/services/volateq-api/api-components/api-components-name";
 
 /**
  * Component -> PIGroup -> PICheckbox
@@ -27,6 +28,8 @@ export class PILayersHierarchy {
     this.parentComponentKpiLayers = [];
     this.groupLayers = [];
     this.analysisResultIds = [];
+
+    this.createParentComponentKpiLayers();
   }
 
   public addAndSelectAnalysisResult(analysisResultId: string | undefined) {
@@ -116,7 +119,7 @@ export class PILayersHierarchy {
           .find(keyFigureLayer => keyFigureLayer.analysisResult.id === analysisResult.id);
 
         if (keyFigure && isNewAnalysisResult) {
-          const parentComponentKpiLayer = this.getOrCreateParentComponentLayer(keyFigure)
+          const parentComponentKpiLayer = this.getParentComponentLayer(keyFigure)
 
           const kpiLayer = this.createKPILayers(analysisResult, keyFigureTypeMap);
           if (kpiLayer) {
@@ -188,15 +191,17 @@ export class PILayersHierarchy {
     return [];
   }
 
-  private getOrCreateParentComponentLayer(keyFigure: KeyFigureSchema): GroupKPILayer {
-    let parentComponentKpiLayer = this.parentComponentKpiLayers
-      .find(parentComponentKpiLayer => parentComponentKpiLayer.componentId === keyFigure.component_id);
-    
-    if (!parentComponentKpiLayer) {
-      parentComponentKpiLayer = {
-        componentId: keyFigure.component.id,
+  private getParentComponentLayer(keyFigure: KeyFigureSchema): GroupKPILayer {
+    return this.parentComponentKpiLayers
+      .find(parentComponentKpiLayer => parentComponentKpiLayer.componentId === keyFigure.component_id)!;
+  }
+
+  private createParentComponentKpiLayers() {
+    for (const apiComponent in apiComponentNames) {
+      const parentComponentKpiLayer: GroupKPILayer = {
+        componentId: Number(apiComponent),
         groupLayer: {
-          name: this.vueComponent.$t(keyFigure.component.abbrev).toString(),
+          name: this.vueComponent.$t(apiComponentNames[apiComponent]).toString(),
           type: "group",
           childLayers: [],
           visible: false,
@@ -209,8 +214,6 @@ export class PILayersHierarchy {
       this.parentComponentKpiLayers.push(parentComponentKpiLayer);
       this.groupLayers.push(parentComponentKpiLayer.groupLayer);
     }
-
-    return parentComponentKpiLayer;
   }
 
   private createKPILayers(
