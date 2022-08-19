@@ -394,6 +394,8 @@
   "created": "Created",
   "by": "by",
   "upload-succes-filename": "{filename} successfully uploaded",
+  "copy-file-link": "Copy file link",
+  "copy-file-link-success": "File link copied successfully",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

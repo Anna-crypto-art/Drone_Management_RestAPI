@@ -54,6 +54,7 @@ export default class AppAuthLogin extends Vue {
       this.$router.push({
         name: "ConfirmLogin",
         params: { confirmKey: confirmationKey },
+        query: { dest: this.$route.query.dest || "" },
       });
     } catch (e) {
       authContainerEventBus.showErrorAlert((e as ApiException).message!);

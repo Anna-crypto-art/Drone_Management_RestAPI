@@ -22,8 +22,16 @@
           <small v-html="row.item.updatedAtBy"></small>
         </template>
         <template #cell(actions)="row">
-          <div class="hover-cell pull-right" v-if="isSuperAdmin">
+          <div class="hover-cell pull-right">
             <b-button
+              @click="onCopyDocFileClick(row.item)"
+              variant="secondary"
+              size="sm"
+              :title="$t('copy-file-link')"
+            >
+              <b-icon icon="clipboard" />
+            </b-button>
+            <b-button v-if="isSuperAdmin"
               @click="onEditDocFileClick(row.item)"
               variant="secondary"
               size="sm"
@@ -31,7 +39,7 @@
             >
               <b-icon icon="wrench" />
             </b-button>
-            <b-button
+            <b-button v-if="isSuperAdmin"
               @click="onDeleteDocFileClick(row.item)"
               variant="outline-danger"
               size="sm"
@@ -47,6 +55,7 @@
       id="edit-doc-file-modal"
       ref="appDocFileModal"
       :title="docFileModalTitle"
+      :subtitle="docFileModalSubtitle"
       :ok-title="docFileModalOkTitle"
       :modalLoading="docFileModalLoading"
       @submit="onSubmitDocFile"
@@ -83,6 +92,7 @@ import { DocFile } from "../shared/services/volateq-api/api-schemas/doc-file-sch
 import dateHelper from "../shared/services/helper/date-helper";
 import { getReadableFileSize } from "../shared/services/helper/file-helper";
 import { AppDownloader } from "../shared/services/app-downloader/app-downloader";
+import { baseUrl } from "@/environment/environment";
 
 
 @Component({
@@ -103,6 +113,7 @@ export default class AppDocFiles extends BaseAuthComponent {
   @Ref() appDocFileModal!: IAppModalForm;
   docFileModalLoading = false;
   docFileModalTitle = "";
+  docFileModalSubtitle = "";
   docFileModalOkTitle = "";
 
   currentDocFile: DocFileItem | null = null;
@@ -118,6 +129,13 @@ export default class AppDocFiles extends BaseAuthComponent {
     ];
 
     await this.updateDocFileRows();
+
+    if (this.$route.query.fileId) {
+      const docFileItem = this.rows.find(docFileItem => docFileItem.id === this.$route.query.fileId);
+      if (docFileItem) {
+        await this.onFileClick(docFileItem, "_self");
+      }
+    }
   }
 
   async updateDocFileRows() {
@@ -138,13 +156,23 @@ export default class AppDocFiles extends BaseAuthComponent {
     }
   }
 
-  async onFileClick(docFileItem: DocFileItem) {
+  async onFileClick(docFileItem: DocFileItem, target?: string) {
     try {
       const docFileUrl = await volateqApi.getDocFileUrl(docFileItem.id!);
 
-      console.log(docFileUrl.url);
+      AppDownloader.open(docFileUrl.url, target || "_blank");
+    } catch (e) {
+      this.showError(e);
+    }
+  }
 
-      AppDownloader.open(docFileUrl.url);
+  async onCopyDocFileClick(docFileItem: DocFileItem) {
+    try {
+      const url = (new URL(`doc/files?fileId=${docFileItem.id}`, baseUrl)).toString();
+  
+      await navigator.clipboard.writeText(url);
+  
+      this.showSuccess(this.$t("copy-file-link-success").toString());
     } catch (e) {
       this.showError(e);
     }
@@ -158,6 +186,7 @@ export default class AppDocFiles extends BaseAuthComponent {
       };
 
       this.docFileModalTitle = this.$t("upload-new-doc-file").toString();
+      this.docFileModalSubtitle = "";
       this.docFileModalOkTitle = this.$t("create").toString();
 
       this.uploadProgress = null;
@@ -171,7 +200,8 @@ export default class AppDocFiles extends BaseAuthComponent {
     try {
       this.currentDocFile = docFileItem;
   
-      this.docFileModalTitle = this.$t("edit-doc-file").toString() + ": " + docFileItem.fileName;
+      this.docFileModalTitle = this.$t("edit-doc-file").toString();
+      this.docFileModalSubtitle = docFileItem.fileName || "";
       this.docFileModalOkTitle = this.$t("apply").toString();
   
       this.uploadProgress = null;

@@ -44,7 +44,7 @@ const nonAuthProtectRoutes = authRoutes.map(a => a.name);
 router.beforeEach((to, from, next) => {
   if (!store.getters.auth.isAuthenticated) {
     if (nonAuthProtectRoutes.indexOf(to.name || "") === -1) {
-      next({ name: "Login" });
+      next({ name: "Login", query: { dest: to.fullPath }});
       return;
     }
   } else {

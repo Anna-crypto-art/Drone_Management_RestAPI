@@ -11,7 +11,7 @@ export class AppDownloader {
     document.body.removeChild(fileLink);
   }
 
-  public static open(url: string): void {
-    window.open(url, "_blank")?.focus();
+  public static open(url: string, target="_blank"): void {
+    window.open(url, target)?.focus();
   }
 }
