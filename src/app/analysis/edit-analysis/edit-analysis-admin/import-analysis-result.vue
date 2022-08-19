@@ -23,20 +23,7 @@
         <b-form-file v-model="jsonFile" accept=".json"></b-form-file>
       </b-form-group>
       <b-form-group :label="$t('select-result-image-files-zip')">
-        <b-form-file v-model="imageFilesZip" accept=".zip"></b-form-file>
-        <div v-if="uploadProgress" class="mar-top">
-          {{ $t('uploading') }}
-          <b-progress :max="uploadProgress.total">
-            <b-progress-bar :value="uploadProgress.loaded" variant="success">
-              <span v-if="uploadProgress.loaded === uploadProgress.total">
-                {{ $t("upload-succes-filename", { filename: imageFilesZip.name }) }}
-              </span>
-              <span v-if="uploadProgress.loaded < uploadProgress.total">
-                 {{ Math.round(uploadProgress.loaded / uploadProgress.total * 100) }}%
-              </span>
-            </b-progress-bar>
-          </b-progress>
-        </div>
+        <app-simple-file-upload v-model="imageFilesZip" :uploadProgress="uploadProgress" accept=".zip" />
       </b-form-group>
       <app-button type="submit" :loading="loading">{{ $t("apply") }}</app-button>
     </b-form>
@@ -58,12 +45,15 @@ import { ApiTasks } from "@/app/shared/services/volateq-api/api-tasks";
 import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import { QFlyServerState } from "@/app/shared/services/volateq-api/api-schemas/server-schemas";
+import AppSimpleFileUpload from "@/app/shared/components/app-simple-file-upload/app-simple-file-upload.vue";
+import { UploadProgress } from "@/app/shared/components/app-simple-file-upload/types";
 
 @Component({
   name: "app-import-analysis-result",
   components: {
     AppButton,
-    AppBox
+    AppBox,
+    AppSimpleFileUpload,
   },
 })
 export default class AppImportAnalysisResult extends BaseAuthComponent {
@@ -75,7 +65,7 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
   jsonFile: File | null = null;
   imageFilesZip: File | null = null;
 
-  uploadProgress: { total: number, loaded: number } | null = null;
+  uploadProgress: UploadProgress | null = null;
 
   showAlertInfo = false;
 

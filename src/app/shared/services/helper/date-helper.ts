@@ -1,5 +1,5 @@
 export default {
-  getTimeDiff: function (date: string): any[] {
+  getTimeDiff: function (date: string): [string, { time: number }] {
     const elapsed = Date.now() - Date.parse(date);
 
     const msPerMinute = 60 * 1000;

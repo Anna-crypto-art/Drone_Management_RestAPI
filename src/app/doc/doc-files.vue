@@ -1,6 +1,6 @@
 <template>
-  <div class="app-doc-files">
-    <div class="app-doc-files-table-toolbar">
+  <app-content :title="$t('documentation')">
+    <div class="app-doc-files-table-toolbar" v-if="isSuperAdmin">
       <b-button variant="primary" @click="onCreateDocFileClick">
         {{ $t("upload-new-doc-file") }}
       </b-button>
@@ -13,10 +13,13 @@
           </div>
         </template>
         <template #cell(fileName)="row">
-          <a href="#" @click="onFileClick">{{ row.item.fileName }}</a>
+          <a href="#" @click.prevent="onFileClick(row.item)">{{ row.item.fileName }}</a>
           <div class="grayed" v-show="row.item.description">
             {{ row.item.description }}
           </div>
+        </template>
+        <template #cell(updatedAtBy)="row">
+          <small v-html="row.item.updatedAtBy"></small>
         </template>
         <template #cell(actions)="row">
           <div class="hover-cell pull-right" v-if="isSuperAdmin">
@@ -29,7 +32,7 @@
               <b-icon icon="wrench" />
             </b-button>
             <b-button
-              @click="onDeleteDocFilerClick(row.item)"
+              @click="onDeleteDocFileClick(row.item)"
               variant="outline-danger"
               size="sm"
               :title="$t('delete-doc-file')"
@@ -48,22 +51,19 @@
       :modalLoading="docFileModalLoading"
       @submit="onSubmitDocFile"
     >
-      <b-form-group :label="$t('file')">
-        <b-form-input
-          id="docFile"
-          v-model="currentDocFile.fileName"
-          :placeholder="$t('name')"
-          required
-        ></b-form-input>
-      </b-form-group>
-      <b-form-group :label="$t('description')">
-        <b-form-textarea
-          id="description"
-          v-model="currentDocFile.description"
-        ></b-form-textarea>
-      </b-form-group>
-    </app-modal-form>    
-  </div>
+      <div v-if="currentDocFile">
+        <b-form-group :label="$t('doc-file')">
+          <app-simple-file-upload v-model="currentDocFile.file" :uploadProgress="uploadProgress" />
+        </b-form-group>
+        <b-form-group :label="$t('description')">
+          <b-form-textarea
+            id="description"
+            v-model="currentDocFile.description"
+          ></b-form-textarea>
+        </b-form-group>
+      </div>
+    </app-modal-form> 
+  </app-content>
 </template>
 
 <script lang="ts">
@@ -76,16 +76,25 @@ import { BvTableFieldArray } from "bootstrap-vue";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { DocFileItem } from "@/app/doc/types";
+import AppSimpleFileUpload from "@/app/shared/components/app-simple-file-upload/app-simple-file-upload.vue";
+import { UploadProgress } from "@/app/shared/components/app-simple-file-upload/types";
+import AppContent from "@/app/shared/components/app-content/app-content.vue";
+import { DocFile } from "../shared/services/volateq-api/api-schemas/doc-file-schema";
+import dateHelper from "../shared/services/helper/date-helper";
+import { getReadableFileSize } from "../shared/services/helper/file-helper";
+import { AppDownloader } from "../shared/services/app-downloader/app-downloader";
 
 
 @Component({
-  name: "app-settings-users",
+  name: "app-doc-files",
   components: {
+    AppContent,
     AppTableContainer,
     AppModalForm,
+    AppSimpleFileUpload,
   },
 })
-export default class AppSettingsCustomers extends BaseAuthComponent {
+export default class AppDocFiles extends BaseAuthComponent {
   columns: BvTableFieldArray = [];
   rows: DocFileItem[] = [];
 
@@ -98,11 +107,13 @@ export default class AppSettingsCustomers extends BaseAuthComponent {
 
   currentDocFile: DocFileItem | null = null;
 
+  uploadProgress: UploadProgress | null = null;
+
   async created() {
     this.columns = [
       { key: "fileName", label: this.$t("file-name").toString() },
-      { key: "updatedAtBy", label: this.$t("").toString() },
-      { key: "size", label: this.$t("plants").toString() },
+      { key: "updatedAtBy", label: this.$t("changed").toString() },
+      { key: "size", label: this.$t("size").toString() },
       { key: "actions", label: "" },
     ];
 
@@ -112,7 +123,14 @@ export default class AppSettingsCustomers extends BaseAuthComponent {
   async updateDocFileRows() {
     this.loading = true;
     try {
-      // blub
+      this.rows = (await volateqApi.getDocFiles()).map(docFile => ({
+        id: docFile.id,
+        file: null,
+        description: docFile.description || null,
+        fileName: docFile.file_name,
+        updatedAtBy: this.getChangedText(docFile),
+        size: getReadableFileSize(docFile.size),
+      }));
     } catch (e) {
       this.showError(e);
     } finally {
@@ -120,33 +138,82 @@ export default class AppSettingsCustomers extends BaseAuthComponent {
     }
   }
 
-  onCreateDocFileClick() {
-    this.currentDocFile = {
-      fileName: null,
-      description: null,
+  async onFileClick(docFileItem: DocFileItem) {
+    try {
+      const docFileUrl = await volateqApi.getDocFileUrl(docFileItem.id!);
+
+      AppDownloader.download(docFileUrl.url, docFileItem.fileName!)
+    } catch (e) {
+      this.showError(e);
     }
+  }
 
-    this.docFileModalTitle = this.$t("upload-new-doc-file").toString();
-    this.docFileModalOkTitle = this.$t("create").toString();
+  onCreateDocFileClick() {
+    try {
+      this.currentDocFile = {
+        file: null,
+        description: null,
+      };
 
-    this.appDocFileModal.show();
+      this.docFileModalTitle = this.$t("upload-new-doc-file").toString();
+      this.docFileModalOkTitle = this.$t("create").toString();
+
+      this.uploadProgress = null;
+      this.appDocFileModal.show();
+    } catch (e) {
+      this.showError(e);
+    } 
   }
 
   onEditDocFileClick(docFileItem: DocFileItem) {
-    this.currentDocFile = docFileItem;
-
-    this.docFileModalTitle = this.$t("edit-doc-file").toString() + ": " + docFileItem.fileName;
-    this.docFileModalOkTitle = this.$t("apply").toString();
-
-    this.appDocFileModal.show();
+    try {
+      this.currentDocFile = docFileItem;
+  
+      this.docFileModalTitle = this.$t("edit-doc-file").toString() + ": " + docFileItem.fileName;
+      this.docFileModalOkTitle = this.$t("apply").toString();
+  
+      this.uploadProgress = null;
+      this.appDocFileModal.show();
+    } catch (e) {
+      this.showError(e);
+    }
   }
 
   async onSubmitDocFile() {
     this.docFileModalLoading = true;
     try {
-      // blub
+      if (!this.currentDocFile) {
+        throw new Error("Something went wrong! (Detais: currentDocFile is falsy)");
+      }
 
-      this.showSuccess(this.$t("doc-file-updated-success").toString());
+      if (this.currentDocFile.id) { // update document
+        if (!this.currentDocFile.file && 
+          (this.currentDocFile.description === null || this.currentDocFile.description === undefined)) 
+        {
+          throw { error: "MISSING_FILE_OR_DESCRIPTION", message: "Nothing changed..." };
+        }
+
+        await volateqApi.editDocFile(
+          this.currentDocFile.id,
+          this.currentDocFile.file || undefined, 
+          this.currentDocFile.description || undefined,
+          (progressEvent) => this.uploadProgress = { total: progressEvent.total, loaded: progressEvent.loaded },
+        );
+
+        this.showSuccess(this.$t("doc-file-updated-success").toString());
+      } else { // create document
+        if (!this.currentDocFile.file) {
+          throw { error: "MISSING_FILE", message: "Please select a document to upload" };
+        }
+
+        await volateqApi.createDocFile(
+          this.currentDocFile.file,
+          this.currentDocFile.description || undefined,
+          (progressEvent) => this.uploadProgress = { total: progressEvent.total, loaded: progressEvent.loaded },
+        );
+
+        this.showSuccess(this.$t("doc-file-created-success").toString());
+      }
 
       this.appDocFileModal.hide();
 
@@ -158,14 +225,14 @@ export default class AppSettingsCustomers extends BaseAuthComponent {
     }
   }
 
-  async onDeleteCustomerClick(docFileItem: DocFileItem) {
+  async onDeleteDocFileClick(docFileItem: DocFileItem) {
     this.loading = true;
     try {
       if (!confirm(this.$t("sure-delete-doc-file", { fileName: docFileItem.fileName }).toString())) {
         return;
       }
 
-      // blub
+      await volateqApi.deleteDocFile(docFileItem.id!);
 
       this.showSuccess(this.$t("doc-file-deleted-success", { fileName: docFileItem.fileName }).toString());
 
@@ -176,12 +243,24 @@ export default class AppSettingsCustomers extends BaseAuthComponent {
       this.loading = false;
     }
   }
+
+  private getChangedText(docFile: DocFile): string {
+    const userName = (docFile.user.first_name + " " + docFile.user.last_name).trim() || docFile.user.email;
+    
+    let createdOrUpdated = "";
+    let timeDiff = "";
+    if (!docFile.updated_at) {
+      createdOrUpdated = this.$t("created").toString();
+      timeDiff = this.$t(...dateHelper.getTimeDiff(docFile.created_at)).toString()
+    } else {
+      createdOrUpdated = this.$t("updated").toString();
+      timeDiff = this.$t(...dateHelper.getTimeDiff(docFile.updated_at)).toString()
+    }
+
+    return `${createdOrUpdated} ${timeDiff} ${this.$t("by").toString()} ${userName}`
+  }
 }
 </script>
 
 <style lang="scss">
-.app-settings-customers-plants-selection {
-  max-height: 400px;
-  overflow-y: auto;
-}
 </style>

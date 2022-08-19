@@ -1,23 +1,14 @@
 import { RouteConfig } from "vue-router";
 import { ApiRoles } from "../shared/services/volateq-api/api-roles";
-const AppPlantView = () => import("@/app/plant/plant-view.vue");
-const AppPlants = () => import("@/app/plant/plants.vue");
+const AppDocFiles = () => import("@/app/doc/doc-files.vue");
 
 const docRoutes: RouteConfig[] = [
   {
     name: "DocFiles",
     path: "/doc/files",
-    component: AppPlants,
+    component: AppDocFiles,
     meta: {
       role: [ApiRoles.CUSTOMER_ADMIN, ApiRoles.PILOT],
-    }
-  },
-  {
-    name: "Plant",
-    path: "/plant/:id",
-    component: AppPlantView,
-    meta: {
-      role: ApiRoles.CUSTOMER_ADMIN,
     }
   },
 ];

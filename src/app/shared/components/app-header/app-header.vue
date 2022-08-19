@@ -22,6 +22,10 @@
         <b-nav-item class="link" href="/analyses" :active="isActiveRoute(['/analyses', '/analysis/new'])">
           <span class="nav-item-text">{{ $t("analysis") }}</span>
         </b-nav-item>
+
+        <b-nav-item class="link" href="/doc/files" :active="isActiveRoute(['/doc/files'])">
+          <span class="nav-item-text">{{ $t("documentation") }}</span>
+        </b-nav-item>
       </b-navbar-nav>
 
       <b-navbar-nav class="ml-auto">

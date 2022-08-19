@@ -25,6 +25,7 @@ import { AnalysisMonitoring } from "./api-schemas/analysis-monitoring";
 import { QFlyServerSchema } from "./api-schemas/server-schemas";
 import { QFlyServerActionRequest } from "./api-requests/server-requests";
 import { ReferenceMeasurementSchema, ReferenceMeasurementValueSchema } from "./api-schemas/reference-measurement-schema";
+import { DocFile } from "./api-schemas/doc-file-schema";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -545,6 +546,52 @@ export class VolateqAPI extends HttpClientBase {
 
   public async getReferenceMeasurementValuesGeoVisual(referenceMeasurementId: string): Promise<any> {
     return this.get(`/auth/geo-visual/${referenceMeasurementId}/reference-measuurement-values`);
+  }
+
+  public async getDocFiles(): Promise<DocFile[]> {
+    return this.get(`/auth/doc/files`);
+  }
+
+  public async getDocFileUrl(fileId: string): Promise<{ url: string }> {
+    return this.get(`/auth/doc/file/${fileId}`);
+  }
+
+  public async createDocFile(
+    docFile: File,
+    description?: string,
+    onUploadProgress?: (progressEvent: ProgressEvent) => void
+  ): Promise<void> {
+    const docFilePost = { doc_file: docFile };
+    if (description) {
+      docFilePost["description"] = description;
+    }
+
+    return this.postForm(`/auth/doc/file`, docFilePost, onUploadProgress);
+  }
+
+  public async editDocFile(
+    fileId: string,
+    docFile?: File,
+    description?: string,
+    onUploadProgress?: (progressEvent: ProgressEvent) => void,
+  ): Promise<void> {
+    const docFilePost = {};
+    if (docFile) {
+      docFilePost["doc_file"] = docFile;
+    }
+    if (description) {
+      docFilePost["description"] = description;
+    }
+
+    if (Object.keys(docFilePost).length === 0) {
+      return;
+    }
+
+    return this.postForm(`/auth/doc/file/${fileId}`, docFilePost, onUploadProgress);
+  }
+
+  public async deleteDocFile(fileId: string): Promise<void> {
+    return this.delete(`/auth/doc/file/${fileId}`);
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {
