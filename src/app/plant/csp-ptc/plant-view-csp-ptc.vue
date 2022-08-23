@@ -27,7 +27,7 @@
           <app-plant-diagram-view-csp-ptc v-if="loadDiagrams" :analysisResults="analysisResults" :plant="plant" />
         </b-tab>
         <b-tab v-if="isSuperAdmin">
-          <template #title><b-icon icon="braces" /></template>
+          <template #title><b-icon icon="shield-shaded" /></template>
           <app-plant-admin-view-csp-ptc :selectedAnalysisResult="selectedAnalysisResult" :plant="plant" />
         </b-tab>
       </b-tabs>

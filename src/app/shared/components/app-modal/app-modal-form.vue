@@ -3,7 +3,7 @@
     <template v-slot:modal-title>
       <div class="app-modal-form-title">
         <slot name="modal-title">
-          <h2>{{ title }}</h2>
+          <h2>{{ title }} <app-super-admin-marker v-if="superAdminProtected" /></h2>
           <div v-if="subtitle" v-html="subtitle" class="app-modal-form-title-subtitle grayed"></div>
         </slot>
       </div>
@@ -26,23 +26,26 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
+import { BaseAuthComponent } from "../base-auth-component/base-auth-component";
+import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 
 @Component({
   name: "app-modal-form",
   components: {
     AppButton,
+    AppSuperAdminMarker,
   },
 })
-export default class AppModalForm extends Vue implements IAppModalForm {
+export default class AppModalForm extends BaseAuthComponent implements IAppModalForm {
   @Prop({ required: true }) id!: string;
   @Prop({ default: "" }) title!: string;
   @Prop() subtitle: string | undefined;
   @Prop({ required: true }) okTitle!: string;
   @Prop({ default: false }) modalLoading!: boolean;
+  @Prop({ default: false }) superAdminProtected!: boolean;
 
   showAlert = false;
   alertMsg = "";

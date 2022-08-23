@@ -33,9 +33,9 @@
           <template #button-content>
             <b-icon icon="gear-fill" font-scale="1.5" />
           </template>
-          <b-dropdown-item href="/settings/users" v-if="isSuperAdmin" class="link">{{ $t("users") }}</b-dropdown-item>
-          <b-dropdown-item href="/settings/customers" v-if="isSuperAdmin" class="link">{{ $t("customers") }}</b-dropdown-item>
-          <b-dropdown-item href="/analysis-monitoring" v-if="isSuperAdmin" class="link">{{ $t("monitoring") }}</b-dropdown-item>
+          <b-dropdown-item href="/settings/users" v-if="isSuperAdmin" class="link">{{ $t("users") }} <app-super-admin-marker /></b-dropdown-item>
+          <b-dropdown-item href="/settings/customers" v-if="isSuperAdmin" class="link">{{ $t("customers") }} <app-super-admin-marker /></b-dropdown-item>
+          <b-dropdown-item href="/analysis-monitoring" v-if="isSuperAdmin" class="link">{{ $t("monitoring") }} <app-super-admin-marker /></b-dropdown-item>
 
           <b-dropdown-divider v-if="isSuperAdmin" />
 
@@ -53,9 +53,13 @@ import { Component, Prop } from "vue-property-decorator";
 
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 
 @Component({
   name: "app-header",
+  components: {
+    AppSuperAdminMarker
+  }
 })
 export default class AppHeader extends BaseAuthComponent {
   @Prop({ default: true }) fluid!: boolean;

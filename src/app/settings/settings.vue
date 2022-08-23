@@ -1,5 +1,9 @@
 <template>
-  <app-content :title="$t($route.meta.title)" :subtitle="$t($route.meta.subtitle)">
+  <app-content 
+  :title="$t($route.meta.title)"
+  :subtitle="$t($route.meta.subtitle)"
+  :superAdminProtected="$route.meta.role == 1"
+  >
     <router-view></router-view>
   </app-content>
 </template>

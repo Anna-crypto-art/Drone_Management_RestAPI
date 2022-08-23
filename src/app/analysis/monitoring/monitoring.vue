@@ -2,6 +2,7 @@
   <app-content
     :title="$t('QFly Analysis Monitoring')"
     :subtitle="$t('Overview about all currently running evaluations.')"
+    :superAdminProtected="true"
   >
     <div class="monitoring-toolbar">
       <b-button @click="loadAnalysisStatus()">{{ $t("Reload") }}</b-button>

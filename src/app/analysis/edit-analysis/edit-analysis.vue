@@ -38,13 +38,15 @@
         </b-tab>
         <b-tab class="app-edit-analysis-ref-measures" v-if="hasReferenceMeasurements">
           <template #title>
-            <b-icon icon="clipboard-check" /><span class="pad-left">{{ $t("reference-measurements") }}</span>
+            <b-icon icon="clipboard-check" />
+            <span class="pad-left">{{ $t("reference-measurements") }}</span>
+            <app-super-admin-marker />
           </template>
           <app-analysis-reference-measurements :analysis="analysis" />
         </b-tab>
         <b-tab v-if="isSuperAdmin" class="app-edit-analysis-admin-tab">
           <template #title>
-            <b-icon icon="braces" /><span class="pad-left">{{ $t("admin-panel") }}</span>
+            <b-icon icon="shield-shaded" /><span class="pad-left">{{ $t("admin-panel") }}</span>
           </template>
           <app-edit-analysis-admin :analysis="analysis" />
         </b-tab>
@@ -72,6 +74,7 @@ import { AppContentEventService } from "@/app/shared/components/app-content/app-
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 import AppAnalysisReferenceMeasurements from "@/app/analysis/edit-analysis/reference-measurement/analysis-reference-measurements.vue";
+import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 
 @Component({
   name: "app-edit-analysis",
@@ -84,6 +87,7 @@ import AppAnalysisReferenceMeasurements from "@/app/analysis/edit-analysis/refer
     AppUploadAnalysisFiles,
     AppBox,
     AppAnalysisReferenceMeasurements,
+    AppSuperAdminMarker,
   },
 })
 export default class AppEditAnalysis extends BaseAuthComponent {

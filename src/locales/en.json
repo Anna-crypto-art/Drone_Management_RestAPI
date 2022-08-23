@@ -378,7 +378,7 @@
   "load-all-ortho-images": "Load all ortho images",
   "load-all-ortho-images-sure": "Are you sure that you want to load all ortho images? This may take a while... ",
   "analysis-with-metdata-data-complete_quest": "You uploaded plant metadata. Please select <b>Uploaded data complete</b> if the uploaded data is complete.",
-  "upload-new-doc-file": "Upload new document",
+  "upload-new-doc-file": "Upload document",
   "edit-doc-file": "Edit document",
   "delete-doc-file": "Delete document",
   "doc-file": "Document",
@@ -396,6 +396,9 @@
   "upload-succes-filename": "{filename} successfully uploaded",
   "copy-file-link": "Copy file link",
   "copy-file-link-success": "File link copied successfully",
+  "protected-super-admin-only": "Protected: SUPER_ADMIN only",
+  "title": "Title",
+  "document": "Document",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

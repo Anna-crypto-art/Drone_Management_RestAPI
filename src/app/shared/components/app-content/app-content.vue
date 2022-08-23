@@ -9,7 +9,7 @@
           </router-link>
         </div>
         <div class="app-content-title">
-          <h1 v-html="title"></h1>
+          <h1><span v-html="title"></span> <app-super-admin-marker v-if="superAdminProtected" /></h1>
           <div v-if="subtitle" v-html="subtitle" class="app-content-subtitle grayed"></div>
           <div v-if="!subtitle" class="app-content-subtitle grayed">
             <slot name="subtitle"></slot>
@@ -40,11 +40,13 @@ import AppHeader from "@/app/shared/components/app-header/app-header.vue";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import { AppAlert, AppAlertEvents } from "@/app/shared/services/app-alert/app-alert";
 import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
+import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 
 @Component({
   name: "app-content",
   components: {
     AppHeader,
+    AppSuperAdminMarker,
   },
 })
 export default class AppContent extends Vue {
@@ -53,6 +55,7 @@ export default class AppContent extends Vue {
   @Prop({ default: false }) navback: boolean | undefined;
   @Prop({ default: true }) showHeader!: boolean;
   @Prop({ default: null }) eventId!: string | null;
+  @Prop({ default: false }) superAdminProtected!: boolean;
 
   alert: AppAlert = { msg: "", variant: "info" };
   alertId: AppAlert = { msg: "", variant: "info" };

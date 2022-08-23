@@ -1,7 +1,7 @@
 <template>
   <app-content :title="$t('plants-overview')" :subtitle="$t('plants-overview_descr')">
     <div class="plant-tools" v-if="isSuperAdmin">
-      <b-button variant="secondary" @click="onCreatePlantClick()">{{ $t('create-plant') }}</b-button>
+      <app-button variant="secondary" @click="onCreatePlantClick()" :superAdminProtected="true">{{ $t('create-plant') }}</app-button>
       <b-form-select
         id="customers"
         class="plant-tools-select-customer"
@@ -9,7 +9,7 @@
         :options="customers"
         @change="onCustomerSelectionChanged"
       />
-      <label class="plant-tools-select-customer-label" for="customers">{{ $t("customer") }}</label>
+      <label class="plant-tools-select-customer-label" for="customers">{{ $t("customer") }}<app-super-admin-marker /></label>
       <div class="clearfix"></div>
     </div>
     <app-table-container>
@@ -50,31 +50,33 @@
         </template>
         <template #cell(actions)="row">
           <div class="hover-cell pull-right">
-            <b-button
+            <app-button
               v-show="isSuperAdmin"
               @click="onManagePlantClick(row.item)"
               variant="secondary"
               size="sm"
               :title="$t('upload-dt')"
-            >
-              <b-icon icon="hammer"></b-icon>
-            </b-button>
-            <b-button
+              icon="hammer"
+              :superAdminProtected="true"
+            />
+            <app-button
+              v-show="isSuperAdmin"
               @click="onEditPlantClick(row.item)"
               variant="secondary"
               size="sm"
               :title="$t('edit-plant')"
-            >
-              <b-icon icon="wrench"></b-icon>
-            </b-button>
-            <b-button
+              icon="wrench"
+              :superAdminProtected="true"
+            />
+            <app-button
+              v-show="isSuperAdmin"
               @click="onDeletePlantClick(row.item)"
               variant="outline-danger"
               size="sm"
               :title="$t('delete-plant')"
-            >
-              <b-icon icon="trash"></b-icon>
-            </b-button>
+              icon="trash"
+              :superAdminProtected="true"
+            />
           </div>
           <div class="clearfix"></div>
         </template>
@@ -89,6 +91,7 @@
       :ok-title="$t('apply')"
       :modalLoading="plantModalLoading"
       @submit="saveManagePlant"
+      :superAdminProtected="true"
     >
       <b-form-group v-if="managePlantModel.plant" v-show="managePlantModel.plant.fieldgeometry">
         <a href="#" @click="onFileClick(managePlantModel.plant.fieldgeometry)">
@@ -112,6 +115,7 @@
       :okTitle="$t('create')"
       :modalLoading="createPlantLoading"
       @submit="onSubmitCreatePlant"
+      :superAdminProtected="true"
     >
       <b-row>
         <b-col>
@@ -142,6 +146,7 @@
       :okTitle="$t('apply')"
       :modalLoading="editPlantLoading"
       @submit="onSubmitEditPlant"
+      :superAdminProtected="true"
     >
       <b-form-group :label="$t('name')" v-if="editPlant">
         <b-form-input id="edit-plant-name" v-model="editPlant.name" required :placeholder="$t('name')" />
@@ -171,6 +176,8 @@ import { FieldgeometrySchema } from "../shared/services/volateq-api/api-schemas/
 import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "../shared/services/volateq-api/volateq-api";
 import { EditPlant, PlantItem } from "./types";
+import AppButton from "@/app/shared/components/app-button/app-button.vue"
+import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 
 @Component({
   name: "app-analysis",
@@ -178,6 +185,8 @@ import { EditPlant, PlantItem } from "./types";
     AppContent,
     AppTableContainer,
     AppModalForm,
+    AppButton,
+    AppSuperAdminMarker,
   },
 })
 export default class AppPlants extends BaseAuthComponent {

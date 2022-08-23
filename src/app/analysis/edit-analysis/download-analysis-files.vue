@@ -12,6 +12,7 @@
       variant="secondary"
       :disabled="isDownloadButtonDisabled"
       @click="onMoveSelectedFilesClick"
+      :superAdminProtected="true"
     >
       {{ $t("move-selected-files") }}
     </app-button>
@@ -21,6 +22,7 @@
       :disabled="isDownloadButtonDisabled"
       :loading="deleteSelectedFilesLoading"
       @click="onDeleteSelectedFilesClick"
+      :superAdminProtected="true"
     >
       {{ $t("delete-selected-files") }}
     </app-button>
@@ -59,6 +61,7 @@
       :okTitle="$t('move')"
       :title="$t('move-selected-files')"
       @submit="onMoveSelectedFiles"
+      :superAdminProtected="true"
     >
       <b-form-group :label="$t('select-analysis')">
         <b-form-select v-model="targetAnalysisId" :options="moveAnalysisSelection" required />

@@ -558,10 +558,14 @@ export class VolateqAPI extends HttpClientBase {
 
   public async createDocFile(
     docFile: File,
+    title?: string,
     description?: string,
     onUploadProgress?: (progressEvent: ProgressEvent) => void
   ): Promise<void> {
     const docFilePost = { doc_file: docFile };
+    if (title) {
+      docFilePost["title"] = title;
+    }
     if (description) {
       docFilePost["description"] = description;
     }
@@ -572,12 +576,16 @@ export class VolateqAPI extends HttpClientBase {
   public async editDocFile(
     fileId: string,
     docFile?: File,
+    title?: string,
     description?: string,
     onUploadProgress?: (progressEvent: ProgressEvent) => void,
   ): Promise<void> {
     const docFilePost = {};
     if (docFile) {
       docFilePost["doc_file"] = docFile;
+    }
+    if (title) {
+      docFilePost["title"] = title;
     }
     if (description) {
       docFilePost["description"] = description;

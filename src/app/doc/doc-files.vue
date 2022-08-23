@@ -1,9 +1,9 @@
 <template>
   <app-content :title="$t('documentation')">
     <div class="app-doc-files-table-toolbar" v-if="isSuperAdmin">
-      <b-button variant="primary" @click="onCreateDocFileClick">
+      <app-button variant="primary" @click="onCreateDocFileClick" :superAdminProtected="true">
         {{ $t("upload-new-doc-file") }}
-      </b-button>
+      </app-button>
     </div>
     <app-table-container>
       <b-table :fields="columns" :items="rows" head-variant="light" hover :busy="loading">
@@ -13,9 +13,12 @@
           </div>
         </template>
         <template #cell(fileName)="row">
-          <a href="#" @click.prevent="onFileClick(row.item)">{{ row.item.fileName }}</a>
+          <a href="#" @click.prevent="onFileClick(row.item)">{{ row.item.title || row.item.fileName }}</a>
           <div class="grayed" v-show="row.item.description">
             {{ row.item.description }}
+          </div>
+          <div v-show="row.item.title && isSuperAdmin" class="grayed">
+            <small>{{ row.item.fileName }}</small>
           </div>
         </template>
         <template #cell(updatedAtBy)="row">
@@ -23,30 +26,29 @@
         </template>
         <template #cell(actions)="row">
           <div class="hover-cell pull-right">
-            <b-button
+            <app-button
               @click="onCopyDocFileClick(row.item)"
               variant="secondary"
               size="sm"
               :title="$t('copy-file-link')"
-            >
-              <b-icon icon="clipboard" />
-            </b-button>
-            <b-button v-if="isSuperAdmin"
+              icon="clipboard"
+            />
+            <app-button
               @click="onEditDocFileClick(row.item)"
               variant="secondary"
               size="sm"
               :title="$t('edit-doc-file')"
-            >
-              <b-icon icon="wrench" />
-            </b-button>
-            <b-button v-if="isSuperAdmin"
+              :superAdminProtected="true"
+              icon="wrench"
+            />
+            <app-button
               @click="onDeleteDocFileClick(row.item)"
               variant="outline-danger"
               size="sm"
               :title="$t('delete-doc-file')"
-            >
-              <b-icon icon="trash"></b-icon>
-            </b-button>
+              :superAdminProtected="true"
+              icon="trash"
+            />
           </div>
         </template>
       </b-table>
@@ -58,11 +60,15 @@
       :subtitle="docFileModalSubtitle"
       :ok-title="docFileModalOkTitle"
       :modalLoading="docFileModalLoading"
+      :superAdminProtected="true"
       @submit="onSubmitDocFile"
     >
       <div v-if="currentDocFile">
         <b-form-group :label="$t('doc-file')">
           <app-simple-file-upload v-model="currentDocFile.file" :uploadProgress="uploadProgress" />
+        </b-form-group>
+        <b-form-group :label="$t('title')">
+          <b-form-input v-model="currentDocFile.title" />
         </b-form-group>
         <b-form-group :label="$t('description')">
           <b-form-textarea
@@ -93,6 +99,7 @@ import dateHelper from "../shared/services/helper/date-helper";
 import { getReadableFileSize } from "../shared/services/helper/file-helper";
 import { AppDownloader } from "../shared/services/app-downloader/app-downloader";
 import { baseUrl } from "@/environment/environment";
+import AppButton from "@/app/shared/components/app-button/app-button.vue";
 
 
 @Component({
@@ -102,6 +109,7 @@ import { baseUrl } from "@/environment/environment";
     AppTableContainer,
     AppModalForm,
     AppSimpleFileUpload,
+    AppButton,
   },
 })
 export default class AppDocFiles extends BaseAuthComponent {
@@ -122,7 +130,7 @@ export default class AppDocFiles extends BaseAuthComponent {
 
   async created() {
     this.columns = [
-      { key: "fileName", label: this.$t("file-name").toString() },
+      { key: "fileName", label: this.$t("document").toString() },
       { key: "updatedAtBy", label: this.$t("changed").toString() },
       { key: "size", label: this.$t("size").toString() },
       { key: "actions", label: "" },
@@ -145,6 +153,7 @@ export default class AppDocFiles extends BaseAuthComponent {
         id: docFile.id,
         file: null,
         description: docFile.description || null,
+        title: docFile.title,
         fileName: docFile.file_name,
         updatedAtBy: this.getChangedText(docFile),
         size: getReadableFileSize(docFile.size),
@@ -183,6 +192,7 @@ export default class AppDocFiles extends BaseAuthComponent {
       this.currentDocFile = {
         file: null,
         description: null,
+        title: null,
       };
 
       this.docFileModalTitle = this.$t("upload-new-doc-file").toString();
@@ -228,6 +238,7 @@ export default class AppDocFiles extends BaseAuthComponent {
         await volateqApi.editDocFile(
           this.currentDocFile.id,
           this.currentDocFile.file || undefined, 
+          this.currentDocFile.title || undefined,
           this.currentDocFile.description || undefined,
           (progressEvent) => this.uploadProgress = { total: progressEvent.total, loaded: progressEvent.loaded },
         );
@@ -240,6 +251,7 @@ export default class AppDocFiles extends BaseAuthComponent {
 
         await volateqApi.createDocFile(
           this.currentDocFile.file,
+          this.currentDocFile.title || undefined,
           this.currentDocFile.description || undefined,
           (progressEvent) => this.uploadProgress = { total: progressEvent.total, loaded: progressEvent.loaded },
         );
