@@ -106,6 +106,8 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
     this.isMobileQuery = window.matchMedia("screen and (max-width: 1000px)");
     this.isMobileQuery.addEventListener("change", this.isMobileListener);
     this.isMobileListener(this.isMobileQuery);
+
+    this.setBrowserTitle(this.plant.name);
   }
 
   protected async onAnalysisSelected() {

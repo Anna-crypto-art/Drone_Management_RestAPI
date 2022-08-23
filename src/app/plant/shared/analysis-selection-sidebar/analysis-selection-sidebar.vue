@@ -160,10 +160,6 @@ export default class AppAnalysisSelectionSidebar extends Vue {
 
       if (analysisResultId && !selectFirst) {
         if (typeof analysisResultId === "string") {
-          console.log("analysisResultId")
-          console.log(analysisResultId)
-          console.log(this.analysisResults)
-
           tableRowIndex = this.analysisResults.findIndex(analysisResult => analysisResult.id === analysisResultId);
         } else if (Array.isArray(analysisResultId) && analysisResultId.length === 2) {
           const firstAnalysisId = analysisResultId[0];

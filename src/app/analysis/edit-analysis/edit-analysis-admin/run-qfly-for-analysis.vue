@@ -161,10 +161,6 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
   async runServerAction() {
     this.loading = true;
     try {
-      console.log("this.selectedTask");
-      console.log(this.selectedTask);
-      console.log(ApiTasks[this.selectedTask!]);
-
       if (confirm("Are you sure?")) {
         await volateqApi.runQFlyServerAction(this.analysis.id, {
           action: this.selectedServerAction && QFlyServerAction[this.selectedServerAction] || undefined,

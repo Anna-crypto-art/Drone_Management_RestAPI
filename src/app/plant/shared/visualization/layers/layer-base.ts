@@ -51,9 +51,6 @@ export abstract class LayerBase {
   protected onZoom(onZoomCallback: (zoomLevel: number | undefined) => void): void {
     const view = this.vueComponent.openLayers?.getMap().getView();
 
-    console.log("view:")
-    console.log(view)
-
     if (view) {
       view.on("change:resolution", (e) => {
         onZoomCallback(view.getZoom());

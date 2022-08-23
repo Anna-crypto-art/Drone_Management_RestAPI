@@ -34,13 +34,13 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
 import { Prop, Component } from "vue-property-decorator";
 import AppHeader from "@/app/shared/components/app-header/app-header.vue";
 import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import { AppAlert, AppAlertEvents } from "@/app/shared/services/app-alert/app-alert";
 import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
+import { BaseAuthComponent } from "../base-auth-component/base-auth-component";
 
 @Component({
   name: "app-content",
@@ -49,7 +49,7 @@ import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/
     AppSuperAdminMarker,
   },
 })
-export default class AppContent extends Vue {
+export default class AppContent extends BaseAuthComponent {
   @Prop({ required: true }) title: string | undefined;
   @Prop() subtitle: string | undefined;
   @Prop({ default: false }) navback: boolean | undefined;
@@ -62,7 +62,7 @@ export default class AppContent extends Vue {
   showAlert = false;
   showAlertId = false;
 
-  created() {
+  async created() {
     if (this.eventId) {
       AppContentEventService.on(this.eventId, AppAlertEvents.showAlert, (alert: AppAlert) => {
         this.alertId = alert;
@@ -80,6 +80,8 @@ export default class AppContent extends Vue {
     appContentEventBus.onClearAlert(() => {
       this.showAlert = false;
     });
+
+    this.setBrowserTitle(this.title);
   }
 }
 </script>

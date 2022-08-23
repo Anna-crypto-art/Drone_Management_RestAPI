@@ -20,8 +20,6 @@ export class AbsorberComponentLayer extends ComponentLayer {
 
   public load(): Promise<Record<string, unknown> | undefined> {
     this.onZoom((zoomlevel) => {
-      console.log(zoomlevel)
-
       if (this.refMeasureRunning && zoomlevel) {
         if (zoomlevel < 18) {
           this.width = 5;
@@ -86,5 +84,12 @@ export class AbsorberComponentLayer extends ComponentLayer {
     this.coloredPcsCodes?.push(pcs);
 
     this.rerender();
+  }
+
+  public undoChangeColor(pcs: string) {
+    const colorIndex = this.coloredPcsCodes?.indexOf(pcs);
+    if (colorIndex != undefined && colorIndex !== -1) {
+      this.coloredPcsCodes?.splice(colorIndex, 1);
+    }
   }
 }

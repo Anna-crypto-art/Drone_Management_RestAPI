@@ -153,6 +153,14 @@
         <b-form-group :label="$t('notes')">
           <b-textarea v-model="refMeasureValue.notes" />
         </b-form-group>
+        <app-button v-if="refMeasureValue.id"
+          variant="danger"
+          icon="trash"
+          @click="onDeleteRefMeasureValue"
+          :loading="refMeasureDeleteLoading"
+        >
+          {{ $t("delete") }}
+        </app-button>
       </div>
     </app-modal-form>
   </div>
@@ -167,15 +175,14 @@ import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Component, Prop, Ref } from "vue-property-decorator";
 import { AnalysisSelectionBaseComponent } from "../../shared/analysis-selection-sidebar/analysis-selection-base-component";
-import { LoopComponentLayer } from "./component-layers/loop-component-layer";
 import { COMPONENT_LAYERS, KEY_FIGURE_LAYERS } from "./layers";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue"
+import AppButton from "@/app/shared/components/app-button/app-button.vue"
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { ReferenceMeasurementValueSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
 import { AbsorberComponentLayer } from "./component-layers/absorber-component-layer";
 import { ScaComponentLayer } from "./component-layers/sca-component-layer";
-import { KeyFigureColors } from "../../shared/visualization/layers/types";
 import { SceComponentLayer } from "./component-layers/sce-component-layer";
 
 @Component({
@@ -184,6 +191,7 @@ import { SceComponentLayer } from "./component-layers/sce-component-layer";
     AppVisualization,
     AppExplanation,
     AppModalForm,
+    AppButton,
   },
 })
 export default class AppVisualCspPtc
@@ -200,7 +208,14 @@ export default class AppVisualCspPtc
 
   refMeasureEventObject: ReferenceMeasurementEventObject | null = null;
   refMeasureValueModalLoading = false;
-  refMeasureValue: { pcs: string, hceTemperature: number | null, hceBrokenGlass: boolean | null, notes: string | null } | null = null;
+  refMeasureValue: { 
+      pcs: string,
+      hceTemperature: number | null,
+      hceBrokenGlass: boolean | null,
+      notes: string | null,
+      id: string | null,
+    } | null = null;
+  refMeasureDeleteLoading = false;
 
   async created() {
     await super.created();
@@ -286,6 +301,7 @@ export default class AppVisualCspPtc
                   hceTemperature: refMeasureValue.hce_temperature || null,
                   hceBrokenGlass: refMeasureValue.hce_broken_glass || null,
                   notes: refMeasureValue.notes || null,
+                  id: refMeasureValue.id,
                 };
               } else {
                 this.refMeasureValue = {
@@ -293,6 +309,7 @@ export default class AppVisualCspPtc
                   hceTemperature: null,
                   hceBrokenGlass: null,
                   notes: null,
+                  id: null,
                 };
               }
 
@@ -348,6 +365,25 @@ export default class AppVisualCspPtc
       this.showError(e);
     } finally {
       this.refMeasureValueModalLoading = false;
+    }
+  }
+
+  async onDeleteRefMeasureValue() {
+    this.refMeasureDeleteLoading = true;
+    try {
+      await volateqApi.deleteReferenceMeasurementValue(this.refMeasureValue!.id!);
+
+      const absorberComponentLayer = this.refMeasureEventObject!.componentLayers
+        .find(compLayer => compLayer instanceof AbsorberComponentLayer) as AbsorberComponentLayer | undefined;
+      if (absorberComponentLayer) {
+        absorberComponentLayer.undoChangeColor(this.refMeasureValue!.pcs);
+      }
+
+      this.refMeasureValueModal.hide();
+    } catch (e) {
+      this.showError(e);
+    } finally {
+      this.refMeasureDeleteLoading = false;
     }
   }
 }

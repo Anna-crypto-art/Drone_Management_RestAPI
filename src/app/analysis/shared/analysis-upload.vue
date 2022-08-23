@@ -129,9 +129,6 @@ export default class AppAnalysisUpload
       try {
         const analysis = await volateqApi.getAnalysis(this.analysis!.id);
 
-        console.log("const analysis");
-        console.log(analysis);
-
         if (analysis.has_plant_metadata && !analysis.data_complete) {
           AppContentEventService.showInfo(this.appContentEventId, this.$t("analysis-with-metdata-data-complete_quest").toString());
         }

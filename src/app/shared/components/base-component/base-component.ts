@@ -2,6 +2,10 @@ import Vue, { VNode } from "vue";
 import { ApiErrors, ApiException } from "../../services/volateq-api/api-errors";
 
 export abstract class BaseComponent extends Vue {
+  protected setBrowserTitle(title?: string) {
+    document.title = title ? title : "Volateq";
+  }
+
   public showError(e: any) {
     console.error(e);
     

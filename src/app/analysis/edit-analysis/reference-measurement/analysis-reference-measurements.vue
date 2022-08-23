@@ -160,7 +160,7 @@ export default class AppAnalysisReferenceMeasurements extends BaseAuthComponent 
 
       this.loading = true;
 
-      await volateqApi.deleteRerefenceMeasurement(refMeasureItem.id);
+      await volateqApi.deleteReferenceMeasurement(refMeasureItem.id);
 
       this.showSuccess(this.$t("reference-measurement-delete-success").toString())
       
