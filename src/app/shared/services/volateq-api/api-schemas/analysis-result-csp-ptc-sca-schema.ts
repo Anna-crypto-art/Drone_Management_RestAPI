@@ -2,6 +2,7 @@ import { AnalysisResultSchemaBase } from "./analysis-result-schema-base";
 
 export interface AnalysisResultCspPtcScaSchema extends AnalysisResultSchemaBase {
   encoder_value: number;
+  comment: string;
   orientation_at_drive: number;
   uncertainty_at_drive: number;
   tracking_encoder_offset: number;

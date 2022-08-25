@@ -89,6 +89,7 @@
         >
           <b-col>
             {{ featureInfo.name }}
+            <app-super-admin-marker v-if="featureInfo.superAdminOnly" />
             <app-explanation v-if="featureInfo.descr">
               <span v-html="$t(featureInfo.descr)"></span>
             </app-explanation>
@@ -188,8 +189,8 @@ import { RefMeasureLayers } from "./ref-measure-layers";
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import { layerEvents } from "./layer-events";
 import { OrthoImage } from "./layers/types";
-import { ScaComponentLayer } from "../../csp-ptc/visualization/component-layers/sca-component-layer";
 import { OrhtoImageMixin } from "./mixins/ortho-image-mixin";
+import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -204,6 +205,7 @@ const STORAGE_KEY_SATELLITEVIEW = "storage-key-satelliteview";
     AppDropdownButton,
     AppButton,
     AppModalForm,
+    AppSuperAdminMarker,
   },
 })
 export default class AppVisualization

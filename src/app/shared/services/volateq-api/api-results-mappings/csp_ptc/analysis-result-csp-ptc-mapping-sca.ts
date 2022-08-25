@@ -70,6 +70,12 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
     getDiffValue: r => r.sdx_rms_value__diff,
     unit: "[mrad]",
   },
+  {
+    getValue: r => r.comment,
+    transName: "comment",
+    disableForTable: true,
+    superAdminOnly: true,
+  },
 ];
 
 export default analysisResultCspPtcMappingSca;

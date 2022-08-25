@@ -6,18 +6,28 @@ import { FilterFieldType } from "@/app/plant/shared/filter-fields/types";
 
 export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
   private compareAnalysisResult: AnalysisResultDetailedSchema | null = null;
+  private tableView = false;
 
   constructor(
     private readonly analysisResultMapping: AnalysisResultMappings<T>,
     private readonly analysisResult: AnalysisResultDetailedSchema,
+    private readonly isSuperAdmin: boolean = false,
   ) {}
 
   public setCompareAnalysisResult(compareAnalysisResult: AnalysisResultDetailedSchema | null) {
     this.compareAnalysisResult = compareAnalysisResult;
   }
 
+  public setTableView(tableView: boolean) {
+    this.tableView = tableView;
+  }
+
   public getEntries(): AnalysisResultMappings<T> {
-    return this.analysisResultMapping.filter(entry => this.hasKeyFigure(entry));
+    return this.analysisResultMapping.filter(entry => {
+      return this.hasKeyFigure(entry) &&
+        (!this.tableView || !entry.disableForTable) &&
+        (!entry.superAdminOnly || this.isSuperAdmin);
+    });
   }
 
   public getDiagramEntries(): AnalysisResultMappings<T> {

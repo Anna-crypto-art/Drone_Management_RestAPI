@@ -108,7 +108,7 @@ export default class AppTableComponent extends BaseAuthComponent implements ITab
   async created() {
     this.tableName = "table_" + this.analysisResult.id + "_" + this.activeComponent.componentId;
 
-    this.mappingHelper = new AnalysisResultMappingHelper(this.activeComponent.mapping, this.analysisResult);
+    this.mappingHelper = new AnalysisResultMappingHelper(this.activeComponent.mapping, this.analysisResult, this.isSuperAdmin);
     this.mappingHelper.setCompareAnalysisResult(this.compareAnalysisResult);
     this.mappingEntries = this.mappingHelper.getEntries();
     this.columns = this.mappingHelper.getColumns(transName => this.$t(transName));

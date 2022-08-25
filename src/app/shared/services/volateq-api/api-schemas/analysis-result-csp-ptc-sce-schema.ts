@@ -5,6 +5,7 @@ export interface AnalysisResultCspPtcSceSchema extends AnalysisResultSchemaBase 
   orientation_uncertainty: number;
   alignment_deviation_to_drive: number;
   sdx_rms_value: number;
+  comment: string;
 }
 
 export interface AnalysisResultCspPtcSceComparedSchema extends AnalysisResultCspPtcSceSchema {

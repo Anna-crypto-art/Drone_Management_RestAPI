@@ -13,6 +13,8 @@ export interface AnalysisResultMappingEntry<T extends AnalysisResultSchemaBase, 
   unit?: string;
   getDiffValue?: (result: C) => unknown;
   formatter?: (value: unknown) => string;
+  disableForTable?: boolean;
+  superAdminOnly?: boolean;
 }
 
 export type AnalysisResultMappings<T extends AnalysisResultSchemaBase, C = any> = AnalysisResultMappingEntry<T, C>[];

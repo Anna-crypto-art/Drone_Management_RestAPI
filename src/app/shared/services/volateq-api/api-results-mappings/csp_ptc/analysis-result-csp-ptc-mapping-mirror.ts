@@ -15,6 +15,12 @@ const analysisResultCspPtcMappingMirror: AnalysisResultMappings<
     enableForDiagram: true,
     getDiffValue: r => r.is_missing__diff,
   },
+  {
+    getValue: r => r.comment,
+    transName: "comment",
+    disableForTable: true,
+    superAdminOnly: true,
+  },
 ];
 
 export default analysisResultCspPtcMappingMirror;

@@ -87,6 +87,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
         bold: entry.transName === this.keyFigureInfo.keyName,
         descr: entry.transDescr,
         unit: recordValue !== "" ? entry.unit : undefined,
+        superAdminOnly: entry.superAdminOnly,
       });
     }
 

@@ -62,6 +62,7 @@ export interface FeatureInfo {
   descr?: string;
   unit?: string;
   bold?: boolean;
+  superAdminOnly?: boolean;
 }
 
 export interface FeatureActions {
