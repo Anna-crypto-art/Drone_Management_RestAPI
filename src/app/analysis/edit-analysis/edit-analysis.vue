@@ -1,8 +1,8 @@
 <template>
   <app-content v-if="analysis" :title="analysis.name || ''" :navback="true" :eventId="analysis.id">
     <template #subtitle>
-      <div v-if="analysis.current_state">
-        <b>{{ $t(analysis.current_state.state.name) }}</b>
+      <div class="mar-top">
+        <app-step-progress :steps="analysisProgressSteps" />
       </div>
     </template>
     <div class="app-edit-analysis">
@@ -72,9 +72,11 @@ import { AnalysisEvent } from "../shared/types";
 import { TaskSchema } from "@/app/shared/services/volateq-api/api-schemas/task-schema";
 import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
-import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
+import { apiStateNames, ApiStates } from "@/app/shared/services/volateq-api/api-states";
 import AppAnalysisReferenceMeasurements from "@/app/analysis/edit-analysis/reference-measurement/analysis-reference-measurements.vue";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
+import { ProgressStep } from "@/app/shared/components/app-step-progress/types";
+import AppStepProgress from "@/app/shared/components/app-step-progress/app-step-progress.vue";
 
 @Component({
   name: "app-edit-analysis",
@@ -88,6 +90,7 @@ import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/
     AppBox,
     AppAnalysisReferenceMeasurements,
     AppSuperAdminMarker,
+    AppStepProgress,
   },
 })
 export default class AppEditAnalysis extends BaseAuthComponent {
@@ -103,6 +106,16 @@ export default class AppEditAnalysis extends BaseAuthComponent {
     AnalysisEventService.on(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS, () => {
       this.updateAnalysis(this.analysis!.id)
     });
+  }
+
+  get analysisProgressSteps(): ProgressStep[] {
+    return Object.keys(apiStateNames).map(stateId => ({
+      id: parseInt(stateId),
+      name: this.$t(apiStateNames[stateId]).toString(),
+      description: this.$t(apiStateNames[stateId] + "_descr").toString(),
+      active: this.analysis && this.analysis.current_state && 
+        parseInt(stateId) === this.analysis.current_state.state.id || false,
+    }))
   }
 
   get uploadAllowed(): boolean {
