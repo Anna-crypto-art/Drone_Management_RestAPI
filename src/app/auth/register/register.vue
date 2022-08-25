@@ -59,6 +59,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { ApiErrors, ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import authContainerEventBus from "@/app/auth/shared/components/auth-container-event-bus";
+import { Dictionary } from "vue-router/types/router";
 
 @Component({
   name: "app-auth-register",
@@ -90,22 +91,30 @@ export default class AppAuthRegister extends Vue {
 
       this.hasUser = true;
     } catch (e) {
-      if ((e as ApiException).error === ApiErrors.RESOURCE_NOT_FOUND) {
-        this.$router.push({ name: "Login" });
+      if ((e as ApiException).error === ApiErrors.RESOURCE_NOT_FOUND || (e as ApiException).error === ApiErrors.TOKEN_EXPIRED) {
+        let query: Dictionary<string | undefined> | undefined = undefined;
+        if ((e as ApiException).error === ApiErrors.TOKEN_EXPIRED) {
+          query = {
+            error: (e as ApiException).error,
+            message: (e as ApiException).message,
+          }
+        }
+
+        this.$router.push({ name: "Login", query: query });
       }
 
-      this.showAlert((e as ApiException).error);
+      this.showAlert(e as ApiException);
     }
   }
 
   async onSubmit(e: Event): Promise<void> {
     if (this.user.password !== this.user.repeat_password) {
-      this.showAlert("PASSWORDS_DONT_MATCH");
+      this.showAlert({ error: "PASSWORDS_DONT_MATCH" });
       return;
     }
 
     if (!this.checkedTermsOfService) {
-      this.showAlert("ACCEPT_TERMS_OF_SERVICE");
+      this.showAlert({ error: "ACCEPT_TERMS_OF_SERVICE" });
       return;
     }
 
@@ -116,12 +125,12 @@ export default class AppAuthRegister extends Vue {
 
       this.$router.push({ name: "Login" });
     } catch (e) {
-      this.showAlert((e as ApiException).error);
+      this.showAlert(e as ApiException);
     }
   }
 
-  showAlert(msg: string) {
-    authContainerEventBus.showErrorAlert(msg);
+  showAlert(e: ApiException) {
+    authContainerEventBus.showError(e);
     this.loading = false;
   }
 }

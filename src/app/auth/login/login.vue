@@ -1,6 +1,6 @@
 <template>
   <div class="app-auth-login">
-    <app-auth-container title="">
+    <app-auth-container title="" :infoAlert="infoAlert">
       <b-form @submit.prevent="onSubmit">
         <b-form-group :label="$t('email')" label-for="email">
           <b-form-input id="email" v-model="email" type="email" :placeholder="$t('email')" required></b-form-input>
@@ -44,6 +44,15 @@ export default class AppAuthLogin extends Vue {
   password = "";
 
   loading = false;
+
+  infoAlert = "";
+
+  created() {
+    if (this.$route.query?.error) {
+      this.infoAlert = this.$route.query.error + 
+        ((this.$route.query.message && "<br><small>" + this.$route.query.message + "</small>") || "");
+    }
+  }
 
   async onSubmit() {
     try {

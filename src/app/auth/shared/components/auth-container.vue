@@ -14,6 +14,13 @@
               <h1>{{ title }}</h1>
               <div v-if="subtitle" v-html="subtitle" class="app-auth-box-subtitle grayed"></div>
             </div>
+            <b-alert v-if="infoAlert" 
+              class="mar-bottom"
+              v-model="showInfoAlert"
+              variant="info"
+              v-html="infoAlert"
+              dismissible
+            />
             <slot></slot>
             <b-alert
               class="app-auth-container-alert"
@@ -41,6 +48,7 @@ import authContainerEventBus from "@/app/auth/shared/components/auth-container-e
 export default class AppAuthContainer extends Vue {
   @Prop({ default: "" }) title!: string;
   @Prop({ default: "" }) subtitle!: string;
+  @Prop({ default: "" }) infoAlert!: string;
 
   alert: AppAlert = { msg: "", variant: "success" };
   showAlert = false;
@@ -53,6 +61,10 @@ export default class AppAuthContainer extends Vue {
     authContainerEventBus.onClearAlert(() => {
       this.showAlert = false;
     });
+  }
+
+  get showInfoAlert(): boolean {
+    return !!this.infoAlert;
   }
 }
 </script>

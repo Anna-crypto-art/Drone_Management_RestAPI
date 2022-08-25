@@ -34,6 +34,7 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import authContainerEventBus from "@/app/auth/shared/components/auth-container-event-bus";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { ApiErrors, ApiException } from "@/app/shared/services/volateq-api/api-errors";
+import { Dictionary } from "vue-router/types/router";
 
 @Component({
   name: "app-auth-reset-password",
@@ -52,8 +53,16 @@ export default class AppAuthResetPassword extends Vue {
     try {
       await volateqApi.confirmPasswordReset(this.$route.params.confirmKey);
     } catch (e) {
-      if ((e as ApiException).error === ApiErrors.RESOURCE_NOT_FOUND) {
-        this.$router.push({ name: "Login" });
+      if ((e as ApiException).error === ApiErrors.RESOURCE_NOT_FOUND || (e as ApiException).error === ApiErrors.TOKEN_EXPIRED) {
+        let query: Dictionary<string | undefined> | undefined = undefined;
+        if ((e as ApiException).error === ApiErrors.TOKEN_EXPIRED) {
+          query = {
+            error: (e as ApiException).error,
+            message: (e as ApiException).message,
+          }
+        }
+
+        this.$router.push({ name: "Login", query: query });
       }
 
       authContainerEventBus.showErrorAlert((e as ApiException).error);
