@@ -1,13 +1,18 @@
 <template>
   <div class="app-step-progress">
-    <div v-for="step in realSteps" :key="step.id" :class="'app-step-progress-step ' + step.class">
-      <div class="app-step-progress-step-counter">{{ step.id }}</div>
-      <div class="app-step-progress-step-name">
-        {{ step.name }}
-        <!-- <app-explanation v-if="step.description">
-          {{ step.description }}
-        </app-explanation> -->
+    <div v-for="step in realSteps" :key="step.id" 
+      :class="'app-step-progress-step ' + step.class" 
+      :id="'appStepProgressStep' + step.id"
+    >
+      <div :class="'app-step-progress-step-counter ' + (step.danger ? 'text-danger' : '')">
+        {{ step.danger ? 'X' : step.id }}
       </div>
+      <div :class="'app-step-progress-step-name ' + (step.danger ? 'text-danger' : '')">
+        {{ step.name }}
+      </div>
+      <b-popover v-if="step.active" :target="'appStepProgressStep' + step.id" triggers="hover" placement="top">
+        <span v-html="step.description"></span>
+      </b-popover>
     </div>
   </div>
 </template>
@@ -34,7 +39,7 @@ export default class AppStepProgress extends Vue {
   }
 
   @Watch('steps') onStepsChanged() {
-    const stepTransTime = 250; // ms
+    const stepTransTime = 300; // ms
 
     this.realSteps = [];
 
@@ -44,6 +49,7 @@ export default class AppStepProgress extends Vue {
         name: step.name,
         description: step.description,
         active: step.active,
+        danger: step.danger,
         class: "",
       };
       this.realSteps.push(realStep);
@@ -81,18 +87,20 @@ export default class AppStepProgress extends Vue {
 <style lang="scss">
 @import "@/scss/_colors.scss";
 
-$stepTop: 20px;
+$stepTop: 12px;
 $stepBorder: 2px;
 $completeColor: $blue;
 $uncompleteColor: $grey;
-$stepSize: 40px;
-$stepMarginBottom: 6px;
-$stepTransTime: .25s;
-$counterCompleteColor: $white;
+$stepSize: 25px;
+$stepMarginBottom: 3px;
+$stepTransTime: .3s;
+$counterCompleteColor: $blue;
+$counterFontSize: 0.7em;
 
 .app-step-progress {
   display: flex;
   justify-content: space-between;
+  padding-bottom: 30px;
 
   &-step {
     position: relative;
@@ -129,6 +137,20 @@ $counterCompleteColor: $white;
       font-weight: bold;
     }
 
+    &:first-child::before {
+      left: 0;
+    }
+    &.completed:first-child::before {
+      width: 150%;
+    }
+    &.active:first-child::before {
+      width: 50%;
+    }
+    &:first-child::after {
+      left: 0;
+      width: 150%;
+    }
+
     &:last-child::before {
       content: none;
     }
@@ -145,16 +167,22 @@ $counterCompleteColor: $white;
       width: $stepSize;
       height: $stepSize;
       border-radius: 50%;
-      background: $uncompleteColor;
+      font-size: $counterFontSize;
+      background: $white;
+      border: 2px solid $uncompleteColor;
       margin-bottom: $stepMarginBottom;
     }
-    &.completed &-counter {
-      background: $completeColor;
-      color: $counterCompleteColor
+    &.completed &-counter, &.active &-counter {
+      border: 2px solid $completeColor;
+      background: $white;
+      color: $dark;
     }
 
     &-name {
       font-size: 0.6em;
+    }
+    &.completed &-name, &.active &-name {
+      color: $dark;
     }
   }
 }

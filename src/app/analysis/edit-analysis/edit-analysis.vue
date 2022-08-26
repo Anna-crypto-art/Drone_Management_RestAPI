@@ -109,17 +109,53 @@ export default class AppEditAnalysis extends BaseAuthComponent {
   }
 
   get analysisProgressSteps(): ProgressStep[] {
-    return Object.keys(apiStateNames).map(stateId => ({
-      id: parseInt(stateId),
-      name: this.$t(apiStateNames[stateId]).toString(),
-      description: this.$t(apiStateNames[stateId] + "_descr").toString(),
-      active: this.analysis && this.analysis.current_state && 
-        parseInt(stateId) === this.analysis.current_state.state.id || false,
-    }))
+    const skipStepCount = 2;
+    return [
+      {
+        id: ApiStates.UPLOADING,
+        name: this.hasState([ApiStates.UPLOAD_FAILED, ApiStates.DATA_INCOMPLETE]) ?
+          this.$t(this.analysis!.current_state!.state.name).toString() : 
+          this.$t(apiStateNames[ApiStates.UPLOADING]).toString(),
+        description: this.hasState([ApiStates.UPLOAD_FAILED, ApiStates.DATA_INCOMPLETE]) ?
+          this.$t(this.analysis!.current_state!.state.name + "_descr").toString() : 
+          this.$t(apiStateNames[ApiStates.UPLOADING] + "_descr").toString(),
+        danger: this.hasState([ApiStates.UPLOAD_FAILED, ApiStates.DATA_INCOMPLETE]),
+        active: this.hasState([ApiStates.UPLOADING, ApiStates.UPLOAD_FAILED, ApiStates.DATA_INCOMPLETE]),
+      }, 
+      {
+        id: ApiStates.DATA_COMPLETE - skipStepCount,
+        name: this.$t(apiStateNames[ApiStates.DATA_COMPLETE]).toString(),
+        description: this.$t(apiStateNames[ApiStates.DATA_COMPLETE] + "_descr").toString(),
+        active: this.hasState([ApiStates.DATA_COMPLETE]),
+      },
+      {
+        id: ApiStates.DATA_COMPLETE_VERIFIED - skipStepCount,
+        name: this.$t(apiStateNames[ApiStates.DATA_COMPLETE_VERIFIED]).toString(),
+        description: this.$t(apiStateNames[ApiStates.DATA_COMPLETE_VERIFIED] + "_descr").toString(),
+        active: this.hasState([ApiStates.DATA_COMPLETE_VERIFIED]),
+      },
+      {
+        id: ApiStates.PROCESSING - skipStepCount,
+        name: this.$t(apiStateNames[ApiStates.PROCESSING]).toString(),
+        description: this.$t(apiStateNames[ApiStates.PROCESSING] + "_descr").toString(),
+        active: this.hasState([ApiStates.PROCESSING]),
+      },
+      {
+        id: ApiStates.FINISHED - skipStepCount,
+        name: this.$t(apiStateNames[ApiStates.FINISHED]).toString(),
+        description: this.$t(apiStateNames[ApiStates.FINISHED] + "_descr").toString(),
+        active: this.hasState([ApiStates.FINISHED]),
+      },
+    ];
   }
 
   get uploadAllowed(): boolean {
     return this.analysis && this.analysis.current_state.state.id < ApiStates.DATA_COMPLETE_VERIFIED || false;
+  }
+
+  private hasState(apiStates: ApiStates[]): boolean {
+    return this.analysis && this.analysis.current_state &&
+      apiStates.includes(this.analysis.current_state.state.id) || false;
   }
 
   private async updateAnalysis(analysisId: string) {

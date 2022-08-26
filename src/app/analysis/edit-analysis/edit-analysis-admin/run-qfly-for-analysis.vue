@@ -119,7 +119,7 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
       ];
       if (this.analysis.current_state.state.id === ApiStates.DATA_COMPLETE) {
         this.runTaskSelection.push({
-          text: this.$t('validate-file-completenes').toString(),
+          text: this.$t('validate-file-completeness').toString(),
           value: ApiTasks.validate_plant_metadata,
         });
       }
