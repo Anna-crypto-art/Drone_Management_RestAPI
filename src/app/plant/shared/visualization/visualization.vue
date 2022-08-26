@@ -126,12 +126,12 @@
       @submit="onStartRefMeasure"
     >
       <div v-if="refMeasure">
-        <b-alert variant="secondary" v-model="refMeasure.analysisLoaded">
+        <b-alert variant="info" v-model="refMeasure.analysisLoaded">
           <span v-if="refMeasure.analysisId !== null" 
-          v-html="$t('acquire-reference-measurement-for-analyis', { analysis: refMeasure.analysisName })">
+            v-html="$t('acquire-reference-measurement-for-analysis', { analysis: refMeasure.analysisName })">
           </span>
           <span v-if="refMeasure.analysisId === null">
-            {{ $t("acquire-reference-measurement-and-create-analyis") }}
+            {{ $t("acquire-reference-measurement-and-create-analysis") }}
           </span>
         </b-alert>
         <b-form-group v-if="refMeasureCusomterSelection" :label="$t('customer')">

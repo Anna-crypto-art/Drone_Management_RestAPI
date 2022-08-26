@@ -43,13 +43,11 @@
 <script lang="ts">
 import AppTableComponent from "@/app/plant/shared/table-component/table-component.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
-import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppSearchInput from "@/app/shared/components/app-search-input/app-search-input.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
 import dateHelper from "@/app/shared/services/helper/date-helper";
-import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";

@@ -25,7 +25,10 @@
       <b-form-group :label="$t('select-result-image-files-zip')">
         <app-simple-file-upload v-model="imageFilesZip" :uploadProgress="uploadProgress" accept=".zip" />
       </b-form-group>
-      <app-button type="submit" :loading="loading">{{ $t("apply") }}</app-button>
+      <b-alert :show="!importResultsAllowed" variant="info">
+        {{ $t("import-result-files-not-allowed_descr") }}
+      </b-alert>
+      <app-button type="submit" :loading="loading" :disabled="!importResultsAllowed" >{{ $t("apply") }}</app-button>
     </b-form>
   </app-box>
 </template>
@@ -47,6 +50,7 @@ import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import { QFlyServerState } from "@/app/shared/services/volateq-api/api-schemas/server-schemas";
 import AppSimpleFileUpload from "@/app/shared/components/app-simple-file-upload/app-simple-file-upload.vue";
 import { UploadProgress } from "@/app/shared/components/app-simple-file-upload/types";
+import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 
 @Component({
   name: "app-import-analysis-result",
@@ -103,6 +107,10 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
     } catch (e) {
       this.showError(e);
     }
+  }
+
+  get importResultsAllowed(): boolean {
+    return this.analysis.current_state.state.id >= ApiStates.DATA_COMPLETE_VERIFIED;
   }
 
   private async setManageImportFiles() {

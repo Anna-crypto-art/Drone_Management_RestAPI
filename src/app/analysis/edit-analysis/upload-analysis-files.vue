@@ -1,6 +1,10 @@
 <template>
   <div>
-    <app-analysis-upload
+    <b-alert :show="!uploadAllowed" variant="info">
+      {{ $t("upload-not-allowed_descr") }}
+    </b-alert>
+    
+    <app-analysis-upload v-if="uploadAllowed"
     :analysis="analysis"
     @startUpload="onStartUpload"
     @cancelUpload="onCancelUpload"
@@ -26,6 +30,10 @@ import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 })
 export default class AppUploadAnalysisFiles extends BaseAuthComponent {
   @Prop({ required: true }) analysis!: AnalysisSchema;
+
+  get uploadAllowed(): boolean {
+    return this.analysis && this.analysis.current_state.state.id < ApiStates.DATA_COMPLETE_VERIFIED || false;
+  }
 
   async onStartUpload(files: string[], resume: boolean, done: (analysis: AnalysisSchema | undefined) => void) {
     try {

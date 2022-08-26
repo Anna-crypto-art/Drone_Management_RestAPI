@@ -13,7 +13,7 @@
           </template>
           <app-download-analysis-files :analysis="analysis" />
         </b-tab>
-        <b-tab class="app-edit-analysis-upload-tab" v-if="uploadAllowed">
+        <b-tab class="app-edit-analysis-upload-tab">
           <template #title>
             <b-icon icon="upload" /><span class="pad-left">{{ $t("upload") }}</span>
           </template>
@@ -149,10 +149,6 @@ export default class AppEditAnalysis extends BaseAuthComponent {
     ];
   }
 
-  get uploadAllowed(): boolean {
-    return this.analysis && this.analysis.current_state.state.id < ApiStates.DATA_COMPLETE_VERIFIED || false;
-  }
-
   private hasState(apiStates: ApiStates[]): boolean {
     return this.analysis && this.analysis.current_state &&
       apiStates.includes(this.analysis.current_state.state.id) || false;
@@ -167,6 +163,17 @@ export default class AppEditAnalysis extends BaseAuthComponent {
       this.hasReferenceMeasurements = (await volateqApi.getReferenceMeasurements(this.analysis.id)).length > 0;
 
       this.watchAnalysisTask();
+
+      if (this.isSuperAdmin && this.analysis.analysis_result && 
+        this.analysis.analysis_result.released && this.analysis.current_state.state.id !== ApiStates.FINISHED
+      ) {
+        AppContentEventService.showInfo(this.analysis!.id, this.$t("analysis-not-finished_descr").toString());
+      }
+      if (this.isSuperAdmin && this.analysis.current_state.state.id === ApiStates.FINISHED && 
+        (!this.analysis.analysis_result || !this.analysis.analysis_result.released)
+      ) {
+        AppContentEventService.showInfo(this.analysis!.id, this.$t("analysis-not-released_descr").toString());
+      }
     } catch (e) {
       this.showError(e);
     }
