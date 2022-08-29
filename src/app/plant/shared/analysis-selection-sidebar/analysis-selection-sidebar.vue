@@ -44,11 +44,14 @@ import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/k
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { BvTableFieldArray } from "bootstrap-vue";
 import Vue from "vue";
-import { Component, Prop, Ref } from "vue-property-decorator";
+import { Component, Prop, Ref, Watch } from "vue-property-decorator";
 import { State } from "vuex-class";
 import { AnalysisSelectionService } from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-service";
 import { AnalysisSelectionEvent } from "./types";
 import dateHelper from "@/app/shared/services/helper/date-helper";
+import { Dictionary } from "vue-router/types/router";
+import { PlantRouteQuery } from "../types";
+import { RouteQueryAnalysisSelectionBaseComponent } from "../route-query-analysis-selection-base-component";
 
 @Component({
   name: "app-analysis-selection-sidebar",
@@ -58,7 +61,7 @@ import dateHelper from "@/app/shared/services/helper/date-helper";
     AppSidebar,
   },
 })
-export default class AppAnalysisSelectionSidebar extends Vue {
+export default class AppAnalysisSelectionSidebar extends RouteQueryAnalysisSelectionBaseComponent {
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
   @Prop() getPIColor!: (keyFigure: KeyFigureSchema) => string;
@@ -89,7 +92,9 @@ export default class AppAnalysisSelectionSidebar extends Vue {
       });
     }
 
-    await this.selectAnalysis();
+    if (!this.$route.query.result) {
+      await this.selectAnalysis();
+    }
 
     AnalysisSelectionService.on(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL, () => {
       this.analysisResultsTable.clearSelected();
@@ -98,6 +103,10 @@ export default class AppAnalysisSelectionSidebar extends Vue {
     AnalysisSelectionService.on(this.plant.id, AnalysisSelectionEvent.SELECT_FIRST, async () => {
       await this.selectAnalysis(true);
     });
+  }
+
+  async onResultChanged(query: PlantRouteQuery) {
+    await this.selectAnalysis();
   }
 
   onAnalysisResultSelected(selectedAnalysisResult: { id: string }[]): void {
@@ -120,6 +129,8 @@ export default class AppAnalysisSelectionSidebar extends Vue {
           AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED,
           selectedAnalysisResultIds
         );
+
+        this.pushRoute({ result: selectedAnalysisResultIds });
       }
     } else {
       let selectedAnalysisResultId: string | undefined = undefined
@@ -132,6 +143,8 @@ export default class AppAnalysisSelectionSidebar extends Vue {
         AnalysisSelectionEvent.ANALYSIS_SELECTED,
         selectedAnalysisResultId
       );
+
+      this.pushRoute({ result: selectedAnalysisResultId });
     }
   }
 

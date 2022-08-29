@@ -34,7 +34,7 @@ export interface GroupKPILayer {
 export interface IPlantVisualization {
   plant: PlantSchema;
   openLayers: IOpenLayersComponent | undefined;
-  onLayerSelected(selected: boolean, legend?: Legend);
+  onLayerSelected(selected: boolean, legend: Legend | undefined);
   hideToast: () => void;
 }
 

@@ -170,7 +170,7 @@ import AppCollapse from "@/app/shared/components/app-collapse/app-collapse.vue";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { FeatureLike } from "ol/Feature";
-import { Component, Prop, Ref } from "vue-property-decorator";
+import { Component, Prop, Ref, Watch } from "vue-property-decorator";
 import { ComponentLayer } from "./layers/component-layer";
 import { State } from "vuex-class";
 import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
@@ -190,6 +190,9 @@ import { layerEvents } from "./layer-events";
 import { OrthoImage } from "./layers/types";
 import { ScaComponentLayer } from "../../csp-ptc/visualization/component-layers/sca-component-layer";
 import { OrhtoImageMixin } from "./mixins/ortho-image-mixin";
+import { RouteQueryAnalysisSelectionBaseComponent } from "../route-query-analysis-selection-base-component";
+import { PlantRouteQuery } from "../types";
+import { KeyFigureLayer } from "./layers/key-figure-layer";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -207,7 +210,7 @@ const STORAGE_KEY_SATELLITEVIEW = "storage-key-satelliteview";
   },
 })
 export default class AppVisualization
-  extends AnalysisSelectionBaseComponent
+  extends RouteQueryAnalysisSelectionBaseComponent
   implements IPlantVisualization
 {
   @Prop() plant!: PlantSchema;
@@ -321,9 +324,13 @@ export default class AppVisualization
 
     this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
     this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
+  }
 
-    if (this.$route.query.pi) {
-      const keyFigureId: number = parseInt(this.$route.query.pi as string);
+  protected async onPiChanged(query: PlantRouteQuery) {
+    let selectedPIs: string[] = Array.isArray(query.pi!) ? query.pi! : [query.pi!];
+
+    for (const selectedPI of selectedPIs) {
+      const keyFigureId: number = parseInt(selectedPI);
       if (!Object.values(ApiKeyFigure).includes(keyFigureId)) {
         this.showError({ error: "PI_NOT_FOUND", message: this.$t("pi-not-found").toString() });
       } else {
@@ -432,7 +439,7 @@ export default class AppVisualization
     }
   }
 
-  onLayerSelected(selected: boolean, legend?: Legend) {
+  onLayerSelected(selected: boolean, legend: Legend | undefined) {
     if (legend) {
       const legendIndex = this.legends.findIndex(l => l.id === legend.id);
       if (selected) {
@@ -446,6 +453,11 @@ export default class AppVisualization
           this.legends.splice(legendIndex, 1);
         }
       }
+    }
+
+    if (selected) {
+      const selectedLayers = this.piLayersHierarchy.getAllChildLayers().filter(childLayer => childLayer.getSelected());
+      this.updateRoute({ pi: selectedLayers.map(selectedLayer => selectedLayer.keyFigureId.toString() )});
     }
 
     this.hideToast();

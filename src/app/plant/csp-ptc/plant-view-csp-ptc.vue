@@ -11,7 +11,7 @@
       <h2 :class="'plant-view-csp-ptc-title ' + (sidebarStates['analysis'] ? 'open' : '')">
         {{ plant.name }}
       </h2>
-      <b-tabs align="center" @activate-tab="onTabChange">
+      <b-tabs align="center" v-model="selectedTab">
         <b-tab>
           <template #title>
             <b-icon icon="map" />
@@ -49,13 +49,14 @@ import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/k
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { ISidebarModule } from "@/app/shared/stores/sidebar";
-import { Component, Prop, Ref } from "vue-property-decorator";
+import { Component, Prop, Ref, Watch } from "vue-property-decorator";
 import { State } from "vuex-class";
 import { AnalysisSelectionService } from "../shared/analysis-selection-sidebar/analysis-selection-service";
 import { cspPtcKeyFigureRainbowColors } from "./csp-ptc-key-figure-colors";
 import AppPlantDiagramViewCspPtc from "@/app/plant/csp-ptc/plant-diagram-view-csp-ptc.vue";
-import { AnalysisSelectionBaseComponent } from "../shared/analysis-selection-sidebar/analysis-selection-base-component";
+import { RouteQueryAnalysisSelectionBaseComponent } from "../shared/route-query-analysis-selection-base-component";
 import { PlantViewCspPtcTabs } from "./types";
+import { PlantRouteQuery } from "../shared/types";
 
 @Component({
   name: "app-plant-view-csp-ptc",
@@ -70,7 +71,7 @@ import { PlantViewCspPtcTabs } from "./types";
     AppPlantDiagramViewCspPtc,
   },
 })
-export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
+export default class AppPlantViewCspPtc extends RouteQueryAnalysisSelectionBaseComponent {
   @Prop() plant!: PlantSchema;
   @Ref() analysisSelectionSidebar!: IAnalysisSelectionSidebar;
 
@@ -80,11 +81,15 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
   preMobileSidebarState: ISidebarModule | null = null;
 
   leftSidebarAbsolute = true; // TODO: Make it absolute on all tabs?
-  currentTab = 0;
   // Load table data if user switches to table view, only
   // So we avoid keeping REST-API busy for no reason.
   loadTables = false;
   loadDiagrams = false; // same for diagrams
+
+  selectedTab = 0;
+
+  notMapTabLoaded = false;
+  zoomToHome = false;
 
   private isMobile!: boolean; // TODO: Replace this with the new mobile store
   private isMobileQuery!: MediaQueryList;
@@ -93,7 +98,7 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
 
     this.$store.direct.commit.sidebar.setAll(!this.isMobile);
     this.updateLeftSidebarAbsolute();
-  }  
+  }
 
   async created(): Promise<void> {
     await super.created();
@@ -109,6 +114,34 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
     this.isMobileListener(this.isMobileQuery);
 
     this.setBrowserTitle(this.plant.name);
+
+    await this.loadTabContent();
+
+    if (this.selectedTab !== PlantViewCspPtcTabs.MAP) {
+      this.notMapTabLoaded = true;
+    }
+  }
+
+  @Watch("selectedTab") async onSelectedTabChanged() {
+    if (this.selectedTab !== this.currentTab) {
+      // Special case of openlayers: 
+      // Zoom to home does not work properly if canvas has no focus...
+      // So we have to call it again...
+      if (this.notMapTabLoaded && this.selectedTab === PlantViewCspPtcTabs.MAP) {
+        this.zoomToHome = true;
+      }
+      
+      const nextView = PlantViewCspPtcTabs[this.selectedTab].toString().toLowerCase() as any;
+      this.pushRoute({ view: nextView });
+    }
+
+    this.updateLeftSidebarAbsolute();
+
+    await this.loadTabContent();
+  }
+
+  protected async onViewChanged(query: PlantRouteQuery) {
+    this.selectedTab = this.currentTab;
   }
 
   protected async onAnalysisSelected() {
@@ -127,34 +160,17 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
     return this.analysisResults ? this.analysisResults?.length > 0 : false;
   }
 
-  async onTabChange(tab: number) {
-    this.currentTab = tab;
-    this.updateLeftSidebarAbsolute();
-
-    if (this.hasResults) {
-      if (this.currentTab === PlantViewCspPtcTabs.TABLE) {
-        this.loadTables = true; 
-      } else if (this.currentTab === PlantViewCspPtcTabs.DIAGRAM) {
-        this.loadDiagrams = true; 
-      }
-
-      if ([PlantViewCspPtcTabs.MAP, PlantViewCspPtcTabs.TABLE, PlantViewCspPtcTabs.DIAGRAM].includes(this.currentTab)) {
-        // wait for tables or map component to be loaded and
-        // fire last Analysis event to load data or rerender
-        if (this.firstAnalysisResult) {
-          await this.$nextTick();
-          AnalysisSelectionService.whazzup(this.plant.id);
-        }
-      }
-    }
-
-    this.$router.push({ name: "Plant", query: { v: PlantViewCspPtcTabs[this.currentTab].toString().toLowerCase() }})
-  }
-
   private rerenderOLCanvas(timeout = 0): void {
     setTimeout(() => {
       // triggers openlayers canvas element to rerender
       window.dispatchEvent(new UIEvent("resize"));
+
+      if (this.zoomToHome) {
+        window.dispatchEvent(new CustomEvent("app-visualization:go-home"));
+
+        this.zoomToHome = false;
+        this.notMapTabLoaded = false;
+      }
     }, timeout);
   }
 
@@ -163,7 +179,31 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
   }
 
   updateLeftSidebarAbsolute() {
-    this.leftSidebarAbsolute = this.isMobile || this.currentTab === 0;
+    this.leftSidebarAbsolute = this.isMobile || this.selectedTab === PlantViewCspPtcTabs.MAP;
+  }
+
+  get currentTab(): number {
+    const queryTabName = (this.$route.query.view || "map" ).toString().toUpperCase();
+    return Object.values(PlantViewCspPtcTabs).findIndex(tabName => tabName == queryTabName) || 0;
+  }
+
+  private async loadTabContent() {
+    if (this.hasResults) {
+      if (this.selectedTab === PlantViewCspPtcTabs.TABLE) {
+        this.loadTables = true; 
+      } else if (this.selectedTab === PlantViewCspPtcTabs.DIAGRAM) {
+        this.loadDiagrams = true; 
+      }
+
+      if ([PlantViewCspPtcTabs.MAP, PlantViewCspPtcTabs.TABLE, PlantViewCspPtcTabs.DIAGRAM].includes(this.selectedTab)) {
+        // wait for tables or map component to be loaded and
+        // fire last Analysis event to load data or rerender
+        if (this.firstAnalysisResult) {
+          await this.$nextTick();
+          AnalysisSelectionService.whazzup(this.plant.id);
+        }
+      }
+    }
   }
 }
 </script>

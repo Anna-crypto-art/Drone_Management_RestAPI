@@ -184,6 +184,7 @@ import { ReferenceMeasurementValueSchema } from "@/app/shared/services/volateq-a
 import { AbsorberComponentLayer } from "./component-layers/absorber-component-layer";
 import { ScaComponentLayer } from "./component-layers/sca-component-layer";
 import { SceComponentLayer } from "./component-layers/sce-component-layer";
+import { KeyFigureLayer } from "../../shared/visualization/layers/key-figure-layer";
 
 @Component({
   name: "app-visual-csp-ptc",
@@ -225,7 +226,7 @@ export default class AppVisualCspPtc
     return this.visualization?.openLayers;
   }
 
-  onLayerSelected(selected: boolean, legend?: Legend): void {
+  onLayerSelected(selected: boolean, legend: Legend | undefined): void {
     return this.visualization?.onLayerSelected(selected, legend);
   }
 

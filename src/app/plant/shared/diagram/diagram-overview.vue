@@ -104,12 +104,13 @@ export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
     const numberBox = this.numberBoxes!.find(numberBox => numberBox.id === numberBoxId)!;
 
     this.$router.push({ name: "Plant", params: { id: this.plant.id }, query: { 
+      view: "map",
       pi: numberBox.keyFigure.id + "",
       result: this.compareAnalysisResult ? 
         [this.firstAnalysisResult!.id, this.compareAnalysisResult.id] :
         (this.firstAnalysisResult ? this.firstAnalysisResult!.id : undefined)
     }})
-    this.$router.go(0);
+    // this.$router.go(0);
   }
 
   private activateNumberBox(numberBox: DiagramNumberBox) {
