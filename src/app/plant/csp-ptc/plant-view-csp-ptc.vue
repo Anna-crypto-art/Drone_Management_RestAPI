@@ -40,7 +40,7 @@ import AppPlantAdminViewCspPtc from "@/app/plant/csp-ptc/plant-admin-view-csp-pt
 import AppTablesCspPtc from "@/app/plant/csp-ptc/tables/tables-csp-ptc.vue";
 import AppVisualCspPtc from "@/app/plant/csp-ptc/visualization/visual-csp-ptc.vue";
 import AppAnalysisSelectionSidebar from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-sidebar.vue";
-import { AnalysisSelectionEvent, IAnalysisSelectionSidebar } from "@/app/plant/shared/analysis-selection-sidebar/types";
+import { IAnalysisSelectionSidebar } from "@/app/plant/shared/analysis-selection-sidebar/types";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
@@ -55,6 +55,7 @@ import { AnalysisSelectionService } from "../shared/analysis-selection-sidebar/a
 import { cspPtcKeyFigureRainbowColors } from "./csp-ptc-key-figure-colors";
 import AppPlantDiagramViewCspPtc from "@/app/plant/csp-ptc/plant-diagram-view-csp-ptc.vue";
 import { AnalysisSelectionBaseComponent } from "../shared/analysis-selection-sidebar/analysis-selection-base-component";
+import { PlantViewCspPtcTabs } from "./types";
 
 @Component({
   name: "app-plant-view-csp-ptc",
@@ -92,7 +93,7 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
 
     this.$store.direct.commit.sidebar.setAll(!this.isMobile);
     this.updateLeftSidebarAbsolute();
-  }
+  }  
 
   async created(): Promise<void> {
     await super.created();
@@ -131,13 +132,13 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
     this.updateLeftSidebarAbsolute();
 
     if (this.hasResults) {
-      if (this.currentTab === 1) { // 1 = tables
+      if (this.currentTab === PlantViewCspPtcTabs.TABLE) {
         this.loadTables = true; 
-      } else if (this.currentTab === 2) { // 2 = diagrams
+      } else if (this.currentTab === PlantViewCspPtcTabs.DIAGRAM) {
         this.loadDiagrams = true; 
       }
 
-      if (this.currentTab === 1 || this.currentTab === 0 || this.currentTab === 2) { // 0 = map
+      if ([PlantViewCspPtcTabs.MAP, PlantViewCspPtcTabs.TABLE, PlantViewCspPtcTabs.DIAGRAM].includes(this.currentTab)) {
         // wait for tables or map component to be loaded and
         // fire last Analysis event to load data or rerender
         if (this.firstAnalysisResult) {
@@ -146,6 +147,8 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
         }
       }
     }
+
+    this.$router.push({ name: "Plant", query: { v: PlantViewCspPtcTabs[this.currentTab].toString().toLowerCase() }})
   }
 
   private rerenderOLCanvas(timeout = 0): void {
