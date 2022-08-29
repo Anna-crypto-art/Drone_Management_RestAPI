@@ -130,7 +130,7 @@ export default class AppAnalysisSelectionSidebar extends RouteQueryAnalysisSelec
           selectedAnalysisResultIds
         );
 
-        this.pushRoute({ result: selectedAnalysisResultIds });
+        this.updateRoute({ result: selectedAnalysisResultIds });
       }
     } else {
       let selectedAnalysisResultId: string | undefined = undefined
@@ -144,7 +144,7 @@ export default class AppAnalysisSelectionSidebar extends RouteQueryAnalysisSelec
         selectedAnalysisResultId
       );
 
-      this.pushRoute({ result: selectedAnalysisResultId });
+      this.updateRoute({ result: selectedAnalysisResultId });
     }
   }
 
