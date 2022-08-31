@@ -49,9 +49,8 @@ import { State } from "vuex-class";
 import { AnalysisSelectionService } from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-service";
 import { AnalysisSelectionEvent } from "./types";
 import dateHelper from "@/app/shared/services/helper/date-helper";
-import { Dictionary } from "vue-router/types/router";
 import { PlantRouteQuery } from "../types";
-import { RouteQueryAnalysisSelectionBaseComponent } from "../route-query-analysis-selection-base-component";
+import { RouteQueryHelper } from "../helper/route-query-helper";
 
 @Component({
   name: "app-analysis-selection-sidebar",
@@ -61,7 +60,7 @@ import { RouteQueryAnalysisSelectionBaseComponent } from "../route-query-analysi
     AppSidebar,
   },
 })
-export default class AppAnalysisSelectionSidebar extends RouteQueryAnalysisSelectionBaseComponent {
+export default class AppAnalysisSelectionSidebar extends Vue {
   @Prop() plant!: PlantSchema;
   @Prop() analysisResults!: AnalysisResultDetailedSchema[];
   @Prop() getPIColor!: (keyFigure: KeyFigureSchema) => string;
@@ -80,6 +79,8 @@ export default class AppAnalysisSelectionSidebar extends RouteQueryAnalysisSelec
   selectMode = "single";
   lastSelectedAnalysisResults: { id: string }[] = [];
 
+  private routeQueryHelper = new RouteQueryHelper(this);
+
   async created() {
     for (const analysisResult of this.analysisResults) {
       this.analysisResultsTableItems.push({
@@ -92,9 +93,7 @@ export default class AppAnalysisSelectionSidebar extends RouteQueryAnalysisSelec
       });
     }
 
-    if (!this.$route.query.result) {
-      await this.selectAnalysis();
-    }
+    await this.selectAnalysis();
 
     AnalysisSelectionService.on(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL, () => {
       this.analysisResultsTable.clearSelected();
@@ -105,8 +104,11 @@ export default class AppAnalysisSelectionSidebar extends RouteQueryAnalysisSelec
     });
   }
 
-  async onResultChanged(query: PlantRouteQuery) {
-    await this.selectAnalysis();
+  @Watch("$route.query.result", { deep: true })
+  async onResultChanged() {
+    await this.routeQueryHelper.queryChanged(async () => {
+      await this.selectAnalysis();
+    });
   }
 
   onAnalysisResultSelected(selectedAnalysisResult: { id: string }[]): void {
@@ -130,7 +132,7 @@ export default class AppAnalysisSelectionSidebar extends RouteQueryAnalysisSelec
           selectedAnalysisResultIds
         );
 
-        this.updateRoute({ result: selectedAnalysisResultIds });
+        this.routeQueryHelper.replaceRoute({ result: selectedAnalysisResultIds });
       }
     } else {
       let selectedAnalysisResultId: string | undefined = undefined
@@ -144,7 +146,7 @@ export default class AppAnalysisSelectionSidebar extends RouteQueryAnalysisSelec
         selectedAnalysisResultId
       );
 
-      this.updateRoute({ result: selectedAnalysisResultId });
+      this.routeQueryHelper.replaceRoute({ result: selectedAnalysisResultId });
     }
   }
 

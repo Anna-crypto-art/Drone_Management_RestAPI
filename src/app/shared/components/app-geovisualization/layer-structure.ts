@@ -15,7 +15,7 @@ export class LayerStructure extends EventEmitter {
   public ignoreSelectedWatcher = false;
 
   constructor(
-    private readonly layerLoader?: LayerLoader<Layer<Source, LayerRenderer<any>> | undefined>,
+    public readonly layerLoader?: LayerLoader<Layer<Source, LayerRenderer<any>> | undefined>,
     private readonly _name: string | (() => VNode[]) = "",
     private readonly layerType?: BaseLayerType
   ) {
@@ -55,6 +55,8 @@ export class LayerStructure extends EventEmitter {
     if (this.parentLayer) {
       if (this.parentLayer.singleSelection) {
         this.parentLayer.getChildLayers().forEach(sibling => {
+          console.log("unselectParentLayers: " + sibling.name + " " + sibling.selected)
+
           if (sibling.id !== this.id && (sibling.selected || sibling.isGroup)) {
             sibling.selected = false;
           }

@@ -6,7 +6,7 @@
           <template #button>
             <b-icon icon="gear-fill" /> <span class="pad-left">{{ $t("display-settings") }}</span>
           </template>
-          <b-form-checkbox v-model="enableMultiSelection" switch @change="onMultiSelectionChanged">
+          <b-form-checkbox v-model="enableMultiSelection" switch @change="onMultiSelectionChanged" :disabled="multiSelectionDisabled">
             {{ $t("multi-selection") }} <app-explanation>{{ $t("multi-selection-overlapping_expl") }}</app-explanation>
           </b-form-checkbox>
           <b-form-checkbox v-model="showCouldNotBeMeasured" switch @change="onShowCouldNotBeMeasuredChanged">
@@ -188,11 +188,9 @@ import { RefMeasureLayers } from "./ref-measure-layers";
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import { layerEvents } from "./layer-events";
 import { OrthoImage } from "./layers/types";
-import { ScaComponentLayer } from "../../csp-ptc/visualization/component-layers/sca-component-layer";
 import { OrhtoImageMixin } from "./mixins/ortho-image-mixin";
-import { RouteQueryAnalysisSelectionBaseComponent } from "../route-query-analysis-selection-base-component";
 import { PlantRouteQuery } from "../types";
-import { KeyFigureLayer } from "./layers/key-figure-layer";
+import { RouteQueryHelper } from "../helper/route-query-helper";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -210,7 +208,7 @@ const STORAGE_KEY_SATELLITEVIEW = "storage-key-satelliteview";
   },
 })
 export default class AppVisualization
-  extends RouteQueryAnalysisSelectionBaseComponent
+  extends AnalysisSelectionBaseComponent
   implements IPlantVisualization
 {
   @Prop() plant!: PlantSchema;
@@ -237,6 +235,7 @@ export default class AppVisualization
   enableMultiSelection = false;
   showCouldNotBeMeasured = true;
   satelliteView = false;
+  multiSelectionDisabled = false;
 
   refMeasureId: string | null = null;
   refMeasureButtonLoading = false;
@@ -253,6 +252,8 @@ export default class AppVisualization
 
   private isMounted = false;
   private firstLoad = true;
+
+  private routeQueryHelper = new RouteQueryHelper(this);
 
   async created() {
     await super.created();
@@ -280,9 +281,16 @@ export default class AppVisualization
 
   protected async onAnalysisSelected() {
     this.piLayersHierarchy.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
+    
+    const multiBefore = !!this.piLayersHierarchy.getCompareAnalysisResultId();
+    if (multiBefore) {
+      this.doEnableMultiSelection();
+    }
+    
     this.piLayersHierarchy.setCompareAnalysisResult(null);
-    this.piLayersHierarchy.toggleMultiSelection(true, true);
-    this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
+    if (this.piLayersHierarchy.getSelectedAnalysisResultId() !== this.firstAnalysisResult?.id || multiBefore) {
+      this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection, true);
+    }
     this.piLayersHierarchy.updateVisibility();
     this.availableOrthoImages = this.piLayersHierarchy.getAvailableOrthoImages();
 
@@ -297,10 +305,17 @@ export default class AppVisualization
   }
 
   protected async onMultiAnalysesSelected() {
+    const selectionChanged = this.piLayersHierarchy.getSelectedAnalysisResultId() !== this.firstAnalysisResult?.id ||
+      this.piLayersHierarchy.getCompareAnalysisResultId() !== this.compareAnalysisResult?.id;
+
     this.piLayersHierarchy.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     this.piLayersHierarchy.setCompareAnalysisResult(this.compareAnalysisResult || null);
-    this.piLayersHierarchy.toggleMultiSelection(false, true);
+    
+    this.disableMultiSelection();
+    selectionChanged && this.piLayersHierarchy.toggleMultiSelection(false, true);
+    
     this.piLayersHierarchy.updateVisibility();
+
     this.availableOrthoImages = this.piLayersHierarchy.getAvailableOrthoImages();
 
     await this.refMeasureLayers.addAndSelectAnalysisResult(undefined);
@@ -324,18 +339,42 @@ export default class AppVisualization
 
     this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
     this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
+
+    await this.onPiChanged();
   }
 
-  protected async onPiChanged(query: PlantRouteQuery) {
-    let selectedPIs: string[] = Array.isArray(query.pi!) ? query.pi! : [query.pi!];
+  @Watch("$route.query.pi", { deep: true })
+  async onPiChanged() {
+    console.log("onPiChanged")
 
-    for (const selectedPI of selectedPIs) {
-      const keyFigureId: number = parseInt(selectedPI);
-      if (!Object.values(ApiKeyFigure).includes(keyFigureId)) {
-        this.showError({ error: "PI_NOT_FOUND", message: this.$t("pi-not-found").toString() });
-      } else {
-        this.piLayersHierarchy.selectKeyFigureLayer(keyFigureId);
-      }
+    if (this.$route.query.view === undefined || this.$route.query.view === null || this.$route.query.view === "map") {
+      await this.routeQueryHelper.queryChanged(async () => {
+
+        console.log("onPiChanged -")
+  
+        let selectedPIs: (string | null)[] = Array.isArray(this.$route.query.pi!) ? 
+          this.$route.query.pi! : 
+          [this.$route.query.pi!];
+        for (const selectedPI of selectedPIs) {
+          if (selectedPI) {
+            const keyFigureId: number = parseInt(selectedPI);
+            if (!Object.values(ApiKeyFigure).includes(keyFigureId)) {
+              this.showError({ error: "PI_NOT_FOUND", message: this.$t("pi-not-found").toString() });
+            } else {
+              // Wait for analysis result to be loaded
+              await this.$nextTick(); 
+              await this.$nextTick();
+
+              this.piLayersHierarchy.selectKeyFigureLayer(keyFigureId);
+            }
+
+            if (this.compareAnalysisResult !== null) {
+              // do not select multiple key figures in compare view
+              break;
+            }
+          }
+        }
+      });
     }
   }
 
@@ -439,6 +478,16 @@ export default class AppVisualization
     }
   }
 
+  private disableMultiSelection() {
+    this.enableMultiSelection = false;
+    this.multiSelectionDisabled = true;
+  }
+
+  private doEnableMultiSelection() {
+    this.enableMultiSelection = appLocalStorage.getItem(STORAGE_KEY_MULTISELECTION) || false;
+    this.multiSelectionDisabled = false;
+  }
+
   onLayerSelected(selected: boolean, legend: Legend | undefined) {
     if (legend) {
       const legendIndex = this.legends.findIndex(l => l.id === legend.id);
@@ -455,11 +504,12 @@ export default class AppVisualization
       }
     }
 
-    if (selected) {
-      const selectedLayers = this.piLayersHierarchy.getAllChildLayers().filter(childLayer => childLayer.getSelected());
-      this.updateRoute({ pi: selectedLayers.map(selectedLayer => selectedLayer.keyFigureId.toString() )});
-    }
+    const selectedLayers = this.piLayersHierarchy.getAllChildLayers().filter(childLayer => childLayer.getSelected());
 
+    console.log(selectedLayers.map(l => l.keyFigureId));
+
+    this.routeQueryHelper.replaceRoute({ pi: selectedLayers.map(selectedLayer => selectedLayer.keyFigureId.toString() )});
+    
     this.hideToast();
   }
 

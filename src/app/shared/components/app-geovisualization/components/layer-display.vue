@@ -61,6 +61,13 @@ export default class AppGeovisualLayerDisplay extends Vue {
 
     this.layer.on("setSelected", (selected) => {
       this.selected = selected;
+
+      // Special case: Selected programmatically, does not select layerType...
+      if (this.layer.selected !== selected) {
+        if (this.layer.layerLoader) {
+          this.layer.layerLoader.layerType.selected = selected;
+        }
+      }
     });
   }
 

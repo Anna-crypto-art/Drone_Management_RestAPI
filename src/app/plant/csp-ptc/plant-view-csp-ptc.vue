@@ -54,9 +54,10 @@ import { State } from "vuex-class";
 import { AnalysisSelectionService } from "../shared/analysis-selection-sidebar/analysis-selection-service";
 import { cspPtcKeyFigureRainbowColors } from "./csp-ptc-key-figure-colors";
 import AppPlantDiagramViewCspPtc from "@/app/plant/csp-ptc/plant-diagram-view-csp-ptc.vue";
-import { RouteQueryAnalysisSelectionBaseComponent } from "../shared/route-query-analysis-selection-base-component";
+import { RouteQueryHelper } from "../shared/helper/route-query-helper";
 import { PlantViewCspPtcTabs } from "./types";
 import { PlantRouteQuery } from "../shared/types";
+import { AnalysisSelectionBaseComponent } from "../shared/analysis-selection-sidebar/analysis-selection-base-component";
 
 @Component({
   name: "app-plant-view-csp-ptc",
@@ -71,7 +72,7 @@ import { PlantRouteQuery } from "../shared/types";
     AppPlantDiagramViewCspPtc,
   },
 })
-export default class AppPlantViewCspPtc extends RouteQueryAnalysisSelectionBaseComponent {
+export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
   @Prop() plant!: PlantSchema;
   @Ref() analysisSelectionSidebar!: IAnalysisSelectionSidebar;
 
@@ -90,6 +91,8 @@ export default class AppPlantViewCspPtc extends RouteQueryAnalysisSelectionBaseC
 
   notMapTabLoaded = false;
   zoomToHome = false;
+
+  private routeQueryHelper = new RouteQueryHelper(this);
 
   private isMobile!: boolean; // TODO: Replace this with the new mobile store
   private isMobileQuery!: MediaQueryList;
@@ -132,7 +135,7 @@ export default class AppPlantViewCspPtc extends RouteQueryAnalysisSelectionBaseC
       }
       
       const nextView = PlantViewCspPtcTabs[this.selectedTab].toString().toLowerCase() as any;
-      this.pushRoute({ view: nextView });
+      await this.routeQueryHelper.pushRoute({ view: nextView });
     }
 
     this.updateLeftSidebarAbsolute();
@@ -140,8 +143,10 @@ export default class AppPlantViewCspPtc extends RouteQueryAnalysisSelectionBaseC
     await this.loadTabContent();
   }
 
-  protected async onViewChanged(query: PlantRouteQuery) {
-    this.selectedTab = this.currentTab;
+  @Watch("$route.query.view", { deep: true, immediate: true}) async onViewChanged() {
+    await this.routeQueryHelper.queryChanged(async () => {
+      this.selectedTab = this.currentTab;
+    });
   }
 
   protected async onAnalysisSelected() {

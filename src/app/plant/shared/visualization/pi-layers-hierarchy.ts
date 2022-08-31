@@ -75,7 +75,13 @@ export class PILayersHierarchy {
     for (const childLayer of this.getAllChildLayers()) {
       childLayer.setColorScheme(multiSelection ? KeyFigureColorScheme.RAINBOW : KeyFigureColorScheme.TRAFFIC_LIGHT);
       childLayer.reloadLayer();
-      childLayer.setSelected(false);
+
+      if (multiSelection && childLayer.getSelected()) {
+        // Reload selected layer
+        childLayer.setSelected(false);
+      }
+
+      childLayer.setSelected(multiSelection && childLayer.getSelected());
     }
   }
 
@@ -102,7 +108,7 @@ export class PILayersHierarchy {
   public selectKeyFigureLayer(keyFigureId: ApiKeyFigure) {
     const keyFigureLayer = this.getAllChildLayers().find(keyFigureLayer => 
       keyFigureLayer.isVisible && keyFigureLayer.keyFigureId === keyFigureId);
-    if (keyFigureLayer) {
+    if (keyFigureLayer && !keyFigureLayer.getSelected()) {
       keyFigureLayer.setSelected(true);
     }
   }
@@ -189,6 +195,14 @@ export class PILayersHierarchy {
     }
 
     return [];
+  }
+
+  public getSelectedAnalysisResultId(): string | undefined {
+    return this.selectedAnalysisResultId;
+  }
+
+  public getCompareAnalysisResultId(): string | undefined {
+    return this.compareAnylysisResultId;
   }
 
   private getParentComponentLayer(keyFigure: KeyFigureSchema): GroupKPILayer {
