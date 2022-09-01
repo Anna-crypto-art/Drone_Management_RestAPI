@@ -1,13 +1,14 @@
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import Vue from "vue";
-import { Watch } from "vue-property-decorator";
 import { RawLocation } from "vue-router";
-import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
 import { PlantRouteQuery } from "../types";
 
 export class RouteQueryHelper {
   constructor(private readonly vueComponent: Vue & { plant: PlantSchema }) {}
 
+  /**
+   * Ignore watched query changes 
+   */
   public closedEyes = false;
 
   public async queryChanged(onQueryChanged: () => Promise<void>) {

@@ -280,15 +280,38 @@ export default class AppVisualization
   }
 
   protected async onAnalysisSelected() {
+    console.log("onAnalysisSelected " + this.firstAnalysisResult?.id);
+
     this.piLayersHierarchy.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     
-    const multiBefore = !!this.piLayersHierarchy.getCompareAnalysisResultId();
-    if (multiBefore) {
+    const multiAnalysesSelectedBefore = !!this.piLayersHierarchy.getCompareAnalysisResultId();
+    if (multiAnalysesSelectedBefore) {
+      // If we had multiple analysis selected before, we need to restore and enable multiselection again
       this.doEnableMultiSelection();
     }
     
     this.piLayersHierarchy.setCompareAnalysisResult(null);
-    if (this.piLayersHierarchy.getSelectedAnalysisResultId() !== this.firstAnalysisResult?.id || multiBefore) {
+    if (this.piLayersHierarchy.getSelectedAnalysisResultId() !== this.firstAnalysisResult?.id ||
+      multiAnalysesSelectedBefore
+    ) {
+      /*
+      Multiselection is our devil of complexity ...
+
+      Shortly explained "piLayersHierarchy.toggleMultiSelection": 
+        1. unselect all key figures
+        2. select selected key figures again, if allowed (refresh! [Because of the color...])
+      */
+
+      if (this.enableMultiSelection) {
+        // Ensure, that the routeQueryHelper doesn't refresh the route to avoid circual key figure selection.
+        // Shortly explained "Circular key figure selection":
+        // 1. "piLayersHierarchy.toggleMultiSelection" causes "setSelected"
+        // 2. geo-visualization (LayerStructure) causes "onSelected"
+        // 3. "onLayerSelected" causes "onPiChanged"
+        // 4. "onPiChanged" causes "setSelected" ...
+        this.routeQueryHelper.closedEyes = true;
+      }
+
       this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection, true);
     }
     this.piLayersHierarchy.updateVisibility();
@@ -307,12 +330,16 @@ export default class AppVisualization
   protected async onMultiAnalysesSelected() {
     const selectionChanged = this.piLayersHierarchy.getSelectedAnalysisResultId() !== this.firstAnalysisResult?.id ||
       this.piLayersHierarchy.getCompareAnalysisResultId() !== this.compareAnalysisResult?.id;
-
+    
     this.piLayersHierarchy.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     this.piLayersHierarchy.setCompareAnalysisResult(this.compareAnalysisResult || null);
     
+    // Multi selection is not allowed for compare mode
     this.disableMultiSelection();
-    selectionChanged && this.piLayersHierarchy.toggleMultiSelection(false, true);
+    
+    if (selectionChanged) {
+      this.piLayersHierarchy.toggleMultiSelection(false, true);
+    }
     
     this.piLayersHierarchy.updateVisibility();
 
@@ -345,13 +372,8 @@ export default class AppVisualization
 
   @Watch("$route.query.pi", { deep: true })
   async onPiChanged() {
-    console.log("onPiChanged")
-
     if (this.$route.query.view === undefined || this.$route.query.view === null || this.$route.query.view === "map") {
       await this.routeQueryHelper.queryChanged(async () => {
-
-        console.log("onPiChanged -")
-  
         let selectedPIs: (string | null)[] = Array.isArray(this.$route.query.pi!) ? 
           this.$route.query.pi! : 
           [this.$route.query.pi!];
@@ -505,8 +527,6 @@ export default class AppVisualization
     }
 
     const selectedLayers = this.piLayersHierarchy.getAllChildLayers().filter(childLayer => childLayer.getSelected());
-
-    console.log(selectedLayers.map(l => l.keyFigureId));
 
     this.routeQueryHelper.replaceRoute({ pi: selectedLayers.map(selectedLayer => selectedLayer.keyFigureId.toString() )});
     

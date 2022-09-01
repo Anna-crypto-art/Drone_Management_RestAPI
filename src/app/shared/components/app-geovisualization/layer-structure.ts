@@ -55,8 +55,6 @@ export class LayerStructure extends EventEmitter {
     if (this.parentLayer) {
       if (this.parentLayer.singleSelection) {
         this.parentLayer.getChildLayers().forEach(sibling => {
-          console.log("unselectParentLayers: " + sibling.name + " " + sibling.selected)
-
           if (sibling.id !== this.id && (sibling.selected || sibling.isGroup)) {
             sibling.selected = false;
           }
