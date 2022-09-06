@@ -10,10 +10,18 @@ export class HttpClientBase {
 
   static createAuthHttpClient(baseURL: string): AxiosInstance {
     const httpClient = Axios.create({ baseURL });
+
     httpClient.interceptors.request.use((config: AxiosRequestConfig): AxiosRequestConfig => {
+      const headers = {};
+
       if (store.getters.auth.isAuthenticated) {
-        config.headers = { Authorization: `Bearer ${store.state.auth.token}` };
+        headers["Authorization"] = `Bearer ${store.state.auth.token}`;
       }
+      if (store.state.protect.botProtectionToken) {
+        headers["X-Volateq-Bot-Protection-Token"] = store.state.protect.botProtectionToken
+      }
+
+      config.headers = headers
 
       return config;
     });
@@ -28,7 +36,15 @@ export class HttpClientBase {
       (response: AxiosResponse) => {
         return response.data;
       },
-      (error: AxiosError) => {
+      async (error: AxiosError) => {
+        if (error.response?.status === 499) {
+          await this.refreshProtectionToken();
+          
+          error.config.headers["X-Volateq-Bot-Protection-Token"] = store.state.protect.botProtectionToken
+          error.config.baseURL = undefined;
+          return Axios.request(error.config)
+        }
+
         if (error.response && error.response.data && error.response.data.error) {
           if (
             error.response.data.error === ApiErrors.INVALID_TOKEN ||
@@ -51,6 +67,11 @@ export class HttpClientBase {
         });
       }
     );
+  }
+
+  private async refreshProtectionToken() {
+    const response = await Axios.get((new URL('/bot-protection-token', this.baseURL)).toString());
+    await store.dispatch.protect.updateBotProtectionToken(response.data)
   }
 
   protected async postForm(
