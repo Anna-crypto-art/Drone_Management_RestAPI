@@ -30,9 +30,10 @@ export class HttpClientBase {
   }
 
   constructor() {
+    this.baseURL = apiBaseUrl;
+
     this.refreshProtectionToken();
 
-    this.baseURL = apiBaseUrl;
     this.httpClient = HttpClientBase.createAuthHttpClient(this.baseURL!);
     this.httpClient.interceptors.response.use(
       (response: AxiosResponse) => {
