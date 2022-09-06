@@ -32,9 +32,6 @@ export class HttpClientBase {
 
   constructor() {
     this.baseURL = apiBaseUrl;
-
-    this.refreshProtectionToken();
-
     this.httpClient = HttpClientBase.createAuthHttpClient(this.baseURL!);
     this.httpClient.interceptors.response.use(
       (response: AxiosResponse) => {
@@ -54,13 +51,13 @@ export class HttpClientBase {
           return Promise.reject(error.response.data);
         }
 
-        // CORS Error due to 404 of nginx due to missing or wrong bot protection token
+        // CORS Error due to 404 of nginx (it does not set cors header...) due to missing or wrong bot protection token
         if (error.response === undefined) {
           await this.refreshProtectionToken();
           
           // retry the same request again, but with a fresh token
           error.config.headers["XVolateqBotProtectionToken"] = store.state.protect.botProtectionToken
-          return Axios.request(error.config)
+          return (await Axios.request(error.config)).data
         }
 
         console.error("FATAL");

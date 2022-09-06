@@ -7,6 +7,8 @@ const ProtectionModule = defineModule({
   state: { botProtectionToken: appLocalStorage.getItem("botProtectionToken") },
   mutations: {
     updateBotProtectionToken(state, botProtectionToken: string) {
+      appLocalStorage.setItem("botProtectionToken", botProtectionToken)
+
       state.botProtectionToken = botProtectionToken
     }
   },
