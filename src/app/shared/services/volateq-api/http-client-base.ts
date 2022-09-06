@@ -53,7 +53,7 @@ export class HttpClientBase {
         if (error.response?.status === 404) {
           await this.refreshProtectionToken();
           
-          error.config.headers["X-Volateq-Bot-Protection-Token"] = store.state.protect.botProtectionToken
+          error.config.headers["XVolateqBotProtectionToken"] = store.state.protect.botProtectionToken
           error.config.baseURL = undefined;
           return Axios.request(error.config)
         }
