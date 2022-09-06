@@ -37,14 +37,6 @@ export class HttpClientBase {
         return response.data;
       },
       async (error: AxiosError) => {
-        if (error.response?.status === 499) {
-          await this.refreshProtectionToken();
-          
-          error.config.headers["X-Volateq-Bot-Protection-Token"] = store.state.protect.botProtectionToken
-          error.config.baseURL = undefined;
-          return Axios.request(error.config)
-        }
-
         if (error.response && error.response.data && error.response.data.error) {
           if (
             error.response.data.error === ApiErrors.INVALID_TOKEN ||
@@ -56,6 +48,14 @@ export class HttpClientBase {
           }
 
           return Promise.reject(error.response.data);
+        }
+
+        if (error.response?.status === 404) {
+          await this.refreshProtectionToken();
+          
+          error.config.headers["X-Volateq-Bot-Protection-Token"] = store.state.protect.botProtectionToken
+          error.config.baseURL = undefined;
+          return Axios.request(error.config)
         }
 
         console.error("FATAL");
