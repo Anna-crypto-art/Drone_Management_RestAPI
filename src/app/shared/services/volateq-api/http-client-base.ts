@@ -18,7 +18,7 @@ export class HttpClientBase {
         headers["Authorization"] = `Bearer ${store.state.auth.token}`;
       }
       if (store.state.protect.botProtectionToken) {
-        headers["X-Volateq-Bot-Protection-Token"] = store.state.protect.botProtectionToken
+        headers["XVolateqBotProtectionToken"] = store.state.protect.botProtectionToken
       }
 
       config.headers = headers
