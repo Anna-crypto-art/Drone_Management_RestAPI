@@ -2,6 +2,7 @@ import Axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } f
 import { apiBaseUrl } from "@/environment/environment";
 import store from "@/app/app-state";
 import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
+import { eachQuarterOfInterval } from "date-fns";
 
 export class HttpClientBase {
   private readonly httpClient: AxiosInstance;
@@ -53,11 +54,12 @@ export class HttpClientBase {
           return Promise.reject(error.response.data);
         }
 
-        if (error.response?.status === 404) {
+        // CORS Error due to 404 of nginx due to missing or wrong bot protection token
+        if (error.response === undefined) {
           await this.refreshProtectionToken();
           
+          // retry the same request again, but with a fresh token
           error.config.headers["XVolateqBotProtectionToken"] = store.state.protect.botProtectionToken
-          error.config.baseURL = undefined;
           return Axios.request(error.config)
         }
 
