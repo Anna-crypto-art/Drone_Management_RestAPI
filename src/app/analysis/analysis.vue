@@ -1,7 +1,7 @@
 <template>
   <app-content :title="$t('analysis-overview')" :subtitle="$t('analysis-overview_descr')">
     <div class="app-analysis">
-      <b-button variant="primary" v-if="!hasIncompleteAnalysis" @click="onNewDataUploadClick">
+      <b-button variant="primary" v-if="hasCompleteAnalysesOnly" @click="onNewDataUploadClick">
         {{ $t("new-data-upload") }}
       </b-button>
       <b-alert :show="!!incompleteAnalysis" variant="info" class="mar-bottom-2x">
@@ -198,22 +198,27 @@ export default class AppAnalysis extends BaseAuthComponent {
     await this.updateAnalysisRows();
   }
 
-  get hasIncompleteAnalysis(): boolean {
-    return !!this.analysisRows?.find(
-      analysis => analysis.state && analysis.state.state.id <= ApiStates.DATA_INCOMPLETE
-    );
+  get hasCompleteAnalysesOnly(): boolean {
+    return this.analysisRows && this.incompleteAnalyses.length === 0 || false;
   }
 
   get incompleteAnalysis(): any | null {
-    const incompleteAnalyses = this.analysisRows?.filter(
-      analysis => analysis.state && analysis.state.state.id <= ApiStates.DATA_INCOMPLETE
-    );
-
-    if (!incompleteAnalyses || incompleteAnalyses.length > 1) {
-      return null;
+    const incompleteAnalyses = this.incompleteAnalyses;
+    if (incompleteAnalyses.length === 1) {
+      return incompleteAnalyses[0];
     }
 
-    return incompleteAnalyses[0];
+    return null;
+  }
+
+  get incompleteAnalyses(): any[] {
+    if (!this.analysisRows) {
+      return [];
+    }
+
+    return this.analysisRows.filter(
+      analysis => analysis.state && analysis.state.state.id <= ApiStates.DATA_INCOMPLETE
+    );
   }
 
   hasResult(analysisItem: any): boolean {
@@ -229,7 +234,7 @@ export default class AppAnalysis extends BaseAuthComponent {
   }
 
   onNewDataUploadClick() {
-    if (!this.hasIncompleteAnalysis) {
+    if (this.hasCompleteAnalysesOnly) {
       const query = this.selectedPlantId ? { plantId: this.selectedPlantId } : undefined;
 
       this.$router.push({ name: "AnalysisNew", query });
