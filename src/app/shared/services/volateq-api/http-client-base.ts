@@ -30,6 +30,8 @@ export class HttpClientBase {
   }
 
   constructor() {
+    this.refreshProtectionToken();
+
     this.baseURL = apiBaseUrl;
     this.httpClient = HttpClientBase.createAuthHttpClient(this.baseURL!);
     this.httpClient.interceptors.response.use(
