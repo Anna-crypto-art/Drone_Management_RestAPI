@@ -280,40 +280,43 @@ export default class AppVisualization
   }
 
   protected async onAnalysisSelected() {
-    console.log("onAnalysisSelected " + this.firstAnalysisResult?.id);
+    const analysisSelectionChanged = 
+      this.piLayersHierarchy.getSelectedAnalysisResultId() !== this.firstAnalysisResult?.id;
 
-    this.piLayersHierarchy.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
+    const isNewAnalysisResult = this.piLayersHierarchy.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     
     const multiAnalysesSelectedBefore = !!this.piLayersHierarchy.getCompareAnalysisResultId();
-    if (multiAnalysesSelectedBefore) {
-      // If we had multiple analysis selected before, we need to restore and enable multiselection again
-      this.doEnableMultiSelection();
-    }
-    
     this.piLayersHierarchy.setCompareAnalysisResult(null);
-    if (this.piLayersHierarchy.getSelectedAnalysisResultId() !== this.firstAnalysisResult?.id ||
-      multiAnalysesSelectedBefore
-    ) {
-      /*
-      Multiselection is our devil of complexity ...
 
-      Shortly explained "piLayersHierarchy.toggleMultiSelection": 
-        1. unselect all key figures
-        2. select selected key figures again, if allowed (refresh! [Because of the color...])
-      */
+    if (multiAnalysesSelectedBefore) {
+      // Recover subgroup multiselection, because compare view disabled multiselection on all levels.
+      this.piLayersHierarchy.toggleMultiSelectionDeep(true);
 
-      if (this.enableMultiSelection) {
-        // Ensure, that the routeQueryHelper doesn't refresh the route to avoid circual key figure selection.
-        // Shortly explained "Circular key figure selection":
-        // 1. "piLayersHierarchy.toggleMultiSelection" causes "setSelected"
-        // 2. geo-visualization (LayerStructure) causes "onSelected"
-        // 3. "onLayerSelected" causes "onPiChanged"
-        // 4. "onPiChanged" causes "setSelected" ...
-        this.routeQueryHelper.closedEyes = true;
+      // If we had multiple analysis selected before, we need to restore and enable multiselection again
+      this.doEnableMultiSelection();  
+      this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
+    }
+
+    if (analysisSelectionChanged || multiAnalysesSelectedBefore) {
+      if (!this.firstLoad && isNewAnalysisResult) {
+        // Wait for new analysis result to be loaded
+        // Actually, I don't understand why it takes so long
+        // nor what am I waiting for exactly... Feel free to do some research, here
+        for (let i = 0; i < 5; i++) {
+          await this.$nextTick();
+        }
       }
 
-      this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection, true);
+      // Ensure, that the routeQueryHelper doesn't refresh the route to avoid circual key figure selection.
+      // Shortly explained "Circular key figure selection":
+      // 1. "piLayersHierarchy.reselectAllLayers" causes "setSelected"
+      // 2. geo-visualization (LayerStructure) causes "onSelected"
+      // 3. "onLayerSelected" causes "onPiChanged"
+      // 4. "onPiChanged" causes "setSelected" ...
+      this.routeQueryHelper.closedEyes = true;
+      this.piLayersHierarchy.reselectAllLayers(this.enableMultiSelection);
     }
+
     this.piLayersHierarchy.updateVisibility();
     this.availableOrthoImages = this.piLayersHierarchy.getAvailableOrthoImages();
 
@@ -338,7 +341,9 @@ export default class AppVisualization
     this.disableMultiSelection();
     
     if (selectionChanged) {
-      this.piLayersHierarchy.toggleMultiSelection(false, true);
+      this.piLayersHierarchy.toggleMultiSelection(false);
+      this.piLayersHierarchy.toggleMultiSelectionDeep(false);
+      this.piLayersHierarchy.reselectAllLayers(false);
     }
     
     this.piLayersHierarchy.updateVisibility();
@@ -367,6 +372,8 @@ export default class AppVisualization
     this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
     this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
 
+    // onAnalysisSelected closes the eyes. But we need them open here!
+    this.routeQueryHelper.closedEyes = false;
     await this.onPiChanged();
   }
 
@@ -537,6 +544,8 @@ export default class AppVisualization
     appLocalStorage.setItem(STORAGE_KEY_MULTISELECTION, this.enableMultiSelection);
 
     this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
+    this.piLayersHierarchy.reselectAllLayers(this.enableMultiSelection);
+
     // Group Layer "performance-indicators"
     (this.layers[0] as GroupLayer).singleSelection = !this.enableMultiSelection;
   }

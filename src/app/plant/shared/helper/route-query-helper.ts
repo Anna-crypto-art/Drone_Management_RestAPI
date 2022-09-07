@@ -8,8 +8,19 @@ export class RouteQueryHelper {
 
   /**
    * Ignore watched query changes 
+   * Due to concurrency issues closed eyes is actually a stack...
    */
-  public closedEyes = false;
+  private closedEyesStack: true[] = [];
+  public get closedEyes(): boolean {
+    return this.closedEyesStack.length > 0;
+  }
+  public set closedEyes(closeEye: boolean) {
+    if (closeEye) {
+      this.closedEyesStack.push(true);
+    } else if (this.closedEyesStack.length > 0) {
+      this.closedEyesStack.splice(0, 1);
+    }
+  }
 
   public async queryChanged(onQueryChanged: () => Promise<void>) {
     if (this.closedEyes) {
