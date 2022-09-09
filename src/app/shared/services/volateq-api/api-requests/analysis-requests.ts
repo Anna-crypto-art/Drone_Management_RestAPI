@@ -3,7 +3,6 @@ import { ApiStates } from "../api-states";
 export interface NewEmptyAnalysis {
   plant_id: string;
   flown_at: string;
-  customer_id?: string;
 }
 
 export interface NewAnalysis extends NewEmptyAnalysis {

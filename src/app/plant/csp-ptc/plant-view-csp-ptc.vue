@@ -107,7 +107,11 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
     await super.created();
 
     try {
-      this.analysisResults = await volateqApi.getAnalysisResults(this.plant.id);
+      if (this.isCustomerAdmin || this.isSuperAdmin) {
+        this.analysisResults = await volateqApi.getAnalysisResults(this.plant.id);
+      } else {
+        this.analysisResults = [];
+      }
     } catch (e) {
       this.showError(e);
     }
