@@ -23,17 +23,6 @@
         </b-form-select>
         <label class="app-analysis-plants-filter-label" for="plants">{{ $t("plant") }}</label>
       </div>
-      <div class="app-analysis-customer-filter pull-right" v-show="customers">
-        <b-form-select
-          id="customers"
-          class="app-analysis-customers-filter-select"
-          v-model="selectedCustomerId"
-          :options="customers"
-          @change="onCustomerSelectionChanged"
-        >
-        </b-form-select>
-        <label class="app-analysis-customers-filter-label" for="customers">{{ $t("customer") }}</label>
-      </div>
       <div class="clear"></div>
       <app-table-container>
         <b-table
@@ -136,9 +125,6 @@ export default class AppAnalysis extends BaseAuthComponent {
   plantSelection: Array<any> | null = null;
   selectedPlantId: string | null = null;
 
-  customers: Array<any> | null = null;
-  selectedCustomerId: string | null = null;
-
   analysisRows: Array<any> | null = null;
   isLoading = true;
 
@@ -176,25 +162,6 @@ export default class AppAnalysis extends BaseAuthComponent {
   }
 
   async onPlantSelectionChanged() {
-    if (this.selectedPlantId) {
-      const plant = this.plants!.find(plant => plant.id === this.selectedPlantId);
-      if (plant!.customers && plant!.customers.length > 1) {
-        this.customers = [
-          { value: null, text: "" },
-          ...plant!.customers.map(customer => ({ value: customer.id, text: customer.name }))
-        ];
-      } else {
-        this.customers = null;
-      }
-    } else {
-      this.customers = null;
-    }
-    
-
-    await this.updateAnalysisRows();
-  }
-
-  async onCustomerSelectionChanged() {
     await this.updateAnalysisRows();
   }
 
@@ -249,9 +216,6 @@ export default class AppAnalysis extends BaseAuthComponent {
       if (this.selectedPlantId) {
         analysisFilter.plant_id = this.selectedPlantId;
       }
-      if (this.selectedCustomerId) {
-        analysisFilter.customer_id = this.selectedCustomerId;
-      }
       
       this.analysisRows = (await volateqApi.getAllAnalysis(analysisFilter)).map((a: AnalysisSchema) => {
         const row = {
@@ -303,11 +267,11 @@ export default class AppAnalysis extends BaseAuthComponent {
   }
 }
 
-.app-analysis-plants-filter-select, .app-analysis-customers-filter-select {
+.app-analysis-plants-filter-select {
   width: 200px !important;
   float: right;
 }
-.app-analysis-plants-filter-label, .app-analysis-customers-filter-label {
+.app-analysis-plants-filter-label {
   float: right;
   margin-top: 5px;
   padding-right: 1em;
