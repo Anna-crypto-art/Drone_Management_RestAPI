@@ -2,15 +2,6 @@
   <app-content :title="$t('plants-overview')" :subtitle="$t('plants-overview_descr')">
     <div class="plant-tools" v-if="isSuperAdmin">
       <app-button variant="secondary" @click="onCreatePlantClick()" :superAdminProtected="true">{{ $t('create-plant') }}</app-button>
-      <b-form-select
-        id="customers"
-        class="plant-tools-select-customer"
-        v-model="selectedCustomerId"
-        :options="customers"
-        @change="onCustomerSelectionChanged"
-      />
-      <label class="plant-tools-select-customer-label" for="customers">{{ $t("customer") }}<app-super-admin-marker /></label>
-      <div class="clearfix"></div>
     </div>
     <app-table-container>
       <b-table
@@ -26,6 +17,10 @@
           <div class="text-center">
             <b-spinner class="align-middle"></b-spinner>
           </div>
+        </template>
+
+        <template #head(customers)>
+          {{ $t("customers") }} <app-super-admin-marker />
         </template>
 
         <template #head(actions)>
@@ -203,7 +198,6 @@ export default class AppPlants extends BaseAuthComponent {
     file: null,
   };
 
-  selectedCustomerId: string | null = null;
   customers: Array<any> = [];
 
   technologies: Array<any> = [];
@@ -244,7 +238,7 @@ export default class AppPlants extends BaseAuthComponent {
   async updatePlants(): Promise<void> {
     try {
       this.tableLoading = true;
-      const plants: PlantSchema[] = await volateqApi.getPlants(true, this.selectedCustomerId || undefined);
+      const plants: PlantSchema[] = await volateqApi.getPlants(true);
 
       this.plants = plants.map(plant => ({
         id: plant.id,
@@ -324,12 +318,8 @@ export default class AppPlants extends BaseAuthComponent {
     }
   }
 
-  async onCustomerSelectionChanged() {
-    await this.updatePlants();
-  }
-
   onCreatePlantClick() {
-    this.newPlant = { name: "", technology_id: null, customer_id: null };
+    this.newPlant = { name: "", technology_id: null, customer_id: this.selectedCustomer?.id || null };
     this.appCreatePlantModal.hideAlert();
     this.appCreatePlantModal.show();
   }

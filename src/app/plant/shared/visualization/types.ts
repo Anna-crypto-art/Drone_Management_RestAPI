@@ -157,7 +157,6 @@ export interface ReferenceMeasurementOptions {
   analysisLoaded: boolean;
   analysisId: string | null;
   analysisName: string | null;
-  customerId: string | null;
   oldMeasureId: string | null;
   measureDate: string | null;
   notes: string | null;

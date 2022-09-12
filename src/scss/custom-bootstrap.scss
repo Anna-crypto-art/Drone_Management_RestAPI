@@ -91,6 +91,9 @@ $theme-colors: (
     border-color: $hover-blue;
   }
 }
+.alert > ul {
+  padding-left: 20px;
+}
 
 .dropdown-menu {
   border-radius: 0;

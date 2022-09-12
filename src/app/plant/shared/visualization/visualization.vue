@@ -9,7 +9,7 @@
           <b-form-checkbox v-model="enableMultiSelection" switch @change="onMultiSelectionChanged" :disabled="multiSelectionDisabled">
             {{ $t("multi-selection") }} <app-explanation>{{ $t("multi-selection-overlapping_expl") }}</app-explanation>
           </b-form-checkbox>
-          <b-form-checkbox v-model="showCouldNotBeMeasured" switch @change="onShowCouldNotBeMeasuredChanged">
+          <b-form-checkbox v-model="showCouldNotBeMeasured" switch @change="onShowCouldNotBeMeasuredChanged" :disabled="analysisResults.length === 0">
             {{ $t("show-could-not-be-measured") }}
           </b-form-checkbox>
           <b-form-checkbox v-model="satelliteView" switch @change="onSatelliteViewChanged">
@@ -134,9 +134,6 @@
             {{ $t("acquire-reference-measurement-and-create-analysis") }}
           </span>
         </b-alert>
-        <b-form-group v-if="refMeasureCusomterSelection" :label="$t('customer')">
-          <b-form-select v-model="refMeasure.customerId" :options="refMeasureCusomterSelection" required @change="onRefMeasureCustomerSelected" />
-        </b-form-group>
 
         <b-form-group v-show="oldRefMeasures" :label="$t('continue-reference-measurement')">
           <b-form-select v-model="refMeasure.oldMeasureId" :options="oldRefMeasures" />
@@ -241,7 +238,6 @@ export default class AppVisualization
   refMeasureButtonLoading = false;
   refMeasureModalLoading = false;
   refMeasure: ReferenceMeasurementOptions | null = null;
-  refMeasureCusomterSelection: { value: string, text: string }[] | null = null;
   oldRefMeasures: { value: string | null, text: string }[] | null = null;
 
   hasLoadedOrthoImages = false;
@@ -258,7 +254,7 @@ export default class AppVisualization
   async created() {
     await super.created();
 
-    this.enableMultiSelection = appLocalStorage.getItem(STORAGE_KEY_MULTISELECTION) || false;
+    this.doEnableMultiSelection();
     this.showCouldNotBeMeasured = appLocalStorage.getItem(STORAGE_KEY_SHOWUNDEFINED) || false;
     this.satelliteView = appLocalStorage.getItem(STORAGE_KEY_SATELLITEVIEW) || false;
 
@@ -514,7 +510,7 @@ export default class AppVisualization
 
   private doEnableMultiSelection() {
     this.enableMultiSelection = appLocalStorage.getItem(STORAGE_KEY_MULTISELECTION) || false;
-    this.multiSelectionDisabled = false;
+    this.multiSelectionDisabled = this.analysisResults.length === 0;
   }
 
   onLayerSelected(selected: boolean, legend: Legend | undefined) {
@@ -619,7 +615,7 @@ export default class AppVisualization
         type: "group",
         childLayers: this.piLayersHierarchy.groupLayers,
         singleSelection: true,
-        visible: true,
+        visible: this.analysisResults.length > 0,
       },
 
       this.layers.push(
@@ -669,20 +665,13 @@ export default class AppVisualization
         analysisLoaded: false,
         analysisId: null,
         analysisName: null,
-        customerId: null,
         oldMeasureId: null,
         measureDate: null,
         notes: null,
         gps: true,
       }
 
-      if (this.plant.customers && this.plant.customers.length > 1) {
-        this.refMeasureCusomterSelection = this.plant.customers.map(customer => ({ value: customer.id, text: customer.name }));
-      } else {
-        this.refMeasureCusomterSelection = null;
-
-        await this.loadAnalysisForReferenceMeasurement();
-      }
+      await this.loadAnalysisForReferenceMeasurement();
 
       if (this.refMeasure.analysisId) {
         const me = await volateqApi.getMe();
@@ -712,16 +701,8 @@ export default class AppVisualization
     }
   }
 
-  async onRefMeasureCustomerSelected() {
-    this.loadAnalysisForReferenceMeasurement();
-  }
-
   async loadAnalysisForReferenceMeasurement() {
-    const incompleteAnalysis = (await volateqApi.getAllAnalysis({
-      plant_id: this.plant.id, 
-      customer_id: this.refMeasure?.customerId || undefined,
-    })).find(analysis => analysis.current_state.state.id < ApiStates.DATA_COMPLETE);
-
+    const incompleteAnalysis = await volateqApi.findAnalysisForNewReferenceMeasurement(this.plant.id);
     if (incompleteAnalysis) {
       this.refMeasure!.analysisId = incompleteAnalysis.id;
       this.refMeasure!.analysisName = incompleteAnalysis.name;
@@ -741,7 +722,6 @@ export default class AppVisualization
         this.refMeasure!.analysisId = (await volateqApi.createEmptyAnalysis({
           plant_id: this.plant.id,
           flown_at: this.refMeasure!.measureDate!,
-          customer_id: this.refMeasure!.customerId || undefined
         })).id;
       }
 

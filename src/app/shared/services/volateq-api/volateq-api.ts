@@ -1,13 +1,13 @@
 import store from "@/app/app-state";
 import { InviteUser, RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { ConfirmLoginResult, TokenResult } from "@/app/shared/services/volateq-api/api-schemas/auth-schema";
-import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
+import { CustomerNameSchema, CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
 import { UserInfoSchema, UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 import { HttpClientBase } from "@/app/shared/services/volateq-api/http-client-base";
 import { apiBaseUrl, baseUrl } from "@/environment/environment";
 import { AddReferenceMeasurmentValue, CreateReferenceMeasurement, NewAnalysis, NewEmptyAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
 import { CreatePlantRequest, UpdatePlantRequest } from "./api-requests/plant-requests";
-import { AnalysisFileInfoSchema, AnalysisSchema } from "./api-schemas/analysis-schema";
+import { AnalysisFileInfoSchema, AnalysisSchema, SimpleAnalysisSchema } from "./api-schemas/analysis-schema";
 import { PlantSchema } from "./api-schemas/plant-schema";
 import { AnalysisResultDetailedSchema } from "./api-schemas/analysis-result-schema";
 import { TableFilterRequest, TableRequest } from "./api-requests/common/table-requests";
@@ -70,14 +70,14 @@ export class VolateqAPI extends HttpClientBase {
     await store.dispatch.auth.updateToken({
       token: tokenResult.token,
       role: tokenResult.role,
-      customer_id: tokenResult.customer_id,
+      customer: tokenResult.customer,
     });
   }
 
   public async logout(): Promise<void> {
     await this.post("/auth/logout");
 
-    await store.dispatch.auth.updateToken({ token: "", role: undefined, customer_id: undefined });
+    await store.dispatch.auth.updateToken({ token: "", role: undefined, customer: undefined });
   }
 
   public async getMe(): Promise<UserSchema> {
@@ -409,6 +409,10 @@ export class VolateqAPI extends HttpClientBase {
     });
   }
 
+  public getAllPlants(): Promise<PlantSchema[]> {
+    return this.get(`/auth/plants/all`);
+  }
+
   public getAnalysisResultFileUrl(analysisResultFileId: string): Promise<{ url: string }> {
     return this.get(`/auth/analysis-result/result-file/${analysisResultFileId}`);
   }
@@ -499,6 +503,10 @@ export class VolateqAPI extends HttpClientBase {
 
   public async getUploadingUsers(analysisId: string): Promise<UserInfoSchema[]> {
     return this.get(`/auth/analysis/${analysisId}/uploading-users`);
+  }
+
+  public async findAnalysisForNewReferenceMeasurement(plantId: string): Promise <undefined | SimpleAnalysisSchema> {
+    return this.get(`/auth/reference-measurement/find-analysis/${plantId}`);
   }
 
   public async createReferenceMeasurement(analysisId: string, createReferenceMeasurement: CreateReferenceMeasurement): Promise<{ id: string }> {
@@ -604,6 +612,10 @@ export class VolateqAPI extends HttpClientBase {
 
   public async deleteDocFile(fileId: string): Promise<void> {
     return this.delete(`/auth/doc/file/${fileId}`);
+  }
+
+  public async switchCustomer(toCustomerId: string | undefined): Promise<CustomerNameSchema> {
+    return this.post(`/auth/user/switch-customer`, { customer_id: toCustomerId });
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {
