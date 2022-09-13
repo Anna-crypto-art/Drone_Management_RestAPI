@@ -407,6 +407,7 @@
   "switch-customer": "Switch customer",
   "select-target-customer": "Select target customer",
   "info-no-customer-selected": "You have no customer selected. Some actions related to an analysis of a plant with multiple customers will fail: <ul><li>Create a new empty analysis for a reference measurment for a plant with multiple customers</li><li>Upload new data for plant with multiple customers</li></ul>",
+  "product-packages": "Product packages",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

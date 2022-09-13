@@ -1,5 +1,6 @@
 import { CustomerSchema, SimpleCustomerSchema } from "./customer-schemas";
 import { FieldgeometrySchema } from "./fieldgeometry-schema";
+import { CustomerPlantProductPackageSchema } from "./product-package";
 import { TechnologySchema } from "./technology-schema";
 
 export interface PlantSchema {
@@ -14,4 +15,5 @@ export interface PlantSchema {
    * only available for SUPER_ADMINS
    */
   customers?: SimpleCustomerSchema[];
+  product_packages?: CustomerPlantProductPackageSchema[];
 }

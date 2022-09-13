@@ -6,7 +6,7 @@ import { UserInfoSchema, UserSchema } from "@/app/shared/services/volateq-api/ap
 import { HttpClientBase } from "@/app/shared/services/volateq-api/http-client-base";
 import { apiBaseUrl, baseUrl } from "@/environment/environment";
 import { AddReferenceMeasurmentValue, CreateReferenceMeasurement, NewAnalysis, NewEmptyAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
-import { CreatePlantRequest, UpdatePlantRequest } from "./api-requests/plant-requests";
+import { CreatePlantRequest, updatePlantPackagesRequest, UpdatePlantRequest } from "./api-requests/plant-requests";
 import { AnalysisFileInfoSchema, AnalysisSchema, SimpleAnalysisSchema } from "./api-schemas/analysis-schema";
 import { PlantSchema } from "./api-schemas/plant-schema";
 import { AnalysisResultDetailedSchema } from "./api-schemas/analysis-result-schema";
@@ -26,6 +26,7 @@ import { QFlyServerSchema } from "./api-schemas/server-schemas";
 import { QFlyServerActionRequest } from "./api-requests/server-requests";
 import { ReferenceMeasurementSchema, ReferenceMeasurementValueSchema } from "./api-schemas/reference-measurement-schema";
 import { DocFile } from "./api-schemas/doc-file-schema";
+import { ProductPackageSchema } from "./api-schemas/product-package";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -448,6 +449,14 @@ export class VolateqAPI extends HttpClientBase {
     return this.post(`/auth/plant/${plantId}`, updatePlantRequest);
   }
 
+  public updatePlantPackages(
+    plantId: string,
+    customerId: string,
+    updatePlantPackagesRequest: updatePlantPackagesRequest,
+  ): Promise<void> {
+    return this.post(`/auth/plant/${plantId}/${customerId}/package`, updatePlantPackagesRequest);
+  }
+
   public getAnalysisMonitoring(): Promise<AnalysisMonitoring> {
     return this.get(`/auth/analysis-monitoring`).then(
       response =>
@@ -616,6 +625,10 @@ export class VolateqAPI extends HttpClientBase {
 
   public async switchCustomer(toCustomerId: string | undefined): Promise<CustomerNameSchema> {
     return this.post(`/auth/user/switch-customer`, { customer_id: toCustomerId });
+  }
+
+  public async getProductPackages(): Promise<ProductPackageSchema[]> {
+    return this.get(`/auth/product-packages`);
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {

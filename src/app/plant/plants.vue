@@ -19,7 +19,7 @@
           </div>
         </template>
 
-        <template #head(customers)>
+        <template #head(customerNames)>
           {{ $t("customers") }} <app-super-admin-marker />
         </template>
 
@@ -32,6 +32,11 @@
             {{ row.item.name }}
           </router-link>
           <span v-if="!row.item.digitized">{{ row.item.name }}</span>
+        </template>
+        <template #cell(productPackages)="row">
+          <div v-for="pp in row.item.productPackages" :key="pp.id">
+            {{ pp.product_package.name }} <small class="text-grey">- Yearly {{ pp.yearly_interval }}</small>
+          </div>
         </template>
 
         <template #cell(digitized)="row">
@@ -137,23 +142,33 @@
       id="edit-plant-modal"
       ref="appEditPlantModal"
       :title="$t('edit-plant')"
-      :subtitle="managePlantModel.plant && managePlantModel.plant.name || ''"
+      :subtitle="editPlant && editPlant.name || ''"
       :okTitle="$t('apply')"
       :modalLoading="editPlantLoading"
       @submit="onSubmitEditPlant"
       :superAdminProtected="true"
     >
-      <b-form-group :label="$t('name')" v-if="editPlant">
-        <b-form-input id="edit-plant-name" v-model="editPlant.name" required :placeholder="$t('name')" />
-      </b-form-group>
-      <b-form-group v-if="editPlant && editPlant.digitized" :label="$t('setup-phase')">
-        <b-form-checkbox v-model="editPlant.inSetupPhase" switch>
-          {{ $t("in-setup-phase") }}
-        </b-form-checkbox>
-      </b-form-group>
-      <b-form-group v-if="editPlant && editPlant.digitized" :label="$t('orientation-angle')">
-        <b-form-input type="number" step="0.01" min="-90" max="90" v-model="editPlant.orientation" />
-      </b-form-group>
+      <div v-if="editPlant">
+        <app-modal-form-info-area>
+          <h4>{{ $t("product-packages") }}</h4>
+          <div v-for="customerProductPackage in editPlant.productPackages" :key="customerProductPackage.customer.id">
+            <b-form-group :label="customerProductPackage.customer.name">
+              <app-multiselect v-model="customerProductPackage.productPackages" :options="productPackages" />
+            </b-form-group>
+          </div>
+        </app-modal-form-info-area>
+        <b-form-group :label="$t('name')">
+          <b-form-input id="edit-plant-name" v-model="editPlant.name" required :placeholder="$t('name')" />
+        </b-form-group>
+        <b-form-group v-if="editPlant.digitized" :label="$t('setup-phase')">
+          <b-form-checkbox v-model="editPlant.inSetupPhase" switch>
+            {{ $t("in-setup-phase") }}
+          </b-form-checkbox>
+        </b-form-group>
+        <b-form-group v-if="editPlant.digitized" :label="$t('orientation-angle')">
+          <b-form-input type="number" step="0.01" min="-90" max="90" v-model="editPlant.orientation" />
+        </b-form-group>
+      </div>
     </app-modal-form>
   </app-content>
 </template>
@@ -170,9 +185,12 @@ import { AppDownloader } from "../shared/services/app-downloader/app-downloader"
 import { FieldgeometrySchema } from "../shared/services/volateq-api/api-schemas/fieldgeometry-schema";
 import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "../shared/services/volateq-api/volateq-api";
-import { EditPlant, PlantItem } from "./types";
+import { EditPlant, EditPlantProductPackages, PlantItem } from "./types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue"
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
+import AppMultiselect from "@/app/shared/components/app-multiselect/app-multiselect.vue";
+import { MultiselectOption } from "../shared/components/app-multiselect/types";
+import AppModalFormInfoArea from "../shared/components/app-modal/app-modal-form-info-area.vue";
 
 @Component({
   name: "app-analysis",
@@ -182,6 +200,8 @@ import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/
     AppModalForm,
     AppButton,
     AppSuperAdminMarker,
+    AppMultiselect,
+    AppModalFormInfoArea,
   },
 })
 export default class AppPlants extends BaseAuthComponent {
@@ -202,6 +222,8 @@ export default class AppPlants extends BaseAuthComponent {
 
   technologies: Array<any> = [];
 
+  productPackages: Array<MultiselectOption> = [];
+
   @Ref() appCreatePlantModal!: IAppModalForm;
   createPlantLoading = false;
   newPlant: { name: string, technology_id: number | null, customer_id: string | null } | null = 
@@ -217,11 +239,12 @@ export default class AppPlants extends BaseAuthComponent {
       { key: "digitized", label: this.$t("digitized").toString() },
       { key: "established", label: this.$t("established").toString() },
       { key: "analysesCount", label: this.$t("number-of-analyses").toString() },
-      { key: "technology", label: this.$t("technology").toString() }
+      { key: "technology", label: this.$t("technology").toString() },
+      { key: "productPackages", label: this.$t("product-packages").toString() },
     ];
 
     if (this.isSuperAdmin) {
-      this.columns.push({ key: "customers", label: this.$t("customers").toString() })
+      this.columns.push({ key: "customerNames", label: this.$t("customers").toString() })
       this.columns.push({ key: "actions" });
 
       this.customers = [
@@ -230,6 +253,18 @@ export default class AppPlants extends BaseAuthComponent {
       ];
 
       this.technologies = (await volateqApi.getTechnologies()).map(tech => ({ value: tech.id, text: tech.abbrev }))
+
+      const productPackages = await volateqApi.getProductPackages();
+      for (const productPackage of productPackages) {
+        if (productPackage.id !== 1) { // Skip CSP_PTC Base
+          for (const yearlyInterval of [1, 4, 12]) {
+            this.productPackages.push({ 
+              id: productPackage.id + "_" + yearlyInterval, 
+              label: productPackage.name + " - Yearly " + yearlyInterval 
+            });
+          }
+        }
+      }
     }
 
     await this.updatePlants();
@@ -248,7 +283,9 @@ export default class AppPlants extends BaseAuthComponent {
         established: !plant.in_setup_phase,
         fieldgeometry: plant.fieldgeometry,
         technology: plant.technology.abbrev,
-        customers: plant.customers?.map(customer => customer.name).join(", "),
+        customerNames: plant.customers?.map(customer => customer.name).join(", "),
+        customers: plant.customers,
+        productPackages: plant.product_packages?.filter(pp => pp.product_package.id !== 1), // Filter CSP_PTC Base product
       })).sort((a, b) => {
         const nameA = a.name.toLowerCase();
         const nameB = b.name.toLowerCase();
@@ -372,6 +409,7 @@ export default class AppPlants extends BaseAuthComponent {
       digitized: plant.digitized,
       inSetupPhase: !plant.established,
       orientation: plant.fieldgeometry?.orientation,
+      productPackages: this.mapPlantProductPackages(plant),
     };
     this.appEditPlantModal.show();
   }
@@ -385,6 +423,27 @@ export default class AppPlants extends BaseAuthComponent {
         orientation: this.editPlant?.orientation || undefined,
       });
 
+      const plantItem = this.plants!.find(plant => plant.id === this.editPlant!.id)!;
+      const oldPlantProductPackages = this.mapPlantProductPackages(plantItem);
+      for (const customer of plantItem.customers!) {
+        const oldPlantProductPackage = oldPlantProductPackages.find(p => p.customer.id === customer.id)!;
+        const newPlantProductPackage = this.editPlant!.productPackages.find(p => p.customer.id === customer.id)!;
+        if (JSON.stringify(oldPlantProductPackage) !== JSON.stringify(newPlantProductPackage)) {
+          const productPackageIds: number[] = [];
+          const yearlyIntervals: number[] = [];
+          for (const productPackage of newPlantProductPackage.productPackages) {
+            const splitedPPId = productPackage.split("_");
+            productPackageIds.push(parseInt(splitedPPId[0]));
+            yearlyIntervals.push(parseInt(splitedPPId[1]));
+          }
+
+          await volateqApi.updatePlantPackages(this.editPlant!.id, customer.id, { 
+            product_packages: productPackageIds,
+            yearly_intervals: yearlyIntervals,
+          });
+        }
+      }
+
       this.appEditPlantModal.hide();
 
       this.showSuccess(this.$t("plant-updated-success", { plant: this.editPlant!.name }).toString());
@@ -395,6 +454,15 @@ export default class AppPlants extends BaseAuthComponent {
     } finally {
       this.editPlantLoading = false;
     }
+  }
+
+  private mapPlantProductPackages(plant: PlantItem): EditPlantProductPackages[] {
+    return plant.customers!.map(customer => 
+      ({ 
+        customer: { id: customer.id, name: customer.name },
+        productPackages: plant.productPackages?.filter(pp => pp.customer_plant.customer_id === customer.id)
+          .map(pp => pp.product_package.id + "_" + pp.yearly_interval) || [],
+      }));
   }
 }
 </script>

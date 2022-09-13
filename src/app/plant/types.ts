@@ -1,5 +1,6 @@
-import { CustomerSchema } from "../shared/services/volateq-api/api-schemas/customer-schemas";
+import { SimpleCustomerSchema } from "../shared/services/volateq-api/api-schemas/customer-schemas";
 import { FieldgeometrySchema } from "../shared/services/volateq-api/api-schemas/fieldgeometry-schema";
+import { CustomerPlantProductPackageSchema } from "../shared/services/volateq-api/api-schemas/product-package";
 
 export interface PlantItem {
   id: string;
@@ -8,8 +9,17 @@ export interface PlantItem {
   analysesCount: number;
   established: boolean,
   technology: string;
-  customers?: string;
+  customerNames?: string;
+  customers?: SimpleCustomerSchema[];
   fieldgeometry?: FieldgeometrySchema;
+  productPackages?: CustomerPlantProductPackageSchema[];
+}
+
+export interface EditPlantProductPackages {
+  customer: { id: string; name: string; };
+  
+  // ("id_yearly")
+  productPackages: string[];
 }
 
 export interface EditPlant {
@@ -18,4 +28,5 @@ export interface EditPlant {
   digitized: boolean;
   inSetupPhase: boolean;
   orientation?: number;
+  productPackages: EditPlantProductPackages[];
 }
