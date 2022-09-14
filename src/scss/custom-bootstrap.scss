@@ -37,7 +37,7 @@ $theme-colors: (
     transition: linear 100ms background-color;
 
     &:hover {
-      background-color: $blue-05pc;
+      background-color: $hover-light-blue;
       border-color: $blue;
     }
   }
@@ -148,9 +148,14 @@ $theme-colors: (
     opacity: 1;
   }
 }
+.table-hover tbody tr {
+  position: relative;
+}
 .table-hover tbody tr > td .hover-cell {
   opacity: 0;
+  position: absolute;
   transition: ease 100ms opacity;
+  right: 1em;
 
   & > .b-dropdown {
     margin-right: 5px;

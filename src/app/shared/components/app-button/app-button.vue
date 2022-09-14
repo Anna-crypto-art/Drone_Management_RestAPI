@@ -3,7 +3,7 @@
   :v-if="!superAdminProtected || (superAdminProtected && isSuperAdmin)"
   :variant="variant" 
   :type="type" 
-  :class="'app-button ' + cls"
+  :class="'app-button ' + (round ? 'app-button-round' : '') + cls"
   :disabled="isDisabled"
   :size="size"
   :title="realTitle"
@@ -40,6 +40,7 @@ export default class AppButton extends BaseAuthComponent {
   @Prop({ default: null }) icon!: string | null;
   @Prop({ default: false }) hideText!: boolean;
   @Prop({ default: false }) superAdminProtected!: boolean;
+  @Prop({ default: false }) round!: boolean;
 
   realTitle = "";
 
@@ -74,6 +75,16 @@ export default class AppButton extends BaseAuthComponent {
 .app-button {
   position: relative;
 
+  &-round {
+    border-radius: 100px !important;
+    padding: 0.5em !important;
+    text-align: center;
+
+    .app-button-super-admin-shaded {
+      border-radius: 100px;
+    }
+  }
+
   &-loading {
     margin-right: 5px;
   }
@@ -105,6 +116,7 @@ export default class AppButton extends BaseAuthComponent {
     right: 0;
     left: 0;
     bottom: 0;
+    overflow: hidden;
 
     div {
       height: 100%;
