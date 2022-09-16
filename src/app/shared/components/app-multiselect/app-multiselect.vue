@@ -10,6 +10,7 @@
       :value="innerValue" 
       @input="onInput"
       :multiple="true"
+      :disabled="disabled"
     />
   </div>
 </template>
@@ -28,15 +29,13 @@ import { MultiselectOption } from "./types";
 export default class AppMultiselect extends Vue {
   @Prop({ default: null }) value!: string[] | null;
   @Prop({ default: [] }) options!: MultiselectOption[];
+  @Prop({ default: false }) disabled!: boolean;
 
   innerValue: MultiselectOption[] | null = null;
 
   created() {
     if (this.value) {
       this.innerValue = this.options.filter(option => this.value!.includes(option.id))
-
-      console.log("multiselect: innerValue");
-      console.log(this.innerValue);
     }
   }
 

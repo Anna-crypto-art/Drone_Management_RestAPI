@@ -23,20 +23,24 @@
         />
       </app-table-filter>
     </div>
-    <app-table-container>
+    <app-table-container size="sm">
       <b-table :fields="columns" :items="rows" head-variant="light" hover :busy="loading">
         <template #table-busy>
           <div class="text-center">
             <b-spinner class="align-middle"></b-spinner>
           </div>
         </template>
+        <template #cell(orderType)="row">
+          {{ orderTypes[row.item.orderType] }}
+        </template>
         <template #cell(productPackages)="row">
           <div v-for="productPackage in row.item.productPackages" :key="productPackage.id">
-            {{ productPackage.product_package.name }} <i>- Yearly {{ productPackage.yearly_interval }}</i>
+            {{ productPackage.product_package.name }} 
+            <b-badge v-if="row.item.orderType === 2">Yearly {{ productPackage.quantity }}</b-badge>
           </div>
         </template>
         <template #cell(userCreatedUpdated)="row">
-          <small class="text-grey">{{ row.item.userCreatedUpdated }}</small>
+          <small class="text-grey" v-html="row.item.userCreatedUpdated"></small>
         </template>
         <template #cell(actions)="row">
           <div class="hover-cell pull-right">
@@ -81,15 +85,26 @@
           </b-col>
           <b-col>
             <b-form-group :label="$t('customer')">
-              <b-form-select v-model="currentOrder.customerId" :options="createOrderCustomerOptions" required />
+              <b-form-select 
+                v-model="currentOrder.customerId"
+                :options="createOrderCustomerOptions"
+                :disabled="!currentOrder.plantId"
+                required />
             </b-form-group>
           </b-col>
         </b-row>
         <b-form-group v-if="!currentOrder.id" :label="$t('type')">
-          <b-form-select v-model="currentOrder.orderType" :options="createOrderTypeOptions" required />
+          <b-form-select 
+            v-model="currentOrder.orderType"
+            :options="createOrderTypeOptions"
+            @change="onCreateOrderTypeChanged"
+            required />
         </b-form-group>
         <b-form-group :label="$t('product-packages')">
-          <app-multiselect v-model="currentOrder.productPackages" :options="productPackages" />
+          <app-multiselect 
+            v-model="currentOrder.productPackages"
+            :options="productPackagesOptions"
+            :disabled="!currentOrder.orderType" />
         </b-form-group>
         <b-form-group :label="$t('start-date')">
           <b-datepicker v-model="currentOrder.startDate" required />
@@ -120,6 +135,7 @@ import dateHelper from "@/app/shared/services/helper/date-helper";
 import { OrderProductPackageSchema, OrderSchema, OrderType } from "@/app/shared/services/volateq-api/api-schemas/order-schema";
 import { ProductPackagesQuantities } from "./types";
 import { MultiselectOption } from "@/app/shared/components/app-multiselect/types";
+import { ProductPackageSchema } from "@/app/shared/services/volateq-api/api-schemas/product-package";
 
 
 @Component({
@@ -136,7 +152,10 @@ export default class AppSettingsOrders extends BaseAuthComponent {
   rows: any[] = [];
 
   orderTypes: Record<OrderType, string> | null = null;
-  productPackages: Array<MultiselectOption> = [];
+
+  productPackages!: ProductPackageSchema[];
+  productPackagesOptions: Array<MultiselectOption> = [];
+
   plants!: PlantSchema[];
   customers!: CustomerSchema[];
 
@@ -173,17 +192,7 @@ export default class AppSettingsOrders extends BaseAuthComponent {
       { key: "actions", label: "" },
     ];
     
-    const productPackages = await volateqApi.getProductPackages();
-    for (const productPackage of productPackages) {
-      if (productPackage.id !== 1) { // Skip CSP_PTC Base
-        for (const quantity of [1, 4, 12]) {
-          this.productPackages.push({ 
-            id: productPackage.id + "_" + quantity, 
-            label: productPackage.name + " - Yearly " + quantity 
-          });
-        }
-      }
-    }
+    this.productPackages = await volateqApi.getProductPackages();
 
     this.orderTypes = {
       [OrderType.SETUP]: this.$t('setup').toString(),
@@ -202,17 +211,22 @@ export default class AppSettingsOrders extends BaseAuthComponent {
   }
 
   private async updateOrderRows() {
-    this.rows = (await volateqApi.getOrders(this.selectedPlantId, this.selectedCustomerId)).map(order => ({
-      id: order.id,
-      name: order.name,
-      orderType: order.order_type,
-      customer: order.customer.name,
-      plant: order.plant.name,
-      startDate: dateHelper.toDate(order.start_date),
-      endDate: dateHelper.toDate(order.end_date),
-      productPackages: order.product_packages.filter(pp => pp.product_package.id !== 1), // Filter CSP_PTC Base product,
-      userCreatedUpdated: this.getUserCreatedUpdated(order),
-    }));
+    this.loading = true;
+    try {
+      this.rows = (await volateqApi.getOrders(this.selectedPlantId, this.selectedCustomerId)).map(order => ({
+        id: order.id,
+        name: order.name,
+        orderType: order.order_type,
+        customer: order.customer.name,
+        plant: order.plant.name,
+        startDate: dateHelper.toDate(order.start_date),
+        endDate: dateHelper.toDate(order.end_date),
+        productPackages: order.product_packages.filter(pp => pp.product_package.id !== 1), // Filter CSP_PTC Base product,
+        userCreatedUpdated: this.getUserCreatedUpdated(order),
+      }));
+    } finally {
+      this.loading = false;
+    }
   }
 
   @CatchError()
@@ -241,7 +255,10 @@ export default class AppSettingsOrders extends BaseAuthComponent {
       startDate: orderRow.startDate,
       endDate: orderRow.endDate,
       productPackages: this.concatProductPackagesWithYearly(orderRow.productPackages),
+      orderType: orderRow.orderType,
     };
+
+    this.updateProductPackagesOptions();
 
     this.orderModalTitle = this.$t("edit-order").toString();
     this.orderModalOkTitle = this.$t("apply").toString();
@@ -310,6 +327,45 @@ export default class AppSettingsOrders extends BaseAuthComponent {
   @CatchError()
   onCreateOrderPlantSelectionChanged() {
     this.updateCreateOrderCustomerOptions();
+
+    if (this.createOrderCustomerOptions.length === 1) {
+      this.currentOrder.customerId = this.createOrderCustomerOptions[0].value;
+    } else {
+      this.currentOrder.customerId = null;
+    }
+  }
+
+  @CatchError()
+  onCreateOrderTypeChanged() {
+    this.updateProductPackagesOptions();
+  }
+
+  private updateProductPackagesOptions() {
+    const productPackagesOptions: MultiselectOption[] = [];
+
+    if (this.currentOrder?.orderType) {
+      let quantities: number[] = [];
+      let quantText = "";
+      if (parseInt(this.currentOrder.orderType) === OrderType.SETUP) {
+        quantities = [1];
+      } else if (parseInt(this.currentOrder.orderType) === OrderType.SUBSCRIPTION) {
+        quantities = [1, 4, 12];
+        quantText = " - Yearly ";
+      }
+
+      for (const productPackage of this.productPackages) {
+        if (productPackage.id !== 1) { // Skip CSP_PTC Base
+          for (const quantity of quantities) {
+            productPackagesOptions.push({ 
+              id: productPackage.id + "_" + quantity, 
+              label: productPackage.name + (quantText ? quantText + quantity : ""),
+            });
+          }
+        }
+      }
+
+      this.productPackagesOptions = productPackagesOptions;
+    }
   }
 
   private updatePlantFilterOptions() {
@@ -345,7 +401,7 @@ export default class AppSettingsOrders extends BaseAuthComponent {
     const userName = (user.first_name + " " + user.last_name).trim() || user.email;
     const at = this.$t(...dateHelper.getTimeDiff(order.updated_at || order.created_at)).toString();
 
-    return `${createdOrChanged} ${userName} ${at}`;
+    return `${createdOrChanged}<br>${userName}<br>${at}`;
   }
 
   private concatProductPackagesWithYearly(productPackages: OrderProductPackageSchema[]): string[] {

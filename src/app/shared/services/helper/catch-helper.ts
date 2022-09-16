@@ -41,36 +41,3 @@ export function CatchError(loadingProp?: string) {
     }
   });
 }
-
-// export const catchError = (settings?: { 
-//   loadingPropertyName?: string,
-//  }) => {
-//   return (target: BaseComponent, key: string, descriptor: PropertyDescriptor) => {
-//     const method = descriptor.value;
-
-//     console.log(descriptor);
-
-//     descriptor.value = async (...args: any) => {
-//       if (settings?.loadingPropertyName) {
-//         console.log("target.constructor[settings?.loadingPropertyName]");
-//         console.log(target.constructor[settings?.loadingPropertyName]);
-
-//         target[settings?.loadingPropertyName] = true; 
-//       }
-
-//       console.log(target);
-
-//       try {
-//         return await method.apply(target, args);
-//       } catch (e) {
-//         console.log(target);
-
-//         target.showError(e);
-//       } finally {
-//         if (settings?.loadingPropertyName) {
-//           target[settings?.loadingPropertyName] = false; 
-//         }
-//       }
-//     }
-//   }
-// }
