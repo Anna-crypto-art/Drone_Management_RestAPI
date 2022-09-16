@@ -1,8 +1,9 @@
 import { AnalysisStateSchema } from "./analysis-state-schema";
 import { CustomerSchema } from "./customer-schemas";
-import { UserInfoSchema } from "./user-schemas";
+import { SimpleUserSchema } from "./user-schemas";
 import { AnalysisResultSchema } from "./analysis-result-schema";
 import { PlantSchema } from "./plant-schema";
+import { ProductPackageSchema } from "./product-package";
 
 export interface AnalysisFilesSchema {
   video_files: string[];
@@ -22,12 +23,13 @@ export interface AnalysisSchema extends SimpleAnalysisSchema {
   plant: PlantSchema;
   customer: CustomerSchema;
   files?: AnalysisFilesSchema;
-  user: UserInfoSchema;
+  user: SimpleUserSchema;
   data_complete: boolean;
   flown_at: string;
   analysis_result: AnalysisResultSchema;
   has_plant_metadata: boolean;
   task_id: string;
+  product_packages: ProductPackageSchema[];
 }
 
 export interface AnalysisFileInfoSchema {

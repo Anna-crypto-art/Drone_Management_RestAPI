@@ -2,11 +2,11 @@ import store from "@/app/app-state";
 import { InviteUser, RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { ConfirmLoginResult, TokenResult } from "@/app/shared/services/volateq-api/api-schemas/auth-schema";
 import { CustomerNameSchema, CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
-import { UserInfoSchema, UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
+import { SimpleUserSchema, UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 import { HttpClientBase } from "@/app/shared/services/volateq-api/http-client-base";
 import { apiBaseUrl, baseUrl } from "@/environment/environment";
 import { AddReferenceMeasurmentValue, CreateReferenceMeasurement, NewAnalysis, NewEmptyAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
-import { CreatePlantRequest, updatePlantPackagesRequest, UpdatePlantRequest } from "./api-requests/plant-requests";
+import { CreatePlantRequest, UpdatePlantRequest } from "./api-requests/plant-requests";
 import { AnalysisFileInfoSchema, AnalysisSchema, SimpleAnalysisSchema } from "./api-schemas/analysis-schema";
 import { PlantSchema } from "./api-schemas/plant-schema";
 import { AnalysisResultDetailedSchema } from "./api-schemas/analysis-result-schema";
@@ -27,6 +27,8 @@ import { QFlyServerActionRequest } from "./api-requests/server-requests";
 import { ReferenceMeasurementSchema, ReferenceMeasurementValueSchema } from "./api-schemas/reference-measurement-schema";
 import { DocFile } from "./api-schemas/doc-file-schema";
 import { ProductPackageSchema } from "./api-schemas/product-package";
+import { CreateOrderRequest, UpdateOrderRequest } from "./api-requests/order-requests";
+import { OrderSchema } from "./api-schemas/order-schema";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -403,10 +405,10 @@ export class VolateqAPI extends HttpClientBase {
     return this.post(`/auth/analysis-result/${analysisResultId}`, updates);
   }
 
-  public getPlants(withAnalysisResultsCount = false, customerId?: string): Promise<PlantSchema[]> {
+  public getPlants(withAnalysisResultsCount = false, withOrders = false): Promise<PlantSchema[]> {
     return this.get(`/auth/plants`, {
       with_analysis_results_count: withAnalysisResultsCount ? 1 : 0,
-      customer_id: customerId,
+      with_orders: withOrders ? 1 : 0,
     });
   }
 
@@ -447,14 +449,6 @@ export class VolateqAPI extends HttpClientBase {
 
   public updatePlant(plantId: string, updatePlantRequest: UpdatePlantRequest): Promise<void> {
     return this.post(`/auth/plant/${plantId}`, updatePlantRequest);
-  }
-
-  public updatePlantPackages(
-    plantId: string,
-    customerId: string,
-    updatePlantPackagesRequest: updatePlantPackagesRequest,
-  ): Promise<void> {
-    return this.post(`/auth/plant/${plantId}/${customerId}/package`, updatePlantPackagesRequest);
   }
 
   public getAnalysisMonitoring(): Promise<AnalysisMonitoring> {
@@ -510,7 +504,7 @@ export class VolateqAPI extends HttpClientBase {
     await this.post(`/auth/analysis/${analysisId}/finish-running-task`);
   }
 
-  public async getUploadingUsers(analysisId: string): Promise<UserInfoSchema[]> {
+  public async getUploadingUsers(analysisId: string): Promise<SimpleUserSchema[]> {
     return this.get(`/auth/analysis/${analysisId}/uploading-users`);
   }
 
@@ -629,6 +623,35 @@ export class VolateqAPI extends HttpClientBase {
 
   public async getProductPackages(): Promise<ProductPackageSchema[]> {
     return this.get(`/auth/product-packages`);
+  }
+
+  public async createOrder(
+    createOrderRequest: CreateOrderRequest,
+  ): Promise<void> {
+    return this.post(`/auth/order`, createOrderRequest);
+  }
+
+  public async updateOrder(
+    orderId: string,
+    updateOrderRequest: UpdateOrderRequest,
+  ): Promise<void> {
+    return this.post(`/auth/order/${orderId}`, updateOrderRequest);
+  }
+
+  public async getOrders(plantId?: string | null, customerId?: string | null): Promise<OrderSchema[]> {
+    const plantCustomerFilter = {};
+    if (plantId) {
+      plantCustomerFilter['plant_id'] = plantId;
+    }
+    if (customerId) {
+      plantCustomerFilter['customer_id'] = customerId;
+    }
+
+    return this.get(`/auth/orders`, plantCustomerFilter);
+  }
+
+  public async deleteOrder(orderId: string): Promise<void> {
+    return this.delete(`/auth/order/${orderId}`);
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {

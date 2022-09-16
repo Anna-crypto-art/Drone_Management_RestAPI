@@ -12,17 +12,15 @@
           {{ $t("upload-data-for-analysis", { analysis: incompleteAnalysis.name }) }}
         </b-button>
       </router-link>
-      <div class="app-analysis-plants-filter pull-right" v-show="plantSelection">
+      <app-table-filter v-show="plantSelection">
+        <label for="plants">{{ $t("plant") }}</label>
         <b-form-select
           id="plants"
-          class="app-analysis-plants-filter-select"
           v-model="selectedPlantId"
           :options="plantSelection"
           @change="onPlantSelectionChanged"
-        >
-        </b-form-select>
-        <label class="app-analysis-plants-filter-label" for="plants">{{ $t("plant") }}</label>
-      </div>
+        />
+      </app-table-filter>
       <div class="clear"></div>
       <app-table-container>
         <b-table
@@ -100,6 +98,7 @@ import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import AppModalFormInfoArea from "@/app/shared/components/app-modal/app-modal-form-info-area.vue";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
+import AppTableFilter from "@/app/shared/components/app-table-filter/app-table-filter.vue";
 import { BvTableFieldArray } from "bootstrap-vue";
 import { Component } from "vue-property-decorator";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
@@ -116,6 +115,7 @@ import volateqApi from "../shared/services/volateq-api/volateq-api";
     AppTableContainer,
     AppModalForm,
     AppModalFormInfoArea,
+    AppTableFilter,
   },
 })
 export default class AppAnalysis extends BaseAuthComponent {
@@ -265,15 +265,5 @@ export default class AppAnalysis extends BaseAuthComponent {
   &-plants-filter {
     width: 300px;
   }
-}
-
-.app-analysis-plants-filter-select {
-  width: 200px !important;
-  float: right;
-}
-.app-analysis-plants-filter-label {
-  float: right;
-  margin-top: 5px;
-  padding-right: 1em;
 }
 </style>

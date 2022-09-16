@@ -103,7 +103,7 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 
 
 @Component({
-  name: "app-settings-users",
+  name: "app-settings-customers",
   components: {
     AppTableContainer,
     AppModalForm,

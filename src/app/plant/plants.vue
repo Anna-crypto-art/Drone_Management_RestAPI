@@ -149,14 +149,6 @@
       :superAdminProtected="true"
     >
       <div v-if="editPlant">
-        <app-modal-form-info-area>
-          <h4>{{ $t("product-packages") }}</h4>
-          <div v-for="customerProductPackage in editPlant.productPackages" :key="customerProductPackage.customer.id">
-            <b-form-group :label="customerProductPackage.customer.name">
-              <app-multiselect v-model="customerProductPackage.productPackages" :options="productPackages" />
-            </b-form-group>
-          </div>
-        </app-modal-form-info-area>
         <b-form-group :label="$t('name')">
           <b-form-input id="edit-plant-name" v-model="editPlant.name" required :placeholder="$t('name')" />
         </b-form-group>
@@ -183,24 +175,24 @@ import { IAppModalForm } from "../shared/components/app-modal/types";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
 import { AppDownloader } from "../shared/services/app-downloader/app-downloader";
 import { FieldgeometrySchema } from "../shared/services/volateq-api/api-schemas/fieldgeometry-schema";
-import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "../shared/services/volateq-api/volateq-api";
-import { EditPlant, EditPlantProductPackages, PlantItem } from "./types";
+import { EditPlant, PlantItem } from "./types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue"
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
-import AppMultiselect from "@/app/shared/components/app-multiselect/app-multiselect.vue";
-import { MultiselectOption } from "../shared/components/app-multiselect/types";
 import AppModalFormInfoArea from "../shared/components/app-modal/app-modal-form-info-area.vue";
+import { sortAlphabetical } from "../shared/services/helper/sort-helper";
+import { CatchError } from "../shared/services/helper/catch-helper";
+import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
+import { OrderProductPackageSchema, OrderSchema } from "../shared/services/volateq-api/api-schemas/order-schema";
 
 @Component({
-  name: "app-analysis",
+  name: "app-plants",
   components: {
     AppContent,
     AppTableContainer,
     AppModalForm,
     AppButton,
     AppSuperAdminMarker,
-    AppMultiselect,
     AppModalFormInfoArea,
   },
 })
@@ -222,8 +214,6 @@ export default class AppPlants extends BaseAuthComponent {
 
   technologies: Array<any> = [];
 
-  productPackages: Array<MultiselectOption> = [];
-
   @Ref() appCreatePlantModal!: IAppModalForm;
   createPlantLoading = false;
   newPlant: { name: string, technology_id: number | null, customer_id: string | null } | null = 
@@ -233,6 +223,7 @@ export default class AppPlants extends BaseAuthComponent {
   editPlantLoading = false;
   editPlant: EditPlant | null = null
 
+  @CatchError("tableLoading")
   async created(): Promise<void> {
     this.columns = [
       { key: "name", label: this.$t("name").toString() },
@@ -253,90 +244,60 @@ export default class AppPlants extends BaseAuthComponent {
       ];
 
       this.technologies = (await volateqApi.getTechnologies()).map(tech => ({ value: tech.id, text: tech.abbrev }))
-
-      const productPackages = await volateqApi.getProductPackages();
-      for (const productPackage of productPackages) {
-        if (productPackage.id !== 1) { // Skip CSP_PTC Base
-          for (const yearlyInterval of [1, 4, 12]) {
-            this.productPackages.push({ 
-              id: productPackage.id + "_" + yearlyInterval, 
-              label: productPackage.name + " - Yearly " + yearlyInterval 
-            });
-          }
-        }
-      }
     }
 
     await this.updatePlants();
   }
 
-  async updatePlants(): Promise<void> {
-    try {
-      this.tableLoading = true;
-      const plants: PlantSchema[] = await volateqApi.getPlants(true);
-
-      this.plants = plants.map(plant => ({
-        id: plant.id,
-        name: plant.name,
-        digitized: !!plant.fieldgeometry,
-        analysesCount: plant.analysis_results_count!,
-        established: !plant.in_setup_phase,
-        fieldgeometry: plant.fieldgeometry,
-        technology: plant.technology.abbrev,
-        customerNames: plant.customers?.map(customer => customer.name).join(", "),
-        customers: plant.customers,
-        productPackages: plant.product_packages?.filter(pp => pp.product_package.id !== 1), // Filter CSP_PTC Base product
-      })).sort((a, b) => {
-        const nameA = a.name.toLowerCase();
-        const nameB = b.name.toLowerCase();
-
-        if (nameA < nameB) {
-          return -1;
+  private async updatePlants(): Promise<void> {
+    this.plants = sortAlphabetical<PlantSchema>(await volateqApi.getPlants(true, true), "name").map(plant => ({
+      id: plant.id,
+      name: plant.name,
+      digitized: !!plant.fieldgeometry,
+      analysesCount: plant.analysis_results_count!,
+      established: !plant.in_setup_phase,
+      fieldgeometry: plant.fieldgeometry,
+      technology: plant.technology.abbrev,
+      customerNames: plant.customers?.map(customer => customer.name).join(", "),
+      customers: plant.customers,
+      productPackages: ((orders: OrderSchema[]): OrderProductPackageSchema[] => { 
+        const pps: OrderProductPackageSchema[] = [];
+        for (const order of orders) {
+          pps.push(...order.product_packages.filter(pp => pp.product_package.id !== 1)); // Filter CSP_PTC Base product
         }
-        if (nameA > nameB) {
-          return 1;
-        }
-        return 0;
-      })
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.tableLoading = false;
-    }
+        return pps;
+      })(plant.current_orders),
+    }));
   }
 
+  @CatchError("plantModalLoading")
   async saveManagePlant(): Promise<void> {
-    try {
-      this.plantModalLoading = true;
+    const task = await volateqApi.importFieldgeometry(
+      this.managePlantModel.file!,
+      this.managePlantModel.plant!.id,
+      this.managePlantModel.clearBefore
+    );
 
-      const task = await volateqApi.importFieldgeometry(
-        this.managePlantModel.file!,
-        this.managePlantModel.plant!.id,
-        this.managePlantModel.clearBefore
-      );
-      volateqApi.waitForTask(
-        task.id,
-        async (task, failed) => {
-          this.plantModalLoading = false;
+    volateqApi.waitForTask(
+      task.id,
+      async (task, failed) => {
+        this.plantModalLoading = false;
 
-          if (failed) {
-            this.showError({ error: "SOMETHING_WENT_WRONG", message: task.output!.error });
-          } else {
-            this.managePlantModal.hide();
-            this.showSuccess(this.$t("dt-imported-successfully").toString());
-            await this.updatePlants();
-          }
-        },
-        task => {
-          this.managePlantModal.alertInfo(volateqApi.getTaskOutputAsMessage(task, this.$t("wait-for-start").toString()));
+        if (failed) {
+          this.showError({ error: "SOMETHING_WENT_WRONG", message: task.output!.error });
+        } else {
+          this.managePlantModal.hide();
+          this.showSuccess(this.$t("dt-imported-successfully").toString());
+          await this.updatePlants();
         }
-      );
-    } catch (e) {
-      this.plantModalLoading = false;
-      this.showError(e);
-    }
+      },
+      task => {
+        this.managePlantModal.alertInfo(volateqApi.getTaskOutputAsMessage(task, this.$t("wait-for-start").toString()));
+      }
+    );
   }
 
+  @CatchError()
   onManagePlantClick(plant: PlantItem): void {
     this.managePlantModel.plant = plant;
     this.managePlantModel.clearBefore = true;
@@ -345,63 +306,48 @@ export default class AppPlants extends BaseAuthComponent {
     this.managePlantModal.show();
   }
 
+  @CatchError()
   async onFileClick(fieldgeometry: FieldgeometrySchema) {
-    try {
-      const downloadUrl = await volateqApi.getFieldgeometryFileUrl(fieldgeometry.id);
-
-      AppDownloader.download(downloadUrl.url, fieldgeometry.file_name);
-    } catch (e) {
-      this.showError(e);
-    }
+    const downloadUrl = await volateqApi.getFieldgeometryFileUrl(fieldgeometry.id);
+    AppDownloader.download(downloadUrl.url, fieldgeometry.file_name);
   }
 
+  @CatchError()
   onCreatePlantClick() {
     this.newPlant = { name: "", technology_id: null, customer_id: this.selectedCustomer?.id || null };
     this.appCreatePlantModal.hideAlert();
     this.appCreatePlantModal.show();
   }
   
+  @CatchError("createPlantLoading")
   async onSubmitCreatePlant() {
-    this.createPlantLoading = true;
-    try {
-      await volateqApi.createPlant({
-        name: this.newPlant!.name,
-        technology_id: this.newPlant!.technology_id!,
-        customer_id: this.newPlant!.customer_id!
-      });
+    await volateqApi.createPlant({
+      name: this.newPlant!.name,
+      technology_id: this.newPlant!.technology_id!,
+      customer_id: this.newPlant!.customer_id!
+    });
 
-      this.appCreatePlantModal.hide();
+    this.appCreatePlantModal.hide();
 
-      this.showSuccess(this.$t("plant-created-success").toString());
-      
-      await this.updatePlants();
-
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.createPlantLoading = false;
-    }
+    this.showSuccess(this.$t("plant-created-success").toString());
+    
+    await this.updatePlants();
   }
 
+  @CatchError("tableLoading")
   async onDeletePlantClick(plant: PlantItem) {
-    this.tableLoading = true;
-    try {
-      if (!confirm(this.$t("sure-delete-plant", {plant: plant.name }).toString())) {
-        return;
-      }
-
-      await volateqApi.deletePlant(plant.id);
-
-      this.showSuccess(this.$t("plant-deleted-success", { plant: plant.name }).toString());
-
-      await this.updatePlants();
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.tableLoading = false;
+    if (!confirm(this.$t("sure-delete-plant", {plant: plant.name }).toString())) {
+      return;
     }
+
+    await volateqApi.deletePlant(plant.id);
+
+    this.showSuccess(this.$t("plant-deleted-success", { plant: plant.name }).toString());
+
+    await this.updatePlants();
   }
 
+  @CatchError()
   onEditPlantClick(plant: PlantItem) {
     this.editPlant = { 
       id: plant.id,
@@ -409,72 +355,26 @@ export default class AppPlants extends BaseAuthComponent {
       digitized: plant.digitized,
       inSetupPhase: !plant.established,
       orientation: plant.fieldgeometry?.orientation,
-      productPackages: this.mapPlantProductPackages(plant),
     };
     this.appEditPlantModal.show();
   }
 
+  @CatchError("editPlantLoading")
   async onSubmitEditPlant() {
-    this.editPlantLoading = true;
-    try {
-      await volateqApi.updatePlant(this.editPlant!.id, { 
-        name: this.editPlant!.name,
-        in_setup_phase: this.editPlant!.inSetupPhase,
-        orientation: this.editPlant?.orientation || undefined,
-      });
+    await volateqApi.updatePlant(this.editPlant!.id, { 
+      name: this.editPlant!.name,
+      in_setup_phase: this.editPlant!.inSetupPhase,
+      orientation: this.editPlant?.orientation || undefined,
+    });
 
-      const plantItem = this.plants!.find(plant => plant.id === this.editPlant!.id)!;
-      const oldPlantProductPackages = this.mapPlantProductPackages(plantItem);
-      for (const customer of plantItem.customers!) {
-        const oldPlantProductPackage = oldPlantProductPackages.find(p => p.customer.id === customer.id)!;
-        const newPlantProductPackage = this.editPlant!.productPackages.find(p => p.customer.id === customer.id)!;
-        if (JSON.stringify(oldPlantProductPackage) !== JSON.stringify(newPlantProductPackage)) {
-          const productPackageIds: number[] = [];
-          const yearlyIntervals: number[] = [];
-          for (const productPackage of newPlantProductPackage.productPackages) {
-            const splitedPPId = productPackage.split("_");
-            productPackageIds.push(parseInt(splitedPPId[0]));
-            yearlyIntervals.push(parseInt(splitedPPId[1]));
-          }
+    this.appEditPlantModal.hide();
 
-          await volateqApi.updatePlantPackages(this.editPlant!.id, customer.id, { 
-            product_packages: productPackageIds,
-            yearly_intervals: yearlyIntervals,
-          });
-        }
-      }
+    this.showSuccess(this.$t("plant-updated-success", { plant: this.editPlant!.name }).toString());
 
-      this.appEditPlantModal.hide();
-
-      this.showSuccess(this.$t("plant-updated-success", { plant: this.editPlant!.name }).toString());
-
-      await this.updatePlants();
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.editPlantLoading = false;
-    }
-  }
-
-  private mapPlantProductPackages(plant: PlantItem): EditPlantProductPackages[] {
-    return plant.customers!.map(customer => 
-      ({ 
-        customer: { id: customer.id, name: customer.name },
-        productPackages: plant.productPackages?.filter(pp => pp.customer_plant.customer_id === customer.id)
-          .map(pp => pp.product_package.id + "_" + pp.yearly_interval) || [],
-      }));
+    await this.updatePlants();
   }
 }
 </script>
 
 <style lang="scss">
-.plant-tools-select-customer {
-  width: 200px !important;
-  float: right;
-  &-label {
-    float: right;
-    margin-top: 5px;
-    padding-right: 1em;
-  }
-}
 </style>

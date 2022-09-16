@@ -1,6 +1,6 @@
 import { SimpleCustomerSchema } from "../shared/services/volateq-api/api-schemas/customer-schemas";
 import { FieldgeometrySchema } from "../shared/services/volateq-api/api-schemas/fieldgeometry-schema";
-import { CustomerPlantProductPackageSchema } from "../shared/services/volateq-api/api-schemas/product-package";
+import { OrderProductPackageSchema } from "../shared/services/volateq-api/api-schemas/order-schema";
 
 export interface PlantItem {
   id: string;
@@ -12,7 +12,7 @@ export interface PlantItem {
   customerNames?: string;
   customers?: SimpleCustomerSchema[];
   fieldgeometry?: FieldgeometrySchema;
-  productPackages?: CustomerPlantProductPackageSchema[];
+  productPackages: OrderProductPackageSchema[];
 }
 
 export interface EditPlantProductPackages {
@@ -28,5 +28,4 @@ export interface EditPlant {
   digitized: boolean;
   inSetupPhase: boolean;
   orientation?: number;
-  productPackages: EditPlantProductPackages[];
 }

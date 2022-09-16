@@ -36,6 +36,7 @@
 
           <b-dropdown-item href="/settings/users" v-if="isSuperAdmin" class="link">{{ $t("users") }} <app-super-admin-marker /></b-dropdown-item>
           <b-dropdown-item href="/settings/customers" v-if="isSuperAdmin" class="link">{{ $t("customers") }} <app-super-admin-marker /></b-dropdown-item>
+          <b-dropdown-item href="/settings/orders" v-if="isSuperAdmin" class="link">{{ $t("orders") }} <app-super-admin-marker /></b-dropdown-item>
           <b-dropdown-item href="/analysis-monitoring" v-if="isSuperAdmin" class="link">{{ $t("monitoring") }} <app-super-admin-marker /></b-dropdown-item>
 
           <b-dropdown-divider v-if="isSuperAdmin" />
