@@ -221,7 +221,7 @@ export default class AppSettingsOrders extends BaseAuthComponent {
         plant: order.plant.name,
         startDate: dateHelper.toDate(order.start_date),
         endDate: dateHelper.toDate(order.end_date),
-        productPackages: order.product_packages.filter(pp => pp.product_package.id !== 1), // Filter CSP_PTC Base product,
+        productPackages: order.order_product_packages.filter(pp => pp.product_package.id !== 1), // Filter CSP_PTC Base product,
         userCreatedUpdated: this.getUserCreatedUpdated(order),
       }));
     } finally {

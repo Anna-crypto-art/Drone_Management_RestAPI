@@ -264,7 +264,7 @@ export default class AppPlants extends BaseAuthComponent {
       productPackages: ((orders: OrderSchema[]): OrderProductPackageSchema[] => { 
         const pps: OrderProductPackageSchema[] = [];
         for (const order of orders) {
-          pps.push(...order.product_packages.filter(pp => pp.product_package.id !== 1) // Filter CSP_PTC Base product
+          pps.push(...order.order_product_packages.filter(pp => pp.product_package.id !== 1) // Filter CSP_PTC Base product
             .map(pp => {
               pp.quantity = order.order_type === OrderType.SETUP ? 0 : pp.quantity;
               return pp;

@@ -22,7 +22,7 @@ export interface OrderSchema {
   customer: CustomerSchema;
   start_date: string;
   end_date: string;
-  product_packages: OrderProductPackageSchema[];
+  order_product_packages: OrderProductPackageSchema[];
   created_at: string;
   user_created: SimpleUserSchema;
   updated_at?: string;
