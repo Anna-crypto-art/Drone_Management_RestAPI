@@ -193,7 +193,7 @@
   "glass-tube-temperature-class-limits": "Classification limits of glass tube temperature",
   "alignment-offset-class-3": "Exceeds ±{limit1}{unit}",
   "alignment-offset-class-2": "In between  ±{limit0}{unit} and ±{limit1}{unit}",
-  "alignment-offset-class-1": "Fall short of ±{limit0}{unit}",
+  "alignment-offset-class-1": "Less than ±{limit0}{unit}",
   "sca-torsion-class-3": "Significant torsion",
   "sca-torsion-class-2": "Moderate torsion",
   "sca-torsion-class-1": "Minimal torsion",
@@ -407,6 +407,7 @@
   "switch-customer": "Switch customer",
   "select-target-customer": "Select target customer",
   "info-no-customer-selected": "You have no customer selected. Some actions related to an analysis of a plant with multiple customers will fail: <ul><li>Create a new empty analysis for a reference measurment for a plant with multiple customers</li><li>Upload new data for plant with multiple customers</li></ul>",
+  "updated-by": "Updated by",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

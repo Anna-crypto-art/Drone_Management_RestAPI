@@ -676,13 +676,12 @@ export default class AppVisualization
       if (this.refMeasure.analysisId) {
         const me = await volateqApi.getMe();
 
-        const myReferenceMeasurements = (await volateqApi.getReferenceMeasurements(this.refMeasure.analysisId))
-          .filter(referenceMeasurement => referenceMeasurement.user_id === me.id);
+        const oldReferenceMeasurements = await volateqApi.getReferenceMeasurements(this.refMeasure.analysisId)
 
-        if (myReferenceMeasurements.length > 0) {
+        if (oldReferenceMeasurements.length > 0) {
           this.oldRefMeasures = [
             { value: null, text: "" },
-            ...myReferenceMeasurements.map(referenceMeasurement => ({
+            ...oldReferenceMeasurements.map(referenceMeasurement => ({
               value: referenceMeasurement.id,
               text: dateHelper.toDate(referenceMeasurement.measure_date) + " - " 
                 + (referenceMeasurement.notes || ""),

@@ -4,11 +4,12 @@ import { UserInfoSchema } from "./user-schemas";
 export interface ReferenceMeasurementSchema {
   id: string;
   analysis_id: string;
-  user_id: string;
   measure_date: string;
   notes?: string;
   created_at: string;
-  user: UserInfoSchema;
+  updated_at: string;
+  user_created: UserInfoSchema;
+  user_updated: UserInfoSchema;
 }
 
 export interface ReferenceMeasurementValueSchema {
