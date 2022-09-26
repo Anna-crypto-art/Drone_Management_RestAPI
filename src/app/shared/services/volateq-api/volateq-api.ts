@@ -29,6 +29,7 @@ import { DocFile } from "./api-schemas/doc-file-schema";
 import { ProductPackageSchema } from "./api-schemas/product-package";
 import { CreateOrderRequest, UpdateOrderRequest } from "./api-requests/order-requests";
 import { OrderProductPackageSchema, OrderSchema } from "./api-schemas/order-schema";
+import { MultiselectOption } from "../../components/app-multiselect/types";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -202,7 +203,7 @@ export class VolateqAPI extends HttpClientBase {
 
   public async updateAnalysis(
     analysisId: string,
-    updateData: { data_complete?: boolean; flown_at?: string }
+    updateData: { data_complete?: boolean; flown_at?: string, order_product_package_ids?: string[] },
   ): Promise<void> {
     await this.post(`/auth/analysis/${analysisId}`, updateData);
   }
@@ -654,8 +655,29 @@ export class VolateqAPI extends HttpClientBase {
     return this.delete(`/auth/order/${orderId}`);
   }
 
-  public async getOrderProductPackages(plantId: string, curDate?: string): Promise<OrderProductPackageSchema[]> {
-    return this.get(`/auth/order-product-packages/${plantId}`, curDate ? { cur_date: curDate } : undefined);
+  public async getOrderProductPackages(plantId: string, curDate?: string, customerId?: string): Promise<OrderProductPackageSchema[]> {
+    const queryParams = {};
+    if (curDate) {
+      queryParams["cur_date"] = curDate;
+    }
+    if (customerId) {
+      queryParams["customer_id"] = customerId;
+    }
+
+    return this.get(`/auth/order-product-packages/${plantId}`, queryParams);
+  }
+
+  public async getOrderPPsMulitselectOptions(plantId: string, curDate?: string, customerId?: string): Promise<MultiselectOption[]> {
+    const orderPPs = await volateqApi.getOrderProductPackages(plantId, curDate, customerId);
+
+    return orderPPs
+      .filter(orderPP => orderPP.product_package.id !== 1) // Filter CSP_PTC Basic
+      .map(orderPP => ({
+        id: orderPP.id,
+        label: orderPP.quantity ? 
+          orderPP.product_package.name + " - Yearly " + orderPP.quantity : 
+          orderPP.product_package.name
+      }));
   }
 
   public async getNewAnalysisProductPackagesProposal(plantId: string, curDate?: string): Promise<OrderProductPackageSchema[]> {

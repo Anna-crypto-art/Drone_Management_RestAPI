@@ -190,18 +190,7 @@ export default class AppNewAnalysis extends BaseAuthComponent {
       return;
     }
 
-    const orderPPs = await volateqApi.getOrderProductPackages(this.selectedPlantId, this.flownAt);
-    if (orderPPs.length === 0) {
-      return;
-    }
-
-    this.productPackagesSelection = orderPPs.map(orderPP => ({
-      id: orderPP.id,
-      label: orderPP.quantity ? 
-        orderPP.product_package.name + " - Yearly " + orderPP.quantity : 
-        orderPP.product_package.name
-    }));
-
+    this.productPackagesSelection = await volateqApi.getOrderPPsMulitselectOptions(this.selectedPlantId, this.flownAt);
     this.selectedProductPackages = (await volateqApi.getNewAnalysisProductPackagesProposal(this.selectedPlantId, this.flownAt))
       .map(orderPP => orderPP.id);
   }

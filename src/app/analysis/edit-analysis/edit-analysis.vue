@@ -30,6 +30,16 @@
                   <b-form-group :label="$t('acquisition-date')" label-cols-sm="4" label-cols-lg="2">
                     <b-datepicker v-model="flownAt" required /> 
                   </b-form-group>
+                  <b-form-group :label="$t('product-packages')" label-cols-sm="4" label-cols-lg="2">
+                    <b-alert variant="info" :show="productPackagesSelectionDisabled">
+                      {{ $t("product-packages-selection-for-analysis-disabled") }}
+                    </b-alert>
+                    <app-multiselect 
+                      v-model="selectedProductPackageIds"
+                      :options="productPackagesSelection"
+                      :disabled="productPackagesSelectionDisabled"
+                    />
+                  </b-form-group>
                   <app-button type="submit" :loading="loading">{{ $t("apply") }}</app-button>
                 </b-form>
               </app-box>
@@ -77,6 +87,9 @@ import AppAnalysisReferenceMeasurements from "@/app/analysis/edit-analysis/refer
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 import { ProgressStep } from "@/app/shared/components/app-step-progress/types";
 import AppStepProgress from "@/app/shared/components/app-step-progress/app-step-progress.vue";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
+import AppMultiselect from "@/app/shared/components/app-multiselect/app-multiselect.vue";
+import { MultiselectOption } from "@/app/shared/components/app-multiselect/types";
 
 @Component({
   name: "app-edit-analysis",
@@ -91,6 +104,7 @@ import AppStepProgress from "@/app/shared/components/app-step-progress/app-step-
     AppAnalysisReferenceMeasurements,
     AppSuperAdminMarker,
     AppStepProgress,
+    AppMultiselect,
   },
 })
 export default class AppEditAnalysis extends BaseAuthComponent {
@@ -99,6 +113,10 @@ export default class AppEditAnalysis extends BaseAuthComponent {
   flownAt = "";
   loading = false;
   hasReferenceMeasurements = false;
+
+  productPackagesSelection: MultiselectOption[] = [];
+  selectedProductPackageIds: string[] | null = null;
+  productPackagesSelectionDisabled = false;
 
   async created() {
     await this.updateAnalysis(this.$route.params.id);
@@ -154,28 +172,34 @@ export default class AppEditAnalysis extends BaseAuthComponent {
       apiStates.includes(this.analysis.current_state.state.id) || false;
   }
 
+  @CatchError()
   private async updateAnalysis(analysisId: string) {
-    try {
-      this.analysis = await volateqApi.getAnalysis(analysisId);
+    this.analysis = await volateqApi.getAnalysis(analysisId);
 
-      this.flownAt = this.analysis.flown_at;
+    this.flownAt = this.analysis.flown_at;
 
-      this.hasReferenceMeasurements = (await volateqApi.getReferenceMeasurements(this.analysis.id)).length > 0;
+    this.hasReferenceMeasurements = (await volateqApi.getReferenceMeasurements(this.analysis.id)).length > 0;
 
-      this.watchAnalysisTask();
+    this.productPackagesSelection = await volateqApi.getOrderPPsMulitselectOptions(
+      this.analysis.plant.id,
+      this.analysis.flown_at,
+      this.analysis.customer.id,
+    );
+    this.selectedProductPackageIds = this.analysis.order_product_packages.map(orderPP => orderPP.id);
+    this.productPackagesSelectionDisabled = !this.isSuperAdmin &&
+      this.analysis.current_state.state.id >= ApiStates.DATA_COMPLETE;
 
-      if (this.isSuperAdmin && this.analysis.analysis_result && 
-        this.analysis.analysis_result.released && this.analysis.current_state.state.id !== ApiStates.FINISHED
-      ) {
-        AppContentEventService.showInfo(this.analysis!.id, this.$t("analysis-not-finished_descr").toString());
-      }
-      if (this.isSuperAdmin && this.analysis.current_state.state.id === ApiStates.FINISHED && 
-        (!this.analysis.analysis_result || !this.analysis.analysis_result.released)
-      ) {
-        AppContentEventService.showInfo(this.analysis!.id, this.$t("analysis-not-released_descr").toString());
-      }
-    } catch (e) {
-      this.showError(e);
+    this.watchAnalysisTask();
+
+    if (this.isSuperAdmin && this.analysis.analysis_result && 
+      this.analysis.analysis_result.released && this.analysis.current_state.state.id !== ApiStates.FINISHED
+    ) {
+      AppContentEventService.showInfo(this.analysis!.id, this.$t("analysis-not-finished_descr").toString());
+    }
+    if (this.isSuperAdmin && this.analysis.current_state.state.id === ApiStates.FINISHED && 
+      (!this.analysis.analysis_result || !this.analysis.analysis_result.released)
+    ) {
+      AppContentEventService.showInfo(this.analysis!.id, this.$t("analysis-not-released_descr").toString());
     }
   }
 
@@ -193,7 +217,6 @@ export default class AppEditAnalysis extends BaseAuthComponent {
             AppContentEventService.showSuccess(this.analysis!.id, volateqApi.getTaskOutputAsMessage(task))
           }
 
-
           AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.FINISHED_ANALYSIS_TASK, task);
         },
         (task: TaskSchema) => {
@@ -205,20 +228,16 @@ export default class AppEditAnalysis extends BaseAuthComponent {
     }
   }
 
+  @CatchError("loading")
   async onSubmitEditAnalysis() {
-    try {
-      this.loading = true;
+    await volateqApi.updateAnalysis(this.analysis!.id, { 
+      flown_at: this.flownAt?.substring(0, 10),
+      order_product_package_ids: this.selectedProductPackageIds || undefined,
+    });
 
-      await volateqApi.updateAnalysis(this.analysis!.id, { flown_at: this.flownAt })
+    this.showSuccess(this.$t("analysis-updated-successfully").toString());
 
-      this.showSuccess(this.$t("analysis-updated-successfully").toString());
-
-      AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS);
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.loading = false;
-    }
+    AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS);
   }
 }
 </script>

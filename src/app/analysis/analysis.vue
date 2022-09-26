@@ -68,10 +68,7 @@
             <div v-else>UNKNOWN</div>
           </template>
           <template #cell(productPackages)="row">
-            <div v-for="pp in row.item.productPackages" :key="pp.id">
-              {{ pp.product_package.name }} 
-              <b-badge v-if="pp.quantity">Yearly {{ pp.quantity }}</b-badge>
-            </div>
+            <app-order-pps-view :orderProductPackages="row.item.productPackages" />
           </template>
           <template #cell(hasResults)="row">
             <b-icon v-show="hasResult(row.item) && !hasReleasedResult(row.item)" icon="check" class="font-xl text-success" />
@@ -105,6 +102,7 @@ import AppModalFormInfoArea from "@/app/shared/components/app-modal/app-modal-fo
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import AppTableFilter from "@/app/shared/components/app-table-filter/app-table-filter.vue";
+import AppOrderPpsView from "@/app/shared/components/app-order-pps-view/app-order-pps-view.vue";
 import { BvTableFieldArray } from "bootstrap-vue";
 import { Component } from "vue-property-decorator";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
@@ -122,6 +120,7 @@ import volateqApi from "../shared/services/volateq-api/volateq-api";
     AppModalForm,
     AppModalFormInfoArea,
     AppTableFilter,
+    AppOrderPpsView,
   },
 })
 export default class AppAnalysis extends BaseAuthComponent {

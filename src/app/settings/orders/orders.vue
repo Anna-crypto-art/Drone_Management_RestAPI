@@ -34,10 +34,7 @@
           {{ orderTypes[row.item.orderType] }}
         </template>
         <template #cell(productPackages)="row">
-          <div v-for="productPackage in row.item.productPackages" :key="productPackage.id">
-            {{ productPackage.product_package.name }} 
-            <b-badge v-if="row.item.orderType === 2">Yearly {{ productPackage.quantity }}</b-badge>
-          </div>
+          <app-order-pps-view :orderProductPackages="row.item.productPackages" />
         </template>
         <template #cell(userCreatedUpdated)="row">
           <small class="text-grey" v-html="row.item.userCreatedUpdated"></small>
@@ -123,6 +120,7 @@ import AppTableContainer from "@/app/shared/components/app-table-container/app-t
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import AppMultiselect from "@/app/shared/components/app-multiselect/app-multiselect.vue";
 import AppTableFilter from "@/app/shared/components/app-table-filter/app-table-filter.vue";
+import AppOrderPpsView from "@/app/shared/components/app-order-pps-view/app-order-pps-view.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import { BvTableFieldArray } from "bootstrap-vue";
@@ -145,6 +143,7 @@ import { ProductPackageSchema } from "@/app/shared/services/volateq-api/api-sche
     AppModalForm,
     AppMultiselect,
     AppTableFilter,
+    AppOrderPpsView,
   },
 })
 export default class AppSettingsOrders extends BaseAuthComponent {

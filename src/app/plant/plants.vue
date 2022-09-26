@@ -34,10 +34,7 @@
           <span v-if="!row.item.digitized">{{ row.item.name }}</span>
         </template>
         <template #cell(productPackages)="row">
-          <div v-for="pp in row.item.productPackages" :key="pp.id">
-            {{ pp.product_package.name }} 
-            <b-badge v-if="pp.quantity">Yearly {{ pp.quantity }}</b-badge>
-          </div>
+          <app-order-pps-view :orderProductPackages="row.item.productPackages" />
         </template>
 
         <template #cell(digitized)="row">
@@ -181,6 +178,7 @@ import { EditPlant, PlantItem } from "./types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue"
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 import AppModalFormInfoArea from "../shared/components/app-modal/app-modal-form-info-area.vue";
+import AppOrderPpsView from "@/app/shared/components/app-order-pps-view/app-order-pps-view.vue";
 import { sortAlphabetical } from "../shared/services/helper/sort-helper";
 import { CatchError } from "../shared/services/helper/catch-helper";
 import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
@@ -195,6 +193,7 @@ import { OrderProductPackageSchema, OrderSchema } from "../shared/services/volat
     AppButton,
     AppSuperAdminMarker,
     AppModalFormInfoArea,
+    AppOrderPpsView,
   },
 })
 export default class AppPlants extends BaseAuthComponent {
