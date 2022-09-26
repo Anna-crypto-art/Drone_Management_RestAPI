@@ -124,10 +124,11 @@ $theme-colors: (
 
 .table {
   color: $dark;
-}
-.table.bordered {
   border: 1px solid $border-color-grey;
   border-top: none;
+}
+.table.no-border {
+  border: none !important;
 }
 
 .table.b-table > thead > tr > [aria-sort="none"] {

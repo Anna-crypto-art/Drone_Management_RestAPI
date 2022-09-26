@@ -184,7 +184,7 @@ import AppModalFormInfoArea from "../shared/components/app-modal/app-modal-form-
 import { sortAlphabetical } from "../shared/services/helper/sort-helper";
 import { CatchError } from "../shared/services/helper/catch-helper";
 import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
-import { OrderProductPackageSchema, OrderSchema, OrderType } from "../shared/services/volateq-api/api-schemas/order-schema";
+import { OrderProductPackageSchema, OrderSchema } from "../shared/services/volateq-api/api-schemas/order-schema";
 
 @Component({
   name: "app-plants",
@@ -264,11 +264,7 @@ export default class AppPlants extends BaseAuthComponent {
       productPackages: ((orders: OrderSchema[]): OrderProductPackageSchema[] => { 
         const pps: OrderProductPackageSchema[] = [];
         for (const order of orders) {
-          pps.push(...order.order_product_packages.filter(pp => pp.product_package.id !== 1) // Filter CSP_PTC Base product
-            .map(pp => {
-              pp.quantity = order.order_type === OrderType.SETUP ? 0 : pp.quantity;
-              return pp;
-            })); 
+          pps.push(...order.order_product_packages.filter(pp => pp.product_package.id !== 1)); // Filter CSP_PTC Base product
         }
         return pps;
       })(plant.current_orders),

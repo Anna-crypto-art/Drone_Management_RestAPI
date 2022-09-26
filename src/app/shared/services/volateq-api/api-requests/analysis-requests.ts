@@ -7,6 +7,7 @@ export interface NewEmptyAnalysis {
 
 export interface NewAnalysis extends NewEmptyAnalysis {
   files: string[];
+  order_product_package_ids?: string[];
 }
 
 export interface UpdateAnalysisState {

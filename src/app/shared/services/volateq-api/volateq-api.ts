@@ -28,7 +28,7 @@ import { ReferenceMeasurementSchema, ReferenceMeasurementValueSchema } from "./a
 import { DocFile } from "./api-schemas/doc-file-schema";
 import { ProductPackageSchema } from "./api-schemas/product-package";
 import { CreateOrderRequest, UpdateOrderRequest } from "./api-requests/order-requests";
-import { OrderSchema } from "./api-schemas/order-schema";
+import { OrderProductPackageSchema, OrderSchema } from "./api-schemas/order-schema";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -652,6 +652,14 @@ export class VolateqAPI extends HttpClientBase {
 
   public async deleteOrder(orderId: string): Promise<void> {
     return this.delete(`/auth/order/${orderId}`);
+  }
+
+  public async getOrderProductPackages(plantId: string, curDate?: string): Promise<OrderProductPackageSchema[]> {
+    return this.get(`/auth/order-product-packages/${plantId}`, curDate ? { cur_date: curDate } : undefined);
+  }
+
+  public async getNewAnalysisProductPackagesProposal(plantId: string, curDate?: string): Promise<OrderProductPackageSchema[]> {
+    return this.get(`/auth/new-analysis-product-packages-proposal/${plantId}`, curDate ? { cur_date: curDate } : undefined)
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {

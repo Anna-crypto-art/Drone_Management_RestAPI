@@ -3,7 +3,7 @@ import { CustomerSchema } from "./customer-schemas";
 import { SimpleUserSchema } from "./user-schemas";
 import { AnalysisResultSchema } from "./analysis-result-schema";
 import { PlantSchema } from "./plant-schema";
-import { ProductPackageSchema } from "./product-package";
+import { OrderProductPackageSchema } from "./order-schema";
 
 export interface AnalysisFilesSchema {
   video_files: string[];
@@ -29,7 +29,7 @@ export interface AnalysisSchema extends SimpleAnalysisSchema {
   analysis_result: AnalysisResultSchema;
   has_plant_metadata: boolean;
   task_id: string;
-  product_packages: ProductPackageSchema[];
+  order_product_packages: OrderProductPackageSchema[];
 }
 
 export interface AnalysisFileInfoSchema {

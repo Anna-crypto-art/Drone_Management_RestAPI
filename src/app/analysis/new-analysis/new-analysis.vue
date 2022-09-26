@@ -18,6 +18,11 @@
                 <b-datepicker v-model="flownAt" required /> 
               </b-form-group>
             </b-col>
+            <b-col lg="4" v-show="productPackagesSelection.length > 0">
+              <b-form-group label-cols="auto" :label="$t('product-packages')">
+                <app-multiselect v-model="selectedProductPackages" :options="productPackagesSelection" />
+              </b-form-group>
+            </b-col>
           </b-row>
         </template>
         <template #cancelButton>
@@ -29,15 +34,18 @@
 </template>
 
 <script lang="ts">
-import { Component } from "vue-property-decorator";
+import { Component, Watch } from "vue-property-decorator";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppAnalysisUpload from "@/app/analysis/shared/analysis-upload.vue";
+import AppMultiselect from "@/app/shared/components/app-multiselect/app-multiselect.vue";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
+import { MultiselectOption } from "@/app/shared/components/app-multiselect/types";
 
 @Component({
   name: "app-new-analysis",
@@ -45,6 +53,7 @@ import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
     AppContent,
     AppButton,
     AppAnalysisUpload,
+    AppMultiselect,
   },
 })
 export default class AppNewAnalysis extends BaseAuthComponent {
@@ -57,12 +66,20 @@ export default class AppNewAnalysis extends BaseAuthComponent {
 
   analysis: AnalysisSchema | null = null;
 
+  productPackagesSelection: MultiselectOption[] = [];
+  selectedProductPackages: string[] | null = null;
+
+  @CatchError()
   async created() {
-    try {
-      this.preparePlantSelection();
-    } catch (e) {
-      this.showError(e);
-    }
+    this.preparePlantSelection();
+  }
+
+  @Watch('selectedPlantId') async onSelectedPlantIdChanged() {
+    await this.loadProductPackagesSelection();
+  }
+
+  @Watch('flownAt') async onFlownAtChanged() {
+    await this.loadProductPackagesSelection();
   }
 
   async onStartUpload(files: string[], resume: boolean, done: (analysis: AnalysisSchema | null) => void) {
@@ -90,6 +107,7 @@ export default class AppNewAnalysis extends BaseAuthComponent {
         plant_id: this.selectedPlantId!,
         files: files,
         flown_at: this.flownAt!,
+        order_product_package_ids: this.selectedProductPackages || undefined,
       });
   
       this.analysis = await volateqApi.getAnalysis(analysisIdObj.id);
@@ -162,6 +180,30 @@ export default class AppNewAnalysis extends BaseAuthComponent {
     if (this.plants.length === 1) {
       this.selectedPlantId = this.plants[0].id;
     }
+  }
+
+  @CatchError()
+  private async loadProductPackagesSelection() {
+    this.productPackagesSelection = [];
+
+    if (!this.selectedPlantId || !this.flownAt) {
+      return;
+    }
+
+    const orderPPs = await volateqApi.getOrderProductPackages(this.selectedPlantId, this.flownAt);
+    if (orderPPs.length === 0) {
+      return;
+    }
+
+    this.productPackagesSelection = orderPPs.map(orderPP => ({
+      id: orderPP.id,
+      label: orderPP.quantity ? 
+        orderPP.product_package.name + " - Yearly " + orderPP.quantity : 
+        orderPP.product_package.name
+    }));
+
+    this.selectedProductPackages = (await volateqApi.getNewAnalysisProductPackagesProposal(this.selectedPlantId, this.flownAt))
+      .map(orderPP => orderPP.id);
   }
 }
 </script>

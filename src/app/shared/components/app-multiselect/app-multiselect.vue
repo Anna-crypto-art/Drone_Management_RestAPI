@@ -16,7 +16,7 @@
 </template>
 <script lang="ts">
 import Vue from "vue";
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Watch } from "vue-property-decorator";
 import Multiselect from "vue-multiselect";
 import { MultiselectOption } from "./types";
 
@@ -34,6 +34,10 @@ export default class AppMultiselect extends Vue {
   innerValue: MultiselectOption[] | null = null;
 
   created() {
+    this.onValueChanged();
+  }
+
+  @Watch('value') onValueChanged() {
     if (this.value) {
       this.innerValue = this.options.filter(option => this.value!.includes(option.id))
     }

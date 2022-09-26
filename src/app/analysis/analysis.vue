@@ -67,6 +67,12 @@
             </div>
             <div v-else>UNKNOWN</div>
           </template>
+          <template #cell(productPackages)="row">
+            <div v-for="pp in row.item.productPackages" :key="pp.id">
+              {{ pp.product_package.name }} 
+              <b-badge v-if="pp.quantity">Yearly {{ pp.quantity }}</b-badge>
+            </div>
+          </template>
           <template #cell(hasResults)="row">
             <b-icon v-show="hasResult(row.item) && !hasReleasedResult(row.item)" icon="check" class="font-xl text-success" />
             <b-icon v-show="hasReleasedResult(row.item)" icon="check-all" class="font-xl text-success" />
@@ -147,6 +153,7 @@ export default class AppAnalysis extends BaseAuthComponent {
       },
       { key: "user", label: this.$t("created-by").toString(), sortable: true },
       { key: "state", label: this.$t("state").toString(), sortable: true },
+      { key: "productPackages", label: this.$t("product-packages").toString() },
       { key: "hasResults", label: this.$t("has-results-released").toString() },
       { key: "actions" },
     ];
@@ -234,6 +241,7 @@ export default class AppAnalysis extends BaseAuthComponent {
           plantId: a.plant.id,
           plant: a.plant.name,
           customer: a.customer.name,
+          productPackages: a.order_product_packages,
         };
 
         return row;

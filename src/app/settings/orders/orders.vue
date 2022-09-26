@@ -203,6 +203,10 @@ export default class AppSettingsOrders extends BaseAuthComponent {
     this.plants = sortAlphabetical(await volateqApi.getAllPlants(), "name");
     this.customers = sortAlphabetical(await volateqApi.getCustomers(), "name");
 
+    if (this.selectedCustomer) {
+      this.selectedCustomerId = this.selectedCustomer.id;
+    }
+
     this.createOrderPlantOptions = this.plants.map(plant => ({ value: plant.id, text: plant.name }));
     this.updatePlantFilterOptions();
     this.updateCustomerFilterOptions();
