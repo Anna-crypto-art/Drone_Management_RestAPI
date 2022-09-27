@@ -7,23 +7,20 @@
       @cancelUpload="onCancelUpload"
       @retryUpload="onRetryUpload">
         <template #uploadForm>
-          <b-row style="margin-bottom: 25px">
-            <b-col lg="4" v-if="plantOptions.length > 1">
-              <b-form-group label-cols="auto" :label="$t('plant')">
-                <b-form-select required v-model="selectedPlantId" :options="plantOptions"></b-form-select>
-              </b-form-group>
-            </b-col>
-            <b-col lg="4">
-              <b-form-group label-cols="auto" :label="$t('acquisition-date')">
-                <b-datepicker v-model="flownAt" required /> 
-              </b-form-group>
-            </b-col>
-            <b-col lg="4" v-show="productPackagesSelection.length > 0">
-              <b-form-group label-cols="auto" :label="$t('product-packages')">
-                <app-multiselect v-model="selectedProductPackages" :options="productPackagesSelection" />
-              </b-form-group>
-            </b-col>
-          </b-row>
+          <b-form-group v-show="plantOptions.length > 1" label-cols-lg="2" :label="$t('plant')">
+            <b-form-select required v-model="selectedPlantId" :options="plantOptions"></b-form-select>
+          </b-form-group>
+          <b-form-group label-cols-lg="2" :label="$t('acquisition-date')">
+            <b-datepicker v-model="flownAt" required /> 
+          </b-form-group>
+          <b-form-group v-show="productPackagesSelection.length > 0" label-cols-lg="2" :label="$t('product-packages')">
+            <app-multiselect 
+              v-model="selectedProductPackages"
+              :options="productPackagesSelection" 
+              :readonly="!isSuperAdmin"
+            />
+          </b-form-group>
+          <div class="pad-bottom-2x"></div>
         </template>
         <template #cancelButton>
           {{ $t("cancel-and-delete-all-files") }}

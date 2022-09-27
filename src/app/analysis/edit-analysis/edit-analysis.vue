@@ -31,13 +31,10 @@
                     <b-datepicker v-model="flownAt" required /> 
                   </b-form-group>
                   <b-form-group :label="$t('product-packages')" label-cols-sm="4" label-cols-lg="2">
-                    <b-alert variant="info" :show="productPackagesSelectionDisabled">
-                      {{ $t("product-packages-selection-for-analysis-disabled") }}
-                    </b-alert>
                     <app-multiselect 
                       v-model="selectedProductPackageIds"
                       :options="productPackagesSelection"
-                      :disabled="productPackagesSelectionDisabled"
+                      :readonly="!isSuperAdmin"
                     />
                   </b-form-group>
                   <app-button type="submit" :loading="loading">{{ $t("apply") }}</app-button>

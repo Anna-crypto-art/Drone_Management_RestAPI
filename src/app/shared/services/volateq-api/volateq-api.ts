@@ -345,8 +345,11 @@ export class VolateqAPI extends HttpClientBase {
     );
   }
 
-  public async getAnalysisResults(plantId: string): Promise<AnalysisResultDetailedSchema[]> {
-    const analysisResults = await this.get(`/auth/plant/${plantId}/analysis-results`);
+  public async getAnalysisResults(plantId: string, allKeyFigures = false): Promise<AnalysisResultDetailedSchema[]> {
+    const analysisResults = await this.get(
+      `/auth/plant/${plantId}/analysis-results`, 
+      allKeyFigures ? { all_key_figures: 1 } : undefined
+    );
 
     this.filterKeyFigures(analysisResults);
 

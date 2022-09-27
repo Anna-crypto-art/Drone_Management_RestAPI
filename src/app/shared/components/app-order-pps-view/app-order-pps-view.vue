@@ -1,9 +1,11 @@
 <template>
-  <div>
-    <div v-for="orderPP in innerOrderPPs" :key="orderPP.id">
-      {{ orderPP.product_package.name }} 
-      <b-badge v-if="orderPP.quantity">Yearly {{ orderPP.quantity }}</b-badge>
+  <div :class="'app-order-pps-view' + (lefted ? ' lefted' : '')">
+    <div v-for="orderPP in innerOrderPPs" :key="orderPP.id"
+    :class="'app-order-pps-view-item ' + (orderPP.quantity ? 'primary' : 'secondary')">
+      <b>{{ orderPP.product_package.name }}</b>
+      <i v-if="orderPP.quantity"> Yearly {{ orderPP.quantity }}</i>
     </div>
+    <div v-if="lefted" class="clear"></div>
   </div>
 </template>
 
@@ -17,6 +19,7 @@ import { OrderProductPackageSchema } from "../../services/volateq-api/api-schema
 })
 export default class AppOrderPpsView extends Vue {
   @Prop({ default: [] }) orderProductPackages!: OrderProductPackageSchema[];
+  @Prop({ default: false }) lefted!: boolean;
 
   innerOrderPPs: OrderProductPackageSchema[] = [];
 
@@ -31,4 +34,40 @@ export default class AppOrderPpsView extends Vue {
 </script>
 
 <style lang="scss">
+@import "@/scss/_colors.scss";
+
+.app-order-pps-view {
+  &.lefted {
+    .app-order-pps-view-item {
+      float: left;
+      margin-right: 0.5em;
+    }
+  }
+
+  &-item {
+    font-size: 12px;
+    padding: 0.1em 0.75em;
+    border-radius: 10em;
+    border: 1px solid $hover-blue;
+    margin-bottom: 0.5em;
+    width: 120px;
+    text-align: center;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    &.primary {
+      color: $white;
+      background: $hover-blue;
+      width: 165px;
+    }
+    &.secondary {
+      background: $white;
+      & > b {
+        font-weight: normal;
+      }
+    }
+  }
+}
 </style>

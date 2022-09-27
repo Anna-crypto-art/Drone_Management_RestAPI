@@ -424,7 +424,6 @@
   "subscription": "Subscription",
   "setup": "Setup",
   "updated-by": "Updated by",
-  "product-packages-selection-for-analysis-disabled": "It is not possible to change the product packages of the analysis, because the state of the analysis exceeds 'Data complete'.",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

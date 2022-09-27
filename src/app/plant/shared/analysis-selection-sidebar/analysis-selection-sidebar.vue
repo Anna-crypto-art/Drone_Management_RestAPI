@@ -24,9 +24,9 @@
               <b-checkbox v-if="compareMode" :checked="rowSelected" disabled class="b-table-selectable-checkbox"></b-checkbox>
             </template>
             <template #row-details="row">
-              <span class="analysis-selection-sidebar-kpi-badge" v-for="kpi in row.item.kpis" :key="kpi.id">
-                <b-badge variant="primary" :style="'background-color: ' + getKpiColor(kpi)">{{ kpi.name }}</b-badge>
-              </span>
+              <div style="margin-left: 30px">
+                <app-order-pps-view :orderProductPackages="row.item.orderPPs" :lefted="true" />
+              </div>
             </template>
           </b-table>
         </app-table-container>
@@ -49,8 +49,8 @@ import { State } from "vuex-class";
 import { AnalysisSelectionService } from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-service";
 import { AnalysisSelectionEvent } from "./types";
 import dateHelper from "@/app/shared/services/helper/date-helper";
-import { PlantRouteQuery } from "../types";
 import { RouteQueryHelper } from "../helper/route-query-helper";
+import AppOrderPpsView from "@/app/shared/components/app-order-pps-view/app-order-pps-view.vue";
 
 @Component({
   name: "app-analysis-selection-sidebar",
@@ -58,6 +58,7 @@ import { RouteQueryHelper } from "../helper/route-query-helper";
     AppTableContainer,
     AppExplanation,
     AppSidebar,
+    AppOrderPpsView,
   },
 })
 export default class AppAnalysisSelectionSidebar extends Vue {
@@ -87,9 +88,8 @@ export default class AppAnalysisSelectionSidebar extends Vue {
         id: analysisResult.id,
         name: analysisResult.analysis.name,
         date: dateHelper.toDate(analysisResult.analysis.flown_at),
-        kpis: analysisResult.key_figures,
-        // only show details for history mode .. that will be implemented in near future
-        _showDetails: false,
+        orderPPs: analysisResult.analysis.order_product_packages,
+        _showDetails: analysisResult.analysis.order_product_packages.length > 0,
       });
     }
 

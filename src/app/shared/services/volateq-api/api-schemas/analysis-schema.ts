@@ -18,6 +18,10 @@ export interface SimpleAnalysisSchema {
   flown_at: string;
 }
 
+export interface SimpleAnalysisOrderPPSchema extends SimpleAnalysisSchema {
+  order_product_packages: OrderProductPackageSchema[];
+}
+
 export interface AnalysisSchema extends SimpleAnalysisSchema {
   current_state: AnalysisStateSchema;
   plant: PlantSchema;

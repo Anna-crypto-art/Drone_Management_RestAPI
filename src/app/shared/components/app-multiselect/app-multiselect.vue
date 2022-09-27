@@ -12,6 +12,7 @@
       :multiple="true"
       :disabled="disabled"
     />
+    <div v-show="readonly" class="app-multiselect-readonly"></div>
   </div>
 </template>
 <script lang="ts">
@@ -30,6 +31,7 @@ export default class AppMultiselect extends Vue {
   @Prop({ default: null }) value!: string[] | null;
   @Prop({ default: [] }) options!: MultiselectOption[];
   @Prop({ default: false }) disabled!: boolean;
+  @Prop({ default: false }) readonly!: boolean;
 
   innerValue: MultiselectOption[] | null = null;
 
@@ -41,6 +43,10 @@ export default class AppMultiselect extends Vue {
     if (this.value) {
       this.innerValue = this.options.filter(option => this.value!.includes(option.id))
     }
+  }
+
+  @Watch('options') onOptionsChanged() {
+    this.onValueChanged();
   }
 
   onInput(value: MultiselectOption[]) {
@@ -59,6 +65,8 @@ export default class AppMultiselect extends Vue {
 @import "@/scss/_colors.scss";
 
 .app-multiselect {
+  position: relative;
+
   .multiselect__tags {
     border-radius: 0;
     border-color: $blue-60pc;
@@ -84,6 +92,16 @@ export default class AppMultiselect extends Vue {
   }
   .multiselect__option--highlight {
     background: $hover-blue;
+  }
+
+  &-readonly {
+    position: absolute;
+    opacity: 0.1;
+    background-color: $black;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
   }
 }
 </style>

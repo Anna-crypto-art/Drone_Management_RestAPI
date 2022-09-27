@@ -68,6 +68,11 @@
       <b-form-group :label="$t('select-target-customer')">
         <b-form-select v-model="selectedCustomerId" :options="customerSelection" />
       </b-form-group>
+      <b-form-group>
+        <b-form-checkbox v-model="showAllKeyFigures">
+          {{ $('show-all-pis') }}
+        </b-form-checkbox>
+      </b-form-group>
     </app-modal-form>
 
   </b-navbar>
@@ -99,6 +104,8 @@ export default class AppHeader extends BaseAuthComponent {
   switchCustomerLoading = false;
   customerSelection: { text: string; value: string | null }[] = [];
   selectedCustomerId: string | null = null;
+
+  showAllKeyFigures = false;
 
   async logout(): Promise<void> {
     try {

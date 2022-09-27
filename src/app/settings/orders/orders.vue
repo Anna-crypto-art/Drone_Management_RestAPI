@@ -350,7 +350,7 @@ export default class AppSettingsOrders extends BaseAuthComponent {
       let quantities: number[] = [];
       let quantText = "";
       if (parseInt(this.currentOrder.orderType) === OrderType.SETUP) {
-        quantities = [1];
+        quantities = [0];
       } else if (parseInt(this.currentOrder.orderType) === OrderType.SUBSCRIPTION) {
         quantities = [1, 4, 12];
         quantText = " - Yearly ";
