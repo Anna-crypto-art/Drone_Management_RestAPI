@@ -621,8 +621,8 @@ export class VolateqAPI extends HttpClientBase {
     return this.delete(`/auth/doc/file/${fileId}`);
   }
 
-  public async switchCustomer(toCustomerId: string | undefined): Promise<CustomerNameSchema> {
-    return this.post(`/auth/user/switch-customer`, { customer_id: toCustomerId });
+  public async switchCustomer(toCustomerId: string | undefined, showAllKeyFigures: boolean): Promise<CustomerNameSchema> {
+    return this.post(`/auth/user/switch-customer`, { customer_id: toCustomerId, show_all_key_figures: showAllKeyFigures });
   }
 
   public async getProductPackages(): Promise<ProductPackageSchema[]> {

@@ -44,24 +44,31 @@
           <template #head(actions)>
             <span class="hidden">{{ $t("actions") }}</span>
           </template>
+          <template #head(customer)>
+            {{ $t("customer") }} <app-super-admin-marker />
+          </template>
           <template #cell(name)="row">
             <router-link :to="{ name: 'EditAnalysis', params: { id: row.item.id } }">{{ row.item.name }}</router-link>
-          </template>
-          <template #cell(plant)="row">
-            {{ row.item.plant }}<br />
-            <small class="grayed">{{ row.item.customer }}</small>
-          </template>
-          <template #cell(user)="row">
-            <span v-if="row.item.user.userName">
-              {{ row.item.user.userName }}<br />
-              <small class="grayed">{{ row.item.user.email }}</small>
-            </span>
-            <span v-else>{{ row.item.user.email }}</span>
+            <div>
+              <small class="grayed">{{ row.item.user.userName || row.item.user.email }}</small>
+            </div>
           </template>
 
           <template #cell(state)="row">
             <div v-if="row.item.state">
               {{ $t(row.item.state.state.name) }}
+              <b-icon 
+                v-show="hasReleasedResult(row.item)"
+                icon="check"
+                class="text-success"
+                v-b-popover.hover.top="$t('results-available')"
+              />
+              <b-icon 
+                v-show="isSuperAdmin && hasResult(row.item) && !hasReleasedResult(row.item)"
+                icon="shield-check"
+                class="text-success" 
+                v-b-popover.hover.top="$t('results-available-super-admin-only')"
+              />
               <br />
               <small class="grayed">{{ trans(getTimeDiff(row.item.state.started_at)) }}</small>
             </div>
@@ -69,10 +76,6 @@
           </template>
           <template #cell(productPackages)="row">
             <app-order-pps-view :orderProductPackages="row.item.productPackages" />
-          </template>
-          <template #cell(hasResults)="row">
-            <b-icon v-show="hasResult(row.item) && !hasReleasedResult(row.item)" icon="check" class="font-xl text-success" />
-            <b-icon v-show="hasReleasedResult(row.item)" icon="check-all" class="font-xl text-success" />
           </template>
           <template #cell(actions)="row">
             <div class="hover-cell pull-right">
@@ -110,6 +113,7 @@ import dateHelper from "../shared/services/helper/date-helper";
 import { AnalysisSchema } from "../shared/services/volateq-api/api-schemas/analysis-schema";
 import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
 import { ApiStates } from "../shared/services/volateq-api/api-states";
+import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 import volateqApi from "../shared/services/volateq-api/volateq-api";
 
 @Component({
@@ -121,6 +125,7 @@ import volateqApi from "../shared/services/volateq-api/volateq-api";
     AppModalFormInfoArea,
     AppTableFilter,
     AppOrderPpsView,
+    AppSuperAdminMarker,
   },
 })
 export default class AppAnalysis extends BaseAuthComponent {
@@ -141,7 +146,6 @@ export default class AppAnalysis extends BaseAuthComponent {
 
     this.columns = [
       { key: "name", label: this.$t("name").toString(), sortable: true },
-      { key: "plant", label: this.$t("plant").toString(), sortable: true },
       {
         key: "date",
         label: this.$t("acquisition-date").toString(),
@@ -150,12 +154,14 @@ export default class AppAnalysis extends BaseAuthComponent {
           return dateHelper.toDate(flownAt);
         },
       },
-      { key: "user", label: this.$t("created-by").toString(), sortable: true },
       { key: "state", label: this.$t("state").toString(), sortable: true },
       { key: "productPackages", label: this.$t("product-packages").toString() },
-      { key: "hasResults", label: this.$t("has-results-released").toString() },
       { key: "actions" },
     ];
+
+    if (this.isSuperAdmin) {
+      this.columns.push({ key: "customer", label: this.$t("customer").toString(), sortable: true });
+    }
 
     await this.getPlants();
 

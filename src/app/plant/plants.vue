@@ -22,6 +22,12 @@
         <template #head(customerNames)>
           {{ $t("customers") }} <app-super-admin-marker />
         </template>
+        <template #head(established)>
+          {{ $t("established") }} <app-super-admin-marker />
+        </template>
+        <template #head(technology)>
+          {{ $t("technology") }} <app-super-admin-marker />
+        </template>
 
         <template #head(actions)>
           <span class="hidden">{{ $t("actions") }}</span>
@@ -32,9 +38,14 @@
             {{ row.item.name }}
           </router-link>
           <span v-if="!row.item.digitized">{{ row.item.name }}</span>
+          <div>
+            <small class="grayed">
+              {{ row.item.analysesCount }} {{ $t("analysis") }}
+            </small>
+          </div>
         </template>
         <template #cell(productPackages)="row">
-          <app-order-pps-view :orderProductPackages="row.item.productPackages" />
+          <app-order-pps-view :orderProductPackages="row.item.productPackages"  />
         </template>
 
         <template #cell(digitized)="row">
@@ -227,16 +238,15 @@ export default class AppPlants extends BaseAuthComponent {
   async created(): Promise<void> {
     this.columns = [
       { key: "name", label: this.$t("name").toString() },
-      { key: "digitized", label: this.$t("digitized").toString() },
-      { key: "established", label: this.$t("established").toString() },
-      { key: "analysesCount", label: this.$t("number-of-analyses").toString() },
-      { key: "technology", label: this.$t("technology").toString() },
       { key: "productPackages", label: this.$t("product-packages").toString() },
     ];
 
     if (this.isSuperAdmin) {
-      this.columns.push({ key: "customerNames", label: this.$t("customers").toString() })
+      this.columns.push({ key: "established", label: this.$t("established").toString() });
+      this.columns.push({ key: "technology", label: this.$t("technology").toString() });
+      this.columns.push({ key: "customerNames", label: this.$t("customers").toString() });
       this.columns.push({ key: "actions" });
+
 
       this.customers = [
         { value: null, text: "" },

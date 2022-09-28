@@ -13,6 +13,8 @@ export interface NotifiacationSettingsSchema {
 
 export interface UserProfileSchema {
   login_failed_count: number;
+  /** SUPER_ADMIN property */
+  show_all_key_figures?: boolean;
 }
 
 export enum UserStateSchema {

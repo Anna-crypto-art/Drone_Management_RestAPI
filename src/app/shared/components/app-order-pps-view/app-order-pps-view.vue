@@ -4,6 +4,7 @@
     :class="'app-order-pps-view-item ' + (orderPP.quantity ? 'primary' : 'secondary')">
       <b>{{ orderPP.product_package.name }}</b>
       <i v-if="orderPP.quantity"> Yearly {{ orderPP.quantity }}</i>
+      <i v-if="!orderPP.quantity"> Setup</i>
     </div>
     <div v-if="lefted" class="clear"></div>
   </div>
@@ -50,7 +51,7 @@ export default class AppOrderPpsView extends Vue {
     border-radius: 10em;
     border: 1px solid $hover-blue;
     margin-bottom: 0.5em;
-    width: 120px;
+    width: 165px;
     text-align: center;
 
     &:last-child {
@@ -64,9 +65,9 @@ export default class AppOrderPpsView extends Vue {
     }
     &.secondary {
       background: $white;
-      & > b {
-        font-weight: normal;
-      }
+      // & > b {
+      //   font-weight: normal;
+      // }
     }
   }
 }

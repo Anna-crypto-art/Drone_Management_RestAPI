@@ -151,6 +151,7 @@ $theme-colors: (
 }
 .table-hover tbody tr {
   position: relative;
+  background-color: $white;
 }
 .table-hover tbody tr > td .hover-cell {
   opacity: 0;

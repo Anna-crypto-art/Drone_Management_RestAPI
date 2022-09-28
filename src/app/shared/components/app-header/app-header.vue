@@ -58,7 +58,8 @@
     <app-modal-form v-if="isSuperAdmin"
       id="switch-customer-modal"
       ref="switchCustomerModal"
-      :title="$t('switch-customer')"
+      :title="$t('switch')"
+      :subtitle="$t('switch-customer-and-change-PIs-view')"
       :superAdminProtected="true"
       :modalLoading="switchCustomerLoading"
       :okTitle="$t('apply')"
@@ -68,9 +69,9 @@
       <b-form-group :label="$t('select-target-customer')">
         <b-form-select v-model="selectedCustomerId" :options="customerSelection" />
       </b-form-group>
-      <b-form-group>
+      <b-form-group :label="$t('change-pi-view-availability')">
         <b-form-checkbox v-model="showAllKeyFigures">
-          {{ $('show-all-pis') }}
+          {{ $t('show-all-pis') }}
         </b-form-checkbox>
       </b-form-group>
     </app-modal-form>
@@ -137,6 +138,9 @@ export default class AppHeader extends BaseAuthComponent {
 
     this.selectedCustomerId = this.selectedCustomer?.id || null;
 
+    const user = await volateqApi.getMe();
+    this.showAllKeyFigures = user.profile?.show_all_key_figures || false;
+
     this.switchCustomerModal.show();
   }
 
@@ -144,7 +148,7 @@ export default class AppHeader extends BaseAuthComponent {
     this.switchCustomerLoading = true;
 
     try {
-      await volateqApi.switchCustomer(this.selectedCustomerId || undefined);
+      await volateqApi.switchCustomer(this.selectedCustomerId || undefined, this.showAllKeyFigures);
 
       let selectedCustomer: any  = this.customerSelection.find(customer => customer.value === this.selectedCustomerId);
       if (selectedCustomer) {
