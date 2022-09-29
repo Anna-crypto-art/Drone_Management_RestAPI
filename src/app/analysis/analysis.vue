@@ -109,6 +109,7 @@ import AppOrderPpsView from "@/app/shared/components/app-order-pps-view/app-orde
 import { BvTableFieldArray } from "bootstrap-vue";
 import { Component } from "vue-property-decorator";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
+import { sortAlphabetical } from "../shared/services/helper/sort-helper";
 import dateHelper from "../shared/services/helper/date-helper";
 import { AnalysisSchema } from "../shared/services/volateq-api/api-schemas/analysis-schema";
 import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
@@ -260,7 +261,7 @@ export default class AppAnalysis extends BaseAuthComponent {
 
   private async getPlants() {
     try {
-      this.plants = await volateqApi.getPlants();
+      this.plants = sortAlphabetical(await volateqApi.getPlants(), "name");
       // Hide the filter if one plant is available
       if (this.plants.length > 1) {
         this.plantSelection = this.plants.map(plant => ({ value: plant.id, text: plant.name }));
