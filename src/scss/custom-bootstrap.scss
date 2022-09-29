@@ -126,6 +126,7 @@ $theme-colors: (
   color: $dark;
   border: 1px solid $border-color-grey;
   border-top: none;
+  background-color: $white;
 }
 .table.no-border {
   border: none !important;
@@ -151,7 +152,6 @@ $theme-colors: (
 }
 .table-hover tbody tr {
   position: relative;
-  background-color: $white;
 }
 .table-hover tbody tr > td .hover-cell {
   opacity: 0;
