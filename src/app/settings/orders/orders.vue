@@ -102,6 +102,9 @@
             v-model="currentOrder.productPackages"
             :options="productPackagesOptions"
             :disabled="!currentOrder.orderType" />
+          <app-button cls="mar-top" size="sm" @click="onOpenKeyFigureDisable" variant="secondary" :loading="loadingOrderPPKFDisabled">
+            {{ $t('disable-key-figures-for-product-packages') }}
+          </app-button>
         </b-form-group>
         <b-form-group :label="$t('start-date')">
           <b-datepicker v-model="currentOrder.startDate" required />
@@ -111,6 +114,21 @@
         </b-form-group>
       </div>
     </app-modal-form>    
+    <app-modal-form
+      id="edit-order-pp-key-figures-disabled"
+      ref="orderPPKFDisabledModal"
+      :title="$t('disable-key-figures-for-product-packages')"
+      :ok-title="$t('apply')"
+      @submit="onSubmitKeyFigureDisable"
+    >
+      <div v-if="disabledKeyFigures">
+        <b-form-group v-for="pp in disabledKeyFigures" :key="pp.id" :label="pp.name">
+          <app-multiselect 
+              v-model="pp.key_figure_ids"
+              :options="pp.keyFigureOptions" />
+        </b-form-group>
+      </div>
+    </app-modal-form>
   </div>
 </template>
 
@@ -133,8 +151,8 @@ import dateHelper from "@/app/shared/services/helper/date-helper";
 import { OrderProductPackageSchema, OrderSchema, OrderType } from "@/app/shared/services/volateq-api/api-schemas/order-schema";
 import { ProductPackagesQuantities } from "./types";
 import { MultiselectOption } from "@/app/shared/components/app-multiselect/types";
-import { ProductPackageSchema } from "@/app/shared/services/volateq-api/api-schemas/product-package";
-
+import { ProductPackageWithKeyFiguresSchema } from "@/app/shared/services/volateq-api/api-schemas/product-package";
+import AppButton from "@/app/shared/components/app-button/app-button.vue";
 
 @Component({
   name: "app-settings-orders",
@@ -144,6 +162,7 @@ import { ProductPackageSchema } from "@/app/shared/services/volateq-api/api-sche
     AppMultiselect,
     AppTableFilter,
     AppOrderPpsView,
+    AppButton,
   },
 })
 export default class AppSettingsOrders extends BaseAuthComponent {
@@ -152,7 +171,7 @@ export default class AppSettingsOrders extends BaseAuthComponent {
 
   orderTypes: Record<OrderType, string> | null = null;
 
-  productPackages!: ProductPackageSchema[];
+  productPackages!: ProductPackageWithKeyFiguresSchema[];
   productPackagesOptions: Array<MultiselectOption> = [];
 
   plants!: PlantSchema[];
@@ -177,6 +196,10 @@ export default class AppSettingsOrders extends BaseAuthComponent {
   orderModalOkTitle = "";
   currentOrder: any | null = null;
 
+  loadingOrderPPKFDisabled = false
+  @Ref() orderPPKFDisabledModal!: IAppModalForm;
+  disabledKeyFigures: any[] = [];
+
   @CatchError("loading")
   async created() {
     this.columns = [
@@ -191,7 +214,7 @@ export default class AppSettingsOrders extends BaseAuthComponent {
       { key: "actions", label: "" },
     ];
     
-    this.productPackages = await volateqApi.getProductPackages();
+    this.productPackages = await volateqApi.getProductPackagesWithKeyFigures();
 
     this.orderTypes = {
       [OrderType.SETUP]: this.$t('setup').toString(),
@@ -280,6 +303,10 @@ export default class AppSettingsOrders extends BaseAuthComponent {
         quantities: ppyi.quantities,
         start_date: this.currentOrder.startDate,
         end_date: this.currentOrder.endDate,
+        key_figures_disabled: this.currentOrder.disabledKeyFigures?.map(kfd => ({ 
+          product_package_id: kfd.product_package_id,
+          key_figure_ids: kfd.key_figure_ids,
+        }))
       });
 
       this.showSuccess(this.$t("order-updated-success").toString());
@@ -292,6 +319,10 @@ export default class AppSettingsOrders extends BaseAuthComponent {
         quantities: ppyi.quantities,
         start_date: this.currentOrder.startDate,
         end_date: this.currentOrder.endDate,
+        key_figures_disabled: this.currentOrder.disabledKeyFigures?.map(kfd => ({ 
+          product_package_id: kfd.product_package_id,
+          key_figure_ids: kfd.key_figure_ids,
+        }))
       });
 
       this.showSuccess(this.$t("order-created-success").toString());
@@ -300,6 +331,53 @@ export default class AppSettingsOrders extends BaseAuthComponent {
     this.appOrderModal.hide();
 
     await this.updateOrderRows();
+  }
+
+  @CatchError('loadingOrderPPKFDisabled')
+  async onOpenKeyFigureDisable() {
+    console.log("blub")
+
+    let existingDisabledKeyFigures = this.currentOrder.disabledKeyFigures;
+    if (!existingDisabledKeyFigures) {
+      existingDisabledKeyFigures = [];
+
+      if (this.currentOrder.id) {
+        existingDisabledKeyFigures = (await volateqApi.getOrderPPDisabledKeyFigures(this.currentOrder.id)).map(orderPP => ({
+          product_package_id: orderPP.product_package_id,
+          key_figure_ids: orderPP.key_figures_disabled.map(kf => kf.id),
+        }));
+      }
+    }
+
+    const newDisabledKeyFigures: any[] = [];
+
+    for (const ppId of this.currentOrder.productPackages) {
+      const ppName = this.productPackagesOptions.find(ppo => ppo.id === ppId)!.label;
+      const productPackageId = parseInt(ppId.split('_')[0]);
+      const keyFiguresIds = existingDisabledKeyFigures
+        .find(existOrderPP => existOrderPP.product_package_id === productPackageId)?.key_figure_ids || []
+      
+      newDisabledKeyFigures.push({
+        id: ppId,
+        name: ppName,
+        product_package_id: productPackageId,
+        key_figure_ids: keyFiguresIds,
+        keyFigureOptions: this.productPackages
+          .find(productPackage => productPackage.id === productPackageId)!
+          .key_figures.map(kf => ({ id: kf.id, label: kf.name }))
+      });
+    }
+
+    this.disabledKeyFigures = newDisabledKeyFigures;
+
+    this.orderPPKFDisabledModal.show();
+  }
+
+  @CatchError()
+  onSubmitKeyFigureDisable() {
+    this.currentOrder.disabledKeyFigures = this.disabledKeyFigures;
+
+    this.orderPPKFDisabledModal.hide();
   }
 
   @CatchError()

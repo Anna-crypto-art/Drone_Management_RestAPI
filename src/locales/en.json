@@ -428,6 +428,7 @@
   "show-all-pis": "Show all evaluated PIs",
   "results-available": "Results available",
   "results-available-super-admin-only": "The results are available only for SUPER_ADMINs",
+  "disable-key-figures-for-product-packages": "Disable PIs for selected packages",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

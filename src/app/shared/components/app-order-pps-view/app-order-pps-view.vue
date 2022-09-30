@@ -5,6 +5,7 @@
       <b>{{ orderPP.product_package.name }}</b>
       <i v-if="orderPP.quantity"> Yearly {{ orderPP.quantity }}</i>
       <i v-if="!orderPP.quantity"> Setup</i>
+      <small class="app-order-pps-view-item-badge" v-if="orderPP.disabled_key_figures_count"> -{{ orderPP.disabled_key_figures_count }}</small>
     </div>
     <div v-if="lefted" class="clear"></div>
   </div>
@@ -46,6 +47,7 @@ export default class AppOrderPpsView extends Vue {
   }
 
   &-item {
+    position: relative;
     font-size: 12px;
     padding: 0.1em 0.75em;
     border-radius: 10em;
@@ -65,9 +67,19 @@ export default class AppOrderPpsView extends Vue {
     }
     &.secondary {
       background: $white;
-      // & > b {
-      //   font-weight: normal;
-      // }
+    }
+
+    &-badge {
+      position: absolute;
+      border-radius: 10px;
+      padding: 3px;
+      right: -5px;
+      top: -5px;
+      color: $white;
+      background-color: $orange;
+      height: 15px;
+      font-size: 10px;
+      line-height: 10px;
     }
   }
 }

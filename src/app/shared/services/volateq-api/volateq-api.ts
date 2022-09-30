@@ -26,9 +26,9 @@ import { QFlyServerSchema } from "./api-schemas/server-schemas";
 import { QFlyServerActionRequest } from "./api-requests/server-requests";
 import { ReferenceMeasurementSchema, ReferenceMeasurementValueSchema } from "./api-schemas/reference-measurement-schema";
 import { DocFile } from "./api-schemas/doc-file-schema";
-import { ProductPackageSchema } from "./api-schemas/product-package";
+import { ProductPackageSchema, ProductPackageWithKeyFiguresSchema } from "./api-schemas/product-package";
 import { CreateOrderRequest, UpdateOrderRequest } from "./api-requests/order-requests";
-import { OrderProductPackageSchema, OrderSchema } from "./api-schemas/order-schema";
+import { OrderPPKeyFiguresDisabledSchema, OrderProductPackageSchema, OrderSchema } from "./api-schemas/order-schema";
 import { MultiselectOption } from "../../components/app-multiselect/types";
 
 export class VolateqAPI extends HttpClientBase {
@@ -629,6 +629,10 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/product-packages`);
   }
 
+  public async getProductPackagesWithKeyFigures(): Promise<ProductPackageWithKeyFiguresSchema[]> {
+    return this.get(`/auth/product-packages-with-key-figures`);
+  }
+
   public async createOrder(
     createOrderRequest: CreateOrderRequest,
   ): Promise<void> {
@@ -685,6 +689,10 @@ export class VolateqAPI extends HttpClientBase {
 
   public async getNewAnalysisProductPackagesProposal(plantId: string, curDate?: string): Promise<OrderProductPackageSchema[]> {
     return this.get(`/auth/new-analysis-product-packages-proposal/${plantId}`, curDate ? { cur_date: curDate } : undefined)
+  }
+
+  public async getOrderPPDisabledKeyFigures(orderId: string): Promise<OrderPPKeyFiguresDisabledSchema[]> {
+    return this.get(`/auth/order-product-packages/${orderId}/disabled-key-figures`)
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {
