@@ -1,7 +1,7 @@
 <template>
   <div class="app-table-component">
     <app-table-component-container ref="container" :tableName="tableName" :pagination="pagination" size="sm">
-      <app-table-filter 
+      <app-table-component-filter 
         :analysisResult="analysisResult"
         :activeComponent="activeComponent"
         :plant="plant"
@@ -12,7 +12,7 @@
             {{ $t("show-sum-avg") }}
           </b-form-checkbox>
         </template>
-      </app-table-filter>
+      </app-table-component-filter>
       <b-table
         :id="tableName"
         hover
@@ -43,7 +43,6 @@
 <script lang="ts">
 import { Component, Prop, Ref, Watch } from "vue-property-decorator";
 import { BvTableCtxObject } from "bootstrap-vue";
-import appContentEventBus from "@/app/shared/components/app-content/app-content-event-bus";
 import AppTableComponentContainer from "@/app/plant/shared/table-component/table-component-container.vue";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import { ITableComponentContainer } from "./types";
@@ -55,7 +54,7 @@ import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-
 import { AnalysisResultMappings, BvTableFieldExtArray } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { TableFilterRequest, TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import AppTableFilter from "@/app/plant/shared/table-component/table-filter.vue";
+import AppTableComponentFilter from "@/app/plant/shared/table-component/table-filter.vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { MathHelper } from "@/app/shared/services/helper/math-helper";
 import { TableResultSchema } from "@/app/shared/services/volateq-api/api-schemas/table-result-schema";
@@ -67,7 +66,7 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
   components: {
     AppTableComponentContainer,
     AppExplanation,
-    AppTableFilter,
+    AppTableComponentFilter,
   },
 })
 export default class AppTableComponent extends BaseAuthComponent implements ITableComponent {

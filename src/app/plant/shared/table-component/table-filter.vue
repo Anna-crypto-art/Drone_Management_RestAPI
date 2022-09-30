@@ -1,5 +1,5 @@
 <template>
-  <div class="app-table-filter mar-top mar-bottom" v-if="analysisResult">
+  <div class="app-table-component-filter mar-top mar-bottom" v-if="analysisResult">
     <app-collapse :name="analysisResult.id">
       <template #button>
         <b-icon icon="filter" /> <span class="pad-left">{{ $t("filter") }}</span>
@@ -58,14 +58,14 @@ import { TableFilterRequest } from "@/app/shared/services/volateq-api/api-reques
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 
 @Component({
-  name: "app-table-filter",
+  name: "app-table-component-filter",
   components: {
     AppCollapse,
     AppButton,
     AppFilterFields,
   },
 })
-export default class AppTableFilter extends BaseAuthComponent {
+export default class AppTableComponentFilter extends BaseAuthComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) analysisResult!: AnalysisResultDetailedSchema;
   @Prop({ required: true }) activeComponent!: IActiveComponent;
