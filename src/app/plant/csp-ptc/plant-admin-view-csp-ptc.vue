@@ -3,6 +3,9 @@
     <b-container>
       <b-row>
         <b-col sm="6">
+          <b-alert :show="showAnalysisNotFinished" variant="info" class="mar-top">
+            {{ $t("analysis-not-finished_descr") }}
+          </b-alert>
           <app-box :title="$t('analysis-visibility-of', { analysisName: analysisResultName })">
             <b-form-checkbox
               v-show="analysisResultReleased !== null"
@@ -27,6 +30,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
+import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 
 @Component({
   name: "app-plant-admin-view-csp-ptc",
@@ -40,10 +44,12 @@ export default class AppPlantAdminViewCspPtc extends BaseAuthComponent {
   @Prop({ default: null }) selectedAnalysisResult: AnalysisResultDetailedSchema | null = null; 
   
   analysisResultReleased: boolean | null = null;
+  analysisState: ApiStates | null = null;
 
-  @Watch('selectedAnalysisResult') selectedAnalysisResultChanged() {
+  @Watch('selectedAnalysisResult') async selectedAnalysisResultChanged() {
     if (this.selectedAnalysisResult) {
       this.analysisResultReleased = this.selectedAnalysisResult.released;
+      this.analysisState = (await volateqApi.getAnalysis(this.selectedAnalysisResult.analysis_id)).current_state.state.id;
     }
   }
 
@@ -67,6 +73,10 @@ export default class AppPlantAdminViewCspPtc extends BaseAuthComponent {
 
   get analysisResultName(): string {
     return this.selectedAnalysisResult?.analysis.name || "";
+  }
+
+  get showAnalysisNotFinished(): boolean {
+    return this.analysisResultReleased && this.analysisState !== ApiStates.FINISHED || false;
   }
 }
 </script>

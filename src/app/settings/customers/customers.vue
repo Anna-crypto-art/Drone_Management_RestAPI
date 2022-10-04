@@ -14,9 +14,6 @@
         </template>
         <template #cell(plants)="row">
           <span class="grayed">
-          <!-- <div v-for="plant in row.item.plants" :key="plant.id">
-            {{ plant.name }}
-          </div> -->
             {{ row.item.plants.map(plant => plant.name).join(", ") }}
           </span>
         </template>
@@ -91,7 +88,6 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
 import { Component, Ref } from "vue-property-decorator";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
@@ -107,7 +103,7 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 
 
 @Component({
-  name: "app-settings-users",
+  name: "app-settings-customers",
   components: {
     AppTableContainer,
     AppModalForm,
@@ -145,7 +141,7 @@ export default class AppSettingsCustomers extends BaseAuthComponent {
     await this.updateCustomerRows();
 
     try {
-      this.plants = (await volateqApi.getPlants()).sort((a, b) => {
+      this.plants = (await volateqApi.getAllPlants()).sort((a, b) => {
         const nameA = a.name.toLowerCase();
         const nameB = b.name.toLowerCase();
 

@@ -2,6 +2,7 @@ import Axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } f
 import { apiBaseUrl } from "@/environment/environment";
 import store from "@/app/app-state";
 import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
+import { eachQuarterOfInterval } from "date-fns";
 
 export class HttpClientBase {
   private readonly httpClient: AxiosInstance;
@@ -10,10 +11,18 @@ export class HttpClientBase {
 
   static createAuthHttpClient(baseURL: string): AxiosInstance {
     const httpClient = Axios.create({ baseURL });
+
     httpClient.interceptors.request.use((config: AxiosRequestConfig): AxiosRequestConfig => {
+      const headers = {};
+
       if (store.getters.auth.isAuthenticated) {
-        config.headers = { Authorization: `Bearer ${store.state.auth.token}` };
+        headers["Authorization"] = `Bearer ${store.state.auth.token}`;
       }
+      if (store.state.protect.botProtectionToken) {
+        headers["XVolateqBotProtectionToken"] = store.state.protect.botProtectionToken
+      }
+
+      config.headers = headers
 
       return config;
     });
@@ -28,18 +37,27 @@ export class HttpClientBase {
       (response: AxiosResponse) => {
         return response.data;
       },
-      (error: AxiosError) => {
+      async (error: AxiosError) => {
         if (error.response && error.response.data && error.response.data.error) {
           if (
             error.response.data.error === ApiErrors.INVALID_TOKEN ||
             error.response.data.error === ApiErrors.TOKEN_EXPIRED
           ) {
-            store.dispatch.auth.updateToken({ token: "", role: undefined, customer_id: undefined });
+            store.dispatch.auth.updateToken({ token: "", role: undefined, customer: undefined });
 
             location.reload();
           }
 
           return Promise.reject(error.response.data);
+        }
+
+        // CORS Error due to 404 of nginx (it does not set cors header...) due to missing or wrong bot protection token
+        if (error.response === undefined) {
+          await this.refreshProtectionToken();
+          
+          // retry the same request again, but with a fresh token
+          error.config.headers["XVolateqBotProtectionToken"] = store.state.protect.botProtectionToken
+          return (await Axios.request(error.config)).data
         }
 
         console.error("FATAL");
@@ -51,6 +69,11 @@ export class HttpClientBase {
         });
       }
     );
+  }
+
+  private async refreshProtectionToken() {
+    const response = await Axios.get((new URL('/bot-protection-token', this.baseURL)).toString());
+    await store.dispatch.protect.updateBotProtectionToken(response.data)
   }
 
   protected async postForm(

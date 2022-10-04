@@ -32,14 +32,18 @@ export class PILayersHierarchy {
     this.createParentComponentKpiLayers();
   }
 
-  public addAndSelectAnalysisResult(analysisResultId: string | undefined) {
+  public addAndSelectAnalysisResult(analysisResultId: string | undefined): boolean {
     this.selectedAnalysisResultId = analysisResultId
     
     if (analysisResultId && !this.analysisResultIds.find(id => id === analysisResultId)) {
       this.analysisResultIds.push(analysisResultId);
 
       this.updateGroupedKPILayers();
+
+      return true;
     }
+
+    return false;
   }
 
   public getAllChildLayers(): KeyFigureLayer<AnalysisResultSchemaBase>[] {
@@ -60,22 +64,45 @@ export class PILayersHierarchy {
     return allChildLayers;
   }
 
-  public toggleMultiSelection(multiSelection: boolean, deep = false): void {
+  public toggleMultiSelectionDeep(multiSelection: boolean) {
     for (const componentId in this.parentComponentKpiLayers) {
-      this.parentComponentKpiLayers[componentId].groupLayer.singleSelection = !multiSelection;
-      
-      if (deep) {
-        if (this.parentComponentKpiLayers[componentId].subGroupLayers) {
-          for (const childLayer of this.parentComponentKpiLayers[componentId].groupLayer.childLayers) {
-            (childLayer as GroupLayer).singleSelection = !multiSelection;
-          }
+      if (this.parentComponentKpiLayers[componentId].subGroupLayers) {
+        for (const childLayer of this.parentComponentKpiLayers[componentId].groupLayer.childLayers) {
+          (childLayer as GroupLayer).singleSelection = !multiSelection;
         }
       }
     }
-    for (const childLayer of this.getAllChildLayers()) {
+  }
+
+  public toggleMultiSelection(multiSelection: boolean): void {
+    for (const componentId in this.parentComponentKpiLayers) {
+      this.parentComponentKpiLayers[componentId].groupLayer.singleSelection = !multiSelection;
+    }
+  }
+
+  public reselectAllLayers(multiSelection: boolean) {
+    const allChildLayers = this.getAllChildLayers();
+
+    const selectedKeyFigureIds = allChildLayers.filter(childLayer => childLayer.getSelected())
+      .map(childLayer => childLayer.keyFigureId);
+        
+    for (const childLayer of allChildLayers) {
       childLayer.setColorScheme(multiSelection ? KeyFigureColorScheme.RAINBOW : KeyFigureColorScheme.TRAFFIC_LIGHT);
       childLayer.reloadLayer();
       childLayer.setSelected(false);
+    }
+
+    const reselectOneLayerOnly = !multiSelection;
+    for (const childLayer of allChildLayers) {
+      if (selectedKeyFigureIds.includes(childLayer.keyFigureId) &&
+        childLayer.analysisResult.id === this.selectedAnalysisResultId)
+      {
+        childLayer.setSelected(true);
+
+        if (reselectOneLayerOnly) {
+          break;
+        }
+      }
     }
   }
 
@@ -102,7 +129,7 @@ export class PILayersHierarchy {
   public selectKeyFigureLayer(keyFigureId: ApiKeyFigure) {
     const keyFigureLayer = this.getAllChildLayers().find(keyFigureLayer => 
       keyFigureLayer.isVisible && keyFigureLayer.keyFigureId === keyFigureId);
-    if (keyFigureLayer) {
+    if (keyFigureLayer && !keyFigureLayer.getSelected()) {
       keyFigureLayer.setSelected(true);
     }
   }
@@ -189,6 +216,14 @@ export class PILayersHierarchy {
     }
 
     return [];
+  }
+
+  public getSelectedAnalysisResultId(): string | undefined {
+    return this.selectedAnalysisResultId;
+  }
+
+  public getCompareAnalysisResultId(): string | undefined {
+    return this.compareAnylysisResultId;
   }
 
   private getParentComponentLayer(keyFigure: KeyFigureSchema): GroupKPILayer {

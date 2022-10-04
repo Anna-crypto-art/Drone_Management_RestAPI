@@ -2,15 +2,6 @@
   <app-content :title="$t('plants-overview')" :subtitle="$t('plants-overview_descr')">
     <div class="plant-tools" v-if="isSuperAdmin">
       <app-button variant="secondary" @click="onCreatePlantClick()" :superAdminProtected="true">{{ $t('create-plant') }}</app-button>
-      <b-form-select
-        id="customers"
-        class="plant-tools-select-customer"
-        v-model="selectedCustomerId"
-        :options="customers"
-        @change="onCustomerSelectionChanged"
-      />
-      <label class="plant-tools-select-customer-label" for="customers">{{ $t("customer") }}<app-super-admin-marker /></label>
-      <div class="clearfix"></div>
     </div>
     <app-table-container>
       <b-table
@@ -28,6 +19,16 @@
           </div>
         </template>
 
+        <template #head(customerNames)>
+          {{ $t("customers") }} <app-super-admin-marker />
+        </template>
+        <template #head(established)>
+          {{ $t("established") }} <app-super-admin-marker />
+        </template>
+        <template #head(technology)>
+          {{ $t("technology") }} <app-super-admin-marker />
+        </template>
+
         <template #head(actions)>
           <span class="hidden">{{ $t("actions") }}</span>
         </template>
@@ -37,6 +38,14 @@
             {{ row.item.name }}
           </router-link>
           <span v-if="!row.item.digitized">{{ row.item.name }}</span>
+          <div>
+            <small class="grayed">
+              {{ row.item.analysesCount }} {{ $t("analysis") }}
+            </small>
+          </div>
+        </template>
+        <template #cell(productPackages)="row">
+          <app-order-pps-view :orderProductPackages="row.item.productPackages"  />
         </template>
 
         <template #cell(digitized)="row">
@@ -142,23 +151,25 @@
       id="edit-plant-modal"
       ref="appEditPlantModal"
       :title="$t('edit-plant')"
-      :subtitle="managePlantModel.plant && managePlantModel.plant.name || ''"
+      :subtitle="editPlant && editPlant.name || ''"
       :okTitle="$t('apply')"
       :modalLoading="editPlantLoading"
       @submit="onSubmitEditPlant"
       :superAdminProtected="true"
     >
-      <b-form-group :label="$t('name')" v-if="editPlant">
-        <b-form-input id="edit-plant-name" v-model="editPlant.name" required :placeholder="$t('name')" />
-      </b-form-group>
-      <b-form-group v-if="editPlant && editPlant.digitized" :label="$t('setup-phase')">
-        <b-form-checkbox v-model="editPlant.inSetupPhase" switch>
-          {{ $t("in-setup-phase") }}
-        </b-form-checkbox>
-      </b-form-group>
-      <b-form-group v-if="editPlant && editPlant.digitized" :label="$t('orientation-angle')">
-        <b-form-input type="number" step="0.01" min="-90" max="90" v-model="editPlant.orientation" />
-      </b-form-group>
+      <div v-if="editPlant">
+        <b-form-group :label="$t('name')">
+          <b-form-input id="edit-plant-name" v-model="editPlant.name" required :placeholder="$t('name')" />
+        </b-form-group>
+        <b-form-group v-if="editPlant.digitized" :label="$t('setup-phase')">
+          <b-form-checkbox v-model="editPlant.inSetupPhase" switch>
+            {{ $t("in-setup-phase") }}
+          </b-form-checkbox>
+        </b-form-group>
+        <b-form-group v-if="editPlant.digitized" :label="$t('orientation-angle')">
+          <b-form-input type="number" step="0.01" min="-90" max="90" v-model="editPlant.orientation" />
+        </b-form-group>
+      </div>
     </app-modal-form>
   </app-content>
 </template>
@@ -173,20 +184,27 @@ import { IAppModalForm } from "../shared/components/app-modal/types";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
 import { AppDownloader } from "../shared/services/app-downloader/app-downloader";
 import { FieldgeometrySchema } from "../shared/services/volateq-api/api-schemas/fieldgeometry-schema";
-import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "../shared/services/volateq-api/volateq-api";
 import { EditPlant, PlantItem } from "./types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue"
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
+import AppModalFormInfoArea from "../shared/components/app-modal/app-modal-form-info-area.vue";
+import AppOrderPpsView from "@/app/shared/components/app-order-pps-view/app-order-pps-view.vue";
+import { sortAlphabetical } from "../shared/services/helper/sort-helper";
+import { CatchError } from "../shared/services/helper/catch-helper";
+import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
+import { OrderProductPackageSchema, OrderSchema } from "../shared/services/volateq-api/api-schemas/order-schema";
 
 @Component({
-  name: "app-analysis",
+  name: "app-plants",
   components: {
     AppContent,
     AppTableContainer,
     AppModalForm,
     AppButton,
     AppSuperAdminMarker,
+    AppModalFormInfoArea,
+    AppOrderPpsView,
   },
 })
 export default class AppPlants extends BaseAuthComponent {
@@ -203,7 +221,6 @@ export default class AppPlants extends BaseAuthComponent {
     file: null,
   };
 
-  selectedCustomerId: string | null = null;
   customers: Array<any> = [];
 
   technologies: Array<any> = [];
@@ -217,18 +234,19 @@ export default class AppPlants extends BaseAuthComponent {
   editPlantLoading = false;
   editPlant: EditPlant | null = null
 
+  @CatchError("tableLoading")
   async created(): Promise<void> {
     this.columns = [
       { key: "name", label: this.$t("name").toString() },
-      { key: "digitized", label: this.$t("digitized").toString() },
-      { key: "established", label: this.$t("established").toString() },
-      { key: "analysesCount", label: this.$t("number-of-analyses").toString() },
-      { key: "technology", label: this.$t("technology").toString() }
+      { key: "productPackages", label: this.$t("product-packages").toString() },
     ];
 
     if (this.isSuperAdmin) {
-      this.columns.push({ key: "customers", label: this.$t("customers").toString() })
+      this.columns.push({ key: "established", label: this.$t("established").toString() });
+      this.columns.push({ key: "technology", label: this.$t("technology").toString() });
+      this.columns.push({ key: "customerNames", label: this.$t("customers").toString() });
       this.columns.push({ key: "actions" });
+
 
       this.customers = [
         { value: null, text: "" },
@@ -241,71 +259,55 @@ export default class AppPlants extends BaseAuthComponent {
     await this.updatePlants();
   }
 
-  async updatePlants(): Promise<void> {
-    try {
-      this.tableLoading = true;
-      const plants: PlantSchema[] = await volateqApi.getPlants(true, this.selectedCustomerId || undefined);
-
-      this.plants = plants.map(plant => ({
-        id: plant.id,
-        name: plant.name,
-        digitized: !!plant.fieldgeometry,
-        analysesCount: plant.analysis_results_count!,
-        established: !plant.in_setup_phase,
-        fieldgeometry: plant.fieldgeometry,
-        technology: plant.technology.abbrev,
-        customers: plant.customers?.map(customer => customer.name).join(", "),
-      })).sort((a, b) => {
-        const nameA = a.name.toLowerCase();
-        const nameB = b.name.toLowerCase();
-
-        if (nameA < nameB) {
-          return -1;
+  private async updatePlants(): Promise<void> {
+    this.plants = sortAlphabetical<PlantSchema>(await volateqApi.getPlants(true, true), "name").map(plant => ({
+      id: plant.id,
+      name: plant.name,
+      digitized: !!plant.fieldgeometry,
+      analysesCount: plant.analysis_results_count!,
+      established: !plant.in_setup_phase,
+      fieldgeometry: plant.fieldgeometry,
+      technology: plant.technology.abbrev,
+      customerNames: plant.customers?.map(customer => customer.name).join(", "),
+      customers: plant.customers,
+      productPackages: ((orders: OrderSchema[]): OrderProductPackageSchema[] => { 
+        const pps: OrderProductPackageSchema[] = [];
+        for (const order of orders) {
+          pps.push(...order.order_product_packages.filter(pp => pp.product_package.id !== 1)); // Filter CSP_PTC Base product
         }
-        if (nameA > nameB) {
-          return 1;
-        }
-        return 0;
-      })
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.tableLoading = false;
-    }
+        return pps;
+      })(plant.current_orders),
+    }));
   }
 
+  @CatchError("plantModalLoading")
   async saveManagePlant(): Promise<void> {
-    try {
-      this.plantModalLoading = true;
+    const task = await volateqApi.importFieldgeometry(
+      this.managePlantModel.file!,
+      this.managePlantModel.plant!.id,
+      this.managePlantModel.clearBefore
+    );
 
-      const task = await volateqApi.importFieldgeometry(
-        this.managePlantModel.file!,
-        this.managePlantModel.plant!.id,
-        this.managePlantModel.clearBefore
-      );
-      volateqApi.waitForTask(
-        task.id,
-        async (task, failed) => {
-          this.plantModalLoading = false;
+    volateqApi.waitForTask(
+      task.id,
+      async (task, failed) => {
+        this.plantModalLoading = false;
 
-          if (failed) {
-            this.showError({ error: "SOMETHING_WENT_WRONG", message: task.output!.error });
-          } else {
-            this.managePlantModal.hide();
-            this.showSuccess(this.$t("dt-imported-successfully").toString());
-            await this.updatePlants();
-          }
-        },
-        task => {
-          this.managePlantModal.alertInfo(volateqApi.getTaskOutputAsMessage(task, this.$t("wait-for-start").toString()));
+        if (failed) {
+          this.showError({ error: "SOMETHING_WENT_WRONG", message: task.output!.error });
+        } else {
+          this.managePlantModal.hide();
+          this.showSuccess(this.$t("dt-imported-successfully").toString());
+          await this.updatePlants();
         }
-      );
-    } catch (e) {
-      this.plantModalLoading = false;
-      this.showError(e);
-    }
+      },
+      task => {
+        this.managePlantModal.alertInfo(volateqApi.getTaskOutputAsMessage(task, this.$t("wait-for-start").toString()));
+      }
+    );
   }
 
+  @CatchError()
   onManagePlantClick(plant: PlantItem): void {
     this.managePlantModel.plant = plant;
     this.managePlantModel.clearBefore = true;
@@ -314,67 +316,48 @@ export default class AppPlants extends BaseAuthComponent {
     this.managePlantModal.show();
   }
 
+  @CatchError()
   async onFileClick(fieldgeometry: FieldgeometrySchema) {
-    try {
-      const downloadUrl = await volateqApi.getFieldgeometryFileUrl(fieldgeometry.id);
-
-      AppDownloader.download(downloadUrl.url, fieldgeometry.file_name);
-    } catch (e) {
-      this.showError(e);
-    }
+    const downloadUrl = await volateqApi.getFieldgeometryFileUrl(fieldgeometry.id);
+    AppDownloader.download(downloadUrl.url, fieldgeometry.file_name);
   }
 
-  async onCustomerSelectionChanged() {
-    await this.updatePlants();
-  }
-
+  @CatchError()
   onCreatePlantClick() {
-    this.newPlant = { name: "", technology_id: null, customer_id: null };
+    this.newPlant = { name: "", technology_id: null, customer_id: this.selectedCustomer?.id || null };
     this.appCreatePlantModal.hideAlert();
     this.appCreatePlantModal.show();
   }
   
+  @CatchError("createPlantLoading")
   async onSubmitCreatePlant() {
-    this.createPlantLoading = true;
-    try {
-      await volateqApi.createPlant({
-        name: this.newPlant!.name,
-        technology_id: this.newPlant!.technology_id!,
-        customer_id: this.newPlant!.customer_id!
-      });
+    await volateqApi.createPlant({
+      name: this.newPlant!.name,
+      technology_id: this.newPlant!.technology_id!,
+      customer_id: this.newPlant!.customer_id!
+    });
 
-      this.appCreatePlantModal.hide();
+    this.appCreatePlantModal.hide();
 
-      this.showSuccess(this.$t("plant-created-success").toString());
-      
-      await this.updatePlants();
-
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.createPlantLoading = false;
-    }
+    this.showSuccess(this.$t("plant-created-success").toString());
+    
+    await this.updatePlants();
   }
 
+  @CatchError("tableLoading")
   async onDeletePlantClick(plant: PlantItem) {
-    this.tableLoading = true;
-    try {
-      if (!confirm(this.$t("sure-delete-plant", {plant: plant.name }).toString())) {
-        return;
-      }
-
-      await volateqApi.deletePlant(plant.id);
-
-      this.showSuccess(this.$t("plant-deleted-success", { plant: plant.name }).toString());
-
-      await this.updatePlants();
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.tableLoading = false;
+    if (!confirm(this.$t("sure-delete-plant", {plant: plant.name }).toString())) {
+      return;
     }
+
+    await volateqApi.deletePlant(plant.id);
+
+    this.showSuccess(this.$t("plant-deleted-success", { plant: plant.name }).toString());
+
+    await this.updatePlants();
   }
 
+  @CatchError()
   onEditPlantClick(plant: PlantItem) {
     this.editPlant = { 
       id: plant.id,
@@ -386,37 +369,22 @@ export default class AppPlants extends BaseAuthComponent {
     this.appEditPlantModal.show();
   }
 
+  @CatchError("editPlantLoading")
   async onSubmitEditPlant() {
-    this.editPlantLoading = true;
-    try {
-      await volateqApi.updatePlant(this.editPlant!.id, { 
-        name: this.editPlant!.name,
-        in_setup_phase: this.editPlant!.inSetupPhase,
-        orientation: this.editPlant?.orientation || undefined,
-      });
+    await volateqApi.updatePlant(this.editPlant!.id, { 
+      name: this.editPlant!.name,
+      in_setup_phase: this.editPlant!.inSetupPhase,
+      orientation: this.editPlant?.orientation || undefined,
+    });
 
-      this.appEditPlantModal.hide();
+    this.appEditPlantModal.hide();
 
-      this.showSuccess(this.$t("plant-updated-success", { plant: this.editPlant!.name }).toString());
+    this.showSuccess(this.$t("plant-updated-success", { plant: this.editPlant!.name }).toString());
 
-      await this.updatePlants();
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.editPlantLoading = false;
-    }
+    await this.updatePlants();
   }
 }
 </script>
 
 <style lang="scss">
-.plant-tools-select-customer {
-  width: 200px !important;
-  float: right;
-  &-label {
-    float: right;
-    margin-top: 5px;
-    padding-right: 1em;
-  }
-}
 </style>

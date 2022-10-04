@@ -11,7 +11,7 @@
       <h2 :class="'plant-view-csp-ptc-title ' + (sidebarStates['analysis'] ? 'open' : '')">
         {{ plant.name }}
       </h2>
-      <b-tabs align="center" @activate-tab="onTabChange">
+      <b-tabs align="center" v-model="selectedTab">
         <b-tab>
           <template #title>
             <b-icon icon="map" />
@@ -40,7 +40,7 @@ import AppPlantAdminViewCspPtc from "@/app/plant/csp-ptc/plant-admin-view-csp-pt
 import AppTablesCspPtc from "@/app/plant/csp-ptc/tables/tables-csp-ptc.vue";
 import AppVisualCspPtc from "@/app/plant/csp-ptc/visualization/visual-csp-ptc.vue";
 import AppAnalysisSelectionSidebar from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-sidebar.vue";
-import { AnalysisSelectionEvent, IAnalysisSelectionSidebar } from "@/app/plant/shared/analysis-selection-sidebar/types";
+import { IAnalysisSelectionSidebar } from "@/app/plant/shared/analysis-selection-sidebar/types";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
@@ -49,11 +49,14 @@ import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/k
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { ISidebarModule } from "@/app/shared/stores/sidebar";
-import { Component, Prop, Ref } from "vue-property-decorator";
+import { Component, Prop, Ref, Watch } from "vue-property-decorator";
 import { State } from "vuex-class";
 import { AnalysisSelectionService } from "../shared/analysis-selection-sidebar/analysis-selection-service";
 import { cspPtcKeyFigureRainbowColors } from "./csp-ptc-key-figure-colors";
 import AppPlantDiagramViewCspPtc from "@/app/plant/csp-ptc/plant-diagram-view-csp-ptc.vue";
+import { RouteQueryHelper } from "../shared/helper/route-query-helper";
+import { PlantViewCspPtcTabs } from "./types";
+import { PlantRouteQuery } from "../shared/types";
 import { AnalysisSelectionBaseComponent } from "../shared/analysis-selection-sidebar/analysis-selection-base-component";
 
 @Component({
@@ -79,11 +82,17 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
   preMobileSidebarState: ISidebarModule | null = null;
 
   leftSidebarAbsolute = true; // TODO: Make it absolute on all tabs?
-  currentTab = 0;
   // Load table data if user switches to table view, only
   // So we avoid keeping REST-API busy for no reason.
   loadTables = false;
   loadDiagrams = false; // same for diagrams
+
+  selectedTab = 0;
+
+  notMapTabLoaded = false;
+  zoomToHome = false;
+
+  private routeQueryHelper = new RouteQueryHelper(this);
 
   private isMobile!: boolean; // TODO: Replace this with the new mobile store
   private isMobileQuery!: MediaQueryList;
@@ -98,7 +107,11 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
     await super.created();
 
     try {
-      this.analysisResults = await volateqApi.getAnalysisResults(this.plant.id);
+      if (this.isCustomerAdmin || this.isSuperAdmin) {
+        this.analysisResults = await volateqApi.getAnalysisResults(this.plant.id);
+      } else {
+        this.analysisResults = [];
+      }
     } catch (e) {
       this.showError(e);
     }
@@ -108,6 +121,36 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
     this.isMobileListener(this.isMobileQuery);
 
     this.setBrowserTitle(this.plant.name);
+
+    await this.loadTabContent();
+
+    if (this.selectedTab !== PlantViewCspPtcTabs.MAP) {
+      this.notMapTabLoaded = true;
+    }
+  }
+
+  @Watch("selectedTab") async onSelectedTabChanged() {
+    if (this.selectedTab !== this.currentTab) {
+      // Special case of openlayers: 
+      // Zoom to home does not work properly if canvas has no focus...
+      // So we have to call it again...
+      if (this.notMapTabLoaded && this.selectedTab === PlantViewCspPtcTabs.MAP) {
+        this.zoomToHome = true;
+      }
+      
+      const nextView = PlantViewCspPtcTabs[this.selectedTab].toString().toLowerCase() as any;
+      await this.routeQueryHelper.pushRoute({ view: nextView });
+    }
+
+    this.updateLeftSidebarAbsolute();
+
+    await this.loadTabContent();
+  }
+
+  @Watch("$route.query.view", { deep: true, immediate: true}) async onViewChanged() {
+    await this.routeQueryHelper.queryChanged(async () => {
+      this.selectedTab = this.currentTab;
+    });
   }
 
   protected async onAnalysisSelected() {
@@ -126,32 +169,17 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
     return this.analysisResults ? this.analysisResults?.length > 0 : false;
   }
 
-  async onTabChange(tab: number) {
-    this.currentTab = tab;
-    this.updateLeftSidebarAbsolute();
-
-    if (this.hasResults) {
-      if (this.currentTab === 1) { // 1 = tables
-        this.loadTables = true; 
-      } else if (this.currentTab === 2) { // 2 = diagrams
-        this.loadDiagrams = true; 
-      }
-
-      if (this.currentTab === 1 || this.currentTab === 0 || this.currentTab === 2) { // 0 = map
-        // wait for tables or map component to be loaded and
-        // fire last Analysis event to load data or rerender
-        if (this.firstAnalysisResult) {
-          await this.$nextTick();
-          AnalysisSelectionService.whazzup(this.plant.id);
-        }
-      }
-    }
-  }
-
   private rerenderOLCanvas(timeout = 0): void {
     setTimeout(() => {
       // triggers openlayers canvas element to rerender
       window.dispatchEvent(new UIEvent("resize"));
+
+      if (this.zoomToHome) {
+        window.dispatchEvent(new CustomEvent("app-visualization:go-home"));
+
+        this.zoomToHome = false;
+        this.notMapTabLoaded = false;
+      }
     }, timeout);
   }
 
@@ -160,7 +188,31 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
   }
 
   updateLeftSidebarAbsolute() {
-    this.leftSidebarAbsolute = this.isMobile || this.currentTab === 0;
+    this.leftSidebarAbsolute = this.isMobile || this.selectedTab === PlantViewCspPtcTabs.MAP;
+  }
+
+  get currentTab(): number {
+    const queryTabName = (this.$route.query.view || "map" ).toString().toUpperCase();
+    return Object.values(PlantViewCspPtcTabs).findIndex(tabName => tabName == queryTabName) || 0;
+  }
+
+  private async loadTabContent() {
+    if (this.hasResults) {
+      if (this.selectedTab === PlantViewCspPtcTabs.TABLE) {
+        this.loadTables = true; 
+      } else if (this.selectedTab === PlantViewCspPtcTabs.DIAGRAM) {
+        this.loadDiagrams = true; 
+      }
+
+      if ([PlantViewCspPtcTabs.MAP, PlantViewCspPtcTabs.TABLE, PlantViewCspPtcTabs.DIAGRAM].includes(this.selectedTab)) {
+        // wait for tables or map component to be loaded and
+        // fire last Analysis event to load data or rerender
+        if (this.firstAnalysisResult) {
+          await this.$nextTick();
+          AnalysisSelectionService.whazzup(this.plant.id);
+        }
+      }
+    }
   }
 }
 </script>

@@ -91,7 +91,8 @@ export default class AppAnalysisReferenceMeasurements extends BaseAuthComponent 
   refMeasureColumns: BvTableFieldArray = [
     { key: "measureDate", label: this.$t("measure-date").toString() },
     { key: "measureNotes", label: this.$t("notes").toString() },
-    { key: "user", label: this.$t("acquired-by").toString() },
+    { key: "user_created", label: this.$t("acquired-by").toString() },
+    { key: "user_updated", label: this.$t("updated-by").toString() },
     { key: "actions", label: "" },
   ];
   selectedRefMeasureId: string | null = null;
@@ -190,7 +191,11 @@ export default class AppAnalysisReferenceMeasurements extends BaseAuthComponent 
         id: refMeasure.id,
         measureDate: dateHelper.toDate(refMeasure.measure_date),
         measureNotes: refMeasure.notes,
-        user: (refMeasure.user.first_name + " " + refMeasure.user.last_name).trim() || refMeasure.user.email,
+        user_created: (refMeasure.user_created.first_name + " " + refMeasure.user_created.last_name).trim() || refMeasure.user_created.email,
+        user_updated: refMeasure.user_updated ? 
+          ((refMeasure.user_updated.first_name + " " + refMeasure.user_updated.last_name).trim() 
+            || refMeasure.user_updated.email) + " " + this.$t(...dateHelper.getTimeDiff(refMeasure.updated_at)).toString() :
+          ""
       }));
     } catch (e) {
       this.showError(e);

@@ -33,7 +33,6 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 import { AnalysisEventService } from "../../shared/analysis-event-service";
 import { AnalysisEvent } from "../../shared/types";
 import { TaskSchema } from "@/app/shared/services/volateq-api/api-schemas/task-schema";
@@ -116,19 +115,15 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
 
       this.runTaskSelection = [
         { value: null, text: "" },
-      ];
-      if (this.analysis.current_state.state.id === ApiStates.DATA_COMPLETE) {
-        this.runTaskSelection.push({
-          text: this.$t('validate-file-completenes').toString(),
+        {
+          text: this.$t('validate-file-completeness').toString(),
           value: ApiTasks.validate_plant_metadata,
-        });
-      }
-      if ([ApiStates.DATA_COMPLETE_VERIFIED, ApiStates.PROCESSING].includes(this.analysis.current_state.state.id)) {
-        this.runTaskSelection.push({
+        },
+        {
           text: this.$t('run-qfly-wizard').toString(),
           value: ApiTasks.run_qfly_wizard,
-        });
-      }
+        },
+      ];
     } catch (e) {
       this.showError(e);
     }
@@ -148,14 +143,6 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
 
   get serverStateRunning(): boolean {
     return this.qFlyServer!.state == QFlyServerState.RUNNING;
-  }
-
-  get validateFilesDisabled(): boolean {
-    return this.analysis.current_state.state.id !== ApiStates.DATA_COMPLETE
-  }
-
-  get runQFlyWizardDisabled(): boolean {
-    return !([ApiStates.DATA_COMPLETE_VERIFIED, ApiStates.PROCESSING].includes(this.analysis.current_state.state.id));
   }
 
   async runServerAction() {

@@ -1,13 +1,13 @@
 import store from "@/app/app-state";
 import { InviteUser, RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { ConfirmLoginResult, TokenResult } from "@/app/shared/services/volateq-api/api-schemas/auth-schema";
-import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
-import { UserInfoSchema, UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
+import { CustomerNameSchema, CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
+import { SimpleUserSchema, UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 import { HttpClientBase } from "@/app/shared/services/volateq-api/http-client-base";
 import { apiBaseUrl, baseUrl } from "@/environment/environment";
 import { AddReferenceMeasurmentValue, CreateReferenceMeasurement, NewAnalysis, NewEmptyAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
 import { CreatePlantRequest, UpdatePlantRequest } from "./api-requests/plant-requests";
-import { AnalysisFileInfoSchema, AnalysisSchema } from "./api-schemas/analysis-schema";
+import { AnalysisFileInfoSchema, AnalysisSchema, SimpleAnalysisSchema } from "./api-schemas/analysis-schema";
 import { PlantSchema } from "./api-schemas/plant-schema";
 import { AnalysisResultDetailedSchema } from "./api-schemas/analysis-result-schema";
 import { TableFilterRequest, TableRequest } from "./api-requests/common/table-requests";
@@ -26,6 +26,10 @@ import { QFlyServerSchema } from "./api-schemas/server-schemas";
 import { QFlyServerActionRequest } from "./api-requests/server-requests";
 import { ReferenceMeasurementSchema, ReferenceMeasurementValueSchema } from "./api-schemas/reference-measurement-schema";
 import { DocFile } from "./api-schemas/doc-file-schema";
+import { ProductPackageSchema, ProductPackageWithKeyFiguresSchema } from "./api-schemas/product-package";
+import { CreateOrderRequest, UpdateOrderRequest } from "./api-requests/order-requests";
+import { OrderPPKeyFiguresDisabledSchema, OrderProductPackageSchema, OrderSchema } from "./api-schemas/order-schema";
+import { MultiselectOption } from "../../components/app-multiselect/types";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -70,14 +74,14 @@ export class VolateqAPI extends HttpClientBase {
     await store.dispatch.auth.updateToken({
       token: tokenResult.token,
       role: tokenResult.role,
-      customer_id: tokenResult.customer_id,
+      customer: tokenResult.customer,
     });
   }
 
   public async logout(): Promise<void> {
     await this.post("/auth/logout");
 
-    await store.dispatch.auth.updateToken({ token: "", role: undefined, customer_id: undefined });
+    await store.dispatch.auth.updateToken({ token: "", role: undefined, customer: undefined });
   }
 
   public async getMe(): Promise<UserSchema> {
@@ -199,7 +203,7 @@ export class VolateqAPI extends HttpClientBase {
 
   public async updateAnalysis(
     analysisId: string,
-    updateData: { data_complete?: boolean; flown_at?: string }
+    updateData: { data_complete?: boolean; flown_at?: string, order_product_package_ids?: string[] },
   ): Promise<void> {
     await this.post(`/auth/analysis/${analysisId}`, updateData);
   }
@@ -341,8 +345,11 @@ export class VolateqAPI extends HttpClientBase {
     );
   }
 
-  public async getAnalysisResults(plantId: string): Promise<AnalysisResultDetailedSchema[]> {
-    const analysisResults = await this.get(`/auth/plant/${plantId}/analysis-results`);
+  public async getAnalysisResults(plantId: string, allKeyFigures = false): Promise<AnalysisResultDetailedSchema[]> {
+    const analysisResults = await this.get(
+      `/auth/plant/${plantId}/analysis-results`, 
+      allKeyFigures ? { all_key_figures: 1 } : undefined
+    );
 
     this.filterKeyFigures(analysisResults);
 
@@ -402,11 +409,15 @@ export class VolateqAPI extends HttpClientBase {
     return this.post(`/auth/analysis-result/${analysisResultId}`, updates);
   }
 
-  public getPlants(withAnalysisResultsCount = false, customerId?: string): Promise<PlantSchema[]> {
+  public getPlants(withAnalysisResultsCount = false, withOrders = false): Promise<PlantSchema[]> {
     return this.get(`/auth/plants`, {
       with_analysis_results_count: withAnalysisResultsCount ? 1 : 0,
-      customer_id: customerId,
+      with_orders: withOrders ? 1 : 0,
     });
+  }
+
+  public getAllPlants(): Promise<PlantSchema[]> {
+    return this.get(`/auth/plants/all`);
   }
 
   public getAnalysisResultFileUrl(analysisResultFileId: string): Promise<{ url: string }> {
@@ -497,8 +508,12 @@ export class VolateqAPI extends HttpClientBase {
     await this.post(`/auth/analysis/${analysisId}/finish-running-task`);
   }
 
-  public async getUploadingUsers(analysisId: string): Promise<UserInfoSchema[]> {
+  public async getUploadingUsers(analysisId: string): Promise<SimpleUserSchema[]> {
     return this.get(`/auth/analysis/${analysisId}/uploading-users`);
+  }
+
+  public async findAnalysisForNewReferenceMeasurement(plantId: string): Promise <undefined | SimpleAnalysisSchema> {
+    return this.get(`/auth/reference-measurement/find-analysis/${plantId}`);
   }
 
   public async createReferenceMeasurement(analysisId: string, createReferenceMeasurement: CreateReferenceMeasurement): Promise<{ id: string }> {
@@ -604,6 +619,80 @@ export class VolateqAPI extends HttpClientBase {
 
   public async deleteDocFile(fileId: string): Promise<void> {
     return this.delete(`/auth/doc/file/${fileId}`);
+  }
+
+  public async switchCustomer(toCustomerId: string | undefined, showAllKeyFigures: boolean): Promise<CustomerNameSchema> {
+    return this.post(`/auth/user/switch-customer`, { customer_id: toCustomerId, show_all_key_figures: showAllKeyFigures });
+  }
+
+  public async getProductPackages(): Promise<ProductPackageSchema[]> {
+    return this.get(`/auth/product-packages`);
+  }
+
+  public async getProductPackagesWithKeyFigures(): Promise<ProductPackageWithKeyFiguresSchema[]> {
+    return this.get(`/auth/product-packages-with-key-figures`);
+  }
+
+  public async createOrder(
+    createOrderRequest: CreateOrderRequest,
+  ): Promise<void> {
+    return this.post(`/auth/order`, createOrderRequest);
+  }
+
+  public async updateOrder(
+    orderId: string,
+    updateOrderRequest: UpdateOrderRequest,
+  ): Promise<void> {
+    return this.post(`/auth/order/${orderId}`, updateOrderRequest);
+  }
+
+  public async getOrders(plantId?: string | null, customerId?: string | null): Promise<OrderSchema[]> {
+    const plantCustomerFilter = {};
+    if (plantId) {
+      plantCustomerFilter['plant_id'] = plantId;
+    }
+    if (customerId) {
+      plantCustomerFilter['customer_id'] = customerId;
+    }
+
+    return this.get(`/auth/orders`, plantCustomerFilter);
+  }
+
+  public async deleteOrder(orderId: string): Promise<void> {
+    return this.delete(`/auth/order/${orderId}`);
+  }
+
+  public async getOrderProductPackages(plantId: string, curDate?: string, customerId?: string): Promise<OrderProductPackageSchema[]> {
+    const queryParams = {};
+    if (curDate) {
+      queryParams["cur_date"] = curDate;
+    }
+    if (customerId) {
+      queryParams["customer_id"] = customerId;
+    }
+
+    return this.get(`/auth/order-product-packages/${plantId}`, queryParams);
+  }
+
+  public async getOrderPPsMulitselectOptions(plantId: string, curDate?: string, customerId?: string): Promise<MultiselectOption[]> {
+    const orderPPs = await volateqApi.getOrderProductPackages(plantId, curDate, customerId);
+
+    return orderPPs
+      .filter(orderPP => orderPP.product_package.id !== 1) // Filter CSP_PTC Basic
+      .map(orderPP => ({
+        id: orderPP.id,
+        label: orderPP.quantity ? 
+          orderPP.product_package.name + " - Yearly " + orderPP.quantity : 
+          orderPP.product_package.name
+      }));
+  }
+
+  public async getNewAnalysisProductPackagesProposal(plantId: string, curDate?: string): Promise<OrderProductPackageSchema[]> {
+    return this.get(`/auth/new-analysis-product-packages-proposal/${plantId}`, curDate ? { cur_date: curDate } : undefined)
+  }
+
+  public async getOrderPPDisabledKeyFigures(orderId: string): Promise<OrderPPKeyFiguresDisabledSchema[]> {
+    return this.get(`/auth/order-product-packages/${orderId}/disabled-key-figures`)
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {

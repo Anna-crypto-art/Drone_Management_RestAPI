@@ -9,7 +9,7 @@ const plantRoutes: RouteConfig[] = [
     path: "/plants",
     component: AppPlants,
     meta: {
-      role: ApiRoles.CUSTOMER_ADMIN,
+      role: [ApiRoles.CUSTOMER_ADMIN, ApiRoles.ASSISTANT],
     }
   },
   {
@@ -17,7 +17,7 @@ const plantRoutes: RouteConfig[] = [
     path: "/plant/:id",
     component: AppPlantView,
     meta: {
-      role: ApiRoles.CUSTOMER_ADMIN,
+      role: [ApiRoles.CUSTOMER_ADMIN, ApiRoles.ASSISTANT],
     }
   },
 ];

@@ -13,9 +13,12 @@
             :placeholder="$t('password')"
             required
           ></b-form-input>
-          <router-link :to="{ name: 'ForgotPassword' }" class="input-info-link">{{
-            $t("forgot-password")
-          }}</router-link>
+          <div class="pull-right forgot-password-link">
+            <router-link :to="{ name: 'ForgotPassword' }" class="">
+              {{ $t("forgot-password") }}
+            </router-link>
+          </div>
+          <div class="clear"></div>
         </b-form-group>
         <app-button type="submit" cls="width-100pc" :loading="loading">{{ $t("login") }}</app-button>
       </b-form>
@@ -74,4 +77,13 @@ export default class AppAuthLogin extends Vue {
 }
 </script>
 
-<style lang="scss"></style>
+<style lang="scss">
+.forgot-password-link {
+  margin-bottom: -1rem;
+
+  a {
+    font-size: 0.9em;
+    text-decoration: underline;
+  }
+}
+</style>

@@ -13,6 +13,8 @@ export interface NotifiacationSettingsSchema {
 
 export interface UserProfileSchema {
   login_failed_count: number;
+  /** SUPER_ADMIN property */
+  show_all_key_figures?: boolean;
 }
 
 export enum UserStateSchema {
@@ -39,7 +41,7 @@ export interface UserSchema {
   plants?: PlantSchema[];
 }
 
-export interface UserInfoSchema {
+export interface SimpleUserSchema {
   email: string;
   first_name: string;
   last_name: string;

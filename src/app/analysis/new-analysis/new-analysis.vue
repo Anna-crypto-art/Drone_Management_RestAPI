@@ -7,23 +7,20 @@
       @cancelUpload="onCancelUpload"
       @retryUpload="onRetryUpload">
         <template #uploadForm>
-          <b-row style="margin-bottom: 25px">
-            <b-col lg="4" v-if="plantOptions.length > 1">
-              <b-form-group label-cols="auto" :label="$t('plant')">
-                <b-form-select required v-model="selectedPlantId" :options="plantOptions" @change="onPlantSelectionChanged"></b-form-select>
-              </b-form-group>
-            </b-col>
-            <b-col lg="4" v-if="customerOptions.length > 1">
-              <b-form-group label-cols="auto" :label="$t('customer')">
-                <b-form-select required v-model="selectedCustomerId" :options="customerOptions"></b-form-select>
-              </b-form-group>
-            </b-col>
-            <b-col lg="4">
-              <b-form-group label-cols="auto" :label="$t('acquisition-date')">
-                <b-datepicker v-model="flownAt" required /> 
-              </b-form-group>
-            </b-col>
-          </b-row>
+          <b-form-group v-show="plantOptions.length > 1" label-cols-lg="2" :label="$t('plant')">
+            <b-form-select required v-model="selectedPlantId" :options="plantOptions"></b-form-select>
+          </b-form-group>
+          <b-form-group label-cols-lg="2" :label="$t('acquisition-date')">
+            <b-datepicker v-model="flownAt" required /> 
+          </b-form-group>
+          <b-form-group v-show="productPackagesSelection.length > 0" label-cols-lg="2" :label="$t('product-packages')">
+            <app-multiselect 
+              v-model="selectedProductPackages"
+              :options="productPackagesSelection" 
+              :readonly="!isSuperAdmin"
+            />
+          </b-form-group>
+          <div class="pad-bottom-2x"></div>
         </template>
         <template #cancelButton>
           {{ $t("cancel-and-delete-all-files") }}
@@ -34,15 +31,18 @@
 </template>
 
 <script lang="ts">
-import { Component } from "vue-property-decorator";
+import { Component, Watch } from "vue-property-decorator";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppAnalysisUpload from "@/app/analysis/shared/analysis-upload.vue";
+import AppMultiselect from "@/app/shared/components/app-multiselect/app-multiselect.vue";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
+import { MultiselectOption } from "@/app/shared/components/app-multiselect/types";
 
 @Component({
   name: "app-new-analysis",
@@ -50,6 +50,7 @@ import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
     AppContent,
     AppButton,
     AppAnalysisUpload,
+    AppMultiselect,
   },
 })
 export default class AppNewAnalysis extends BaseAuthComponent {
@@ -58,28 +59,24 @@ export default class AppNewAnalysis extends BaseAuthComponent {
   selectedPlantId: string | null = null;
   plantOptions: Array<any> = [];
 
-  selectedCustomerId: string | null = null;
-  customerOptions: Array<any> = [];
-
   flownAt: string | null = null;
 
   analysis: AnalysisSchema | null = null;
 
+  productPackagesSelection: MultiselectOption[] = [];
+  selectedProductPackages: string[] | null = null;
+
+  @CatchError()
   async created() {
-    try {
-      this.preparePlantSelection();
-    } catch (e) {
-      this.showError(e);
-    }
+    this.preparePlantSelection();
   }
 
-  onPlantSelectionChanged() {
-    const plant = this.plants.find(plant => plant.id === this.selectedPlantId);
-    if (plant && plant.customers && plant.customers.length > 1) {
-      this.customerOptions = plant.customers.map(customer => ({ value: customer.id, text: customer.name }));
-    } else {
-      this.customerOptions = [];
-    }
+  @Watch('selectedPlantId') async onSelectedPlantIdChanged() {
+    await this.loadProductPackagesSelection();
+  }
+
+  @Watch('flownAt') async onFlownAtChanged() {
+    await this.loadProductPackagesSelection();
   }
 
   async onStartUpload(files: string[], resume: boolean, done: (analysis: AnalysisSchema | null) => void) {
@@ -107,7 +104,7 @@ export default class AppNewAnalysis extends BaseAuthComponent {
         plant_id: this.selectedPlantId!,
         files: files,
         flown_at: this.flownAt!,
-        customer_id: this.selectedCustomerId || undefined,
+        order_product_package_ids: this.selectedProductPackages || undefined,
       });
   
       this.analysis = await volateqApi.getAnalysis(analysisIdObj.id);
@@ -180,8 +177,19 @@ export default class AppNewAnalysis extends BaseAuthComponent {
     if (this.plants.length === 1) {
       this.selectedPlantId = this.plants[0].id;
     }
+  }
 
-    this.onPlantSelectionChanged();
+  @CatchError()
+  private async loadProductPackagesSelection() {
+    this.productPackagesSelection = [];
+
+    if (!this.selectedPlantId || !this.flownAt) {
+      return;
+    }
+
+    this.productPackagesSelection = await volateqApi.getOrderPPsMulitselectOptions(this.selectedPlantId, this.flownAt);
+    this.selectedProductPackages = (await volateqApi.getNewAnalysisProductPackagesProposal(this.selectedPlantId, this.flownAt))
+      .map(orderPP => orderPP.id);
   }
 }
 </script>

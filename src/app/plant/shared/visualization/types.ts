@@ -34,7 +34,7 @@ export interface GroupKPILayer {
 export interface IPlantVisualization {
   plant: PlantSchema;
   openLayers: IOpenLayersComponent | undefined;
-  onLayerSelected(selected: boolean, legend?: Legend);
+  onLayerSelected(selected: boolean, legend: Legend | undefined);
   hideToast: () => void;
 }
 
@@ -158,7 +158,6 @@ export interface ReferenceMeasurementOptions {
   analysisLoaded: boolean;
   analysisId: string | null;
   analysisName: string | null;
-  customerId: string | null;
   oldMeasureId: string | null;
   measureDate: string | null;
   notes: string | null;

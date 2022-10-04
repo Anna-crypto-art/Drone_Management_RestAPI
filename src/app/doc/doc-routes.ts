@@ -8,7 +8,7 @@ const docRoutes: RouteConfig[] = [
     path: "/doc/files",
     component: AppDocFiles,
     meta: {
-      role: [ApiRoles.CUSTOMER_ADMIN, ApiRoles.PILOT],
+      role: [ApiRoles.CUSTOMER_ADMIN, ApiRoles.PILOT, ApiRoles.ASSISTANT],
     }
   },
 ];

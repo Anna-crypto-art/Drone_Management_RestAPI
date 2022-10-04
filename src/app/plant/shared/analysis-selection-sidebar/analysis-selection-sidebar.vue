@@ -24,9 +24,9 @@
               <b-checkbox v-if="compareMode" :checked="rowSelected" disabled class="b-table-selectable-checkbox"></b-checkbox>
             </template>
             <template #row-details="row">
-              <span class="analysis-selection-sidebar-kpi-badge" v-for="kpi in row.item.kpis" :key="kpi.id">
-                <b-badge variant="primary" :style="'background-color: ' + getKpiColor(kpi)">{{ kpi.name }}</b-badge>
-              </span>
+              <div style="margin-left: 30px">
+                <app-order-pps-view :orderProductPackages="row.item.orderPPs" :lefted="true" />
+              </div>
             </template>
           </b-table>
         </app-table-container>
@@ -44,11 +44,13 @@ import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/k
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { BvTableFieldArray } from "bootstrap-vue";
 import Vue from "vue";
-import { Component, Prop, Ref } from "vue-property-decorator";
+import { Component, Prop, Ref, Watch } from "vue-property-decorator";
 import { State } from "vuex-class";
 import { AnalysisSelectionService } from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-service";
 import { AnalysisSelectionEvent } from "./types";
 import dateHelper from "@/app/shared/services/helper/date-helper";
+import { RouteQueryHelper } from "../helper/route-query-helper";
+import AppOrderPpsView from "@/app/shared/components/app-order-pps-view/app-order-pps-view.vue";
 
 @Component({
   name: "app-analysis-selection-sidebar",
@@ -56,6 +58,7 @@ import dateHelper from "@/app/shared/services/helper/date-helper";
     AppTableContainer,
     AppExplanation,
     AppSidebar,
+    AppOrderPpsView,
   },
 })
 export default class AppAnalysisSelectionSidebar extends Vue {
@@ -77,15 +80,16 @@ export default class AppAnalysisSelectionSidebar extends Vue {
   selectMode = "single";
   lastSelectedAnalysisResults: { id: string }[] = [];
 
+  private routeQueryHelper = new RouteQueryHelper(this);
+
   async created() {
     for (const analysisResult of this.analysisResults) {
       this.analysisResultsTableItems.push({
         id: analysisResult.id,
         name: analysisResult.analysis.name,
         date: dateHelper.toDate(analysisResult.analysis.flown_at),
-        kpis: analysisResult.key_figures,
-        // only show details for history mode .. that will be implemented in near future
-        _showDetails: false,
+        orderPPs: analysisResult.analysis.order_product_packages,
+        _showDetails: analysisResult.analysis.order_product_packages.length > 0,
       });
     }
 
@@ -97,6 +101,13 @@ export default class AppAnalysisSelectionSidebar extends Vue {
 
     AnalysisSelectionService.on(this.plant.id, AnalysisSelectionEvent.SELECT_FIRST, async () => {
       await this.selectAnalysis(true);
+    });
+  }
+
+  @Watch("$route.query.result", { deep: true })
+  async onResultChanged() {
+    await this.routeQueryHelper.queryChanged(async () => {
+      await this.selectAnalysis();
     });
   }
 
@@ -120,6 +131,8 @@ export default class AppAnalysisSelectionSidebar extends Vue {
           AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED,
           selectedAnalysisResultIds
         );
+
+        this.routeQueryHelper.replaceRoute({ result: selectedAnalysisResultIds });
       }
     } else {
       let selectedAnalysisResultId: string | undefined = undefined
@@ -132,6 +145,8 @@ export default class AppAnalysisSelectionSidebar extends Vue {
         AnalysisSelectionEvent.ANALYSIS_SELECTED,
         selectedAnalysisResultId
       );
+
+      this.routeQueryHelper.replaceRoute({ result: selectedAnalysisResultId });
     }
   }
 
@@ -180,6 +195,8 @@ export default class AppAnalysisSelectionSidebar extends Vue {
 
       await this.$nextTick();
       this.analysisResultsTable.selectRow(tableRowIndex);
+    } else {
+      this.$store.direct.commit.sidebar.set({ name: "analysis", state: false });
     }
   }
 }

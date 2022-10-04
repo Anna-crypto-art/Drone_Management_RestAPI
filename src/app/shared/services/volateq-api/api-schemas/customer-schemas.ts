@@ -13,9 +13,12 @@ export enum CustomerRole {
   OPERATOR = 'Operator',
 }
 
-export interface SimpleCustomerSchema {
+export interface CustomerNameSchema {
   id: string;
   name: string;
+}
+
+export interface SimpleCustomerSchema extends CustomerNameSchema {
   role: CustomerRole;
 }
 

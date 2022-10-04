@@ -1,9 +1,10 @@
 import { ApiRoles } from "../api-roles";
+import { CustomerNameSchema } from "./customer-schemas";
 
 export interface TokenResult {
   token: string;
   role: ApiRoles;
-  customer_id?: string;
+  customer?: CustomerNameSchema;
 }
 
 export interface ConfirmLoginResult {

@@ -4,14 +4,6 @@
       <b-button variant="primary" class="btn-invite" @click="showInviteUserModal()" v-b-modal.invite-modal>
         {{ $t("invite") }}
       </b-button>
-      <b-form-select
-        id="customers"
-        class="app-settings-users-table-toolbar-select-customer"
-        v-model="selectedCustomerId"
-        :options="customers"
-        @change="onCustomerSelectionChanged"
-      />
-      <label class="app-settings-users-table-toolbar-select-customer-label" for="customers">{{ $t("customer") }}</label>
     </div>
     <div class="clearfix"></div>
     <app-table-container>
@@ -215,9 +207,9 @@ export default class AppSettingsUsers extends BaseAuthComponent {
   roles = [
     { value: ApiRoles.CUSTOMER_ADMIN, text: apiRoleNames[ApiRoles.CUSTOMER_ADMIN] },
     { value: ApiRoles.PILOT, text: apiRoleNames[ApiRoles.PILOT] },
+    { value: ApiRoles.ASSISTANT, text: apiRoleNames[ApiRoles.ASSISTANT] },
   ];
   newUser: InviteUser = this.initialInviteUser();
-  selectedCustomerId: string | null = null;
   inviteUserCustomerPlants: SelectPlant[] = [];
 
   @Ref() appEditUserModal!: IAppModalForm;
@@ -242,7 +234,7 @@ export default class AppSettingsUsers extends BaseAuthComponent {
       }));
       this.customers.unshift({ value: null, text: '' })
 
-      this.plants = await volateqApi.getPlants();
+      this.plants = await volateqApi.getAllPlants();
     } catch (e) {
       this.showError(e);
     }
@@ -252,7 +244,7 @@ export default class AppSettingsUsers extends BaseAuthComponent {
     let users: UserSchema[] = [];
     this.loading = true;
     try {
-      users = await volateqApi.getUsers(this.selectedCustomerId || undefined);
+      users = await volateqApi.getUsers(this.selectedCustomer?.id);
 
       this.rows = users.map((user: UserSchema) => {
         let stateDate = "";
@@ -348,18 +340,10 @@ export default class AppSettingsUsers extends BaseAuthComponent {
   }
 
   initialInviteUser(): InviteUser {
-    if (this.selectedCustomerId) {
-      return {
-        email: "",
-        role_id: null,
-        customer_id: this.selectedCustomerId,
-      }
-    }
-
     return {
       email: "",
       role_id: null,
-      customer_id: null,
+      customer_id: this.selectedCustomer?.id || null,
     };
   }
 
@@ -392,10 +376,6 @@ export default class AppSettingsUsers extends BaseAuthComponent {
     } catch (e) {
       this.showError(e as ApiException);
     }
-  }
-
-  async onCustomerSelectionChanged() {
-    await this.updateUserRows();
   }
 
   async onDeleteUserClick(user: UserItem) {

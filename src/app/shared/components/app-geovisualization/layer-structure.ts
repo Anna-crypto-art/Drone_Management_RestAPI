@@ -15,7 +15,7 @@ export class LayerStructure extends EventEmitter {
   public ignoreSelectedWatcher = false;
 
   constructor(
-    private readonly layerLoader?: LayerLoader<Layer<Source, LayerRenderer<any>> | undefined>,
+    public readonly layerLoader?: LayerLoader<Layer<Source, LayerRenderer<any>> | undefined>,
     private readonly _name: string | (() => VNode[]) = "",
     private readonly layerType?: BaseLayerType
   ) {

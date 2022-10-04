@@ -225,7 +225,7 @@ export default class AppVisualCspPtc
     return this.visualization?.openLayers;
   }
 
-  onLayerSelected(selected: boolean, legend?: Legend): void {
+  onLayerSelected(selected: boolean, legend: Legend | undefined): void {
     return this.visualization?.onLayerSelected(selected, legend);
   }
 

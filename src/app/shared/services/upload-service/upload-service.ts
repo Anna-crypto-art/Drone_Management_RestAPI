@@ -129,7 +129,10 @@ export class UploadService implements IUploadService {
   }
 
   private initValues() {
-    this.resumable.opts.headers = { Authorization: `Bearer ${store.state.auth.token}` };
+    this.resumable.opts.headers = { 
+      Authorization: `Bearer ${store.state.auth.token}`,
+      XVolateqBotProtectionToken: store.state.protect.botProtectionToken,
+    };
     this.metadata = undefined;
     this.currentProgress = 0;
   }

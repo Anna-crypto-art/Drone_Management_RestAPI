@@ -38,14 +38,6 @@ form [type="submit"] {
   }
 }
 
-.input-info-link {
-  font-size: 0.9rem;
-  text-align: right;
-  display: block;
-  text-decoration: underline;
-  margin-bottom: -1rem;
-}
-
 .grayed {
   color: $dark-60pc;
 }
@@ -101,9 +93,11 @@ form [type="submit"] {
 .pad-left-half {
   padding-left: 0.5em;
 }
-
 .pad-right {
   padding-right: 1em;
+}
+.pad-bottom-2x {
+  padding-bottom: 2em;
 }
 
 .mar-top {
@@ -114,6 +108,9 @@ form [type="submit"] {
 }
 .mar-bottom {
   margin-bottom: 1em;
+}
+.mar-bottom-2x {
+  margin-bottom: 2em;
 }
 .mar-left {
   margin-left: 1em;

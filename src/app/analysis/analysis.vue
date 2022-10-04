@@ -1,36 +1,26 @@
 <template>
   <app-content :title="$t('analysis-overview')" :subtitle="$t('analysis-overview_descr')">
     <div class="app-analysis">
-      <b-button variant="primary" v-if="!hasIncompleteAnalysis" @click="onNewDataUploadClick">
+      <b-button variant="primary" v-if="hasCompleteAnalysesOnly" @click="onNewDataUploadClick">
         {{ $t("new-data-upload") }}
       </b-button>
+      <b-alert :show="!!incompleteAnalysis" variant="info" class="mar-bottom-2x">
+        <span v-if="incompleteAnalysis" v-html="$t('new-upload-not-allowed_descr', { analysis: incompleteAnalysis.name })"></span>
+      </b-alert>
       <router-link v-if="incompleteAnalysis" :to="{ name: 'EditAnalysis', params: { id: incompleteAnalysis.id } }"> 
         <b-button variant="primary">
           {{ $t("upload-data-for-analysis", { analysis: incompleteAnalysis.name }) }}
         </b-button>
       </router-link>
-      <div class="app-analysis-plants-filter pull-right" v-show="plantSelection">
+      <app-table-filter v-show="plantSelection">
+        <label for="plants">{{ $t("plant") }}</label>
         <b-form-select
           id="plants"
-          class="app-analysis-plants-filter-select"
           v-model="selectedPlantId"
           :options="plantSelection"
           @change="onPlantSelectionChanged"
-        >
-        </b-form-select>
-        <label class="app-analysis-plants-filter-label" for="plants">{{ $t("plant") }}</label>
-      </div>
-      <div class="app-analysis-customer-filter pull-right" v-show="customers">
-        <b-form-select
-          id="customers"
-          class="app-analysis-customers-filter-select"
-          v-model="selectedCustomerId"
-          :options="customers"
-          @change="onCustomerSelectionChanged"
-        >
-        </b-form-select>
-        <label class="app-analysis-customers-filter-label" for="customers">{{ $t("customer") }}</label>
-      </div>
+        />
+      </app-table-filter>
       <div class="clear"></div>
       <app-table-container>
         <b-table
@@ -54,32 +44,38 @@
           <template #head(actions)>
             <span class="hidden">{{ $t("actions") }}</span>
           </template>
+          <template #head(customer)>
+            {{ $t("customer") }} <app-super-admin-marker />
+          </template>
           <template #cell(name)="row">
             <router-link :to="{ name: 'EditAnalysis', params: { id: row.item.id } }">{{ row.item.name }}</router-link>
-          </template>
-          <template #cell(plant)="row">
-            {{ row.item.plant }}<br />
-            <small class="grayed">{{ row.item.customer }}</small>
-          </template>
-          <template #cell(user)="row">
-            <span v-if="row.item.user.userName">
-              {{ row.item.user.userName }}<br />
-              <small class="grayed">{{ row.item.user.email }}</small>
-            </span>
-            <span v-else>{{ row.item.user.email }}</span>
+            <div>
+              <small class="grayed">{{ row.item.user.userName || row.item.user.email }}</small>
+            </div>
           </template>
 
           <template #cell(state)="row">
             <div v-if="row.item.state">
               {{ $t(row.item.state.state.name) }}
+              <b-icon 
+                v-show="hasReleasedResult(row.item)"
+                icon="check"
+                class="text-success"
+                v-b-popover.hover.top="$t('results-available')"
+              />
+              <b-icon 
+                v-show="isSuperAdmin && hasResult(row.item) && !hasReleasedResult(row.item)"
+                icon="shield-check"
+                class="text-success" 
+                v-b-popover.hover.top="$t('results-available-super-admin-only')"
+              />
               <br />
               <small class="grayed">{{ trans(getTimeDiff(row.item.state.started_at)) }}</small>
             </div>
             <div v-else>UNKNOWN</div>
           </template>
-          <template #cell(hasResults)="row">
-            <b-icon v-show="hasResult(row.item) && !hasReleasedResult(row.item)" icon="check" class="font-xl text-success" />
-            <b-icon v-show="hasReleasedResult(row.item)" icon="check-all" class="font-xl text-success" />
+          <template #cell(productPackages)="row">
+            <app-order-pps-view :orderProductPackages="row.item.productPackages" />
           </template>
           <template #cell(actions)="row">
             <div class="hover-cell pull-right">
@@ -108,13 +104,17 @@ import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import AppModalFormInfoArea from "@/app/shared/components/app-modal/app-modal-form-info-area.vue";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
+import AppTableFilter from "@/app/shared/components/app-table-filter/app-table-filter.vue";
+import AppOrderPpsView from "@/app/shared/components/app-order-pps-view/app-order-pps-view.vue";
 import { BvTableFieldArray } from "bootstrap-vue";
 import { Component } from "vue-property-decorator";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
+import { sortAlphabetical } from "../shared/services/helper/sort-helper";
 import dateHelper from "../shared/services/helper/date-helper";
 import { AnalysisSchema } from "../shared/services/volateq-api/api-schemas/analysis-schema";
 import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
 import { ApiStates } from "../shared/services/volateq-api/api-states";
+import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 import volateqApi from "../shared/services/volateq-api/volateq-api";
 
 @Component({
@@ -124,6 +124,9 @@ import volateqApi from "../shared/services/volateq-api/volateq-api";
     AppTableContainer,
     AppModalForm,
     AppModalFormInfoArea,
+    AppTableFilter,
+    AppOrderPpsView,
+    AppSuperAdminMarker,
   },
 })
 export default class AppAnalysis extends BaseAuthComponent {
@@ -132,9 +135,6 @@ export default class AppAnalysis extends BaseAuthComponent {
   plants!: PlantSchema[];
   plantSelection: Array<any> | null = null;
   selectedPlantId: string | null = null;
-
-  customers: Array<any> | null = null;
-  selectedCustomerId: string | null = null;
 
   analysisRows: Array<any> | null = null;
   isLoading = true;
@@ -147,7 +147,6 @@ export default class AppAnalysis extends BaseAuthComponent {
 
     this.columns = [
       { key: "name", label: this.$t("name").toString(), sortable: true },
-      { key: "plant", label: this.$t("plant").toString(), sortable: true },
       {
         key: "date",
         label: this.$t("acquisition-date").toString(),
@@ -156,11 +155,14 @@ export default class AppAnalysis extends BaseAuthComponent {
           return dateHelper.toDate(flownAt);
         },
       },
-      { key: "user", label: this.$t("created-by").toString(), sortable: true },
       { key: "state", label: this.$t("state").toString(), sortable: true },
-      { key: "hasResults", label: this.$t("has-results-released").toString() },
+      { key: "productPackages", label: this.$t("product-packages").toString() },
       { key: "actions" },
     ];
+
+    if (this.isSuperAdmin) {
+      this.columns.push({ key: "customer", label: this.$t("customer").toString(), sortable: true });
+    }
 
     await this.getPlants();
 
@@ -173,44 +175,30 @@ export default class AppAnalysis extends BaseAuthComponent {
   }
 
   async onPlantSelectionChanged() {
-    if (this.selectedPlantId) {
-      const plant = this.plants!.find(plant => plant.id === this.selectedPlantId);
-      if (plant!.customers && plant!.customers.length > 1) {
-        this.customers = [
-          { value: null, text: "" },
-          ...plant!.customers.map(customer => ({ value: customer.id, text: customer.name }))
-        ];
-      } else {
-        this.customers = null;
-      }
-    } else {
-      this.customers = null;
-    }
-    
-
     await this.updateAnalysisRows();
   }
 
-  async onCustomerSelectionChanged() {
-    await this.updateAnalysisRows();
-  }
-
-  get hasIncompleteAnalysis(): boolean {
-    return !!this.analysisRows?.find(
-      analysis => analysis.state && analysis.state.state.id <= ApiStates.DATA_INCOMPLETE
-    );
+  get hasCompleteAnalysesOnly(): boolean {
+    return this.analysisRows && this.incompleteAnalyses.length === 0 || false;
   }
 
   get incompleteAnalysis(): any | null {
-    const incompleteAnalyses = this.analysisRows?.filter(
-      analysis => analysis.state && analysis.state.state.id <= ApiStates.DATA_INCOMPLETE
-    );
-
-    if (!incompleteAnalyses || incompleteAnalyses.length > 1) {
-      return null;
+    const incompleteAnalyses = this.incompleteAnalyses;
+    if (incompleteAnalyses.length === 1) {
+      return incompleteAnalyses[0];
     }
 
-    return incompleteAnalyses[0];
+    return null;
+  }
+
+  get incompleteAnalyses(): any[] {
+    if (!this.analysisRows) {
+      return [];
+    }
+
+    return this.analysisRows.filter(
+      analysis => analysis.state && analysis.state.state.id <= ApiStates.DATA_INCOMPLETE
+    );
   }
 
   hasResult(analysisItem: any): boolean {
@@ -226,7 +214,7 @@ export default class AppAnalysis extends BaseAuthComponent {
   }
 
   onNewDataUploadClick() {
-    if (!this.hasIncompleteAnalysis) {
+    if (this.hasCompleteAnalysesOnly) {
       const query = this.selectedPlantId ? { plantId: this.selectedPlantId } : undefined;
 
       this.$router.push({ name: "AnalysisNew", query });
@@ -240,9 +228,6 @@ export default class AppAnalysis extends BaseAuthComponent {
       const analysisFilter: { plant_id?: string, customer_id?: string } = {};
       if (this.selectedPlantId) {
         analysisFilter.plant_id = this.selectedPlantId;
-      }
-      if (this.selectedCustomerId) {
-        analysisFilter.customer_id = this.selectedCustomerId;
       }
       
       this.analysisRows = (await volateqApi.getAllAnalysis(analysisFilter)).map((a: AnalysisSchema) => {
@@ -262,6 +247,7 @@ export default class AppAnalysis extends BaseAuthComponent {
           plantId: a.plant.id,
           plant: a.plant.name,
           customer: a.customer.name,
+          productPackages: a.order_product_packages,
         };
 
         return row;
@@ -275,7 +261,7 @@ export default class AppAnalysis extends BaseAuthComponent {
 
   private async getPlants() {
     try {
-      this.plants = await volateqApi.getPlants();
+      this.plants = sortAlphabetical(await volateqApi.getPlants(), "name");
       // Hide the filter if one plant is available
       if (this.plants.length > 1) {
         this.plantSelection = this.plants.map(plant => ({ value: plant.id, text: plant.name }));
@@ -293,15 +279,5 @@ export default class AppAnalysis extends BaseAuthComponent {
   &-plants-filter {
     width: 300px;
   }
-}
-
-.app-analysis-plants-filter-select, .app-analysis-customers-filter-select {
-  width: 200px !important;
-  float: right;
-}
-.app-analysis-plants-filter-label, .app-analysis-customers-filter-label {
-  float: right;
-  margin-top: 5px;
-  padding-right: 1em;
 }
 </style>

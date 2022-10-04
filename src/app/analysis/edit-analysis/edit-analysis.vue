@@ -1,8 +1,8 @@
 <template>
   <app-content v-if="analysis" :title="analysis.name || ''" :navback="true" :eventId="analysis.id">
     <template #subtitle>
-      <div v-if="analysis.current_state">
-        <b>{{ $t(analysis.current_state.state.name) }}</b>
+      <div class="mar-top">
+        <app-step-progress :steps="analysisProgressSteps" />
       </div>
     </template>
     <div class="app-edit-analysis">
@@ -13,7 +13,7 @@
           </template>
           <app-download-analysis-files :analysis="analysis" />
         </b-tab>
-        <b-tab class="app-edit-analysis-upload-tab" v-if="uploadAllowed">
+        <b-tab class="app-edit-analysis-upload-tab">
           <template #title>
             <b-icon icon="upload" /><span class="pad-left">{{ $t("upload") }}</span>
           </template>
@@ -29,6 +29,13 @@
                 <b-form @submit.prevent="onSubmitEditAnalysis">
                   <b-form-group :label="$t('acquisition-date')" label-cols-sm="4" label-cols-lg="2">
                     <b-datepicker v-model="flownAt" required /> 
+                  </b-form-group>
+                  <b-form-group :label="$t('product-packages')" label-cols-sm="4" label-cols-lg="2">
+                    <app-multiselect 
+                      v-model="selectedProductPackageIds"
+                      :options="productPackagesSelection"
+                      :readonly="!isSuperAdmin"
+                    />
                   </b-form-group>
                   <app-button type="submit" :loading="loading">{{ $t("apply") }}</app-button>
                 </b-form>
@@ -72,9 +79,14 @@ import { AnalysisEvent } from "../shared/types";
 import { TaskSchema } from "@/app/shared/services/volateq-api/api-schemas/task-schema";
 import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
-import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
+import { apiStateNames, ApiStates } from "@/app/shared/services/volateq-api/api-states";
 import AppAnalysisReferenceMeasurements from "@/app/analysis/edit-analysis/reference-measurement/analysis-reference-measurements.vue";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
+import { ProgressStep } from "@/app/shared/components/app-step-progress/types";
+import AppStepProgress from "@/app/shared/components/app-step-progress/app-step-progress.vue";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
+import AppMultiselect from "@/app/shared/components/app-multiselect/app-multiselect.vue";
+import { MultiselectOption } from "@/app/shared/components/app-multiselect/types";
 
 @Component({
   name: "app-edit-analysis",
@@ -88,6 +100,8 @@ import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/
     AppBox,
     AppAnalysisReferenceMeasurements,
     AppSuperAdminMarker,
+    AppStepProgress,
+    AppMultiselect,
   },
 })
 export default class AppEditAnalysis extends BaseAuthComponent {
@@ -97,6 +111,10 @@ export default class AppEditAnalysis extends BaseAuthComponent {
   loading = false;
   hasReferenceMeasurements = false;
 
+  productPackagesSelection: MultiselectOption[] = [];
+  selectedProductPackageIds: string[] | null = null;
+  productPackagesSelectionDisabled = false;
+
   async created() {
     await this.updateAnalysis(this.$route.params.id);
 
@@ -105,21 +123,82 @@ export default class AppEditAnalysis extends BaseAuthComponent {
     });
   }
 
-  get uploadAllowed(): boolean {
-    return this.analysis && this.analysis.current_state.state.id < ApiStates.DATA_COMPLETE_VERIFIED || false;
+  get analysisProgressSteps(): ProgressStep[] {
+    const skipStepCount = 2;
+    return [
+      {
+        id: ApiStates.UPLOADING,
+        name: this.hasState([ApiStates.UPLOAD_FAILED, ApiStates.DATA_INCOMPLETE]) ?
+          this.$t(this.analysis!.current_state!.state.name).toString() : 
+          this.$t(apiStateNames[ApiStates.UPLOADING]).toString(),
+        description: this.hasState([ApiStates.UPLOAD_FAILED, ApiStates.DATA_INCOMPLETE]) ?
+          this.$t(this.analysis!.current_state!.state.name + "_descr").toString() : 
+          this.$t(apiStateNames[ApiStates.UPLOADING] + "_descr").toString(),
+        danger: this.hasState([ApiStates.UPLOAD_FAILED, ApiStates.DATA_INCOMPLETE]),
+        active: this.hasState([ApiStates.UPLOADING, ApiStates.UPLOAD_FAILED, ApiStates.DATA_INCOMPLETE]),
+      }, 
+      {
+        id: ApiStates.DATA_COMPLETE - skipStepCount,
+        name: this.$t(apiStateNames[ApiStates.DATA_COMPLETE]).toString(),
+        description: this.$t(apiStateNames[ApiStates.DATA_COMPLETE] + "_descr").toString(),
+        active: this.hasState([ApiStates.DATA_COMPLETE]),
+      },
+      {
+        id: ApiStates.DATA_COMPLETE_VERIFIED - skipStepCount,
+        name: this.$t(apiStateNames[ApiStates.DATA_COMPLETE_VERIFIED]).toString(),
+        description: this.$t(apiStateNames[ApiStates.DATA_COMPLETE_VERIFIED] + "_descr").toString(),
+        active: this.hasState([ApiStates.DATA_COMPLETE_VERIFIED]),
+      },
+      {
+        id: ApiStates.PROCESSING - skipStepCount,
+        name: this.$t(apiStateNames[ApiStates.PROCESSING]).toString(),
+        description: this.$t(apiStateNames[ApiStates.PROCESSING] + "_descr").toString(),
+        active: this.hasState([ApiStates.PROCESSING]),
+      },
+      {
+        id: ApiStates.FINISHED - skipStepCount,
+        name: this.$t(apiStateNames[ApiStates.FINISHED]).toString(),
+        description: this.$t(apiStateNames[ApiStates.FINISHED] + "_descr").toString(),
+        active: this.hasState([ApiStates.FINISHED]),
+      },
+    ];
   }
 
+  private hasState(apiStates: ApiStates[]): boolean {
+    return this.analysis && this.analysis.current_state &&
+      apiStates.includes(this.analysis.current_state.state.id) || false;
+  }
+
+  @CatchError()
   private async updateAnalysis(analysisId: string) {
-    try {
-      this.analysis = await volateqApi.getAnalysis(analysisId);
+    this.analysis = await volateqApi.getAnalysis(analysisId);
 
-      this.flownAt = this.analysis.flown_at;
+    this.flownAt = this.analysis.flown_at;
 
+    if (this.isSuperAdmin) {
       this.hasReferenceMeasurements = (await volateqApi.getReferenceMeasurements(this.analysis.id)).length > 0;
+    }
 
-      this.watchAnalysisTask();
-    } catch (e) {
-      this.showError(e);
+    this.productPackagesSelection = await volateqApi.getOrderPPsMulitselectOptions(
+      this.analysis.plant.id,
+      this.analysis.flown_at,
+      this.analysis.customer.id,
+    );
+    this.selectedProductPackageIds = this.analysis.order_product_packages.map(orderPP => orderPP.id);
+    this.productPackagesSelectionDisabled = !this.isSuperAdmin &&
+      this.analysis.current_state.state.id >= ApiStates.DATA_COMPLETE;
+
+    this.watchAnalysisTask();
+
+    if (this.isSuperAdmin && this.analysis.analysis_result && 
+      this.analysis.analysis_result.released && this.analysis.current_state.state.id !== ApiStates.FINISHED
+    ) {
+      AppContentEventService.showInfo(this.analysis!.id, this.$t("analysis-not-finished_descr").toString());
+    }
+    if (this.isSuperAdmin && this.analysis.current_state.state.id === ApiStates.FINISHED && 
+      (!this.analysis.analysis_result || !this.analysis.analysis_result.released)
+    ) {
+      AppContentEventService.showInfo(this.analysis!.id, this.$t("analysis-not-released_descr").toString());
     }
   }
 
@@ -137,7 +216,6 @@ export default class AppEditAnalysis extends BaseAuthComponent {
             AppContentEventService.showSuccess(this.analysis!.id, volateqApi.getTaskOutputAsMessage(task))
           }
 
-
           AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.FINISHED_ANALYSIS_TASK, task);
         },
         (task: TaskSchema) => {
@@ -149,20 +227,16 @@ export default class AppEditAnalysis extends BaseAuthComponent {
     }
   }
 
+  @CatchError("loading")
   async onSubmitEditAnalysis() {
-    try {
-      this.loading = true;
+    await volateqApi.updateAnalysis(this.analysis!.id, { 
+      flown_at: this.flownAt?.substring(0, 10),
+      order_product_package_ids: this.selectedProductPackageIds || undefined,
+    });
 
-      await volateqApi.updateAnalysis(this.analysis!.id, { flown_at: this.flownAt })
+    this.showSuccess(this.$t("analysis-updated-successfully").toString());
 
-      this.showSuccess(this.$t("analysis-updated-successfully").toString());
-
-      AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS);
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.loading = false;
-    }
+    AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS);
   }
 }
 </script>
