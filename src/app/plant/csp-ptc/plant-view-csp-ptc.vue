@@ -8,26 +8,26 @@
       :absolute="leftSidebarAbsolute"
     />
     <div class="plant-view-csp-ptc-rightside">
-      <h2 :class="'plant-view-csp-ptc-title ' + (sidebarStates['analysis'] ? 'open' : '')">
+      <!-- <h2 :class="'plant-view-csp-ptc-title ' + (sidebarStates['analysis'] ? 'open' : '')">
         {{ plant.name }}
-      </h2>
-      <b-tabs align="center" v-model="selectedTab">
+      </h2> -->
+      <b-tabs v-model="selectedTab">
         <b-tab>
           <template #title>
-            <b-icon icon="map" />
+            <b-icon icon="map" /> <span class="pad-left">{{ $t("map") }}</span>
           </template>
           <app-visual-csp-ptc :analysisResults="analysisResults" :plant="plant" />
         </b-tab>
         <b-tab v-if="hasResults">
-          <template #title><b-icon icon="table" /></template>
+          <template #title><b-icon icon="table" /> <span class="pad-left">{{ $t("table") }}</span></template>
           <app-tables-csp-ptc v-if="loadTables" :analysisResults="analysisResults" :plant="plant" />
         </b-tab>
         <b-tab v-if="hasResults">
-          <template #title><b-icon icon="bar-chart-fill" /></template>
+          <template #title><b-icon icon="bar-chart-fill" /> <span class="pad-left">{{ $t("statistics") }}</span></template>
           <app-plant-diagram-view-csp-ptc v-if="loadDiagrams" :analysisResults="analysisResults" :plant="plant" />
         </b-tab>
         <b-tab v-if="isSuperAdmin">
-          <template #title><b-icon icon="shield-shaded" /></template>
+          <template #title><b-icon icon="shield-shaded" /><span class="pad-left">{{ $t("admin") }}</span></template>
           <app-plant-admin-view-csp-ptc :selectedAnalysisResult="selectedAnalysisResult" :plant="plant" />
         </b-tab>
       </b-tabs>

@@ -434,6 +434,10 @@
   "ball-joint-south-damaged": "Ball joint south is damaged",
   "ball-joint-north-damaged": "Ball joint north is damaged",
   "ball-joint-damaged_descr": "Potential for increased friction in ball joint, derived from different HCE lateral positions for two SCA motion directions (measurement of hysteresis when moving collector into zenith from west and east, respectively).",
+  "map": "Map",
+  "table": "Table",
+  "statistics": "Statistics",
+  "admin": "Admin",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

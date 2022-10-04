@@ -131,6 +131,20 @@ $theme-colors: (
 .table.no-border {
   border: none !important;
 }
+.table.b-table.b-table-selectable {
+  .b-table-row-selected {
+    border-left: 2px solid $blue-60pc;
+    font-weight: bold;
+
+    small {
+      font-weight: bold;
+    }
+  }
+  
+  tr:hover {
+    border-left: 2px solid $blue-60pc;
+  }
+}
 
 .table.b-table > thead > tr > [aria-sort="none"] {
   background-size: 0 0;

@@ -2,13 +2,16 @@
   <div :class="'analysis-selection-sidebar' + (absolute ? ' absolute' : '')">
     <app-sidebar :open="sidebarOpen" @toggled="onSidebarToggled">
       <div class="analysis-selection-sidebar-leftside">
+        <h2 class="analysis-selection-sidebar-leftside-title">
+          {{ plant.name }}
+        </h2>
         <div class="analysis-selection-sidebar-leftside-settings" v-if="analysisResults.length > 1">
           <b-checkbox switch v-model="compareMode" @change="onCompareModeChanged">
             {{ $t("compare-mode") }}
             <app-explanation>{{ $t("compare-mode_descr") }}</app-explanation>
           </b-checkbox>
         </div>
-        <app-table-container size="sm">
+        <app-table-container>
           <b-table
             ref="analysisResultsTable"
             :items="analysisResultsTableItems"
@@ -22,6 +25,11 @@
             <template #head(selected)></template>
             <template #cell(selected)="{ rowSelected }">
               <b-checkbox v-if="compareMode" :checked="rowSelected" disabled class="b-table-selectable-checkbox"></b-checkbox>
+            </template>
+            <template #cell(name)="row">
+              {{ row.item.date }}
+              <br>
+              <small class="grayed">{{ row.item.name }}</small>
             </template>
             <template #row-details="row">
               <div style="margin-left: 30px">
@@ -70,9 +78,8 @@ export default class AppAnalysisSelectionSidebar extends Vue {
   @State(state => state.sidebar["analysis"]) sidebarOpen!: boolean;
 
   analysisResultsTableColumns: BvTableFieldArray = [
-    { key: "selected", label: "" },
-    { key: "name", label: this.$t("name").toString() },
-    { key: "date", label: this.$t("acquisition-date").toString() },
+    { key: "selected", label: "",  },
+    { key: "name", label: this.$t("analysis").toString() },
   ];
   analysisResultsTableItems: Record<string, unknown>[] = [];
 
@@ -221,7 +228,6 @@ export default class AppAnalysisSelectionSidebar extends Vue {
 
   &-leftside {
     padding: 0.5em;
-    padding-top: 40px;
     height: 100%;
     width: 100%;
     border-right: $border-color-grey 1px solid;
@@ -232,6 +238,10 @@ export default class AppAnalysisSelectionSidebar extends Vue {
 
     &-settings {
       margin: 15px 0;
+    }
+
+    &-title {
+      margin-bottom: 1em;
     }
   }
   &-kpi-badge {
