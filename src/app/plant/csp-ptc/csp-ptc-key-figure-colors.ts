@@ -21,6 +21,7 @@ export const cspPtcKeyFigureRainbowColors: Record<ApiKeyFigure, KeyFigureColors>
   [ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_ONLINE_ID]: KeyFigureColors.black,
   [ApiKeyFigure.SCA_ORTHO_IMAGES_IR_ID]: KeyFigureColors.black,
   [ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_OFFLINE_ID]: KeyFigureColors.black,
+  [ApiKeyFigure.SCA_BALL_JOINT_FRICTION_ID]: KeyFigureColors.black,
 
   // SCE
   [ApiKeyFigure.SCE_ALIGNMENT_ID]: KeyFigureColors.GREEN_toxicCoconut,

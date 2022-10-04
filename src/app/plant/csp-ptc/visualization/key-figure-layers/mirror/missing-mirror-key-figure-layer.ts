@@ -33,7 +33,7 @@ export class MissingMirrorKeyFigureLayer extends MirrorKeyFigureLayer {
     const missingMirrorsFeaturesCount = this.geoJSON.features.length - notMeasuredSCEFeaturesCount;
 
     const legend = {
-      id: this.keyFigureId.toString(),
+      id: this.getLegendId(),
       entries: [
         {
           color: this.color!,

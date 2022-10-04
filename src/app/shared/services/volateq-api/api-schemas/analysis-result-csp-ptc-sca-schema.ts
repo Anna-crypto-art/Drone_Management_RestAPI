@@ -2,7 +2,7 @@ import { AnalysisResultSchemaBase } from "./analysis-result-schema-base";
 
 export interface AnalysisResultCspPtcScaSchema extends AnalysisResultSchemaBase {
   encoder_value: number;
-  comment: string;
+  comment?: string;
   orientation_at_drive: number;
   uncertainty_at_drive: number;
   tracking_encoder_offset: number;
@@ -13,6 +13,8 @@ export interface AnalysisResultCspPtcScaSchema extends AnalysisResultSchemaBase 
   ortho_image_rgb_url?: string;
   ortho_image_ir_url?: string;
   ortho_image_sdx_url?: string;
+  is_damaged_ball_joint_south: boolean;
+  is_damaged_ball_joint_north: boolean;
 }
 
 export interface AnalysisResultCspPtcScaComparedSchema extends AnalysisResultCspPtcScaSchema {

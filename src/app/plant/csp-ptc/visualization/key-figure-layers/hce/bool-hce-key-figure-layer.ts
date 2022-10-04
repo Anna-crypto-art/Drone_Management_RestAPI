@@ -64,7 +64,7 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
     }
 
     const legend = {
-      id: this.keyFigureId.toString(),
+      id: this.getLegendId(),
       entries: [
         {
           color: this.compareAnalysisResult ? KeyFigureColors.black : this.color!,

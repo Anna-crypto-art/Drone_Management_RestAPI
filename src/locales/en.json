@@ -429,6 +429,11 @@
   "results-available": "Results available",
   "results-available-super-admin-only": "The results are available only for SUPER_ADMINs",
   "disable-key-figures-for-product-packages": "Disable PIs for selected packages",
+  "comment": "Comment",
+  "switch-customer": "Switch customer",
+  "ball-joint-south-damaged": "Ball joint south is damaged",
+  "ball-joint-north-damaged": "Ball joint north is damaged",
+  "ball-joint-damaged_descr": "Potential for increased friction in ball joint, derived from different HCE lateral positions for two SCA motion directions (measurement of hysteresis when moving collector into zenith from west and east, respectively).",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

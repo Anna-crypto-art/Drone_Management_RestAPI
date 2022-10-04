@@ -60,6 +60,10 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     return undefined;
   }
 
+  public getLegendId(): string {
+    return `${this.keyFigureId}__${this.keyFigureInfo.displayName || this.keyFigureInfo.keyName || this.keyFigureInfo.templateName || ""}`;
+  }
+
   protected async onSelected(selected: boolean): Promise<void> {
     super.onSelected(selected);
 
@@ -67,7 +71,11 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   }
 
   protected mapResultToFeatureInfos(result: T): FeatureInfos | undefined {
-    const mappingHelper = new AnalysisResultMappingHelper(this.analysisResultMapping, this.analysisResult!);
+    const mappingHelper = new AnalysisResultMappingHelper(
+      this.analysisResultMapping,
+      this.analysisResult!,
+      this.vueComponent.isSuperAdmin,
+    );
     const resultItem = mappingHelper.getItem(result);
 
     const recordFeatureInfos: FeatureInfo[] = [];

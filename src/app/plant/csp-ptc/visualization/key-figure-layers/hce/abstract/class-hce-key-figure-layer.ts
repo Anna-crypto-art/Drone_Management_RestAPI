@@ -10,7 +10,7 @@ export abstract class ClassHceKeyFigureLayer extends HceKeyFigureLayer {
     }
 
     return {
-      id: this.keyFigureInfo.displayName || this.keyFigureId.toString(),
+      id: this.getLegendId(),
       entries: [
         {
           color: this.getColor(),

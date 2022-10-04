@@ -76,6 +76,21 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
     disableForTable: true,
     superAdminOnly: true,
   },
+  {
+    getValue: r => r.is_damaged_ball_joint_south,
+    transName: "ball-joint-south-damaged",
+    transDescr: "ball-joint-damaged_descr",
+    keyFigureId: ApiKeyFigure.SCA_BALL_JOINT_FRICTION_ID,
+    filterType: FilterFieldType.BOOLEAN,
+    // formatter: ''
+  },
+  {
+    getValue: r => r.is_damaged_ball_joint_north,
+    transName: "ball-joint-north-damaged",
+    transDescr: "ball-joint-damaged_descr",
+    keyFigureId: ApiKeyFigure.SCA_BALL_JOINT_FRICTION_ID,
+    filterType: FilterFieldType.BOOLEAN,
+  }
 ];
 
 export default analysisResultCspPtcMappingSca;

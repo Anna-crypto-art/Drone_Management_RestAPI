@@ -79,7 +79,7 @@ export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer {
     }
 
     return {
-      id: this.keyFigureInfo.displayName || this.keyFigureId.toString(),
+      id: this.getLegendId(),
       entries: [
         {
           color: this.compareAnalysisResult ? KeyFigureColors.black : this.getColor(),

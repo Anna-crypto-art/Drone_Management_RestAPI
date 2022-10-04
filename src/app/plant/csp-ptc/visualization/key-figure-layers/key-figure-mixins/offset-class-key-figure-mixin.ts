@@ -56,7 +56,7 @@ export class OffsetClassKeyFigureMixin {
     }
 
     return {
-      id: this.layer.keyFigureInfo.displayName!,
+      id: this.layer.getLegendId(),
       entries: legendEntries
     };
   }
@@ -154,7 +154,7 @@ export class OffsetClassKeyFigureMixin {
     }
 
     return {
-      id: this.layer.keyFigureInfo.displayName!,
+      id: this.layer.getLegendId(),
       entries: [
         {
           color: KeyFigureColors.black,

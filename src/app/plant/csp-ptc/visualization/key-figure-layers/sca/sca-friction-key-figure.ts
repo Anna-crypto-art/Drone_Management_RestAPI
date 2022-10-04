@@ -10,7 +10,7 @@ export class ScaFrictionKeyFigureLayer extends ScaKeyFigureLayer {
     }
 
     return {
-      id: this.keyFigureInfo.displayName || this.keyFigureId.toString(),
+      id: this.getLegendId(),
       entries: [
         {
           color: this.getColor(),

@@ -1,7 +1,7 @@
 import { AnalysisResultSchemaBase } from "./analysis-result-schema-base";
 
 export interface AnalysisResultCspPtcMirrorSchema extends AnalysisResultSchemaBase {
-  comment: string;
+  comment?: string;
   is_missing: boolean;
 }
 
