@@ -1,11 +1,8 @@
 <template>
   <div class="visualization">
     <app-geovisualization ref="openLayers" v-if="hasLayers" :layers="layers" :loading="loading" @click="onOpenLayersClick">
-      <template #topContent>
-        <app-collapse name="displaySettings">
-          <template #button>
-            <b-icon icon="gear-fill" /> <span class="pad-left">{{ $t("display-settings") }}</span>
-          </template>
+      <template #displaySettings>
+        <div class="visualization-display-settings-container">
           <b-form-checkbox v-model="enableMultiSelection" switch @change="onMultiSelectionChanged" :disabled="multiSelectionDisabled">
             {{ $t("multi-selection") }} <app-explanation>{{ $t("multi-selection-overlapping_expl") }}</app-explanation>
           </b-form-checkbox>
@@ -26,7 +23,7 @@
           <hr v-show="availableOrthoImages.length > 0">
           <app-dropdown-button 
             v-show="availableOrthoImages.length > 0"
-            variant="secondary"
+            variant="primary"
             :title="$t('load-all-ortho-images')"
             :loading="loadAllOrhtoImagesLoading"
             size="sm"
@@ -37,7 +34,7 @@
               {{ orthoImage.name }}
             </b-dropdown-item-button>
           </app-dropdown-button>
-        </app-collapse>
+        </div>
       </template>
 
       <!-- Pass slots through -->
@@ -615,6 +612,7 @@ export default class AppVisualization
       this.piHeadGroup = {
         name: this.$t("performance-indicators").toString(),
         type: "group",
+        icon: "speedometer2",
         childLayers: this.piLayersHierarchy.groupLayers,
         singleSelection: true,
         visible: this.analysisResults.length > 0,
@@ -626,30 +624,38 @@ export default class AppVisualization
         {
           name: this.$t("components").toString(),
           type: "group",
+          icon: "app-indicator",
           childLayers: this.componentLayers.map(compLayer => compLayer.toGeoLayer()),
         },
         {
-          name: "pcs",
-          type: "custom",
-          customLoader: () => {
-            return;
-          },
-          onSelected: (selected: boolean) => {
-            this.showPCS = selected;
-  
-            this.piLayersHierarchy.getAllChildLayers().forEach(kpiLayer => {
-              kpiLayer.showPCS(selected);
-              kpiLayer.rerenderMap();
-            });
-            this.componentLayers.forEach(compLayer => {
-              compLayer.showPCS(selected),
-              compLayer.rerenderMap();
-            });
-          },
-          selected: false,
-          styleClass: "margin-top",
+          name: this.$t("display-settings").toString(),
+          type: "group",
+          icon: "gear-fill",
+          customSlot: "displaySettings",
+          childLayers: [
+            {
+              name: "pcs",
+              type: "custom",
+              customLoader: () => {
+                return;
+              },
+              onSelected: (selected: boolean) => {
+                this.showPCS = selected;
+      
+                this.piLayersHierarchy.getAllChildLayers().forEach(kpiLayer => {
+                  kpiLayer.showPCS(selected);
+                  kpiLayer.rerenderMap();
+                });
+                this.componentLayers.forEach(compLayer => {
+                  compLayer.showPCS(selected),
+                  compLayer.rerenderMap();
+                });
+              },
+              selected: false,
+            },
+            this.worldMapLayer,
+          ]
         },
-        this.worldMapLayer
       );
     } catch (e) {
       this.showError(e);
@@ -846,6 +852,12 @@ export default class AppVisualization
         width: auto;
       }
     }
+  }
+
+  &-display-settings-container {
+    padding: 1em;
+    margin-bottom: 1em;
+    background-color: $grey;
   }
 }
 .openlayers-map {

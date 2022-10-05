@@ -22,10 +22,6 @@
     </div>
 
     <div class="content">
-      <div class="content-top">
-        <slot name="topContent" />
-      </div>
-
       <app-geovisual-layer-display :layer="rootLayer">
         <!-- Pass slots through -->
         <template v-for="(_, slot) in $slots">
@@ -168,7 +164,7 @@ export default class AppGeovisualLayerSwitcher extends Vue {
 <style lang="scss">
 @import "@/scss/_colors.scss";
 
-$sidebar-width: min(400px, min(70vw, calc(100vw - 50px)));
+$sidebar-width: min(425px, min(70vw, calc(100vw - 50px)));
 
 .layer-switcher {
   position: absolute;
@@ -205,7 +201,7 @@ $sidebar-width: min(400px, min(70vw, calc(100vw - 50px)));
   }
 
   .content {
-    padding: 20px;
+    padding: 0 0.5em 0.5em;
     overflow: auto;
     height: 100%;
   }

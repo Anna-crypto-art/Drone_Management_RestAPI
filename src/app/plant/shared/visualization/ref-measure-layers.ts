@@ -23,6 +23,7 @@ export class RefMeasureLayers {
       type: "group",
       visible: false,
       childLayers: this.geoJsonLayers,
+      icon: "clipboard-check",
     };
   }
 

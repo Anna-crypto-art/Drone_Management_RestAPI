@@ -12,8 +12,8 @@
       :class="'toggle-button opens-right ' + (open ? 'show-label' : '')"
       @click="onToggle()"
     >
-      <b-icon :icon="(open && 'book-half') || 'book'"></b-icon>
-      <span class="toggle-button-text">&nbsp; {{ $t("history") }}</span>
+      <app-icon-analysis :fill="open" />
+      <span class="toggle-button-text">&nbsp; {{ $t("analysis") }}</span>
     </b-button>
   </div>
 </template>
@@ -21,9 +21,13 @@
 <script lang="ts">
 import Vue from "vue";
 import { Prop, Component } from "vue-property-decorator";
+import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
 
 @Component({
   name: "app-sidebar",
+  components: {
+    AppIconAnalysis,
+  }
 })
 export default class AppSidebar extends Vue {
   @Prop({ default: true }) open!: boolean;

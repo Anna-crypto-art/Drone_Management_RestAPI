@@ -241,6 +241,7 @@ export class PILayersHierarchy {
           childLayers: [],
           visible: false,
           singleSelection: true,
+          collapse: true,
         },
         keyFigureLayers: [],
         subGroupLayers: [],

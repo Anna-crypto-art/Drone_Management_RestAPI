@@ -40,6 +40,9 @@ export interface GroupLayer extends BaseLayerType {
   type: "group";
   childLayers: LayerType[];
   singleSelection?: boolean;
+  icon?: string;
+  customSlot?: string;
+  collapse?: boolean;
 }
 
 export interface CustomLayer extends BaseLayerType {

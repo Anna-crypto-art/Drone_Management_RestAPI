@@ -85,10 +85,12 @@
                 :to="{
                   name: 'Plant',
                   params: { id: row.item.plantId },
-                  query: { view: 'table', result: row.item.analysisResult.id },
+                  query: { view: 'map', result: row.item.analysisResult.id },
                 }"
               >
-                <b-button variant="primary" size="sm"><b-icon icon="graph-up"></b-icon></b-button>
+                <b-button variant="primary" size="sm">
+                  <app-icon-analysis />
+                </b-button>
               </router-link>
             </div>
             <div class="clearfix"></div>
@@ -115,6 +117,7 @@ import { AnalysisSchema } from "../shared/services/volateq-api/api-schemas/analy
 import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
 import { ApiStates } from "../shared/services/volateq-api/api-states";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
+import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
 import volateqApi from "../shared/services/volateq-api/volateq-api";
 
 @Component({
@@ -127,6 +130,7 @@ import volateqApi from "../shared/services/volateq-api/volateq-api";
     AppTableFilter,
     AppOrderPpsView,
     AppSuperAdminMarker,
+    AppIconAnalysis,
   },
 })
 export default class AppAnalysis extends BaseAuthComponent {

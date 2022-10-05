@@ -6,6 +6,7 @@ import { VNode } from "vue/types/umd";
 import { Watch } from "vue-property-decorator";
 import LayerLoader from "./loader/layer-loader";
 import LayerRenderer from "ol/renderer/Layer";
+import LayerGroup from "ol/layer/Group";
 
 export class LayerStructure extends EventEmitter {
   private readonly childLayers: LayerStructure[];
@@ -130,11 +131,42 @@ export class LayerStructure extends EventEmitter {
     return this.getLayerType()?.styleClass || "";
   }
 
+  public get icon(): string {
+    return (this.layerType as GroupLayer)?.icon || "";
+  }
+
+  public get customSlot(): string {
+    return (this.layerType as GroupLayer)?.customSlot || "";
+  }
+
+  public get collapse(): boolean {
+    return (this.layerType as GroupLayer)?.collapse || false;
+  }
+
   public hasChildLayer(id: string): boolean {
     return !!this.getChildLayer(id);
   }
 
   public getChildLayer(id: string): LayerStructure | undefined {
     return this.getChildLayers().find(childLayer => childLayer.id === id);
+  }
+
+  public getVisibleChildLayers(): LayerStructure[] {
+    return this.getChildLayers().filter(childLayer => childLayer.visible);
+  }
+
+  public hasSelectedChildLayer(): boolean {
+    for (const childLayer of this.getChildLayers()) {
+      if (childLayer.hasChildrens) {
+        if (childLayer.hasSelectedChildLayer()) {
+          return true;
+        }
+      }
+      if (childLayer.selected) {
+        return true;
+      }
+    }
+    
+    return false;
   }
 }

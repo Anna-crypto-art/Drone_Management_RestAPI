@@ -8,10 +8,7 @@
       :absolute="leftSidebarAbsolute"
     />
     <div class="plant-view-csp-ptc-rightside">
-      <!-- <h2 :class="'plant-view-csp-ptc-title ' + (sidebarStates['analysis'] ? 'open' : '')">
-        {{ plant.name }}
-      </h2> -->
-      <b-tabs v-model="selectedTab">
+      <b-tabs v-model="selectedTab" align="center" class="plant-view-csp-ptc-tabs" :class="{ open: sidebarStates['analysis'] }">
         <b-tab>
           <template #title>
             <b-icon icon="map" /> <span class="pad-left">{{ $t("map") }}</span>
@@ -229,16 +226,6 @@ $left-width: 400px;
   display: flex;
   position: relative;
 
-  &-title {
-    position: relative;
-    z-index: 100;
-    font-size: 1.5rem;
-    display: block;
-    position: absolute;
-    top: 0.3em;
-    left: 0.5em;
-  }
-
   &-rightside {
     height: 100%;
     width: 100%;
@@ -253,5 +240,11 @@ $left-width: 400px;
       padding: 0;
     }
   }
+
+  // &-tabs.open {
+  //   .nav-tabs {
+  //     margin-left: $left-width;
+  //   }
+  // }
 }
 </style>

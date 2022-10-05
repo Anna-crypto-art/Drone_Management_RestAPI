@@ -30,9 +30,7 @@
               {{ row.item.date }}
               <br>
               <small class="grayed">{{ row.item.name }}</small>
-            </template>
-            <template #row-details="row">
-              <div style="margin-left: 30px">
+              <div :class="{ 'mar-top': row.item.orderPPs && row.item.orderPPs.length > 0 }">
                 <app-order-pps-view :orderProductPackages="row.item.orderPPs" :lefted="true" />
               </div>
             </template>
@@ -96,7 +94,6 @@ export default class AppAnalysisSelectionSidebar extends Vue {
         name: analysisResult.analysis.name,
         date: dateHelper.toDate(analysisResult.analysis.flown_at),
         orderPPs: analysisResult.analysis.order_product_packages,
-        _showDetails: analysisResult.analysis.order_product_packages.length > 0,
       });
     }
 
