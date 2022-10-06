@@ -1,12 +1,42 @@
 import { FeatureInfos, Legend } from "@/app/plant/shared/visualization/types";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { AnalysisResultCspPtcScaSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-sca-schema";
+import { FeatureLike } from "ol/Feature";
+import { Style } from "ol/style";
+import { CompareClassLimitsKeyFigureMixin } from "../key-figure-mixins/compare-class-limits-key-figure-mixin";
+import { ICompareClassLimitsKeyFigureMixin } from "../key-figure-mixins/types";
 import { ScaKeyFigureLayer } from "./abstract/sca-key-figure-layer";
 
-export class ScaFrictionKeyFigureLayer extends ScaKeyFigureLayer {
+export class ScaFrictionKeyFigureLayer extends ScaKeyFigureLayer implements ICompareClassLimitsKeyFigureMixin {
+  private compareClassLimitsKeyFigureMixin!: CompareClassLimitsKeyFigureMixin;
+
+  protected created(): void {
+    this.compareClassLimitsKeyFigureMixin = new CompareClassLimitsKeyFigureMixin(this)
+
+    this.enableCompare = true;
+  }
+
+  public getStyle(feature: FeatureLike): Style {
+    const style = super.getStyle(feature);
+
+    if (this.enableCompare && this.compareAnalysisResult) {
+      style.getFill().setColor(
+        this.compareClassLimitsKeyFigureMixin.getDiffColor(
+          this.getProperties(feature)
+        )
+      );
+    }
+
+    return style;
+  }
+
   protected getLegend(): Legend | undefined {
     if (!this.geoJSON) {
       return undefined;
+    }
+
+    if (this.enableCompare && this.compareAnalysisResult) {
+      return this.compareClassLimitsKeyFigureMixin.getDiffLegend();
     }
 
     return {
@@ -14,16 +44,19 @@ export class ScaFrictionKeyFigureLayer extends ScaKeyFigureLayer {
       entries: [
         {
           color: this.getColor(),
-          name:
-            this.getLegendEntryTransName(
-              "sca-torsion-class",
-              this.analysisResult.csp_ptc.sca_torsion_class_limits,
-              this.query?.torsion_class,
-              "°"
-            ) + this.getLegendEntryCount(),
+          name: this.getLegendName() + this.getLegendEntryCount(),
         },
       ],
     };
+  }
+
+  private getLegendName(): string {
+    return this.getLegendEntryTransName(
+      "sca-torsion-class",
+      this.analysisResult.csp_ptc.sca_torsion_class_limits,
+      this.query?.torsion_class,
+      "°"
+    )
   }
 
   protected getMoreSpecificAnalysisResultParams(): TableRequest {
@@ -42,5 +75,17 @@ export class ScaFrictionKeyFigureLayer extends ScaKeyFigureLayer {
 
   protected getColor(): string {
     return this.getClassColor(this.query?.torsion_class);
+  }
+
+  public getDiffLegendName(): string {
+    return this.getLegendName();
+  }
+
+  public getQueryClass(): number | undefined {
+    return this.query?.torsion_class;
+  }
+
+  public getClassLimits(): number[] {
+    return this.analysisResult.csp_ptc.sca_torsion_class_limits;
   }
 }

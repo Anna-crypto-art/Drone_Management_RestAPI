@@ -1,12 +1,12 @@
 import { KeyFigureColors, KeyFigureColorScheme } from "@/app/plant/shared/visualization/layers/types";
 import { SceKeyFigureLayer } from "./abstract/sce-key-figure-layer";
 import { OffsetClassKeyFigureMixin } from "../key-figure-mixins/offset-class-key-figure-mixin";
-import { IOffsetClassKeyFigureMixin } from "../key-figure-mixins/types";
+import { ICompareClassLimitsKeyFigureMixin } from "../key-figure-mixins/types";
 import { FeatureLike } from "ol/Feature";
 import { Style } from "ol/style";
 import { ComparedFeatureType, FeatureProperties, Legend } from "@/app/plant/shared/visualization/types";
 
-export class SceAlignmentKeyFigureLayer extends SceKeyFigureLayer implements IOffsetClassKeyFigureMixin {
+export class SceAlignmentKeyFigureLayer extends SceKeyFigureLayer implements ICompareClassLimitsKeyFigureMixin {
   private offsetClassKeyFigureMixin!: OffsetClassKeyFigureMixin;
 
   protected created(): void {
@@ -27,11 +27,11 @@ export class SceAlignmentKeyFigureLayer extends SceKeyFigureLayer implements IOf
     return this.offsetClassKeyFigureMixin.getLegend();
   }
 
-  public getOffsetClassLimits() {
+  public getClassLimits() {
     return this.analysisResult.csp_ptc.sce_alignment_deviation_to_drive_class_limits;
   }
 
-  public getQueryOffsetClass(): number | undefined {
+  public getQueryClass(): number | undefined {
     return this.query?.orientation_offset_class;
   }
 
@@ -54,5 +54,9 @@ export class SceAlignmentKeyFigureLayer extends SceKeyFigureLayer implements IOf
     }
 
     return super.getClassColor(classValue);
+  }
+
+  public getDiffLegendName(): string {
+    return this.offsetClassKeyFigureMixin.getDiffLegendName();
   }
 }

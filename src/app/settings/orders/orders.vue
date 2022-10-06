@@ -335,8 +335,6 @@ export default class AppSettingsOrders extends BaseAuthComponent {
 
   @CatchError('loadingOrderPPKFDisabled')
   async onOpenKeyFigureDisable() {
-    console.log("blub")
-
     let existingDisabledKeyFigures = this.currentOrder.disabledKeyFigures;
     if (!existingDisabledKeyFigures) {
       existingDisabledKeyFigures = [];

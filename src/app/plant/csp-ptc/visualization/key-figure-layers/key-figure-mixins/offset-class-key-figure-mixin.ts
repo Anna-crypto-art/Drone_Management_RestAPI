@@ -3,13 +3,16 @@ import { FeatureProperties, Legend, LegendEntry } from "@/app/plant/shared/visua
 import { complimentaryColor } from "@/app/shared/services/helper/color-helper";
 import { FeatureLike } from "ol/Feature";
 import { CspPtcKeyFigureLayer } from "../csp-ptc-key-figure-layer";
-import { IOffsetClassKeyFigureMixin } from "./types";
+import { CompareClassLimitsKeyFigureMixin } from "./compare-class-limits-key-figure-mixin";
+import { ICompareClassLimitsKeyFigureMixin } from "./types";
 
-export class OffsetClassKeyFigureMixin {
+export class OffsetClassKeyFigureMixin extends CompareClassLimitsKeyFigureMixin {
   public constructor(
-    private readonly layer: CspPtcKeyFigureLayer<any> & IOffsetClassKeyFigureMixin
+    layer: CspPtcKeyFigureLayer<any> & ICompareClassLimitsKeyFigureMixin
   ) {
-    this.layer.enableCompare =  this.layer.getQueryOffsetClass()! > 1;
+    super(layer);
+
+    this.layer.enableCompare =  this.layer.getQueryClass()! > 1;
   }
 
   public getColor(feature: FeatureLike): string {
@@ -23,11 +26,6 @@ export class OffsetClassKeyFigureMixin {
     const complementary = offset !== undefined && offset !== null && offset < 0;
 
     return this.getOffsetColor(complementary);
-  }
-
-  private getDiffColor(featureProperties: FeatureProperties): string {
-    const comparedFeatureType = this.layer.getComparedFeatureType(featureProperties, this.layer.getQueryOffsetClass()!);
-    return this.layer.getDiffColorByComparedFeatureType(comparedFeatureType);
   }
 
   public getLegend(): Legend | undefined {
@@ -48,7 +46,7 @@ export class OffsetClassKeyFigureMixin {
       },
     ];
 
-    if (this.layer.getQueryOffsetClass() === 2 || this.layer.getQueryOffsetClass() === 3) {
+    if (this.layer.getQueryClass() === 2 || this.layer.getQueryClass() === 3) {
       legendEntries.push({
         color: this.getOffsetColor(true),
         name: this.getLegendName(true, negativeFeatureCount),
@@ -66,18 +64,18 @@ export class OffsetClassKeyFigureMixin {
       return KeyFigureColors.grey;
     }
 
-    let color = this.layer.getClassColor(this.layer.getQueryOffsetClass());
-    if (complementary && this.layer.getQueryOffsetClass() && this.layer.getQueryOffsetClass()! > 1) {
+    let color = this.layer.getClassColor(this.layer.getQueryClass());
+    if (complementary && this.layer.getQueryClass() && this.layer.getQueryClass()! > 1) {
       if (this.layer.colorScheme === KeyFigureColorScheme.RAINBOW) {
         color = complimentaryColor(color);
       } else if (this.layer.colorScheme === KeyFigureColorScheme.TRAFFIC_LIGHT) {
-        if (this.layer.getQueryOffsetClass() === 2) {
+        if (this.layer.getQueryClass() === 2) {
           color = this.layer.getColorWithAlpha(KeyFigureColors.blue, 0.4);
-        } else if (this.layer.getQueryOffsetClass() === 3) {
+        } else if (this.layer.getQueryClass() === 3) {
           color = KeyFigureColors.blue;
         }
       }
-    } else if (!complementary && this.layer.getQueryOffsetClass() && this.layer.getQueryOffsetClass() === 2) {
+    } else if (!complementary && this.layer.getQueryClass() && this.layer.getQueryClass() === 2) {
       color = this.layer.getColorWithAlpha(KeyFigureColors.red, 0.4);
     }
 
@@ -86,18 +84,18 @@ export class OffsetClassKeyFigureMixin {
 
   private getLegendName(negativeOffset = false, featureCount?: number): string {
     const unit = this.layer.getUnit();
-    const limitAt0 = this.layer.getOffsetClassLimits()[0] + unit;
-    const limitAt1 = this.layer.getOffsetClassLimits()[1] + unit;
+    const limitAt0 = this.layer.getClassLimits()[0] + unit;
+    const limitAt1 = this.layer.getClassLimits()[1] + unit;
 
     if (this.layer.query?.undefined === 1) {
       return this.layer.vueComponent.$t("not-measured").toString() + this.layer.getLegendEntryCount();
     }
 
-    if (this.layer.getQueryOffsetClass() === 1) {
+    if (this.layer.getQueryClass() === 1) {
       return this.layer.vueComponent.$t("less-than", {limit: limitAt0}).toString() + ": " + this.layer.getLegendEntryCount();
     }
 
-    if (this.layer.getQueryOffsetClass() === 2) {
+    if (this.layer.getQueryClass() === 2) {
       if (negativeOffset) {
         return this.layer.vueComponent.$t("between-and", {limit1: "-" + limitAt1, limit2: "-" + limitAt0}).toString() +
           ": " + this.layer.getLegendEntryCount(featureCount);
@@ -107,7 +105,7 @@ export class OffsetClassKeyFigureMixin {
           ": " + this.layer.getLegendEntryCount(featureCount);
     }
     
-    if (this.layer.getQueryOffsetClass() === 3) {
+    if (this.layer.getQueryClass() === 3) {
       if (negativeOffset) {
         return this.layer.vueComponent.$t("less-than", {limit: "-" + limitAt1}).toString() + 
           ": " + this.layer.getLegendEntryCount(featureCount);
@@ -120,87 +118,10 @@ export class OffsetClassKeyFigureMixin {
     throw Error("Unsupported query value for orientation offset");
   }
 
-  private getDiffLegend(): Legend {
-    const comparedFeatures = this.layer.getComparedFeatures(this.layer.getQueryOffsetClass()!);
-
-    const compareEntries: LegendEntry[] = [{
-      color: KeyFigureColors.red,
-      name: this.layer.vueComponent.$t("of-which-are-new").toString() + 
-        this.layer.getLegendEntryCount(comparedFeatures.newWorsenedFeatures.length),
-      indent: true,
-    }];
-
-    if (comparedFeatures.newImprovedFeatures.length > 0) {
-      compareEntries.push({
-        color: KeyFigureColors.grey,
-        name: this.layer.vueComponent.$t("of-which-are-new-but-improved").toString() + 
-          this.layer.getLegendEntryCount(comparedFeatures.newImprovedFeatures.length),
-        indent: true,
-      });
-    }
-
-    compareEntries.push({
-      color: KeyFigureColors.green,
-      name: this.layer.vueComponent.$t("fixed").toString() +
-        this.layer.getLegendEntryCount(comparedFeatures.goneFixedFeatures.length),
-    });
-
-    if (comparedFeatures.goneImprovedFeatures.length > 0) {
-      compareEntries.push({
-        color: this.layer.getColorWithAlpha(KeyFigureColors.green, 0.5),
-        name: this.layer.vueComponent.$t("improved-not-fixed").toString() + 
-          this.layer.getLegendEntryCount(comparedFeatures.goneImprovedFeatures.length),
-      });
-    }
-
-    return {
-      id: this.layer.getLegendId(),
-      entries: [
-        {
-          color: KeyFigureColors.black,
-          name: this.layer.vueComponent.$t("alignment-offset-class-" + this.layer.getQueryOffsetClass(), {
-              limit0: this.layer.getOffsetClassLimits()[0],
-              limit1: this.layer.getOffsetClassLimits()[1],
-            }).toString() + this.layer.getLegendEntryCount(this.layer.geoJSON!.features.length - comparedFeatures.goneFeatures.length),
-        },
-        ...compareEntries
-      ],
-    };
-  }
-
-  public getFeaturePropertiesClassValue(properties: FeatureProperties): FeatureProperties {
-    const featureValue: number = properties.value! as number;
-    const featureDiffValue: number = (properties.diff_value || 0) as number;
-
-    const classFeatureValue = this.getFeatureClassValue(featureValue);
-    let classFeatureDiffValue = this.getFeatureClassValue(featureValue + featureDiffValue) - classFeatureValue;
-
-    // keep the diff direction
-    if (classFeatureDiffValue < 0 && featureDiffValue > 0 || classFeatureDiffValue > 0 && featureDiffValue < 0) {
-      classFeatureDiffValue *= -1;
-    }
-
-    return {
-      name: properties.name,
-      value: classFeatureValue,
-      diff_value: classFeatureDiffValue,
-    };
-  }
-
-  private getFeatureClassValue(featureValue: number): number {
-    const limitAt0 = this.layer.getOffsetClassLimits()[0];
-    const limitAt1 = this.layer.getOffsetClassLimits()[1];
-
-    featureValue = Math.abs(featureValue);
-
-    if (featureValue < limitAt0) {
-      return 1;
-    } else if (featureValue >= limitAt0 && featureValue < limitAt1) {
-      return 2;
-    } else if (featureValue >= limitAt1) {
-      return 3;
-    }
-
-    throw Error("featureValue exceeds class ranges")
+  public getDiffLegendName(): string {
+    return this.layer.vueComponent.$t("alignment-offset-class-" + this.layer.getQueryClass(), {
+      limit0: this.layer.getClassLimits()[0],
+      limit1: this.layer.getClassLimits()[1],
+    }).toString()
   }
 }

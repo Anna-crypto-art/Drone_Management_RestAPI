@@ -3,9 +3,9 @@ import { FeatureLike } from "ol/Feature";
 import { Style } from "ol/style";
 import { HceKeyFigureLayer } from "./abstract/hce-key-figure-layer";
 import { OffsetClassKeyFigureMixin } from "../key-figure-mixins/offset-class-key-figure-mixin";
-import { IOffsetClassKeyFigureMixin } from "../key-figure-mixins/types";
+import { ICompareClassLimitsKeyFigureMixin } from "../key-figure-mixins/types";
 
-abstract class HcePositionKeyFigureLayer extends HceKeyFigureLayer implements IOffsetClassKeyFigureMixin {
+abstract class HcePositionKeyFigureLayer extends HceKeyFigureLayer implements ICompareClassLimitsKeyFigureMixin {
   private offsetClassKeyFigureMixin!: OffsetClassKeyFigureMixin;
 
   protected abstract getHcePositionOffsetClass(): number | undefined;
@@ -16,11 +16,11 @@ abstract class HcePositionKeyFigureLayer extends HceKeyFigureLayer implements IO
     this.offsetClassKeyFigureMixin = new OffsetClassKeyFigureMixin(this);
   }
 
-  public getOffsetClassLimits(): number[] {
+  public getClassLimits(): number[] {
     return this.analysisResult.csp_ptc.hce_position_total_class_limits;
   }
 
-  public getQueryOffsetClass(): number | undefined {
+  public getQueryClass(): number | undefined {
     return this.getHcePositionOffsetClass();
   }
 
@@ -45,6 +45,10 @@ abstract class HcePositionKeyFigureLayer extends HceKeyFigureLayer implements IO
 
   public getUnit(): string {
     return "[mm]";
+  }
+
+  public getDiffLegendName(): string {
+    return this.offsetClassKeyFigureMixin.getDiffLegendName();
   }
 }
 

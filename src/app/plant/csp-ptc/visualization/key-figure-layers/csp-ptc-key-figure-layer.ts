@@ -65,6 +65,7 @@ export abstract class CspPtcKeyFigureLayer<T extends AnalysisResultSchemaBase> e
       case ComparedFeatureType.GONE_FIXED:
         return KeyFigureColors.green;
       
+      case ComparedFeatureType.GONE_WORSENED:
       case ComparedFeatureType.GONE_IMPROVED:
         return this.getColorWithAlpha(KeyFigureColors.green, 0.5)
       
@@ -76,9 +77,7 @@ export abstract class CspPtcKeyFigureLayer<T extends AnalysisResultSchemaBase> e
 
       case ComparedFeatureType.NO_CHANGE:
         return KeyFigureColors.black;
-      
-      case ComparedFeatureType.GONE_WORSENED:
-        return KeyFigureColors.blue;
+
     }
   }
 

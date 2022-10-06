@@ -2,10 +2,10 @@ import { ComparedFeatureType, FeatureProperties, Legend } from "@/app/plant/shar
 import { FeatureLike } from "ol/Feature";
 import { Style } from "ol/style";
 import { OffsetClassKeyFigureMixin } from "../../key-figure-mixins/offset-class-key-figure-mixin";
-import { IOffsetClassKeyFigureMixin } from "../../key-figure-mixins/types";
+import { ICompareClassLimitsKeyFigureMixin } from "../../key-figure-mixins/types";
 import { ScaKeyFigureLayer } from "./sca-key-figure-layer";
 
-export abstract class OrientationKeyFigureLayer extends ScaKeyFigureLayer implements IOffsetClassKeyFigureMixin {
+export abstract class OrientationKeyFigureLayer extends ScaKeyFigureLayer implements ICompareClassLimitsKeyFigureMixin {
   private offsetClassKeyFigureMixin!: OffsetClassKeyFigureMixin;
 
   protected created(): void {
@@ -28,11 +28,11 @@ export abstract class OrientationKeyFigureLayer extends ScaKeyFigureLayer implem
    
   protected abstract getOrientationOffsetClassLimits(): number[];
 
-  public getOffsetClassLimits(): number[] {
+  public getClassLimits(): number[] {
     return this.getOrientationOffsetClassLimits();
   }
 
-  public getQueryOffsetClass(): number | undefined {
+  public getQueryClass(): number | undefined {
     return this.query?.orientation_offset_class;
   }
 
@@ -45,5 +45,9 @@ export abstract class OrientationKeyFigureLayer extends ScaKeyFigureLayer implem
       this.offsetClassKeyFigureMixin.getFeaturePropertiesClassValue(properties),
       currentClass
     );
+  }
+
+  public getDiffLegendName(): string {
+    return this.offsetClassKeyFigureMixin.getDiffLegendName();
   }
 }

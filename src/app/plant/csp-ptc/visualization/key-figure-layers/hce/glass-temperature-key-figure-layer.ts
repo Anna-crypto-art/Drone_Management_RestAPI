@@ -1,21 +1,26 @@
 import { KeyFigureColors, KeyFigureColorScheme } from "@/app/plant/shared/visualization/layers/types";
 import { FeatureProperties, Legend, LegendEntry } from "@/app/plant/shared/visualization/types";
+import { CompareClassKeyFigureMixin } from "../key-figure-mixins/compare-class-key-figure-mixin";
+import { ICompareClassKeyFigureMixin } from "../key-figure-mixins/types";
 import { ClassHceKeyFigureLayer } from "./abstract/class-hce-key-figure-layer";
 
-export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer {
+export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer implements ICompareClassKeyFigureMixin {
+  private compareClassKeyFigureMixin!: CompareClassKeyFigureMixin<ICompareClassKeyFigureMixin>;
+
   protected created(): void {
     super.created();
+
+    this.compareClassKeyFigureMixin = new CompareClassKeyFigureMixin(this);
 
     this.enableCompare = this.query!.glass_tube_temperature_class! > 1;
   }
 
-  protected getQueryClass(): number | undefined {
+  public getQueryClass(): number | undefined {
     return this.query?.glass_tube_temperature_class;
   }
 
   protected getDiffColor(featureProperties: FeatureProperties): string {
-    const comparedFeatureType = this.getComparedFeatureType(featureProperties, this.query!.glass_tube_temperature_class!);
-    return this.getDiffColorByComparedFeatureType(comparedFeatureType);
+    return this.compareClassKeyFigureMixin.getDiffColor(featureProperties);
   }
 
   public getClassColor(classValue: number | undefined): string {
@@ -44,46 +49,17 @@ export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer {
     }
 
     const compareEntries: LegendEntry[] = [];
-    let featureCount = this.geoJSON!.features.length
     if (this.compareAnalysisResult) {
-      const comparedFeatures = this.getComparedFeatures(this.query!.glass_tube_temperature_class!);
-      featureCount -= comparedFeatures.goneFeatures.length;
-
-      compareEntries.push({
-        color: KeyFigureColors.red,
-        name: this.vueComponent.$t("of-which-are-new").toString() + 
-          this.getLegendEntryCount(comparedFeatures.newWorsenedFeatures.length),
-        indent: true,
-      });
-
-      if (comparedFeatures.newImprovedFeatures.length > 0) {
-        compareEntries.push({
-          color: KeyFigureColors.grey,
-          name: this.vueComponent.$t("of-which-are-new-but-improved").toString() + 
-            this.getLegendEntryCount(comparedFeatures.newImprovedFeatures.length),
-          indent: true,
-        });
-      }
-
-      compareEntries.push({
-        color: KeyFigureColors.green,
-        name: this.vueComponent.$t("fixed").toString() + this.getLegendEntryCount(comparedFeatures.goneFixedFeatures.length),
-      });
-
-      if (comparedFeatures.goneImprovedFeatures.length > 0) {
-        compareEntries.push({
-          color: this.getColorWithAlpha(KeyFigureColors.green, 0.5),
-          name: this.vueComponent.$t("improved-not-fixed").toString() + this.getLegendEntryCount(comparedFeatures.goneImprovedFeatures.length),
-        });
-      }
+      return this.compareClassKeyFigureMixin.getDiffLegend();
     }
 
     return {
       id: this.getLegendId(),
       entries: [
         {
-          color: this.compareAnalysisResult ? KeyFigureColors.black : this.getColor(),
-          name: this.vueComponent.$t(this.getLegendName()).toString() + this.getLegendEntryCount(featureCount),
+          color: this.getColor(),
+          name: this.vueComponent.$t(this.getLegendName()).toString() + 
+            this.getLegendEntryCount(this.geoJSON!.features.length),
         },
         ...compareEntries
       ],
@@ -100,5 +76,9 @@ export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer {
     }
 
     return super.getLegendName();
+  }
+
+  public getDiffLegendName(): string {
+    return this.vueComponent.$t(this.getLegendName()).toString();
   }
 }
