@@ -1,6 +1,6 @@
 <template>
-  <div class="layer-display-tabs">
-    <div v-if="isRoot">
+  <div class="layer-display" :class="{ 'visible-layer': visible }">
+    <div v-if="isRoot" class="layer-display-tabs">
       <b-tabs>
         <b-tab v-for="(childLayer, layerIndex) in layer.getVisibleChildLayers()" :key="layerIndex">
           <template #title>
@@ -26,11 +26,10 @@
     <div
       v-if="!isRoot"
       v-show="visible"
-      :class="
-        'layer-display' +
-        (layer.isGroup ? ' layer-display-group' : '') +
-        (level === 'subroot' ? ' layer-display-subroot ' : ' pad-left') +
-        layer.styleClass
+      :class="'layer-display-level-' + layerGroupLevel + 
+        ' ' + layer.styleClass +
+        (!isSubroot ? ' pad-left' : '') +
+        (layer.isGroup ? ' layer-display-group' : '')
       "
     >
       <b-form-checkbox v-if="!layer.isGroup" :checked="selected" @change="onChange">
@@ -39,7 +38,7 @@
           <app-explanation v-if="layer.description"><span v-html="layer.description"></span></app-explanation>
         </slot>
       </b-form-checkbox>
-      <h3 v-if="level !== 'subroot' && layer.isGroup && layer.name" :class="'layer-display-group-level-' + layerGroupLevel">
+      <h3 v-if="!isSubroot && layer.isGroup && layer.name" class="layer-display-group-title">
         <div @click="onCollapse(layer)" class="layer-collapse" :class="{ open: collapsed }">
           <slot :name="layer.name">
             {{ layer.name }}
@@ -72,7 +71,7 @@
             :level="level === 'root' ? 'subroot' : 'other'"
             :layer="childLayer"
             :key="layerIndex"
-            :initCollapsed="layerIndex === 0"
+            :initCollapsed="isFirstVisibleLayer(childLayer)"
           >
             <!-- Pass slots through -->
             <template v-for="(_, slot) in $slots">
@@ -174,7 +173,7 @@ export default class AppGeovisualLayerDisplay extends Vue {
   get layerGroupLevel(): number {
     let level = 0;
     let parentLayer: LayerStructure | undefined = this.layer.parentLayer;
-    while (parentLayer && level < 3) {
+    while (parentLayer && level < 4) {
       level++;
       parentLayer = parentLayer.parentLayer;
     }
@@ -183,7 +182,11 @@ export default class AppGeovisualLayerDisplay extends Vue {
   }
 
   get isRoot(): boolean {
-    return this.level === 'root'
+    return this.level === 'root';
+  }
+
+  get isSubroot(): boolean {
+    return this.level === 'subroot';
   }
 
   onCollapse(layer: LayerStructure) {
@@ -191,33 +194,45 @@ export default class AppGeovisualLayerDisplay extends Vue {
       this.collapsed = !this.collapsed;
     }
   }
+
+  isFirstVisibleLayer(layer: LayerStructure): boolean {
+    const visibleChildLayers = this.layer.getVisibleChildLayers();
+
+    return visibleChildLayers.length > 0 && visibleChildLayers[0].id === layer.id;
+  }
 }
 </script>
 
 <style lang="scss">
 .layer-display {
-  // .layer-display {
-  //   padding-left: 20px;
+  &-tabs {
+    .tabs .nav-link:not(.active) .layer-tab-name {
+      display: none;
+    }
 
-  //   &-subroot {
-  //     padding-left: 0;
-  //   }
-  // }
-
-  &-group-level-2 {
-    margin-top: 1em;
-    font-size: 1.3rem;
-    margin-bottom: 10px;
+    .tab-content {
+      padding-top: 1em;
+    }
   }
 
-  &-group-level-3 {
-    margin-top: 15px !important;
-    font-size: 1.1rem;
-    margin-top: 10px;
+  &-level-2.layer-display-group {
+    margin-bottom: 1em;
+
+    .layer-display-group-title {
+      font-size: 1.3rem;
+      margin-top: 0;
+      margin-bottom: 0.5em;
+    }
   }
 
-  &.margin-top {
-    margin-top: 30px;
+  &-level-3.layer-display-group {
+    margin-top: 0;
+
+    .layer-display-group-title {
+      font-size: 1.1rem;
+      margin-top: 0;
+      margin-bottom: 0.5em;
+    }
   }
 
   .layer-collapse {
@@ -225,18 +240,9 @@ export default class AppGeovisualLayerDisplay extends Vue {
   }
 }
 
-.layer-display-tabs {
-  .tabs .nav-link:not(.active) .layer-tab-name {
-    display: none;
-  }
-
-  .tab-content {
-    padding-top: 1em;
-  }
-}
-
-.tab-content > .tab-pane > .layer-display-tabs > .layer-display-group > .layer-sublayers > div > .layer-display-tabs:first-child > .layer-display-group > .layer-display-group-level-2 {
-  margin-top: 0;
+.layer-display > .layer-display-group > .layer-sublayers > div > .layer-display.visible-layer ~ 
+.layer-display.visible-layer > .layer-display-level-3.layer-display-group{
+  margin-top: 1em;
 }
 
 </style>

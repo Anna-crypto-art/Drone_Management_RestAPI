@@ -117,10 +117,14 @@ export default class AppAnalysisSelectionSidebar extends Vue {
 
   onAnalysisResultSelected(selectedAnalysisResult: { id: string }[]): void {
     if (selectedAnalysisResult.length > 2) {
-      const newSelectedIndex = selectedAnalysisResult
-        .findIndex(selected => !this.lastSelectedAnalysisResults.find(lastSelected => lastSelected.id === selected.id))
+      const newSelected = selectedAnalysisResult
+        .find(selected => !this.lastSelectedAnalysisResults.find(lastSelected => lastSelected.id === selected.id))
       
-      this.analysisResultsTable.unselectRow(newSelectedIndex)
+      if (newSelected) {
+        const newSelectedIndex = this.analysisResultsTableItems.findIndex(row => row.id === newSelected.id);
+        this.analysisResultsTable.unselectRow(newSelectedIndex)
+      }
+      
       return;
     }
     this.lastSelectedAnalysisResults = selectedAnalysisResult;
