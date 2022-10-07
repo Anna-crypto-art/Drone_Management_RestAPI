@@ -504,8 +504,6 @@ export default class AppVisualization
         }
       } else {
         if (legendIndex != -1) {
-          console.log("remove legend")
-          console.log(legend)
           this.legends.splice(legendIndex, 1);
         }
       }
