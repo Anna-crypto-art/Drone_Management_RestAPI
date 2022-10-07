@@ -1,5 +1,7 @@
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { EventHelper } from "@/app/shared/services/helper/event-helper";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
+import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { AnalysisSelectionService } from "./analysis-selection-service";
@@ -7,10 +9,12 @@ import { AnalysisSelectionEvent } from "./types";
 
 export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
   abstract plant: PlantSchema;
-  abstract analysisResults: AnalysisResultDetailedSchema[] | null;
+  abstract analyses: AnalysisForViewSchema[] | null;
 
-  protected selectedAnalysisResult: AnalysisResultDetailedSchema | null = null;
-  protected selectedAnalysesResults: AnalysisResultDetailedSchema[] | null = null; // compare mode
+  private selectedAnalysis: AnalysisForViewSchema | null = null;
+  private selectedAnalyses: AnalysisForViewSchema[] | null = null; // compare mode
+
+  private eventHelper = new EventHelper();
 
   async created() {
     super.created();
@@ -18,51 +22,51 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
     AnalysisSelectionService.on(
       this.plant.id,
       AnalysisSelectionEvent.ANALYSIS_SELECTED,
-      async (selectedAnalysisResultId: string | undefined) => {
-        if (this.analysisResults) {
-          this.selectedAnalysisResult = this.analysisResults
-            .find(analysisResult => analysisResult.id === selectedAnalysisResultId) || null;
-
-          if (this.selectedAnalysisResult) {
-            this.selectedAnalysesResults = null;
+      this.eventHelper.registerEvent(AnalysisSelectionEvent.ANALYSIS_SELECTED, async (selectedAnalysisId: string | undefined) => {
+        if (this.analyses) {
+          this.selectedAnalysis = this.analyses
+            .find(analysis => analysis.id === selectedAnalysisId) || null;
+    
+          if (this.selectedAnalysis) {
+            this.selectedAnalyses = null;
           }
         }
-
+    
         await this.onAnalysisSelected();
-      }
-    )
+      })
+    );
 
     AnalysisSelectionService.on(
       this.plant.id,
       AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED,
-      async (selectedAnalysisResultIds: string[] | undefined) => {
-        if (!selectedAnalysisResultIds) {
-          this.selectedAnalysesResults = null;
-        } else if (this.analysisResults) {
-          this.selectedAnalysesResults = this.analysisResults
-            .filter(analysisResult => selectedAnalysisResultIds.includes(analysisResult.id));
-
-            if (this.selectedAnalysesResults) {
-              this.selectedAnalysisResult = null;
-            }
+      this.eventHelper.registerEvent(AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED, async (selectedAnalysesIds: string[] | undefined) => {
+        if (!selectedAnalysesIds) {
+          this.selectedAnalyses = null;
+        } else if (this.analyses) {
+          this.selectedAnalyses = this.analyses
+            .filter(analysis => selectedAnalysesIds.includes(analysis.id));
+    
+          if (this.selectedAnalyses.length > 1) {
+            this.selectedAnalysis = null;
+          }
         }
-
+    
         await this.onMultiAnalysesSelected();
-      }
-    )
+      })
+    );
   }
 
   protected async onAnalysisSelected() { /* override me, if you need to */ }
   protected async onMultiAnalysesSelected() { /* override me, if you need to */ }
 
   protected getKeyFigures(): KeyFigureSchema[] {
-    if (this.selectedAnalysisResult) {
-      return this.selectedAnalysisResult.key_figures;
+    if (this.selectedAnalysis?.analysis_result) {
+      return this.selectedAnalysis?.analysis_result.key_figures;
     }
 
-    if (this.selectedAnalysesResults) {
-      return this.selectedAnalysesResults[0].key_figures.filter(key_figure => {
-        return !!this.selectedAnalysesResults![1].key_figures.find(kf => kf.id === key_figure.id)
+    if (this.selectedAnalyses) {
+      return this.selectedAnalyses[0].analysis_result!.key_figures.filter(key_figure => {
+        return !!this.selectedAnalyses![1].analysis_result!.key_figures.find(kf => kf.id === key_figure.id)
       });
     }
 
@@ -70,27 +74,27 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
   }
 
   protected hasAnyAnalysisSelected(): boolean {
-    return this.selectedAnalysisResult !== null || this.selectedAnalysesResults !== null;
+    return this.selectedAnalysis !== null || this.selectedAnalyses !== null;
   }
 
   protected get firstAnalysisResult(): AnalysisResultDetailedSchema | null {
-    if (this.selectedAnalysisResult) {
-      return this.selectedAnalysisResult;
-    }
-
-    if (this.selectedAnalysesResults) {
-      return this.selectedAnalysesResults[0];
-    }
-
-    return null;
+    return this.selectedAnalysis?.analysis_result || 
+      (this.selectedAnalyses && this.selectedAnalyses[0].analysis_result) || null;
   }
 
   protected get compareAnalysisResult(): AnalysisResultDetailedSchema | null {
-    if (this.selectedAnalysesResults) {
-      return this.selectedAnalysesResults[1];
-    }
-
-    return null;
+    return (this.selectedAnalyses && this.selectedAnalyses[1].analysis_result) || null;
   }
 
+  protected get firstAnalysis(): AnalysisForViewSchema | null {
+    return this.selectedAnalysis;
+  }
+
+  protected get analysisResults(): AnalysisResultDetailedSchema[] {
+    return this.analyses?.map(analysis => analysis.analysis_result!).filter(analysisResult => !!analysisResult) || [];
+  }
+
+  beforeDestroy() {
+    this.eventHelper.unregisterAll(AnalysisSelectionService.getAnalysisSelectionEventBus(this.plant.id));
+  }
 }

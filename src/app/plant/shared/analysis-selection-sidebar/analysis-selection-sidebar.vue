@@ -5,7 +5,7 @@
         <h2 class="analysis-selection-sidebar-leftside-title">
           {{ plant.name }}
         </h2>
-        <div class="analysis-selection-sidebar-leftside-settings" v-if="analysisResults.length > 1">
+        <div class="analysis-selection-sidebar-leftside-settings" v-if="analyses.length > 1">
           <b-checkbox switch v-model="compareMode" @change="onCompareModeChanged">
             {{ $t("compare-mode") }}
             <app-explanation>{{ $t("compare-mode_descr") }}</app-explanation>
@@ -13,21 +13,26 @@
         </div>
         <app-table-container>
           <b-table
-            ref="analysisResultsTable"
-            :items="analysisResultsTableItems"
-            :fields="analysisResultsTableColumns"
+            ref="analysesTable"
+            :items="analysesTableItems"
+            :fields="analysesTableColumns"
             :select-mode="selectMode"
             selectable
             hover
             head-variant="light"
-            @row-selected="onAnalysisResultSelected"
+            @row-selected="onAnalysisSelected"
           >
             <template #head(selected)></template>
             <template #cell(selected)="{ rowSelected }">
               <b-checkbox v-if="compareMode" :checked="rowSelected" disabled class="b-table-selectable-checkbox"></b-checkbox>
             </template>
             <template #cell(name)="row">
-              {{ row.item.date }}
+              {{ row.item.date }} 
+              <app-icon v-if="row.item.refMeasureCount > 0"
+                icon="clipboard-check"
+                class="mar-left-half blue"
+                v-b-popover.hover.top="$t('has-ref-measures', { count: row.item.refMeasureCount })"
+              />
               <br>
               <small class="grayed">{{ row.item.name }}</small>
               <div :class="{ 'mar-top': row.item.orderPPs && row.item.orderPPs.length > 0 }">
@@ -45,7 +50,6 @@
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
-import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { BvTableFieldArray } from "bootstrap-vue";
@@ -57,6 +61,8 @@ import { AnalysisSelectionEvent } from "./types";
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import { RouteQueryHelper } from "../helper/route-query-helper";
 import AppOrderPpsView from "@/app/shared/components/app-order-pps-view/app-order-pps-view.vue";
+import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import AppIcon from "@/app/shared/components/app-icon/app-icon.vue";
 
 @Component({
   name: "app-analysis-selection-sidebar",
@@ -65,42 +71,44 @@ import AppOrderPpsView from "@/app/shared/components/app-order-pps-view/app-orde
     AppExplanation,
     AppSidebar,
     AppOrderPpsView,
+    AppIcon,
   },
 })
 export default class AppAnalysisSelectionSidebar extends Vue {
   @Prop() plant!: PlantSchema;
-  @Prop() analysisResults!: AnalysisResultDetailedSchema[];
+  @Prop() analyses!: AnalysisForViewSchema[];
   @Prop() getPIColor!: (keyFigure: KeyFigureSchema) => string;
   @Prop() absolute!: boolean;
-  @Ref() analysisResultsTable!: any; // b-table
+  @Ref() analysesTable!: any; // b-table
   @State(state => state.sidebar["analysis"]) sidebarOpen!: boolean;
 
-  analysisResultsTableColumns: BvTableFieldArray = [
+  analysesTableColumns: BvTableFieldArray = [
     { key: "selected", label: "",  },
     { key: "name", label: this.$t("analysis").toString() },
   ];
-  analysisResultsTableItems: Record<string, unknown>[] = [];
+  analysesTableItems: Record<string, unknown>[] = [];
 
   compareMode = false;
   selectMode = "single";
-  lastSelectedAnalysisResults: { id: string }[] = [];
+  lastSelectedAnalyses: { id: string }[] = [];
 
   private routeQueryHelper = new RouteQueryHelper(this);
 
   async created() {
-    for (const analysisResult of this.analysisResults) {
-      this.analysisResultsTableItems.push({
-        id: analysisResult.id,
-        name: analysisResult.analysis.name,
-        date: dateHelper.toDate(analysisResult.analysis.flown_at),
-        orderPPs: analysisResult.analysis.order_product_packages,
+    for (const analysis of this.analyses) {
+      this.analysesTableItems.push({
+        id: analysis.id,
+        name: analysis.name,
+        date: dateHelper.toDate(analysis.flown_at),
+        orderPPs: analysis.order_product_packages,
+        refMeasureCount: analysis.reference_measurements.length,
       });
     }
 
     await this.selectAnalysis();
 
     AnalysisSelectionService.on(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL, () => {
-      this.analysisResultsTable.clearSelected();
+      this.analysesTable.clearSelected();
     });
 
     AnalysisSelectionService.on(this.plant.id, AnalysisSelectionEvent.SELECT_FIRST, async () => {
@@ -115,46 +123,58 @@ export default class AppAnalysisSelectionSidebar extends Vue {
     });
   }
 
-  onAnalysisResultSelected(selectedAnalysisResult: { id: string }[]): void {
-    if (selectedAnalysisResult.length > 2) {
-      const newSelected = selectedAnalysisResult
-        .find(selected => !this.lastSelectedAnalysisResults.find(lastSelected => lastSelected.id === selected.id))
+  onAnalysisSelected(selectedAnalyses: { id: string }[]): void {
+    if (selectedAnalyses.length > 2) {
+      const newSelected = selectedAnalyses
+        .find(selected => !this.lastSelectedAnalyses.find(lastSelected => lastSelected.id === selected.id))
       
       if (newSelected) {
-        const newSelectedIndex = this.analysisResultsTableItems.findIndex(row => row.id === newSelected.id);
-        this.analysisResultsTable.unselectRow(newSelectedIndex)
+        this.unselectAnalysis(newSelected.id);
       }
       
       return;
     }
-    this.lastSelectedAnalysisResults = selectedAnalysisResult;
+    this.lastSelectedAnalyses = selectedAnalyses;
 
     if (this.compareMode) {
-      let selectedAnalysisResultIds: string[] | undefined = undefined;
-      if (selectedAnalysisResult && selectedAnalysisResult.length === 2) {
-        selectedAnalysisResultIds = [selectedAnalysisResult[0].id, selectedAnalysisResult[1].id];
+      if (selectedAnalyses.length > 0) {
+        const selectedAnalysesWithoutResults = this.analyses.filter(analysis => 
+          selectedAnalyses.find(selectedAnalysis => selectedAnalysis.id === analysis.id) && !analysis.analysis_result);
+        
+        if (selectedAnalysesWithoutResults.length > 0) {
+          for (const selectedAnalysisWithoutResults of selectedAnalysesWithoutResults) {
+            this.unselectAnalysis(selectedAnalysisWithoutResults.id);
+          }
+
+          return;
+        }
+      }
+
+      let selectedAnalysisIds: string[] | undefined = undefined;
+      if (selectedAnalyses && selectedAnalyses.length === 2) {
+        selectedAnalysisIds = [selectedAnalyses[0].id, selectedAnalyses[1].id];
 
         AnalysisSelectionService.emit(
           this.plant.id,
           AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED,
-          selectedAnalysisResultIds
+          selectedAnalysisIds
         );
 
-        this.routeQueryHelper.replaceRoute({ result: selectedAnalysisResultIds });
+        this.routeQueryHelper.replaceRoute({ result: selectedAnalysisIds });
       }
     } else {
-      let selectedAnalysisResultId: string | undefined = undefined
-      if (selectedAnalysisResult && selectedAnalysisResult.length > 0) {
-        selectedAnalysisResultId = selectedAnalysisResult[0].id;
+      let selectedAnalysisId: string | undefined = undefined
+      if (selectedAnalyses && selectedAnalyses.length > 0) {
+        selectedAnalysisId = selectedAnalyses[0].id;
       }
 
       AnalysisSelectionService.emit(
         this.plant.id,
         AnalysisSelectionEvent.ANALYSIS_SELECTED,
-        selectedAnalysisResultId
+        selectedAnalysisId
       );
 
-      this.routeQueryHelper.replaceRoute({ result: selectedAnalysisResultId });
+      this.routeQueryHelper.replaceRoute({ result: selectedAnalysisId });
     }
   }
 
@@ -163,12 +183,26 @@ export default class AppAnalysisSelectionSidebar extends Vue {
   }
 
   async onCompareModeChanged() {
-    this.selectMode = this.compareMode ? "multi" : "single";
+    let selectIndex = -1;
 
     if (!this.compareMode) {
-      // if compare mode has been finished, select first row again
+      selectIndex = 0;
+      if (this.lastSelectedAnalyses && this.lastSelectedAnalyses.length > 0) {
+        selectIndex = this.analysesTableItems.findIndex(row => row.id === this.lastSelectedAnalyses[0].id);
+      }
+    }
+
+    this.selectMode = this.compareMode ? "multi" : "single";
+
+    if (selectIndex >= 0) {
+      // Wait for table reselection
       await this.$nextTick();
-      this.analysisResultsTable.selectRow(0);
+      await this.$nextTick();
+      await this.$nextTick();
+      await this.$nextTick();
+      await this.$nextTick();
+
+      this.analysesTable.selectRow(selectIndex);
     }
   }
 
@@ -177,24 +211,24 @@ export default class AppAnalysisSelectionSidebar extends Vue {
   }
 
   private async selectAnalysis(selectFirst = false): Promise<void> {
-    if (this.analysisResults.length > 0) {
+    if (this.analyses.length > 0) {
       let tableRowIndex = 0;
-      const analysisResultId = this.$route.query.result;
+      const analysisId = this.$route.query.result;
 
-      if (analysisResultId && !selectFirst) {
-        if (typeof analysisResultId === "string") {
-          tableRowIndex = this.analysisResults.findIndex(analysisResult => analysisResult.id === analysisResultId);
-        } else if (Array.isArray(analysisResultId) && analysisResultId.length === 2) {
-          const firstAnalysisId = analysisResultId[0];
-          const seconedAnalysisId = analysisResultId[1];
-          const firstTableRowIndex = this.analysisResults.findIndex(analysisResult => analysisResult.id === firstAnalysisId);
-          const secondTableRowIndex = this.analysisResults.findIndex(analysisResult => analysisResult.id === seconedAnalysisId);
+      if (analysisId && !selectFirst) {
+        if (typeof analysisId === "string") {
+          tableRowIndex = this.analyses.findIndex(analysis => analysis.id === analysisId);
+        } else if (Array.isArray(analysisId) && analysisId.length === 2) {
+          const firstAnalysisId = analysisId[0];
+          const seconedAnalysisId = analysisId[1];
+          const firstTableRowIndex = this.analyses.findIndex(analysis => analysis.id === firstAnalysisId);
+          const secondTableRowIndex = this.analyses.findIndex(analysis => analysis.id === seconedAnalysisId);
 
           if (firstTableRowIndex >= 0 && secondTableRowIndex >= 0) {
             this.compareMode = true;
             await this.onCompareModeChanged();
             await this.$nextTick();
-            this.analysisResultsTable.selectRow(firstTableRowIndex);
+            this.analysesTable.selectRow(firstTableRowIndex);
 
             tableRowIndex = secondTableRowIndex;
           }
@@ -202,10 +236,15 @@ export default class AppAnalysisSelectionSidebar extends Vue {
       }
 
       await this.$nextTick();
-      this.analysisResultsTable.selectRow(tableRowIndex);
+      this.analysesTable.selectRow(tableRowIndex);
     } else {
       this.$store.direct.commit.sidebar.set({ name: "analysis", state: false });
     }
+  }
+
+  private unselectAnalysis(analysisId: string) {
+    const selectedIndex = this.analysesTableItems.findIndex(row => row.id === analysisId);
+    this.analysesTable.unselectRow(selectedIndex);
   }
 }
 </script>

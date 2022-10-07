@@ -1,9 +1,10 @@
 import { AnalysisStateSchema } from "./analysis-state-schema";
 import { CustomerSchema } from "./customer-schemas";
 import { SimpleUserSchema } from "./user-schemas";
-import { AnalysisResultSchema } from "./analysis-result-schema";
+import { AnalysisResultDetailedSchema, AnalysisResultSchema } from "./analysis-result-schema";
 import { PlantSchema } from "./plant-schema";
 import { OrderProductPackageSchema } from "./order-schema";
+import { ReferenceMeasurementSchema } from "./reference-measurement-schema";
 
 export interface AnalysisFilesSchema {
   video_files: string[];
@@ -38,4 +39,15 @@ export interface AnalysisSchema extends SimpleAnalysisSchema {
 
 export interface AnalysisFileInfoSchema {
   [filename: string]: { size: number, uploaded_at: string } | undefined;
+}
+
+export interface AnalysisForViewSchema {
+  id: string;
+  name: string;
+  customer: CustomerSchema;
+  plant: PlantSchema;
+  analysis_result?: AnalysisResultDetailedSchema;
+  flown_at: string;
+  order_product_packages: OrderProductPackageSchema[];
+  reference_measurements: ReferenceMeasurementSchema[];
 }

@@ -3,7 +3,7 @@
     <app-visualization
       ref="visualization"
       :plant="plant"
-      :analysisResults="analysisResults"
+      :analyses="analyses"
       :componentLayerTypes="componentLayerTypes"
       :keyFigureLayers="keyFigureLayers"
       @startReferenceMeasurement="onStartReferenceMeasurement"
@@ -171,7 +171,6 @@ import { IPlantVisualization, Legend, ReferenceMeasurementEventObject } from "@/
 import AppVisualization from "@/app/plant/shared/visualization/visualization.vue";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualization/types/components";
-import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Component, Prop, Ref } from "vue-property-decorator";
 import { AnalysisSelectionBaseComponent } from "../../shared/analysis-selection-sidebar/analysis-selection-base-component";
@@ -184,6 +183,7 @@ import { ReferenceMeasurementValueSchema } from "@/app/shared/services/volateq-a
 import { AbsorberComponentLayer } from "./component-layers/absorber-component-layer";
 import { ScaComponentLayer } from "./component-layers/sca-component-layer";
 import { SceComponentLayer } from "./component-layers/sce-component-layer";
+import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 
 @Component({
   name: "app-visual-csp-ptc",
@@ -202,7 +202,7 @@ export default class AppVisualCspPtc
   keyFigureLayers = KEY_FIGURE_LAYERS;
 
   @Prop() plant!: PlantSchema;
-  @Prop() analysisResults!: AnalysisResultDetailedSchema[];
+  @Prop() analyses!: AnalysisForViewSchema[];
   @Ref() visualization: IPlantVisualization | undefined;
   @Ref() refMeasureValueModal!: IAppModalForm;
 

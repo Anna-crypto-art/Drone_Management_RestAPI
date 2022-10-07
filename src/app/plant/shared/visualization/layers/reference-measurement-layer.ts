@@ -22,7 +22,7 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
 
   constructor(
     public readonly vueComponent: BaseAuthComponent & IPlantVisualization,
-    public readonly analysisResult: AnalysisResultDetailedSchema,
+    public readonly analysisResult: AnalysisResultDetailedSchema | null,
     public readonly referenceMeasurement: ReferenceMeasurementSchema,
   ) {
     super(vueComponent);

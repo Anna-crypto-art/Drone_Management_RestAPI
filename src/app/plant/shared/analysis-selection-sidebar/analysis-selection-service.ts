@@ -21,12 +21,16 @@ class AnalysisSelectionBus extends Vue {
       this.$emit(this.lastEvent, ...this.lastArgs);
     }
   }
+
+  off(event: AnalysisSelectionEvent, callbackFn: any) {
+    this.$off(event, callbackFn);
+  }
 }
 
 export class AnalysisSelectionService {
   private static anaylsisSelectionBusses: Record<string, AnalysisSelectionBus> = {};
 
-  private static getAnalysisSelectionEventBus(plantId: string): AnalysisSelectionBus {
+  public static getAnalysisSelectionEventBus(plantId: string): AnalysisSelectionBus {
     if (!(plantId in AnalysisSelectionService.anaylsisSelectionBusses)) {
       AnalysisSelectionService.anaylsisSelectionBusses[plantId] = new AnalysisSelectionBus();
     }
@@ -40,6 +44,10 @@ export class AnalysisSelectionService {
 
   public static emit(plantId: string, analysisSelectionEvent: AnalysisSelectionEvent, ...args: any[]) {
     AnalysisSelectionService.getAnalysisSelectionEventBus(plantId).emit(analysisSelectionEvent, args);
+  }
+
+  public static off(plantId: string, analysisSelectionEvent: AnalysisSelectionEvent, callbackFn: any) {
+    AnalysisSelectionService.getAnalysisSelectionEventBus(plantId).off(analysisSelectionEvent, callbackFn);
   }
 
   /**

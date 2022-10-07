@@ -2,7 +2,7 @@
   <div class="plant-view-diagram-csp-ptc">
     <app-diagram-overview
       :plant="plant"
-      :analysisResults="analysisResults" 
+      :analyses="analyses" 
       :resultMappings="resultMappings"
       :componentSelection="componentIdSelection"
     />
@@ -11,7 +11,6 @@
 
 <script lang="ts">
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
-import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Component, Prop } from "vue-property-decorator";
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
@@ -25,6 +24,7 @@ import { DiagramNumberBox, DiagramResultMappings } from "../shared/diagram/types
 import { FilterFieldType } from "../shared/filter-fields/types";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { KeyFigureColors } from "../shared/visualization/layers/types";
+import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
     
 
 @Component({
@@ -36,7 +36,7 @@ import { KeyFigureColors } from "../shared/visualization/layers/types";
 })
 export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComponent {
   @Prop() plant!: PlantSchema;
-  @Prop() analysisResults!: AnalysisResultDetailedSchema[];
+  @Prop() analyses!: AnalysisForViewSchema[];
 
   numberBoxes: DiagramNumberBox[] | null = null;
   tableFilter: TableFilterRequest | null = null;

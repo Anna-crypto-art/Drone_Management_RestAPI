@@ -2,7 +2,7 @@
   <div class="app-tables-csp-ptc">
     <app-tables-component
       :activeComponents="activeComponents"
-      :analysisResults="analysisResults"
+      :analyses="analyses"
       :plant="plant"
     />
   </div>
@@ -19,9 +19,9 @@ import analysisResultCspPtcMappingMirror from "@/app/shared/services/volateq-api
 import AppTablesComponent from "@/app/plant/shared/table-component/tables-component.vue";
 import { ITablesComponent } from "@/app/plant/shared/table-component/types";
 import { IActiveComponent } from "@/app/plant/shared/types";
-import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { apiComponentNames } from "@/app/shared/services/volateq-api/api-components/api-components-name";
+import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 
 @Component({
   name: "app-tables-csp-ptc",
@@ -31,7 +31,7 @@ import { apiComponentNames } from "@/app/shared/services/volateq-api/api-compone
 })
 export default class AppTablesCspPtc extends BaseAuthComponent implements ITablesComponent {
   @Prop() plant!: PlantSchema;
-  @Prop() analysisResults!: AnalysisResultDetailedSchema[];
+  @Prop() analyses!: AnalysisForViewSchema[];
 
   activeComponents: IActiveComponent[] = [
     {

@@ -186,6 +186,7 @@ import { OrthoImage } from "./layers/types";
 import { OrhtoImageMixin } from "./mixins/ortho-image-mixin";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 import { RouteQueryHelper } from "../helper/route-query-helper";
+import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -208,7 +209,7 @@ export default class AppVisualization
   implements IPlantVisualization
 {
   @Prop() plant!: PlantSchema;
-  @Prop() analysisResults!: AnalysisResultDetailedSchema[];
+  @Prop() analyses!: AnalysisForViewSchema[];
   @Prop() componentLayerTypes!: typeof ComponentLayer[];
   @Prop() keyFigureLayers!: KeyFigureTypeMap[];
   @State(state => state.sidebar["analysis"]) sidebarOpen!: boolean;
@@ -315,7 +316,7 @@ export default class AppVisualization
     this.piLayersHierarchy.updateVisibility();
     this.availableOrthoImages = this.piLayersHierarchy.getAvailableOrthoImages();
 
-    await this.refMeasureLayers.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
+    await this.refMeasureLayers.addAndSelectAnalysis(this.firstAnalysis?.id);
     this.refMeasureLayers.updateVisibility();
 
     await this.onFirstLoad();
@@ -345,7 +346,7 @@ export default class AppVisualization
 
     this.availableOrthoImages = this.piLayersHierarchy.getAvailableOrthoImages();
 
-    await this.refMeasureLayers.addAndSelectAnalysisResult(undefined);
+    await this.refMeasureLayers.addAndSelectAnalysis(undefined);
     this.refMeasureLayers.updateVisibility();
 
     await this.onFirstLoad();
@@ -599,7 +600,7 @@ export default class AppVisualization
     try {
       this.componentLayers = this.componentLayerTypes.map(componentType => new (componentType as any)(this));
       this.piLayersHierarchy = new PILayersHierarchy(this, this.analysisResults, this.keyFigureLayers);
-      this.refMeasureLayers = new RefMeasureLayers(this, this.analysisResults);
+      this.refMeasureLayers = new RefMeasureLayers(this, this.analyses);
   
       this.worldMapLayer = {
         name: this.$t("world-map").toString(),

@@ -47,6 +47,9 @@ form [type="submit"] {
 .red {
   color: $red;
 }
+.blue {
+  color: $blue;
+}
 
 .pull-right {
   float: right;
@@ -117,4 +120,7 @@ form [type="submit"] {
 }
 .mar-left {
   margin-left: 1em;
+}
+.mar-left-half {
+  margin-left: 0.5em;
 }

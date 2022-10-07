@@ -4,7 +4,7 @@
       <div class="diagram-overview-group"> 
         <app-diagram-number-box v-for="numberBox in numberBoxes" :key="numberBox.id"
           :numberBox="numberBox"
-          :showActionButton="analysisResults.length > 1"
+          :showActionButton="analyses.length > 1"
           @showHistoryButtonClick="onShowHistoryButtonClick"
           @showAreasButtonClick="onShowAreasButtonClick"
           @closeButtonClick="onCloseButtonClick"
@@ -15,7 +15,7 @@
               :plant="plant"
               :numberBox="numberBox"
               :tableFilter="getTableFilter(numberBox)"
-              :analysisResults="analysisResults"
+              :analyses="analyses"
               :load="numberBox.historyActive"
             />
           </template>
@@ -39,7 +39,6 @@
 <script lang="ts">
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
-import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Component, Prop } from "vue-property-decorator";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
@@ -52,6 +51,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { MathHelper } from "@/app/shared/services/helper/math-helper";
 import AppDiagramHistory from "@/app/plant/shared/diagram/diagram-history.vue";
 import AppDiagramAreas from "@/app/plant/shared/diagram/diagram-areas.vue";
+import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 
 @Component({
   name: "app-diagram-overview",
@@ -65,7 +65,7 @@ import AppDiagramAreas from "@/app/plant/shared/diagram/diagram-areas.vue";
 })
 export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
   @Prop() plant!: PlantSchema;
-  @Prop() analysisResults!: AnalysisResultDetailedSchema[];
+  @Prop() analyses!: AnalysisForViewSchema[];
   @Prop() resultMappings!: DiagramResultMappings[];
   @Prop() componentSelection!: ApiComponent[];
   

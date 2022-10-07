@@ -1,9 +1,9 @@
 <template>
-  <div :class="'plant-view-csp-ptc' + (isMobile ? ' mobile' : '')" v-if="analysisResults">
+  <div :class="'plant-view-csp-ptc' + (isMobile ? ' mobile' : '')" v-if="analyses">
     <app-analysis-selection-sidebar
       ref="analysisSelectionSidebar"
       :plant="plant"
-      :analysisResults="analysisResults"
+      :analyses="analyses"
       :getPIColor="getPiColor"
       :absolute="leftSidebarAbsolute"
     />
@@ -13,19 +13,19 @@
           <template #title>
             <b-icon icon="map" /> <span class="pad-left">{{ $t("map") }}</span>
           </template>
-          <app-visual-csp-ptc :analysisResults="analysisResults" :plant="plant" />
+          <app-visual-csp-ptc :analyses="analyses" :plant="plant" />
         </b-tab>
-        <b-tab v-if="hasResults">
+        <b-tab v-if="hasResults && hasSelectAnalysisResults" >
           <template #title><b-icon icon="table" /> <span class="pad-left">{{ $t("table") }}</span></template>
-          <app-tables-csp-ptc v-if="loadTables" :analysisResults="analysisResults" :plant="plant" />
+          <app-tables-csp-ptc v-if="loadTables" :analyses="analyses" :plant="plant" />
         </b-tab>
-        <b-tab v-if="hasResults">
+        <b-tab v-if="hasResults && hasSelectAnalysisResults">
           <template #title><b-icon icon="bar-chart-fill" /> <span class="pad-left">{{ $t("statistics") }}</span></template>
-          <app-plant-diagram-view-csp-ptc v-if="loadDiagrams" :analysisResults="analysisResults" :plant="plant" />
+          <app-plant-diagram-view-csp-ptc v-if="loadDiagrams" :analyses="analyses" :plant="plant" />
         </b-tab>
-        <b-tab v-if="isSuperAdmin">
+        <b-tab v-if="isSuperAdmin && hasSelectAnalysisResults">
           <template #title><b-icon icon="shield-shaded" /><span class="pad-left">{{ $t("admin") }}</span></template>
-          <app-plant-admin-view-csp-ptc :selectedAnalysisResult="selectedAnalysisResult" :plant="plant" />
+          <app-plant-admin-view-csp-ptc :selectedAnalysisResult="firstAnalysisResult" :plant="plant" />
         </b-tab>
       </b-tabs>
     </div>
@@ -41,7 +41,6 @@ import { IAnalysisSelectionSidebar } from "@/app/plant/shared/analysis-selection
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
-import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
@@ -53,8 +52,9 @@ import { cspPtcKeyFigureRainbowColors } from "./csp-ptc-key-figure-colors";
 import AppPlantDiagramViewCspPtc from "@/app/plant/csp-ptc/plant-diagram-view-csp-ptc.vue";
 import { RouteQueryHelper } from "../shared/helper/route-query-helper";
 import { PlantViewCspPtcTabs } from "./types";
-import { PlantRouteQuery } from "../shared/types";
 import { AnalysisSelectionBaseComponent } from "../shared/analysis-selection-sidebar/analysis-selection-base-component";
+import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
 
 @Component({
   name: "app-plant-view-csp-ptc",
@@ -73,7 +73,7 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
   @Prop() plant!: PlantSchema;
   @Ref() analysisSelectionSidebar!: IAnalysisSelectionSidebar;
 
-  analysisResults: AnalysisResultDetailedSchema[] | null = null;
+  analyses: AnalysisForViewSchema[] | null = null;
 
   @State(state => state.sidebar) sidebarStates!: ISidebarModule;
   preMobileSidebarState: ISidebarModule | null = null;
@@ -100,18 +100,11 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
     this.updateLeftSidebarAbsolute();
   }
 
+  @CatchError()
   async created(): Promise<void> {
     await super.created();
 
-    try {
-      if (this.isCustomerAdmin || this.isSuperAdmin) {
-        this.analysisResults = await volateqApi.getAnalysisResults(this.plant.id);
-      } else {
-        this.analysisResults = [];
-      }
-    } catch (e) {
-      this.showError(e);
-    }
+    this.analyses = await volateqApi.getAnalysesForView(this.plant.id);
 
     this.isMobileQuery = window.matchMedia("screen and (max-width: 1000px)");
     this.isMobileQuery.addEventListener("change", this.isMobileListener);
@@ -163,7 +156,11 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
   }
 
   get hasResults(): boolean {
-    return this.analysisResults ? this.analysisResults?.length > 0 : false;
+    return this.analyses && this.analyses.filter(analysis => analysis.analysis_result).length > 0 || false;
+  }
+
+  get hasSelectAnalysisResults(): boolean {
+    return !!this.firstAnalysisResult;
   }
 
   private rerenderOLCanvas(timeout = 0): void {

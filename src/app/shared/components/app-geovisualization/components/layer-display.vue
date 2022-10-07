@@ -92,6 +92,7 @@ import { Component, Prop, Watch } from "vue-property-decorator";
 import { LayerStructure } from "../layer-structure";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppIcon from "@/app/shared/components/app-icon/app-icon.vue"
+import { EventHelper } from "@/app/shared/services/helper/event-helper";
 
 @Component({
   name: "app-geovisual-layer-display",
@@ -111,6 +112,8 @@ export default class AppGeovisualLayerDisplay extends Vue {
 
   collapsed = false;
 
+  private eventHelper = new EventHelper();
+
   created() {
     if (this.initCollapsed || this.layer.hasSelectedChildLayer()) {
       this.collapsed = true;
@@ -118,7 +121,7 @@ export default class AppGeovisualLayerDisplay extends Vue {
 
     this.selected = this.layer.selected;
 
-    this.layer.on("setSelected", (selected) => {
+    this.layer.on("setSelected", this.eventHelper.registerEvent("setSelected", (selected: boolean) => {
       this.selected = selected;
 
       // Special case: Selected programmatically, does not select layerType...
@@ -133,26 +136,23 @@ export default class AppGeovisualLayerDisplay extends Vue {
         while (layer.parentLayer && !layer.collapse) {
           layer = layer.parentLayer;
         }
-        if (layer) {
+        if (layer && layer.parentLayer) {
           layer.emit("collapse");
 
-          for (const sibling of layer.parentLayer!.getChildLayers()) {
+          for (const sibling of layer.parentLayer.getChildLayers()) {
             if (layer.id !== sibling.id) {
               sibling.emit("uncollapse")
             }
           }
         }
       }
-    });
-
-    this.layer.on("collapse", () => {
-      this.collapsed = true;
-    })
-    this.layer.on("uncollapse", () => {
+    }));
+    this.layer.on("collapse", this.eventHelper.registerEvent("collapse", () => { this.collapsed = true; }));
+    this.layer.on("uncollapse", this.eventHelper.registerEvent("uncollapse", () => {
       if (!this.layer.hasSelectedChildLayer()) {
         this.collapsed = false;
       }
-    })
+    }));
   }
 
   onChange(e: boolean): void {
@@ -199,6 +199,14 @@ export default class AppGeovisualLayerDisplay extends Vue {
     const visibleChildLayers = this.layer.getVisibleChildLayers();
 
     return visibleChildLayers.length > 0 && visibleChildLayers[0].id === layer.id;
+  }
+
+  beforeDestroy() {
+    // I tried to avoid "MaxListenersExceededWarning" Warning. But if I keep this lines uncommented my still active events get lost...
+
+    // this.eventHelper.unregisterAll(this.layer);
+
+    // this.layer.unregisterEvents();
   }
 }
 </script>

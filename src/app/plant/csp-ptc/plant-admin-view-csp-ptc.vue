@@ -41,10 +41,14 @@ import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 })
 export default class AppPlantAdminViewCspPtc extends BaseAuthComponent {
   @Prop({ required: true }) plant!: PlantSchema;
-  @Prop({ default: null }) selectedAnalysisResult: AnalysisResultDetailedSchema | null = null; 
+  @Prop({ default: null }) selectedAnalysisResult!: AnalysisResultDetailedSchema | null; 
   
   analysisResultReleased: boolean | null = null;
   analysisState: ApiStates | null = null;
+
+  async created() {
+    await this.selectedAnalysisResultChanged();
+  }
 
   @Watch('selectedAnalysisResult') async selectedAnalysisResultChanged() {
     if (this.selectedAnalysisResult) {

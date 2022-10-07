@@ -438,6 +438,7 @@
   "table": "Table",
   "statistics": "Statistics",
   "admin": "Admin",
+  "has-ref-measures": "{count} reference measurement(s)",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

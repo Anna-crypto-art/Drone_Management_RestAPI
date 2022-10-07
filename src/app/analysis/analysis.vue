@@ -85,7 +85,7 @@
                 :to="{
                   name: 'Plant',
                   params: { id: row.item.plantId },
-                  query: { view: 'map', result: row.item.analysisResult.id },
+                  query: { view: 'map', result: row.item.id },
                 }"
               >
                 <b-button variant="primary" size="sm">

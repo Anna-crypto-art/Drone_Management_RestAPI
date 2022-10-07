@@ -1,13 +1,12 @@
 import { GeoJSONLayer, GroupLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { ReferenceMeasurementLayer } from "./layers/reference-measurement-layer";
 import { IPlantVisualization } from "./types";
 
 export class RefMeasureLayers {
-  private selectedAnalysisResult: AnalysisResultDetailedSchema | undefined;
-  private analysisResultIds: string[] = [];
+  private selectedAnalysis: AnalysisForViewSchema | undefined;
+  private analysesIds: string[] = [];
   
   public readonly referenceMeasurementLayers: ReferenceMeasurementLayer[] = [];
   public readonly geoJsonLayers: GeoJSONLayer[] = [];
@@ -16,7 +15,7 @@ export class RefMeasureLayers {
   
   constructor(
     private readonly vueComponent: BaseAuthComponent & IPlantVisualization,
-    private readonly analysisResults: AnalysisResultDetailedSchema[],
+    private readonly analyses: AnalysisForViewSchema[],
   ) {
     this.groupLayer = {
       name: this.vueComponent.$t("reference-measurements").toString(),
@@ -27,24 +26,23 @@ export class RefMeasureLayers {
     };
   }
 
-  public async addAndSelectAnalysisResult(analysisResultId: string | undefined) {
-    this.selectedAnalysisResult = this.analysisResults.find(analysisResult => analysisResult.id === analysisResultId);
+  public async addAndSelectAnalysis(analysisId: string | undefined) {
+    this.selectedAnalysis = this.analyses.find(analysis => analysis.id === analysisId);
     
-    if (analysisResultId && !this.analysisResultIds.find(id => id === analysisResultId)) {
-      this.analysisResultIds.push(analysisResultId);
+    if (analysisId && !this.analysesIds.find(id => id === analysisId)) {
+      this.analysesIds.push(analysisId);
 
       await this.addLayers();
     }
   }
 
   private async addLayers(): Promise<void> {
-    if (!this.selectedAnalysisResult) {
+    if (!this.selectedAnalysis) {
       return;
     }
 
-    const refMeasures = await volateqApi.getReferenceMeasurements(this.selectedAnalysisResult.analysis.id);
-    for (const refMeasure of refMeasures) {
-      const refMeasureLayer = new ReferenceMeasurementLayer(this.vueComponent, this.selectedAnalysisResult, refMeasure);
+    for (const refMeasure of this.selectedAnalysis.reference_measurements) {
+      const refMeasureLayer = new ReferenceMeasurementLayer(this.vueComponent, this.selectedAnalysis.analysis_result || null, refMeasure);
       this.referenceMeasurementLayers.push(refMeasureLayer);
       this.geoJsonLayers.push(refMeasureLayer.toGeoLayer());
     }
@@ -53,7 +51,7 @@ export class RefMeasureLayers {
   public updateVisibility(): void {
     let allInvisble = true;
     for (const refMeasureLayer of this.referenceMeasurementLayers) {
-      const visible = refMeasureLayer.referenceMeasurement.analysis_id === this.selectedAnalysisResult?.analysis.id;
+      const visible = refMeasureLayer.referenceMeasurement.analysis_id === this.selectedAnalysis?.id;
       
       refMeasureLayer.setVisible(visible);
 

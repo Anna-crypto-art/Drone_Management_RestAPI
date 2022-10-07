@@ -7,7 +7,7 @@ import { HttpClientBase } from "@/app/shared/services/volateq-api/http-client-ba
 import { apiBaseUrl, baseUrl } from "@/environment/environment";
 import { AddReferenceMeasurmentValue, CreateReferenceMeasurement, NewAnalysis, NewEmptyAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
 import { CreatePlantRequest, UpdatePlantRequest } from "./api-requests/plant-requests";
-import { AnalysisFileInfoSchema, AnalysisSchema, SimpleAnalysisSchema } from "./api-schemas/analysis-schema";
+import { AnalysisFileInfoSchema, AnalysisForViewSchema, AnalysisSchema, SimpleAnalysisSchema } from "./api-schemas/analysis-schema";
 import { PlantSchema } from "./api-schemas/plant-schema";
 import { AnalysisResultDetailedSchema } from "./api-schemas/analysis-result-schema";
 import { TableFilterRequest, TableRequest } from "./api-requests/common/table-requests";
@@ -138,6 +138,18 @@ export class VolateqAPI extends HttpClientBase {
 
   public getAnalysis(analysisId?: string): Promise<AnalysisSchema> {
     return this.get(`/auth/analysis/${analysisId}`);
+  }
+
+  public async getAnalysesForView(plantId: string): Promise<AnalysisForViewSchema[]> {
+    const analyses: AnalysisForViewSchema[] = await this.get(`/auth/analyses-for-view/${plantId}`);
+
+    for (const analysis of analyses) {
+      if (analysis.analysis_result) {
+        this.filterKeyFigure(analysis.analysis_result);
+      }
+    }
+
+    return analyses;
   }
 
   public getAnalysisFileUploadUrl(analysisId: string): string {
@@ -698,15 +710,19 @@ export class VolateqAPI extends HttpClientBase {
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {
     // Temporary special case for IR_INTENSITY: Replaced by GLASS_TUBE_TEMPERATURE
     for (const analysisResult of analysisResults) {
-      const ir_intensity_index = analysisResult.key_figures.findIndex(
-        keyFigure => keyFigure.id === ApiKeyFigure.IR_INTENSITY_ID
-      );
-      if (
-        ir_intensity_index != -1 &&
-        analysisResult.key_figures.find(keyFigure => keyFigure.id === ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID)
-      ) {
-        analysisResult.key_figures.splice(ir_intensity_index, 1);
-      }
+      this.filterKeyFigure(analysisResult);
+    }
+  }
+
+  private filterKeyFigure(analysisResult: AnalysisResultDetailedSchema): void {
+    const ir_intensity_index = analysisResult.key_figures.findIndex(
+      keyFigure => keyFigure.id === ApiKeyFigure.IR_INTENSITY_ID
+    );
+    if (
+      ir_intensity_index != -1 &&
+      analysisResult.key_figures.find(keyFigure => keyFigure.id === ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID)
+    ) {
+      analysisResult.key_figures.splice(ir_intensity_index, 1);
     }
   }
 }

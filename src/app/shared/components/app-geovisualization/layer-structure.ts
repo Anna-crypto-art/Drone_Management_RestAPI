@@ -3,10 +3,9 @@ import { EventEmitter } from "events";
 import { Layer } from "ol/layer";
 import Source from "ol/source/Source";
 import { VNode } from "vue/types/umd";
-import { Watch } from "vue-property-decorator";
 import LayerLoader from "./loader/layer-loader";
 import LayerRenderer from "ol/renderer/Layer";
-import LayerGroup from "ol/layer/Group";
+import { EventHelper } from "../../services/helper/event-helper";
 
 export class LayerStructure extends EventEmitter {
   private readonly childLayers: LayerStructure[];
@@ -14,6 +13,8 @@ export class LayerStructure extends EventEmitter {
   public parentLayer?: LayerStructure;
 
   public ignoreSelectedWatcher = false;
+
+  private readonly eventHelper = new EventHelper();
 
   constructor(
     public readonly layerLoader?: LayerLoader<Layer<Source, LayerRenderer<any>> | undefined>,
@@ -28,11 +29,13 @@ export class LayerStructure extends EventEmitter {
   }
 
   private initializeEvents(): void {
-    this.layerLoader?.layerType.events?.on("setSelected", (selected) => { this.emit("setSelected", selected); });
-    this.on("setSelected", async (selected) => { await this.selectLayer(selected) });
+    this.layerLoader?.layerType.events?.on("setSelected", this.eventHelper.registerEvent("layerType_setSelected", (selected: boolean) => {
+      this.emit("setSelected", selected);
+    }));
+    this.on("setSelected", this.eventHelper.registerEvent("setSelected", async (selected: boolean) => await this.selectLayer(selected)));
   }
 
-  private async selectLayer(selected: boolean): Promise<void> {
+  private async selectLayer(selected: boolean) {
     if (selected) {
       this.unselectParentLayers();
     }
@@ -168,5 +171,10 @@ export class LayerStructure extends EventEmitter {
     }
     
     return false;
+  }
+
+  public unregisterEvents() {
+    this.layerLoader?.layerType.events?.off("setSelected", this.eventHelper.getEvent("layerType_setSelected"));
+    this.off("setSelected", this.eventHelper.getEvent("setSelected"));
   }
 }

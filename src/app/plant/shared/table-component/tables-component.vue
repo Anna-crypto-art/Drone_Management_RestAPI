@@ -48,7 +48,7 @@ import AppSearchInput from "@/app/shared/components/app-search-input/app-search-
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
 import dateHelper from "@/app/shared/services/helper/date-helper";
-import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
+import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { Component, Prop } from "vue-property-decorator";
@@ -68,7 +68,7 @@ import { ITableComponent } from "./types";
 })
 export default class AppTablesComponent extends AnalysisSelectionBaseComponent {
   @Prop() plant!: PlantSchema;
-  @Prop() analysisResults!: AnalysisResultDetailedSchema[];
+  @Prop() analyses!: AnalysisForViewSchema[];
   @Prop() activeComponents!: IActiveComponent[];
 
   csvExportLoading = false;
@@ -137,7 +137,7 @@ export default class AppTablesComponent extends AnalysisSelectionBaseComponent {
         const tableComponent = this.getRefTableComponent(activeComponent);
 
         const authCsvDownloadUrl = volateqApi.getSpecificAnalysisResultCsvUrl(
-          this.selectedAnalysisResult!.id,
+          this.firstAnalysisResult!.id,
           activeComponent.componentId,
           tableComponent.getTableRequestParam(),
           tableComponent.getTableFilterParam(),
@@ -149,7 +149,7 @@ export default class AppTablesComponent extends AnalysisSelectionBaseComponent {
           "_" +
           this.plant.name +
           "_" +
-          dateHelper.toDate(this.selectedAnalysisResult!.csp_ptc.created_at) +
+          dateHelper.toDate(this.firstAnalysisResult!.csp_ptc.created_at) +
           "_" +
           activeComponent.label +
           ".csv";

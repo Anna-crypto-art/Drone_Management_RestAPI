@@ -17,13 +17,12 @@
 
 <script lang="ts">
 import { TableFilterRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
-import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { Component, Prop, Watch } from "vue-property-decorator";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { Line as LineChart } from "vue-chartjs/legacy";
-import { AnalysisHistoryResult, DiagramNumberBox, DiagramNumberBoxNum, GroupedAnalysisResult } from "./types";
+import { AnalysisHistoryResult, DiagramNumberBox, DiagramNumberBoxNum } from "./types";
 import {
   Chart as ChartJS,
   Title,
@@ -41,12 +40,12 @@ import {
 } from "chart.js";
 import ChartDataLables from "chartjs-plugin-datalabels";
 import 'chartjs-adapter-date-fns';
-import { TableResultSchema } from "@/app/shared/services/volateq-api/api-schemas/table-result-schema";
 import { MathHelper } from "@/app/shared/services/helper/math-helper";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppLoading from "@/app/shared/components/app-loading/app-loading.vue";
 import dateHelper from "@/app/shared/services/helper/date-helper";
+import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 
 ChartJS.register(
   Title,
@@ -75,7 +74,7 @@ export default class AppDiagramHistory extends BaseAuthComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) numberBox!: DiagramNumberBox;
   @Prop({ required: true }) tableFilter!: TableFilterRequest;
-  @Prop({ required: true }) analysisResults!: AnalysisResultDetailedSchema[];
+  @Prop({ required: true }) analyses!: AnalysisForViewSchema[];
   @Prop({ required: true }) load!: boolean;
   
   // TODO: make @State(mobile) working...
@@ -147,7 +146,7 @@ export default class AppDiagramHistory extends BaseAuthComponent {
         this.plant.id,
         this.numberBox.keyFigure.component_id,
         {
-          limit: this.analysisResults.length
+          limit: this.analyses.length
         },
         this.tableFilter,
       );

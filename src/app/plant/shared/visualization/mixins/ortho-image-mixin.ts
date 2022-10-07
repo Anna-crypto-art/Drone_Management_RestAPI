@@ -29,7 +29,7 @@ export class OrhtoImageMixin {
   }
 
   private setOrthoImageAvailable() {
-    if (this.layer.orthoImages !== null) {
+    if (this.layer.orthoImages !== null && this.layer.analysisResult) {
       for (const orthoImage of this.layer.orthoImages) {
         orthoImage.available = !!this.layer.analysisResult.key_figures.find(keyFigure => keyFigure.id === orthoImage.keyFigureId);
       }
@@ -137,7 +137,7 @@ export class OrhtoImageMixin {
       await OrhtoImageMixin.loadOrthoImage(
         orthoImage,
         this.layer.vueComponent.plant,
-        this.layer.analysisResult.id,
+        this.layer.analysisResult!.id,
         this.layer.getComponentId(),
         featureInfos.title,
       );
