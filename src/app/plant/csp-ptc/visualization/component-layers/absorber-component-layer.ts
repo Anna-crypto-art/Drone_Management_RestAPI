@@ -60,30 +60,30 @@ export class AbsorberComponentLayer extends ComponentLayer {
     }
   }
 
-  public startReferenceMeasurement(existingPcsCodes: string[], onClickCallback: (pcs: string) => Promise<void>) {
+  public async startReferenceMeasurement(existingPcsCodes: string[], onClickCallback: (pcs: string) => Promise<void>) {
     this.onClickCallback = onClickCallback;
     this.refMeasureRunning = true;
     this.coloredPcsCodes = existingPcsCodes;
 
     this.width = 5;
 
-    this.rerender();
+    await this.rerender();
   }
 
-  public finishReferenceMeasurement() {
+  public async finishReferenceMeasurement() {
     this.onClickCallback = null;
     this.refMeasureRunning = false;
     this.coloredPcsCodes = null;
 
     this.width = 1;
 
-    this.rerender();
+    await this.rerender();
   }
 
-  public changeColor(pcs: string) {
+  public async changeColor(pcs: string) {
     this.coloredPcsCodes?.push(pcs);
 
-    this.rerender();
+    await this.rerender();
   }
 
   public undoChangeColor(pcs: string) {

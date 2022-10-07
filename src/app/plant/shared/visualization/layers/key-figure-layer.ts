@@ -61,10 +61,12 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   }
 
   public getLegendId(): string {
-    return `${this.keyFigureId}__${this.keyFigureInfo.displayName || this.keyFigureInfo.keyName || this.keyFigureInfo.templateName || ""}`;
+    return `${this.analysisResult.id}__${this.keyFigureId}__${this.keyFigureInfo.displayName || this.keyFigureInfo.keyName || this.keyFigureInfo.templateName || ""}`;
   }
 
   protected async onSelected(selected: boolean): Promise<void> {
+    if (selected){ console.log("onSelected");console.log(this.getLegend()); }
+
     super.onSelected(selected);
 
     this.vueComponent.onLayerSelected(selected, this.getLegend());
@@ -227,6 +229,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
 
   public get id() {
     return `${this.analysisResult.id}__
+      ${this.keyFigureId}__
       ${this.keyFigureInfo.displayName || this.keyFigureInfo.keyName || this.keyFigureInfo.templateName}`;
   }
 

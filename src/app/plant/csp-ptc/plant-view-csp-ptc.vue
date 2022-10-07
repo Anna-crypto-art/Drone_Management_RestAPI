@@ -112,11 +112,17 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
 
     this.setBrowserTitle(this.plant.name);
 
+    this.selectedTab = this.currentTab;
+
     await this.loadTabContent();
 
     if (this.selectedTab !== PlantViewCspPtcTabs.MAP) {
       this.notMapTabLoaded = true;
     }
+
+    this.routeQueryHelper.queryChanged(async () => {
+      this.selectedTab = this.currentTab;
+    });
   }
 
   @Watch("selectedTab") async onSelectedTabChanged() {
@@ -135,12 +141,6 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
     this.updateLeftSidebarAbsolute();
 
     await this.loadTabContent();
-  }
-
-  @Watch("$route.query.view", { deep: true, immediate: true}) async onViewChanged() {
-    await this.routeQueryHelper.queryChanged(async () => {
-      this.selectedTab = this.currentTab;
-    });
   }
 
   protected async onAnalysisSelected() {
@@ -203,7 +203,7 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
         // fire last Analysis event to load data or rerender
         if (this.firstAnalysisResult) {
           await this.$nextTick();
-          AnalysisSelectionService.whazzup(this.plant.id);
+          await AnalysisSelectionService.whazzup(this.plant.id);
         }
       }
     }

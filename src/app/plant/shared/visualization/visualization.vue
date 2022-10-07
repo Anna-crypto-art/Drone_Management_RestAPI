@@ -162,7 +162,6 @@ import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualizati
 import { GroupLayer, LayerType, OSMLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
 import AppCollapse from "@/app/shared/components/app-collapse/app-collapse.vue";
-import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { FeatureLike } from "ol/Feature";
 import { Component, Prop, Ref, Watch } from "vue-property-decorator";
@@ -172,13 +171,11 @@ import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/an
 import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-dropdown-button.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
-import { EventEmitter } from "events";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { AnalysisSelectionService } from "../analysis-selection-sidebar/analysis-selection-service";
 import { AnalysisSelectionEvent } from "../analysis-selection-sidebar/types";
-import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 import { RefMeasureLayers } from "./ref-measure-layers";
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import { layerEvents } from "./layer-events";
@@ -187,6 +184,7 @@ import { OrhtoImageMixin } from "./mixins/ortho-image-mixin";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 import { RouteQueryHelper } from "../helper/route-query-helper";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import { SequentialEventEmitter } from "@/app/shared/services/sequential-event-emitter/sequential-event-emitter";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -266,6 +264,8 @@ export default class AppVisualization
     layerEvents.onRemoveOrthoImages(() => {
       this.hasLoadedOrthoImages = false;
     });
+
+    this.routeQueryHelper.queryChanged(async () => await this.loadQueryPi());
   }
 
   async mounted() {
@@ -294,23 +294,9 @@ export default class AppVisualization
     }
 
     if (analysisSelectionChanged || multiAnalysesSelectedBefore) {
-      if (!this.firstLoad && isNewAnalysisResult) {
-        // Wait for new analysis result to be loaded
-        // Actually, I don't understand why it takes so long
-        // nor what am I waiting for exactly... Feel free to do some research, here
-        for (let i = 0; i < 10; i++) {
-          await this.$nextTick();
-        }
+      if (!this.firstLoad) {
+        await this.piLayersHierarchy.reselectAllLayers(this.enableMultiSelection);
       }
-
-      // Ensure, that the routeQueryHelper doesn't refresh the route to avoid circual key figure selection.
-      // Shortly explained "Circular key figure selection":
-      // 1. "piLayersHierarchy.reselectAllLayers" causes "setSelected"
-      // 2. geo-visualization (LayerStructure) causes "onSelected"
-      // 3. "onLayerSelected" causes "onPiChanged"
-      // 4. "onPiChanged" causes "setSelected" ...
-      this.routeQueryHelper.closedEyes = true;
-      this.piLayersHierarchy.reselectAllLayers(this.enableMultiSelection);
     }
 
     this.piLayersHierarchy.updateVisibility();
@@ -339,7 +325,7 @@ export default class AppVisualization
     if (selectionChanged) {
       this.piLayersHierarchy.toggleMultiSelection(false);
       this.piLayersHierarchy.toggleMultiSelectionDeep(false);
-      this.piLayersHierarchy.reselectAllLayers(false);
+      await this.piLayersHierarchy.reselectAllLayers(false);
     }
     
     this.piLayersHierarchy.updateVisibility();
@@ -368,39 +354,33 @@ export default class AppVisualization
     this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
     this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
 
-    // onAnalysisSelected closes the eyes. But we need them open here!
-    this.routeQueryHelper.closedEyes = false;
-    await this.onPiChanged();
+    await this.loadQueryPi();
   }
 
-  @Watch("$route.query.pi", { deep: true })
-  async onPiChanged() {
-    if (this.$route.query.view === undefined || this.$route.query.view === null || this.$route.query.view === "map") {
-      await this.routeQueryHelper.queryChanged(async () => {
-        let selectedPIs: (string | null)[] = Array.isArray(this.$route.query.pi!) ? 
-          this.$route.query.pi! : 
-          [this.$route.query.pi!];
-        for (const selectedPI of selectedPIs) {
-          if (selectedPI) {
-            const keyFigureId: number = parseInt(selectedPI);
-            if (!Object.values(ApiKeyFigure).includes(keyFigureId)) {
-              this.showError({ error: "PI_NOT_FOUND", message: this.$t("pi-not-found").toString() });
-            } else {
-              // Wait for analysis result to be loaded
-              await this.$nextTick(); 
-              await this.$nextTick();
+  async loadQueryPi() {
+    let selectedPIs: (string | null)[] = Array.isArray(this.$route.query.pi!) ? 
+      this.$route.query.pi! : 
+      [this.$route.query.pi!];
+    for (const selectedPI of selectedPIs) {
+      if (selectedPI) {
+        const keyFigureId: number = parseInt(selectedPI);
+        if (!Object.values(ApiKeyFigure).includes(keyFigureId)) {
+          this.showError({ error: "PI_NOT_FOUND", message: this.$t("pi-not-found").toString() });
+        } else {
+          // Wait for analysis result to be loaded
+          await this.$nextTick(); 
+          await this.$nextTick();
 
-              this.piLayersHierarchy.selectKeyFigureLayer(keyFigureId);
-            }
-
-            if (this.compareAnalysisResult !== null) {
-              // do not select multiple key figures in compare view
-              break;
-            }
-          }
+          await this.piLayersHierarchy.selectKeyFigureLayer(keyFigureId);
         }
-      });
+
+        if (this.compareAnalysisResult !== null) {
+          // do not select multiple key figures in compare view
+          break;
+        }
+      }
     }
+
   }
 
   get hasLayers(): boolean {
@@ -524,6 +504,8 @@ export default class AppVisualization
         }
       } else {
         if (legendIndex != -1) {
+          console.log("remove legend")
+          console.log(legend)
           this.legends.splice(legendIndex, 1);
         }
       }
@@ -536,11 +518,11 @@ export default class AppVisualization
     this.hideToast();
   }
 
-  onMultiSelectionChanged() {
+  async onMultiSelectionChanged() {
     appLocalStorage.setItem(STORAGE_KEY_MULTISELECTION, this.enableMultiSelection);
 
     this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
-    this.piLayersHierarchy.reselectAllLayers(this.enableMultiSelection);
+    await this.piLayersHierarchy.reselectAllLayers(this.enableMultiSelection);
 
     // Group Layer "performance-indicators"
     (this.layers[0] as GroupLayer).singleSelection = !this.enableMultiSelection;
@@ -552,13 +534,13 @@ export default class AppVisualization
     this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
   }
 
-  onSatelliteViewChanged() {
+  async onSatelliteViewChanged() {
     appLocalStorage.setItem(STORAGE_KEY_SATELLITEVIEW, this.satelliteView);
 
     this.worldMapLayer.satellite = this.satelliteView;
     this.worldMapLayer.reloadLayer = true;
-    this.worldMapLayer.events!.emit("setSelected", false);
-    this.worldMapLayer.events!.emit("setSelected", true);
+    await this.worldMapLayer.events!.emit("setSelected", false);
+    await this.worldMapLayer.events!.emit("setSelected", true);
   }
 
   async onClickFeatureAction(actionName: string) {
@@ -607,7 +589,7 @@ export default class AppVisualization
         type: "osm",
         selected: true,
         satellite: this.satelliteView,
-        events: new EventEmitter(),
+        events: new SequentialEventEmitter(),
       };
   
       this.piHeadGroup = {
@@ -743,7 +725,7 @@ export default class AppVisualization
 
       const refMeasureValues = await volateqApi.getReferencMeasurementValues(this.refMeasureId);
 
-      AnalysisSelectionService.emit(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL);
+      await AnalysisSelectionService.emit(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL);
       if (this.sidebarOpen) {
         this.$store.direct.commit.sidebar.toggle({ name: "analysis" });
       }
@@ -768,7 +750,7 @@ export default class AppVisualization
     }
   }
 
-  onRefMeasureFinishClick() {
+  async onRefMeasureFinishClick() {
     if (confirm(this.$t('finish-reference-measurement-are-you-sure').toString())) {
       this.$emit("finishReferenceMeasurement", {
           options: this.refMeasure,
@@ -780,7 +762,7 @@ export default class AppVisualization
       this.refMeasureId = null;
       this.refMeasure = null;
 
-      AnalysisSelectionService.emit(this.plant.id, AnalysisSelectionEvent.SELECT_FIRST);
+      await AnalysisSelectionService.emit(this.plant.id, AnalysisSelectionEvent.SELECT_FIRST);
       if (!this.sidebarOpen) {
         this.$store.direct.commit.sidebar.toggle({ name: "analysis" });
       }

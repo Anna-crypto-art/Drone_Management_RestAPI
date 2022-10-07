@@ -80,7 +80,9 @@ export class PILayersHierarchy {
     }
   }
 
-  public reselectAllLayers(multiSelection: boolean) {
+  public async reselectAllLayers(multiSelection: boolean) {
+    console.log("reselectAllLayers");
+
     const allChildLayers = this.getAllChildLayers();
 
     const selectedKeyFigureIds = allChildLayers.filter(childLayer => childLayer.getSelected())
@@ -89,7 +91,7 @@ export class PILayersHierarchy {
     for (const childLayer of allChildLayers) {
       childLayer.setColorScheme(multiSelection ? KeyFigureColorScheme.RAINBOW : KeyFigureColorScheme.TRAFFIC_LIGHT);
       childLayer.reloadLayer();
-      childLayer.setSelected(false);
+      await childLayer.setSelected(false);
     }
 
     const reselectOneLayerOnly = !multiSelection;
@@ -97,7 +99,7 @@ export class PILayersHierarchy {
       if (selectedKeyFigureIds.includes(childLayer.keyFigureId) &&
         childLayer.analysisResult.id === this.selectedAnalysisResultId)
       {
-        childLayer.setSelected(true);
+        await childLayer.setSelected(true);
 
         if (reselectOneLayerOnly) {
           break;
@@ -126,11 +128,11 @@ export class PILayersHierarchy {
     }
   }
 
-  public selectKeyFigureLayer(keyFigureId: ApiKeyFigure) {
+  public async selectKeyFigureLayer(keyFigureId: ApiKeyFigure) {
     const keyFigureLayer = this.getAllChildLayers().find(keyFigureLayer => 
       keyFigureLayer.isVisible && keyFigureLayer.keyFigureId === keyFigureId);
     if (keyFigureLayer && !keyFigureLayer.getSelected()) {
-      keyFigureLayer.setSelected(true);
+      await keyFigureLayer.setSelected(true);
     }
   }
 

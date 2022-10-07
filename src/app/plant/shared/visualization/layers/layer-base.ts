@@ -1,13 +1,13 @@
 import { FeatureLike } from "ol/Feature";
 import { Style, Stroke, Text, Fill } from "ol/style";
 import { asArray, asString } from "ol/color";
-import { FeatureProperties, IPlantVisualization } from "../types";
+import { IPlantVisualization } from "../types";
 import { GeoJSONLayer, VectorGeoLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { EventEmitter } from "events";
 import { Geolocation, Feature } from "ol";
 import CircleStyle from "ol/style/Circle";
 import { Point } from "ol/geom";
+import { SequentialEventEmitter } from "@/app/shared/services/sequential-event-emitter/sequential-event-emitter";
 
 export const GEO_JSON_OPTIONS = { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" };
 
@@ -30,7 +30,7 @@ export abstract class LayerBase {
   protected zIndex?: number;
   protected showPcsZoomLevel = 15;
   protected refreshLayer = false;
-  protected readonly events = new EventEmitter();
+  protected readonly events = new SequentialEventEmitter();
 
   constructor(public readonly vueComponent: BaseAuthComponent & IPlantVisualization) {}
 
@@ -105,8 +105,8 @@ export abstract class LayerBase {
     return this.geoLayerObject;
   }
 
-  public setSelected(selected: boolean) {
-    this.events.emit("setSelected", selected);
+  public async setSelected(selected: boolean) {
+    await this.events.emit("setSelected", selected);
   }
 
   public getSelected(): boolean {
@@ -216,11 +216,11 @@ export abstract class LayerBase {
     }
   }
 
-  public rerender() {
+  public async rerender() {
     if (this.selected) {
-      this.setSelected(false);
+      await this.setSelected(false);
     }
-    this.setSelected(true);
+    await this.setSelected(true);
 
     this.rerenderMap();
   }

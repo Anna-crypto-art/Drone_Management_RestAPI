@@ -184,6 +184,7 @@ import { AbsorberComponentLayer } from "./component-layers/absorber-component-la
 import { ScaComponentLayer } from "./component-layers/sca-component-layer";
 import { SceComponentLayer } from "./component-layers/sce-component-layer";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
 
 @Component({
   name: "app-visual-csp-ptc",
@@ -275,97 +276,85 @@ export default class AppVisualCspPtc
     this.visualization?.hideToast();
   }
 
-  onStartReferenceMeasurement(event: ReferenceMeasurementEventObject) {
-    try {
-      for (const componentLayer of event.componentLayers) {
-        if (componentLayer instanceof SceComponentLayer) {
-          if (!componentLayer.getSelected()) {
-            componentLayer.setSelected(true);
-          }
-        } else if (componentLayer instanceof ScaComponentLayer) {
-          if (!componentLayer.getSelected()) {
-            componentLayer.setSelected(true);
-          }
+  @CatchError()
+  async onStartReferenceMeasurement(event: ReferenceMeasurementEventObject) {
+    for (const componentLayer of event.componentLayers) {
+      if (componentLayer instanceof SceComponentLayer) {
+        if (!componentLayer.getSelected()) {
+          await componentLayer.setSelected(true);
+        }
+      } else if (componentLayer instanceof ScaComponentLayer) {
+        if (!componentLayer.getSelected()) {
+          await componentLayer.setSelected(true);
+        }
 
-          componentLayer.addGeolocationFeature();
-        } else if (componentLayer instanceof AbsorberComponentLayer) {
-          const existingPcsCodes = event.refMeasureValues.map(val => val.fieldgeometry_component!.kks) || [];
-          componentLayer.startReferenceMeasurement(existingPcsCodes, async (pcs) => {
-            try {
-              const refMeasureValue: ReferenceMeasurementValueSchema | undefined = 
-                await volateqApi.getReferencMeasurementValue(event.refMeasureId, pcs);
-              
-              if (refMeasureValue) {
-                this.refMeasureValue = {
-                  pcs: pcs,
-                  hceTemperature: refMeasureValue.hce_temperature || null,
-                  hceBrokenGlass: refMeasureValue.hce_broken_glass || null,
-                  notes: refMeasureValue.notes || null,
-                  id: refMeasureValue.id,
-                };
-              } else {
-                this.refMeasureValue = {
-                  pcs: pcs,
-                  hceTemperature: null,
-                  hceBrokenGlass: null,
-                  notes: null,
-                  id: null,
-                };
-              }
-
-              this.refMeasureValueModal.show();
-            } catch (e) {
-              this.showError(e);
+        componentLayer.addGeolocationFeature();
+      } else if (componentLayer instanceof AbsorberComponentLayer) {
+        const existingPcsCodes = event.refMeasureValues.map(val => val.fieldgeometry_component!.kks) || [];
+        await componentLayer.startReferenceMeasurement(existingPcsCodes, async (pcs) => {
+          try {
+            const refMeasureValue: ReferenceMeasurementValueSchema | undefined = 
+              await volateqApi.getReferencMeasurementValue(event.refMeasureId, pcs);
+            
+            if (refMeasureValue) {
+              this.refMeasureValue = {
+                pcs: pcs,
+                hceTemperature: refMeasureValue.hce_temperature || null,
+                hceBrokenGlass: refMeasureValue.hce_broken_glass || null,
+                notes: refMeasureValue.notes || null,
+                id: refMeasureValue.id,
+              };
+            } else {
+              this.refMeasureValue = {
+                pcs: pcs,
+                hceTemperature: null,
+                hceBrokenGlass: null,
+                notes: null,
+                id: null,
+              };
             }
-          });
-        }
-      }
 
-      this.refMeasureEventObject = event;
-    } catch (e) {
-      this.showError(e);
+            this.refMeasureValueModal.show();
+          } catch (e) {
+            this.showError(e);
+          }
+        });
+      }
     }
+
+    this.refMeasureEventObject = event;
   }
 
-  onFinishReferenceMeasurement(event: ReferenceMeasurementEventObject) {
-    try {
-      for (const componentLayer of event.componentLayers) {
-        if (componentLayer instanceof ScaComponentLayer) {
-          componentLayer.removeGeolocationFeature();
-        } else if (componentLayer instanceof AbsorberComponentLayer) {
-          componentLayer.finishReferenceMeasurement();
-          this.refMeasureValue = null;
-        }
+  @CatchError()
+  async onFinishReferenceMeasurement(event: ReferenceMeasurementEventObject) {
+    for (const componentLayer of event.componentLayers) {
+      if (componentLayer instanceof ScaComponentLayer) {
+        componentLayer.removeGeolocationFeature();
+      } else if (componentLayer instanceof AbsorberComponentLayer) {
+        await componentLayer.finishReferenceMeasurement();
+        this.refMeasureValue = null;
       }
-
-      this.refMeasureEventObject = null;
-    } catch (e) {
-      this.showError(e);
     }
+
+    this.refMeasureEventObject = null;
   }
 
+  @CatchError('refMeasureValueModalLoading')
   async onAddRefMeasureValue() {
-    this.refMeasureValueModalLoading = true;
-    try {
-      await volateqApi.addReferencMeasurementValue(this.refMeasureEventObject!.refMeasureId, {
-        pcs: this.refMeasureValue!.pcs,
-        notes: this.refMeasureValue!.notes || undefined,
-        hce_temperature: this.refMeasureValue!.hceTemperature || undefined,
-        hce_broken_glass: this.refMeasureValue!.hceBrokenGlass || undefined,
-      });
+    await volateqApi.addReferencMeasurementValue(this.refMeasureEventObject!.refMeasureId, {
+      pcs: this.refMeasureValue!.pcs,
+      notes: this.refMeasureValue!.notes || undefined,
+      hce_temperature: this.refMeasureValue!.hceTemperature || undefined,
+      hce_broken_glass: this.refMeasureValue!.hceBrokenGlass || undefined,
+    });
 
-      const absorberComponentLayer = this.refMeasureEventObject!.componentLayers
-        .find(compLayer => compLayer instanceof AbsorberComponentLayer) as AbsorberComponentLayer | undefined;
-      if (absorberComponentLayer) {
-        absorberComponentLayer.changeColor(this.refMeasureValue!.pcs);
-      }
-
-      this.refMeasureValueModal.hide();
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.refMeasureValueModalLoading = false;
+    const absorberComponentLayer = this.refMeasureEventObject!.componentLayers
+      .find(compLayer => compLayer instanceof AbsorberComponentLayer) as AbsorberComponentLayer | undefined;
+    if (absorberComponentLayer) {
+      await absorberComponentLayer.changeColor(this.refMeasureValue!.pcs);
     }
+
+    this.refMeasureValueModal.hide();
   }
 
   async onDeleteRefMeasureValue() {

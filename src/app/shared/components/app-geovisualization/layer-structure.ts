@@ -1,20 +1,19 @@
 import { BaseLayerType, GroupLayer } from "./types/layers";
-import { EventEmitter } from "events";
 import { Layer } from "ol/layer";
 import Source from "ol/source/Source";
 import { VNode } from "vue/types/umd";
 import LayerLoader from "./loader/layer-loader";
 import LayerRenderer from "ol/renderer/Layer";
-import { EventHelper } from "../../services/helper/event-helper";
+import { SequentialEventEmitter } from "../../services/sequential-event-emitter/sequential-event-emitter";
 
-export class LayerStructure extends EventEmitter {
+export class LayerStructure extends SequentialEventEmitter {
   private readonly childLayers: LayerStructure[];
 
   public parentLayer?: LayerStructure;
 
   public ignoreSelectedWatcher = false;
 
-  private readonly eventHelper = new EventHelper();
+  public collapsed = false;
 
   constructor(
     public readonly layerLoader?: LayerLoader<Layer<Source, LayerRenderer<any>> | undefined>,
@@ -29,10 +28,10 @@ export class LayerStructure extends EventEmitter {
   }
 
   private initializeEvents(): void {
-    this.layerLoader?.layerType.events?.on("setSelected", this.eventHelper.registerEvent("layerType_setSelected", (selected: boolean) => {
-      this.emit("setSelected", selected);
-    }));
-    this.on("setSelected", this.eventHelper.registerEvent("setSelected", async (selected: boolean) => await this.selectLayer(selected)));
+    this.layerLoader?.layerType.events?.on("setSelected", async (selected: boolean) => {
+      await this.emit("setSelected", selected);
+    });
+    this.on("setSelected", async (selected: boolean) => await this.selectLayer(selected));
   }
 
   private async selectLayer(selected: boolean) {
@@ -171,10 +170,5 @@ export class LayerStructure extends EventEmitter {
     }
     
     return false;
-  }
-
-  public unregisterEvents() {
-    this.layerLoader?.layerType.events?.off("setSelected", this.eventHelper.getEvent("layerType_setSelected"));
-    this.off("setSelected", this.eventHelper.getEvent("setSelected"));
   }
 }

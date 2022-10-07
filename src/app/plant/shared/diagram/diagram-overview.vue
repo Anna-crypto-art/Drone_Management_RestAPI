@@ -52,6 +52,7 @@ import { MathHelper } from "@/app/shared/services/helper/math-helper";
 import AppDiagramHistory from "@/app/plant/shared/diagram/diagram-history.vue";
 import AppDiagramAreas from "@/app/plant/shared/diagram/diagram-areas.vue";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import { RouteQueryHelper } from "../helper/route-query-helper";
 
 @Component({
   name: "app-diagram-overview",
@@ -110,7 +111,8 @@ export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
         [this.firstAnalysisResult!.id, this.compareAnalysisResult.id] :
         (this.firstAnalysisResult ? this.firstAnalysisResult!.id : undefined)
     }})
-    // this.$router.go(0);
+    
+    RouteQueryHelper.emitQueryChanged();
   }
 
   private activateNumberBox(numberBox: DiagramNumberBox) {

@@ -33,6 +33,7 @@
                 class="mar-left-half blue"
                 v-b-popover.hover.top="$t('has-ref-measures', { count: row.item.refMeasureCount })"
               />
+              <app-super-admin-marker v-if="row.item.analysisResultReleased === false" />
               <br>
               <small class="grayed">{{ row.item.name }}</small>
               <div :class="{ 'mar-top': row.item.orderPPs && row.item.orderPPs.length > 0 }">
@@ -63,6 +64,7 @@ import { RouteQueryHelper } from "../helper/route-query-helper";
 import AppOrderPpsView from "@/app/shared/components/app-order-pps-view/app-order-pps-view.vue";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import AppIcon from "@/app/shared/components/app-icon/app-icon.vue";
+import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 
 @Component({
   name: "app-analysis-selection-sidebar",
@@ -72,6 +74,7 @@ import AppIcon from "@/app/shared/components/app-icon/app-icon.vue";
     AppSidebar,
     AppOrderPpsView,
     AppIcon,
+    AppSuperAdminMarker,
   },
 })
 export default class AppAnalysisSelectionSidebar extends Vue {
@@ -102,28 +105,26 @@ export default class AppAnalysisSelectionSidebar extends Vue {
         date: dateHelper.toDate(analysis.flown_at),
         orderPPs: analysis.order_product_packages,
         refMeasureCount: analysis.reference_measurements.length,
+        analysisResultReleased: analysis.analysis_result?.released,
       });
     }
 
     await this.selectAnalysis();
 
-    AnalysisSelectionService.on(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL, () => {
+    AnalysisSelectionService.on(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL, async () => {
       this.analysesTable.clearSelected();
     });
 
     AnalysisSelectionService.on(this.plant.id, AnalysisSelectionEvent.SELECT_FIRST, async () => {
       await this.selectAnalysis(true);
     });
-  }
 
-  @Watch("$route.query.result", { deep: true })
-  async onResultChanged() {
-    await this.routeQueryHelper.queryChanged(async () => {
+    this.routeQueryHelper.queryChanged(async () => {
       await this.selectAnalysis();
     });
   }
 
-  onAnalysisSelected(selectedAnalyses: { id: string }[]): void {
+  async onAnalysisSelected(selectedAnalyses: { id: string }[]) {
     if (selectedAnalyses.length > 2) {
       const newSelected = selectedAnalyses
         .find(selected => !this.lastSelectedAnalyses.find(lastSelected => lastSelected.id === selected.id))
@@ -154,13 +155,13 @@ export default class AppAnalysisSelectionSidebar extends Vue {
       if (selectedAnalyses && selectedAnalyses.length === 2) {
         selectedAnalysisIds = [selectedAnalyses[0].id, selectedAnalyses[1].id];
 
-        AnalysisSelectionService.emit(
+        await this.routeQueryHelper.replaceRoute({ result: selectedAnalysisIds });
+
+        await AnalysisSelectionService.emit(
           this.plant.id,
           AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED,
           selectedAnalysisIds
         );
-
-        this.routeQueryHelper.replaceRoute({ result: selectedAnalysisIds });
       }
     } else {
       let selectedAnalysisId: string | undefined = undefined
@@ -168,13 +169,13 @@ export default class AppAnalysisSelectionSidebar extends Vue {
         selectedAnalysisId = selectedAnalyses[0].id;
       }
 
-      AnalysisSelectionService.emit(
+      await this.routeQueryHelper.replaceRoute({ result: selectedAnalysisId });
+
+      await AnalysisSelectionService.emit(
         this.plant.id,
         AnalysisSelectionEvent.ANALYSIS_SELECTED,
         selectedAnalysisId
       );
-
-      this.routeQueryHelper.replaceRoute({ result: selectedAnalysisId });
     }
   }
 
@@ -200,7 +201,7 @@ export default class AppAnalysisSelectionSidebar extends Vue {
         await this.$nextTick();
       }
 
-      this.analysesTable.selectRow(selectIndex);
+      // this.analysesTable.selectRow(selectIndex);
     }
   }
 

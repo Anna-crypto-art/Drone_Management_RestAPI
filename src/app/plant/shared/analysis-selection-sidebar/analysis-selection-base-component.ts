@@ -14,15 +14,13 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
   private selectedAnalysis: AnalysisForViewSchema | null = null;
   private selectedAnalyses: AnalysisForViewSchema[] | null = null; // compare mode
 
-  private eventHelper = new EventHelper();
-
   async created() {
     super.created();
 
     AnalysisSelectionService.on(
       this.plant.id,
       AnalysisSelectionEvent.ANALYSIS_SELECTED,
-      this.eventHelper.registerEvent(AnalysisSelectionEvent.ANALYSIS_SELECTED, async (selectedAnalysisId: string | undefined) => {
+      async (selectedAnalysisId: string | undefined) => {
         if (this.analyses) {
           this.selectedAnalysis = this.analyses
             .find(analysis => analysis.id === selectedAnalysisId) || null;
@@ -33,13 +31,13 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
         }
     
         await this.onAnalysisSelected();
-      })
+      }
     );
 
     AnalysisSelectionService.on(
       this.plant.id,
       AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED,
-      this.eventHelper.registerEvent(AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED, async (selectedAnalysesIds: string[] | undefined) => {
+      async (selectedAnalysesIds: string[] | undefined) => {
         if (!selectedAnalysesIds) {
           this.selectedAnalyses = null;
         } else if (this.analyses) {
@@ -52,7 +50,7 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
         }
     
         await this.onMultiAnalysesSelected();
-      })
+      }
     );
   }
 
@@ -92,9 +90,5 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
 
   protected get analysisResults(): AnalysisResultDetailedSchema[] {
     return this.analyses?.map(analysis => analysis.analysis_result!).filter(analysisResult => !!analysisResult) || [];
-  }
-
-  beforeDestroy() {
-    this.eventHelper.unregisterAll(AnalysisSelectionService.getAnalysisSelectionEventBus(this.plant.id));
   }
 }

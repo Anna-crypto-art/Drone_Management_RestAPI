@@ -2,60 +2,35 @@ import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant
 import Vue from "vue";
 import { RawLocation } from "vue-router";
 import { PlantRouteQuery } from "../types";
+import { EventEmitter } from "events";
 
 export class RouteQueryHelper {
+  private static event = new EventEmitter();
+
+  public static emitQueryChanged() {
+    RouteQueryHelper.event.emit("queryChanged");
+  }
+
   constructor(private readonly vueComponent: Vue & { plant: PlantSchema }) {}
 
-  /**
-   * Ignore watched query changes 
-   * Due to concurrency issues closed eyes is actually a stack...
-   */
-  private closedEyesStack: true[] = [];
-  public get closedEyes(): boolean {
-    return this.closedEyesStack.length > 0;
-  }
-  public set closedEyes(closeEye: boolean) {
-    if (closeEye) {
-      this.closedEyesStack.push(true);
-    } else if (this.closedEyesStack.length > 0) {
-      this.closedEyesStack.splice(0, 1);
-    }
-  }
-
-  public async queryChanged(onQueryChanged: () => Promise<void>) {
-    if (this.closedEyes) {
-      return;
-    }
-
-    try {
+  public queryChanged(onQueryChanged: () => Promise<void>) {
+    window.addEventListener('popstate', async (event) => {
       await onQueryChanged();
-    } finally {
-      this.closedEyes = false;
+    });
+
+    RouteQueryHelper.event.on("queryChanged", async () => await onQueryChanged());
+  }
+
+  public async pushRoute(query: PlantRouteQuery) {
+    if (this.hasQueryChanged(query)) {
+      await this.vueComponent.$router.push(this.getRoute(query));
     }
   }
 
-  public async pushRoute(query: PlantRouteQuery, watchChanges = false) {
-    this.closedEyes = !watchChanges;
-
+  public async replaceRoute(query: PlantRouteQuery) {
     if (this.hasQueryChanged(query)) {
-      this.vueComponent.$router.push(this.getRoute(query));
+      await this.vueComponent.$router.replace(this.getRoute(query));
     }
-
-    await this.vueComponent.$nextTick();
-
-    this.closedEyes = false;
-  }
-
-  public async replaceRoute(query: PlantRouteQuery, watchChanges = false) {
-    this.closedEyes = !watchChanges;
-
-    if (this.hasQueryChanged(query)) {
-      this.vueComponent.$router.replace(this.getRoute(query));
-    }
-
-    await this.vueComponent.$nextTick();
-
-    this.closedEyes = false;
   }
 
   private hasQueryChanged(query: PlantRouteQuery): boolean {

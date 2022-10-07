@@ -1,29 +1,26 @@
 
-import Vue from "vue";
+import { SeqEventCallbackFunction, SequentialEventEmitter } from "@/app/shared/services/sequential-event-emitter/sequential-event-emitter";
 import { AnalysisSelectionEvent } from "./types";
 
-class AnalysisSelectionBus extends Vue {
+class AnalysisSelectionBus extends SequentialEventEmitter {
   lastEvent: AnalysisSelectionEvent | null = null;
   lastArgs: any | null = null;
 
-  emit(event: AnalysisSelectionEvent, args: any) {
+  async emit(event: AnalysisSelectionEvent, ...args: any[]) {
     this.lastEvent = event;
     this.lastArgs = args;
 
-    this.$emit(event, ...args);
+    await super.emit(event, ...args);
   }
-  on(event: AnalysisSelectionEvent, callbackFn: any) {
-    this.$on(event, callbackFn);
+  
+  on(event: AnalysisSelectionEvent, func: SeqEventCallbackFunction) {
+    super.on(event, func);
   }
 
-  reemit() {
+  async reemit() {
     if (this.lastEvent !== null) {
-      this.$emit(this.lastEvent, ...this.lastArgs);
+      await this.emit(this.lastEvent, ...this.lastArgs);
     }
-  }
-
-  off(event: AnalysisSelectionEvent, callbackFn: any) {
-    this.$off(event, callbackFn);
   }
 }
 
@@ -38,16 +35,16 @@ export class AnalysisSelectionService {
     return AnalysisSelectionService.anaylsisSelectionBusses[plantId];
   }
   
-  public static on(plantId: string, analysisSelectionEvent: AnalysisSelectionEvent, callbackFn: any) {
+  public static on(
+    plantId: string,
+    analysisSelectionEvent: AnalysisSelectionEvent,
+    callbackFn: SeqEventCallbackFunction
+  ) {
     AnalysisSelectionService.getAnalysisSelectionEventBus(plantId).on(analysisSelectionEvent, callbackFn);
   }
 
-  public static emit(plantId: string, analysisSelectionEvent: AnalysisSelectionEvent, ...args: any[]) {
-    AnalysisSelectionService.getAnalysisSelectionEventBus(plantId).emit(analysisSelectionEvent, args);
-  }
-
-  public static off(plantId: string, analysisSelectionEvent: AnalysisSelectionEvent, callbackFn: any) {
-    AnalysisSelectionService.getAnalysisSelectionEventBus(plantId).off(analysisSelectionEvent, callbackFn);
+  public static async emit(plantId: string, analysisSelectionEvent: AnalysisSelectionEvent, ...args: any[]) {
+    await AnalysisSelectionService.getAnalysisSelectionEventBus(plantId).emit(analysisSelectionEvent, ...args);
   }
 
   /**
@@ -57,7 +54,7 @@ export class AnalysisSelectionService {
    * Re-emits last emitted event for latecomers
    * @param plantId 
    */
-  public static whazzup(plantId: string) {
-    AnalysisSelectionService.getAnalysisSelectionEventBus(plantId).reemit();
+  public static async whazzup(plantId: string) {
+    await AnalysisSelectionService.getAnalysisSelectionEventBus(plantId).reemit();
   }
 }
