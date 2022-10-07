@@ -116,9 +116,6 @@ export default class AppGeovisualLayerDisplay extends Vue {
       this.collapsed = true;
     }
 
-    console.log("this.collapsed " + this.layer.id)
-    console.log(this.collapsed)
-
     this.selected = this.layer.selected;
 
     this.layer.on("setSelected", async (selected: boolean) => {
@@ -150,7 +147,6 @@ export default class AppGeovisualLayerDisplay extends Vue {
     this.layer.on("collapse", async () => { this.collapsed = true; });
     this.layer.on("uncollapse", async () => {
       if (!this.layer.hasSelectedChildLayer()) {
-        console.log("uncollapse");
         this.collapsed = false;
       }
     });
@@ -206,7 +202,6 @@ export default class AppGeovisualLayerDisplay extends Vue {
 
   onCollapse(layer: LayerStructure) {
     if (layer.collapse) {
-      console.log("onCollapse");
       this.collapsed = !this.collapsed;
     }
   }

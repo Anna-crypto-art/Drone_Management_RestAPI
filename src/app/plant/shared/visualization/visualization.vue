@@ -279,7 +279,7 @@ export default class AppVisualization
     const analysisSelectionChanged = 
       this.piLayersHierarchy.getSelectedAnalysisResultId() !== this.firstAnalysisResult?.id;
 
-    const isNewAnalysisResult = this.piLayersHierarchy.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
+    this.piLayersHierarchy.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     
     const multiAnalysesSelectedBefore = !!this.piLayersHierarchy.getCompareAnalysisResultId();
     this.piLayersHierarchy.setCompareAnalysisResult(null);

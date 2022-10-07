@@ -81,8 +81,6 @@ export class PILayersHierarchy {
   }
 
   public async reselectAllLayers(multiSelection: boolean) {
-    console.log("reselectAllLayers");
-
     const allChildLayers = this.getAllChildLayers();
 
     const selectedKeyFigureIds = allChildLayers.filter(childLayer => childLayer.getSelected())
