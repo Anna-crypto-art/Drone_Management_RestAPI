@@ -196,11 +196,9 @@ export default class AppAnalysisSelectionSidebar extends Vue {
 
     if (selectIndex >= 0) {
       // Wait for table reselection
-      await this.$nextTick();
-      await this.$nextTick();
-      await this.$nextTick();
-      await this.$nextTick();
-      await this.$nextTick();
+      for (let i = 0; i < 10; i++) {
+        await this.$nextTick();
+      }
 
       this.analysesTable.selectRow(selectIndex);
     }
