@@ -298,7 +298,7 @@ export default class AppVisualization
         // Wait for new analysis result to be loaded
         // Actually, I don't understand why it takes so long
         // nor what am I waiting for exactly... Feel free to do some research, here
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 10; i++) {
           await this.$nextTick();
         }
       }
