@@ -70,6 +70,16 @@
       >
         {{ $t("finish-reference-measurement") }}
       </app-button>
+      <app-button 
+        v-show="!refMeasureId"
+        variant="secondary"
+        icon="file-earmark-check-fill"
+        :hideText="true"
+        @click="onShowDronePlantCoverageClick"
+        :loading="dronePlantCoverageButtonLoading"
+      >
+        {{ $t("check-drone-plant-coverage") }}
+      </app-button>
     </div>
     <b-toast id="piInfoToast" no-auto-hide solid toaster="b-toaster-bottom-center">
       <template #toast-title>
@@ -235,6 +245,7 @@ export default class AppVisualization
   refMeasureId: string | null = null;
   refMeasureButtonLoading = false;
   refMeasureModalLoading = false;
+  dronePlantCoverageButtonLoading = false;
   refMeasure: ReferenceMeasurementOptions | null = null;
   oldRefMeasures: { value: string | null, text: string }[] | null = null;
 
@@ -686,6 +697,22 @@ export default class AppVisualization
       this.showError(e)
     } finally {
       this.refMeasureButtonLoading = false;
+    }
+  }
+
+  async onShowDronePlantCoverageClick() {
+    this.dronePlantCoverageButtonLoading = true;
+    try {
+      //let analysis_result_id = this.piLayersHierarchy.getSelectedAnalysisResultId();
+      console.log(this.firstAnalysis?.id);
+      if (this.firstAnalysis?.id) {
+        const analysisDronePlantCoverage = await volateqApi.getDronePlantCoverage(this.firstAnalysis?.id);
+        console.log(analysisDronePlantCoverage);
+      }
+    } catch (e) {
+      this.showError(e)
+    } finally {
+      this.dronePlantCoverageButtonLoading = false;
     }
   }
 
