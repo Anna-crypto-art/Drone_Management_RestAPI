@@ -71,12 +71,14 @@
         {{ $t("finish-reference-measurement") }}
       </app-button>
       <app-button 
-        v-show="!refMeasureId"
+        v-show="!refMeasureId && isSuperAdmin"
         variant="secondary"
-        icon="file-earmark-check-fill"
+        icon="files"
         :hideText="true"
         @click="onShowDronePlantCoverageClick"
         :loading="dronePlantCoverageButtonLoading"
+        :superAdminProtected="true"
+        :forceHideSuperAdminIcon="true"
       >
         {{ $t("check-drone-plant-coverage") }}
       </app-button>
@@ -897,5 +899,9 @@ export default class AppVisualization
 
 .visualization-actions .app-button:hover {
   background-color: $hover-light-blue;
+}
+
+.app-button {
+  margin-right: 20px;
 }
 </style>

@@ -370,7 +370,7 @@
   "ignore-value-undo": "Undo ignoring value",
   "ignored": "Ignored",
   "reference-measurement-value-change-success": "Reference measurement value changed successfully",
-  "check-drone-plant-coverage": "Check the drone's plant coverage",
+  "check-drone-plant-coverage": "Check coverage of uploaded files",
   "move-selected-files": "Move selected files",
   "selected-files-moved-success": "Selected files moved successfully",
   "delete-selected-files": "Delete selected files",
