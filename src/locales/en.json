@@ -377,7 +377,7 @@
   "selected-files-deleted-success": "Selected files successfully deleted",
   "load-all-ortho-images": "Load all ortho images",
   "load-all-ortho-images-sure": "Are you sure that you want to load all ortho images? This may take a while... ",
-  "analysis-with-metdata-data-complete_quest": "You uploaded plant metadata. Please select <b>Uploaded data complete</b> if the uploaded data is complete.",
+  "analysis-with-metdata-data-complete_quest": "You uploaded plant metadata. Please select <b>Uploaded data complete</b> if all data necessary for the analysis are now uploaded.",
   "upload-new-doc-file": "Upload document",
   "edit-doc-file": "Edit document",
   "delete-doc-file": "Delete document",
