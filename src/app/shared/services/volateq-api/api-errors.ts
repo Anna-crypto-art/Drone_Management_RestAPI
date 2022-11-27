@@ -7,6 +7,7 @@ export enum ApiErrors {
   EMAIL_ALREADY_EXISTS = "EMAIL_ALREADY_EXISTS",
   RESOURCE_NOT_FOUND = "RESOURCE_NOT_FOUND",
   BAD_REQUEST = "BAD_REQUEST",
+  DISCONNECT = "DISCONNECT",
 }
 
 export interface ApiException {

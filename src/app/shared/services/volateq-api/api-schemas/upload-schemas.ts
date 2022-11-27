@@ -33,7 +33,7 @@ export interface UploadChunkResult {
 }
 
 export interface MyUploadingUpload {
-  upload_id: string;
+  upload_id?: string;
   analysis_id?: string;
   analysis_name?: string;
 }

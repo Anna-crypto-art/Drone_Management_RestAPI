@@ -724,7 +724,7 @@ export class VolateqAPI extends HttpClientBase {
 
   public async uploadFileChunk(
     uploadId: string, 
-    fileChunk: File,
+    fileChunk: Blob,
     fileId: string,
     chunkNumber: number,
     onUploadProgressEvent?: (progressEvent: ProgressEvent) => void,
