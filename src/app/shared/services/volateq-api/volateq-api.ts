@@ -30,6 +30,9 @@ import { ProductPackageSchema, ProductPackageWithKeyFiguresSchema } from "./api-
 import { CreateOrderRequest, UpdateOrderRequest } from "./api-requests/order-requests";
 import { OrderPPKeyFiguresDisabledSchema, OrderProductPackageSchema, OrderSchema } from "./api-schemas/order-schema";
 import { MultiselectOption } from "../../components/app-multiselect/types";
+import { MyUploadingUpload, SecuredFilename, Upload, UploadChunkResult } from "./api-schemas/upload-schemas";
+import { CreateUploadRequest } from "./api-requests/upload-requests";
+import { ja, th } from "date-fns/locale";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -704,7 +707,45 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public async getOrderPPDisabledKeyFigures(orderId: string): Promise<OrderPPKeyFiguresDisabledSchema[]> {
-    return this.get(`/auth/order-product-packages/${orderId}/disabled-key-figures`)
+    return this.get(`/auth/order-product-packages/${orderId}/disabled-key-figures`);
+  }
+
+  public async getSecuredFilenames(filenames: string[]): Promise<SecuredFilename[]> {
+    return this.post(`/auth/upload/secure-filenames`, { file_names: filenames });
+  }
+
+  public async createAnalysisUpload(analysisId: string, createUploadRequest: CreateUploadRequest): Promise<Upload> {
+    return this.post(`/auth/upload/analysis/${analysisId}`, createUploadRequest);
+  }
+
+  public async getUpload(uploadId: string): Promise<Upload> {
+    return this.get(`/auth/upload/${uploadId}`);
+  }
+
+  public async uploadFileChunk(
+    uploadId: string, 
+    fileChunk: File,
+    fileId: string,
+    chunkNumber: number,
+    onUploadProgressEvent?: (progressEvent: ProgressEvent) => void,
+  ): Promise<UploadChunkResult> {
+    return this.postForm(`/auth/upload/${uploadId}`, { 
+      file: fileChunk,
+      file_id: fileId,
+      chunk_number: (chunkNumber as unknown) as string
+    }, onUploadProgressEvent)
+  }
+
+  public async resumeUpload(uploadId: string): Promise<void> {
+    await this.post(`/auth/upload/${uploadId}/resume`);
+  }
+
+  public async cancelUpload(uploadId: string): Promise<void> {
+    await this.post(`/auth/upload/${uploadId}/resume`);
+  }
+
+  public async getMyUploadingUpload(): Promise<MyUploadingUpload> {
+    return this.get(`/auth/upload/me-uploading`)
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {
