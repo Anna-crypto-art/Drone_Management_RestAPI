@@ -1,3 +1,10 @@
+export enum UploaderEvent {
+  FILE_PROGRESS = "UPLOAD_FILE_PROGRESS",
+  FILE_COMPLETE = "FILE_COMPLETE",
+  ERROR = "UPLOAD_ERROR",
+  UPLOAD_PROGRESS = "UPLOAD_PROGRESS",
+}
+
 export interface IResumableFile {
   fileName: string;
   uniqueIdentifier: string;
