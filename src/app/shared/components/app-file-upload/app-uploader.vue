@@ -1,12 +1,18 @@
 <template>
   <div class="app-file-upload">
-    <b-alert v-model="resuming" :variant="info" fade>
-      {{ missingUploadFilesTxt }}
+    <b-alert v-show="hasStateRetrying" variant="danger">
+      <div v-if="error">
+        {{ $t("error-occured-retrying") }}
+        <b-spinner />
+        <hr>
+        <b>{{ error.error }}</b><br>
+        {{ error.message }}
+      </div>
     </b-alert>
 
     <app-files-selection @filesSelected="onFilesSelected">
     
-      <div class="app-file-upload-content mar-bottom">
+      <div class="app-file-upload-content mar-bottom-half">
         <h3 v-if="title" class="app-file-upload-content-title">{{ title }}</h3>
         <slot />
       </div>
@@ -24,6 +30,9 @@
       </template>
     </app-files-selection>
 
+    <app-button :loading="uploading" :disabled="uploadButtonDisabled" cls="pull-right">
+      {{ $t("upload") }}
+    </app-button>
   </div>
 </template>
 
@@ -33,45 +42,51 @@ import { Component, Prop, Ref } from "vue-property-decorator";
 import { UploaderService } from "@/app/shared/services/upload-service/uploader-service";
 import AppFileUploader from "./app-file-uploader.vue"
 import AppFilesSelection from "./app-files-selection.vue";
+import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { UploaderState } from "./types";
 import { ApiException } from "../../services/volateq-api/api-errors";
 import { FileUploader } from "../../services/upload-service/file-uploader";
 import { AnalysisUploaderService } from "../../services/upload-service/analysis-uploader-service";
-import appContentEventBus from "../app-content/app-content-event-bus";
+import { CatchError } from "../../services/helper/catch-helper";
+import { BaseAuthComponent } from "../base-auth-component/base-auth-component";
 
 @Component({
   name: "app-uploader",
   components: {
     AppFileUploader,
     AppFilesSelection,
+    AppButton,
   },
 })
-export default class AppUploader extends Vue {
+export default class AppUploader extends BaseAuthComponent {
   @Prop({ required: true }) uploaderService!: UploaderService;
   @Prop() title: string | undefined;
 
   uploaderState = UploaderState.SELECTING;
   uploading = false;
-  resuming = false;
+  // resuming = false;
   error: ApiException | null = null;
 
   async created() {
     this.registerUploaderEvents();
 
-    await this.checkMyUploadingUpload();
+    // await this.checkMyUploadingUpload();
   }
 
-  hasStateSelecting(): boolean {
+  get hasStateSelecting(): boolean {
     return this.uploaderState === UploaderState.SELECTING;
   }
-  hasStateResuming(): boolean {
+  get hasStateResuming(): boolean {
     return this.uploaderState === UploaderState.RESUMING;
   }
-  hasStateUploading(): boolean {
+  get hasStateUploading(): boolean {
     return this.uploaderState === UploaderState.UPLOADING;
   }
-  hasStateRetrying(): boolean {
+  get hasStateRetrying(): boolean {
     return this.uploaderState === UploaderState.RETRYING;
+  }
+  get hasStateCompleted(): boolean {
+    return this.uploaderState === UploaderState.COMPLETED;
   }
 
   async onFilesSelected(files: File[]): Promise<void> {
@@ -79,36 +94,41 @@ export default class AppUploader extends Vue {
     await this.uploaderService.addFiles(files);
   }
 
+  @CatchError()
   async onStartUpload(): Promise<void> {
-    
+    await this.uploaderService.doUpload();
   }
 
   get files(): FileUploader[] {
     return this.uploaderService.fileUploaders;
   }
 
-  async onCancelUpload(): Promise<void> {
+  uploadButtonDisabled(): boolean {
+    return this.files.length === 0 || this.uploading;
   }
 
-  async onResumeUpload(): Promise<void> {
+  // async onCancelUpload(): Promise<void> {
+  // }
 
-  }
+  // async onResumeUpload(): Promise<void> {
 
-  private async checkMyUploadingUpload() {
-    const uploadingUpload = await this.uploaderService.getMyUploadingUpload();
+  // }
 
-    if (uploadingUpload?.upload_id) {
-      this.uploaderService.setUpload(uploadingUpload?.upload_id);
+  // private async checkMyUploadingUpload() {
+  //   const uploadingUpload = await this.uploaderService.getMyUploadingUpload();
 
-      if (this.uploaderService instanceof AnalysisUploaderService && uploadingUpload.analysis_id) {
-        this.uploaderService.setAnalysisId(uploadingUpload.analysis_id);
-      }
+  //   if (uploadingUpload?.upload_id) {
+  //     this.uploaderService.setUpload(uploadingUpload?.upload_id);
 
-      this.uploaderState = UploaderState.RESUMING;
+  //     if (this.uploaderService instanceof AnalysisUploaderService && uploadingUpload.analysis_id) {
+  //       this.uploaderService.setAnalysisId(uploadingUpload.analysis_id);
+  //     }
 
-      this.uploaderStateChanged();
-    }
-  }
+  //     this.uploaderState = UploaderState.RESUMING;
+
+  //     this.uploaderStateChanged();
+  //   }
+  // }
 
   private registerUploaderEvents() {
     this.uploaderService.onStartUpload(() => {
@@ -135,16 +155,20 @@ export default class AppUploader extends Vue {
   }
 
   private uploaderStateChanged(): void {
-    if (this.hasStateUploading() || this.hasStateRetrying()) {
+    if (this.hasStateUploading || this.hasStateRetrying) {
       this.uploading = true;
     }
 
-    if (this.hasStateUploading()) {
+    if (this.hasStateUploading) {
       this.error = null;
     }
 
-    if (this.hasStateResuming()) {
-      this.resuming = true;
+    if (this.hasStateResuming) {
+      // this.resuming = true;
+    }
+
+    if (this.hasStateCompleted) {
+      this.showSuccess(this.$t("upload-completed-successfully").toString());
     }
   }
 }
@@ -152,17 +176,6 @@ export default class AppUploader extends Vue {
 
 <style lang="scss">
 @import "@/scss/_colors.scss";
-.app-file-upload {
-  margin-bottom: 30px;
-  &-dropzone {
-    background-color: $background-grey;
-    padding: 20px;
-    &-content {
-      &-title {
-        margin-bottom: 15px;
-      }
-      margin-bottom: 30px;
-    }
-  }
-}
+// .app-file-upload {
+// }
 </style>

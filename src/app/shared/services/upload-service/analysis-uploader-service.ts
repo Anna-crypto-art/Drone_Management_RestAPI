@@ -6,7 +6,7 @@ export class AnalysisUploaderService extends UploaderService {
 
   constructor(
     private readonly plantId?: string,
-    private analysisId?: string,
+    public analysisId?: string,
     chunkSizeInMB?: number,
   ) {
     super(chunkSizeInMB);

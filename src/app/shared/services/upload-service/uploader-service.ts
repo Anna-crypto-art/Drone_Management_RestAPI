@@ -105,6 +105,8 @@ export abstract class UploaderService {
       throw new Error("Missing upload files or unknown upload files for resume upload")
     }
 
+    this.event.emit(UploaderEvent.START_UPLOAD);
+
     let fileUploader: FileUploader | undefined;
     while ((fileUploader = this.fileUploaders.find(f => !f.complete)) !== undefined) {
       try {
