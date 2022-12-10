@@ -2,7 +2,7 @@ import { EventEmitter } from "events";
 import { waitFor } from "../helper/debounce-helper";
 import { ApiException } from "../volateq-api/api-errors";
 import { CreateFileUpload } from "../volateq-api/api-requests/upload-requests";
-import { Upload } from "../volateq-api/api-schemas/upload-schemas";
+import { MyUploadingUpload, Upload } from "../volateq-api/api-schemas/upload-schemas";
 import volateqApi from "../volateq-api/volateq-api";
 import { FileUploader } from "./file-uploader";
 import { UploaderEvent } from "./types";
@@ -10,7 +10,7 @@ import { UploaderEvent } from "./types";
 
 export abstract class UploaderService {
   private event = new EventEmitter();
-  private fileUploaders: FileUploader[] = [];
+  public fileUploaders: FileUploader[] = [];
   protected upload: Upload | null = null;
 
   constructor(
@@ -26,7 +26,10 @@ export abstract class UploaderService {
         throw new Error("File mapping error");
       }
 
-      this.fileUploaders.push(new FileUploader(file, securedFileName.secured_name, this.chunkSizeInMB));
+      const fileUploader = new FileUploader(file, securedFileName.secured_name, this.chunkSizeInMB);
+      fileUploader.onProgress(progress => { this.event.emit(UploaderEvent.UPLOAD_PROGRESS); });
+
+      this.fileUploaders.push(fileUploader);
     }
   }
 
@@ -41,28 +44,50 @@ export abstract class UploaderService {
     this.event.on(UploaderEvent.ERROR, onErrorCallback);
   }
 
+  public onStartUpload(onStartUploadCallback: () => void) {
+    this.event.on(UploaderEvent.START_UPLOAD, onStartUploadCallback);
+  }
+
+  public onProgress(onProgressCallback: () => void) {
+    this.event.on(UploaderEvent.UPLOAD_PROGRESS, onProgressCallback);
+  }
+
+  public onUploadComplete(onUploadCompleteCallback: () => void) {
+    this.event.on(UploaderEvent.UPLOAD_COMPLETE, onUploadCompleteCallback);
+  }
+
   public abstract doUpload(): Promise<void>;
 
   protected getCreateUploadFiles(): CreateFileUpload[] {
     return this.fileUploaders.map(f => ({ name: f.fileName, size: f.file.size }));
   }
 
-  protected prepareFiles(upload: Upload) {
-    for (const uploadFile of this.fileUploaders) {
-      const preparedUploadFile = upload.files.find(f => f.name == uploadFile.fileName);
+  protected prepareFileUploaders() {
+    if (!this.upload) {
+      throw new Error("Upload is undefined. Missing upload object");
+    }
+
+    for (const fileUploader of this.fileUploaders) {
+      const preparedUploadFile = this.upload.files.find(f => f.name == fileUploader.fileName);
       if (!preparedUploadFile) {
         throw new Error("File mapping error");
       }
 
-      uploadFile.uploadId = upload.upload_id;
-      uploadFile.fileId = preparedUploadFile.id;
-      uploadFile.complete = preparedUploadFile.complete;
-      uploadFile.missingChunkNumbers = preparedUploadFile.missing_chunks;
+      fileUploader.uploadId = this.upload.upload_id;
+      fileUploader.fileId = preparedUploadFile.id;
+      fileUploader.complete = preparedUploadFile.complete;
+      fileUploader.missingChunkNumbers = preparedUploadFile.missing_chunks;
     }
   }
 
-  protected setUpload(upload: Upload) {
-    this.prepareFiles(upload);
+  public async setUpload(upload_or_upload_id: Upload | string) {
+    if (typeof upload_or_upload_id === "string") {
+      this.upload = await volateqApi.getUpload(upload_or_upload_id);
+    } else {
+      this.upload = upload_or_upload_id;
+    }
+
+    this.prepareFileUploaders();
   }
 
   protected async startUpload() {
@@ -75,21 +100,21 @@ export abstract class UploaderService {
     if (this.fileUploaders.find(f => !f.fileId)) {
       throw new Error("Files not prepared for upload");
     }
+    const invalidFilesSelection = this.getInvalidUploadFilesSelection();
+    if (invalidFilesSelection.missingFiles.length > 0 || invalidFilesSelection.unknownFiles.length > 0) {
+      throw new Error("Missing upload files or unknown upload files for resume upload")
+    }
 
     let fileUploader: FileUploader | undefined;
     while ((fileUploader = this.fileUploaders.find(f => !f.complete)) !== undefined) {
       try {
         await this.tryUpload(fileUploader);
-
-        this.event.emit(UploaderEvent.UPLOAD_PROGRESS);
       } catch {
         let instantTries = 3;
 
         while (instantTries > 0) {
           try {
             await this.tryUpload(fileUploader);
-
-            this.event.emit(UploaderEvent.UPLOAD_PROGRESS);
 
             break;
           } catch {
@@ -127,10 +152,36 @@ export abstract class UploaderService {
     this.fileUploaders = [];
   }
 
+  public async getMyUploadingUpload(): Promise<MyUploadingUpload | undefined> {
+    return volateqApi.getMyUploadingUpload();
+  }
+
+  public getInvalidUploadFilesSelection(): { missingFiles: string[], unknownFiles: string[] } {
+    if (!this.upload) {
+      throw new Error("upload is undefined");
+    }
+
+    const invalidFilesSelection = { 
+      missingFiles: this.upload.files
+        .filter(f => !this.fileUploaders.find(fileUploader => fileUploader.fileName === f.name))
+        .map(f => f.name), 
+      unknownFiles: this.fileUploaders
+        .filter(fileUploader => !this.upload!.files.find(f => f.name === fileUploader.fileName))
+        .map(fileUploader => fileUploader.fileName),
+    };
+
+    return invalidFilesSelection;
+  }
 
   private async tryUpload(uploadFile: FileUploader) {
     try {
       await uploadFile.upload();
+
+      if (this.isUploadComplete()) {
+        this.event.emit(UploaderEvent.UPLOAD_COMPLETE);
+      } else {
+        this.event.emit(UploaderEvent.UPLOAD_PROGRESS);
+      }
     } catch (e) {
       uploadFile.emitError();
       this.event.emit(UploaderEvent.ERROR, e);
@@ -140,7 +191,14 @@ export abstract class UploaderService {
   }
 
   private async refreshUpload() {
-    this.upload = await volateqApi.getUpload(this.upload!.upload_id);
-    this.prepareFiles(this.upload);
+    if (!this.upload) {
+      throw new Error("Upload is undefined");
+    }
+
+    this.setUpload(this.upload.upload_id);
+  }
+
+  private isUploadComplete(): boolean {
+    return !this.fileUploaders.find(f => !f.complete);
   }
 }

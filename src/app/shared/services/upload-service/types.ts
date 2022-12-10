@@ -3,6 +3,8 @@ export enum UploaderEvent {
   FILE_COMPLETE = "FILE_COMPLETE",
   ERROR = "UPLOAD_ERROR",
   UPLOAD_PROGRESS = "UPLOAD_PROGRESS",
+  START_UPLOAD = "START_UPLOAD",
+  UPLOAD_COMPLETE = "UPLOAD_COMPLETE",
 }
 
 export interface IResumableFile {

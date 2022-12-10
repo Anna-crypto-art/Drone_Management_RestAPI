@@ -47,6 +47,10 @@ export class FileUploader {
     this.emitComplete();
   }
 
+  public get size(): number {
+    return this.file.size;
+  }
+
   public async upload() {
     if (this.complete) {
       this.fileUploadCompleted();
