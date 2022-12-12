@@ -3,7 +3,7 @@
     <slot />
 
     <div class="app-file-selection-button mar-bottom">
-      <b-form-file v-model="fileButtonSelection" @change="onFileButtonSelected" plain multiple></b-form-file>
+      <app-file-input v-model="fileButtonSelection" />
     </div>
 
     <slot name="files" />
@@ -12,10 +12,14 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Watch } from "vue-property-decorator";
+import AppFileInput from "./app-file-input.vue";
 
 @Component({
   name: "app-files-selection",
+  components: {
+    AppFileInput,
+  }
 })
 export default class AppFilesSelection extends Vue {
   fileButtonSelection: File[] | null = null;
@@ -27,8 +31,10 @@ export default class AppFilesSelection extends Vue {
     this.$emit("filesSelected", this.fileDropSelection || this.fileButtonSelection);
   }
 
-  onFileButtonSelected() {
-    this.fileDropSelection = null;
+  @Watch("fileButtonSelection") onFileButtonSelectionChanged() {
+    if (this.fileButtonSelection) {
+      this.fileDropSelection = null;
+    }
 
     this.emitFiles();
   }
@@ -36,30 +42,42 @@ export default class AppFilesSelection extends Vue {
   onDrop(e: DragEvent) {
     e.preventDefault();
 
+    this.dragging = false;
+
     const files: File[] = [];
 
-    if (e.dataTransfer?.items) {
-      for (let i = 0; i < e.dataTransfer.items.length; i++) {
-        const item = e.dataTransfer.items[i];
-        if (item.kind === 'file') {
-          const itemFile = item.getAsFile();
-          if (itemFile) {
-            files.push(itemFile);
-          }
-        }
-      }
-    } else if (e.dataTransfer?.files) {
-      for (let i = 0; i < e.dataTransfer?.files.length; i++) {
-        files.push(e.dataTransfer.files[i]);
-      }
-    }
+    // if (e.dataTransfer!.items) {
+    //   for (let i = 0; i < e.dataTransfer!.items.length; i++) {
+    //     const item = e.dataTransfer!.items[i];
+    //     if (item.kind === 'file') {
+    //       const itemFile = item.getAsFile();
+    //       if (itemFile) {
+    //         files.push(itemFile);
+    //       }
+    //     }
+    //   }
+    // } else {
+      [...(e.dataTransfer!.files as any)].forEach(file => {
+        files.push(file);
+      })
+      // for (let i = 0; i < e.dataTransfer!.files!.length; i++) {
+      //   files.push(e.dataTransfer!.files[i]);
+      // }
+    // }
+
+    this.fileButtonSelection = null;
 
     if (files.length > 0) {
       this.fileDropSelection = files;
-      this.fileButtonSelection = null;
     } else {
-      this.fileButtonSelection = null;
+      this.fileDropSelection = null;
     }
+
+    console.log(files);
+    console.log(e.dataTransfer!.files!.length);
+    console.log(e.dataTransfer!.files[0]);
+    console.log("fileDropSelection")
+    console.log(this.fileDropSelection)
 
     this.emitFiles();
   }
@@ -81,11 +99,11 @@ export default class AppFilesSelection extends Vue {
 @import "@/scss/_colors.scss";
 .app-file-selection {
   background-color: $background-grey;
-  padding: 0.5em;
-  transition: 150ms ease border-color;
+  padding: 1em;
+  transition: 150ms ease background-color;
 
   &.dragging {
-    border: 1px solid $blue;
+    background-color: $dark-20pc;
   }
 }
 </style>

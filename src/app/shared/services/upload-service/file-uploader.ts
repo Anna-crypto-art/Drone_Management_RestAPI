@@ -6,7 +6,7 @@ import { UploaderEvent } from "./types";
 export class FileUploader {
   private event = new EventEmitter();
   
-  public complete: boolean = false;
+  public complete = false;
   public uploadId: string | null = null;
   public fileId: string | null = null;
   public missingChunkNumbers: number[] = [];
@@ -72,7 +72,16 @@ export class FileUploader {
       offsetIndex = chunkNumber - 1;
 
       const start = offsetIndex * chunkSize;
-      let end = start * chunkSize;
+      let end = chunkNumber * chunkSize;
+
+      console.log("upload...")
+      console.log("fileSize: " + fileSize)
+      console.log("chunkSize: " + chunkSize)
+      console.log("chunkNumber: " + chunkNumber)
+      console.log("offsetIndex: " + offsetIndex)
+      console.log("start: " + start)
+      console.log("end: " + end)
+
 
       if (end >= fileSize) {
         eof = true;
@@ -87,7 +96,10 @@ export class FileUploader {
         this.fileId!,
         offsetIndex + 1,
         (progress) => {
-          const fileProgress = Math.ceil(progress.loaded * (end - start) / fileSize);
+          console.log("progress");
+          console.log(progress);
+
+          const fileProgress = Math.round((progress.loaded / progress.total) * ((end - start) / fileSize) * 100);
           this.emitProgress(fileProgress);
         }
       );

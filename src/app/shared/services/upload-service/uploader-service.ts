@@ -12,6 +12,7 @@ export abstract class UploaderService {
   private event = new EventEmitter();
   public fileUploaders: FileUploader[] = [];
   protected upload: Upload | null = null;
+  public allowStartUpload = true;
 
   constructor(
     public readonly chunkSizeInMB = 100
@@ -36,7 +37,7 @@ export abstract class UploaderService {
   public removeFile(fileName: string): void {
     const removeFileIndex = this.fileUploaders.findIndex(file => file.fileName === fileName);
     if (removeFileIndex !== -1) {
-      this.fileUploaders.splice(removeFileIndex, 0);
+      this.fileUploaders.splice(removeFileIndex, 1);
     }
   }
 

@@ -15,7 +15,7 @@
         />
       </b-form-group>
 
-      <app-analysis-uploader :analysis="analysis" />
+      <app-analysis-uploader :plantId="selectedPlantId" :analysis="analysis" :flownAt="flownAt" />
     </div>
   </app-content>
 </template>

@@ -8,7 +8,7 @@
     >
       {{ $t("data-complete") }} <app-explanation>{{ dataCompleteMetadataExpl }}</app-explanation>
     </b-form-checkbox>
-    <app-uploader :uploaderService="uploaderService" :title="$t('select-files')" />
+    <app-uploader v-if="uploaderService" :uploaderService="uploaderService" :title="$t('select-files')" />
   </div>
 </template>
 
@@ -36,7 +36,8 @@ import { AnalysisEvent } from "./types";
   },
 })
 export default class AppAnalysisUploader extends BaseAuthComponent {
-  @Prop({ required: true }) plantId!: string;
+  @Prop({ default: null }) plantId!: string | null;
+  @Prop({ default: null }) flownAt!: string | null;
   @Prop({ default: null }) analysis!: AnalysisSchema | null;
 
   dataComplete = false;
@@ -48,7 +49,7 @@ export default class AppAnalysisUploader extends BaseAuthComponent {
   async created() {
     await super.created();
 
-    this.uploaderService = new AnalysisUploaderService(this.plantId, this.analysis?.id);
+    this.uploaderService = new AnalysisUploaderService(this.plantId || undefined, this.analysis?.id);
 
     this.dataComplete = this.analysis ? this.analysis.data_complete : false;
 
@@ -63,6 +64,17 @@ export default class AppAnalysisUploader extends BaseAuthComponent {
     this.dataComplete = this.analysis ? this.analysis.data_complete : false;
   }
 
+  @Watch("plantId") onPlantIdChanged() {
+    if (this.plantId) {
+      this.uploaderService!.setPlantId(this.plantId);
+    }
+  }
+
+  @Watch("flownAt") onFlownAtChanged() {
+    if (this.flownAt) {
+      this.uploaderService!.setFlownAt(this.flownAt);
+    }
+  }
 
   registerUploadEvents() {
     this.uploaderService!.onStartUpload(async () => {

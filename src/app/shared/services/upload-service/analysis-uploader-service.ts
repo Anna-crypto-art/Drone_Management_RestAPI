@@ -2,35 +2,51 @@ import volateqApi from "../volateq-api/volateq-api";
 import { UploaderService } from "./uploader-service";
 
 export class AnalysisUploaderService extends UploaderService {
-  private flownAt: Date | undefined;
+  private flownAt: string | undefined;
 
   constructor(
-    private readonly plantId?: string,
+    private plantId?: string,
     public analysisId?: string,
     chunkSizeInMB?: number,
   ) {
     super(chunkSizeInMB);
+
+    this.setAllowStartUpload();
   }
 
   public async doUpload(): Promise<void> {
+    if (!this.plantId) {
+      throw new Error("Missing plant id");
+    }
+
     await this.createAnalysisUpload();
 
     await this.startUpload();
   }
 
-  public setFlownAt(flownAt: Date) {
+  public setFlownAt(flownAt: string) {
     this.flownAt = flownAt;
+
+    this.setAllowStartUpload();
   }
 
   public setAnalysisId(analysisId: string) {
     this.analysisId = analysisId;
+
+    this.setAllowStartUpload();
+  }
+
+  public setPlantId(plantId: string) {
+    this.plantId = plantId;
+
+    this.setAllowStartUpload();
   }
 
   private async createAnalysisUpload(): Promise<void> {
     if (!this.upload) {
       if (!this.analysisId) {
         this.analysisId = (await volateqApi.createEmptyAnalysis({
-          flown_at: this.flownAt && this.flownAt.toISOString() || new Date(Date.now()).toISOString(),
+          flown_at: this.flownAt!,
           plant_id: this.plantId!,
         })).id;
       }
@@ -42,5 +58,9 @@ export class AnalysisUploaderService extends UploaderService {
       
       this.setUpload(upload);
     }
+  }
+
+  private setAllowStartUpload() {
+    this.allowStartUpload = !!this.analysisId || !!(this.plantId && this.flownAt);
   }
 }

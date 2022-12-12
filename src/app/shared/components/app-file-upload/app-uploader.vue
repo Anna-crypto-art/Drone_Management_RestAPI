@@ -12,7 +12,7 @@
 
     <app-files-selection @filesSelected="onFilesSelected">
     
-      <div class="app-file-upload-content mar-bottom-half">
+      <div class="app-file-upload-content mar-bottom">
         <h3 v-if="title" class="app-file-upload-content-title">{{ title }}</h3>
         <slot />
       </div>
@@ -30,7 +30,7 @@
       </template>
     </app-files-selection>
 
-    <app-button :loading="uploading" :disabled="uploadButtonDisabled" cls="pull-right">
+    <app-button :loading="uploading" :disabled="uploadButtonDisabled" @click="onStartUpload" cls="pull-right">
       {{ $t("upload") }}
     </app-button>
   </div>
@@ -89,9 +89,11 @@ export default class AppUploader extends BaseAuthComponent {
     return this.uploaderState === UploaderState.COMPLETED;
   }
 
-  async onFilesSelected(files: File[]): Promise<void> {
+  async onFilesSelected(files: File[] | null): Promise<void> {
     this.uploaderService.fileUploaders = [];
-    await this.uploaderService.addFiles(files);
+    if (files) {
+      await this.uploaderService.addFiles(files);
+    }
   }
 
   @CatchError()
@@ -103,8 +105,8 @@ export default class AppUploader extends BaseAuthComponent {
     return this.uploaderService.fileUploaders;
   }
 
-  uploadButtonDisabled(): boolean {
-    return this.files.length === 0 || this.uploading;
+  get uploadButtonDisabled(): boolean {
+    return this.files.length === 0 || this.uploading || !this.uploaderService.allowStartUpload;
   }
 
   // async onCancelUpload(): Promise<void> {

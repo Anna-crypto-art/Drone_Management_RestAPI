@@ -1,5 +1,6 @@
 const AppAnalysis = () => import("@/app/analysis/analysis.vue");
 const AppNewAnalysis = () => import("@/app/analysis/new-analysis/new-analysis.vue");
+const AppNewAwesomeAnalysis = () => import("@/app/analysis/new-analysis/new-awesome-analysis.vue");
 const AppEditAnalysis = () => import("@/app/analysis/edit-analysis/edit-analysis.vue");
 const AppAnalysisMonitoring = () => import("@/app/analysis/monitoring/monitoring.vue");
 import { RouteConfig } from "vue-router";
@@ -18,6 +19,14 @@ const anaylsisRoutes: RouteConfig[] = [
     name: "AnalysisNew",
     path: "/analysis/new",
     component: AppNewAnalysis,
+    meta: {
+      role: [ApiRoles.CUSTOMER_ADMIN, ApiRoles.PILOT],
+    },
+  },
+  {
+    name: "AnalysisAwesomeNew",
+    path: "/analysis/awesome-new",
+    component: AppNewAwesomeAnalysis,
     meta: {
       role: [ApiRoles.CUSTOMER_ADMIN, ApiRoles.PILOT],
     },
