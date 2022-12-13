@@ -2,7 +2,7 @@
   <div :class="'analysis-selection-sidebar' + (absolute ? ' absolute' : '')">
     <app-sidebar :open="sidebarOpen" @toggled="onSidebarToggled">
       <div class="analysis-selection-sidebar-leftside">
-        <h2 class="analysis-selection-sidebar-leftside-title">
+        <h2 class="analysis-selection-sidebar-leftside-title" translate="no">
           {{ plant.name }}
         </h2>
         <div class="analysis-selection-sidebar-leftside-settings" v-if="analyses.length > 1">
