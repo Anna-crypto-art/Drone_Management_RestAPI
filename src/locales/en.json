@@ -191,6 +191,7 @@
   "missing-mirror": "Missing mirror",
   "sca-tracking-angle": "Tracking angle of SCA",
   "select-files": "Select files",
+  "browse-or-drag-drop-files": "Browse or Drag & Drop files",
   "glass-tube-temperature-class-limits": "Classification limits of glass tube temperature",
   "alignment-offset-class-3": "Exceeds ±{limit1}{unit}",
   "alignment-offset-class-2": "In between  ±{limit0}{unit} and ±{limit1}{unit}",

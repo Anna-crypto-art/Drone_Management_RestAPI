@@ -1,5 +1,6 @@
-import volateqApi from "../volateq-api/volateq-api";
-import { UploaderService } from "./uploader-service";
+import volateqApi from "../../shared/services/volateq-api/volateq-api";
+import { UploaderService } from "../../shared/services/upload-service/uploader-service";
+import { i18n } from "@/main";
 
 export class AnalysisUploaderService extends UploaderService {
   private flownAt: string | undefined;
@@ -10,13 +11,23 @@ export class AnalysisUploaderService extends UploaderService {
     chunkSizeInMB?: number,
   ) {
     super(chunkSizeInMB);
-
-    this.setAllowStartUpload();
   }
 
   public async doUpload(): Promise<void> {
-    if (!this.plantId) {
-      throw new Error("Missing plant id");
+    if (!this.analysisId) {
+      if (!this.flownAt) {
+        throw { 
+          error: 'INVALID_OR_MISSING_PARAMS', 
+          message: i18n.t('missing').toString() + " " + i18n.t('acquisition-date').toString() 
+        };
+      }
+
+      if (!this.plantId) {
+        throw { 
+          error: 'INVALID_OR_MISSING_PARAMS', 
+          message: i18n.t('missing').toString() + " " + i18n.t('plant').toString() 
+        };
+      }
     }
 
     await this.createAnalysisUpload();
@@ -26,20 +37,14 @@ export class AnalysisUploaderService extends UploaderService {
 
   public setFlownAt(flownAt: string) {
     this.flownAt = flownAt;
-
-    this.setAllowStartUpload();
   }
 
   public setAnalysisId(analysisId: string) {
     this.analysisId = analysisId;
-
-    this.setAllowStartUpload();
   }
 
   public setPlantId(plantId: string) {
     this.plantId = plantId;
-
-    this.setAllowStartUpload();
   }
 
   private async createAnalysisUpload(): Promise<void> {
@@ -58,9 +63,5 @@ export class AnalysisUploaderService extends UploaderService {
       
       this.setUpload(upload);
     }
-  }
-
-  private setAllowStartUpload() {
-    this.allowStartUpload = !!this.analysisId || !!(this.plantId && this.flownAt);
   }
 }

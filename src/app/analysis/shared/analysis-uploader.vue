@@ -8,7 +8,7 @@
     >
       {{ $t("data-complete") }} <app-explanation>{{ dataCompleteMetadataExpl }}</app-explanation>
     </b-form-checkbox>
-    <app-uploader v-if="uploaderService" :uploaderService="uploaderService" :title="$t('select-files')" />
+    <app-uploader v-if="uploaderService" :uploaderService="uploaderService" :title="$t('browse-or-drag-drop-files')" />
   </div>
 </template>
 
@@ -19,7 +19,7 @@ import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppUploader from "@/app/shared/components/app-file-upload/app-uploader.vue";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { AnalysisUploaderService } from "@/app/shared/services/upload-service/analysis-uploader-service";
+import { AnalysisUploaderService } from "@/app/analysis/shared/analysis-uploader-service";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { Component, Prop, Ref, Watch } from "vue-property-decorator";

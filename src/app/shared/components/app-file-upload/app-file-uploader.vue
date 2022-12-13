@@ -1,5 +1,5 @@
 <template>
-  <div class="app-file-upload-file mar-bottom">
+  <div class="app-file-upload-file mar-bottom-half">
     <div class="app-file-upload-file-infos">
       <div class="app-file-upload-file-name">
         <small class="app-file-upload-file-name-size grayed">{{ fileSize }}</small>
@@ -81,7 +81,7 @@ export default class AppFileUploader extends Vue {
     z-index: 1;
     width: 100%;
     padding: 0.25em 1em;
-    line-height: 14px;
+    line-height: 16px;
   }
 
   &-name {
@@ -97,8 +97,8 @@ export default class AppFileUploader extends Vue {
 
   &-remove {
     position: absolute;
-    right: 15px;
-    top: 8px;
+    right: 10px;
+    top: 5px;
     font-size: 1.25em;
     cursor: pointer;
 

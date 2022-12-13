@@ -18,7 +18,7 @@
       </div>
       
       <template #files>
-        <div class="app-file-upload-files" v-show="files.length > 0">
+        <div class="app-file-upload-files mar-top" v-show="files.length > 0">
           <app-file-uploader
             v-for="file in files"
             :key="file.fileName"
@@ -46,7 +46,7 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { UploaderState } from "./types";
 import { ApiException } from "../../services/volateq-api/api-errors";
 import { FileUploader } from "../../services/upload-service/file-uploader";
-import { AnalysisUploaderService } from "../../services/upload-service/analysis-uploader-service";
+import { AnalysisUploaderService } from "../../../analysis/shared/analysis-uploader-service";
 import { CatchError } from "../../services/helper/catch-helper";
 import { BaseAuthComponent } from "../base-auth-component/base-auth-component";
 
