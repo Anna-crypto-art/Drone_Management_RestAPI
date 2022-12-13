@@ -1,16 +1,21 @@
 <template>
   <div class="app-file-upload">
-    <b-alert v-show="hasStateRetrying" variant="danger">
+    <b-alert v-model="showErrorAlert" variant="danger">
       <div v-if="error">
         {{ $t("error-occured-retrying") }}
-        <b-spinner />
-        <hr>
-        <b>{{ error.error }}</b><br>
-        {{ error.message }}
+        <small><b-spinner /></small>
+        <br>
+        <div class="mar-top">
+          {{ $t("details") }}:
+          <div class="font-xs">
+          <b>{{ error.error }}</b><br>
+          {{ error.message }}
+          </div>
+        </div>
       </div>
     </b-alert>
 
-    <app-files-selection @filesSelected="onFilesSelected">
+    <app-files-selection @filesSelected="onFilesSelected" :disabled="disableFilesSelection">
     
       <div class="app-file-upload-content mar-bottom">
         <h3 v-if="title" class="app-file-upload-content-title">{{ title }}</h3>
@@ -30,7 +35,7 @@
       </template>
     </app-files-selection>
 
-    <app-button :loading="uploading" :disabled="uploadButtonDisabled" @click="onStartUpload" cls="pull-right">
+    <app-button v-show="uploadUnfinished" :loading="uploading" :disabled="uploadButtonDisabled" @click="onStartUpload" cls="pull-right mar-top mar-bottom">
       {{ $t("upload") }}
     </app-button>
   </div>
@@ -46,7 +51,6 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { UploaderState } from "./types";
 import { ApiException } from "../../services/volateq-api/api-errors";
 import { FileUploader } from "../../services/upload-service/file-uploader";
-import { AnalysisUploaderService } from "../../../analysis/shared/analysis-uploader-service";
 import { CatchError } from "../../services/helper/catch-helper";
 import { BaseAuthComponent } from "../base-auth-component/base-auth-component";
 
@@ -66,9 +70,15 @@ export default class AppUploader extends BaseAuthComponent {
   uploading = false;
   // resuming = false;
   error: ApiException | null = null;
+  showErrorAlert = false;
+
+  uploadUnfinished = true;
 
   async created() {
     this.registerUploaderEvents();
+
+    this.error = { message: "blub", error: "blub" };
+    this.showErrorAlert = true;
 
     // await this.checkMyUploadingUpload();
   }
@@ -106,7 +116,11 @@ export default class AppUploader extends BaseAuthComponent {
   }
 
   get uploadButtonDisabled(): boolean {
-    return this.files.length === 0 || this.uploading || !this.uploaderService.allowStartUpload;
+    return this.files.length === 0 || this.uploading;
+  }
+
+  get disableFilesSelection(): boolean {
+    return this.uploading || !this.uploadUnfinished;
   }
 
   // async onCancelUpload(): Promise<void> {
@@ -145,7 +159,12 @@ export default class AppUploader extends BaseAuthComponent {
     });
     this.uploaderService.onError(e => {
       this.uploaderState = UploaderState.RETRYING;
+
       this.error = e;
+      this.showErrorAlert = true;
+
+      console.log("onError:")
+      console.log(e)
 
       this.uploaderStateChanged();
     });
@@ -163,6 +182,7 @@ export default class AppUploader extends BaseAuthComponent {
 
     if (this.hasStateUploading) {
       this.error = null;
+      this.showErrorAlert = false;
     }
 
     if (this.hasStateResuming) {
@@ -170,7 +190,10 @@ export default class AppUploader extends BaseAuthComponent {
     }
 
     if (this.hasStateCompleted) {
-      this.showSuccess(this.$t("upload-completed-successfully").toString());
+      this.uploadUnfinished = false;
+      this.uploading = false;
+
+      this.showSuccess(this.$t("upload-completed-successfully").toString(), false);
     }
   }
 }

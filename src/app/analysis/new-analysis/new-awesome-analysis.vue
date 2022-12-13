@@ -1,6 +1,6 @@
 <template>
   <app-content :title="$t('new-data-upload')" :navback="true" :subtitle="plantName" eventId="newAnalysis">
-    <div class="app-new-analysis">    
+    <div class="app-new-analysis mar-bottom-2x">
       <b-form-group v-show="plantOptions.length > 1" label-cols-lg="2" :label="$t('plant')">
         <b-form-select required v-model="selectedPlantId" :options="plantOptions"></b-form-select>
       </b-form-group>
@@ -14,9 +14,8 @@
           :readonly="!isSuperAdmin"
         />
       </b-form-group>
-
-      <app-analysis-uploader :plantId="selectedPlantId" :analysis="analysis" :flownAt="flownAt" />
     </div>
+    <app-analysis-uploader :plantId="selectedPlantId" :analysis="analysis" :flownAt="flownAt" />
   </app-content>
 </template>
 

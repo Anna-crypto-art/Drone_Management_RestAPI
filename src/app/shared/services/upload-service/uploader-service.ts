@@ -12,7 +12,12 @@ export abstract class UploaderService {
   private event = new EventEmitter();
   public fileUploaders: FileUploader[] = [];
   protected upload: Upload | null = null;
-  public allowStartUpload = true;
+
+  // Axios fires onUploadProgress, even on (and after!) error 
+  // without any error information within the progress event object...
+  // That is pretty annoying! Anyway the workaround here is 
+  // to ensure that the progress event has been fired twice without any error in between
+  private raisedError = false;
 
   constructor(
     public readonly chunkSizeInMB = 100
@@ -28,7 +33,7 @@ export abstract class UploaderService {
       }
 
       const fileUploader = new FileUploader(file, securedFileName.secured_name, this.chunkSizeInMB);
-      fileUploader.onProgress(progress => { this.event.emit(UploaderEvent.UPLOAD_PROGRESS); });
+      fileUploader.onProgress(progress => { this.emitProgress(); });
 
       this.fileUploaders.push(fileUploader);
     }
@@ -55,6 +60,20 @@ export abstract class UploaderService {
 
   public onUploadComplete(onUploadCompleteCallback: () => void) {
     this.event.on(UploaderEvent.UPLOAD_COMPLETE, onUploadCompleteCallback);
+  }
+
+  private emitError(ex: ApiException | any): void {
+    this.event.emit(UploaderEvent.ERROR, ex);
+
+    this.raisedError = true;
+  }
+
+  private emitProgress(): void {
+    if (this.raisedError) {
+      this.raisedError = false;
+    } else {
+      this.event.emit(UploaderEvent.UPLOAD_PROGRESS);
+    }
   }
 
   public abstract doUpload(): Promise<void>;
@@ -134,7 +153,7 @@ export abstract class UploaderService {
 
             erroring = false;
           } catch (e) {
-            this.event.emit(UploaderEvent.ERROR, e);
+            this.emitError(e);
 
             await waitFor(10000);
           }
@@ -183,11 +202,11 @@ export abstract class UploaderService {
       if (this.isUploadComplete()) {
         this.event.emit(UploaderEvent.UPLOAD_COMPLETE);
       } else {
-        this.event.emit(UploaderEvent.UPLOAD_PROGRESS);
+        this.emitProgress();
       }
     } catch (e) {
       uploadFile.emitError();
-      this.event.emit(UploaderEvent.ERROR, e);
+      this.emitError(e);
 
       throw e;      
     }

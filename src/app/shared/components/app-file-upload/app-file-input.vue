@@ -1,9 +1,10 @@
 <template>
-  <label class="app-file-input btn btn-primary">
+  <label class="app-file-input btn btn-primary" v-bind:class="{ disabled: disabled }">
     <input 
       ref="fileInputElement"
       type="file"
       class="app-file-input-file"
+      :disabled="disabled"
       @click="onClick"
       @change="onChange"
       :accept="accept"
@@ -23,6 +24,7 @@ export default class AppFileInput extends Vue {
   @Prop({ required: true }) value!: File[] | null;
   @Prop({ default: true }) multiple!: boolean;
   @Prop({ default: "*" }) accept!: string;
+  @Prop({ default: false }) disabled!: boolean;
 
   @Ref() fileInputElement!: HTMLInputElement;
 

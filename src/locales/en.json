@@ -441,7 +441,8 @@
   "admin": "Admin",
   "has-ref-measures": "{count} reference measurement(s)",
   "browse": "Browse...",
-  
+  "goto-analysis": "Go to analysis {analysis}",
+  "error-occured-retrying": "An Error occured. Retrying to resume...",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

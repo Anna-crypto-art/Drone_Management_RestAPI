@@ -3,7 +3,7 @@
     <slot />
 
     <div class="app-file-selection-button">
-      <app-file-input v-model="fileButtonSelection" />
+      <app-file-input v-model="fileButtonSelection" :disabled="disabled" />
     </div>
 
     <slot name="files" />
@@ -22,12 +22,18 @@ import AppFileInput from "./app-file-input.vue";
   }
 })
 export default class AppFilesSelection extends Vue {
+  @Prop({ default: false }) disabled!: boolean;
+
   fileButtonSelection: File[] | null = null;
   fileDropSelection: File[] | null = null;
 
   dragging = false;
 
   emitFiles() {
+    if (this.disabled) {
+      return;
+    }
+
     this.$emit("filesSelected", this.fileDropSelection || this.fileButtonSelection);
   }
 

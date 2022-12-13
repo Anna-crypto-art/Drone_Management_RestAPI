@@ -72,17 +72,7 @@ export class FileUploader {
       offsetIndex = chunkNumber - 1;
 
       const start = offsetIndex * chunkSize;
-      let end = chunkNumber * chunkSize;
-
-      console.log("upload...")
-      console.log("fileSize: " + fileSize)
-      console.log("chunkSize: " + chunkSize)
-      console.log("chunkNumber: " + chunkNumber)
-      console.log("offsetIndex: " + offsetIndex)
-      console.log("start: " + start)
-      console.log("end: " + end)
-
-
+      let end = chunkNumber * chunkSize;      
       if (end >= fileSize) {
         eof = true;
         end = fileSize;

@@ -1,14 +1,18 @@
 <template>
   <div class="app-analysis-upload">
-    <b-form-checkbox
-      v-show="analysis"
-      v-model="dataComplete"
-      @change="onChangeDataComplete"
-      :disabled="!hasPlantMetadata"
-    >
-      {{ $t("data-complete") }} <app-explanation>{{ dataCompleteMetadataExpl }}</app-explanation>
-    </b-form-checkbox>
+    <div class="mar-bottom-2x">
+      <b-form-checkbox
+        v-model="dataComplete"
+        @change="onChangeDataComplete"
+        :disabled="!hasPlantMetadata"
+      >
+        {{ $t("data-complete") }} <app-explanation>{{ dataCompleteMetadataExpl }}</app-explanation>
+      </b-form-checkbox>
+    </div>
     <app-uploader v-if="uploaderService" :uploaderService="uploaderService" :title="$t('browse-or-drag-drop-files')" />
+    <div class="pull-right mar-top mar-bottom" v-if="gotoNewAnalysis">
+      <app-button @click="onGotoNewAnalysisClick">{{ $t("goto-analysis", { analysis: gotoNewAnalysis.name }) }}</app-button>
+    </div>
   </div>
 </template>
 
@@ -25,6 +29,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { Component, Prop, Ref, Watch } from "vue-property-decorator";
 import { AnalysisEventService } from "./analysis-event-service";
 import { AnalysisEvent } from "./types";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
 
 @Component({
   name: "app-analysis-uploader",
@@ -41,8 +46,11 @@ export default class AppAnalysisUploader extends BaseAuthComponent {
   @Prop({ default: null }) analysis!: AnalysisSchema | null;
 
   dataComplete = false;
+  hasPlantMetadata = false;
 
   uploaderService: AnalysisUploaderService | null = null;
+
+  gotoNewAnalysis: AnalysisSchema | null = null;
 
   private appContentEventId = "newAnalysis";
 
@@ -78,20 +86,22 @@ export default class AppAnalysisUploader extends BaseAuthComponent {
 
   registerUploadEvents() {
     this.uploaderService!.onStartUpload(async () => {
-      if (!this.analysis) {
-        this.analysis = await volateqApi.getAnalysis(this.uploaderService!.analysisId);
-      }
+      const analysis = this.analysis || (await volateqApi.getAnalysis(this.uploaderService!.analysisId));
+      this.hasPlantMetadata = analysis.has_plant_metadata || false;
     });
 
     this.uploaderService!.onUploadComplete(async () => {
-      if (this.analysis!.has_plant_metadata && !this.analysis!.data_complete) {
-          AppContentEventService.showInfo(this.appContentEventId, this.$t("analysis-with-metdata-data-complete_quest").toString());
+      const analysis = await volateqApi.getAnalysis(this.uploaderService!.analysisId);
+      if (analysis.has_plant_metadata && analysis.data_complete) {
+        AppContentEventService.showInfo(this.appContentEventId, this.$t("analysis-with-metdata-data-complete_quest").toString());
+      }
+
+      this.hasPlantMetadata = analysis.has_plant_metadata || false;
+
+      if (!this.analysis) {
+        this.gotoNewAnalysis = analysis;
       }
     });
-  }
-
-  get hasPlantMetadata(): boolean {
-    return (this.analysis && this.analysis.has_plant_metadata) || false;
   }
 
   get dataCompleteMetadataExpl(): string {
@@ -101,21 +111,25 @@ export default class AppAnalysisUploader extends BaseAuthComponent {
     );
   }
 
+  @CatchError()
   async onChangeDataComplete() {
-    try {
-      if (!this.analysis!.plant.in_setup_phase && this.dataComplete) {
-        if (!confirm(this.$t("data-complete-sure-quest").toString())) {
-          this.dataComplete = false;
-          return;
-        }
+    const analysis = await volateqApi.getAnalysis(this.uploaderService!.analysisId);
+
+    if (analysis.plant.in_setup_phase && this.dataComplete) {
+      if (!confirm(this.$t("data-complete-sure-quest").toString())) {
+        this.dataComplete = false;
+        return;
       }
-
-      await volateqApi.updateAnalysis(this.analysis!.id, { data_complete: this.dataComplete });
-
-      AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS);
-    } catch (e) {
-      this.showError(e);
     }
+
+    await volateqApi.updateAnalysis(analysis.id, { data_complete: this.dataComplete });
+
+    AnalysisEventService.emit(analysis.id, AnalysisEvent.UPDATE_ANALYSIS); 
+  }
+
+  @CatchError()
+  onGotoNewAnalysisClick() {
+    this.$router.push({ name: "EditAnalysis", params: { id: this.gotoNewAnalysis!.id }});
   }
 }
 </script>
