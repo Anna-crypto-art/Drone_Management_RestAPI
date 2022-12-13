@@ -35,7 +35,7 @@
 
         <template #cell(name)="row">
           <router-link v-show="row.item.digitized" :to="{ name: 'Plant', params: { id: row.item.id } }">
-            {{ row.item.name }}
+            <span translate="no">{{ row.item.name }}</span>
           </router-link>
           <span v-if="!row.item.digitized">{{ row.item.name }}</span>
           <div>
