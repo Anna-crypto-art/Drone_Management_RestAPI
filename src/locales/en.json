@@ -442,7 +442,9 @@
   "has-ref-measures": "{count} reference measurement(s)",
   "browse": "Browse...",
   "goto-analysis": "Go to analysis {analysis}",
-  "error-occured-retrying": "An Error occured. Retrying to resume...",
+  "error-occured-retrying": "An Error occured. Trying to resume...",
+  "details": "Details",
+  "trials": "Trials",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

@@ -18,6 +18,7 @@ export abstract class UploaderService {
   // That is pretty annoying! Anyway the workaround here is 
   // to ensure that the progress event has been fired twice without any error in between
   private raisedError = false;
+  private trials = 0;
 
   constructor(
     public readonly chunkSizeInMB = 100
@@ -62,16 +63,23 @@ export abstract class UploaderService {
     this.event.on(UploaderEvent.UPLOAD_COMPLETE, onUploadCompleteCallback);
   }
 
+  public getTrials(): number {
+    return this.trials;
+  }
+
   private emitError(ex: ApiException | any): void {
     this.event.emit(UploaderEvent.ERROR, ex);
 
     this.raisedError = true;
+    this.trials += 1;
   }
 
   private emitProgress(): void {
     if (this.raisedError) {
       this.raisedError = false;
     } else {
+      this.trials = 0;
+
       this.event.emit(UploaderEvent.UPLOAD_PROGRESS);
     }
   }
@@ -130,17 +138,23 @@ export abstract class UploaderService {
     let fileUploader: FileUploader | undefined;
     while ((fileUploader = this.fileUploaders.find(f => !f.complete)) !== undefined) {
       try {
+        console.log("tryUpload: " + fileUploader.fileName);
+
         await this.tryUpload(fileUploader);
       } catch {
         let instantTries = 3;
 
         while (instantTries > 0) {
           try {
+            console.log("instantTries: " + instantTries);
+
             await this.tryUpload(fileUploader);
 
             break;
           } catch {
             instantTries--;
+
+            console.log("catch instantTries... " + instantTries);
 
             await waitFor(1000 * Math.abs(instantTries - 3));
           }
@@ -149,11 +163,15 @@ export abstract class UploaderService {
         let erroring = true;
         while (erroring) {
           try {
+            console.log("Erroring! refreshUpload..");
+
             this.refreshUpload();
 
             erroring = false;
           } catch (e) {
             this.emitError(e);
+
+            console.log("Catch refreshUpload... erroring: " + erroring);
 
             await waitFor(10000);
           }

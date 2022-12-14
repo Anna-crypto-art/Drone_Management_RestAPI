@@ -3,14 +3,13 @@
     <b-alert v-model="showErrorAlert" variant="danger">
       <div v-if="error">
         {{ $t("error-occured-retrying") }}
-        <small><b-spinner /></small>
-        <br>
-        <div class="mar-top">
-          {{ $t("details") }}:
-          <div class="font-xs">
-          <b>{{ error.error }}</b><br>
+        <span class="pad-left">
+          <b-spinner small />
+          ({{ errorTrials }} {{ $t('trials') }})
+        </span>
+        <div class="mar-top font-xs">
+          {{ $t("details") }}: <b>{{ error.error }}</b><br>
           {{ error.message }}
-          </div>
         </div>
       </div>
     </b-alert>
@@ -77,9 +76,6 @@ export default class AppUploader extends BaseAuthComponent {
   async created() {
     this.registerUploaderEvents();
 
-    this.error = { message: "blub", error: "blub" };
-    this.showErrorAlert = true;
-
     // await this.checkMyUploadingUpload();
   }
 
@@ -121,6 +117,10 @@ export default class AppUploader extends BaseAuthComponent {
 
   get disableFilesSelection(): boolean {
     return this.uploading || !this.uploadUnfinished;
+  }
+
+  get errorTrials(): number {
+    return this.uploaderService.getTrials();
   }
 
   // async onCancelUpload(): Promise<void> {
