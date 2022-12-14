@@ -20,6 +20,7 @@ export interface Upload {
   upload_id: string;
   state: UploadState;
   files: UploadFile[];
+  analysis_id?: string;
 }
 
 export enum UploadProgress {

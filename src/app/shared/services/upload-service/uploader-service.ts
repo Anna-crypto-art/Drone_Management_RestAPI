@@ -34,7 +34,7 @@ export abstract class UploaderService {
       }
 
       const fileUploader = new FileUploader(file, securedFileName.secured_name, this.chunkSizeInMB);
-      fileUploader.onProgress(progress => { this.emitProgress(); });
+      fileUploader.onChunkComplete(() => { this.emitResume() });
 
       this.fileUploaders.push(fileUploader);
     }
@@ -55,8 +55,8 @@ export abstract class UploaderService {
     this.event.on(UploaderEvent.START_UPLOAD, onStartUploadCallback);
   }
 
-  public onProgress(onProgressCallback: () => void) {
-    this.event.on(UploaderEvent.UPLOAD_PROGRESS, onProgressCallback);
+  public onResume(onResumeCallback: () => void) {
+    this.event.on(UploaderEvent.RESUME_UPLOAD_AFTER_ERROR, onResumeCallback);
   }
 
   public onUploadComplete(onUploadCompleteCallback: () => void) {
@@ -74,14 +74,10 @@ export abstract class UploaderService {
     this.trials += 1;
   }
 
-  private emitProgress(): void {
-    if (this.raisedError) {
-      this.raisedError = false;
-    } else {
-      this.trials = 0;
+  private emitResume(): void {
+    this.trials = 0;
 
-      this.event.emit(UploaderEvent.UPLOAD_PROGRESS);
-    }
+    this.event.emit(UploaderEvent.RESUME_UPLOAD_AFTER_ERROR);
   }
 
   public abstract doUpload(): Promise<void>;
@@ -165,7 +161,7 @@ export abstract class UploaderService {
           try {
             console.log("Erroring! refreshUpload..");
 
-            this.refreshUpload();
+            await this.refreshUpload();
 
             erroring = false;
           } catch (e) {
@@ -217,10 +213,8 @@ export abstract class UploaderService {
     try {
       await uploadFile.upload();
 
-      if (this.isUploadComplete()) {
+      if (this.isUploadComplete()) {  
         this.event.emit(UploaderEvent.UPLOAD_COMPLETE);
-      } else {
-        this.emitProgress();
       }
     } catch (e) {
       uploadFile.emitError();

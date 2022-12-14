@@ -31,7 +31,7 @@ import { CreateOrderRequest, UpdateOrderRequest } from "./api-requests/order-req
 import { OrderPPKeyFiguresDisabledSchema, OrderProductPackageSchema, OrderSchema } from "./api-schemas/order-schema";
 import { MultiselectOption } from "../../components/app-multiselect/types";
 import { MyUploadingUpload, SecuredFilename, Upload, UploadChunkResult } from "./api-schemas/upload-schemas";
-import { CreateUploadRequest } from "./api-requests/upload-requests";
+import { CreateAnalysisUploadRequest } from "./api-requests/upload-requests";
 import { ja, th } from "date-fns/locale";
 
 export class VolateqAPI extends HttpClientBase {
@@ -714,8 +714,8 @@ export class VolateqAPI extends HttpClientBase {
     return this.post(`/auth/upload/secure-filenames`, { file_names: filenames });
   }
 
-  public async createAnalysisUpload(analysisId: string, createUploadRequest: CreateUploadRequest): Promise<Upload> {
-    return this.post(`/auth/upload/analysis/${analysisId}`, createUploadRequest);
+  public async createAnalysisUpload(createUploadRequest: CreateAnalysisUploadRequest): Promise<Upload> {
+    return this.post(`/auth/upload/analysis`, createUploadRequest);
   }
 
   public async getUpload(uploadId: string): Promise<Upload> {

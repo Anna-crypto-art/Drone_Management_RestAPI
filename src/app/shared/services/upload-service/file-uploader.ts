@@ -21,6 +21,10 @@ export class FileUploader {
     this.event.on(UploaderEvent.FILE_PROGRESS, progressCallback);
   }
 
+  public onChunkComplete(chunkCompleteCallback: () => void) {
+    this.event.on(UploaderEvent.FILE_CHUNK_COMPLETE, chunkCompleteCallback);
+  }
+
   public onComplete(completeCallback: () => void) {
     this.event.on(UploaderEvent.FILE_COMPLETE, completeCallback);
   }
@@ -39,6 +43,10 @@ export class FileUploader {
 
   public emitError() {
     this.event.emit(UploaderEvent.ERROR);
+  }
+
+  private emitChunkComplete() {
+    this.event.emit(UploaderEvent.FILE_CHUNK_COMPLETE);
   }
 
   public fileUploadCompleted() {
@@ -93,6 +101,8 @@ export class FileUploader {
           this.emitProgress(fileProgress);
         }
       );
+
+      this.emitChunkComplete();
 
       this.removeChunkNumber();
     }

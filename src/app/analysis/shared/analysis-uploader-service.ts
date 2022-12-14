@@ -49,17 +49,19 @@ export class AnalysisUploaderService extends UploaderService {
 
   private async createAnalysisUpload(): Promise<void> {
     if (!this.upload) {
-      if (!this.analysisId) {
-        this.analysisId = (await volateqApi.createEmptyAnalysis({
+      const upload = await volateqApi.createAnalysisUpload({
+        chunk_size_in_mb: this.chunkSizeInMB,
+        files: this.getCreateUploadFiles(),
+        analysis_id: this.analysisId,
+        create_analysis: !this.analysisId && {
           flown_at: this.flownAt!,
           plant_id: this.plantId!,
-        })).id;
-      }
-
-      const upload = await volateqApi.createAnalysisUpload(this.analysisId, {
-        chunk_size_in_mb: this.chunkSizeInMB,
-        files: this.getCreateUploadFiles()
+        } || undefined,
       });
+
+      if (!this.analysisId) {
+        this.analysisId = upload.analysis_id;
+      }
       
       this.setUpload(upload);
     }

@@ -152,7 +152,7 @@ export default class AppUploader extends BaseAuthComponent {
 
       this.uploaderStateChanged();
     });
-    this.uploaderService.onProgress(() => {
+    this.uploaderService.onResume(() => {
       this.uploaderState = UploaderState.UPLOADING;
 
       this.uploaderStateChanged();
@@ -162,9 +162,6 @@ export default class AppUploader extends BaseAuthComponent {
 
       this.error = e;
       this.showErrorAlert = true;
-
-      console.log("onError:")
-      console.log(e)
 
       this.uploaderStateChanged();
     });
