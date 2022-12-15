@@ -134,23 +134,17 @@ export abstract class UploaderService {
     let fileUploader: FileUploader | undefined;
     while ((fileUploader = this.fileUploaders.find(f => !f.complete)) !== undefined) {
       try {
-        console.log("tryUpload: " + fileUploader.fileName);
-
         await this.tryUpload(fileUploader);
       } catch {
         let instantTries = 3;
 
         while (instantTries > 0) {
           try {
-            console.log("instantTries: " + instantTries);
-
             await this.tryUpload(fileUploader);
 
             break;
           } catch {
             instantTries--;
-
-            console.log("catch instantTries... " + instantTries);
 
             await waitFor(1000 * Math.abs(instantTries - 3));
           }
@@ -159,15 +153,11 @@ export abstract class UploaderService {
         let erroring = true;
         while (erroring) {
           try {
-            console.log("Erroring! refreshUpload..");
-
             await this.refreshUpload();
 
             erroring = false;
           } catch (e) {
             this.emitError(e);
-
-            console.log("Catch refreshUpload... erroring: " + erroring);
 
             await waitFor(10000);
           }

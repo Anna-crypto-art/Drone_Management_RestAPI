@@ -94,9 +94,6 @@ export class FileUploader {
         this.fileId!,
         offsetIndex + 1,
         (progress) => {
-          console.log("progress");
-          console.log(progress);
-
           const fileProgress = Math.round((progress.loaded / progress.total) * ((end - start) / fileSize) * 100);
           this.emitProgress(fileProgress);
         }
@@ -105,6 +102,8 @@ export class FileUploader {
       this.emitChunkComplete();
 
       this.removeChunkNumber();
+
+      offsetIndex++;
     }
 
     this.fileUploadCompleted();
