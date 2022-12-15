@@ -94,7 +94,12 @@ export class FileUploader {
         this.fileId!,
         offsetIndex + 1,
         (progress) => {
-          const fileProgress = Math.round((progress.loaded / progress.total) * ((end - start) / fileSize) * 100);
+          const pastProgress = (chunkSize / fileSize) * offsetIndex;
+          const chunkProgress = progress.loaded / progress.total;
+          const chunkProgressRatio = (end - start) / fileSize;
+
+          const fileProgress = Math.round((pastProgress + (chunkProgress * chunkProgressRatio)) * 100);
+          
           this.emitProgress(fileProgress);
         }
       );
