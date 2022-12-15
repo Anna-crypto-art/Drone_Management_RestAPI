@@ -63,7 +63,7 @@ export class AnalysisUploaderService extends UploaderService {
         this.analysisId = upload.analysis_id;
       }
       
-      this.setUpload(upload);
+      await this.setUpload(upload);
     }
   }
 }

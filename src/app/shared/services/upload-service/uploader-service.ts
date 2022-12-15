@@ -146,7 +146,9 @@ export abstract class UploaderService {
           } catch {
             instantTries--;
 
-            await waitFor(1000 * Math.abs(instantTries - 3));
+            const waitingTime = 1000 * Math.abs(instantTries - 3);
+
+            await waitFor(waitingTime);
           }
         }
 
@@ -159,7 +161,9 @@ export abstract class UploaderService {
           } catch (e) {
             this.emitError(e);
 
-            await waitFor(10000);
+            const waitingTime = this.trials < 100 ? 10000 : 60000;
+
+            await waitFor(waitingTime);
           }
         }
       }
@@ -219,7 +223,7 @@ export abstract class UploaderService {
       throw new Error("Upload is undefined");
     }
 
-    this.setUpload(this.upload.upload_id);
+    await this.setUpload(this.upload.upload_id);
   }
 
   private isUploadComplete(): boolean {
