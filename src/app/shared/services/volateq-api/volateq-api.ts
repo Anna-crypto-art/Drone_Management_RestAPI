@@ -127,10 +127,6 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/routes`, params);
   }
 
-  public async createAnalysis(newAnalyis: NewAnalysis): Promise<{ id: string }> {
-    return this.post(`/auth/analysis`, newAnalyis);
-  }
-
   public async createEmptyAnalysis(newEmptyAnalyis: NewEmptyAnalysis): Promise<{ id: string }> {
     return this.post(`/auth/analysis/create-empty`, newEmptyAnalyis);
   }
@@ -153,10 +149,6 @@ export class VolateqAPI extends HttpClientBase {
     }
 
     return analyses;
-  }
-
-  public getAnalysisFileUploadUrl(analysisId: string): string {
-    return `${this.baseURL}/auth/analysis/${analysisId}/file`;
   }
 
   public async updateAnalysisState(analysisId: string, analysisState: UpdateAnalysisState): Promise<void> {
@@ -206,14 +198,6 @@ export class VolateqAPI extends HttpClientBase {
       { image_files_zip: imageFilesZip },
       onUploadProgress
     );
-  }
-
-  public async prepareAnalysisUpload(analysisId: string, fileNames: string[]): Promise<void> {
-    await this.post(`/auth/analysis/${analysisId}/prepare-upload`, { files: fileNames });
-  }
-
-  public async cancelAnalysisUpload(analysisId: string): Promise<void> {
-    await this.post(`/auth/analysis/${analysisId}/cancel-upload`);
   }
 
   public async updateAnalysis(
@@ -742,10 +726,6 @@ export class VolateqAPI extends HttpClientBase {
 
   public async cancelUpload(uploadId: string): Promise<void> {
     await this.post(`/auth/upload/${uploadId}/resume`);
-  }
-
-  public async getMyUploadingUpload(): Promise<MyUploadingUpload> {
-    return this.get(`/auth/upload/me-uploading`)
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {

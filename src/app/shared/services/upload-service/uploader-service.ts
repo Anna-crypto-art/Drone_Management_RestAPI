@@ -182,19 +182,9 @@ export abstract class UploaderService {
 
     await volateqApi.cancelUpload(this.upload!.upload_id);
 
-    this.upload = null;
-    
-    for (const fileUploader of this.fileUploaders) {
-      fileUploader.unregisterEvents();
-    }
-
-    this.fileUploaders = [];
+    this.reset();
 
     this.emitCancel();
-  }
-
-  public async getMyUploadingUpload(): Promise<MyUploadingUpload | undefined> {
-    return volateqApi.getMyUploadingUpload();
   }
 
   public getInvalidUploadFilesSelection(): { missingFiles: string[], unknownFiles: string[] } {
@@ -220,6 +210,8 @@ export abstract class UploaderService {
 
       if (this.isUploadComplete()) {  
         this.event.emit(UploaderEvent.UPLOAD_COMPLETE);
+
+        this.reset();
       }
     } catch (e) {
       uploadFile.emitError();
@@ -229,7 +221,7 @@ export abstract class UploaderService {
     }
   }
 
-  private async refreshUpload() {
+  protected async refreshUpload() {
     if (!this.upload) {
       throw new Error("Upload is undefined");
     }
@@ -239,5 +231,15 @@ export abstract class UploaderService {
 
   private isUploadComplete(): boolean {
     return !this.fileUploaders.find(f => !f.complete);
+  }
+
+  private reset(): void {
+    this.upload = null;
+    
+    for (const fileUploader of this.fileUploaders) {
+      fileUploader.unregisterEvents();
+    }
+
+    this.fileUploaders = [];
   }
 }

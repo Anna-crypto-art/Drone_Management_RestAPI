@@ -8,7 +8,7 @@
           ({{ errorTrials }} {{ $t('trials') }})
         </span>
         <div class="mar-top" v-if="errorTrials > 10">
-          <app-button :variant="secondary" size="sm" @click="onCancelUploadClick" :loading="cancelLoading">
+          <app-button variant="secondary" size="sm" @click="onCancelUploadClick" :loading="cancelLoading">
             {{ $t("cancel-upload") }}
           </app-button>
         </div>
@@ -177,6 +177,8 @@ export default class AppUploader extends BaseAuthComponent {
 
       this.showUploadButton = !this.disableAfterUpload;
       this.uploading = false;
+      this.error = null;
+      this.showErrorAlert = false;
     });
   }
 }

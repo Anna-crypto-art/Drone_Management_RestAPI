@@ -4,11 +4,7 @@
       {{ $t("upload-not-allowed_descr") }}
     </b-alert>
     
-    <app-analysis-upload v-if="uploadAllowed"
-    :analysis="analysis"
-    @startUpload="onStartUpload"
-    @cancelUpload="onCancelUpload"
-    @retryUpload="onRetryUpload" />
+    <app-analysis-uploader v-if="uploadAllowed" :analysis="analysis" />
   </div>
 </template>
 
@@ -16,16 +12,13 @@
 import { Component, Prop } from "vue-property-decorator";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
-import AppAnalysisUpload from "@/app/analysis/shared/analysis-upload.vue";
-import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { AnalysisEventService } from "@/app/analysis/shared/analysis-event-service";
-import { AnalysisEvent } from "@/app/analysis/shared/types";
+import AppAnalysisUploader from "@/app/analysis/shared/analysis-uploader.vue";
 import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 
 @Component({
   name: "app-upload-analysis-files",
   components: {
-    AppAnalysisUpload,
+    AppAnalysisUploader,
   },
 })
 export default class AppUploadAnalysisFiles extends BaseAuthComponent {
@@ -34,47 +27,5 @@ export default class AppUploadAnalysisFiles extends BaseAuthComponent {
   get uploadAllowed(): boolean {
     return this.analysis && this.analysis.current_state.state.id < ApiStates.DATA_COMPLETE_VERIFIED || false;
   }
-
-  async onStartUpload(files: string[], resume: boolean, done: (analysis: AnalysisSchema | undefined) => void) {
-    try {
-      if (this.analysis.current_state.state.id >= ApiStates.DATA_COMPLETE) {
-        throw { error: "INVALID_STATE_FOR_UPLOAD", message: "State DATA_INCOMPLETE (or less) required to upload further files." }
-      }
-
-      // If the upload resumes, we don't want to delete the already uploaded files
-      const filenames = resume ? [] : files;
-
-      await volateqApi.prepareAnalysisUpload(this.analysis.id, filenames);
-      
-      AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
-
-      done(this.analysis);
-    } catch (e) {
-      this.showError(e);
-
-      done(undefined);
-    }
-  }
-
-  async onCancelUpload(done: (failed: boolean) => void) {
-    try {
-      await volateqApi.cancelAnalysisUpload(this.analysis.id);
-      await volateqApi.updateAnalysisState(this.analysis.id, { state_id: ApiStates.UPLOAD_FAILED, message: 'Upload canceled' });
-
-      done(false);
-    } catch (e) {
-      this.showError(e);
-
-      done(true);
-    }
-  }
-
-  onRetryUpload() {
-    // Reload page
-    this.$router.go(0);
-  }
 }
 </script>
-
-<style lang="scss">
-</style>

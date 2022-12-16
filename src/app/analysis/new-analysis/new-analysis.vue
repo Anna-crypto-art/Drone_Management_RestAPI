@@ -1,32 +1,21 @@
 <template>
   <app-content :title="$t('new-data-upload')" :navback="true" :subtitle="plantName" eventId="newAnalysis">
-    <div class="app-new-analysis">
-      <app-analysis-upload
-      :analysis="analysis"
-      @startUpload="onStartUpload"
-      @cancelUpload="onCancelUpload"
-      @retryUpload="onRetryUpload">
-        <template #uploadForm>
-          <b-form-group v-show="plantOptions.length > 1" label-cols-lg="2" :label="$t('plant')">
-            <b-form-select required v-model="selectedPlantId" :options="plantOptions"></b-form-select>
-          </b-form-group>
-          <b-form-group label-cols-lg="2" :label="$t('acquisition-date')">
-            <b-datepicker v-model="flownAt" required /> 
-          </b-form-group>
-          <b-form-group v-show="productPackagesSelection.length > 0" label-cols-lg="2" :label="$t('product-packages')">
-            <app-multiselect 
-              v-model="selectedProductPackages"
-              :options="productPackagesSelection" 
-              :readonly="!isSuperAdmin"
-            />
-          </b-form-group>
-          <div class="pad-bottom-2x"></div>
-        </template>
-        <template #cancelButton>
-          {{ $t("cancel-and-delete-all-files") }}
-        </template>
-      </app-analysis-upload>
+    <div class="app-new-analysis mar-bottom-2x">
+      <b-form-group v-show="plantOptions.length > 1" label-cols-lg="2" :label="$t('plant')">
+        <b-form-select required v-model="selectedPlantId" :options="plantOptions"></b-form-select>
+      </b-form-group>
+      <b-form-group label-cols-lg="2" :label="$t('acquisition-date')">
+        <b-datepicker v-model="flownAt" required /> 
+      </b-form-group>
+      <b-form-group v-show="productPackagesSelection.length > 0" label-cols-lg="2" :label="$t('product-packages')">
+        <app-multiselect 
+          v-model="selectedProductPackages"
+          :options="productPackagesSelection" 
+          :readonly="!isSuperAdmin"
+        />
+      </b-form-group>
     </div>
+    <app-analysis-uploader :plantId="selectedPlantId" :analysis="analysis" :flownAt="flownAt" />
   </app-content>
 </template>
 
@@ -36,7 +25,7 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
-import AppAnalysisUpload from "@/app/analysis/shared/analysis-upload.vue";
+import AppAnalysisUploader from "@/app/analysis/shared/analysis-uploader.vue";
 import AppMultiselect from "@/app/shared/components/app-multiselect/app-multiselect.vue";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
@@ -49,7 +38,7 @@ import { MultiselectOption } from "@/app/shared/components/app-multiselect/types
   components: {
     AppContent,
     AppButton,
-    AppAnalysisUpload,
+    AppAnalysisUploader,
     AppMultiselect,
   },
 })
@@ -77,66 +66,6 @@ export default class AppNewAnalysis extends BaseAuthComponent {
 
   @Watch('flownAt') async onFlownAtChanged() {
     await this.loadProductPackagesSelection();
-  }
-
-  async onStartUpload(files: string[], resume: boolean, done: (analysis: AnalysisSchema | null) => void) {
-    try {
-      if (resume) {
-        done(this.analysis!);
-        return;
-      }
-
-      if (!this.flownAt) {
-        throw { 
-          error: 'INVALID_OR_MISSING_PARAMS', 
-          message: this.$t('missing').toString() + " " + this.$t('acquisition-date').toString() 
-        };
-      }
-
-      if (!files || files.length === 0) {
-        throw { 
-          error: 'INVALID_OR_MISSING_PARAMS',
-          message: this.$t("no-files-for-uploaded-selected").toString(),
-        };
-      }
-
-      const analysisIdObj = await volateqApi.createAnalysis({
-        plant_id: this.selectedPlantId!,
-        files: files,
-        flown_at: this.flownAt!,
-        order_product_package_ids: this.selectedProductPackages || undefined,
-      });
-  
-      this.analysis = await volateqApi.getAnalysis(analysisIdObj.id);
-
-      done(this.analysis);
-    } catch (e) {
-      this.showError(e);
-
-      done(null);
-    }
-  }
-
-  async onCancelUpload(done: (failed: boolean) => void) {
-    if (!this.analysis) {
-      return;
-    }
-
-    try {
-      await volateqApi.cancelAnalysisUpload(this.analysis.id);
-      await volateqApi.deleteAnalysis(this.analysis.id);
-
-      done(false);
-    } catch (e) {
-      this.showError(e);
-
-      done(true);
-    }
-  }
-
-  onRetryUpload() {
-    // Forward to existing analysis
-    this.$router.push({ name: "EditAnalysis", params: { id: this.analysis!.id } });
   }
 
   get plantName(): string {
@@ -193,5 +122,3 @@ export default class AppNewAnalysis extends BaseAuthComponent {
   }
 }
 </script>
-
-<style lang="scss"></style>

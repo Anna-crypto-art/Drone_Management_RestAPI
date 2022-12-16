@@ -21,7 +21,6 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
-import { UPLOAD_ANALYSIS_STORAGE_KEY } from "@/app/shared/components/fetch-component/storage-keys";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import { AnalysisEventService } from "../../shared/analysis-event-service";
 import { AnalysisEvent } from "../../shared/types";
@@ -43,8 +42,6 @@ export default class AppDeleteAnalysis extends BaseAuthComponent {
     try {
       if (confirm("Delete analysis and all according files? This cannot be undone.")) {
         this.loading = true;
-
-        appLocalStorage.removeItem(UPLOAD_ANALYSIS_STORAGE_KEY + "-" + this.analysis.id);
 
         await volateqApi.deleteAnalysis(this.analysis.id);
 

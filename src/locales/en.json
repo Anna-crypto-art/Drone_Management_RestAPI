@@ -445,9 +445,9 @@
   "error-occured-retrying": "An Error occured. Trying to resume...",
   "details": "Details",
   "trials": "Trials",
-  "cancel-uploas": "Cancel upload",
+  "cancel-upload": "Cancel upload",
   "sure-to-cancel-upload": "Do you want to try to cancel the upload?",
-  "file-exists-and-overide": "File already exists and will be overwritten",
+  "file-exists-and-overide": "<span class=\"text-danger\">File already exists and will be overwritten</span>",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

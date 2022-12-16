@@ -64,6 +64,7 @@ export default class AppAnalysisUploader extends BaseAuthComponent {
     this.uploaderService = new AnalysisUploaderService(this.plantId || undefined, this.analysis?.id);
 
     this.dataComplete = this.analysis ? this.analysis.data_complete : false;
+    this.hasPlantMetadata = this.analysis && this.analysis.has_plant_metadata || false;
 
     if (this.analysis) {
       this.appContentEventId = this.analysis.id;
@@ -74,6 +75,7 @@ export default class AppAnalysisUploader extends BaseAuthComponent {
 
   @Watch("analysis") onAnalysisChanged() {
     this.dataComplete = this.analysis ? this.analysis.data_complete : false;
+    this.hasPlantMetadata = this.analysis && this.analysis.has_plant_metadata || false;
   }
 
   @Watch("plantId") onPlantIdChanged() {
