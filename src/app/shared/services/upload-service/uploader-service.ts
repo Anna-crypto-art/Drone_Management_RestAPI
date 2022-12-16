@@ -12,12 +12,6 @@ export abstract class UploaderService {
   private event = new EventEmitter();
   public fileUploaders: FileUploader[] = [];
   protected upload: Upload | null = null;
-
-  // Axios fires onUploadProgress, even on (and after!) error 
-  // without any error information within the progress event object...
-  // That is pretty annoying! Anyway the workaround here is 
-  // to ensure that the progress event has been fired twice without any error in between
-  private raisedError = false;
   private trials = 0;
 
   constructor(
@@ -63,6 +57,10 @@ export abstract class UploaderService {
     this.event.on(UploaderEvent.UPLOAD_COMPLETE, onUploadCompleteCallback);
   }
 
+  public onUploadCanceled(onUploadCancelCallback: () => void) {
+    this.event.on(UploaderEvent.UPLOAD_CANCELED, onUploadCancelCallback);
+  }
+
   public getTrials(): number {
     return this.trials;
   }
@@ -70,7 +68,6 @@ export abstract class UploaderService {
   private emitError(ex: ApiException | any): void {
     this.event.emit(UploaderEvent.ERROR, ex);
 
-    this.raisedError = true;
     this.trials += 1;
   }
 
@@ -78,6 +75,12 @@ export abstract class UploaderService {
     this.trials = 0;
 
     this.event.emit(UploaderEvent.RESUME_UPLOAD_AFTER_ERROR);
+  }
+
+  private emitCancel(): void {
+    this.trials = 0;
+
+    this.event.emit(UploaderEvent.UPLOAD_CANCELED);
   }
 
   public abstract doUpload(): Promise<void>;
@@ -129,6 +132,8 @@ export abstract class UploaderService {
       throw new Error("Missing upload files or unknown upload files for resume upload")
     }
 
+    window.onbeforeunload = () => true;
+
     this.event.emit(UploaderEvent.START_UPLOAD);
 
     let fileUploader: FileUploader | undefined;
@@ -153,7 +158,7 @@ export abstract class UploaderService {
         }
 
         let erroring = true;
-        while (erroring) {
+        while (erroring && this.upload) {
           try {
             await this.refreshUpload();
 
@@ -168,9 +173,13 @@ export abstract class UploaderService {
         }
       }
     }
+
+    window.onbeforeunload = null;
   }
 
   public async cancelUpload() {
+    window.onbeforeunload = null;
+
     await volateqApi.cancelUpload(this.upload!.upload_id);
 
     this.upload = null;
@@ -180,6 +189,8 @@ export abstract class UploaderService {
     }
 
     this.fileUploaders = [];
+
+    this.emitCancel();
   }
 
   public async getMyUploadingUpload(): Promise<MyUploadingUpload | undefined> {

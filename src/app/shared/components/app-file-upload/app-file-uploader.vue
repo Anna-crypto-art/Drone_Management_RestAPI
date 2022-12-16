@@ -2,8 +2,9 @@
   <div class="app-file-upload-file mar-bottom-half">
     <div class="app-file-upload-file-infos">
       <div class="app-file-upload-file-name">
-        <small class="app-file-upload-file-name-size grayed">{{ fileSize }}</small>
-        {{ file.fileName }}
+        <small class="grayed">{{ fileSize }}</small>
+        <span class="pad-left">{{ file.fileName }}</span>
+        <span v-if="file.description" v-html="file.description" class="pad-left font-xs"></span>
       </div>
       <div v-show="!uploading" class="app-file-upload-file-remove" @click="onFileRemove">
         <b-icon icon="x"></b-icon>
@@ -89,10 +90,6 @@ export default class AppFileUploader extends Vue {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-
-    &-size {
-      margin-right: 20px;
-    }
   }
 
   &-remove {

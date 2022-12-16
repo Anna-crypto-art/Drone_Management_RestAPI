@@ -10,6 +10,7 @@ export class FileUploader {
   public uploadId: string | null = null;
   public fileId: string | null = null;
   public missingChunkNumbers: number[] = [];
+  public description = "";
   
   constructor(
     public readonly file: File,
@@ -99,7 +100,7 @@ export class FileUploader {
           const chunkProgressRatio = (end - start) / fileSize;
 
           const fileProgress = Math.round((pastProgress + (chunkProgress * chunkProgressRatio)) * 100);
-          
+
           this.emitProgress(fileProgress);
         }
       );

@@ -13,6 +13,30 @@ export class AnalysisUploaderService extends UploaderService {
     super(chunkSizeInMB);
   }
 
+  public async addFiles(files: File[]): Promise<void> {
+    await super.addFiles(files);
+
+    if (!this.analysisId) {
+      return;
+    }
+
+    const analysis = await volateqApi.getAnalysis(this.analysisId);
+    if (analysis.files) {
+      let fileNames = [];
+      for (const key of Object.keys(analysis.files)) {
+        fileNames = fileNames.concat(analysis!.files[key]);
+      }
+
+      const analysisFileInfos = await volateqApi.getAnalysisFiles(analysis.id, fileNames);
+
+      for (const fileUploader of this.fileUploaders) {
+        if (analysisFileInfos[fileUploader.fileName]) {
+          fileUploader.description = i18n.t("file-exists-and-overide").toString();
+        }
+      }
+    }
+  }
+
   public async doUpload(): Promise<void> {
     if (!this.analysisId) {
       if (!this.flownAt) {

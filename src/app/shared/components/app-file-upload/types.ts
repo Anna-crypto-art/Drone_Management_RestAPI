@@ -2,10 +2,10 @@ import { IResumableFile } from "@/app/shared/services/upload-service/types";
 
 export enum UploaderState {
   SELECTING = 0,
-  RESUMING = 1,
   UPLOADING = 10,
   RETRYING = 11,
   COMPLETED = 20,
+  CANCELED = 21,
 }
 
 

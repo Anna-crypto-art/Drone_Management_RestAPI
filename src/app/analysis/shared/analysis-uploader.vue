@@ -9,7 +9,11 @@
         {{ $t("data-complete") }} <app-explanation>{{ dataCompleteMetadataExpl }}</app-explanation>
       </b-form-checkbox>
     </div>
-    <app-uploader v-if="uploaderService" :uploaderService="uploaderService" :title="$t('browse-or-drag-drop-files')" />
+    <app-uploader v-if="uploaderService"
+      :uploaderService="uploaderService"
+      :title="$t('browse-or-drag-drop-files')" 
+      :disableAfterUpload="!analysis"
+    />
     <div class="pull-right mar-top mar-bottom" v-if="gotoNewAnalysis">
       <app-button @click="onGotoNewAnalysisClick">{{ $t("goto-analysis", { analysis: gotoNewAnalysis.name }) }}</app-button>
     </div>
@@ -100,6 +104,12 @@ export default class AppAnalysisUploader extends BaseAuthComponent {
 
       if (!this.analysis) {
         this.gotoNewAnalysis = analysis;
+      }
+    });
+
+    this.uploaderService!.onUploadCanceled(async () => {
+      if (!this.analysis) {
+        this.gotoNewAnalysis = await volateqApi.getAnalysis(this.uploaderService!.analysisId);
       }
     });
   }

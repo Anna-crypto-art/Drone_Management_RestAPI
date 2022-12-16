@@ -7,6 +7,11 @@
           <b-spinner small />
           ({{ errorTrials }} {{ $t('trials') }})
         </span>
+        <div class="mar-top" v-if="errorTrials > 10">
+          <app-button :variant="secondary" size="sm" @click="onCancelUploadClick" :loading="cancelLoading">
+            {{ $t("cancel-upload") }}
+          </app-button>
+        </div>
         <div class="mar-top font-xs">
           {{ $t("details") }}: <b>{{ error.error }}</b><br>
           {{ error.message }}
@@ -34,15 +39,14 @@
       </template>
     </app-files-selection>
 
-    <app-button v-show="uploadUnfinished" :loading="uploading" :disabled="uploadButtonDisabled" @click="onStartUpload" cls="pull-right mar-top mar-bottom">
+    <app-button v-show="showUploadButton" :loading="uploading" :disabled="uploadButtonDisabled" @click="onStartUpload" cls="pull-right mar-top mar-bottom">
       {{ $t("upload") }}
     </app-button>
   </div>
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import { Component, Prop, Ref } from "vue-property-decorator";
+import { Component, Prop } from "vue-property-decorator";
 import { UploaderService } from "@/app/shared/services/upload-service/uploader-service";
 import AppFileUploader from "./app-file-uploader.vue"
 import AppFilesSelection from "./app-files-selection.vue";
@@ -64,26 +68,24 @@ import { BaseAuthComponent } from "../base-auth-component/base-auth-component";
 export default class AppUploader extends BaseAuthComponent {
   @Prop({ required: true }) uploaderService!: UploaderService;
   @Prop() title: string | undefined;
+  @Prop({ default: false }) disableAfterUpload!: boolean;
 
   uploaderState = UploaderState.SELECTING;
   uploading = false;
-  // resuming = false;
+  
   error: ApiException | null = null;
   showErrorAlert = false;
+  
+  showUploadButton = true;
 
-  uploadUnfinished = true;
+  cancelLoading = false;
 
   async created() {
     this.registerUploaderEvents();
-
-    // await this.checkMyUploadingUpload();
   }
 
   get hasStateSelecting(): boolean {
     return this.uploaderState === UploaderState.SELECTING;
-  }
-  get hasStateResuming(): boolean {
-    return this.uploaderState === UploaderState.RESUMING;
   }
   get hasStateUploading(): boolean {
     return this.uploaderState === UploaderState.UPLOADING;
@@ -94,7 +96,11 @@ export default class AppUploader extends BaseAuthComponent {
   get hasStateCompleted(): boolean {
     return this.uploaderState === UploaderState.COMPLETED;
   }
+  get hasStateCanceled(): boolean {
+    return this.uploaderState === UploaderState.CANCELED;
+  }
 
+  @CatchError()
   async onFilesSelected(files: File[] | null): Promise<void> {
     this.uploaderService.fileUploaders = [];
     if (files) {
@@ -107,6 +113,15 @@ export default class AppUploader extends BaseAuthComponent {
     await this.uploaderService.doUpload();
   }
 
+  @CatchError("cancelLoading")
+  async onCancelUploadClick(): Promise<void> {
+    if (!confirm(this.$t("sure-to-cancel-upload").toString())) {
+      return;
+    }
+
+    await this.uploaderService.cancelUpload();
+  }
+
   get files(): FileUploader[] {
     return this.uploaderService.fileUploaders;
   }
@@ -116,88 +131,53 @@ export default class AppUploader extends BaseAuthComponent {
   }
 
   get disableFilesSelection(): boolean {
-    return this.uploading || !this.uploadUnfinished;
+    return this.uploading || !this.showUploadButton;
   }
 
   get errorTrials(): number {
     return this.uploaderService.getTrials();
   }
 
-  // async onCancelUpload(): Promise<void> {
-  // }
-
-  // async onResumeUpload(): Promise<void> {
-
-  // }
-
-  // private async checkMyUploadingUpload() {
-  //   const uploadingUpload = await this.uploaderService.getMyUploadingUpload();
-
-  //   if (uploadingUpload?.upload_id) {
-  //     this.uploaderService.setUpload(uploadingUpload?.upload_id);
-
-  //     if (this.uploaderService instanceof AnalysisUploaderService && uploadingUpload.analysis_id) {
-  //       this.uploaderService.setAnalysisId(uploadingUpload.analysis_id);
-  //     }
-
-  //     this.uploaderState = UploaderState.RESUMING;
-
-  //     this.uploaderStateChanged();
-  //   }
-  // }
-
   private registerUploaderEvents() {
     this.uploaderService.onStartUpload(() => {
       this.uploaderState = UploaderState.UPLOADING;
 
-      this.uploaderStateChanged();
+      this.uploading = true;
+
+      this.error = null;
+      this.showErrorAlert = false;
     });
+
     this.uploaderService.onResume(() => {
       this.uploaderState = UploaderState.UPLOADING;
 
-      this.uploaderStateChanged();
+      this.error = null;
+      this.showErrorAlert = false;
     });
+
     this.uploaderService.onError(e => {
       this.uploaderState = UploaderState.RETRYING;
 
+      this.uploading = true;
       this.error = e;
       this.showErrorAlert = true;
-
-      this.uploaderStateChanged();
     });
+
     this.uploaderService.onUploadComplete(() => {
       this.uploaderState = UploaderState.COMPLETED;
 
-      this.uploaderStateChanged();
-    });
-  }
-
-  private uploaderStateChanged(): void {
-    if (this.hasStateUploading || this.hasStateRetrying) {
-      this.uploading = true;
-    }
-
-    if (this.hasStateUploading) {
-      this.error = null;
-      this.showErrorAlert = false;
-    }
-
-    if (this.hasStateResuming) {
-      // this.resuming = true;
-    }
-
-    if (this.hasStateCompleted) {
-      this.uploadUnfinished = false;
+      this.showUploadButton = !this.disableAfterUpload;
       this.uploading = false;
 
       this.showSuccess(this.$t("upload-completed-successfully").toString(), false);
-    }
+    });
+
+    this.uploaderService.onUploadCanceled(() => {
+      this.uploaderState = UploaderState.CANCELED;
+
+      this.showUploadButton = !this.disableAfterUpload;
+      this.uploading = false;
+    });
   }
 }
 </script>
-
-<style lang="scss">
-@import "@/scss/_colors.scss";
-// .app-file-upload {
-// }
-</style>
