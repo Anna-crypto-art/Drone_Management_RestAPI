@@ -102,6 +102,15 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     filterType: FilterFieldType.BOOLEAN,
   },
   {
+    getValue: r => r.hot_glass_tube_ends,
+    transName: "hot-glass-tube-ends",
+    transDescr: "hot-glass-tube-ends_expl",
+    keyFigureId: ApiKeyFigure.HOT_GLASS_TUBE_ENDS_ID,
+    filterType: FilterFieldType.BOOLEAN,
+    enableForDiagram: true,
+    getDiffValue: r => r.hot_glass_tube_ends__diff,
+  },
+  {
     getValue: r => r.recommended_action_class,
     transName: "recommended-action",
     transDescr: "recommended-action_expl",

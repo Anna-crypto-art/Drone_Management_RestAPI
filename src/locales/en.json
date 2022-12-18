@@ -165,6 +165,8 @@
   "oxygen-penetration_expl": "HCE shows degradation of the coating, indicating oxygen penetration.",
   "hydrogen-penetration": "Hydrogen penetration",
   "hydrogen-penetration_expl": "Increased probability of hydrogen penetration. Indicators are intact coating and intact glass tube, but increased infrared intensity.",
+  "hot-glass-tube-ends": "Hot glass tube ends",
+  "hot-glass-tube-ends_expl": "HCE shows an inhomogeneous temperature distribution, the ends are much hotter than the center of the tube.",
   "no-analysis-result-selected": "Select an analysis to see table data",
   "show-results": "Show results",
   "select-result-image-files-zip": "Select zip file with all images related to result file (optional)",

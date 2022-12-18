@@ -45,6 +45,12 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     query: { h2_concentration: 1, undefined: 1 },
   },
   {
+    keyFigureId: ApiKeyFigure.HOT_GLASS_TUBE_ENDS_ID,
+    layerType: BoolUndefinedHceKeyFigureLayer,
+    keyFigureInfo: { templateName: "hotGlassTubeEnds", keyName: "hot-glass-tube-ends", zIndex: 11 },
+    query: { hot_glass_tube_ends: 1, undefined: 1 },
+  },
+  {
     keyFigureId: ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
     layerType: GlassTemperatureKeyFigureLayer,
     keyFigureInfo: { templateName: "glassTubeTemperature", keyName: "glass-tube-temperature-class" },

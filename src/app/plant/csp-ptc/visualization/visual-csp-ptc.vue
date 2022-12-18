@@ -32,6 +32,10 @@
         {{ $t("hydrogen-penetration") }}
         <app-explanation><span v-html="$t('hydrogen-penetration_expl')"></span></app-explanation>
       </template>
+      <template #hotGlassTubeEnds>
+        {{ $t("hot-glass-tube-ends") }}
+        <app-explanation><span v-html="$t('hot-glass-tube-ends_expl')"></span></app-explanation>
+      </template>
       <template #glassTubeTemperatureClass3>
         {{
           (firstAnalysisResult &&

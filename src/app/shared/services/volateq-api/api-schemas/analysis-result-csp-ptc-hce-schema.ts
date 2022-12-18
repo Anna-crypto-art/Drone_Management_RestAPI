@@ -12,6 +12,7 @@ export interface AnalysisResultCspPtcHceSchema extends AnalysisResultSchemaBase 
   ir_intensity_class: number;
   coating_degraded: boolean;
   h2_concentration: boolean;
+  hot_glass_tube_ends: boolean;
   recommended_action_class: number;
   glass_tube_temperature_class: number;
   sca_tracking_angle: number;
@@ -33,6 +34,7 @@ export interface AnalysisResultCspPtcHceComparedSchema extends AnalysisResultCsp
   h2_concentration__diff: number;
   missing_glass_tube__diff: number;
   oxygen_penetration__diff: number;
+  hot_glass_tube_ends__diff: number;
   glass_tube_temperature_class__diff: number;
   recommended_action_class__diff: number;
 }

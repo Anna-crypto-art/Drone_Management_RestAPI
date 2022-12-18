@@ -5,6 +5,7 @@ export interface GeoVisualQuery {
   coating_degraded?: 0 | 1;
   oxygen_penetration?: 0 | 1;
   h2_concentration?: 0 | 1;
+  hot_glass_tube_ends?: 0 | 1;
   recommended_action_class?: 1 | 2 | 3;
   orientation_offset_class?: 1 | 2 | 3;
   torsion_class?: 1 | 2 | 3;
