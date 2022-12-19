@@ -8,8 +8,8 @@ export interface ReferenceMeasurementSchema {
   notes?: string;
   created_at: string;
   updated_at: string;
-  user_created: SimpleUserSchema;
-  user_updated: SimpleUserSchema;
+  user_created?: SimpleUserSchema;
+  user_updated?: SimpleUserSchema;
 }
 
 export interface ReferenceMeasurementValueSchema {
