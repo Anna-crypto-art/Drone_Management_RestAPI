@@ -1,52 +1,35 @@
 <template>
-  <div class="plant-view-csp-ptc" v-if="analyses">
+  <div class="plant-view-pv" v-if="analyses">
     <app-analysis-selection-sidebar
       :plant="plant"
       :analyses="analyses"
     />
     <app-plant-view-tabs :plant="plant" :analyses="analyses">
       <template #visual>
-        <app-visual-csp-ptc :analyses="analyses" :plant="plant" />
-      </template>
-      <template #tables>
-        <app-tables-csp-ptc v-if="loadTables" :analyses="analyses" :plant="plant" />
-      </template>
-      <template #diagram>
-        <app-plant-diagram-view-csp-ptc v-if="loadDiagrams" :analyses="analyses" :plant="plant" />
-      </template>
-      <template #admin>
-        <app-plant-admin-view-csp-ptc :selectedAnalysisResult="firstAnalysisResult" :plant="plant" />
+        <app-visual-pv :analyses="analyses" :plant="plant" />
       </template>
     </app-plant-view-tabs>
   </div>
 </template>
 
 <script lang="ts">
-import AppPlantAdminViewCspPtc from "@/app/plant/csp-ptc/plant-admin-view-csp-ptc.vue";
-import AppTablesCspPtc from "@/app/plant/csp-ptc/tables/tables-csp-ptc.vue";
-import AppVisualCspPtc from "@/app/plant/csp-ptc/visualization/visual-csp-ptc.vue";
 import AppAnalysisSelectionSidebar from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-sidebar.vue";
 import AppPlantViewTabs from "@/app/plant/shared/plant-view-tabs/plant-view-tabs.vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { Component, Prop } from "vue-property-decorator";
-import AppPlantDiagramViewCspPtc from "@/app/plant/csp-ptc/plant-diagram-view-csp-ptc.vue";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 
 @Component({
-  name: "app-plant-view-csp-ptc",
+  name: "app-plant-view-pv",
   components: {
     AppPlantViewTabs,
-    AppVisualCspPtc,
-    AppTablesCspPtc,
     AppAnalysisSelectionSidebar,
-    AppPlantAdminViewCspPtc,
-    AppPlantDiagramViewCspPtc,
   },
 })
-export default class AppPlantViewCspPtc extends BaseAuthComponent {
+export default class AppPlantViewPv extends BaseAuthComponent {
   @Prop() plant!: PlantSchema;
 
   analyses: AnalysisForViewSchema[] | null = null;

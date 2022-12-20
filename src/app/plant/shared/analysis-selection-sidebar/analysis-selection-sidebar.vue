@@ -80,8 +80,6 @@ import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/
 export default class AppAnalysisSelectionSidebar extends Vue {
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
-  @Prop() getPIColor!: (keyFigure: KeyFigureSchema) => string;
-  @Prop() absolute!: boolean;
   @Ref() analysesTable!: any; // b-table
   @State(state => state.sidebar["analysis"]) sidebarOpen!: boolean;
 
@@ -90,6 +88,8 @@ export default class AppAnalysisSelectionSidebar extends Vue {
     { key: "name", label: this.$t("analysis").toString() },
   ];
   analysesTableItems: Record<string, unknown>[] = [];
+
+  absolute = true;
 
   compareMode = false;
   selectMode = "single";
@@ -117,6 +117,10 @@ export default class AppAnalysisSelectionSidebar extends Vue {
 
     AnalysisSelectionService.on(this.plant.id, AnalysisSelectionEvent.SELECT_FIRST, async () => {
       await this.selectAnalysis(true);
+    });
+
+    AnalysisSelectionService.on(this.plant.id, AnalysisSelectionEvent.SIDEBAR_ABSOLUTE, async (absolute) => {
+      this.absolute = absolute;
     });
 
     this.routeQueryHelper.queryChanged(async () => {
@@ -194,19 +198,6 @@ export default class AppAnalysisSelectionSidebar extends Vue {
     }
 
     this.selectMode = this.compareMode ? "multi" : "single";
-
-    if (selectIndex >= 0) {
-      // Wait for table reselection
-      for (let i = 0; i < 5; i++) {
-        await this.$nextTick();
-      }
-
-      // this.analysesTable.selectRow(selectIndex);
-    }
-  }
-
-  getKpiColor(keyFigure: KeyFigureSchema): string {
-    return this.getPIColor(keyFigure);
   }
 
   private async selectAnalysis(selectFirst = false): Promise<void> {
