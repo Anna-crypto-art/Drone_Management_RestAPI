@@ -15,6 +15,7 @@
 <script lang="ts">
 import AppAnalysisSelectionSidebar from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-sidebar.vue";
 import AppPlantViewTabs from "@/app/plant/shared/plant-view-tabs/plant-view-tabs.vue";
+import AppVisualPv from "@/app/plant/pv/visualization/visual-pv.vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { Component, Prop } from "vue-property-decorator";
@@ -27,6 +28,7 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
   components: {
     AppPlantViewTabs,
     AppAnalysisSelectionSidebar,
+    AppVisualPv,
   },
 })
 export default class AppPlantViewPv extends BaseAuthComponent {

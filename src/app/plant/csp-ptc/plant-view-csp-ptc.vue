@@ -9,10 +9,10 @@
         <app-visual-csp-ptc :analyses="analyses" :plant="plant" />
       </template>
       <template #tables>
-        <app-tables-csp-ptc v-if="loadTables" :analyses="analyses" :plant="plant" />
+        <app-tables-csp-ptc :analyses="analyses" :plant="plant" />
       </template>
       <template #diagram>
-        <app-plant-diagram-view-csp-ptc v-if="loadDiagrams" :analyses="analyses" :plant="plant" />
+        <app-plant-diagram-view-csp-ptc :analyses="analyses" :plant="plant" />
       </template>
       <template #admin>
         <app-plant-admin-view-csp-ptc :selectedAnalysisResult="firstAnalysisResult" :plant="plant" />
@@ -33,7 +33,7 @@ import { Component, Prop } from "vue-property-decorator";
 import AppPlantDiagramViewCspPtc from "@/app/plant/csp-ptc/plant-diagram-view-csp-ptc.vue";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { AnalysisSelectionBaseComponent } from "../shared/analysis-selection-sidebar/analysis-selection-base-component";
 
 @Component({
   name: "app-plant-view-csp-ptc",
@@ -46,7 +46,7 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
     AppPlantDiagramViewCspPtc,
   },
 })
-export default class AppPlantViewCspPtc extends BaseAuthComponent {
+export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
   @Prop() plant!: PlantSchema;
 
   analyses: AnalysisForViewSchema[] | null = null;

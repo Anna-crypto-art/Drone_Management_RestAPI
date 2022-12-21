@@ -6,5 +6,7 @@ export enum ApiComponent {
   CSP_PTC_SUBFIELD = 7,
   CSP_PTC_LOOP = 8,
 
+  PV_MODULE = 9,
   PV_TRACKER = 10,
+  PV_TRACKERGROUP = 11,
 }

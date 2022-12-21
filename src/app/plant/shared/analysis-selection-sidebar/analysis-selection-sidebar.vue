@@ -228,6 +228,10 @@ export default class AppAnalysisSelectionSidebar extends Vue {
       await this.$nextTick();
       this.analysesTable.selectRow(tableRowIndex);
     } else {
+      await this.$nextTick();
+      await this.$nextTick();
+      await this.$nextTick();
+
       this.$store.direct.commit.sidebar.set({ name: "analysis", state: false });
     }
   }

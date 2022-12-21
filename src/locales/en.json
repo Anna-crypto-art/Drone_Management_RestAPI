@@ -450,6 +450,9 @@
   "cancel-upload": "Cancel upload",
   "sure-to-cancel-upload": "Do you want to try to cancel the upload?",
   "file-exists-and-overide": "<span class=\"text-danger\">File already exists and will be overwritten</span>",
+  "pv-tracker": "Tracker",
+  "pv-tracker-group": "Tracker group",
+  "pv-module": "Module",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

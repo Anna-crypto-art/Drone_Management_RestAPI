@@ -59,11 +59,11 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
 
   private isMobile!: boolean;
   private isMobileQuery!: MediaQueryList;
-  private isMobileListener<Evt extends { matches: boolean }>(e: Evt) {
+  private async isMobileListener<Evt extends { matches: boolean }>(e: Evt) {
     this.isMobile = e.matches;
 
     this.$store.direct.commit.sidebar.setAll(!this.isMobile);
-    this.updateLeftSidebarAbsolute();
+    await this.updateLeftSidebarAbsolute();
   }
 
   @CatchError()
@@ -101,6 +101,8 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
       const nextView = PlantViewTabs[this.selectedTab].toString().toLowerCase() as any;
       await this.routeQueryHelper.pushRoute({ view: nextView });
     }
+
+    await this.updateLeftSidebarAbsolute();
 
     await this.loadTabContent();
   }
@@ -153,11 +155,10 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
         // fire last Analysis event to load data or rerender
         if (this.firstAnalysisResult) {
           await this.$nextTick();
+
           await AnalysisSelectionService.whazzup(this.plant.id);
         }
       }
-
-      this.$emit("tabChanged", this.selectedTab);
     }
   }
 
@@ -165,10 +166,10 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
     this.isMobileQuery.removeEventListener("change", this.isMobileListener);
   }
 
-  updateLeftSidebarAbsolute() {
+  async updateLeftSidebarAbsolute() {
     const leftSidebarAbsolute = this.isMobile || this.selectedTab === PlantViewTabs.MAP;
 
-    AnalysisSelectionService.emit(
+    await AnalysisSelectionService.emit(
       this.plant.id, 
       AnalysisSelectionEvent.SIDEBAR_ABSOLUTE, 
       leftSidebarAbsolute

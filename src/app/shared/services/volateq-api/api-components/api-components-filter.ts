@@ -28,4 +28,13 @@ export const apiComponentsFilter: ComponentsMapping = {
 
   [ApiComponent.CSP_PTC_LOOP]: null,
   [ApiComponent.CSP_PTC_SUBFIELD]: null,
+
+  [ApiComponent.PV_MODULE]: [
+    ApiComponent.PV_TRACKER,
+    ApiComponent.PV_TRACKERGROUP,
+  ],
+  [ApiComponent.PV_TRACKER]: [
+    ApiComponent.PV_TRACKERGROUP,
+  ],
+  [ApiComponent.PV_TRACKERGROUP]: null,
 }
