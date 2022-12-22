@@ -509,8 +509,9 @@ export default class AppVisualization
       }
     }
 
-    const selectedLayers = this.piLayersHierarchy.getAllChildLayers().filter(childLayer => childLayer.getSelected());
+    this.piLayersHierarchy.onLayerSelected();
 
+    const selectedLayers = this.piLayersHierarchy.getSelectedLayers();
     this.routeQueryHelper.replaceRoute({ pi: selectedLayers.map(selectedLayer => selectedLayer.keyFigureId.toString() )});
     
     this.hideToast();
@@ -579,7 +580,13 @@ export default class AppVisualization
   private createLayers(): void {
     try {
       this.componentLayers = this.componentLayerTypes.map(componentType => new (componentType as any)(this));
-      this.piLayersHierarchy = new PILayersHierarchy(this, this.analysisResults, this.keyFigureLayers);
+      this.piLayersHierarchy = new PILayersHierarchy(
+        this,
+        this.analysisResults,
+        this.keyFigureLayers,
+        this.showCouldNotBeMeasured,
+        this.enableMultiSelection
+      );
       this.refMeasureLayers = new RefMeasureLayers(this, this.analyses);
   
       this.worldMapLayer = {

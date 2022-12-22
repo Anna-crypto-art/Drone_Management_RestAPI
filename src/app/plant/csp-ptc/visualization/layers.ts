@@ -80,6 +80,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
         keyFigureInfo: { templateName: "glassTubeTemperatureNotMeasured", displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
         color: KeyFigureColors.grey,
+        invisibleAutoSelection: true,
       },
     ],
   },
@@ -116,6 +117,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
         color: KeyFigureColors.grey,
+        invisibleAutoSelection: true,
       },
     ],
   },
@@ -140,6 +142,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { key_figure_class_name: "HcePositionSupportKeyFigure", undefined: 1 },
         color: KeyFigureColors.grey,
+        invisibleAutoSelection: true,
       },
     ]
   },

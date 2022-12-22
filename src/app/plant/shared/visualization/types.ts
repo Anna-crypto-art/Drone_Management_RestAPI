@@ -151,6 +151,10 @@ export type KeyFigureTypeMap = {
      * Optional condition, to define whether the PI should be displayed or not
      */
     displayCondition?: (anaysisResult: AnalysisResultDetailedSchema) => boolean;
+    /**
+     * Invisble layer that will be selected, if any sibling is selected
+     */
+    invisibleAutoSelection?: boolean;
   }[];
 };
 

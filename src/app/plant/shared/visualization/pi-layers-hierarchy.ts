@@ -23,7 +23,9 @@ export class PILayersHierarchy {
   constructor(
     private readonly vueComponent: Vue,
     private readonly analysisResults: AnalysisResultDetailedSchema[],
-    private readonly keyFigureLayers: KeyFigureTypeMap[]
+    private readonly keyFigureLayers: KeyFigureTypeMap[],
+    private showUndefined: boolean,
+    private multiSelection: boolean,
   ) {
     this.parentComponentKpiLayers = [];
     this.groupLayers = [];
@@ -64,6 +66,24 @@ export class PILayersHierarchy {
     return allChildLayers;
   }
 
+  public getGroupKPILayersWithKeyFigureLayers() {
+    const groupKpiLayersWithKeyFigureLayers: GroupKPILayer[] = [];
+
+    function findGroupKPILayersRec(groupKpiLayers: GroupKPILayer[]) {
+      for (const groupKpiLayer of groupKpiLayers) {
+        if (groupKpiLayer.keyFigureLayers.length > 0) {
+          groupKpiLayersWithKeyFigureLayers.push(groupKpiLayer);
+        }
+
+        groupKpiLayer.subGroupLayers && findGroupKPILayersRec(groupKpiLayer.subGroupLayers);
+      }
+    }
+
+    findGroupKPILayersRec(this.parentComponentKpiLayers);
+
+    return groupKpiLayersWithKeyFigureLayers;
+  }
+
   public toggleMultiSelectionDeep(multiSelection: boolean) {
     for (const componentId in this.parentComponentKpiLayers) {
       if (this.parentComponentKpiLayers[componentId].subGroupLayers) {
@@ -75,6 +95,8 @@ export class PILayersHierarchy {
   }
 
   public toggleMultiSelection(multiSelection: boolean): void {
+    this.multiSelection = multiSelection;
+
     for (const componentId in this.parentComponentKpiLayers) {
       this.parentComponentKpiLayers[componentId].groupLayer.singleSelection = !multiSelection;
     }
@@ -107,10 +129,14 @@ export class PILayersHierarchy {
   }
 
   public toggleShowUndefined(showUndefined: boolean): void {
+    this.showUndefined = showUndefined
+
     for (const childLayer of this.getAllChildLayers()) {
       if (childLayer.query?.undefined !== undefined && childLayer.keyFigureInfo.displayName !== "not-measured") {
         childLayer.query.undefined = showUndefined && 1 || 0;
         childLayer.reloadLayer();
+      } else if (childLayer.invisibleAutoSelection){
+        if (childLayer.getSelected() && !showUndefined)
       }
     }
   }
@@ -224,6 +250,29 @@ export class PILayersHierarchy {
 
   public getCompareAnalysisResultId(): string | undefined {
     return this.compareAnylysisResultId;
+  }
+
+  public async onLayerSelected() {
+    if (this.showUndefined) {
+      const groupKpiLayers = this.getGroupKPILayersWithKeyFigureLayers();
+      for (const groupKpiLayer of groupKpiLayers) {
+        if (!groupKpiLayer.groupLayer.singleSelection && !groupKpiLayer.subGroupLayers) {
+          const invsibleAutoSelectionLayer = groupKpiLayer.keyFigureLayers.find(l => l.invisibleAutoSelection);
+          if (invsibleAutoSelectionLayer) {
+            const selectedLayers = groupKpiLayer.keyFigureLayers.filter(l => l.getSelected() && !l.invisibleAutoSelection);
+            if (selectedLayers.length === 0 && invsibleAutoSelectionLayer.getSelected()) {
+              await invsibleAutoSelectionLayer.setSelected(false);
+            } else if (selectedLayers.length > 0 && !invsibleAutoSelectionLayer.getSelected()) {
+              await invsibleAutoSelectionLayer.setSelected(true);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  public getSelectedLayers(): KeyFigureLayer<AnalysisResultSchemaBase>[] {
+    return this.getAllChildLayers().filter(childLayer => childLayer.getSelected())
   }
 
   private getParentComponentLayer(keyFigure: KeyFigureSchema): GroupKPILayer {
