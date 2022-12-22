@@ -136,7 +136,7 @@ export class PILayersHierarchy {
         childLayer.query.undefined = showUndefined && 1 || 0;
         childLayer.reloadLayer();
       } else if (childLayer.invisibleAutoSelection){
-        if (childLayer.getSelected() && !showUndefined)
+        if (childLayer.getSelected() && !showUndefined) // contiune here
       }
     }
   }
