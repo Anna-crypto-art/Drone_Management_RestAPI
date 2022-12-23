@@ -32,6 +32,8 @@ export abstract class LayerBase {
   protected refreshLayer = false;
   protected readonly events = new SequentialEventEmitter();
 
+  public invisibleAutoSelection?: boolean;
+
   constructor(public readonly vueComponent: BaseAuthComponent & IPlantVisualization) {}
 
   protected abstract getPcs(feature: FeatureLike): string | undefined;
@@ -71,7 +73,7 @@ export abstract class LayerBase {
   }
 
   public get isVisible(): boolean {
-    return this.visible;
+    return this.visible && !this.invisibleAutoSelection;
   }
 
   public reloadLayer(): void {
@@ -93,7 +95,7 @@ export abstract class LayerBase {
         geoJSONOptions: GEO_JSON_OPTIONS,
         style: (feature: FeatureLike) => this.getStyle(feature),
         onSelected: (selected: boolean) => this.onSelected(selected),
-        visible: this.visible,
+        visible: this.visible && !this.invisibleAutoSelection,
         zIndex: this.zIndex,
         layerType: "VectorImageLayer",
         reloadLayer: this.refreshLayer,
@@ -114,9 +116,11 @@ export abstract class LayerBase {
   }
 
   public setVisible(visible: boolean) {
-    this.visible = visible;
-    if (this.geoLayerObject) {
-      this.geoLayerObject.visible = this.visible;
+    if (!this.invisibleAutoSelection) {
+      this.visible = visible;
+      if (this.geoLayerObject) {
+        this.geoLayerObject.visible = this.visible;
+      }
     }
   }
 

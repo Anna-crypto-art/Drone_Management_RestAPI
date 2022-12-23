@@ -351,7 +351,7 @@ export default class AppVisualization
 
     await this.$nextTick();
 
-    this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
+    await this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
     this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
 
     await this.loadQueryPi();
@@ -493,7 +493,7 @@ export default class AppVisualization
     this.multiSelectionDisabled = this.analysisResults.length === 0;
   }
 
-  onLayerSelected(selected: boolean, legend: Legend | undefined) {
+  async onLayerSelected(selected: boolean, legend: Legend | undefined) {
     if (legend) {
       const legendIndex = this.legends.findIndex(l => l.id === legend.id);
       if (selected) {
@@ -509,7 +509,7 @@ export default class AppVisualization
       }
     }
 
-    this.piLayersHierarchy.onLayerSelected();
+    await this.piLayersHierarchy.onLayerSelected();
 
     const selectedLayers = this.piLayersHierarchy.getSelectedLayers();
     this.routeQueryHelper.replaceRoute({ pi: selectedLayers.map(selectedLayer => selectedLayer.keyFigureId.toString() )});
@@ -527,10 +527,10 @@ export default class AppVisualization
     (this.layers[0] as GroupLayer).singleSelection = !this.enableMultiSelection;
   }
 
-  onShowCouldNotBeMeasuredChanged() {
+  async onShowCouldNotBeMeasuredChanged() {
     appLocalStorage.setItem(STORAGE_KEY_SHOWUNDEFINED, this.showCouldNotBeMeasured);
 
-    this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
+    await this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
   }
 
   async onSatelliteViewChanged() {

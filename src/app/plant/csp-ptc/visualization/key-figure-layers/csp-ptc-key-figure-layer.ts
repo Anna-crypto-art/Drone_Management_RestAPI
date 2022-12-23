@@ -16,6 +16,7 @@ export abstract class CspPtcKeyFigureLayer<T extends AnalysisResultSchemaBase> e
     public readonly keyFigureInfo: KeyFigureInfo,
     public readonly query?: GeoVisualQuery,
     protected readonly initColor?: KeyFigureColors,
+    public readonly invisibleAutoSelection?: boolean,
   ) {
     super(vueComponent, analysisResult, keyFigureId, keyFigureInfo, query, initColor);
   }

@@ -230,8 +230,8 @@ export default class AppVisualCspPtc
     return this.visualization?.openLayers;
   }
 
-  onLayerSelected(selected: boolean, legend: Legend | undefined): void {
-    return this.visualization?.onLayerSelected(selected, legend);
+  async onLayerSelected(selected: boolean, legend: Legend | undefined) {
+    return await this.visualization?.onLayerSelected(selected, legend);
   }
 
   getTransAlignmentOffsetClassLimit(componentType: "sce" | "sca" | "hce", classLimit: 1 | 2 | 3): string {

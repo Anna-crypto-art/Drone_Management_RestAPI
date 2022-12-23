@@ -47,8 +47,8 @@ export default class AppVisualPv
     return this.visualization?.openLayers;
   }
 
-  onLayerSelected(selected: boolean, legend: Legend | undefined): void {
-    return this.visualization?.onLayerSelected(selected, legend);
+  async onLayerSelected(selected: boolean, legend: Legend | undefined) {
+    return await this.visualization?.onLayerSelected(selected, legend);
   }
 
   public hideToast(): void {

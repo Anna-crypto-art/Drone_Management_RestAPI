@@ -3,7 +3,7 @@ import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { KeyFigureLayer } from "./layers/key-figure-layer";
 import { KeyFigureColorScheme, KeyFigureInfo, OrthoImage } from "./layers/types";
-import { GroupKPILayer, KeyFigureTypeMap } from "./types";
+import { GroupKPILayer, InvisibleAutoSelectionLayer, KeyFigureTypeMap } from "./types";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { apiComponentNames } from "@/app/shared/services/volateq-api/api-components/api-components-name";
@@ -19,6 +19,8 @@ export class PILayersHierarchy {
   private readonly analysisResultIds: string[];
   private selectedAnalysisResultId: string | undefined;
   private compareAnylysisResultId: string | undefined;
+
+  private raiseOnLayerSelected = true;
 
   constructor(
     private readonly vueComponent: Vue,
@@ -66,13 +68,20 @@ export class PILayersHierarchy {
     return allChildLayers;
   }
 
-  public getGroupKPILayersWithKeyFigureLayers() {
-    const groupKpiLayersWithKeyFigureLayers: GroupKPILayer[] = [];
+  private getInvisibleAutoSelectionLayers(): InvisibleAutoSelectionLayer[] {
+    const autoSelLayers: InvisibleAutoSelectionLayer[] = [];
 
     function findGroupKPILayersRec(groupKpiLayers: GroupKPILayer[]) {
       for (const groupKpiLayer of groupKpiLayers) {
         if (groupKpiLayer.keyFigureLayers.length > 0) {
-          groupKpiLayersWithKeyFigureLayers.push(groupKpiLayer);
+          const invsibleAutoSelectionLayer = groupKpiLayer.keyFigureLayers.find(l => l.invisibleAutoSelection);
+          if (invsibleAutoSelectionLayer) {
+            const selectedLayers = groupKpiLayer.keyFigureLayers.filter(l => l.getSelected() && !l.invisibleAutoSelection);
+            autoSelLayers.push({
+              layer: invsibleAutoSelectionLayer,
+              hasSelectedSiblings: selectedLayers.length > 0,
+            });
+          }
         }
 
         groupKpiLayer.subGroupLayers && findGroupKPILayersRec(groupKpiLayer.subGroupLayers);
@@ -81,7 +90,7 @@ export class PILayersHierarchy {
 
     findGroupKPILayersRec(this.parentComponentKpiLayers);
 
-    return groupKpiLayersWithKeyFigureLayers;
+    return autoSelLayers;
   }
 
   public toggleMultiSelectionDeep(multiSelection: boolean) {
@@ -128,15 +137,25 @@ export class PILayersHierarchy {
     }
   }
 
-  public toggleShowUndefined(showUndefined: boolean): void {
+  public async toggleShowUndefined(showUndefined: boolean): Promise<void> {
     this.showUndefined = showUndefined
 
     for (const childLayer of this.getAllChildLayers()) {
-      if (childLayer.query?.undefined !== undefined && childLayer.keyFigureInfo.displayName !== "not-measured") {
+      if (childLayer.query?.undefined !== undefined && 
+        !childLayer.invisibleAutoSelection && 
+        childLayer.keyFigureInfo.displayName !== "not-measured"
+      ) {
         childLayer.query.undefined = showUndefined && 1 || 0;
         childLayer.reloadLayer();
-      } else if (childLayer.invisibleAutoSelection){
-        if (childLayer.getSelected() && !showUndefined) // contiune here
+      }
+
+      for (const invAutoSelLayer of this.getInvisibleAutoSelectionLayers()) {
+        if (showUndefined && invAutoSelLayer.hasSelectedSiblings && !invAutoSelLayer.layer.getSelected()) {
+          await invAutoSelLayer.layer.setSelected(true);
+        }
+        if (!showUndefined && invAutoSelLayer.layer.getSelected()) {
+          await invAutoSelLayer.layer.setSelected(false);
+        }
       }
     }
   }
@@ -253,21 +272,22 @@ export class PILayersHierarchy {
   }
 
   public async onLayerSelected() {
-    if (this.showUndefined) {
-      const groupKpiLayers = this.getGroupKPILayersWithKeyFigureLayers();
-      for (const groupKpiLayer of groupKpiLayers) {
-        if (!groupKpiLayer.groupLayer.singleSelection && !groupKpiLayer.subGroupLayers) {
-          const invsibleAutoSelectionLayer = groupKpiLayer.keyFigureLayers.find(l => l.invisibleAutoSelection);
-          if (invsibleAutoSelectionLayer) {
-            const selectedLayers = groupKpiLayer.keyFigureLayers.filter(l => l.getSelected() && !l.invisibleAutoSelection);
-            if (selectedLayers.length === 0 && invsibleAutoSelectionLayer.getSelected()) {
-              await invsibleAutoSelectionLayer.setSelected(false);
-            } else if (selectedLayers.length > 0 && !invsibleAutoSelectionLayer.getSelected()) {
-              await invsibleAutoSelectionLayer.setSelected(true);
-            }
-          }
+    if (this.showUndefined && this.raiseOnLayerSelected) {
+      this.raiseOnLayerSelected = false;
+
+      for (const invAutoSelLayer of this.getInvisibleAutoSelectionLayers()) {
+        if (!invAutoSelLayer.hasSelectedSiblings && invAutoSelLayer.layer.getSelected()) {
+          
+          await invAutoSelLayer.layer.setSelected(false);
+        } else if (invAutoSelLayer.hasSelectedSiblings && !invAutoSelLayer.layer.getSelected()) {
+
+          console.log("invAutoSelLayer.layer.setSelected(true)");
+          console.log(invAutoSelLayer.layer.id);
+          await invAutoSelLayer.layer.setSelected(true);
         }
       }
+
+      this.raiseOnLayerSelected = true;
     }
   }
 
@@ -346,7 +366,11 @@ export class PILayersHierarchy {
           childKeyFigureInfo,
           childLayer.query,
           childLayer.color,
+          childLayer.invisibleAutoSelection,
         );
+
+        console.log(childLayer.invisibleAutoSelection);
+
         groupKpiLayer.keyFigureLayers.push(kpiLayer);
         groupKpiLayer.groupLayer.childLayers.push(kpiLayer.toGeoLayer());
       }

@@ -44,6 +44,8 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   ) {
     super(vueComponent);
 
+    console.log(this.invisibleAutoSelection);
+
     this.visible = false;
     this.name = (this.keyFigureInfo.templateName ||
       (this.keyFigureInfo.displayName && this.vueComponent.$t(this.keyFigureInfo.displayName).toString()) ||
@@ -68,7 +70,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   protected async onSelected(selected: boolean): Promise<void> {
     super.onSelected(selected);
 
-    this.vueComponent.onLayerSelected(selected, this.getLegend());
+    await this.vueComponent.onLayerSelected(selected, this.getLegend());
   }
 
   protected mapResultToFeatureInfos(result: T): FeatureInfos | undefined {

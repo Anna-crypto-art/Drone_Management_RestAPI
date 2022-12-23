@@ -34,7 +34,7 @@ export interface GroupKPILayer {
 export interface IPlantVisualization {
   plant: PlantSchema;
   openLayers: IOpenLayersComponent | undefined;
-  onLayerSelected(selected: boolean, legend: Legend | undefined);
+  onLayerSelected(selected: boolean, legend: Legend | undefined): Promise<void>;
   hideToast: () => void;
 }
 
@@ -174,4 +174,9 @@ export interface ReferenceMeasurementEventObject {
   piLayersHierarchy: PILayersHierarchy,
   refMeasureId: string,
   refMeasureValues: ReferenceMeasurementValueSchema[];
+}
+
+export interface InvisibleAutoSelectionLayer {
+  layer: KeyFigureLayer<AnalysisResultSchemaBase>,
+  hasSelectedSiblings: boolean,
 }

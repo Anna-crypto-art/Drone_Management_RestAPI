@@ -29,7 +29,6 @@ export interface GeoJSONLayer extends BaseLayerType {
   autoZoom?: boolean;
   zIndex?: number;
   layerType?: "VectorLayer" | "VectorImageLayer";
-  invisibleAutoSelection?: boolean;
 }
 
 export interface OSMLayer extends BaseLayerType {

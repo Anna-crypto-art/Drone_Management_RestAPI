@@ -1,4 +1,4 @@
-import { BaseLayerType, GroupLayer } from "./types/layers";
+import { BaseLayerType, GroupLayer, GeoJSONLayer } from "./types/layers";
 import { Layer } from "ol/layer";
 import Source from "ol/source/Source";
 import { VNode } from "vue/types/umd";
