@@ -44,8 +44,6 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   ) {
     super(vueComponent);
 
-    console.log(this.invisibleAutoSelection);
-
     this.visible = false;
     this.name = (this.keyFigureInfo.templateName ||
       (this.keyFigureInfo.displayName && this.vueComponent.$t(this.keyFigureInfo.displayName).toString()) ||

@@ -1,19 +1,19 @@
 <template>
   <div class="plant-view-tabs">
-    <b-tabs v-model="selectedTab" align="center">
+    <b-tabs v-model="selectedTab" align="center" @changed="onTabsChanged">
       <b-tab>
         <template #title>
           <b-icon icon="map" /> <span class="pad-left">{{ $t("map") }}</span>
         </template>
         <slot name="visual" />
       </b-tab>
-      <b-tab v-if="hasResults && hasSelectAnalysisResults">
+      <b-tab v-if="hasSelectAnalysisResults">
         <template #title><b-icon icon="table" /> <span class="pad-left">{{ $t("table") }}</span></template>
         <div v-if="loadTables">
           <slot name="tables" />
         </div>
       </b-tab>
-      <b-tab v-if="hasResults && hasSelectAnalysisResults">
+      <b-tab v-if="hasSelectAnalysisResults">
         <template #title><b-icon icon="bar-chart-fill" /> <span class="pad-left">{{ $t("statistics") }}</span></template>
         <div v-if="loadDiagrams">
           <slot name="diagram" />
@@ -39,13 +39,15 @@ import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { AnalysisSelectionEvent } from "../analysis-selection-sidebar/types";
 
 @Component({
-  name: "app-plant-view-tabs",
+  name: "app-plant-view-tabs"
 })
 export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
 
   selectedTab = 0;
+  tabsLoaded = 0;
+  allTabsLoaded = false;
 
   // Load table data if user switches to table view, only
   // So we avoid keeping REST-API busy for no reason.
@@ -72,16 +74,8 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
 
     this.setBrowserTitle(this.plant.name);
 
-    this.selectedTab = this.currentTab;
-
-    await this.loadTabContent();
-
-    if (this.selectedTab !== PlantViewTabs.MAP) {
-      this.notMapTabLoaded = true;
-    }
-
     this.routeQueryHelper.queryChanged(async () => {
-      this.selectedTab = this.currentTab;
+      this.selectedTab = this.queryTab;
     });
 
     this.isMobileQuery = window.matchMedia("screen and (max-width: 1000px)");
@@ -90,7 +84,11 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
   }
 
   @Watch("selectedTab") async onSelectedTabChanged() {
-    if (this.selectedTab !== this.currentTab) {
+    if (!this.allTabsLoaded) {
+      return;
+    }
+
+    if (this.selectedTab !== this.queryTab) {
       // Special case of openlayers: 
       // Zoom to home does not work properly if canvas has no focus...
       // So we have to call it again...
@@ -105,6 +103,32 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
     await this.updateLeftSidebarAbsolute();
 
     await this.loadTabContent();
+  }
+
+  onTabsChanged() {
+    // onTabsChanged gets called, when a tab has been added or removed.
+    // depending on the "v-if" conditions the number of the raised events variates...
+    // 3 times (because to conditions are identical) with analysis results
+    // 1 time without analysis results
+
+    this.tabsLoaded++;
+
+    if ((this.tabsLoaded === 1 && !this.hasResults) || this.tabsLoaded === 3) {
+      this.allTabsLoaded = true;
+      this.onTabsLoaded();
+    }
+  }
+
+  protected async onTabsLoaded() {
+    if (this.selectedTab !== this.queryTab) {
+      this.selectedTab = this.queryTab;
+    } else {
+      await this.onSelectedTabChanged();
+    }
+
+    if (this.selectedTab !== PlantViewTabs.MAP) {
+      this.notMapTabLoaded = true;
+    }
   }
 
   protected async onAnalysisSelected() {
@@ -137,7 +161,7 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
     }, timeout);
   }
 
-  get currentTab(): number {
+  get queryTab(): number {
     const queryTabName = (this.$route.query.view || "map" ).toString().toUpperCase();
     return Object.values(PlantViewTabs).findIndex(tabName => tabName == queryTabName) || 0;
   }

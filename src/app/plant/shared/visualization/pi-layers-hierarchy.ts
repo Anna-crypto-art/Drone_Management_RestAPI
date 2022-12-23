@@ -277,12 +277,8 @@ export class PILayersHierarchy {
 
       for (const invAutoSelLayer of this.getInvisibleAutoSelectionLayers()) {
         if (!invAutoSelLayer.hasSelectedSiblings && invAutoSelLayer.layer.getSelected()) {
-          
           await invAutoSelLayer.layer.setSelected(false);
         } else if (invAutoSelLayer.hasSelectedSiblings && !invAutoSelLayer.layer.getSelected()) {
-
-          console.log("invAutoSelLayer.layer.setSelected(true)");
-          console.log(invAutoSelLayer.layer.id);
           await invAutoSelLayer.layer.setSelected(true);
         }
       }
@@ -368,8 +364,6 @@ export class PILayersHierarchy {
           childLayer.color,
           childLayer.invisibleAutoSelection,
         );
-
-        console.log(childLayer.invisibleAutoSelection);
 
         groupKpiLayer.keyFigureLayers.push(kpiLayer);
         groupKpiLayer.groupLayer.childLayers.push(kpiLayer.toGeoLayer());

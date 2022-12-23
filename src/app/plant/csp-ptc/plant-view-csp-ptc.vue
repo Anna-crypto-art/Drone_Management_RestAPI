@@ -53,6 +53,8 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
 
   @CatchError()
   async created(): Promise<void> {
+    await super.created();
+
     this.analyses = await volateqApi.getAnalysesForView(this.plant.id);
   }
 }
