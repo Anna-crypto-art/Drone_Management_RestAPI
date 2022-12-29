@@ -17,22 +17,21 @@ module.exports = {
       "Access-Control-Allow-Origin": "https://volateq-customer-data.s3.amazonaws.com, http://localhost:5000/, https://*.openstreetmap.org" 
     }
   },
-  configureWebpack: {
-    mode: inProduction ? "production" : "development",
-    optimization: inProduction // Only apply when in production
-      ? {
-          minimize: true,
-          usedExports: true,
-          concatenateModules: true,
-        }
-      : undefined,
-    output: inProduction 
-      ? {
-          hashFunction: "sha256",
-          filename: '[name].[hash].js',
-          chunkFilename: '[name].[hash].js',
-        } 
-      : undefined,
+  configureWebpack: inProduction ? {
+    mode: "production",
+    optimization: {
+      minimize: true,
+      usedExports: true,
+      concatenateModules: true,
+    },
+    output: {
+      hashFunction: "sha256",
+      filename: '[name].[hash].js',
+      chunkFilename: '[name].[hash].js',
+    } 
+  } : {
+    mode: "development",
+    devtool: "source-map",
   },
   pluginOptions: {
     i18n: {

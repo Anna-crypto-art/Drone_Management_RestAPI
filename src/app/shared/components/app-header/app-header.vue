@@ -207,6 +207,8 @@ export default class AppHeader extends BaseAuthComponent {
     background-position: 0px 0px;
     animation: animatedBackground 10s linear infinite;
     z-index: -1;
+    left: 0;
+    top: 0;
 
     &-more {
       height: 100%;
