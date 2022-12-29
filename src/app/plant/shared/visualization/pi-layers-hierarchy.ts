@@ -344,6 +344,8 @@ export class PILayersHierarchy {
         id: `group__
           ${anaysisResult.id}__
           ${keyFigureLayer.keyFigureInfo?.keyName || keyFigureLayer.keyFigureInfo?.templateName || ""}`,
+        description: keyFigureLayer.keyFigureInfo?.description && 
+          this.vueComponent.$t(keyFigureLayer.keyFigureInfo.description).toString(),
       },
       keyFigureLayers: [],
     };

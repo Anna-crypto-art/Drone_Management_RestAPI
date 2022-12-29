@@ -1,6 +1,10 @@
 <template>
   <div class="visualization">
     <app-geovisualization ref="openLayers" v-if="hasLayers" :layers="layers" :loading="loading" @click="onOpenLayersClick">
+      <template #pcs>
+        {{ $t("pcs") }} <app-explanation>{{ $t("pcs_expl") }}</app-explanation>
+      </template>
+
       <template #displaySettings>
         <div class="visualization-display-settings-container">
           <b-form-checkbox v-model="enableMultiSelection" switch @change="onMultiSelectionChanged" :disabled="multiSelectionDisabled">
@@ -51,140 +55,48 @@
         <div class="visualization-legend-entry-name" v-html="entry.name"></div>
       </div>
     </div>
-    <div v-if="!hasLegend" :class="'visualization-actions' + (sidebarOpen ? ' sidebar-open' : '')">
-      <app-button 
-        v-show="!refMeasureId"
-        variant="secondary"
-        icon="clipboard-check"
-        :hideText="true"
-        @click="onRefMeasureClick"
-        :loading="refMeasureButtonLoading"
-      >
-        {{ $t("acquire-reference-measurement") }}
-      </app-button>
-      <app-button 
-        v-show="refMeasureId"
-        variant="primary"
-        icon="clipboard-check"
-        @click="onRefMeasureFinishClick"
-      >
-        {{ $t("finish-reference-measurement") }}
-      </app-button>
+    <div v-show="!hasLegend" :class="'visualization-actions' + (sidebarOpen ? ' sidebar-open' : '')">
+      <app-reference-measurements 
+        :plant="plant"
+        :componentLayers="componentLayers"
+        :piLayersHierarchy="piLayersHierarchy"
+        @startReferenceMeasurement="onStartReferenceMeasurement"
+        @finishReferenceMeasurement="onFinishReferenceMeasurement" />
     </div>
-    <b-toast id="piInfoToast" no-auto-hide solid toaster="b-toaster-bottom-center">
-      <template #toast-title>
-        <h5>{{ piToastInfo.title }}</h5>
-      </template>
-      <div>
-        <div class="toaster-images" v-if="piToastInfo.images">
-          <img v-for="image in piToastInfo.images" :key="image.title" :title="image.title" :src="image.url" />
-        </div>
-        <b-row
-          v-for="featureInfo in piToastInfo.records"
-          :key="featureInfo.name"
-          :class="featureInfo.bold && 'font-weight-bold'"
-        >
-          <b-col>
-            {{ featureInfo.name }}
-            <app-super-admin-marker v-if="featureInfo.superAdminOnly" />
-            <app-explanation v-if="featureInfo.descr">
-              <span v-html="$t(featureInfo.descr)"></span>
-            </app-explanation>
-          </b-col>
-          <b-col>
-            {{ featureInfo.value }}
-            <span v-if="featureInfo.unit">
-              {{ featureInfo.unit }}
-            </span>
-          </b-col>
-        </b-row>
-      </div>
-      <div v-if="piToastInfo.actions" class="toaster-actions">
-        <app-dropdown-button 
-          :variant="piToastInfo.actions.buttonVariant"
-          :title="piToastInfo.actions.name"
-          :loading="toastDropdownButtonLoading"
-          size="sm"
-        >
-          <b-dropdown-item-button v-for="action in piToastInfo.actions.actions" :key="action.name"
-            @click="onClickFeatureAction(action.name)"
-          >
-            {{ action.name }}
-          </b-dropdown-item-button>
-        </app-dropdown-button>
-      </div>
-    </b-toast>
 
-    <app-modal-form
-      id="reference-measurement-modal"
-      ref="refMeasureModal"
-      :title="$t('acquire-reference-measurement')"
-      :ok-title="refMeasure && refMeasure.oldMeasureId ? $t('continue') : $t('start')"
-      :modalLoading="refMeasureModalLoading"
-      @submit="onStartRefMeasure"
-    >
-      <div v-if="refMeasure">
-        <b-alert variant="info" v-model="refMeasure.analysisLoaded">
-          <span v-if="refMeasure.analysisId !== null" 
-            v-html="$t('acquire-reference-measurement-for-analysis', { analysis: refMeasure.analysisName })">
-          </span>
-          <span v-if="refMeasure.analysisId === null">
-            {{ $t("acquire-reference-measurement-and-create-analysis") }}
-          </span>
-        </b-alert>
-
-        <b-form-group v-show="oldRefMeasures" :label="$t('continue-reference-measurement')">
-          <b-form-select v-model="refMeasure.oldMeasureId" :options="oldRefMeasures" />
-        </b-form-group>
-
-        <div v-show="refMeasure.oldMeasureId === null">
-          <b-form-group :label="$t('measure-date')">
-            <b-datepicker v-model="refMeasure.measureDate" required />
-          </b-form-group>
-          <b-form-group :label="$t('notes')">
-            <b-textarea v-model="refMeasure.notes" />
-          </b-form-group>
-          <b-form-group>
-            <b-form-checkbox v-model="refMeasure.gps" switch>{{ $t("use-gps") }}</b-form-checkbox>
-          </b-form-group>
-        </div>
-      </div>
-    </app-modal-form>
+    <app-feature-infos-toast toastId="piInfoToast" :featureInfos="piToastInfo" />
   </div>
 </template>
 
 <script lang="ts">
 import { PILayersHierarchy } from "@/app/plant/shared/visualization/pi-layers-hierarchy";
-import { FeatureInfos, IPlantVisualization, KeyFigureTypeMap, Legend, ReferenceMeasurementEventObject, ReferenceMeasurementOptions } from "@/app/plant/shared/visualization/types";
+import { FeatureInfos, IPlantVisualization, KeyFigureTypeMap, Legend } from "@/app/plant/shared/visualization/types";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppGeovisualization from "@/app/shared/components/app-geovisualization/app-geovisualization.vue";
 import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualization/types/components";
 import { GroupLayer, LayerType, OSMLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
-import AppCollapse from "@/app/shared/components/app-collapse/app-collapse.vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { FeatureLike } from "ol/Feature";
-import { Component, Prop, Ref, Watch } from "vue-property-decorator";
+import { Component, Prop, Ref } from "vue-property-decorator";
 import { ComponentLayer } from "./layers/component-layer";
 import { State } from "vuex-class";
 import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
-import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-dropdown-button.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
-import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
-import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { AnalysisSelectionService } from "../analysis-selection-sidebar/analysis-selection-service";
-import { AnalysisSelectionEvent } from "../analysis-selection-sidebar/types";
 import { RefMeasureLayers } from "./ref-measure-layers";
-import dateHelper from "@/app/shared/services/helper/date-helper";
 import { layerEvents } from "./layer-events";
 import { OrthoImage } from "./layers/types";
 import { OrhtoImageMixin } from "./mixins/ortho-image-mixin";
-import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
+import AppReferenceMeasurements from "../reference-measurements/reference-measurements.vue";
 import { RouteQueryHelper } from "../helper/route-query-helper";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { SequentialEventEmitter } from "@/app/shared/services/sequential-event-emitter/sequential-event-emitter";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
+import { ReferenceMeasurementEventObject } from "../reference-measurements/types";
+import AppFeatureInfosToast from "./feature-infos-toast.vue";
+import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-dropdown-button.vue";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -195,11 +107,10 @@ const STORAGE_KEY_SATELLITEVIEW = "storage-key-satelliteview";
   components: {
     AppGeovisualization,
     AppExplanation,
-    AppCollapse,
-    AppDropdownButton,
     AppButton,
-    AppModalForm,
-    AppSuperAdminMarker,
+    AppReferenceMeasurements,
+    AppFeatureInfosToast,
+    AppDropdownButton,
   },
 })
 export default class AppVisualization
@@ -210,39 +121,35 @@ export default class AppVisualization
   @Prop() analyses!: AnalysisForViewSchema[];
   @Prop() componentLayerTypes!: typeof ComponentLayer[];
   @Prop() keyFigureLayers!: KeyFigureTypeMap[];
+
   @State(state => state.sidebar["analysis"]) sidebarOpen!: boolean;
-  @State(state => state.sidebar["layer-switcher"]) layersSidebarOpen!: boolean;
 
   @Ref() openLayers!: IOpenLayersComponent;
   @Ref() refMeasureModal!: IAppModalForm;
 
-  piLayersHierarchy!: PILayersHierarchy;
+  piLayersHierarchy: PILayersHierarchy | null = null;
+  refMeasureLayers: RefMeasureLayers | null = null;
+
   componentLayers: ComponentLayer[] = [];
-  refMeasureLayers!: RefMeasureLayers;
   layers: LayerType[] = [];
-  showPCS = false;
-  legends: Legend[] = [];
-  piToastInfo: FeatureInfos = { title: "", records: [{ name: "", descr: "", value: "" }] };
-  loading = false;
-  toastDropdownButtonLoading = false;
+  worldMapLayer!: OSMLayer;
   piHeadGroup: GroupLayer | null = null;
 
+  legends: Legend[] = [];
+  
+  piToastInfo: FeatureInfos = { title: "", records: [{ name: "", descr: "", value: "" }] };
+  
+  loading = false;
+
+  showPCS = false;
   enableMultiSelection = false;
   showCouldNotBeMeasured = true;
   satelliteView = false;
   multiSelectionDisabled = false;
 
-  refMeasureId: string | null = null;
-  refMeasureButtonLoading = false;
-  refMeasureModalLoading = false;
-  refMeasure: ReferenceMeasurementOptions | null = null;
-  oldRefMeasures: { value: string | null, text: string }[] | null = null;
-
   hasLoadedOrthoImages = false;
   availableOrthoImages: OrthoImage[] = [];
   loadAllOrhtoImagesLoading = false;
-
-  private worldMapLayer!: OSMLayer;
 
   private isMounted = false;
   private firstLoad = true;
@@ -277,33 +184,33 @@ export default class AppVisualization
 
   protected async onAnalysisSelected() {
     const analysisSelectionChanged = 
-      this.piLayersHierarchy.getSelectedAnalysisResultId() !== this.firstAnalysisResult?.id;
+      this.piLayersHierarchy!.getSelectedAnalysisResultId() !== this.firstAnalysisResult?.id;
 
-    this.piLayersHierarchy.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
+    this.piLayersHierarchy!.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     
-    const multiAnalysesSelectedBefore = !!this.piLayersHierarchy.getCompareAnalysisResultId();
-    this.piLayersHierarchy.setCompareAnalysisResult(null);
+    const multiAnalysesSelectedBefore = !!this.piLayersHierarchy!.getCompareAnalysisResultId();
+    this.piLayersHierarchy!.setCompareAnalysisResult(null);
 
     if (multiAnalysesSelectedBefore) {
       // Recover subgroup multiselection, because compare view disabled multiselection on all levels.
-      this.piLayersHierarchy.toggleMultiSelectionDeep(true);
+      this.piLayersHierarchy!.toggleMultiSelectionDeep(true);
 
       // If we had multiple analysis selected before, we need to restore and enable multiselection again
       this.doEnableMultiSelection();  
-      this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
+      this.piLayersHierarchy!.toggleMultiSelection(this.enableMultiSelection);
     }
 
     if (analysisSelectionChanged || multiAnalysesSelectedBefore) {
       if (!this.firstLoad) {
-        await this.piLayersHierarchy.reselectAllLayers(this.enableMultiSelection);
+        await this.piLayersHierarchy!.reselectAllLayers(this.enableMultiSelection);
       }
     }
 
-    this.piLayersHierarchy.updateVisibility();
-    this.availableOrthoImages = this.piLayersHierarchy.getAvailableOrthoImages();
+    this.piLayersHierarchy!.updateVisibility();
+    this.availableOrthoImages = this.piLayersHierarchy!.getAvailableOrthoImages();
 
-    await this.refMeasureLayers.addAndSelectAnalysis(this.firstAnalysis?.id);
-    this.refMeasureLayers.updateVisibility();
+    await this.refMeasureLayers!.addAndSelectAnalysis(this.firstAnalysis?.id);
+    this.refMeasureLayers!.updateVisibility();
 
     await this.onFirstLoad();
 
@@ -313,27 +220,27 @@ export default class AppVisualization
   }
 
   protected async onMultiAnalysesSelected() {
-    const selectionChanged = this.piLayersHierarchy.getSelectedAnalysisResultId() !== this.firstAnalysisResult?.id ||
-      this.piLayersHierarchy.getCompareAnalysisResultId() !== this.compareAnalysisResult?.id;
+    const selectionChanged = this.piLayersHierarchy!.getSelectedAnalysisResultId() !== this.firstAnalysisResult?.id ||
+      this.piLayersHierarchy!.getCompareAnalysisResultId() !== this.compareAnalysisResult?.id;
     
-    this.piLayersHierarchy.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
-    this.piLayersHierarchy.setCompareAnalysisResult(this.compareAnalysisResult || null);
+    this.piLayersHierarchy!.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
+    this.piLayersHierarchy!.setCompareAnalysisResult(this.compareAnalysisResult || null);
     
     // Multi selection is not allowed for compare mode
     this.disableMultiSelection();
     
     if (selectionChanged) {
-      this.piLayersHierarchy.toggleMultiSelection(false);
-      this.piLayersHierarchy.toggleMultiSelectionDeep(false);
-      await this.piLayersHierarchy.reselectAllLayers(false);
+      this.piLayersHierarchy!.toggleMultiSelection(false);
+      this.piLayersHierarchy!.toggleMultiSelectionDeep(false);
+      await this.piLayersHierarchy!.reselectAllLayers(false);
     }
     
-    this.piLayersHierarchy.updateVisibility();
+    this.piLayersHierarchy!.updateVisibility();
 
-    this.availableOrthoImages = this.piLayersHierarchy.getAvailableOrthoImages();
+    this.availableOrthoImages = this.piLayersHierarchy!.getAvailableOrthoImages();
 
-    await this.refMeasureLayers.addAndSelectAnalysis(undefined);
-    this.refMeasureLayers.updateVisibility();
+    await this.refMeasureLayers!.addAndSelectAnalysis(undefined);
+    this.refMeasureLayers!.updateVisibility();
 
     await this.onFirstLoad();
 
@@ -351,8 +258,8 @@ export default class AppVisualization
 
     await this.$nextTick();
 
-    await this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
-    this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
+    await this.piLayersHierarchy!.toggleShowUndefined(this.showCouldNotBeMeasured);
+    this.piLayersHierarchy!.toggleMultiSelection(this.enableMultiSelection);
 
     await this.loadQueryPi();
   }
@@ -371,7 +278,7 @@ export default class AppVisualization
           await this.$nextTick(); 
           await this.$nextTick();
 
-          await this.piLayersHierarchy.selectKeyFigureLayer(keyFigureId);
+          await this.piLayersHierarchy!.selectKeyFigureLayer(keyFigureId);
         }
 
         if (this.compareAnalysisResult !== null) {
@@ -380,7 +287,6 @@ export default class AppVisualization
         }
       }
     }
-
   }
 
   get hasLayers(): boolean {
@@ -404,31 +310,26 @@ export default class AppVisualization
     return legendEntries;
   }
 
+  @CatchError("loading")
   async onOpenLayersClick(features: FeatureLike[]) {
-    try {
-      this.loading = true;
-      
-      let mergedFeatureInfos = await this.clickKeyFigureLayers(features);
-      mergedFeatureInfos = await this.clickRefMeasureLayers(features, mergedFeatureInfos);
-  
-      if (mergedFeatureInfos) {
-        this.piToastInfo = mergedFeatureInfos;
-        this.$bvToast.show("piInfoToast");
-      } else {
-        this.hideToast();
+    let mergedFeatureInfos = await this.clickKeyFigureLayers(features);
+    mergedFeatureInfos = await this.clickRefMeasureLayers(features, mergedFeatureInfos);
 
-        this.clickComponentLayers(features);
-      }
-    } finally {
-      this.loading = false;
-    }
+    if (mergedFeatureInfos) {
+      this.piToastInfo = mergedFeatureInfos;
+      this.$bvToast.show("piInfoToast");
+    } else {
+      this.hideToast();
+
+      await this.clickComponentLayers(features);
+    } 
   }
 
   private async clickKeyFigureLayers(
     features: FeatureLike[]
   ): Promise<FeatureInfos | undefined> {
     let mergedFeatureInfos: FeatureInfos | undefined;
-    for (const kpiLayer of this.piLayersHierarchy.getAllChildLayers()) {
+    for (const kpiLayer of this.piLayersHierarchy!.getAllChildLayers()) {
       if (kpiLayer.isVisible) {
         const featureInfos = await kpiLayer.onClick(features);
 
@@ -443,7 +344,7 @@ export default class AppVisualization
     features: FeatureLike[],
     mergedFeatureInfos: FeatureInfos | undefined
   ): Promise<FeatureInfos | undefined> {
-    for (const refMeasurerLayer of this.refMeasureLayers.referenceMeasurementLayers) {
+    for (const refMeasurerLayer of this.refMeasureLayers!.referenceMeasurementLayers) {
       const featureInfos = await refMeasurerLayer.onClick(features)
 
       mergedFeatureInfos = this.mergeFeatureInfos(mergedFeatureInfos, featureInfos);
@@ -509,30 +410,33 @@ export default class AppVisualization
       }
     }
 
-    await this.piLayersHierarchy.onLayerSelected();
+    await this.piLayersHierarchy!.onLayerSelected();
 
-    const selectedLayers = this.piLayersHierarchy.getSelectedLayers();
+    const selectedLayers = this.piLayersHierarchy!.getSelectedLayers();
     this.routeQueryHelper.replaceRoute({ pi: selectedLayers.map(selectedLayer => selectedLayer.keyFigureId.toString() )});
     
     this.hideToast();
   }
 
+  @CatchError()
   async onMultiSelectionChanged() {
     appLocalStorage.setItem(STORAGE_KEY_MULTISELECTION, this.enableMultiSelection);
 
-    this.piLayersHierarchy.toggleMultiSelection(this.enableMultiSelection);
-    await this.piLayersHierarchy.reselectAllLayers(this.enableMultiSelection);
+    this.piLayersHierarchy!.toggleMultiSelection(this.enableMultiSelection);
+    await this.piLayersHierarchy!.reselectAllLayers(this.enableMultiSelection);
 
     // Group Layer "performance-indicators"
     (this.layers[0] as GroupLayer).singleSelection = !this.enableMultiSelection;
   }
 
+  @CatchError()
   async onShowCouldNotBeMeasuredChanged() {
     appLocalStorage.setItem(STORAGE_KEY_SHOWUNDEFINED, this.showCouldNotBeMeasured);
 
-    await this.piLayersHierarchy.toggleShowUndefined(this.showCouldNotBeMeasured);
+    await this.piLayersHierarchy!.toggleShowUndefined(this.showCouldNotBeMeasured);
   }
 
+  @CatchError()
   async onSatelliteViewChanged() {
     appLocalStorage.setItem(STORAGE_KEY_SATELLITEVIEW, this.satelliteView);
 
@@ -542,239 +446,103 @@ export default class AppVisualization
     await this.worldMapLayer.events!.emit("setSelected", true);
   }
 
-  async onClickFeatureAction(actionName: string) {
-    try {
-      this.toastDropdownButtonLoading = true;
-
-      await this.piToastInfo.actions!.actions.find(action => action.name === actionName)!.action();
-    }
-    finally {
-      this.toastDropdownButtonLoading = false;
-    }
-  }
-
+  @CatchError()
   onClearOrthoImagesClick() {
-    this.piLayersHierarchy.clearOrthoImages();
+    this.piLayersHierarchy!.clearOrthoImages();
   }
 
+  @CatchError("loadAllOrhtoImagesLoading")
   async onLoadAllOrhtoImagesClick(orthoImage: OrthoImage) {
-    try {
-      if (!confirm(this.$t('load-all-ortho-images-sure').toString())) {
-        return;
-      }
-
-      this.loadAllOrhtoImagesLoading = true;
-
-      await OrhtoImageMixin.loadOrthoImage(
-        orthoImage,
-        this.plant,
-        this.firstAnalysisResult!.id,
-      );
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.loadAllOrhtoImagesLoading = false;
+    if (!confirm(this.$t('load-all-ortho-images-sure').toString())) {
+      return;
     }
+
+    await OrhtoImageMixin.loadOrthoImage(
+      orthoImage,
+      this.plant,
+      this.firstAnalysisResult!.id,
+    );
   }
 
+  @CatchError()
   private createLayers(): void {
-    try {
-      this.componentLayers = this.componentLayerTypes.map(componentType => new (componentType as any)(this));
-      this.piLayersHierarchy = new PILayersHierarchy(
-        this,
-        this.analysisResults,
-        this.keyFigureLayers,
-        this.showCouldNotBeMeasured,
-        this.enableMultiSelection
-      );
-      this.refMeasureLayers = new RefMeasureLayers(this, this.analyses);
-  
-      this.worldMapLayer = {
-        name: this.$t("world-map").toString(),
-        type: "osm",
-        selected: true,
-        satellite: this.satelliteView,
-        events: new SequentialEventEmitter(),
-      };
-  
-      this.piHeadGroup = {
-        name: this.$t("performance-indicators").toString(),
-        type: "group",
-        icon: "speedometer2",
-        childLayers: this.piLayersHierarchy.groupLayers,
-        singleSelection: true,
-        visible: this.analysisResults.length > 0,
-      },
+    this.componentLayers = this.componentLayerTypes.map(componentType => new (componentType as any)(this));
+    this.piLayersHierarchy = new PILayersHierarchy(
+      this,
+      this.analysisResults,
+      this.keyFigureLayers,
+      this.showCouldNotBeMeasured,
+      this.enableMultiSelection
+    );
+    this.refMeasureLayers = new RefMeasureLayers(this, this.analyses);
 
-      this.layers.push(
-        this.piHeadGroup,
-        this.refMeasureLayers.groupLayer,
-        {
-          name: this.$t("components").toString(),
-          type: "group",
-          icon: "app-indicator",
-          childLayers: this.componentLayers.map(compLayer => compLayer.toGeoLayer()),
-        },
-        {
-          name: this.$t("display-settings").toString(),
-          type: "group",
-          icon: "gear-fill",
-          customSlot: "displaySettings",
-          childLayers: [
-            {
-              name: "pcs",
-              type: "custom",
-              customLoader: () => {
-                return;
-              },
-              onSelected: (selected: boolean) => {
-                this.showPCS = selected;
-      
-                this.piLayersHierarchy.getAllChildLayers().forEach(kpiLayer => {
-                  kpiLayer.showPCS(selected);
-                  kpiLayer.rerenderMap();
-                });
-                this.componentLayers.forEach(compLayer => {
-                  compLayer.showPCS(selected),
-                  compLayer.rerenderMap();
-                });
-              },
-              selected: false,
+    this.worldMapLayer = {
+      name: this.$t("world-map").toString(),
+      type: "osm",
+      selected: true,
+      satellite: this.satelliteView,
+      events: new SequentialEventEmitter(),
+    };
+
+    this.piHeadGroup = {
+      name: this.$t("performance-indicators").toString(),
+      type: "group",
+      icon: "speedometer2",
+      childLayers: this.piLayersHierarchy!.groupLayers,
+      singleSelection: true,
+      visible: this.analysisResults.length > 0,
+    },
+
+    this.layers.push(
+      this.piHeadGroup,
+      this.refMeasureLayers.groupLayer,
+      {
+        name: this.$t("components").toString(),
+        type: "group",
+        icon: "app-indicator",
+        childLayers: this.componentLayers.map(compLayer => compLayer.toGeoLayer()),
+      },
+      {
+        name: this.$t("display-settings").toString(),
+        type: "group",
+        icon: "gear-fill",
+        customSlot: "displaySettings",
+        childLayers: [
+          {
+            name: "pcs",
+            type: "custom",
+            customLoader: () => {
+              return;
             },
-            this.worldMapLayer,
-          ]
-        },
-      );
-    } catch (e) {
-      this.showError(e);
-    }
+            onSelected: (selected: boolean) => {
+              this.showPCS = selected;
+    
+              this.piLayersHierarchy!.getAllChildLayers().forEach(kpiLayer => {
+                kpiLayer.showPCS(selected);
+                kpiLayer.rerenderMap();
+              });
+              this.componentLayers.forEach(compLayer => {
+                compLayer.showPCS(selected),
+                compLayer.rerenderMap();
+              });
+            },
+            selected: false,
+          },
+          this.worldMapLayer,
+        ]
+      },
+    );
   }
 
   public hideToast() {
     this.$bvToast.hide("piInfoToast");
   }
 
-  async onRefMeasureClick() {
-    this.refMeasureButtonLoading = true;
-    try {
-      this.refMeasure = {
-        analysisLoaded: false,
-        analysisId: null,
-        analysisName: null,
-        oldMeasureId: null,
-        measureDate: null,
-        notes: null,
-        gps: true,
-      }
-
-      await this.loadAnalysisForReferenceMeasurement();
-
-      if (this.refMeasure.analysisId) {
-        const me = await volateqApi.getMe();
-
-        const oldReferenceMeasurements = await volateqApi.getReferenceMeasurements(this.refMeasure.analysisId)
-
-        if (oldReferenceMeasurements.length > 0) {
-          this.oldRefMeasures = [
-            { value: null, text: "" },
-            ...oldReferenceMeasurements.map(referenceMeasurement => ({
-              value: referenceMeasurement.id,
-              text: dateHelper.toDate(referenceMeasurement.measure_date) + " - " 
-                + (referenceMeasurement.notes || ""),
-            }))
-          ];
-        } else {
-          this.oldRefMeasures = null;
-        }
-      }
-
-      this.refMeasureModal.show();
-    } catch (e) {
-      this.showError(e)
-    } finally {
-      this.refMeasureButtonLoading = false;
-    }
+  onStartReferenceMeasurement(e: ReferenceMeasurementEventObject) {
+    this.$emit("startReferenceMeasurement", e);
   }
-
-  async loadAnalysisForReferenceMeasurement() {
-    const incompleteAnalysis = await volateqApi.findAnalysisForNewReferenceMeasurement(this.plant.id);
-    if (incompleteAnalysis) {
-      this.refMeasure!.analysisId = incompleteAnalysis.id;
-      this.refMeasure!.analysisName = incompleteAnalysis.name;
-    } 
-
-    this.refMeasure!.analysisLoaded = true;
-  }
-
-  async onStartRefMeasure() {
-    this.refMeasureModalLoading = true;
-    try {
-      if ((this.refMeasure!.analysisId === null || this.refMeasure!.oldMeasureId === null) && this.refMeasure!.measureDate === null) {
-        throw { error: "MISSING_MEASURE_DATE", message: "Please select a measurement date" }
-      }
-
-      if (this.refMeasure!.analysisId === null) {
-        this.refMeasure!.analysisId = (await volateqApi.createEmptyAnalysis({
-          plant_id: this.plant.id,
-          flown_at: this.refMeasure!.measureDate!,
-        })).id;
-      }
-
-      this.refMeasureId = this.refMeasure!.oldMeasureId
-      if (this.refMeasureId === null) {
-        this.refMeasureId = (await volateqApi.createReferenceMeasurement(this.refMeasure!.analysisId, { 
-          measure_date: this.refMeasure!.measureDate!,
-          notes: this.refMeasure!.notes || undefined,
-        })).id;
-      }
-
-      const refMeasureValues = await volateqApi.getReferencMeasurementValues(this.refMeasureId);
-
-      await AnalysisSelectionService.emit(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL);
-      if (this.sidebarOpen) {
-        this.$store.direct.commit.sidebar.toggle({ name: "analysis" });
-      }
-      if (this.layersSidebarOpen) {
-        this.$store.direct.commit.sidebar.toggle({ name: "layer-switcher" });
-      }
-
-      this.$emit("startReferenceMeasurement", {
-          options: this.refMeasure,
-          componentLayers: this.componentLayers,
-          piLayersHierarchy: this.piLayersHierarchy,
-          refMeasureId: this.refMeasureId,
-          refMeasureValues: refMeasureValues,
-        } as ReferenceMeasurementEventObject);
-
-      this.refMeasureModal.hide();
-
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.refMeasureModalLoading = false;
-    }
-  }
-
-  async onRefMeasureFinishClick() {
-    if (confirm(this.$t('finish-reference-measurement-are-you-sure').toString())) {
-      this.$emit("finishReferenceMeasurement", {
-          options: this.refMeasure,
-          componentLayers: this.componentLayers,
-          piLayersHierarchy: this.piLayersHierarchy,
-          refMeasureId: this.refMeasureId,
-        } as ReferenceMeasurementEventObject);
-
-      this.refMeasureId = null;
-      this.refMeasure = null;
-
-      await AnalysisSelectionService.emit(this.plant.id, AnalysisSelectionEvent.SELECT_FIRST);
-      if (!this.sidebarOpen) {
-        this.$store.direct.commit.sidebar.toggle({ name: "analysis" });
-      }
-      if (!this.layersSidebarOpen) {
-        this.$store.direct.commit.sidebar.toggle({ name: "layer-switcher" });
-      }
-    }
+  onFinishReferenceMeasurement(e: ReferenceMeasurementEventObject) {
+    this.$emit("finishReferenceMeasurement", e);
   }
 }
 </script>
@@ -860,22 +628,4 @@ export default class AppVisualization
   }
 }
 
-#piInfoToast.toast {
-  /* Fix ortho images dropdown visibility */
-  overflow: visible;
-}
-
-.toaster-images {
-  img {
-    max-width: calc(500px - 1.5rem);
-  }
-  margin-bottom: 0.75rem;
-}
-.toaster-actions {
-  margin-top: 15px;
-}
-
-.visualization-actions .app-button:hover {
-  background-color: $hover-light-blue;
-}
 </style>

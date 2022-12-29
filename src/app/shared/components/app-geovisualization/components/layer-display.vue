@@ -244,6 +244,10 @@ export default class AppGeovisualLayerDisplay extends Vue {
       margin-top: 0;
       margin-bottom: 0.5em;
     }
+
+    .layer-collapse {
+      cursor: default;
+    }
   }
 
   .layer-collapse {

@@ -18,6 +18,7 @@ import { IOrthoImageMixin } from "../mixins/types";
 export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends LayerBase implements IOrthoImageMixin {
   protected abstract readonly analysisResultMapping: AnalysisResultMappings<T>;
   protected readonly name: string;
+  protected readonly description?: string;
 
   protected abstract get color(): string;
   public colorScheme = KeyFigureColorScheme.TRAFFIC_LIGHT;
@@ -48,6 +49,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     this.name = (this.keyFigureInfo.templateName ||
       (this.keyFigureInfo.displayName && this.vueComponent.$t(this.keyFigureInfo.displayName).toString()) ||
       (this.keyFigureInfo.keyName && this.vueComponent.$t(this.keyFigureInfo.keyName).toString()))!;
+    this.description = this.keyFigureInfo.description;
     this.zIndex = this.keyFigureInfo.zIndex || 9; // 9 - to make sure PIs overlay components, always
 
     this.orhtoImageMixin = new OrhtoImageMixin(this);
@@ -56,6 +58,10 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   }
 
   protected created(): void {/* override me */}
+
+  protected getDescription(): string | undefined {
+    return this.description && this.vueComponent.$t(this.description).toString();
+  }
 
   protected getLegend(): Legend | undefined {
     return undefined;
