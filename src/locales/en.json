@@ -449,6 +449,7 @@
   "pv-tracker": "Tracker",
   "pv-tracker-group": "Tracker group",
   "pv-module": "Module",
+  "no-pis-available-yet": "No performance indicators available yet",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

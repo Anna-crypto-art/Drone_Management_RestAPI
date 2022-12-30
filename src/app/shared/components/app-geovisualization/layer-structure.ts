@@ -5,6 +5,7 @@ import { VNode } from "vue/types/umd";
 import LayerLoader from "./loader/layer-loader";
 import LayerRenderer from "ol/renderer/Layer";
 import { SequentialEventEmitter } from "../../services/sequential-event-emitter/sequential-event-emitter";
+import { LayerEvent } from "./types/events";
 
 export class LayerStructure extends SequentialEventEmitter {
   private readonly childLayers: LayerStructure[];
@@ -28,15 +29,21 @@ export class LayerStructure extends SequentialEventEmitter {
   }
 
   private initializeEvents(): void {
-    this.layerLoader?.layerType.events?.on("setSelected", async (selected: boolean) => {
-      await this.emit("setSelected", selected);
+    this.layerLoader?.layerType.events?.on(LayerEvent.SET_SELECTED, async (selected: boolean) => {
+      await this.emit(LayerEvent.SET_SELECTED, selected);
     });
-    this.on("setSelected", async (selected: boolean) => await this.selectLayer(selected));
+    this.on(LayerEvent.SET_SELECTED, async (selected: boolean) => {
+      await this.selectLayer(selected) 
+    });
+
+    this.getLayerType()?.events?.on(LayerEvent.COLLAPSE, async (collapse: boolean) => {
+      await this.emit(LayerEvent.COLLAPSE, collapse);
+    });
   }
 
   private async selectLayer(selected: boolean) {
     if (selected) {
-      this.unselectParentLayers();
+      await this.unselectParentLayers();
     }
 
     await this.layerLoader?.setVisible(selected);
@@ -45,7 +52,7 @@ export class LayerStructure extends SequentialEventEmitter {
 
     if (selected || (!selected && this.isGroup)) {
       for (const childLayer of this.childLayers) {
-        childLayer.selected = selected;
+        await childLayer.setSelected(selected);
       }
     }
   }
@@ -54,17 +61,17 @@ export class LayerStructure extends SequentialEventEmitter {
     return this.layerLoader?.layerType || this.layerType;
   }
 
-  private unselectParentLayers() {
+  private async unselectParentLayers() {
     if (this.parentLayer) {
       if (this.parentLayer.singleSelection) {
-        this.parentLayer.getChildLayers().forEach(sibling => {
+        for (const sibling of this.parentLayer.getChildLayers()) {
           if (sibling.id !== this.id && (sibling.selected || sibling.isGroup)) {
-            sibling.selected = false;
+            await sibling.setSelected(false);
           }
-        });
+        }
       }
 
-      this.parentLayer.unselectParentLayers();
+      await this.parentLayer.unselectParentLayers();
     }
   }
 
@@ -105,12 +112,12 @@ export class LayerStructure extends SequentialEventEmitter {
     return this.layerLoader?.layerType.selected || false;
   }
 
-  public set selected(newVal: boolean) {
+  public async setSelected(selected: boolean) {
     if (this.layerLoader) {
-      this.layerLoader.layerType.selected = newVal;
+      this.layerLoader.layerType.selected = selected;
     }
 
-    this.emit("setSelected", newVal);
+    await this.emit(LayerEvent.SET_SELECTED, selected);
   }
 
   public get visible(): boolean {
@@ -141,8 +148,8 @@ export class LayerStructure extends SequentialEventEmitter {
     return (this.layerType as GroupLayer)?.customSlot || "";
   }
 
-  public get collapse(): boolean {
-    return (this.layerType as GroupLayer)?.collapse || false;
+  public get collapsable(): boolean {
+    return (this.layerType as GroupLayer)?.collapsable || false;
   }
 
   public hasChildLayer(id: string): boolean {

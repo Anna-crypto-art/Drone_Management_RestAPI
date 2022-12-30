@@ -7,6 +7,8 @@ import { GroupKPILayer, InvisibleAutoSelectionLayer, KeyFigureTypeMap } from "./
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { apiComponentNames } from "@/app/shared/services/volateq-api/api-components/api-components-name";
+import { SequentialEventEmitter } from "@/app/shared/services/sequential-event-emitter/sequential-event-emitter";
+import { LayerEvent } from "@/app/shared/components/app-geovisualization/types/events";
 
 /**
  * Component -> PIGroup -> PICheckbox
@@ -147,6 +149,11 @@ export class PILayersHierarchy {
       ) {
         childLayer.query.undefined = showUndefined && 1 || 0;
         childLayer.reloadLayer();
+
+        if (childLayer.getSelected()) {
+          await childLayer.setSelected(false);
+          await childLayer.setSelected(true);
+        }
       }
 
       for (const invAutoSelLayer of this.getInvisibleAutoSelectionLayers()) {
@@ -291,6 +298,17 @@ export class PILayersHierarchy {
     return this.getAllChildLayers().filter(childLayer => childLayer.getSelected())
   }
 
+  public async collapseFirstParentComponentLayer(): Promise<void> {
+    if (this.getSelectedLayers().length === 0) {
+      const parentComponentKpiLayer = this.parentComponentKpiLayers.find(p => p.groupLayer.collapsable && p.groupLayer.visible);
+      if (parentComponentKpiLayer) {
+        console.log("emitting collapse. selectedlayers: " + this.getSelectedLayers().length);
+
+        parentComponentKpiLayer.groupLayer.events!.emit(LayerEvent.COLLAPSE, true);
+      }
+    }
+  }
+
   private getParentComponentLayer(keyFigure: KeyFigureSchema): GroupKPILayer {
     return this.parentComponentKpiLayers
       .find(parentComponentKpiLayer => parentComponentKpiLayer.componentId === keyFigure.component_id)!;
@@ -306,7 +324,8 @@ export class PILayersHierarchy {
           childLayers: [],
           visible: false,
           singleSelection: true,
-          collapse: true,
+          collapsable: true,
+          events: new SequentialEventEmitter(),
         },
         keyFigureLayers: [],
         subGroupLayers: [],

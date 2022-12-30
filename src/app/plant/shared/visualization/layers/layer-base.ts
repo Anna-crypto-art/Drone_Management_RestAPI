@@ -8,6 +8,7 @@ import { Geolocation, Feature } from "ol";
 import CircleStyle from "ol/style/Circle";
 import { Point } from "ol/geom";
 import { SequentialEventEmitter } from "@/app/shared/services/sequential-event-emitter/sequential-event-emitter";
+import { LayerEvent } from "@/app/shared/components/app-geovisualization/types/events";
 
 export const GEO_JSON_OPTIONS = { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" };
 
@@ -108,7 +109,7 @@ export abstract class LayerBase {
   }
 
   public async setSelected(selected: boolean) {
-    await this.events.emit("setSelected", selected);
+    await this.events.emit(LayerEvent.SET_SELECTED, selected);
   }
 
   public getSelected(): boolean {

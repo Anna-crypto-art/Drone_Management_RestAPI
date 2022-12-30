@@ -97,6 +97,7 @@ import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { ReferenceMeasurementEventObject } from "../reference-measurements/types";
 import AppFeatureInfosToast from "./feature-infos-toast.vue";
 import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-dropdown-button.vue";
+import { waitFor } from "@/app/shared/services/helper/debounce-helper";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -172,7 +173,7 @@ export default class AppVisualization
       this.hasLoadedOrthoImages = false;
     });
 
-    this.routeQueryHelper.queryChanged(async () => await this.loadQueryPi());
+    this.routeQueryHelper.queryChanged(async () => { await this.loadQueryPi(); });
   }
 
   async mounted() {
@@ -212,7 +213,12 @@ export default class AppVisualization
     await this.refMeasureLayers!.addAndSelectAnalysis(this.firstAnalysis?.id);
     this.refMeasureLayers!.updateVisibility();
 
-    await this.onFirstLoad();
+    console.log("onAnalysisSelected... analysisSelectionChanged: " + analysisSelectionChanged);
+
+    const hasPISelected = await this.onFirstLoad();
+    if (!hasPISelected && analysisSelectionChanged) {
+      await this.piLayersHierarchy!.collapseFirstParentComponentLayer();
+    }
 
     this.piHeadGroup!.visible = !!this.firstAnalysisResult;
 
@@ -242,18 +248,23 @@ export default class AppVisualization
     await this.refMeasureLayers!.addAndSelectAnalysis(undefined);
     this.refMeasureLayers!.updateVisibility();
 
-    await this.onFirstLoad();
+    const hasPISelected = await this.onFirstLoad();
+    if (!hasPISelected && selectionChanged) {
+      await this.piLayersHierarchy!.collapseFirstParentComponentLayer();
+    }
 
     this.piHeadGroup!.visible = !!this.firstAnalysisResult;
+
+    
 
     this.hideToast();
   }
 
-  private async onFirstLoad() {
+  private async onFirstLoad(): Promise<boolean> {
     if (this.firstLoad) {
       this.firstLoad = false;
     } else {
-      return;
+      return false;
     }
 
     await this.$nextTick();
@@ -261,10 +272,12 @@ export default class AppVisualization
     await this.piLayersHierarchy!.toggleShowUndefined(this.showCouldNotBeMeasured);
     this.piLayersHierarchy!.toggleMultiSelection(this.enableMultiSelection);
 
-    await this.loadQueryPi();
+    return await this.loadQueryPi();
   }
 
-  async loadQueryPi() {
+  async loadQueryPi(): Promise<boolean> {
+    let piSelected = false;
+
     let selectedPIs: (string | null)[] = Array.isArray(this.$route.query.pi!) ? 
       this.$route.query.pi! : 
       [this.$route.query.pi!];
@@ -279,6 +292,8 @@ export default class AppVisualization
           await this.$nextTick();
 
           await this.piLayersHierarchy!.selectKeyFigureLayer(keyFigureId);
+
+          piSelected = true;
         }
 
         if (this.compareAnalysisResult !== null) {
@@ -287,6 +302,8 @@ export default class AppVisualization
         }
       }
     }
+
+    return piSelected;
   }
 
   get hasLayers(): boolean {

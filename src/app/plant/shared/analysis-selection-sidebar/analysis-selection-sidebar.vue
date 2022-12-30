@@ -28,6 +28,11 @@
             </template>
             <template #cell(name)="row">
               {{ row.item.date }} 
+              <app-icon v-if="!row.item.hasResults"
+                icon="cone-striped" 
+                class="mar-left-half orange" 
+                v-b-popover.hover.top="$t('no-pis-available-yet')"
+              />
               <app-icon v-if="row.item.refMeasureCount > 0"
                 icon="clipboard-check"
                 class="mar-left-half blue"
@@ -51,11 +56,9 @@
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
-import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { BvTableFieldArray } from "bootstrap-vue";
-import Vue from "vue";
-import { Component, Prop, Ref, Watch } from "vue-property-decorator";
+import { Component, Prop, Ref } from "vue-property-decorator";
 import { State } from "vuex-class";
 import { AnalysisSelectionService } from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-service";
 import { AnalysisSelectionEvent } from "./types";
@@ -65,6 +68,7 @@ import AppOrderPpsView from "@/app/shared/components/app-order-pps-view/app-orde
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import AppIcon from "@/app/shared/components/app-icon/app-icon.vue";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 
 @Component({
   name: "app-analysis-selection-sidebar",
@@ -77,7 +81,7 @@ import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/
     AppSuperAdminMarker,
   },
 })
-export default class AppAnalysisSelectionSidebar extends Vue {
+export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
   @Ref() analysesTable!: any; // b-table
@@ -106,6 +110,7 @@ export default class AppAnalysisSelectionSidebar extends Vue {
         orderPPs: analysis.order_product_packages,
         refMeasureCount: analysis.reference_measurements.length,
         analysisResultReleased: analysis.analysis_result?.released,
+        hasResults: this.isSuperAdmin ? !!analysis.analysis_result : (analysis.analysis_result?.released || false)
       });
     }
 
@@ -223,6 +228,14 @@ export default class AppAnalysisSelectionSidebar extends Vue {
             tableRowIndex = secondTableRowIndex;
           }
         }        
+      } else if (!analysisId && !selectFirst) {
+        // Select an analysis with results raither then an analysis only with reference measurements
+        for (let i = 0; i < this.analyses.length; i++) {
+          if (this.analyses[i].analysis_result) {
+            tableRowIndex = i;
+            break;
+          }
+        }
       }
 
       await this.$nextTick();

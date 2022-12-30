@@ -42,7 +42,7 @@ export interface GroupLayer extends BaseLayerType {
   singleSelection?: boolean;
   icon?: string;
   customSlot?: string;
-  collapse?: boolean;
+  collapsable?: boolean;
 }
 
 export interface CustomLayer extends BaseLayerType {
