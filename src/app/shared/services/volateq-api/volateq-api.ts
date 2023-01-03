@@ -70,7 +70,7 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public async confirmLogin(confirmationKey: string, securityCode: string): Promise<void> {
-    const tokenResult: TokenResult = await this.post(`/confirm-login/${confirmationKey}`, {
+    const tokenResult: TokenResult = await this.post(`/confirm-email-login/${confirmationKey}`, {
       security_code: securityCode,
     });
 
@@ -98,7 +98,7 @@ export class VolateqAPI extends HttpClientBase {
   public async inviteUser(user: InviteUser): Promise<string> {
     const confirmKey = (await this.post("/auth/user", user)).confirmation_key;
 
-    return `${baseUrl}/confirm/${confirmKey}`;
+    return `${baseUrl}/register/${confirmKey}`;
   }
 
   public async assignPlantsToUser(userId: string, plantIds: string[]): Promise<void> {
@@ -110,11 +110,11 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public async getInvitedUser(confirmKey: string): Promise<UserSchema> {
-    return this.get(`/confirm/${confirmKey}`);
+    return this.get(`/register/${confirmKey}`);
   }
 
   public async registerUser(confirmKey: string, user: RegisterUser): Promise<void> {
-    await this.post(`/confirm/${confirmKey}`, user);
+    await this.post(`/register/${confirmKey}`, user);
   }
 
   public async deleteUser(userId): Promise<void> {
@@ -311,7 +311,7 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public async resendSecurityCode(confirmationKey: string): Promise<void> {
-    await this.post(`/confirm-login-resend/${confirmationKey}`, {});
+    await this.post(`/confirm-email-login-resend/${confirmationKey}`, {});
   }
 
   public getPlant(plantId: string): Promise<PlantSchema> {

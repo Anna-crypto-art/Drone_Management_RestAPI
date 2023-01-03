@@ -19,7 +19,7 @@ const authRoutes: RouteConfig[] = [
   },
   {
     name: "Register",
-    path: "/confirm/:confirmKey",
+    path: "/register/:confirmKey",
     component: AppAuthRegister,
   },
   {
