@@ -69,6 +69,7 @@ import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-sch
 import AppIcon from "@/app/shared/components/app-icon/app-icon.vue";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { waitFor } from "@/app/shared/services/helper/debounce-helper";
 
 @Component({
   name: "app-analysis-selection-sidebar",
@@ -144,6 +145,12 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
       
       return;
     }
+
+    const compareViewFinished = !this.compareMode && this.lastSelectedAnalyses.length === 2;
+    if (compareViewFinished && selectedAnalyses.length === 0) {
+      selectedAnalyses = [this.lastSelectedAnalyses[0]];
+    }
+
     this.lastSelectedAnalyses = selectedAnalyses;
 
     if (this.compareMode) {
@@ -176,9 +183,18 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
       let selectedAnalysisId: string | undefined = undefined
       if (selectedAnalyses && selectedAnalyses.length > 0) {
         selectedAnalysisId = selectedAnalyses[0].id;
+      } else if (compareViewFinished) {
+        selectedAnalysisId = this.lastSelectedAnalyses[0].id;
       }
 
       await this.routeQueryHelper.replaceRoute({ result: selectedAnalysisId });
+
+      if (compareViewFinished) {
+        // Programmatically select the last newer analysis, if the compare view has been finished by the user
+        this.selectAnalysis();
+        // "selectAnalysis()" reraises onAnalysisSelected. Leave the function here to avoid double emitting.
+        return;
+      }
 
       await AnalysisSelectionService.emit(
         this.plant.id,
@@ -193,15 +209,6 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
   }
 
   async onCompareModeChanged() {
-    let selectIndex = -1;
-
-    if (!this.compareMode) {
-      selectIndex = 0;
-      if (this.lastSelectedAnalyses && this.lastSelectedAnalyses.length > 0) {
-        selectIndex = this.analysesTableItems.findIndex(row => row.id === this.lastSelectedAnalyses[0].id);
-      }
-    }
-
     this.selectMode = this.compareMode ? "multi" : "single";
   }
 

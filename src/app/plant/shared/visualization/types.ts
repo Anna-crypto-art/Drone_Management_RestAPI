@@ -80,36 +80,10 @@ export type PropsFeature = FeatureLike & {
   properties: FeatureProperties;
 }
 
-export interface ComparedFeatures {
-  /**
-   * Features, that existed in the analysis before, but in the current analysis not anymore
-   */
-  goneFeatures: PropsFeature[];
-  /**
-   * Subset of "goneFeatures". Features, that have been fixed (class === 1)
-   */
-  goneFixedFeatures: PropsFeature[];
-  /**
-   * Subset of "goneFeatures". Features, that class decreased but is greater then 1, still
-   */
-  goneImprovedFeatures: PropsFeature[];
-  /**
-   * New features, that did not exist in the analysis before
-   */
-  newFeatures: PropsFeature[];
-  /**
-   * Subset of "newFeatures". Features in/with a lower class then before (diff_value < 0)
-   */
-  newImprovedFeatures: PropsFeature[];
-  /**
-   * Subset of "newFeatures". Features in/with a higher class then before (diff_value > 0)
-   */
-  newWorsenedFeatures: PropsFeature[];
-}
+export type ComparedFeatures = Record<ComparedFeatureType, PropsFeature[]>;
 
 export enum ComparedFeatureType {
   NO_CHANGE = 0,
-  GONE_FIXED,
   GONE_IMPROVED,
   GONE_WORSENED,
   NEW_IMPROVED,

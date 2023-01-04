@@ -10,7 +10,7 @@
           <b-form-checkbox v-model="enableMultiSelection" switch @change="onMultiSelectionChanged" :disabled="multiSelectionDisabled">
             {{ $t("multi-selection") }} <app-explanation>{{ $t("multi-selection-overlapping_expl") }}</app-explanation>
           </b-form-checkbox>
-          <b-form-checkbox v-model="showCouldNotBeMeasured" switch @change="onShowCouldNotBeMeasuredChanged" :disabled="analysisResults.length === 0">
+          <b-form-checkbox v-model="showCouldNotBeMeasured" switch @change="onShowCouldNotBeMeasuredChanged" :disabled="isShowCouldNotBeMeasuredDisabled">
             {{ $t("show-could-not-be-measured") }}
           </b-form-checkbox>
           <b-form-checkbox v-model="satelliteView" switch @change="onSatelliteViewChanged">
@@ -143,10 +143,15 @@ export default class AppVisualization
   loading = false;
 
   showPCS = false;
+
   enableMultiSelection = false;
-  showCouldNotBeMeasured = true;
-  satelliteView = false;
   multiSelectionDisabled = false;
+
+  // Consider to set the default value in "doEnableShowCouldNotBeMeasured", too
+  showCouldNotBeMeasured = true; 
+  showCouldNotBeMeasuredDisabled = false; // "compare view" disables showCouldNotBeMeasured
+
+  satelliteView = false;
 
   hasLoadedOrthoImages = false;
   availableOrthoImages: OrthoImage[] = [];
@@ -161,8 +166,8 @@ export default class AppVisualization
     await super.created();
 
     this.doEnableMultiSelection();
-    this.showCouldNotBeMeasured = appLocalStorage.getItem(STORAGE_KEY_SHOWUNDEFINED) || false;
-    this.satelliteView = appLocalStorage.getItem(STORAGE_KEY_SATELLITEVIEW) || false;
+    this.showCouldNotBeMeasured = appLocalStorage.getItem(STORAGE_KEY_SHOWUNDEFINED) || this.showCouldNotBeMeasured;
+    this.satelliteView = appLocalStorage.getItem(STORAGE_KEY_SATELLITEVIEW) || this.satelliteView;
 
     this.createLayers();
 
@@ -197,8 +202,11 @@ export default class AppVisualization
       this.piLayersHierarchy!.toggleMultiSelectionDeep(true);
 
       // If we had multiple analysis selected before, we need to restore and enable multiselection again
-      this.doEnableMultiSelection();  
+      this.doEnableMultiSelection();
       this.piLayersHierarchy!.toggleMultiSelection(this.enableMultiSelection);
+
+      this.doEnableShowCouldNotBeMeasured();
+      await this.piLayersHierarchy!.toggleShowUndefined(this.showCouldNotBeMeasured, false);
     }
 
     if (analysisSelectionChanged || multiAnalysesSelectedBefore) {
@@ -212,8 +220,6 @@ export default class AppVisualization
 
     await this.refMeasureLayers!.addAndSelectAnalysis(this.firstAnalysis?.id);
     this.refMeasureLayers!.updateVisibility();
-
-    console.log("onAnalysisSelected... analysisSelectionChanged: " + analysisSelectionChanged);
 
     const hasPISelected = await this.onFirstLoad();
     if (!hasPISelected && analysisSelectionChanged) {
@@ -232,12 +238,16 @@ export default class AppVisualization
     this.piLayersHierarchy!.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     this.piLayersHierarchy!.setCompareAnalysisResult(this.compareAnalysisResult || null);
     
-    // Multi selection is not allowed for compare mode
+    // "Multi selection" and "show could not be measured" is not allowed for compare mode
     this.disableMultiSelection();
+    this.disableShowCouldNotBeMeasured();
     
     if (selectionChanged) {
       this.piLayersHierarchy!.toggleMultiSelection(false);
       this.piLayersHierarchy!.toggleMultiSelectionDeep(false);
+
+      await this.piLayersHierarchy!.toggleShowUndefined(false, false);
+
       await this.piLayersHierarchy!.reselectAllLayers(false);
     }
     
@@ -254,8 +264,6 @@ export default class AppVisualization
     }
 
     this.piHeadGroup!.visible = !!this.firstAnalysisResult;
-
-    
 
     this.hideToast();
   }
@@ -325,6 +333,10 @@ export default class AppVisualization
     }
 
     return legendEntries;
+  }
+
+  get isShowCouldNotBeMeasuredDisabled(): boolean {
+    return this.analysisResults.length === 0 || this.showCouldNotBeMeasuredDisabled;
   }
 
   @CatchError("loading")
@@ -409,6 +421,16 @@ export default class AppVisualization
   private doEnableMultiSelection() {
     this.enableMultiSelection = appLocalStorage.getItem(STORAGE_KEY_MULTISELECTION) || false;
     this.multiSelectionDisabled = this.analysisResults.length === 0;
+  }
+
+  private disableShowCouldNotBeMeasured() {
+    this.showCouldNotBeMeasured = false;
+    this.showCouldNotBeMeasuredDisabled = true;
+  }
+
+  private doEnableShowCouldNotBeMeasured() {
+    this.showCouldNotBeMeasured = appLocalStorage.getItem(STORAGE_KEY_SHOWUNDEFINED) || true;
+    this.showCouldNotBeMeasuredDisabled = false;
   }
 
   async onLayerSelected(selected: boolean, legend: Legend | undefined) {
