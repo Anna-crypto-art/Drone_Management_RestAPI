@@ -70,7 +70,7 @@
       >
         {{ $t("finish-reference-measurement") }}
       </app-button>
-      <app-button 
+      <!--<app-button 
         v-show="!refMeasureId && isSuperAdmin"
         variant="secondary"
         icon="files"
@@ -81,7 +81,7 @@
         :forceHideSuperAdminIcon="true"
       >
         {{ $t("check-drone-plant-coverage") }}
-      </app-button>
+      </app-button>-->
     </div>
     <b-toast id="piInfoToast" no-auto-hide solid toaster="b-toaster-bottom-center">
       <template #toast-title>

@@ -370,7 +370,6 @@
   "ignore-value-undo": "Undo ignoring value",
   "ignored": "Ignored",
   "reference-measurement-value-change-success": "Reference measurement value changed successfully",
-  "check-drone-plant-coverage": "Check coverage of uploaded files",
   "move-selected-files": "Move selected files",
   "selected-files-moved-success": "Selected files moved successfully",
   "delete-selected-files": "Delete selected files",
@@ -473,5 +472,9 @@
   "SERVER_ACTION_STOP_AND_RELEASE": "Stop and release server",
 
   "Reload": "Reload",
-  "Auto reload": "Auto reload"
+  "Auto reload": "Auto reload",
+
+  "analysis-file-actions": "Analysis files",
+  "check-drone-plant-coverage": "Check plant coverage of uploaded files",
+  "successfully-checked-drone-coverage": "Successfully checked plant coverage of drone files"
 }
