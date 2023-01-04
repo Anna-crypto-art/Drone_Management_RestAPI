@@ -139,7 +139,7 @@ export class PILayersHierarchy {
     }
   }
 
-  public async toggleShowUndefined(showUndefined: boolean): Promise<void> {
+  public async toggleShowUndefined(showUndefined: boolean, reselectLayer = true): Promise<void> {
     this.showUndefined = showUndefined
 
     for (const childLayer of this.getAllChildLayers()) {
@@ -147,21 +147,25 @@ export class PILayersHierarchy {
         !childLayer.invisibleAutoSelection && 
         childLayer.keyFigureInfo.displayName !== "not-measured"
       ) {
-        childLayer.query.undefined = showUndefined && 1 || 0;
-        childLayer.reloadLayer();
+        childLayer.query.undefined = showUndefined ? 1 : 0;
+        if (reselectLayer) {
+          childLayer.reloadLayer();
+        }
 
-        if (childLayer.getSelected()) {
+        if (reselectLayer && childLayer.getSelected()) {
           await childLayer.setSelected(false);
           await childLayer.setSelected(true);
         }
       }
 
-      for (const invAutoSelLayer of this.getInvisibleAutoSelectionLayers()) {
-        if (showUndefined && invAutoSelLayer.hasSelectedSiblings && !invAutoSelLayer.layer.getSelected()) {
-          await invAutoSelLayer.layer.setSelected(true);
-        }
-        if (!showUndefined && invAutoSelLayer.layer.getSelected()) {
-          await invAutoSelLayer.layer.setSelected(false);
+      if (reselectLayer) {
+        for (const invAutoSelLayer of this.getInvisibleAutoSelectionLayers()) {
+          if (showUndefined && invAutoSelLayer.hasSelectedSiblings && !invAutoSelLayer.layer.getSelected()) {
+            await invAutoSelLayer.layer.setSelected(true);
+          }
+          if (!showUndefined && invAutoSelLayer.layer.getSelected()) {
+            await invAutoSelLayer.layer.setSelected(false);
+          }
         }
       }
     }
@@ -302,8 +306,6 @@ export class PILayersHierarchy {
     if (this.getSelectedLayers().length === 0) {
       const parentComponentKpiLayer = this.parentComponentKpiLayers.find(p => p.groupLayer.collapsable && p.groupLayer.visible);
       if (parentComponentKpiLayer) {
-        console.log("emitting collapse. selectedlayers: " + this.getSelectedLayers().length);
-
         parentComponentKpiLayer.groupLayer.events!.emit(LayerEvent.COLLAPSE, true);
       }
     }
