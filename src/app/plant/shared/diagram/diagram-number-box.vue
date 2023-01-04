@@ -12,7 +12,11 @@
       </div>
       <div class="diagram-number-box-numbers" v-if="numberBox.nums">
         <b-row v-for="num in numberBox.nums" :key="num.columnName">
-          <b-col cols="8">{{ num.displayName }}</b-col>
+          <!-- size depends on compare view yes/no -->
+          <b-col :cols="getBootstrapColumnSize(num.diff, active)"
+            :class="num.diff !== undefined ? 'diagram-number-box-numbers-compare-row' : ''">
+            {{ num.displayName }}
+          </b-col>
           <b-col>
             <strong class="diagram-number-box-numbers-num">{{ num.num }}</strong>
             <small v-if="num.diff !== undefined" :class="getTextVariant(num.diffVariant)">
@@ -104,6 +108,17 @@ export default class AppDiagramNumberBox extends Vue {
     return '';
   }
 
+  getBootstrapColumnSize(diff: number, active: boolean) {
+    if (active) {
+      return '3';
+    } else {
+      if (diff !== undefined) {
+        return '6'
+      }
+    }
+    return '8';
+  }
+
   onShowHistoryButtonClick() {
     this.$emit("showHistoryButtonClick", this.numberBox.id)
   }
@@ -159,6 +174,11 @@ export default class AppDiagramNumberBox extends Vue {
     &-num {
       font-weight: bold;
       font-size: 1.3em;
+    }
+    &-compare-row.col-6 {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
   }
 
