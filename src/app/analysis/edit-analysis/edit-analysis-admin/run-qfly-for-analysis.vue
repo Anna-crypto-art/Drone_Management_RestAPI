@@ -83,6 +83,8 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
   get serverInfo(): string {
     if (this.qFlyServer) {
       return this.$t(`SERVER_STATE_${this.qFlyServer.state}`, { server: this.qFlyServer.server?.name }).toString() + 
+        (!this.serverStateUnallocated && this.$t('SERVER_SIZE_STRING', {size: this.qFlyServer?.size.toString()}).toString() ||
+        "") +
         (this.serverStateUnallocated && 
           "<br>" + this.$t('servers-available', { count: this.qFlyServer.servers_available }).toString() ||
           "")
@@ -148,7 +150,24 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
   async runServerAction() {
     this.loading = true;
     try {
-      if (confirm("Are you sure?")) {
+
+      let confirm_text = "";
+      if (!this.tagsChanged && !this.selectedServerAction && !this.selectedTask) {
+        confirm_text += "Nothing changed, nothing will happen!";
+      } else {
+        if (this.tagsChanged) {
+          confirm_text += "Tags changed!\n\n";
+        }
+        if (this.selectedServerAction) {
+            confirm_text += "\n\nServer action: " + QFlyServerAction[this.selectedServerAction] + "\n\n";
+        }
+        if (this.selectedTask) {
+            confirm_text += "\n\nRun task: " + ApiTasks[this.selectedTask] + "\n\n";
+        }
+        confirm_text += "Are you sure?";
+      }
+      
+      if (confirm(confirm_text)) {
         await volateqApi.runQFlyServerAction(this.analysis.id, {
           action: this.selectedServerAction && QFlyServerAction[this.selectedServerAction] || undefined,
           start_task: this.selectedTask && ApiTasks[this.selectedTask] || undefined,
