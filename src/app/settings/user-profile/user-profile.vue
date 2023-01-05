@@ -1,8 +1,6 @@
 <template>
-  <div class="app-user-profile">
-    <app-box :title="$t('change-authentication-method')">
-      
-    </app-box>
+  <div class="app-user-profile" v-if="user">
+    <app-change-auth-method :user="user" />
   </div>
 </template>
 
@@ -10,18 +8,33 @@
 import { Component } from "vue-property-decorator";
 
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import AppBox from "@/app/shared/components/app-box/app-box.vue"
-import AppButton from "@/app/shared/components/app-button/app-button.vue";
+import { UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
+import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import AppChangeAuthMethod from "./change-auth-method.vue";
+import { UserEvent, UserEventService } from "./user-event-service";
 
 @Component({
   name: "app-user-profile",
   components: {
-    AppBox,
-    AppButton,
+    AppChangeAuthMethod
   },
 })
 export default class AppUserProfile extends BaseAuthComponent {
+  user: UserSchema | null = null;
 
+  @CatchError()
+  async created() {
+    await this.refreshUser();
+
+    UserEventService.on(this.user!.id, UserEvent.CHANGED, async () => {
+      await this.refreshUser();
+    })
+  }
+
+  private async refreshUser() {
+    this.user = await volateqApi.getMe();
+  }
 }
 </script>
 

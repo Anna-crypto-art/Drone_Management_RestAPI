@@ -2,7 +2,7 @@ import store from "@/app/app-state";
 import { InviteUser, RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { ConfirmLoginResult, TokenResult } from "@/app/shared/services/volateq-api/api-schemas/auth-schema";
 import { CustomerNameSchema, CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
-import { SimpleUserSchema, UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
+import { SimpleUserSchema, UserAuthMethod, UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 import { HttpClientBase } from "@/app/shared/services/volateq-api/http-client-base";
 import { apiBaseUrl, baseUrl } from "@/environment/environment";
 import { AddReferenceMeasurmentValue, CreateReferenceMeasurement, NewAnalysis, NewEmptyAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
@@ -113,8 +113,8 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/register/${confirmKey}`);
   }
 
-  public async registerUser(confirmKey: string, user: RegisterUser): Promise<void> {
-    await this.post(`/register/${confirmKey}`, user);
+  public async registerUser(confirmKey: string, user: RegisterUser): Promise<{ confirmation_key?: string }> {
+    return await this.post(`/register/${confirmKey}`, user);
   }
 
   public async deleteUser(userId): Promise<void> {
@@ -726,6 +726,22 @@ export class VolateqAPI extends HttpClientBase {
 
   public async cancelUpload(uploadId: string): Promise<void> {
     await this.post(`/auth/upload/${uploadId}/resume`);
+  }
+
+  public async getTotpSecrets(confirmationKey: string): Promise<{ url: string, secret: string }> {
+    return await this.get(`/totp-secrets/${confirmationKey}`);
+  }
+
+  public async verifyTotpCode(confirmationKey: string, securityCode: string): Promise<void> {
+    await this.post(`/totp-secrets/${confirmationKey}`, { security_code: securityCode });
+  }
+
+  public async prepareUserChangeAuthMethod(authMethod: UserAuthMethod, password: string): Promise<{confirmation_key: string}> {
+    return await this.post(`/auth/user/prepare-change-auth-method`, { auth_method: authMethod, password });
+  }
+
+  public async changeUserAuthMethod(confirmationKey: string, securityCode: string, newSecurityCode: string): Promise<void> {
+    await this.post(`/auth/user/change-auth-method/${confirmationKey}`, { security_code: securityCode, new_security_code: newSecurityCode });
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {

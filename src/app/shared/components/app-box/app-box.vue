@@ -4,6 +4,7 @@
     <slot name="title">
       <h4 v-if="title" class="box-title">
         {{ title }}
+        <div v-if="subtitle" class="box-title-subtitle mar-top-half grayed" v-html="subtitle"></div>
       </h4>
     </slot>
     <slot />
@@ -23,6 +24,7 @@ import AppLoading from "@/app/shared/components/app-loading/app-loading.vue";
 })
 export default class AppBox extends Vue {
   @Prop({ default: "" }) title!: string;
+  @Prop({ default: "" }) subtitle!: string;
   @Prop({ default: false }) loading!: boolean;
 
 }
@@ -39,6 +41,15 @@ export default class AppBox extends Vue {
 
   &-title {
     margin-bottom: 1em;
+
+    &-subtitle {
+      font-size: 70%;
+      ul {
+        margin-left: 2em;
+        margin-top: 0.5em;
+
+      }
+    }
   }
 
   &:last-child {
