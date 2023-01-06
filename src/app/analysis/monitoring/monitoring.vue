@@ -203,7 +203,7 @@ export default class AppAnalysisMonitoring extends BaseAuthComponent {
     }
 
     span {
-      overflow: hidden;
+      overflow-wrap: anywhere;
     }
 
     &-running {
