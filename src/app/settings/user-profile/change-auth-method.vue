@@ -141,6 +141,7 @@ export default class AppChangeAuthMethod extends BaseAuthComponent {
   async onPrepareAuthMethodChange() {
     const confirmKey = await volateqApi.prepareUserChangeAuthMethod(this.authMethod!, this.password!);
     this.confirmationKey = confirmKey.confirmation_key;
+    this.password = null;
 
     this.prepAuthChangeModal.hide();
 
@@ -180,7 +181,7 @@ export default class AppChangeAuthMethod extends BaseAuthComponent {
   async onSubmitSetupEmail() {
     this.validateSecurityCode(this.emailSecurityCode);
 
-    await volateqApi.changeUserAuthMethod(this.totpConfirmationKey!, this.oldSecurityCode!, this.emailSecurityCode!);
+    await volateqApi.changeUserAuthMethod(this.authMethod!, this.mailConfirmationKey!, this.oldSecurityCode!, this.emailSecurityCode!);
 
     this.setupEmailModal.hide();
 
@@ -191,7 +192,7 @@ export default class AppChangeAuthMethod extends BaseAuthComponent {
   async onSubmitSetupTotp() {
     this.validateSecurityCode(this.totpSecurityCode);
 
-    await volateqApi.changeUserAuthMethod(this.totpConfirmationKey!, this.oldSecurityCode!, this.totpSecurityCode!);
+    await volateqApi.changeUserAuthMethod(this.authMethod!, this.totpConfirmationKey!, this.oldSecurityCode!, this.totpSecurityCode!);
 
     this.setupTotpModal.hide();
 

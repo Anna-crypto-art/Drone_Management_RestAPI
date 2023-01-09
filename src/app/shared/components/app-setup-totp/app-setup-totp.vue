@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="app-setup-totp">
     <h3>{{ $t('mfa-totp-setup') }}</h3>
     <span v-html="$t('mfa-totp-setup-instructions')"></span>
     <ul>
@@ -10,10 +10,16 @@
     <div class="mar-top">
       <b-spinner v-show="loadingQRCode" class="align-middle" />
       <div v-show="totpSecret">
-        <canvas ref="qrCodeCanvas"></canvas>
-        <b-form-group class="mar-top" :label="$t('secret-token')">
-          <b-form-input readonly v-model="totpSecret" />
-        </b-form-group>
+        <b-row>
+          <b-col>
+            <canvas ref="qrCodeCanvas"></canvas>
+          </b-col>
+          <b-col>
+            <b-form-group class="mar-top-half" :label="$t('secret-token')">
+              <b-form-input readonly v-model="totpSecret" size="sm" />
+            </b-form-group>
+          </b-col>
+        </b-row>
       </div>
     </div>
     <div class="mar-top">
@@ -24,13 +30,13 @@
 
 <script lang="ts">
 import { Component, Prop, Ref } from "vue-property-decorator";
-import Vue from "vue";
 import QRCode from "qrcode";
 
 import { CatchError } from "../../services/helper/catch-helper";
 import AppSecurityCode from "@/app/shared/components/app-security-code/app-security-code.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import volateqApi from "../../services/volateq-api/volateq-api";
+import { BaseComponent } from "../base-component/base-component";
 
 @Component({
   name: "app-setup-totp",
@@ -39,7 +45,7 @@ import volateqApi from "../../services/volateq-api/volateq-api";
     AppButton,
   }
 })
-export default class AppSetupTotp extends Vue {
+export default class AppSetupTotp extends BaseComponent {
   @Prop({ default: null }) value!: string | null;
   @Prop({ required: true }) confirmationKey!: string;
 
@@ -80,4 +86,11 @@ export default class AppSetupTotp extends Vue {
 }
 </script>
 
-<style></style>
+<style lang="scss">
+.app-setup-totp {
+  ul {
+    margin-left: 2em;
+    margin-top: 0.5em;
+  }
+}
+</style>

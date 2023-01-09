@@ -131,7 +131,7 @@
   "torsion-caused-friction-mean_expl": "Maximum torsion caused by friction between two operating states (measurement of hysteresis when moving collector into zenith from west and east, respectively)",
   "mfa": "Multi-Factor Authentication",
   "mfa-email_descr": "We sent you an E-Mail with the security code to enter.",
-  "mfa-totp_descr": "Enter the One-Time-Code of your Authenticator App.",
+  "mfa-totp_descr": "Open the authenticator app on your mobile device.",
   "security-code": "Security code",
   "resend-security-code": "Resend security code",
   "resend-security-code-success": "Successfully resent security code",
@@ -459,7 +459,7 @@
   "secret-token": "Secret token",
   "auth-method-changed-success": "Authentication method changed successfully",
   "security-code-from-email": "Security code from E-Mail",
-  "security-code-from-authenticator": "Security code from Authenticator App (One Time Password)",
+  "security-code-from-authenticator": "Authentication code from authenticator app",
   "verify": "Verify",
   "totp-verify-success": "Time-based-One-Time-Password (TOTP) Token successfully verfified",
   "select-auth-method": "Select a Multi-Factor-Auhtentication method",
@@ -467,6 +467,7 @@
   "mfa-with-totp-recommended": "MFA with TOTP (Recommended)",
   "done": "Done",
   "enter-password": "Enter password",
+  "authentication-code": "Authentication code",
 
 
   "EMPTY": "Empty",

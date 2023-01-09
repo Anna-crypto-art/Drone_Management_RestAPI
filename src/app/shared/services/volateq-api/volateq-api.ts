@@ -38,8 +38,8 @@ export class VolateqAPI extends HttpClientBase {
   /**
    * @returns confirmation_key if user logs in with an unkown host, else undefined.
    */
-  public async login(email: string, password: string): Promise<string> {
-    const confirmLoginResult: ConfirmLoginResult = await this.post(
+  public async login(email: string, password: string): Promise<{ confirmation_key: string, auth_method: UserAuthMethod }> {
+    return await this.post(
       "/auth/login",
       {},
       {
@@ -49,8 +49,6 @@ export class VolateqAPI extends HttpClientBase {
         },
       }
     );
-
-    return confirmLoginResult.confirmation_key;
   }
 
   public async isLoggedIn(): Promise<boolean> {
@@ -69,8 +67,20 @@ export class VolateqAPI extends HttpClientBase {
     return false;
   }
 
-  public async confirmLogin(confirmationKey: string, securityCode: string): Promise<void> {
+  public async confirmMailLogin(confirmationKey: string, securityCode: string): Promise<void> {
     const tokenResult: TokenResult = await this.post(`/confirm-email-login/${confirmationKey}`, {
+      security_code: securityCode,
+    });
+
+    await store.dispatch.auth.updateToken({
+      token: tokenResult.token,
+      role: tokenResult.role,
+      customer: tokenResult.customer,
+    });
+  }
+
+  public async confirmTotpLogin(confirmationKey: string, securityCode: string): Promise<void> {
+    const tokenResult: TokenResult = await this.post(`/confirm-totp-login/${confirmationKey}`, {
       security_code: securityCode,
     });
 
@@ -740,8 +750,12 @@ export class VolateqAPI extends HttpClientBase {
     return await this.post(`/auth/user/prepare-change-auth-method`, { auth_method: authMethod, password });
   }
 
-  public async changeUserAuthMethod(confirmationKey: string, securityCode: string, newSecurityCode: string): Promise<void> {
-    await this.post(`/auth/user/change-auth-method/${confirmationKey}`, { security_code: securityCode, new_security_code: newSecurityCode });
+  public async changeUserAuthMethod(authMethod: UserAuthMethod, confirmationKey: string, securityCode: string, newSecurityCode: string): Promise<void> {
+    await this.post(`/auth/user/change-auth-method/${confirmationKey}`, { 
+      auth_method: authMethod,
+      security_code: securityCode,
+      new_security_code: newSecurityCode,
+    });
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {
