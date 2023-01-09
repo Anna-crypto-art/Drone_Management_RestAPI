@@ -5,10 +5,10 @@
     :superAdminProtected="true"
   >
     <div class="monitoring-toolbar">
-      <b-button @click="loadAnalysisStatus()">{{ $t("Reload") }}</b-button>
+      <b-button @click="loadAnalysisStatus()">{{ $t("reload") }}</b-button>
       <div class="monitoring-toolbar-loading"><b-spinner v-if="loading" /></div>
       <b-checkbox switch v-model="autoReload" @change="changeAutoReload">
-        {{ $t("Auto reload") }}
+        {{ $t("auto-reload") }}
       </b-checkbox>
     </div>
 

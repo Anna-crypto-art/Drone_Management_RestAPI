@@ -153,20 +153,20 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
 
       let confirm_text = "";
       if (!this.tagsChanged && !this.selectedServerAction && !this.selectedTask) {
-        confirm_text += "Nothing changed, nothing will happen!";
+        throw { error: "NOTHING_CHANGED_OR_SELECTED", message: "You did not change any tag or select anything to run/do." };
       } else {
         if (this.tagsChanged) {
-          confirm_text += "Tags changed!\n\n";
+          confirm_text += this.$t('apply-tags-changed').toString() + "\n\n";
         }
         if (this.selectedServerAction) {
-            confirm_text += "\n\nServer action: " + QFlyServerAction[this.selectedServerAction] + "\n\n";
+            confirm_text += "\n\n" + this.$t('apply-selected-server-action').toString() + QFlyServerAction[this.selectedServerAction] + "\n\n";
         }
         if (this.selectedTask) {
-            confirm_text += "\n\nRun task: " + ApiTasks[this.selectedTask] + "\n\n";
+            confirm_text += "\n\n" + this.$t('apply-selected-task-to-run').toString() + ApiTasks[this.selectedTask] + "\n\n";
         }
-        confirm_text += "Are you sure?";
+        confirm_text += this.$t('apply-are-you-sure').toString();
       }
-      
+
       if (confirm(confirm_text)) {
         await volateqApi.runQFlyServerAction(this.analysis.id, {
           action: this.selectedServerAction && QFlyServerAction[this.selectedServerAction] || undefined,
