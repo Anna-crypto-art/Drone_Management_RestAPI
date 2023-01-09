@@ -236,7 +236,9 @@ export default class AppHeader extends BaseAuthComponent {
     }
 
     .nav-link {
-      // background: $blue;
+      @media (max-width: 991px) {
+        background: $blue;
+      }
 
       &:not(.dropdown .nav-link) {
         $transition: 0.2s ease-in-out;

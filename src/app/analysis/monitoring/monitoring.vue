@@ -202,6 +202,10 @@ export default class AppAnalysisMonitoring extends BaseAuthComponent {
       justify-self: end;
     }
 
+    span {
+      overflow-wrap: anywhere;
+    }
+
     &-running {
       background: color.adjust(colors.$blue, $lightness: 45%); // use Volateq's blue with increased lightness
     }
