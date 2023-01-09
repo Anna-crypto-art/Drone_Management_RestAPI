@@ -40,7 +40,6 @@ export default class AppButton extends BaseAuthComponent {
   @Prop({ default: null }) icon!: string | null;
   @Prop({ default: false }) hideText!: boolean;
   @Prop({ default: false }) superAdminProtected!: boolean;
-  @Prop({ default: false }) forceHideSuperAdminIcon!: boolean;
   @Prop({ default: false }) round!: boolean;
 
   realTitle = "";
@@ -65,7 +64,7 @@ export default class AppButton extends BaseAuthComponent {
   }
 
   get showSuperAdminIcon(): boolean {
-    return this.superAdminProtected && !!this.$slots.default && !this.forceHideSuperAdminIcon;
+    return this.superAdminProtected && !!this.$slots.default;
   }
 }
 </script>

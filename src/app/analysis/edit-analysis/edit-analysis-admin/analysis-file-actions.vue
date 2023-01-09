@@ -16,6 +16,7 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
 
 @Component({
   name: "app-analysis-file-actions",
@@ -24,24 +25,21 @@ import AppBox from "@/app/shared/components/app-box/app-box.vue";
     AppBox,
   },
 })
+
 export default class AppAnalysisFileActions extends BaseAuthComponent {
   @Prop({ required: true }) analysis!: AnalysisSchema;
 
   plantCoverageLoading = false;
 
+  @CatchError('plantCoverageLoading')
   async onPlantCoverageClick() {
     this.plantCoverageLoading = true;
-    try {
-      if (this.analysis?.id) {
-        const analysisDronePlantCoverage = await volateqApi.getDronePlantCoverage(this.analysis?.id);
-        console.log(analysisDronePlantCoverage);
-        this.showSuccess(this.$t('successfully-checked-drone-coverage').toString())
-      }
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.plantCoverageLoading = false;
+    if (this.analysis?.id) {
+      const analysisDronePlantCoverage = await volateqApi.getDronePlantCoverage(this.analysis?.id);
+      console.log(analysisDronePlantCoverage);
+      this.showSuccess(this.$t('successfully-checked-drone-coverage').toString())
     }
+    this.plantCoverageLoading = false;
   }
 }
 </script>
