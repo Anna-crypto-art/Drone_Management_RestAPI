@@ -19,7 +19,7 @@
       <slot></slot>
     </form>
     <template v-slot:modal-footer>
-      <b-button variant="secondary" @click="$bvModal.hide(id)">{{ $t("cancel") }}</b-button>
+      <b-button v-if="showCancelButton" variant="secondary" @click="$bvModal.hide(id)">{{ $t("cancel") }}</b-button>
       <app-button @click="onSubmit" :loading="modalLoading">{{ okTitle }}</app-button>
     </template>
   </b-modal>
@@ -46,6 +46,7 @@ export default class AppModalForm extends BaseAuthComponent implements IAppModal
   @Prop({ required: true }) okTitle!: string;
   @Prop({ default: false }) modalLoading!: boolean;
   @Prop({ default: false }) superAdminProtected!: boolean;
+  @Prop({ default: true }) showCancelButton!: boolean
 
   showAlert = false;
   alertMsg = "";

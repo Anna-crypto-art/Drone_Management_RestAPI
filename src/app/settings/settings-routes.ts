@@ -3,6 +3,7 @@ const AppSettingsUsers = () => import("@/app/settings/users/users.vue");
 const AppSettingsCustomers = () => import("@/app/settings/customers/customers.vue");
 const AppSettingsOrders = () => import("@/app/settings/orders/orders.vue");
 const AppSettings = () => import("@/app/settings/settings.vue");
+const AppUserProfile = () => import("@/app/settings/user-profile/user-profile.vue");
 import { ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
 
 const settingsRoutes: RouteConfig[] = [
@@ -37,6 +38,14 @@ const settingsRoutes: RouteConfig[] = [
         meta: {
           role: ApiRoles.SUPER_ADMIN,
           title: "orders",
+        }
+      },
+      {
+        path: "user-profile",
+        name: "UserProfile",
+        component: AppUserProfile,
+        meta: {
+          title: "user-profile",
         }
       }
     ],

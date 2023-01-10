@@ -1,17 +1,9 @@
 <template>
-  <div class="app-auth-confirm-login">
+  <div class="app-auth-confirm-mail-login">
     <app-auth-container :title="$t('mfa')" :subtitle="$t('mfa-email_descr')">
       <b-form @submit.prevent="onSubmit">
-        <b-form-group :label="$t('security-code')" label-for="securityCode">
-          <b-form-input
-            id="securityCode"
-            v-model="securityCode"
-            type="text"
-            :placeholder="$t('security-code')"
-            required
-          ></b-form-input>
-        </b-form-group>
-        <app-button ref="submitButton" type="submit" cls="width-100pc" :loading="loading">{{ $t("login") }}</app-button>
+        <app-security-code :authMethod="0" v-model="securityCode" />
+        <app-button ref="submitButton" type="submit" cls="width-100pc" :loading="loading">{{ $t("verify") }}</app-button>
       </b-form>
       <hr />
       <app-button
@@ -27,49 +19,35 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
 import { Component } from "vue-property-decorator";
 
 import AppAuthContainer from "@/app/auth/shared/components/auth-container.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
+import AppSecurityCode from "@/app/shared/components/app-security-code/app-security-code.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import authContainerEventBus from "@/app/auth/shared/components/auth-container-event-bus";
-import { ApiErrors, ApiException } from "@/app/shared/services/volateq-api/api-errors";
+import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
+import { ConfirmLoginComponent } from "./confirm-login-component";
+import { UserAuthMethod } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 
 @Component({
-  name: "app-auth-confirm-login",
+  name: "app-auth-confirm-mail-login",
   components: {
     AppAuthContainer,
     AppButton,
+    AppSecurityCode,
   },
 })
-export default class AppAuthConfirmLogin extends Vue {
+export default class AppAuthConfirmMailLogin extends ConfirmLoginComponent {
   loading = false;
   resendCodeLoading = false;
   securityCode = "";
 
-  async onSubmit(e: Event): Promise<void> {
-    try {
-      this.loading = true;
-
-      await volateqApi.confirmLogin(this.$route.params.confirmKey, this.securityCode);
-
-      if (this.$route.query.dest && typeof this.$route.query.dest === "string") {
-        this.$router.push({ path: this.$route.query.dest });
-      } else {
-        this.$router.push({ name: "Home" });
-      }
-    } catch (e) {
-      if ((e as any).error && (e as any).error === ApiErrors.RESOURCE_NOT_FOUND) {
-        this.$router.push({ name: "Login" });
-      }
-
-      authContainerEventBus.showError(e as ApiException);
-      this.loading = false;
-    }
+  async onSubmit(): Promise<void> {
+    await this.confirmLogin(UserAuthMethod.EMAIL);
   }
 
-  async resendSecurityCode(e: Event): Promise<void> {
+  async resendSecurityCode(): Promise<void> {
     try {
       this.resendCodeLoading = true;
 

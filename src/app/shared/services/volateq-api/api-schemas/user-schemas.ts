@@ -23,6 +23,11 @@ export enum UserStateSchema {
   UNKNOWN = "UNKNOWN",
 }
 
+export enum UserAuthMethod {
+  EMAIL = 0,
+  TOTP = 1,
+}
+
 export interface UserSchema {
   id: string;
   email: string;
@@ -37,6 +42,7 @@ export interface UserSchema {
   role: RoleSchema;
   state: UserStateSchema;
   is_locked: boolean;
+  auth_method: UserAuthMethod;
   customer?: CustomerSchema;
   plants?: PlantSchema[];
 }

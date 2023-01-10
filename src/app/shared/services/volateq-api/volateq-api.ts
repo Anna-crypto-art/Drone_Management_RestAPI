@@ -2,7 +2,7 @@ import store from "@/app/app-state";
 import { InviteUser, RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { ConfirmLoginResult, TokenResult } from "@/app/shared/services/volateq-api/api-schemas/auth-schema";
 import { CustomerNameSchema, CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
-import { SimpleUserSchema, UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
+import { SimpleUserSchema, UserAuthMethod, UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 import { HttpClientBase } from "@/app/shared/services/volateq-api/http-client-base";
 import { apiBaseUrl, baseUrl } from "@/environment/environment";
 import { AddReferenceMeasurmentValue, CreateReferenceMeasurement, NewAnalysis, NewEmptyAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
@@ -38,8 +38,8 @@ export class VolateqAPI extends HttpClientBase {
   /**
    * @returns confirmation_key if user logs in with an unkown host, else undefined.
    */
-  public async login(email: string, password: string): Promise<string> {
-    const confirmLoginResult: ConfirmLoginResult = await this.post(
+  public async login(email: string, password: string): Promise<{ confirmation_key: string, auth_method: UserAuthMethod }> {
+    return await this.post(
       "/auth/login",
       {},
       {
@@ -49,8 +49,6 @@ export class VolateqAPI extends HttpClientBase {
         },
       }
     );
-
-    return confirmLoginResult.confirmation_key;
   }
 
   public async isLoggedIn(): Promise<boolean> {
@@ -69,8 +67,20 @@ export class VolateqAPI extends HttpClientBase {
     return false;
   }
 
-  public async confirmLogin(confirmationKey: string, securityCode: string): Promise<void> {
-    const tokenResult: TokenResult = await this.post(`/confirm-login/${confirmationKey}`, {
+  public async confirmMailLogin(confirmationKey: string, securityCode: string): Promise<void> {
+    const tokenResult: TokenResult = await this.post(`/confirm-email-login/${confirmationKey}`, {
+      security_code: securityCode,
+    });
+
+    await store.dispatch.auth.updateToken({
+      token: tokenResult.token,
+      role: tokenResult.role,
+      customer: tokenResult.customer,
+    });
+  }
+
+  public async confirmTotpLogin(confirmationKey: string, securityCode: string): Promise<void> {
+    const tokenResult: TokenResult = await this.post(`/confirm-totp-login/${confirmationKey}`, {
       security_code: securityCode,
     });
 
@@ -98,7 +108,7 @@ export class VolateqAPI extends HttpClientBase {
   public async inviteUser(user: InviteUser): Promise<string> {
     const confirmKey = (await this.post("/auth/user", user)).confirmation_key;
 
-    return `${baseUrl}/confirm/${confirmKey}`;
+    return `${baseUrl}/register/${confirmKey}`;
   }
 
   public async assignPlantsToUser(userId: string, plantIds: string[]): Promise<void> {
@@ -110,11 +120,11 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public async getInvitedUser(confirmKey: string): Promise<UserSchema> {
-    return this.get(`/confirm/${confirmKey}`);
+    return this.get(`/register/${confirmKey}`);
   }
 
-  public async registerUser(confirmKey: string, user: RegisterUser): Promise<void> {
-    await this.post(`/confirm/${confirmKey}`, user);
+  public async registerUser(confirmKey: string, user: RegisterUser): Promise<{ confirmation_key?: string }> {
+    return await this.post(`/register/${confirmKey}`, user);
   }
 
   public async deleteUser(userId): Promise<void> {
@@ -311,7 +321,7 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public async resendSecurityCode(confirmationKey: string): Promise<void> {
-    await this.post(`/confirm-login-resend/${confirmationKey}`, {});
+    await this.post(`/confirm-email-login-resend/${confirmationKey}`, {});
   }
 
   public getPlant(plantId: string): Promise<PlantSchema> {
@@ -726,6 +736,26 @@ export class VolateqAPI extends HttpClientBase {
 
   public async cancelUpload(uploadId: string): Promise<void> {
     await this.post(`/auth/upload/${uploadId}/resume`);
+  }
+
+  public async getTotpSecrets(confirmationKey: string): Promise<{ url: string, secret: string }> {
+    return await this.get(`/totp-secrets/${confirmationKey}`);
+  }
+
+  public async verifyTotpCode(confirmationKey: string, securityCode: string): Promise<void> {
+    await this.post(`/totp-secrets/${confirmationKey}`, { security_code: securityCode });
+  }
+
+  public async prepareUserChangeAuthMethod(authMethod: UserAuthMethod, password: string): Promise<{confirmation_key: string}> {
+    return await this.post(`/auth/user/prepare-change-auth-method`, { auth_method: authMethod, password });
+  }
+
+  public async changeUserAuthMethod(authMethod: UserAuthMethod, confirmationKey: string, securityCode: string, newSecurityCode: string): Promise<void> {
+    await this.post(`/auth/user/change-auth-method/${confirmationKey}`, { 
+      auth_method: authMethod,
+      security_code: securityCode,
+      new_security_code: newSecurityCode,
+    });
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {
