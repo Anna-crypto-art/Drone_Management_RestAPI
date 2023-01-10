@@ -25,37 +25,37 @@
     </app-modal-form>
 
     <app-modal-form 
-      id="changeAuthMethodModal"
-      ref="changeAuthMethodModal"
-      :title="$t('mfa')"
-      :subtitle="mfaSubtitle"
-      :modalLoading="loading"
-      :okTitle="$t('apply')"
-      @submit="onChangeAuthMethod"
-    >
-      <app-security-code v-if="confirmationKey" v-model="oldSecurityCode" :authMethod="user.auth_method" />
-    </app-modal-form>
-
-    <app-modal-form 
-      id="setupEmailModal"
-      ref="setupEmailModal"
+      id="changeAuthMethodMail2TotpModal"
+      ref="changeAuthMethodMail2TotpModal"
       :title="$t('mfa')"
       :subtitle="$t('mfa-email_descr')"
       :modalLoading="loading"
       :okTitle="$t('apply')"
-      @submit="onSubmitSetupEmail"
+      @submit="onChangeAuthMethodMail2Totp"
     >
-      <app-security-code v-if="mailConfirmationKey" v-model="emailSecurityCode" :authMethod="0" />
+      <app-modal-form-info-area>
+        <app-security-code v-if="confirmationKey" v-model="emailSecurityCode" :authMethod="user.auth_method" />
+      </app-modal-form-info-area>
+      <app-modal-form-info-area cls="no-mar-bottom">
+        <app-setup-totp v-if="confirmationKey && authMethod === 1" :confirmationKey="confirmationKey" v-model="totpSecurityCode" />
+      </app-modal-form-info-area>
     </app-modal-form>
 
-    <app-modal-form
-      id="setupTotpModal"
-      ref="setupTotpModal"
-      :okTitle="$t('done')"
-      :showCancelButton="false"
-      @submit="onSubmitSetupTotp"
+    <app-modal-form 
+      id="changeAuthMethodTotp2MailModal"
+      ref="changeAuthMethodTotp2MailModal"
+      :title="$t('mfa')"
+      :subtitle="$t('mfa-totp_descr')"
+      :modalLoading="loading"
+      :okTitle="$t('apply')"
+      @submit="onChangeAuthMethodTotp2Mail"
     >
-      <app-setup-totp v-if="totpConfirmationKey" :confirmationKey="totpConfirmationKey" v-model="totpSecurityCode" />
+      <app-modal-form-info-area>
+        <app-security-code v-if="confirmationKey" v-model="totpSecurityCode" :authMethod="user.auth_method" />
+      </app-modal-form-info-area>
+      <app-modal-form-info-area cls="no-mar-bottom">
+        <app-security-code v-if="confirmationKey" v-model="emailSecurityCode" :authMethod="authMethod" />
+      </app-modal-form-info-area>
     </app-modal-form>
   </app-box>
 </template>
@@ -70,6 +70,7 @@ import AppSelectAuthMethod from "@/app/shared/components/app-select-auth-method/
 import { UserAuthMethod, UserSchema, UserStateSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
+import AppModalFormInfoArea from "@/app/shared/components/app-modal/app-modal-form-info-area.vue";
 import AppSetupTotp from "@/app/shared/components/app-setup-totp/app-setup-totp.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import AppSecurityCode from "@/app/shared/components/app-security-code/app-security-code.vue";
@@ -86,15 +87,15 @@ import { UserEvent, UserEventService } from "./user-event-service";
     AppModalForm,
     AppSetupTotp,
     AppSecurityCode,
+    AppModalFormInfoArea,
   },
 })
 export default class AppChangeAuthMethod extends BaseAuthComponent {
   @Prop({ required: true }) user!: UserSchema;
   
   @Ref() prepAuthChangeModal!: IAppModalForm;
-  @Ref() changeAuthMethodModal!: IAppModalForm;
-  @Ref() setupEmailModal!: IAppModalForm;
-  @Ref() setupTotpModal!: IAppModalForm;
+  @Ref() changeAuthMethodMail2TotpModal!: IAppModalForm;
+  @Ref() changeAuthMethodTotp2MailModal!: IAppModalForm;
 
   authMethod: UserAuthMethod | null = null;
   changeAuthMethod: UserAuthMethod | null = null;
@@ -105,10 +106,7 @@ export default class AppChangeAuthMethod extends BaseAuthComponent {
   password: string | null = null;
 
   confirmationKey: string | null = null;
-  mailConfirmationKey: string | null = null;
-  totpConfirmationKey: string | null = null;
 
-  oldSecurityCode: string | null = null;
   emailSecurityCode: string | null = null;
   totpSecurityCode: string | null = null;
 
@@ -145,56 +143,35 @@ export default class AppChangeAuthMethod extends BaseAuthComponent {
 
     this.prepAuthChangeModal.hide();
 
-    this.changeAuthMethod = this.user.auth_method;
-
-    this.changeAuthMethodModal.show();
-  }
-
-  get mfaSubtitle(): string {
-    switch (this.user.auth_method) {
-      case UserAuthMethod.EMAIL:
-        return this.$t('mfa-email_descr').toString();
-
-      case UserAuthMethod.TOTP:
-        return this.$t('mfa-totp_descr').toString();
-    }
-
-    return "";
-  }
-
-  @CatchError()
-  onChangeAuthMethod() {
-    this.validateSecurityCode(this.oldSecurityCode);
-
-    this.changeAuthMethodModal.hide();
-
-    if (this.authMethod === UserAuthMethod.EMAIL) {
-      this.mailConfirmationKey = this.confirmationKey;
-      this.setupEmailModal.show();
-    } else if (this.authMethod === UserAuthMethod.TOTP) {
-      this.totpConfirmationKey = this.confirmationKey;
-      this.setupTotpModal.show();
+    if (this.user.auth_method === UserAuthMethod.EMAIL && this.authMethod === UserAuthMethod.TOTP) {
+      this.changeAuthMethodMail2TotpModal.show();
+    } else if (this.user.auth_method === UserAuthMethod.TOTP && this.authMethod === UserAuthMethod.EMAIL) {
+      this.changeAuthMethodTotp2MailModal.show();
+    } else {
+      throw new Error("Unsupported auth method")
     }
   }
 
-  @CatchError('loading')
-  async onSubmitSetupEmail() {
+  @CatchError("loading")
+  async onChangeAuthMethodMail2Totp() {
     this.validateSecurityCode(this.emailSecurityCode);
+    this.validateSecurityCode(this.totpSecurityCode);
 
-    await volateqApi.changeUserAuthMethod(this.authMethod!, this.mailConfirmationKey!, this.oldSecurityCode!, this.emailSecurityCode!);
+    await volateqApi.changeUserAuthMethod(this.authMethod!, this.confirmationKey!, this.emailSecurityCode!, this.totpSecurityCode!);
 
-    this.setupEmailModal.hide();
+    this.changeAuthMethodMail2TotpModal.hide();
 
     this.finishChangeAuthMethod();
   }
 
-  @CatchError('loading')
-  async onSubmitSetupTotp() {
+  @CatchError("loading")
+  async onChangeAuthMethodTotp2Mail() {
     this.validateSecurityCode(this.totpSecurityCode);
+    this.validateSecurityCode(this.emailSecurityCode);
 
-    await volateqApi.changeUserAuthMethod(this.authMethod!, this.totpConfirmationKey!, this.oldSecurityCode!, this.totpSecurityCode!);
+    await volateqApi.changeUserAuthMethod(this.authMethod!, this.confirmationKey!, this.totpSecurityCode!, this.emailSecurityCode!);
 
-    this.setupTotpModal.hide();
+    this.changeAuthMethodTotp2MailModal.hide();
 
     this.finishChangeAuthMethod();
   }
@@ -207,13 +184,9 @@ export default class AppChangeAuthMethod extends BaseAuthComponent {
 
   private finishChangeAuthMethod() {
     this.password = null;
-    this.oldSecurityCode = null;
     this.emailSecurityCode = null;
     this.totpSecurityCode = null;
     this.confirmationKey = null;
-    this.mailConfirmationKey = null;
-    this.totpConfirmationKey = null;
-    this.totpConfirmationKey = null;
 
     this.showSuccess(this.$t('auth-method-changed-success').toString());
 

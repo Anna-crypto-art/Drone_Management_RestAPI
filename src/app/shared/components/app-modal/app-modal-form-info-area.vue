@@ -1,15 +1,17 @@
 <template>
-  <div class="app-modal-form-info-area">
+  <div :class="'app-modal-form-info-area ' + cls">
     <slot></slot>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import { Component } from "vue-property-decorator";
+import { Component, Prop } from "vue-property-decorator";
 
 @Component({ name: "app-modal-form-info-area" })
-export default class AppModalFormInfoArea extends Vue {}
+export default class AppModalFormInfoArea extends Vue {
+  @Prop({ default: "" }) cls!: string;
+}
 </script>
 
 <style lang="scss">

@@ -11,6 +11,7 @@
         required
         pattern="\d{6,6}"
         @change="onChange"
+        autocomplete="off"
       ></b-form-input>
     </b-form-group>
   </div>

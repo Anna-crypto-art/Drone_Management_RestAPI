@@ -1,6 +1,9 @@
 <template>
   <b-navbar class="app-header" toggleable="lg" type="dark" sticky>
-    <div class="snow"><div class="snow-more"></div></div>
+    
+    <!-- Only for christmas time -->
+    <!-- <div class="snow"><div class="snow-more"></div></div> -->
+
     <b-navbar-brand href="#">
       <b-link to="/">
         <img
