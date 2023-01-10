@@ -334,7 +334,7 @@
   "server-tags": "Server tags",
   "run-server-action": "Run server action",
   "run-task": "Run task",
-  "servers-available": "<b>{count}</b> servers available",
+  "servers-available": "<b>{count}</b> server(s) available",
   "import-task-running-on-qfly-server": "The import results task will run on the allocated QFly server",
   "danger-zone": "Danger zone",
   "finish-running-task": "Finish running task",
@@ -492,15 +492,25 @@
   "CSP_PTC_SCE": "SCE",
   "CSP_PTC_Loop": "Loop",
 
-  "SERVER_STATE_UNALLOCATED": "No server allocated",
+  "SERVER_STATE_UNALLOCATED": "No QFly server allocated",
   "SERVER_STATE_STOPPED": "<b>{server}</b> is stopped",
   "SERVER_STATE_RUNNING": "<b>{server}</b> is running",
-  "SERVER_ACTION_ALLOCATE_AND_START": "Allocate and start a server",
+  "SERVER_SIZE_STRING": " ({size})",
+  "SERVER_ACTION_ALLOCATE": "Allocate a QFly server",
+  "SERVER_ACTION_ALLOCATE_AND_START": "Allocate and start a QFly server",
   "SERVER_ACTION_START": "Start server",
   "SERVER_ACTION_STOP": "Stop server",
   "SERVER_ACTION_RELEASE": "Release server",
   "SERVER_ACTION_STOP_AND_RELEASE": "Stop and release server",
+  "SERVER_ACTION_SET_SERVER_SIZE_SMALL": "Set server size to small (development, review)",
+  "SERVER_ACTION_SET_SERVER_SIZE_MEDIUM": "Set server size to medium",
+  "SERVER_ACTION_SET_SERVER_SIZE_LARGE": "Set server size to large (parallel eval)",
 
-  "Reload": "Reload",
-  "Auto reload": "Auto reload"
+  "reload": "Reload",
+  "auto-reload": "Auto reload",
+
+  "apply-tags-changed": "Tags changed!",
+  "apply-selected-server-action": "Selected server action: ",
+  "apply-selected-task-to-run": "Selected task to run: ",
+  "apply-are-you-sure": "Are you sure?"
 }
