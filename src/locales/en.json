@@ -469,6 +469,12 @@
   "done": "Done",
   "enter-password": "Enter password",
   "authentication-code": "Authentication code",
+  "reload": "Reload",
+  "auto-reload": "Auto reload",
+  "apply-tags-changed": "Tags changed!",
+  "apply-selected-server-action": "Selected server action: ",
+  "apply-selected-task-to-run": "Selected task to run: ",
+  "apply-are-you-sure": "Are you sure?",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",
@@ -504,13 +510,5 @@
   "SERVER_ACTION_STOP_AND_RELEASE": "Stop and release server",
   "SERVER_ACTION_SET_SERVER_SIZE_SMALL": "Set server size to small (development, review)",
   "SERVER_ACTION_SET_SERVER_SIZE_MEDIUM": "Set server size to medium",
-  "SERVER_ACTION_SET_SERVER_SIZE_LARGE": "Set server size to large (parallel eval)",
-
-  "reload": "Reload",
-  "auto-reload": "Auto reload",
-
-  "apply-tags-changed": "Tags changed!",
-  "apply-selected-server-action": "Selected server action: ",
-  "apply-selected-task-to-run": "Selected task to run: ",
-  "apply-are-you-sure": "Are you sure?"
+  "SERVER_ACTION_SET_SERVER_SIZE_LARGE": "Set server size to large (parallel eval)"
 }
