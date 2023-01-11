@@ -16,6 +16,7 @@ export abstract class CspPtcKeyFigureLayer<T extends AnalysisResultSchemaBase> e
     public readonly keyFigureInfo: KeyFigureInfo,
     public readonly query?: GeoVisualQuery,
     protected readonly initColor?: KeyFigureColors,
+    public readonly invisibleAutoSelection?: boolean,
   ) {
     super(vueComponent, analysisResult, keyFigureId, keyFigureInfo, query, initColor);
   }
@@ -62,56 +63,33 @@ export abstract class CspPtcKeyFigureLayer<T extends AnalysisResultSchemaBase> e
 
   public getDiffColorByComparedFeatureType(comparedFeatureType: ComparedFeatureType): string {
     switch (comparedFeatureType) {
-      case ComparedFeatureType.GONE_FIXED:
-        return KeyFigureColors.green;
-      
-      case ComparedFeatureType.GONE_WORSENED:
-      case ComparedFeatureType.GONE_IMPROVED:
-        return this.getColorWithAlpha(KeyFigureColors.green, 0.5)
-      
-      case ComparedFeatureType.NEW_WORSENED:
-        return KeyFigureColors.red;
-
-      case ComparedFeatureType.NEW_IMPROVED:
-        return KeyFigureColors.grey;
-
       case ComparedFeatureType.NO_CHANGE:
         return KeyFigureColors.black;
 
+      case ComparedFeatureType.GONE_IMPROVED:
+        return KeyFigureColors.green;
+
+      case ComparedFeatureType.NEW_WORSENED:
+        return KeyFigureColors.red;
+
+      case ComparedFeatureType.GONE_WORSENED:
+      case ComparedFeatureType.NEW_IMPROVED:
+        return this.getColorWithAlpha('#fff', 0); // transparent -> invisible
     }
   }
 
   public getComparedFeatures(currentClass: number): ComparedFeatures {
     const comparedFeatures: ComparedFeatures = {
-      goneFeatures: [],
-      goneFixedFeatures: [],
-      goneImprovedFeatures: [],
-      newFeatures: [],
-      newImprovedFeatures: [],
-      newWorsenedFeatures: [],
+      [ComparedFeatureType.NO_CHANGE]: [],
+      [ComparedFeatureType.GONE_IMPROVED]: [],
+      [ComparedFeatureType.GONE_WORSENED]: [],
+      [ComparedFeatureType.NEW_IMPROVED]: [],
+      [ComparedFeatureType.NEW_WORSENED]: [],
     };
 
     for (const propFeature of this.geoJSON!.features) {
       const comparedFeatureType = this.getComparedFeatureType(propFeature.properties, currentClass);
-      if (comparedFeatureType === ComparedFeatureType.GONE_FIXED) {
-        comparedFeatures.goneFeatures.push(propFeature);
-        comparedFeatures.goneFixedFeatures.push(propFeature);
-      } 
-      else if (comparedFeatureType === ComparedFeatureType.GONE_IMPROVED) {
-        comparedFeatures.goneFeatures.push(propFeature);
-        comparedFeatures.goneImprovedFeatures.push(propFeature);
-      }
-      else if (comparedFeatureType === ComparedFeatureType.GONE_WORSENED) {
-        comparedFeatures.goneFeatures.push(propFeature);
-      }
-      else if (comparedFeatureType === ComparedFeatureType.NEW_WORSENED) {
-        comparedFeatures.newFeatures.push(propFeature);
-        comparedFeatures.newWorsenedFeatures.push(propFeature);
-      } 
-      else if (comparedFeatureType === ComparedFeatureType.NEW_IMPROVED) {
-        comparedFeatures.newFeatures.push(propFeature);
-        comparedFeatures.newImprovedFeatures.push(propFeature);
-      }
+      comparedFeatures[comparedFeatureType].push(propFeature);
     }
 
     return comparedFeatures;
@@ -121,26 +99,37 @@ export abstract class CspPtcKeyFigureLayer<T extends AnalysisResultSchemaBase> e
     const featureValue: number = properties.value! as number;
     const featureDiffValue: number = properties.diff_value! as number;
 
-    if (featureDiffValue === 0) {
-      return ComparedFeatureType.NO_CHANGE;
-    }
-
     if (featureValue !== currentClass) {
-      if (featureDiffValue > 0) {
+      // featureValue is now (new analysis) in another class than the current class,
+      // but was before (old analysis) in the current class.
+
+      if (featureValue < currentClass) {
+        // featureValue is now in a lower class than the current class.
+        return ComparedFeatureType.GONE_IMPROVED;
+      }
+
+      if (featureValue > currentClass) {
+        // featureValue is now in a higher class than the current class.
+        // case goes under the radar for simplicity
         return ComparedFeatureType.GONE_WORSENED;
       }
-
-      if (featureValue === 1) {
-        return ComparedFeatureType.GONE_FIXED;
-      }
+    } 
+    if (featureValue === currentClass && featureDiffValue !== 0) {
+      // featureValue is now in the same class as the current class,
+      // but was before (old analysis) in another class.
       
-      return ComparedFeatureType.GONE_IMPROVED;
-    } 
-    
-    if (featureValue > 0) {
-      return ComparedFeatureType.NEW_WORSENED;
-    } 
-    
-    return ComparedFeatureType.NEW_IMPROVED;
+      if (featureDiffValue > 0) {
+        // class before was lower than the current class
+        return ComparedFeatureType.NEW_WORSENED
+      }
+
+      if (featureDiffValue < 0) {
+        // class before was higher than the current class
+        // case goes under the radar for simplicity
+        return ComparedFeatureType.NEW_IMPROVED
+      }
+    }
+
+    return ComparedFeatureType.NO_CHANGE;
   }
 }

@@ -61,8 +61,10 @@ export default class AppPlantAdminViewCspPtc extends BaseAuthComponent {
     try {
       if (this.selectedAnalysisResult) {
         await volateqApi.updateAnalysisResult(this.selectedAnalysisResult.id, {
-          release: this.analysisResultReleased as boolean,
+          release: this.analysisResultReleased!,
         });
+
+        this.selectedAnalysisResult.released = this.analysisResultReleased!; 
 
         const msg = this.analysisResultReleased ? 
           this.$t("analysis-result-released-success").toString() :

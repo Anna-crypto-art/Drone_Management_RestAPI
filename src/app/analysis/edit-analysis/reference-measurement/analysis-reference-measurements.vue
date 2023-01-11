@@ -191,7 +191,8 @@ export default class AppAnalysisReferenceMeasurements extends BaseAuthComponent 
         id: refMeasure.id,
         measureDate: dateHelper.toDate(refMeasure.measure_date),
         measureNotes: refMeasure.notes,
-        user_created: (refMeasure.user_created.first_name + " " + refMeasure.user_created.last_name).trim() || refMeasure.user_created.email,
+        user_created: refMeasure.user_created ? 
+          (refMeasure.user_created.first_name + " " + refMeasure.user_created.last_name).trim() || refMeasure.user_created.email : "",
         user_updated: refMeasure.user_updated ? 
           ((refMeasure.user_updated.first_name + " " + refMeasure.user_updated.last_name).trim() 
             || refMeasure.user_updated.email) + " " + this.$t(...dateHelper.getTimeDiff(refMeasure.updated_at)).toString() :

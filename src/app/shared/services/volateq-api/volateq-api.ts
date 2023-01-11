@@ -30,6 +30,9 @@ import { ProductPackageSchema, ProductPackageWithKeyFiguresSchema } from "./api-
 import { CreateOrderRequest, UpdateOrderRequest } from "./api-requests/order-requests";
 import { OrderPPKeyFiguresDisabledSchema, OrderProductPackageSchema, OrderSchema } from "./api-schemas/order-schema";
 import { MultiselectOption } from "../../components/app-multiselect/types";
+import { MyUploadingUpload, SecuredFilename, Upload, UploadChunkResult } from "./api-schemas/upload-schemas";
+import { CreateAnalysisUploadRequest } from "./api-requests/upload-requests";
+import { ja, th } from "date-fns/locale";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -124,10 +127,6 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/routes`, params);
   }
 
-  public async createAnalysis(newAnalyis: NewAnalysis): Promise<{ id: string }> {
-    return this.post(`/auth/analysis`, newAnalyis);
-  }
-
   public async createEmptyAnalysis(newEmptyAnalyis: NewEmptyAnalysis): Promise<{ id: string }> {
     return this.post(`/auth/analysis/create-empty`, newEmptyAnalyis);
   }
@@ -150,10 +149,6 @@ export class VolateqAPI extends HttpClientBase {
     }
 
     return analyses;
-  }
-
-  public getAnalysisFileUploadUrl(analysisId: string): string {
-    return `${this.baseURL}/auth/analysis/${analysisId}/file`;
   }
 
   public async updateAnalysisState(analysisId: string, analysisState: UpdateAnalysisState): Promise<void> {
@@ -203,14 +198,6 @@ export class VolateqAPI extends HttpClientBase {
       { image_files_zip: imageFilesZip },
       onUploadProgress
     );
-  }
-
-  public async prepareAnalysisUpload(analysisId: string, fileNames: string[]): Promise<void> {
-    await this.post(`/auth/analysis/${analysisId}/prepare-upload`, { files: fileNames });
-  }
-
-  public async cancelAnalysisUpload(analysisId: string): Promise<void> {
-    await this.post(`/auth/analysis/${analysisId}/cancel-upload`);
   }
 
   public async updateAnalysis(
@@ -708,7 +695,41 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public async getOrderPPDisabledKeyFigures(orderId: string): Promise<OrderPPKeyFiguresDisabledSchema[]> {
-    return this.get(`/auth/order-product-packages/${orderId}/disabled-key-figures`)
+    return this.get(`/auth/order-product-packages/${orderId}/disabled-key-figures`);
+  }
+
+  public async getSecuredFilenames(filenames: string[]): Promise<SecuredFilename[]> {
+    return this.post(`/auth/upload/secure-filenames`, { file_names: filenames });
+  }
+
+  public async createAnalysisUpload(createUploadRequest: CreateAnalysisUploadRequest): Promise<Upload> {
+    return this.post(`/auth/upload/analysis`, createUploadRequest);
+  }
+
+  public async getUpload(uploadId: string): Promise<Upload> {
+    return this.get(`/auth/upload/${uploadId}`);
+  }
+
+  public async uploadFileChunk(
+    uploadId: string, 
+    fileChunk: Blob,
+    fileId: string,
+    chunkNumber: number,
+    onUploadProgressEvent?: (progressEvent: ProgressEvent) => void,
+  ): Promise<UploadChunkResult> {
+    return this.postForm(`/auth/upload/${uploadId}`, { 
+      file: fileChunk,
+      file_id: fileId,
+      chunk_number: (chunkNumber as unknown) as string
+    }, onUploadProgressEvent)
+  }
+
+  public async resumeUpload(uploadId: string): Promise<void> {
+    await this.post(`/auth/upload/${uploadId}/resume`);
+  }
+
+  public async cancelUpload(uploadId: string): Promise<void> {
+    await this.post(`/auth/upload/${uploadId}/resume`);
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {

@@ -38,7 +38,7 @@ export abstract class BaseComponent extends Vue {
     });
   }
 
-  public showSuccess(msg: string) {
+  public showSuccess(msg: string, autoHide = true) {
     this.$bvToast.toast(" ", {
       title: msg,
       variant: "success",
@@ -46,6 +46,7 @@ export abstract class BaseComponent extends Vue {
       headerClass: "base-toast-header",
       toaster: "b-toaster-bottom-center",
       solid: true,
+      noAutoHide: !autoHide,
     });
   }
 }

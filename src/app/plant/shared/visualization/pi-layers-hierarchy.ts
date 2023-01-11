@@ -3,10 +3,12 @@ import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { KeyFigureLayer } from "./layers/key-figure-layer";
 import { KeyFigureColorScheme, KeyFigureInfo, OrthoImage } from "./layers/types";
-import { GroupKPILayer, KeyFigureTypeMap } from "./types";
+import { GroupKPILayer, InvisibleAutoSelectionLayer, KeyFigureTypeMap } from "./types";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { apiComponentNames } from "@/app/shared/services/volateq-api/api-components/api-components-name";
+import { SequentialEventEmitter } from "@/app/shared/services/sequential-event-emitter/sequential-event-emitter";
+import { LayerEvent } from "@/app/shared/components/app-geovisualization/types/events";
 
 /**
  * Component -> PIGroup -> PICheckbox
@@ -20,10 +22,14 @@ export class PILayersHierarchy {
   private selectedAnalysisResultId: string | undefined;
   private compareAnylysisResultId: string | undefined;
 
+  private raiseOnLayerSelected = true;
+
   constructor(
     private readonly vueComponent: Vue,
     private readonly analysisResults: AnalysisResultDetailedSchema[],
-    private readonly keyFigureLayers: KeyFigureTypeMap[]
+    private readonly keyFigureLayers: KeyFigureTypeMap[],
+    private showUndefined: boolean,
+    private multiSelection: boolean,
   ) {
     this.parentComponentKpiLayers = [];
     this.groupLayers = [];
@@ -64,6 +70,31 @@ export class PILayersHierarchy {
     return allChildLayers;
   }
 
+  private getInvisibleAutoSelectionLayers(): InvisibleAutoSelectionLayer[] {
+    const autoSelLayers: InvisibleAutoSelectionLayer[] = [];
+
+    function findGroupKPILayersRec(groupKpiLayers: GroupKPILayer[]) {
+      for (const groupKpiLayer of groupKpiLayers) {
+        if (groupKpiLayer.keyFigureLayers.length > 0) {
+          const invsibleAutoSelectionLayer = groupKpiLayer.keyFigureLayers.find(l => l.invisibleAutoSelection);
+          if (invsibleAutoSelectionLayer) {
+            const selectedLayers = groupKpiLayer.keyFigureLayers.filter(l => l.getSelected() && !l.invisibleAutoSelection);
+            autoSelLayers.push({
+              layer: invsibleAutoSelectionLayer,
+              hasSelectedSiblings: selectedLayers.length > 0,
+            });
+          }
+        }
+
+        groupKpiLayer.subGroupLayers && findGroupKPILayersRec(groupKpiLayer.subGroupLayers);
+      }
+    }
+
+    findGroupKPILayersRec(this.parentComponentKpiLayers);
+
+    return autoSelLayers;
+  }
+
   public toggleMultiSelectionDeep(multiSelection: boolean) {
     for (const componentId in this.parentComponentKpiLayers) {
       if (this.parentComponentKpiLayers[componentId].subGroupLayers) {
@@ -75,6 +106,8 @@ export class PILayersHierarchy {
   }
 
   public toggleMultiSelection(multiSelection: boolean): void {
+    this.multiSelection = multiSelection;
+
     for (const componentId in this.parentComponentKpiLayers) {
       this.parentComponentKpiLayers[componentId].groupLayer.singleSelection = !multiSelection;
     }
@@ -106,11 +139,34 @@ export class PILayersHierarchy {
     }
   }
 
-  public toggleShowUndefined(showUndefined: boolean): void {
+  public async toggleShowUndefined(showUndefined: boolean, reselectLayer = true): Promise<void> {
+    this.showUndefined = showUndefined
+
     for (const childLayer of this.getAllChildLayers()) {
-      if (childLayer.query?.undefined !== undefined && childLayer.keyFigureInfo.displayName !== "not-measured") {
-        childLayer.query.undefined = showUndefined && 1 || 0;
-        childLayer.reloadLayer();
+      if (childLayer.query?.undefined !== undefined && 
+        !childLayer.invisibleAutoSelection && 
+        childLayer.keyFigureInfo.displayName !== "not-measured"
+      ) {
+        childLayer.query.undefined = showUndefined ? 1 : 0;
+        if (reselectLayer) {
+          childLayer.reloadLayer();
+        }
+
+        if (reselectLayer && childLayer.getSelected()) {
+          await childLayer.setSelected(false);
+          await childLayer.setSelected(true);
+        }
+      }
+
+      if (reselectLayer) {
+        for (const invAutoSelLayer of this.getInvisibleAutoSelectionLayers()) {
+          if (showUndefined && invAutoSelLayer.hasSelectedSiblings && !invAutoSelLayer.layer.getSelected()) {
+            await invAutoSelLayer.layer.setSelected(true);
+          }
+          if (!showUndefined && invAutoSelLayer.layer.getSelected()) {
+            await invAutoSelLayer.layer.setSelected(false);
+          }
+        }
       }
     }
   }
@@ -226,6 +282,35 @@ export class PILayersHierarchy {
     return this.compareAnylysisResultId;
   }
 
+  public async onLayerSelected() {
+    if (this.showUndefined && this.raiseOnLayerSelected) {
+      this.raiseOnLayerSelected = false;
+
+      for (const invAutoSelLayer of this.getInvisibleAutoSelectionLayers()) {
+        if (!invAutoSelLayer.hasSelectedSiblings && invAutoSelLayer.layer.getSelected()) {
+          await invAutoSelLayer.layer.setSelected(false);
+        } else if (invAutoSelLayer.hasSelectedSiblings && !invAutoSelLayer.layer.getSelected()) {
+          await invAutoSelLayer.layer.setSelected(true);
+        }
+      }
+
+      this.raiseOnLayerSelected = true;
+    }
+  }
+
+  public getSelectedLayers(): KeyFigureLayer<AnalysisResultSchemaBase>[] {
+    return this.getAllChildLayers().filter(childLayer => childLayer.getSelected())
+  }
+
+  public async collapseFirstParentComponentLayer(): Promise<void> {
+    if (this.getSelectedLayers().length === 0) {
+      const parentComponentKpiLayer = this.parentComponentKpiLayers.find(p => p.groupLayer.collapsable && p.groupLayer.visible);
+      if (parentComponentKpiLayer) {
+        parentComponentKpiLayer.groupLayer.events!.emit(LayerEvent.COLLAPSE, true);
+      }
+    }
+  }
+
   private getParentComponentLayer(keyFigure: KeyFigureSchema): GroupKPILayer {
     return this.parentComponentKpiLayers
       .find(parentComponentKpiLayer => parentComponentKpiLayer.componentId === keyFigure.component_id)!;
@@ -241,7 +326,8 @@ export class PILayersHierarchy {
           childLayers: [],
           visible: false,
           singleSelection: true,
-          collapse: true,
+          collapsable: true,
+          events: new SequentialEventEmitter(),
         },
         keyFigureLayers: [],
         subGroupLayers: [],
@@ -279,6 +365,8 @@ export class PILayersHierarchy {
         id: `group__
           ${anaysisResult.id}__
           ${keyFigureLayer.keyFigureInfo?.keyName || keyFigureLayer.keyFigureInfo?.templateName || ""}`,
+        description: keyFigureLayer.keyFigureInfo?.description && 
+          this.vueComponent.$t(keyFigureLayer.keyFigureInfo.description).toString(),
       },
       keyFigureLayers: [],
     };
@@ -297,7 +385,9 @@ export class PILayersHierarchy {
           childKeyFigureInfo,
           childLayer.query,
           childLayer.color,
+          childLayer.invisibleAutoSelection,
         );
+
         groupKpiLayer.keyFigureLayers.push(kpiLayer);
         groupKpiLayer.groupLayer.childLayers.push(kpiLayer.toGeoLayer());
       }

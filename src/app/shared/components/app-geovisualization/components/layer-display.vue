@@ -44,13 +44,13 @@
             {{ layer.name }}
             <app-explanation v-if="layer.description"><span v-html="layer.description"></span></app-explanation>
           </slot>
-          <small v-if="layer.collapse" class="font-xs pad-left-half">
-            <app-icon :icon="collapsed ? 'chevron-up' : 'chevron-down'" />
+          <small v-if="layer.collapsable" class="font-xs pad-left-half">
+            <app-icon :icon="collapsed ? 'chevron-up' : 'chevron-down'" :class="{ 'blue': collapsed }" />
           </small>
         </div>
       </h3>
       <div v-if="layer.hasChildrens" class="layer-sublayers">
-        <b-collapse v-if="layer.collapse" v-model="collapsed" :id="layer.id">
+        <b-collapse v-if="layer.collapsable" v-model="collapsed" :id="layer.id">
           <app-geovisual-layer-display
             v-for="(childLayer, layerIndex) in layer.getChildLayers()"
             :level="level === 'root' ? 'subroot' : 'other'"
@@ -65,13 +65,12 @@
             </template>
           </app-geovisual-layer-display>
         </b-collapse>
-        <div v-if="!layer.collapse">
+        <div v-if="!layer.collapsable">
           <app-geovisual-layer-display
             v-for="(childLayer, layerIndex) in layer.getChildLayers()"
             :level="level === 'root' ? 'subroot' : 'other'"
             :layer="childLayer"
             :key="layerIndex"
-            :initCollapsed="isFirstVisibleLayer(childLayer)"
           >
             <!-- Pass slots through -->
             <template v-for="(_, slot) in $slots">
@@ -92,6 +91,7 @@ import { Component, Prop, Watch } from "vue-property-decorator";
 import { LayerStructure } from "../layer-structure";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppIcon from "@/app/shared/components/app-icon/app-icon.vue"
+import { LayerEvent } from "../types/events";
 
 @Component({
   name: "app-geovisual-layer-display",
@@ -103,7 +103,6 @@ import AppIcon from "@/app/shared/components/app-icon/app-icon.vue"
 export default class AppGeovisualLayerDisplay extends Vue {
   @Prop() layer!: LayerStructure;
   @Prop({ default: "root" }) level!: "root" | "subroot" | "other";
-  @Prop({ default: false }) initCollapsed!: boolean;
 
   selectedTab = 0;
 
@@ -112,13 +111,13 @@ export default class AppGeovisualLayerDisplay extends Vue {
   collapsed = false;
 
   created() {
-    if (this.initCollapsed || this.layer.hasSelectedChildLayer()) {
+    if (this.layer.hasSelectedChildLayer()) {
       this.collapsed = true;
     }
 
     this.selected = this.layer.selected;
 
-    this.layer.on("setSelected", async (selected: boolean) => {
+    this.layer.on(LayerEvent.SET_SELECTED, async (selected: boolean) => {
       this.selected = selected;
 
       // Special case: Selected programmatically, does not select layerType...
@@ -130,30 +129,25 @@ export default class AppGeovisualLayerDisplay extends Vue {
 
       if (this.selected) {
         let layer = this.layer;
-        while (layer.parentLayer && !layer.collapse) {
+        while (layer.parentLayer && !layer.collapsable) {
           layer = layer.parentLayer;
         }
         if (layer && layer.parentLayer) {
-          await layer.emit("collapse");
-
-          for (const sibling of layer.parentLayer.getChildLayers()) {
-            if (layer.id !== sibling.id) {
-              await sibling.emit("uncollapse")
-            }
-          }
+          await layer.emit(LayerEvent.COLLAPSE, true);
         }
       }
     });
-    this.layer.on("collapse", async () => { this.collapsed = true; });
-    this.layer.on("uncollapse", async () => {
-      if (!this.layer.hasSelectedChildLayer()) {
-        this.collapsed = false;
+    this.layer.on(LayerEvent.COLLAPSE, async (collapse: boolean) => {
+      if (!collapse && this.layer.hasSelectedChildLayer()) {
+        return;
       }
+
+      this.collapsed = collapse;
     });
   }
 
-  onChange(e: boolean): void {
-    this.layer.selected = e;
+  async onChange(e: boolean) {
+    await this.layer.setSelected(e);
   }
 
   get visible(): boolean {
@@ -165,19 +159,9 @@ export default class AppGeovisualLayerDisplay extends Vue {
   }
 
   @Watch("visible")
-  onVisibleChanged(): void {
+  async onVisibleChanged() {
     if (!this.visible) {
-      this.onChange(false);
-    } else {
-      if (this.layer.parentLayer && this.layer.collapse && !this.collapsed) {
-        const collapsedSibling = this.layer.parentLayer.getChildLayers()
-          .find(sibling => sibling.collapsed);
-
-        if (!collapsedSibling) {
-          this.collapsed = true;
-        }
-      }
-      
+      await this.onChange(false);
     }
   }
 
@@ -201,15 +185,9 @@ export default class AppGeovisualLayerDisplay extends Vue {
   }
 
   onCollapse(layer: LayerStructure) {
-    if (layer.collapse) {
+    if (layer.collapsable) {
       this.collapsed = !this.collapsed;
     }
-  }
-
-  isFirstVisibleLayer(layer: LayerStructure): boolean {
-    const visibleChildLayers = this.layer.getVisibleChildLayers();
-
-    return visibleChildLayers.length > 0 && visibleChildLayers[0].id === layer.id;
   }
 }
 </script>
@@ -243,6 +221,10 @@ export default class AppGeovisualLayerDisplay extends Vue {
       font-size: 1.1rem;
       margin-top: 0;
       margin-bottom: 0.5em;
+    }
+
+    .layer-collapse {
+      cursor: default;
     }
   }
 

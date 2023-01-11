@@ -8,6 +8,7 @@ import { Geolocation, Feature } from "ol";
 import CircleStyle from "ol/style/Circle";
 import { Point } from "ol/geom";
 import { SequentialEventEmitter } from "@/app/shared/services/sequential-event-emitter/sequential-event-emitter";
+import { LayerEvent } from "@/app/shared/components/app-geovisualization/types/events";
 
 export const GEO_JSON_OPTIONS = { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" };
 
@@ -31,6 +32,8 @@ export abstract class LayerBase {
   protected showPcsZoomLevel = 15;
   protected refreshLayer = false;
   protected readonly events = new SequentialEventEmitter();
+
+  public invisibleAutoSelection?: boolean;
 
   constructor(public readonly vueComponent: BaseAuthComponent & IPlantVisualization) {}
 
@@ -71,7 +74,7 @@ export abstract class LayerBase {
   }
 
   public get isVisible(): boolean {
-    return this.visible;
+    return this.visible && !this.invisibleAutoSelection;
   }
 
   public reloadLayer(): void {
@@ -93,7 +96,7 @@ export abstract class LayerBase {
         geoJSONOptions: GEO_JSON_OPTIONS,
         style: (feature: FeatureLike) => this.getStyle(feature),
         onSelected: (selected: boolean) => this.onSelected(selected),
-        visible: this.visible,
+        visible: this.visible && !this.invisibleAutoSelection,
         zIndex: this.zIndex,
         layerType: "VectorImageLayer",
         reloadLayer: this.refreshLayer,
@@ -106,7 +109,7 @@ export abstract class LayerBase {
   }
 
   public async setSelected(selected: boolean) {
-    await this.events.emit("setSelected", selected);
+    await this.events.emit(LayerEvent.SET_SELECTED, selected);
   }
 
   public getSelected(): boolean {
@@ -114,9 +117,11 @@ export abstract class LayerBase {
   }
 
   public setVisible(visible: boolean) {
-    this.visible = visible;
-    if (this.geoLayerObject) {
-      this.geoLayerObject.visible = this.visible;
+    if (!this.invisibleAutoSelection) {
+      this.visible = visible;
+      if (this.geoLayerObject) {
+        this.geoLayerObject.visible = this.visible;
+      }
     }
   }
 

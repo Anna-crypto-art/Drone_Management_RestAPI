@@ -1,0 +1,58 @@
+<template>
+  <div class="plant-view-pv" v-if="analyses">
+    <app-analysis-selection-sidebar
+      :plant="plant"
+      :analyses="analyses"
+    />
+    <app-plant-view-tabs :plant="plant" :analyses="analyses">
+      <template #visual>
+        <app-visual-pv :analyses="analyses" :plant="plant" />
+      </template>
+    </app-plant-view-tabs>
+  </div>
+</template>
+
+<script lang="ts">
+import AppAnalysisSelectionSidebar from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-sidebar.vue";
+import AppPlantViewTabs from "@/app/plant/shared/plant-view-tabs/plant-view-tabs.vue";
+import AppVisualPv from "@/app/plant/pv/visualization/visual-pv.vue";
+import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import { Component, Prop } from "vue-property-decorator";
+import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+
+@Component({
+  name: "app-plant-view-pv",
+  components: {
+    AppPlantViewTabs,
+    AppAnalysisSelectionSidebar,
+    AppVisualPv,
+  },
+})
+export default class AppPlantViewPv extends BaseAuthComponent {
+  @Prop() plant!: PlantSchema;
+
+  analyses: AnalysisForViewSchema[] | null = null;
+
+  @CatchError()
+  async created(): Promise<void> {
+    this.analyses = await volateqApi.getAnalysesForView(this.plant.id);
+  }
+}
+</script>
+
+<style lang="scss">
+@import "@/scss/_colors.scss";
+@import "@/scss/_variables.scss";
+
+$left-width: 400px;
+
+.plant-view-csp-ptc {
+  height: calc(100vh - #{$header-height});
+  width: 100%;
+  display: flex;
+  position: relative;
+}
+</style>

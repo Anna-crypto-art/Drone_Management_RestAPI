@@ -70,7 +70,6 @@ import { AnalysisSchema } from "../../shared/services/volateq-api/api-schemas/an
 import volateqApi from "../../shared/services/volateq-api/volateq-api";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
-import AppAnalysisUpload from "@/app/analysis/shared/analysis-upload.vue";
 import AppDownloadAnalysisFiles from "@/app/analysis/edit-analysis/download-analysis-files.vue";
 import AppEditAnalysisAdmin from "@/app/analysis/edit-analysis/edit-analysis-admin/edit-analysis-admin.vue";
 import AppUploadAnalysisFiles from "@/app/analysis/edit-analysis/upload-analysis-files.vue";
@@ -93,7 +92,6 @@ import { MultiselectOption } from "@/app/shared/components/app-multiselect/types
   components: {
     AppContent,
     AppButton,
-    AppAnalysisUpload,
     AppDownloadAnalysisFiles,
     AppEditAnalysisAdmin,
     AppUploadAnalysisFiles,

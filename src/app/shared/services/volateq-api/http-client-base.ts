@@ -53,11 +53,21 @@ export class HttpClientBase {
 
         // CORS Error due to 404 of nginx (it does not set cors header...) due to missing or wrong bot protection token
         if (error.response === undefined) {
-          await this.refreshProtectionToken();
-          
-          // retry the same request again, but with a fresh token
-          error.config.headers["XVolateqBotProtectionToken"] = store.state.protect.botProtectionToken
-          return (await Axios.request(error.config)).data
+          try {
+            await this.refreshProtectionToken();
+            
+            // retry the same request again, but with a fresh token
+            error.config.headers["XVolateqBotProtectionToken"] = store.state.protect.botProtectionToken
+            return (await Axios.request(error.config)).data
+          } catch {
+            console.error("DISCONNECT");
+            console.error(error);
+
+            return Promise.reject({
+              error: ApiErrors.DISCONNECT,
+              message: "No connection to server",
+            });
+          }
         }
 
         console.error("FATAL");
@@ -78,7 +88,7 @@ export class HttpClientBase {
 
   protected async postForm(
     url: string,
-    data: Record<string, string | File | File[]>,
+    data: Record<string, string | File | File[] | Blob>,
     onUploadProgressEvent?: (progressEvent: ProgressEvent) => void
   ): Promise<any> {
     const formData = new FormData();

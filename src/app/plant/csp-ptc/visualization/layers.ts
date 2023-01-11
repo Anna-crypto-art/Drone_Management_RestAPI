@@ -29,25 +29,31 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
   {
     keyFigureId: ApiKeyFigure.MISSING_GLASS_TUBE_ID,
     layerType: BoolUndefinedHceKeyFigureLayer,
-    keyFigureInfo: { templateName: "missingGhr", keyName: "missing-gct", zIndex: 11 },
+    keyFigureInfo: { keyName: "missing-gct", description: "missing-gct_expl", zIndex: 11 },
     query: { missing_glass_tube: 1, undefined: 1 },
   },
   {
     keyFigureId: ApiKeyFigure.OXYGEN_PENETRATION_ID,
     layerType: BoolUndefinedHceKeyFigureLayer,
-    keyFigureInfo: { templateName: "O2Penetration", keyName: "oxygen-penetration", zIndex: 11 },
+    keyFigureInfo: { keyName: "oxygen-penetration", description: "oxygen-penetration_expl", zIndex: 11 },
     query: { oxygen_penetration: 1, undefined: 1 },
   },
   {
     keyFigureId: ApiKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID,
     layerType: BoolUndefinedHceKeyFigureLayer,
-    keyFigureInfo: { templateName: "H2Concentration", keyName: "hydrogen-penetration", zIndex: 11 },
+    keyFigureInfo: { keyName: "hydrogen-penetration", description: "hydrogen-penetration_expl", zIndex: 11 },
     query: { h2_concentration: 1, undefined: 1 },
+  },
+  {
+    keyFigureId: ApiKeyFigure.HOT_GLASS_TUBE_ENDS_ID,
+    layerType: BoolUndefinedHceKeyFigureLayer,
+    keyFigureInfo: { keyName: "hot-glass-tube-ends", description: "hot-glass-tube-ends_expl", zIndex: 11 },
+    query: { hot_glass_tube_ends: 1, undefined: 1 },
   },
   {
     keyFigureId: ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
     layerType: GlassTemperatureKeyFigureLayer,
-    keyFigureInfo: { templateName: "glassTubeTemperature", keyName: "glass-tube-temperature-class" },
+    keyFigureInfo: { keyName: "glass-tube-temperature-class", description: "glass-tube-temperature-class_expl" },
     subLayers: [
       {
         displayCondition: analysisResult => analysisResult.csp_ptc.glass_tube_temperature_class_count === 4,
@@ -74,34 +80,35 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
         keyFigureInfo: { templateName: "glassTubeTemperatureNotMeasured", displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
         color: KeyFigureColors.grey,
+        invisibleAutoSelection: true,
       },
     ],
   },
   {
     keyFigureId: ApiKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID,
     layerType: RecommendedActionKeyFigureLayer,
-    keyFigureInfo: { templateName: "recommendedAction", keyName: "recommended-action" },
+    keyFigureInfo: { keyName: "recommended-action", description: "recommended-action_expl" },
     subLayers: [
       {
         keyFigureInfo: {
-          templateName: "recommendedActionClass3",
           displayName: "recommended-action-class-3",
+          description: "recommended-action-class-3_expl",
           zIndex: 13,
         },
         query: { recommended_action_class: 3 },
       },
       {
         keyFigureInfo: {
-          templateName: "recommendedActionClass2",
           displayName: "recommended-action-class-2",
+          description: "recommended-action-class-2_expl",
           zIndex: 12,
         },
         query: { recommended_action_class: 2 },
       },
       {
         keyFigureInfo: {
-          templateName: "recommendedActionClass1",
           displayName: "recommended-action-class-1",
+          description: "recommended-action-class-1_expl",
           zIndex: 10,
         },
         query: { recommended_action_class: 1 },
@@ -110,13 +117,14 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
         color: KeyFigureColors.grey,
+        invisibleAutoSelection: true,
       },
     ],
   },
   {
     keyFigureId: ApiKeyFigure.HCE_POSITION_ID,
     layerType: HcePositionSupportKeyFigureLayer,
-    keyFigureInfo: { templateName: "hcePositionSupport", keyName: "hce-position-support-offset-class" },
+    keyFigureInfo: { keyName: "hce-position-support-offset-class", description: "hce-position-support-offset_expl" },
     subLayers: [
       {
         keyFigureInfo: { templateName: "hcePositionSupportOffsetClass3", displayName: "hce-position-support-offset-class-3", zIndex: 13 },
@@ -134,13 +142,14 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { key_figure_class_name: "HcePositionSupportKeyFigure", undefined: 1 },
         color: KeyFigureColors.grey,
+        invisibleAutoSelection: true,
       },
     ]
   },
   {
     keyFigureId: ApiKeyFigure.HCE_POSITION_ID,
     layerType: HcePositionCenterKeyFigureLayer,
-    keyFigureInfo: { templateName: "hcePositionCenter", keyName: "hce-position-center-offset-class" },
+    keyFigureInfo: { keyName: "hce-position-center-offset-class", description: "hce-position-center-offset_expl" },
     subLayers: [
       {
         keyFigureInfo: { templateName: "hcePositionCenterOffsetClass3", displayName: "hce-position-center-offset-class-3", zIndex: 13 },
@@ -158,13 +167,14 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { key_figure_class_name: "HcePositionCenterKeyFigure", undefined: 1 },
         color: KeyFigureColors.grey,
+        invisibleAutoSelection: true,
       },
     ]
   },
   {
     keyFigureId: ApiKeyFigure.SCE_ALIGNMENT_ID,
     layerType: SceAlignmentKeyFigureLayer,
-    keyFigureInfo: { templateName: "sceOrientation", keyName: "sce-alignment-offset" },
+    keyFigureInfo: { keyName: "sce-alignment-offset", description: "sce-alignment-offset_expl" },
     subLayers: [
       {
         keyFigureInfo: { templateName: "sceOrientOffsetClass3", displayName: "sce-orient-offset-class-3", zIndex: 13 },
@@ -182,13 +192,14 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
         color: KeyFigureColors.grey,
+        invisibleAutoSelection: true,
       },
     ],
   },
   {
     keyFigureId: ApiKeyFigure.SCA_TRACKING_DEVIATION_ID,
     layerType: ScaTrackingKeyFigureLayer,
-    keyFigureInfo: { templateName: "scaOrientation", keyName: "tracking-offset" },
+    keyFigureInfo: { keyName: "tracking-offset", description: "tracking-offset_expl" },
     subLayers: [
       {
         keyFigureInfo: { templateName: "scaOrientOffsetClass3", displayName: "sca-orient-offset-class-3", zIndex: 13 },
@@ -206,13 +217,14 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { key_figure_class_name: "ScaTrackingKeyFigure", undefined: 1 },
         color: KeyFigureColors.grey,
+        invisibleAutoSelection: true,
       },
     ],
   },
   {
     keyFigureId: ApiKeyFigure.SCA_TRACKING_DEVIATION_ID,
     layerType: ScaAverageTrackingKeyFigureLayer,
-    keyFigureInfo: { templateName: "scaAvgOrientation", keyName: "average-tracking-offset" },
+    keyFigureInfo: { keyName: "average-tracking-offset", description: "average-tracking-offset_expl" },
     subLayers: [
       {
         keyFigureInfo: { templateName: "scaAvgOrientOffsetClass3", displayName: "sca-avg-orient-offset-class-3", zIndex: 13 },
@@ -230,13 +242,14 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { key_figure_class_name: "ScaAverageTrackingKeyFigure", undefined: 1 },
         color: KeyFigureColors.grey,
+        invisibleAutoSelection: true,
       },
     ],
   },
   {
     keyFigureId: ApiKeyFigure.SCA_FRICTION_ID,
     layerType: ScaFrictionKeyFigureLayer,
-    keyFigureInfo: { templateName: "scaFriction", keyName: "torsion-caused-friction-mean" },
+    keyFigureInfo: { keyName: "torsion-caused-friction-mean", description: "torsion-caused-friction-mean_expl" },
     subLayers: [
       {
         keyFigureInfo: { displayName: "sca-torsion-class-3", zIndex: 13 },
@@ -254,13 +267,14 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
         color: KeyFigureColors.grey,
+        invisibleAutoSelection: true,
       },
     ],
   },
   {
     keyFigureId: ApiKeyFigure.SCA_SDX_ID,
     layerType: ScaSdxKeyFigureLayer,
-    keyFigureInfo: { templateName: "scaSdx", keyName: "slope-deviation" },
+    keyFigureInfo: { keyName: "slope-deviation", description: "slope-deviation_expl" },
     subLayers: [
       {
         keyFigureInfo: { displayName: "slope-deviation-class-3", zIndex: 13 },
@@ -278,6 +292,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
         color: KeyFigureColors.grey,
+        invisibleAutoSelection: true,
       },
     ],
   },

@@ -4,19 +4,24 @@ import { Geometry } from "ol/geom";
 
 export interface KeyFigureInfo {
   /**
-   * will translated (i18n)
+   * will be translated (i18n)
    * unique name used as a (logical) id for a KeyFigureLayer and used for mapping to the value property
    */
   keyName?: string;
   /**
-   * Define this name as a reference within template of visual-csp-tpc -> app-geovisualization
+   * Define this name as a reference within template of visual(-csp-ptc/-pv) -> app-geovisualization
    */
   templateName?: string;
   /**
-   * will translated (i18n)
+   * will be translated (i18n)
    * If the displayed name differs from keyName define displayName. If undefined, keyName will be used
    */
   displayName?: string;
+  /**
+   * will be translated (i18n)
+   * description, shown with app-explanation
+   */
+  description?: string;
   /**
    * Overlay order of the layers. KeyFigureLayer start from 9.
    */
@@ -32,6 +37,11 @@ export interface SubKeyFigureInfo {
    * will translated (i18n) in legend and should be unique within the sublayers
    */
   displayName?: string;
+  /**
+   * will be translated (i18n)
+   * description, shown with app-explanation
+   */
+  description?: string;
   /**
    * Overlay order of the layers. KeyFigureLayer start from 9.
    */

@@ -2,13 +2,17 @@
 import { SeqEventCallbackFunction, SequentialEventEmitter } from "@/app/shared/services/sequential-event-emitter/sequential-event-emitter";
 import { AnalysisSelectionEvent } from "./types";
 
+const invisibleAnalysisSelectionEvents = [AnalysisSelectionEvent.SIDEBAR_ABSOLUTE];
+
 class AnalysisSelectionBus extends SequentialEventEmitter {
   lastEvent: AnalysisSelectionEvent | null = null;
   lastArgs: any | null = null;
 
   async emit(event: AnalysisSelectionEvent, ...args: any[]) {
-    this.lastEvent = event;
-    this.lastArgs = args;
+    if (!invisibleAnalysisSelectionEvents.includes(event)) {
+      this.lastEvent = event;
+      this.lastArgs = args;
+    }
 
     await super.emit(event, ...args);
   }

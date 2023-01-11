@@ -2,7 +2,7 @@
   <div :class="'analysis-selection-sidebar' + (absolute ? ' absolute' : '')">
     <app-sidebar :open="sidebarOpen" @toggled="onSidebarToggled">
       <div class="analysis-selection-sidebar-leftside">
-        <h2 class="analysis-selection-sidebar-leftside-title">
+        <h2 class="analysis-selection-sidebar-leftside-title" translate="no">
           {{ plant.name }}
         </h2>
         <div class="analysis-selection-sidebar-leftside-settings" v-if="analyses.length > 1">
@@ -28,6 +28,11 @@
             </template>
             <template #cell(name)="row">
               {{ row.item.date }} 
+              <app-icon v-if="!row.item.hasResults"
+                icon="cone-striped" 
+                class="mar-left-half orange" 
+                v-b-popover.hover.top="$t('no-pis-available-yet')"
+              />
               <app-icon v-if="row.item.refMeasureCount > 0"
                 icon="clipboard-check"
                 class="mar-left-half blue"
@@ -51,11 +56,9 @@
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
-import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { BvTableFieldArray } from "bootstrap-vue";
-import Vue from "vue";
-import { Component, Prop, Ref, Watch } from "vue-property-decorator";
+import { Component, Prop, Ref } from "vue-property-decorator";
 import { State } from "vuex-class";
 import { AnalysisSelectionService } from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-service";
 import { AnalysisSelectionEvent } from "./types";
@@ -65,6 +68,8 @@ import AppOrderPpsView from "@/app/shared/components/app-order-pps-view/app-orde
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import AppIcon from "@/app/shared/components/app-icon/app-icon.vue";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { waitFor } from "@/app/shared/services/helper/debounce-helper";
 
 @Component({
   name: "app-analysis-selection-sidebar",
@@ -77,11 +82,9 @@ import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/
     AppSuperAdminMarker,
   },
 })
-export default class AppAnalysisSelectionSidebar extends Vue {
+export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
-  @Prop() getPIColor!: (keyFigure: KeyFigureSchema) => string;
-  @Prop() absolute!: boolean;
   @Ref() analysesTable!: any; // b-table
   @State(state => state.sidebar["analysis"]) sidebarOpen!: boolean;
 
@@ -90,6 +93,8 @@ export default class AppAnalysisSelectionSidebar extends Vue {
     { key: "name", label: this.$t("analysis").toString() },
   ];
   analysesTableItems: Record<string, unknown>[] = [];
+
+  absolute = true;
 
   compareMode = false;
   selectMode = "single";
@@ -106,6 +111,7 @@ export default class AppAnalysisSelectionSidebar extends Vue {
         orderPPs: analysis.order_product_packages,
         refMeasureCount: analysis.reference_measurements.length,
         analysisResultReleased: analysis.analysis_result?.released,
+        hasResults: this.isSuperAdmin ? !!analysis.analysis_result : (analysis.analysis_result?.released || false)
       });
     }
 
@@ -117,6 +123,10 @@ export default class AppAnalysisSelectionSidebar extends Vue {
 
     AnalysisSelectionService.on(this.plant.id, AnalysisSelectionEvent.SELECT_FIRST, async () => {
       await this.selectAnalysis(true);
+    });
+
+    AnalysisSelectionService.on(this.plant.id, AnalysisSelectionEvent.SIDEBAR_ABSOLUTE, async (absolute) => {
+      this.absolute = absolute;
     });
 
     this.routeQueryHelper.queryChanged(async () => {
@@ -135,6 +145,12 @@ export default class AppAnalysisSelectionSidebar extends Vue {
       
       return;
     }
+
+    const compareViewFinished = !this.compareMode && this.lastSelectedAnalyses.length === 2;
+    if (compareViewFinished && selectedAnalyses.length === 0) {
+      selectedAnalyses = [this.lastSelectedAnalyses[0]];
+    }
+
     this.lastSelectedAnalyses = selectedAnalyses;
 
     if (this.compareMode) {
@@ -167,9 +183,18 @@ export default class AppAnalysisSelectionSidebar extends Vue {
       let selectedAnalysisId: string | undefined = undefined
       if (selectedAnalyses && selectedAnalyses.length > 0) {
         selectedAnalysisId = selectedAnalyses[0].id;
+      } else if (compareViewFinished) {
+        selectedAnalysisId = this.lastSelectedAnalyses[0].id;
       }
 
       await this.routeQueryHelper.replaceRoute({ result: selectedAnalysisId });
+
+      if (compareViewFinished) {
+        // Programmatically select the last newer analysis, if the compare view has been finished by the user
+        this.selectAnalysis();
+        // "selectAnalysis()" reraises onAnalysisSelected. Leave the function here to avoid double emitting.
+        return;
+      }
 
       await AnalysisSelectionService.emit(
         this.plant.id,
@@ -184,29 +209,7 @@ export default class AppAnalysisSelectionSidebar extends Vue {
   }
 
   async onCompareModeChanged() {
-    let selectIndex = -1;
-
-    if (!this.compareMode) {
-      selectIndex = 0;
-      if (this.lastSelectedAnalyses && this.lastSelectedAnalyses.length > 0) {
-        selectIndex = this.analysesTableItems.findIndex(row => row.id === this.lastSelectedAnalyses[0].id);
-      }
-    }
-
     this.selectMode = this.compareMode ? "multi" : "single";
-
-    if (selectIndex >= 0) {
-      // Wait for table reselection
-      for (let i = 0; i < 5; i++) {
-        await this.$nextTick();
-      }
-
-      // this.analysesTable.selectRow(selectIndex);
-    }
-  }
-
-  getKpiColor(keyFigure: KeyFigureSchema): string {
-    return this.getPIColor(keyFigure);
   }
 
   private async selectAnalysis(selectFirst = false): Promise<void> {
@@ -232,11 +235,23 @@ export default class AppAnalysisSelectionSidebar extends Vue {
             tableRowIndex = secondTableRowIndex;
           }
         }        
+      } else if (!analysisId && !selectFirst) {
+        // Select an analysis with results raither then an analysis only with reference measurements
+        for (let i = 0; i < this.analyses.length; i++) {
+          if (this.analyses[i].analysis_result) {
+            tableRowIndex = i;
+            break;
+          }
+        }
       }
 
       await this.$nextTick();
       this.analysesTable.selectRow(tableRowIndex);
     } else {
+      await this.$nextTick();
+      await this.$nextTick();
+      await this.$nextTick();
+
       this.$store.direct.commit.sidebar.set({ name: "analysis", state: false });
     }
   }

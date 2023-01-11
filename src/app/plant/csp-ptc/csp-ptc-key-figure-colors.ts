@@ -7,6 +7,7 @@ export const cspPtcKeyFigureRainbowColors: Record<ApiKeyFigure, KeyFigureColors>
   [ApiKeyFigure.OXYGEN_PENETRATION_ID]: KeyFigureColors.RED_coffeeWithChili,
   [ApiKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID]: KeyFigureColors.RED_solluxCaptor,
   [ApiKeyFigure.COATING_DEGRADATION_ID]: KeyFigureColors.RED_solluxCaptor,
+  [ApiKeyFigure.HOT_GLASS_TUBE_ENDS_ID]: KeyFigureColors.diagramBad,
   [ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID]: KeyFigureColors.RED_retroBerry,
   [ApiKeyFigure.IR_INTENSITY_ID]: KeyFigureColors.RED_retroBerry,
   [ApiKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID]: KeyFigureColors.red,
