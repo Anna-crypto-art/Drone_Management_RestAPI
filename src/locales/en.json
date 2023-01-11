@@ -475,6 +475,7 @@
   "apply-selected-server-action": "Selected server action: ",
   "apply-selected-task-to-run": "Selected task to run: ",
   "apply-are-you-sure": "Are you sure?",
+  "mfa-method": "MFA Method",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

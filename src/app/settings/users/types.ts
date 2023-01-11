@@ -19,6 +19,7 @@ export interface UserItem {
   };
   role: RoleSchema;
   plants: PlantSchema[];
+  authMethod: number;
 }
 
 export interface EditUser {
