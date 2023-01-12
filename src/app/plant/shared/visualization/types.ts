@@ -53,7 +53,7 @@ export interface FeatureInfos {
   title: string;
   records: FeatureInfo[];
   images?: FeatureImage[];
-  actions?: FeatureActions;
+  actionsSummeries?: FeatureActionsSummery[];
 }
 
 export interface FeatureInfo {
@@ -65,7 +65,7 @@ export interface FeatureInfo {
   superAdminOnly?: boolean;
 }
 
-export interface FeatureActions {
+export interface FeatureActionsSummery {
   buttonVariant: string;
   name: string;
   actions: FeatureAction[];

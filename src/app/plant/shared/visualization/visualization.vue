@@ -16,6 +16,9 @@
           <b-form-checkbox v-model="satelliteView" switch @change="onSatelliteViewChanged">
             {{ $t("satellite-view") }}
           </b-form-checkbox>
+          <b-form-checkbox v-if="isSuperAdmin" v-model="enableResultsModification" switch @change="onEnableResultsModificationChanged">
+            {{ $t("enable-results-modification") }} <app-super-admin-marker />
+          </b-form-checkbox>
           <hr v-show="hasLoadedOrthoImages">
           <app-button v-show="hasLoadedOrthoImages"
             variant="secondary"
@@ -97,7 +100,7 @@ import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { ReferenceMeasurementEventObject } from "../reference-measurements/types";
 import AppFeatureInfosToast from "./feature-infos-toast.vue";
 import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-dropdown-button.vue";
-import { waitFor } from "@/app/shared/services/helper/debounce-helper";
+import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -112,6 +115,7 @@ const STORAGE_KEY_SATELLITEVIEW = "storage-key-satelliteview";
     AppReferenceMeasurements,
     AppFeatureInfosToast,
     AppDropdownButton,
+    AppSuperAdminMarker,
   },
 })
 export default class AppVisualization
@@ -156,6 +160,8 @@ export default class AppVisualization
   hasLoadedOrthoImages = false;
   availableOrthoImages: OrthoImage[] = [];
   loadAllOrhtoImagesLoading = false;
+
+  enableResultsModification = false;
 
   private isMounted = false;
   private firstLoad = true;
@@ -483,6 +489,11 @@ export default class AppVisualization
     this.worldMapLayer.reloadLayer = true;
     await this.worldMapLayer.events!.emit("setSelected", false);
     await this.worldMapLayer.events!.emit("setSelected", true);
+  }
+
+  @CatchError()
+  onEnableResultsModificationChanged() {
+    // blub?
   }
 
   @CatchError()
