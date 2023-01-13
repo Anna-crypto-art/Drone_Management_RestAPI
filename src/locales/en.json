@@ -477,6 +477,7 @@
   "apply-are-you-sure": "Are you sure?",
   "mfa-method": "MFA Method",
   "enable-results-modification": "Enable results modification",
+  "cancel-and-use-mfa-with-email-instead": "Cancel & MFA via E-Mail",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

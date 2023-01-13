@@ -5,6 +5,10 @@
         <app-setup-totp :confirmationKey="confirmationKey" v-model="securityCode" />
         
         <app-button type="submit" :loading="loading">{{ $t('verify') }}</app-button>
+        <hr />
+        <app-button type="button" variant='secondary' :loading="cancelLoading" @click="onCancelMfaClick">
+          {{ $t('cancel-and-use-mfa-with-email-instead') }}
+        </app-button>
       </b-form>
     </app-auth-container>
   </div>
@@ -33,12 +37,13 @@ export default class AppRegisterSetupTotp extends BaseComponent {
   securityCode: string | null = null;
 
   loading = false;
+  cancelLoading = false;
 
   created() {
     this.confirmationKey = this.$route.params.confirmKey;
   }
 
-  @CatchError('loading')
+  @CatchError("loading")
   async onSubmit() {
     await volateqApi.verifyTotpCode(this.confirmationKey!, this.securityCode!);
 
@@ -46,7 +51,17 @@ export default class AppRegisterSetupTotp extends BaseComponent {
 
     this.$router.push({ name: "Login" });
   }
-      
+  
+  @CatchError("cancelLoading")
+  async onCancelMfaClick() {
+    if (!confirm(this.$t('apply-are-you-sure').toString())) {
+      return;
+    }
+
+    await volateqApi.cancelSetupTotpMfa(this.confirmationKey!);
+
+    this.$router.push({ name: "Login" });
+  }
 }
 </script>
 
