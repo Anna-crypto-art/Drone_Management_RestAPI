@@ -576,6 +576,10 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/geo-visual/${referenceMeasurementId}/reference-measuurement-values`);
   }
 
+  public async getDronePlantCoverage(analysisId: string): Promise<void> {
+    return this.get(`/auth/analysis/${analysisId}/drone-plant-coverage`);
+  }
+
   public async getDocFiles(): Promise<DocFile[]> {
     return this.get(`/auth/doc/files`);
   }

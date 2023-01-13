@@ -477,6 +477,9 @@
   "apply-are-you-sure": "Are you sure?",
   "mfa-method": "MFA Method",
   "cancel-and-use-mfa-with-email-instead": "Cancel & MFA via E-Mail",
+  "analysis-file-actions": "Analysis files",
+  "check-drone-plant-coverage": "Check plant coverage of uploaded files",
+  "successfully-checked-drone-coverage": "Successfully checked plant coverage of drone files",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

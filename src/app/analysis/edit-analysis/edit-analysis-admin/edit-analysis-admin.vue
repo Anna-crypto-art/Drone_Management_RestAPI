@@ -10,10 +10,17 @@
     </b-row>
     <b-row>
       <b-col sm>
-        <app-delete-analysis :analysis="analysis" />
+        <app-analysis-file-actions :analysis="analysis" />
       </b-col>
       <b-col sm>
         <app-run-q-fly-for-analysis :analysis="analysis" />
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col sm>
+        <app-delete-analysis :analysis="analysis" />
+      </b-col>
+      <b-col sm>
       </b-col>
     </b-row>
   </div>
@@ -26,6 +33,7 @@ import AppUpdateAnalysisState from "@/app/analysis/edit-analysis/edit-analysis-a
 import AppImportAnalysisResult from "@/app/analysis/edit-analysis/edit-analysis-admin/import-analysis-result.vue";
 import AppDeleteAnalysis from "@/app/analysis/edit-analysis/edit-analysis-admin/delete-analysis.vue";
 import AppRunQFlyForAnalysis from "@/app/analysis/edit-analysis/edit-analysis-admin/run-qfly-for-analysis.vue";
+import AppAnalysisFileActions from "@/app/analysis/edit-analysis/edit-analysis-admin/analysis-file-actions.vue";
 
 @Component({
   name: "app-edit-analysis-result-admin",
@@ -34,6 +42,7 @@ import AppRunQFlyForAnalysis from "@/app/analysis/edit-analysis/edit-analysis-ad
     AppImportAnalysisResult,
     AppDeleteAnalysis,
     AppRunQFlyForAnalysis,
+    AppAnalysisFileActions,
   },
 })
 export default class AppEditAnalysisAdmin extends BaseAuthComponent {
