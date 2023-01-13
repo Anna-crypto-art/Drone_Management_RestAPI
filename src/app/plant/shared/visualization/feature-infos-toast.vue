@@ -27,32 +27,37 @@
         </b-col>
       </b-row>
     </div>
-    <div v-if="featureInfos.actions" class="toaster-actions">
-      <app-dropdown-button 
-        :variant="featureInfos.actions.buttonVariant"
-        :title="featureInfos.actions.name"
-        :loading="toastDropdownButtonLoading"
-        size="sm"
-      >
-        <b-dropdown-item-button v-for="action in featureInfos.actions.actions" :key="action.name"
-          @click="onClickFeatureAction(action.name)"
+    <div v-if="featureInfos.actionsSummaries">
+      <div v-for="actionsSummery in featureInfos.actionsSummaries" :key="actionsSummery.name" class="mar-top">
+        <app-dropdown-button
+          :variant="actionsSummery.buttonVariant"
+          :title="actionsSummery.name"
+          :loading="toastDropdownButtonLoadings[actionsSummery.name]"
+          size="sm"
         >
-          {{ action.name }}
-        </b-dropdown-item-button>
-      </app-dropdown-button>
+          <template #title>
+            {{ actionsSummery.name }} <app-super-admin-marker v-if="actionsSummery.superAdminOnly" />
+          </template>
+          <b-dropdown-item-button v-for="action in actionsSummery.actions" :key="action.name"
+            @click="onClickFeatureAction(action)"
+          >
+            {{ action.name }}
+          </b-dropdown-item-button>
+        </app-dropdown-button>
+      </div>
     </div>
   </b-toast>
 </template>
 
 <script lang="ts">
 import { CatchError } from '@/app/shared/services/helper/catch-helper';
-import Vue from 'vue'
 import { Component, Prop } from "vue-property-decorator";
-import { FeatureInfos } from './types';
+import { FeatureAction, FeatureInfos } from './types';
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-dropdown-button.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
+import { BaseComponent } from '@/app/shared/components/base-component/base-component';
 
 @Component({
   name: "app-feature-infos-toast",
@@ -63,15 +68,23 @@ import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/
     AppSuperAdminMarker,
   }
 })
-export default class AppFeatureInfosToast extends Vue {
+export default class AppFeatureInfosToast extends BaseComponent {
   @Prop({ required: true }) toastId!: string;
   @Prop({ required: true }) featureInfos!: FeatureInfos;
 
-  toastDropdownButtonLoading = false;
+  toastDropdownButtonLoadings: Record<string, boolean> = {};
+
+  created() {
+    if (this.featureInfos.actionsSummaries) {
+      for (const actionsSummery of this.featureInfos.actionsSummaries) {
+        this.toastDropdownButtonLoadings[actionsSummery.name] = false;
+      }
+    }
+  }
 
   @CatchError("toastDropdownButtonLoading")
-  async onClickFeatureAction(actionName: string) {
-    await this.featureInfos.actions!.actions.find(action => action.name === actionName)!.action();
+  async onClickFeatureAction(action: FeatureAction) {
+    await action.action();
   }
 }
 </script>
@@ -88,9 +101,6 @@ export default class AppFeatureInfosToast extends Vue {
       max-width: calc(500px - 1.5rem);
     }
     margin-bottom: 0.75rem;
-  }
-  .toaster-actions {
-    margin-top: 15px;
   }
 }
 </style>

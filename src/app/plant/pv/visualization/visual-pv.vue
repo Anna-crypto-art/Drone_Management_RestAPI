@@ -54,5 +54,9 @@ export default class AppVisualPv
   public hideToast(): void {
     this.visualization?.hideToast();
   }
+
+  public get enableResultsModification(): boolean {
+    return this.visualization!.enableResultsModification;
+  }
 }
 </script>
