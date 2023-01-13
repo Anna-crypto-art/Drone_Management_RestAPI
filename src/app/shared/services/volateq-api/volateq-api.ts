@@ -746,6 +746,10 @@ export class VolateqAPI extends HttpClientBase {
     await this.post(`/totp-secrets/${confirmationKey}`, { security_code: securityCode });
   }
 
+  public async cancelSetupTotpMfa(confirmationKey: string): Promise<void> {
+    await this.delete(`/totp-secrets/${confirmationKey}`);
+  }
+
   public async prepareUserChangeAuthMethod(authMethod: UserAuthMethod, password: string): Promise<{confirmation_key: string}> {
     return await this.post(`/auth/user/prepare-change-auth-method`, { auth_method: authMethod, password });
   }
