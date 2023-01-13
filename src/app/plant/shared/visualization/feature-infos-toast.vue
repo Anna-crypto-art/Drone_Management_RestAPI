@@ -1,5 +1,5 @@
 <template>
-  <b-toast :id="toastId" class="app-feature-infos-toast" no-auto-hide solid toaster="b-toaster-bottom-center">
+  <b-toast :id="toastId" toast-class="app-feature-infos-toast" no-auto-hide solid toaster="b-toaster-bottom-center">
     <template #toast-title>
       <h5>{{ featureInfos.title }}</h5>
     </template>

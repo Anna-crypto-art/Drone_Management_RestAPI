@@ -32,6 +32,9 @@
             ><br /><small class="grayed">{{ row.item.customer.name }}</small></span
           >
         </template>
+        <template #cell(authMethod)="row">
+          <app-icon :icon="getAuthMethodIcon(row.item.authMethod)" />
+        </template>
         <template #cell(plants)="row">
           <div v-for="plant in row.item.plants" :key="plant.id">
             {{ plant.name }}
@@ -170,8 +173,9 @@
 import { Component, Ref } from "vue-property-decorator";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
+import AppIcon from "@/app/shared/components/app-icon/app-icon.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { UserSchema, UserStateSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
+import { UserAuthMethod, UserSchema, UserStateSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import { InviteUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { apiRoleNames, ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
@@ -192,6 +196,7 @@ const MAX_USERS_PER_CUSTOMER = 10;
   components: {
     AppTableContainer,
     AppModalForm,
+    AppIcon,
   },
 })
 export default class AppSettingsUsers extends BaseAuthComponent {
@@ -221,6 +226,7 @@ export default class AppSettingsUsers extends BaseAuthComponent {
       { key: "name", label: this.$t("name").toString() },
       { key: "state", label: this.$t("state").toString() },
       { key: "role", label: this.$t("role").toString() },
+      { key: "authMethod", label: this.$t("mfa-method").toString() },
       { key: "plants", label: this.$t("plants").toString() },
       { key: "actions", label: "" },
     ];
@@ -276,6 +282,7 @@ export default class AppSettingsUsers extends BaseAuthComponent {
           },
           role: user.role,
           plants: user.plants || [],
+          authMethod: user.auth_method
         };
       }).sort((a, b) => {
         // SUPER_ADMINS at first
@@ -455,6 +462,16 @@ export default class AppSettingsUsers extends BaseAuthComponent {
     } finally {
       this.editUserLoading = false;
     }
+  }
+
+  getAuthMethodIcon(authMethod: UserAuthMethod): string {
+    switch (authMethod) {
+      case UserAuthMethod.EMAIL:
+        return "envelope";
+      case UserAuthMethod.TOTP:
+        return "phone-fill";
+    }
+    return ""
   }
 
   private getEditUserCustomerPlants(user: UserItem) {

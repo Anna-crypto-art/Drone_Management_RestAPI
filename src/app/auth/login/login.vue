@@ -34,6 +34,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import Vue from "vue";
 import { Component } from "vue-property-decorator";
+import { UserAuthMethod } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 
 @Component({
   name: "app-auth-login",
@@ -61,11 +62,16 @@ export default class AppAuthLogin extends Vue {
     try {
       this.loading = true;
 
-      const confirmationKey = await volateqApi.login(this.email, this.password);
+      const loginResult = await volateqApi.login(this.email, this.password);
+
+      const confirmAuthMethodRoute: Record<UserAuthMethod, string> = { 
+        [UserAuthMethod.EMAIL]: "ConfirmMailLogin",
+        [UserAuthMethod.TOTP]: "ConfirmTOTPLogin",
+      }
 
       this.$router.push({
-        name: "ConfirmLogin",
-        params: { confirmKey: confirmationKey },
+        name: confirmAuthMethodRoute[loginResult.auth_method],
+        params: { confirmKey: loginResult.confirmation_key },
         query: { dest: this.$route.query.dest || "" },
       });
     } catch (e) {

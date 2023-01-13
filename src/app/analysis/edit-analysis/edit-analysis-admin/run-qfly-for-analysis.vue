@@ -83,6 +83,8 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
   get serverInfo(): string {
     if (this.qFlyServer) {
       return this.$t(`SERVER_STATE_${this.qFlyServer.state}`, { server: this.qFlyServer.server?.name }).toString() + 
+        (!this.serverStateUnallocated && this.$t('SERVER_SIZE_STRING', {size: this.qFlyServer?.size.toString()}).toString() ||
+        "") +
         (this.serverStateUnallocated && 
           "<br>" + this.$t('servers-available', { count: this.qFlyServer.servers_available }).toString() ||
           "")
@@ -148,7 +150,24 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
   async runServerAction() {
     this.loading = true;
     try {
-      if (confirm("Are you sure?")) {
+
+      let confirm_text = "";
+      if (!this.tagsChanged && !this.selectedServerAction && !this.selectedTask) {
+        throw { error: "NOTHING_CHANGED_OR_SELECTED", message: "You did not change any tag or select anything to run/do." };
+      } else {
+        if (this.tagsChanged) {
+          confirm_text += this.$t('apply-tags-changed').toString() + "\n\n";
+        }
+        if (this.selectedServerAction) {
+            confirm_text += "\n\n" + this.$t('apply-selected-server-action').toString() + QFlyServerAction[this.selectedServerAction] + "\n\n";
+        }
+        if (this.selectedTask) {
+            confirm_text += "\n\n" + this.$t('apply-selected-task-to-run').toString() + ApiTasks[this.selectedTask] + "\n\n";
+        }
+        confirm_text += this.$t('apply-are-you-sure').toString();
+      }
+
+      if (confirm(confirm_text)) {
         await volateqApi.runQFlyServerAction(this.analysis.id, {
           action: this.selectedServerAction && QFlyServerAction[this.selectedServerAction] || undefined,
           start_task: this.selectedTask && ApiTasks[this.selectedTask] || undefined,

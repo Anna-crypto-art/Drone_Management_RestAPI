@@ -1,6 +1,9 @@
 <template>
   <b-navbar class="app-header" toggleable="lg" type="dark" sticky>
-    <div class="snow"><div class="snow-more"></div></div>
+    
+    <!-- Only for christmas time -->
+    <!-- <div class="snow"><div class="snow-more"></div></div> -->
+
     <b-navbar-brand href="#">
       <b-link to="/">
         <img
@@ -49,6 +52,12 @@
 
           <b-dropdown-divider v-if="isSuperAdmin" />
 
+          <b-dropdown-item href="/settings/user-profile" class="link">
+            {{ $t("user-profile") }} <span clas="pad-left-half"><app-icon icon="person-fill" /></span>
+          </b-dropdown-item>
+
+          <b-dropdown-divider />
+
           <b-dropdown-form>
             <b-button @click="logout" class="width-100pc">{{ $t("logout") }}</b-button>
           </b-dropdown-form>
@@ -88,6 +97,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
+import AppIcon from "@/app/shared/components/app-icon/app-icon.vue";
 import { IAppModalForm } from "../app-modal/types";
 
 @Component({
@@ -96,6 +106,7 @@ import { IAppModalForm } from "../app-modal/types";
     AppSuperAdminMarker,
     AppButton,
     AppModalForm,
+    AppIcon,
   }
 })
 export default class AppHeader extends BaseAuthComponent {
@@ -236,7 +247,9 @@ export default class AppHeader extends BaseAuthComponent {
     }
 
     .nav-link {
-      // background: $blue;
+      @media (max-width: 991px) {
+        background: $blue;
+      }
 
       &:not(.dropdown .nav-link) {
         $transition: 0.2s ease-in-out;

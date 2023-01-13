@@ -1,4 +1,5 @@
 import { ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
+import { UserAuthMethod } from "../api-schemas/user-schemas";
 
 export interface InviteUser {
   email: string;
@@ -13,4 +14,5 @@ export interface RegisterUser {
   last_name?: string;
   password: string;
   repeat_password: string;
+  auth_method: UserAuthMethod | null;
 }

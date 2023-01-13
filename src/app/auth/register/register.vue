@@ -1,6 +1,6 @@
 <template>
   <div class="app-auth-register">
-    <app-auth-container title="">
+    <app-auth-container>
       <div v-if="hasUser">
         <b-form @submit.prevent="onSubmit" autocomplete="off">
           <div v-show="company">
@@ -35,6 +35,7 @@
               required
             ></b-form-input>
           </b-form-group>
+          <app-select-auth-method v-model="user.auth_method" />
           <div>
             <b-form-checkbox id="terms-of-service" v-model="checkedTermsOfService" required>
               <span v-html="$t('accept-terms-of-service')"></span>
@@ -55,17 +56,20 @@ import { Component } from "vue-property-decorator";
 
 import AppAuthContainer from "@/app/auth/shared/components/auth-container.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
+import AppSelectAuthMethod from "@/app/shared/components/app-select-auth-method/app-select-auth-method.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { ApiErrors, ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import authContainerEventBus from "@/app/auth/shared/components/auth-container-event-bus";
 import { Dictionary } from "vue-router/types/router";
+import { UserAuthMethod } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 
 @Component({
   name: "app-auth-register",
   components: {
     AppAuthContainer,
     AppButton,
+    AppSelectAuthMethod
   },
 })
 export default class AppAuthRegister extends Vue {
@@ -85,6 +89,7 @@ export default class AppAuthRegister extends Vue {
         last_name: user.last_name,
         password: "",
         repeat_password: "",
+        auth_method: null,
       };
       this.email = user.email;
       this.company = (user.customer && user.customer.name) || "";
@@ -113,6 +118,11 @@ export default class AppAuthRegister extends Vue {
       return;
     }
 
+    if (this.user.auth_method === null) {
+      this.showAlert({ error: "AUTHENTICATION_METHOD_REQUIRED" });
+      return;
+    }
+
     if (!this.checkedTermsOfService) {
       this.showAlert({ error: "ACCEPT_TERMS_OF_SERVICE" });
       return;
@@ -121,9 +131,12 @@ export default class AppAuthRegister extends Vue {
     try {
       this.loading = true;
 
-      await volateqApi.registerUser(this.$route.params.confirmKey, this.user);
-
-      this.$router.push({ name: "Login" });
+      const confirmKey = await volateqApi.registerUser(this.$route.params.confirmKey, this.user);
+      if (this.user.auth_method === UserAuthMethod.TOTP) {
+        this.$router.push({ name: "RegisterTOTP", params: { confirmKey: confirmKey.confirmation_key! }});
+      } else {
+        this.$router.push({ name: "Login" });
+      }
     } catch (e) {
       this.showAlert(e as ApiException);
     }
