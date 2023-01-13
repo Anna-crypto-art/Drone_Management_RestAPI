@@ -479,6 +479,7 @@
   "enable-results-modification": "Enable results modification",
   "cancel-and-use-mfa-with-email-instead": "Cancel & MFA via E-Mail",
   "set-to-null": "Set to NULL",
+  "modify": "Modify",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",
