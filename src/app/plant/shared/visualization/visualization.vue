@@ -16,7 +16,7 @@
           <b-form-checkbox v-model="satelliteView" switch @change="onSatelliteViewChanged">
             {{ $t("satellite-view") }}
           </b-form-checkbox>
-          <b-form-checkbox v-if="isSuperAdmin" v-model="enableResultsModification" switch @change="onEnableResultsModificationChanged">
+          <b-form-checkbox v-if="isSuperAdmin" v-model="enableResultsModification" switch>
             {{ $t("enable-results-modification") }} <app-super-admin-marker />
           </b-form-checkbox>
           <hr v-show="hasLoadedOrthoImages">
@@ -489,11 +489,6 @@ export default class AppVisualization
     this.worldMapLayer.reloadLayer = true;
     await this.worldMapLayer.events!.emit("setSelected", false);
     await this.worldMapLayer.events!.emit("setSelected", true);
-  }
-
-  @CatchError()
-  onEnableResultsModificationChanged() {
-    // blub?
   }
 
   @CatchError()

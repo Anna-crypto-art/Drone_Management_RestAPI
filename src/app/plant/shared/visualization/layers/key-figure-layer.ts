@@ -200,6 +200,10 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
 
             this.orhtoImageMixin.addShowOrthoImageActions(featureInfos);
 
+            if (this.vueComponent.enableResultsModification) {
+              await this.addResultsModificationFeatureAction(featureInfos!);
+            }
+
             return featureInfos;
           }
         }
@@ -257,5 +261,33 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   
   public getComponentId() {
     return this.keyFigure.component_id;
+  }
+
+  private async addResultsModificationFeatureAction(featureInfos: FeatureInfos) {
+    if (!featureInfos.actionsSummaries) {
+      featureInfos.actionsSummaries = [];
+    }
+
+    featureInfos.actionsSummaries.push({
+      superAdminOnly: true,
+      buttonVariant: "secondary",
+      name: this.vueComponent.$t("modify").toString(),
+      actions: [
+        {
+          name: this.vueComponent.$t("set-to-null").toString(),
+          action: async () => {
+            const transName = this.keyFigureInfo.keyName || this.keyFigureInfo.displayName;
+            const mappingHelper = new AnalysisResultMappingHelper(this.analysisResultMapping, this.analysisResult);
+            const entry = mappingHelper.getEntries().find(e => e.transName === transName);
+
+            await volateqApi.setAnalysisResultValueToNull(this.analysisResult.id, {
+              key_figure_id: this.keyFigureId,
+              kks: featureInfos.title,
+              property_name: entry ? mappingHelper.getPropertyName(entry) : undefined,
+            });
+          }
+        }
+      ]
+    });
   }
 }
