@@ -506,7 +506,7 @@
   "SERVER_STATE_UNALLOCATED": "No QFly server allocated",
   "SERVER_STATE_STOPPED": "<b>{server}</b> is stopped",
   "SERVER_STATE_RUNNING": "<b>{server}</b> is running",
-  "SERVER_SIZE_STRING": " ({size})",
+  "SERVER_INSTANCE_TYPE_VOLUME_SIZE_STRING": "({instance_type}, {volume_size} GB)",
   "SERVER_ACTION_ALLOCATE": "Allocate a QFly server",
   "SERVER_ACTION_ALLOCATE_AND_START": "Allocate and start a QFly server",
   "SERVER_ACTION_START": "Start server",

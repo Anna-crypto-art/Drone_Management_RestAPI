@@ -29,7 +29,6 @@ export interface ServerTag {
 export interface ServerSchema {
   name: string;
   tags: ServerTag[];
-  size: string;
 }
 
 export interface QFlyServerSchema {
@@ -38,5 +37,6 @@ export interface QFlyServerSchema {
   state: QFlyServerState;
   actions: QFlyServerAction[];
   servers_available?: number;
-  size: string;
+  instance_type?: string;
+  volume_size?: number;
 }
