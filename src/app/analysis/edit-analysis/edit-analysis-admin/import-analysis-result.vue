@@ -41,7 +41,7 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { AnalysisResultFileSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-file-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
-import { AnalysisEventService } from "../../shared/analysis-event-service";
+import { analysisEventService } from "../../shared/analysis-event-service";
 import { AnalysisEvent } from "../../shared/types";
 import { TaskSchema } from "@/app/shared/services/volateq-api/api-schemas/task-schema";
 import { ApiTasks } from "@/app/shared/services/volateq-api/api-tasks";
@@ -76,12 +76,12 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
   async created() {
     await this.setManageImportFiles();
 
-    AnalysisEventService.on(this.analysis.id, AnalysisEvent.RUN_ANALYSIS_TASK, (task: TaskSchema) => {
+    analysisEventService.on(this.analysis.id, AnalysisEvent.RUN_ANALYSIS_TASK, (task: TaskSchema) => {
       if (task.name === ApiTasks.import_analysis_results) {
         this.loading = true;
       }
     });
-    AnalysisEventService.on(this.analysis.id, AnalysisEvent.FINISHED_ANALYSIS_TASK, (task: TaskSchema) => {
+    analysisEventService.on(this.analysis.id, AnalysisEvent.FINISHED_ANALYSIS_TASK, (task: TaskSchema) => {
       if (task.name === ApiTasks.import_analysis_results) {
         this.loading = false;
 
@@ -90,7 +90,7 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
         }
       }
     });
-    AnalysisEventService.on(this.analysis.id, AnalysisEvent.QFLY_SERVER_STATE_CHANGED, (state: QFlyServerState) => {
+    analysisEventService.on(this.analysis.id, AnalysisEvent.QFLY_SERVER_STATE_CHANGED, (state: QFlyServerState) => {
       this.showAlertInfo = state === QFlyServerState.RUNNING;
     })
   }
@@ -136,7 +136,7 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
           this.imageFilesZip?.name,
         );
 
-        AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS);
+        analysisEventService.emit(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS);
 
         if (this.imageFilesZip) {
           await volateqApi.uploadImportAnalysisResultImageFiles(
@@ -162,7 +162,7 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
     this.showSuccess(this.$t("success-managing-result-files").toString());
     this.loading = false;
 
-    AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
+    analysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
   }
 }
 </script>

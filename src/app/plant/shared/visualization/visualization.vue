@@ -95,7 +95,7 @@ import { OrhtoImageMixin } from "./mixins/ortho-image-mixin";
 import AppReferenceMeasurements from "../reference-measurements/reference-measurements.vue";
 import { RouteQueryHelper } from "../helper/route-query-helper";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
-import { SequentialEventEmitter } from "@/app/shared/services/sequential-event-emitter/sequential-event-emitter";
+import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/sequential-event-emitter";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { ReferenceMeasurementEventObject } from "../reference-measurements/types";
 import AppFeatureInfosToast from "./feature-infos-toast.vue";

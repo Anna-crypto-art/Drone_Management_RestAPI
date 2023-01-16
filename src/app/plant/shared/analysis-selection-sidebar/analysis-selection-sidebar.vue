@@ -60,7 +60,7 @@ import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant
 import { BvTableFieldArray } from "bootstrap-vue";
 import { Component, Prop, Ref } from "vue-property-decorator";
 import { State } from "vuex-class";
-import { AnalysisSelectionService } from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-service";
+import { analysisSelectEventService } from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-service";
 import { AnalysisSelectionEvent } from "./types";
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import { RouteQueryHelper } from "../helper/route-query-helper";
@@ -117,15 +117,15 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
 
     await this.selectAnalysis();
 
-    AnalysisSelectionService.on(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL, async () => {
+    analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL, async () => {
       this.analysesTable.clearSelected();
     });
 
-    AnalysisSelectionService.on(this.plant.id, AnalysisSelectionEvent.SELECT_FIRST, async () => {
+    analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.SELECT_FIRST, async () => {
       await this.selectAnalysis(true);
     });
 
-    AnalysisSelectionService.on(this.plant.id, AnalysisSelectionEvent.SIDEBAR_ABSOLUTE, async (absolute) => {
+    analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.SIDEBAR_ABSOLUTE, async (absolute) => {
       this.absolute = absolute;
     });
 
@@ -173,7 +173,7 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
 
         await this.routeQueryHelper.replaceRoute({ result: selectedAnalysisIds });
 
-        await AnalysisSelectionService.emit(
+        await analysisSelectEventService.emit(
           this.plant.id,
           AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED,
           selectedAnalysisIds
@@ -196,7 +196,7 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
         return;
       }
 
-      await AnalysisSelectionService.emit(
+      await analysisSelectEventService.emit(
         this.plant.id,
         AnalysisSelectionEvent.ANALYSIS_SELECTED,
         selectedAnalysisId

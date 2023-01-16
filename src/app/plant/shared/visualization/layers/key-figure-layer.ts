@@ -276,6 +276,10 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
         {
           name: this.vueComponent.$t("set-to-null").toString(),
           action: async () => {
+            if (!confirm(this.vueComponent.$t("apply-are-you-sure").toString())) {
+              return;
+            }
+
             const transName = this.keyFigureInfo.keyName || this.keyFigureInfo.displayName;
             const mappingHelper = new AnalysisResultMappingHelper(this.analysisResultMapping, this.analysisResult);
             const entry = mappingHelper.getEntries().find(e => e.transName === transName);
@@ -285,6 +289,12 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
               kks: featureInfos.title,
               property_name: entry ? mappingHelper.getPropertyName(entry) : undefined,
             });
+
+            this.reloadLayer();
+            await this.setSelected(false);
+            await this.setSelected(true);
+
+            this.vueComponent.hideToast();
           }
         }
       ]

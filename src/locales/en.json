@@ -480,6 +480,9 @@
   "cancel-and-use-mfa-with-email-instead": "Cancel & MFA via E-Mail",
   "set-to-null": "Set to NULL",
   "modify": "Modify",
+  "modification-history": "Modification history",
+  "changed-at": "Changed at",
+  "previous-value": "Prev. value",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

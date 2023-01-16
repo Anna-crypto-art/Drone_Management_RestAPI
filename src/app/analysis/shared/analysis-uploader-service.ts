@@ -1,7 +1,7 @@
 import volateqApi from "../../shared/services/volateq-api/volateq-api";
 import { UploaderService } from "../../shared/services/upload-service/uploader-service";
 import { i18n } from "@/main";
-import { AnalysisEventService } from "./analysis-event-service";
+import { analysisEventService } from "./analysis-event-service";
 import { AnalysisEvent } from "./types";
 
 export class AnalysisUploaderService extends UploaderService {
@@ -59,7 +59,7 @@ export class AnalysisUploaderService extends UploaderService {
     await this.createAnalysisUpload();
 
     if (this.analysisId) {
-      AnalysisEventService.emit(this.analysisId, AnalysisEvent.UPDATE_ANALYSIS);
+      analysisEventService.emit(this.analysisId, AnalysisEvent.UPDATE_ANALYSIS);
     }
 
     await this.startUpload();

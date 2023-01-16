@@ -73,7 +73,7 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppDownloadAnalysisFiles from "@/app/analysis/edit-analysis/download-analysis-files.vue";
 import AppEditAnalysisAdmin from "@/app/analysis/edit-analysis/edit-analysis-admin/edit-analysis-admin.vue";
 import AppUploadAnalysisFiles from "@/app/analysis/edit-analysis/upload-analysis-files.vue";
-import { AnalysisEventService } from "@/app/analysis/shared/analysis-event-service";
+import { analysisEventService } from "@/app/analysis/shared/analysis-event-service";
 import { AnalysisEvent } from "../shared/types";
 import { TaskSchema } from "@/app/shared/services/volateq-api/api-schemas/task-schema";
 import { AppContentEventService } from "@/app/shared/components/app-content/app-content-event-service";
@@ -116,7 +116,7 @@ export default class AppEditAnalysis extends BaseAuthComponent {
   async created() {
     await this.updateAnalysis(this.$route.params.id);
 
-    AnalysisEventService.on(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS, () => {
+    analysisEventService.on(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS, () => {
       this.updateAnalysis(this.analysis!.id)
     });
   }
@@ -214,12 +214,12 @@ export default class AppEditAnalysis extends BaseAuthComponent {
             AppContentEventService.showSuccess(this.analysis!.id, volateqApi.getTaskOutputAsMessage(task))
           }
 
-          AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.FINISHED_ANALYSIS_TASK, task);
+          analysisEventService.emit(this.analysis!.id, AnalysisEvent.FINISHED_ANALYSIS_TASK, task);
         },
         (task: TaskSchema) => {
           AppContentEventService.showInfo(this.analysis!.id, volateqApi.getTaskOutputAsMessage(task, this.$t("wait-for-start").toString()));
 
-          AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.RUN_ANALYSIS_TASK, task)
+          analysisEventService.emit(this.analysis!.id, AnalysisEvent.RUN_ANALYSIS_TASK, task)
         }
       )
     }
@@ -234,7 +234,7 @@ export default class AppEditAnalysis extends BaseAuthComponent {
 
     this.showSuccess(this.$t("analysis-updated-successfully").toString());
 
-    AnalysisEventService.emit(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS);
+    analysisEventService.emit(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS);
   }
 }
 </script>

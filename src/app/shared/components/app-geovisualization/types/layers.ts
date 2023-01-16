@@ -3,7 +3,7 @@ import VectorLayer from "ol/layer/Vector";
 import VectorImageLayer from "ol/layer/VectorImage";
 import VectorSource from "ol/source/Vector";
 import { StyleFunction } from "ol/style/Style";
-import { SequentialEventEmitter } from "@/app/shared/services/sequential-event-emitter/sequential-event-emitter";
+import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/sequential-event-emitter";
 
 export interface BaseLayerType {
   name: string;

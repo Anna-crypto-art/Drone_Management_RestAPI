@@ -67,7 +67,7 @@ import { BvTableFieldArray } from "bootstrap-vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
-import { AnalysisEventService } from "../../shared/analysis-event-service";
+import { analysisEventService } from "../../shared/analysis-event-service";
 import { AnalysisEvent } from "../../shared/types";
 import AppReferenceMeasurementValues from "./reference-measurement-values.vue";
 import dateHelper from "@/app/shared/services/helper/date-helper";
@@ -143,7 +143,7 @@ export default class AppAnalysisReferenceMeasurements extends BaseAuthComponent 
 
       await this.updateRefMeasurements();
 
-      AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
+      analysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
 
       this.moveModal.hide();
     } catch (e) {
@@ -167,7 +167,7 @@ export default class AppAnalysisReferenceMeasurements extends BaseAuthComponent 
       
       await this.updateRefMeasurements();
 
-      AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
+      analysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
     } catch (e) {
       this.showError(e);
     } finally {

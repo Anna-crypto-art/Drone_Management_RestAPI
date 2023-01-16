@@ -85,7 +85,7 @@ import { AppContentEventService } from "@/app/shared/components/app-content/app-
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
-import { AnalysisEventService } from "../shared/analysis-event-service";
+import { analysisEventService } from "../shared/analysis-event-service";
 import { AnalysisEvent } from "../shared/types";
 
 @Component({
@@ -215,7 +215,7 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
 
       this.showSuccess(this.$t("selected-files-moved-success").toString())
 
-      AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
+      analysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
     } catch (e) {
       this.showError(e);
     } finally {
@@ -238,7 +238,7 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
 
       this.showSuccess(this.$t("selected-files-deleted-success").toString())
 
-      AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
+      analysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
     } catch (e) {
       this.showError(e);
     } finally {
