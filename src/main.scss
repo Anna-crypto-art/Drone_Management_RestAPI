@@ -76,18 +76,7 @@ form [type="submit"] {
   margin-left: 5px;
 }
 
-.b-table-selectable-checkbox {
-  .custom-control-label {
-    cursor: pointer;
-  }
-  .custom-control-input:disabled:checked ~ .custom-control-label::before {
-    background-color: $blue;
-  }
-  .custom-control-input[disabled] ~ .custom-control-label::before,
-  .custom-control-input:disabled ~ .custom-control-label::before {
-    background-color: #fff;
-  }
-}
+
 
 .font-xl {
   font-size: 2em;

@@ -23,30 +23,12 @@
       </app-table-filter>
       <div class="clear"></div>
       <app-table-container>
-        <b-table
-          hover
-          :fields="columns"
-          :items="analysisRows"
-          head-variant="light"
-          show-empty
-          :emptyText="$t('no-data')"
-          :busy="isLoading"
+        <app-table
+          :columns="columns"
+          :rows="analysisRows"
+          :loading="isLoading"
+          :hoverActions="true"
         >
-          <template #table-busy>
-            <div class="text-center">
-              <b-spinner class="align-middle"></b-spinner>
-            </div>
-          </template>
-          <template #empty="scope">
-            <span class="grayed">{{ scope.emptyText }}</span>
-          </template>
-
-          <template #head(actions)>
-            <span class="hidden">{{ $t("actions") }}</span>
-          </template>
-          <template #head(customer)>
-            {{ $t("customer") }} <app-super-admin-marker />
-          </template>
           <template #cell(name)="row">
             <router-link :to="{ name: 'EditAnalysis', params: { id: row.item.id } }">{{ row.item.name }}</router-link>
             <div>
@@ -74,28 +56,28 @@
             </div>
             <div v-else>UNKNOWN</div>
           </template>
+
           <template #cell(productPackages)="row">
             <app-order-pps-view :orderProductPackages="row.item.productPackages" />
           </template>
-          <template #cell(actions)="row">
-            <div class="hover-cell pull-right">
-              <router-link
-                v-if="hasReadableResult(row.item)"
-                :title="$t('show-results')"
-                :to="{
-                  name: 'Plant',
-                  params: { id: row.item.plantId },
-                  query: { view: 'map', result: row.item.id },
-                }"
-              >
-                <b-button variant="primary" size="sm">
-                  <app-icon-analysis />
-                </b-button>
-              </router-link>
-            </div>
-            <div class="clearfix"></div>
+
+          <template #hoverActions="row">
+            <router-link
+              v-if="hasReadableResult(row.item)"
+              :title="$t('show-results')"
+              :to="{
+                name: 'Plant',
+                params: { id: row.item.plantId },
+                query: { view: 'map', result: row.item.id },
+              }"
+            >
+              <b-button variant="primary" size="sm">
+                <app-icon-analysis />
+              </b-button>
+            </router-link>
           </template>
-        </b-table>
+
+        </app-table>
       </app-table-container>
     </div>
   </app-content>
@@ -106,9 +88,9 @@ import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import AppModalFormInfoArea from "@/app/shared/components/app-modal/app-modal-form-info-area.vue";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
+import AppTable from "@/app/shared/components/app-table/app-table.vue";
 import AppTableFilter from "@/app/shared/components/app-table-filter/app-table-filter.vue";
 import AppOrderPpsView from "@/app/shared/components/app-order-pps-view/app-order-pps-view.vue";
-import { BvTableFieldArray } from "bootstrap-vue";
 import { Component } from "vue-property-decorator";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
 import { sortAlphabetical } from "../shared/services/helper/sort-helper";
@@ -119,6 +101,8 @@ import { ApiStates } from "../shared/services/volateq-api/api-states";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
 import volateqApi from "../shared/services/volateq-api/volateq-api";
+import { AppTableColumns } from "../shared/components/app-table/types";
+import { CatchError } from "../shared/services/helper/catch-helper";
 
 @Component({
   name: "app-analysis",
@@ -131,10 +115,11 @@ import volateqApi from "../shared/services/volateq-api/volateq-api";
     AppOrderPpsView,
     AppSuperAdminMarker,
     AppIconAnalysis,
+    AppTable,
   },
 })
 export default class AppAnalysis extends BaseAuthComponent {
-  columns: BvTableFieldArray = [];
+  columns: AppTableColumns = [];
 
   plants!: PlantSchema[];
   plantSelection: Array<any> | null = null;
@@ -161,11 +146,15 @@ export default class AppAnalysis extends BaseAuthComponent {
       },
       { key: "state", label: this.$t("state").toString(), sortable: true },
       { key: "productPackages", label: this.$t("product-packages").toString() },
-      { key: "actions" },
     ];
 
     if (this.isSuperAdmin) {
-      this.columns.push({ key: "customer", label: this.$t("customer").toString(), sortable: true });
+      this.columns.push({ 
+        key: "customer",
+        label: this.$t("customer").toString(),
+        sortable: true,
+        superAdminOnly: true,
+      });
     }
 
     await this.getPlants();
@@ -225,54 +214,44 @@ export default class AppAnalysis extends BaseAuthComponent {
     }
   }
 
+  @CatchError("isLoading")
   private async updateAnalysisRows() {
-    this.isLoading = true;
-
-    try {
-      const analysisFilter: { plant_id?: string, customer_id?: string } = {};
-      if (this.selectedPlantId) {
-        analysisFilter.plant_id = this.selectedPlantId;
-      }
-      
-      this.analysisRows = (await volateqApi.getAllAnalysis(analysisFilter)).map((a: AnalysisSchema) => {
-        const row = {
-          id: a.id,
-          name: a.name,
-          date: a.flown_at,
-          user:
-            (a.user && {
-              userName: ((a.user.first_name || "") + " " + (a.user.last_name || "")).trim(),
-              email: a.user.email,
-            }) ||
-            "",
-          analysisResult: a.analysis_result,
-          state: a.current_state,
-          files: a.files,
-          plantId: a.plant.id,
-          plant: a.plant.name,
-          customer: a.customer.name,
-          productPackages: a.order_product_packages,
-        };
-
-        return row;
-      });
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.isLoading = false;
+    const analysisFilter: { plant_id?: string, customer_id?: string } = {};
+    if (this.selectedPlantId) {
+      analysisFilter.plant_id = this.selectedPlantId;
     }
+    
+    this.analysisRows = (await volateqApi.getAllAnalysis(analysisFilter)).map((a: AnalysisSchema) => {
+      const row = {
+        id: a.id,
+        name: a.name,
+        date: a.flown_at,
+        user:
+          (a.user && {
+            userName: ((a.user.first_name || "") + " " + (a.user.last_name || "")).trim(),
+            email: a.user.email,
+          }) ||
+          "",
+        analysisResult: a.analysis_result,
+        state: a.current_state,
+        files: a.files,
+        plantId: a.plant.id,
+        plant: a.plant.name,
+        customer: a.customer.name,
+        productPackages: a.order_product_packages,
+      };
+
+      return row;
+    });
   }
 
+  @CatchError()
   private async getPlants() {
-    try {
-      this.plants = sortAlphabetical(await volateqApi.getPlants(), "name");
-      // Hide the filter if one plant is available
-      if (this.plants.length > 1) {
-        this.plantSelection = this.plants.map(plant => ({ value: plant.id, text: plant.name }));
-        this.plantSelection.unshift({ value: null, text: "" });
-      }
-    } catch (e) {
-      this.showError(e);
+    this.plants = sortAlphabetical(await volateqApi.getPlants(), "name");
+    // Hide the filter if one plant is available
+    if (this.plants.length > 1) {
+      this.plantSelection = this.plants.map(plant => ({ value: plant.id, text: plant.name }));
+      this.plantSelection.unshift({ value: null, text: "" });
     }
   }
 }
