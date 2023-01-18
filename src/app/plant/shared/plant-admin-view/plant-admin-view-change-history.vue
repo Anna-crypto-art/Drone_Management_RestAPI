@@ -1,27 +1,23 @@
 <template>
   <div class="app-plant-admin-view-change-history">
     <app-box :title="$t('modification-history')">
-      <b-table 
-        :fields="analysisResultChangeHistoryColumns"
-        :items="analysisResultChangeHistoryRows"
-        head-variant="light"
-        hover
-        :busy="loading"
+      <app-table 
+        :columns="analysisResultChangeHistoryColumns"
+        :rows="analysisResultChangeHistoryRows"
+        :loading="loading"
+        :hoverActions="true"
       >
-        <template #cell(actions)="row">
-          <div class="hover-cell pull-right">
-            <app-button
-              @click="onUndoClick(row.item)"
-              variant="danger"
-              size="sm"
-              :title="$t('undo')"
-              icon="arrow-bar-left"
-              :loading="loadingUndo"
-            />
-          </div>
-          <div class="clearfix"></div>
+        <template #hoverActions="row">
+          <app-button
+            @click="onUndoClick(row.item)"
+            variant="outline-danger"
+            size="sm"
+            :title="$t('undo')"
+            icon="arrow-bar-left"
+            :loading="loadingUndo"
+          />
         </template>
-      </b-table>
+      </app-table>
     </app-box>
   </div>
 </template>
@@ -30,15 +26,17 @@
 import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component'
 import { Component, Prop, Watch } from "vue-property-decorator";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
+import AppTable from "@/app/shared/components/app-table/app-table.vue";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import { AnalysisResultDetailedSchema } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-schema';
 import volateqApi from '@/app/shared/services/volateq-api/volateq-api';
-import { BvTableFieldArray } from 'bootstrap-vue';
 import { KeyFigureTypeMap } from '../visualization/types';
 import { ApiKeyFigure } from '@/app/shared/services/volateq-api/api-key-figures';
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import { CatchError } from '@/app/shared/services/helper/catch-helper';
-import { analysisSelectEventService } from '../analysis-selection-sidebar/analysis-selection-service';
+import { analysisResultEventService } from './analysis-result-event-service';
+import { AnalysisResultEvent } from './types';
+import { AppTableColumns } from '@/app/shared/components/app-table/types';
 
 
 @Component({
@@ -46,6 +44,7 @@ import { analysisSelectEventService } from '../analysis-selection-sidebar/analys
   components: {
     AppBox,
     AppButton,
+    AppTable,
   }
 })
 export default class AppPlantAdminViewChangeHistory extends BaseAuthComponent {
@@ -53,9 +52,10 @@ export default class AppPlantAdminViewChangeHistory extends BaseAuthComponent {
   @Prop({ required: true }) layers!: KeyFigureTypeMap[];
   
   analysisResultChangeHistoryRows: any[] = [];
-  analysisResultChangeHistoryColumns: BvTableFieldArray = [];
+  analysisResultChangeHistoryColumns: AppTableColumns = [];
 
   loading = false;
+  loadingUndo = false;
 
   async created() {
     this.analysisResultChangeHistoryColumns = [
@@ -63,26 +63,40 @@ export default class AppPlantAdminViewChangeHistory extends BaseAuthComponent {
       { key: "pcs", label: this.$t("pcs").toString() },
       { key: "prevVal", label: this.$t("previous-value").toString() },
       { key: "changedAt", label: this.$t("changed-at").toString() },
-      { key: "actions" },
     ];
 
-    this.refreshAnalysisResultChangeHistory();
-
-    // analysisSelectEventService.on()
+    await this.onAnalysisResultChanged();
   }
 
   @Watch("analysisResult")
+  async onAnalysisResultChanged() {
+    await this.analysisResultChanged();
+
+    if (this.analysisResult) {
+      const eventAddedAlready = !!analysisResultEventService.getListeners(this.analysisResult.id, AnalysisResultEvent.MODIFIED)
+        .find(fn => fn === this.analysisResultChanged)
+
+      if (!eventAddedAlready) {
+        analysisResultEventService.on(this.analysisResult.id, AnalysisResultEvent.MODIFIED, this.analysisResultChanged)
+      }
+    }
+  }
+
   async analysisResultChanged() {
     await this.refreshAnalysisResultChangeHistory();
   }
 
   @CatchError("loadingUndo")
-  async onUndoClick() {
-    if (!confirm("apply-are-you-sure")) {
+  async onUndoClick(row: any) {
+    if (!confirm(this.$t("apply-are-you-sure").toString())) {
       return;
     }
 
+    await volateqApi.undoAnalysisResultValueChange(row.id);
 
+    this.showSuccess(this.$t("Undo successfull").toString());
+
+    analysisResultEventService.emit(this.analysisResult!.id, AnalysisResultEvent.MODIFIED);
   }
 
   @CatchError("loading")
@@ -92,6 +106,7 @@ export default class AppPlantAdminViewChangeHistory extends BaseAuthComponent {
     }
 
     this.analysisResultChangeHistoryRows = (await volateqApi.getAnalysisResultChangeHistory(this.analysisResult.id)).map((hist => ({
+      id: hist.id,
       keyFigureId: this.getKeyFigureName(hist.key_figure_id),
       pcs: hist.kks,
       prevVal: hist.previous_value,

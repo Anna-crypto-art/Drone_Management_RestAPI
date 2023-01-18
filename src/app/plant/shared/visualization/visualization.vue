@@ -101,6 +101,8 @@ import { ReferenceMeasurementEventObject } from "../reference-measurements/types
 import AppFeatureInfosToast from "./feature-infos-toast.vue";
 import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-dropdown-button.vue";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
+import { analysisResultEventService } from "../plant-admin-view/analysis-result-event-service";
+import { AnalysisResultEvent } from "../plant-admin-view/types";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -183,6 +185,14 @@ export default class AppVisualization
     layerEvents.onRemoveOrthoImages(() => {
       this.hasLoadedOrthoImages = false;
     });
+
+    for (const analysis of this.analyses) {
+      if (analysis.analysis_result) {
+        analysisResultEventService.on(analysis.analysis_result.id, AnalysisResultEvent.MODIFIED, async () => {
+          await this.piLayersHierarchy!.reselectAllLayers(this.enableMultiSelection);
+        });
+      }
+    }
 
     this.routeQueryHelper.queryChanged(async () => { await this.loadQueryPi(); });
   }

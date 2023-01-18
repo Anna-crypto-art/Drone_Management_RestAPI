@@ -1,4 +1,4 @@
-import { EventEmitter } from "events";
+import { EventEmitter } from "./event-emitter";
 import { SequentialEventEmitter } from "./sequential-event-emitter";
 import { EventCallbackFunction, IEventEmitter, Event } from "./types";
 
@@ -17,6 +17,10 @@ export abstract class AppEventServiceBase<E extends Event, T extends IEventEmitt
 
   public on(id: string, event: E, func: EventCallbackFunction): void {
     this.getEventEmitter(id).on(event, func);
+  }
+
+  public getListeners(id: string, event: E): Function[] {
+    return this.getEventEmitter(id).getListeners(event);
   }
 
   public abstract emit(id: string, event: E, ...args: any[]): boolean | Promise<boolean>;

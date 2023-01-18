@@ -14,6 +14,8 @@ import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/g
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { OrhtoImageMixin } from "../mixins/ortho-image-mixin";
 import { IOrthoImageMixin } from "../mixins/types";
+import { analysisResultEventService } from "../../plant-admin-view/analysis-result-event-service";
+import { AnalysisResultEvent } from "../../plant-admin-view/types";
 
 export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends LayerBase implements IOrthoImageMixin {
   protected abstract readonly analysisResultMapping: AnalysisResultMappings<T>;
@@ -295,6 +297,8 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
             await this.setSelected(true);
 
             this.vueComponent.hideToast();
+
+            analysisResultEventService.emit(this.analysisResult.id, AnalysisResultEvent.MODIFIED);
           }
         }
       ]

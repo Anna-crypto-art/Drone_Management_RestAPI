@@ -22,4 +22,8 @@ export class SequentialEventEmitter implements IEventEmitter {
 
     return false;
   }
+
+  public getListeners(event: string): EventCallbackFunction[] {
+    return this.registeredEvents[event];
+  }
 }
