@@ -482,6 +482,7 @@
   "check-drone-plant-coverage": "Check plant coverage of uploaded files",
   "successfully-checked-drone-coverage": "Successfully checked plant coverage of drone files",
   "set-to-null": "Set to NULL",
+  "set-to-false": "Set to False",
   "modify": "Modify",
   "modification-history": "Modification history",
   "changed-at": "Changed at",

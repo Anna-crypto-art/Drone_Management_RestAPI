@@ -4,7 +4,7 @@ import { LayerBase } from "./layer-base";
 import { FeatureLike } from "ol/Feature";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { KeyFigureColors, KeyFigureColorScheme, KeyFigureInfo, OrthoImage } from "./types";
-import { FeatureInfo, FeatureInfos, FeatureProperties, Legend, IPlantVisualization, FeatureAction, PropsFeature } from "../types";
+import { FeatureInfo, FeatureInfos, FeatureProperties, Legend, IPlantVisualization, FeatureAction, PropsFeature, FeatureActionsSummary } from "../types";
 import { AnalysisResultMappingEntry, AnalysisResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
@@ -16,6 +16,7 @@ import { OrhtoImageMixin } from "../mixins/ortho-image-mixin";
 import { IOrthoImageMixin } from "../mixins/types";
 import { analysisResultEventService } from "../../plant-admin-view/analysis-result-event-service";
 import { AnalysisResultEvent } from "../../plant-admin-view/types";
+import { FilterFieldType } from "../../filter-fields/types";
 
 export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends LayerBase implements IOrthoImageMixin {
   protected abstract readonly analysisResultMapping: AnalysisResultMappings<T>;
@@ -270,7 +271,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
       featureInfos.actionsSummaries = [];
     }
 
-    featureInfos.actionsSummaries.push({
+    const actionsSummary: FeatureActionsSummary = {
       superAdminOnly: true,
       buttonVariant: "secondary",
       name: this.vueComponent.$t("modify").toString(),
@@ -278,30 +279,46 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
         {
           name: this.vueComponent.$t("set-to-null").toString(),
           action: async () => {
-            if (!confirm(this.vueComponent.$t("apply-are-you-sure").toString())) {
-              return;
-            }
-
-            const transName = this.keyFigureInfo.keyName || this.keyFigureInfo.displayName;
-            const mappingHelper = new AnalysisResultMappingHelper(this.analysisResultMapping, this.analysisResult);
-            const entry = mappingHelper.getEntries().find(e => e.transName === transName);
-
-            await volateqApi.setAnalysisResultValueToNull(this.analysisResult.id, {
-              key_figure_id: this.keyFigureId,
-              kks: featureInfos.title,
-              property_name: entry ? mappingHelper.getPropertyName(entry) : undefined,
-            });
-
-            this.reloadLayer();
-            await this.setSelected(false);
-            await this.setSelected(true);
-
-            this.vueComponent.hideToast();
-
-            analysisResultEventService.emit(this.analysisResult.id, AnalysisResultEvent.MODIFIED);
+            await this.modfiyFeatureResultAction(featureInfos, "null");
           }
+        },
+      ],
+    }
+
+    const entry = this.getMappingEntry();
+    if (entry?.filterType === FilterFieldType.BOOLEAN) {
+      actionsSummary.actions.push({
+        name: this.vueComponent.$t("set-to-false").toString(),
+        action: async () => {
+          await this.modfiyFeatureResultAction(featureInfos, "false");
         }
-      ]
+      })
+    }
+
+    featureInfos.actionsSummaries.push(actionsSummary);
+  }
+
+  private async modfiyFeatureResultAction(featureInfos: FeatureInfos, newValue: "null" | "false") {
+    if (!confirm(this.vueComponent.$t("apply-are-you-sure").toString())) {
+      return;
+    }
+
+    const mappingHelper = new AnalysisResultMappingHelper(this.analysisResultMapping, this.analysisResult);
+    const entry = this.getMappingEntry();
+
+    await volateqApi.setAnalysisResultValueToNullOrFalse(this.analysisResult.id, {
+      key_figure_id: this.keyFigureId,
+      kks: featureInfos.title,
+      property_name: entry ? mappingHelper.getPropertyName(entry) : undefined,
+      new_value: newValue,
     });
+
+    this.reloadLayer();
+    await this.setSelected(false);
+    await this.setSelected(true);
+
+    this.vueComponent.hideToast();
+
+    analysisResultEventService.emit(this.analysisResult.id, AnalysisResultEvent.MODIFIED);
   }
 }

@@ -33,7 +33,7 @@ import { MultiselectOption } from "../../components/app-multiselect/types";
 import { MyUploadingUpload, SecuredFilename, Upload, UploadChunkResult } from "./api-schemas/upload-schemas";
 import { CreateAnalysisUploadRequest } from "./api-requests/upload-requests";
 import { ja, th } from "date-fns/locale";
-import { AnalysisResultSetNullRequest } from "./api-requests/analysis-result-requests";
+import { AnalysisResultSetNullOrFalseRequest } from "./api-requests/analysis-result-requests";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -767,7 +767,7 @@ export class VolateqAPI extends HttpClientBase {
     });
   }
 
-  public async setAnalysisResultValueToNull(analysisResultId: string, setNullRequest: AnalysisResultSetNullRequest): Promise<void> {
+  public async setAnalysisResultValueToNullOrFalse(analysisResultId: string, setNullRequest: AnalysisResultSetNullOrFalseRequest): Promise<void> {
     await this.post(`/auth/analysis-result/${analysisResultId}/set-null`, setNullRequest);
   }
 
