@@ -19,7 +19,7 @@ export abstract class AppEventServiceBase<E extends Event, T extends IEventEmitt
     this.getEventEmitter(id).on(event, func);
   }
 
-  public getListeners(id: string, event: E): Function[] {
+  public getListeners(id: string, event: E): EventCallbackFunction[] {
     return this.getEventEmitter(id).getListeners(event);
   }
 
