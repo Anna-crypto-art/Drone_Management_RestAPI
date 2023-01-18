@@ -1,16 +1,16 @@
 <template>
   <app-content :title="$t('analysis-overview')" :subtitle="$t('analysis-overview_descr')">
     <div class="app-analysis">
-      <b-button variant="primary" v-if="hasCompleteAnalysesOnly" @click="onNewDataUploadClick">
+      <app-button variant="primary" v-if="hasCompleteAnalysesOnly" @click="onNewDataUploadClick">
         {{ $t("new-data-upload") }}
-      </b-button>
+      </app-button>
       <b-alert :show="!!incompleteAnalysis" variant="info" class="mar-bottom-2x">
         <span v-if="incompleteAnalysis" v-html="$t('new-upload-not-allowed_descr', { analysis: incompleteAnalysis.name })"></span>
       </b-alert>
       <router-link v-if="incompleteAnalysis" :to="{ name: 'EditAnalysis', params: { id: incompleteAnalysis.id } }"> 
-        <b-button variant="primary">
+        <app-button variant="primary">
           {{ $t("upload-data-for-analysis", { analysis: incompleteAnalysis.name }) }}
-        </b-button>
+        </app-button>
       </router-link>
       <app-table-filter v-show="plantSelection">
         <label for="plants">{{ $t("plant") }}</label>
@@ -71,9 +71,9 @@
                 query: { view: 'map', result: row.item.id },
               }"
             >
-              <b-button variant="primary" size="sm">
+              <app-button variant="primary" size="sm">
                 <app-icon-analysis />
-              </b-button>
+              </app-button>
             </router-link>
           </template>
 
@@ -103,6 +103,7 @@ import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.
 import volateqApi from "../shared/services/volateq-api/volateq-api";
 import { AppTableColumns } from "../shared/components/app-table/types";
 import { CatchError } from "../shared/services/helper/catch-helper";
+import AppButton from "@/app/shared/components/app-button/app-button.vue";
 
 @Component({
   name: "app-analysis",
@@ -116,6 +117,7 @@ import { CatchError } from "../shared/services/helper/catch-helper";
     AppSuperAdminMarker,
     AppIconAnalysis,
     AppTable,
+    AppButton,
   },
 })
 export default class AppAnalysis extends BaseAuthComponent {

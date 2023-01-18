@@ -31,7 +31,7 @@
             <app-button class="pull-left mar-right" type="submit" style="margin-top: 0 !important;">
               {{ $t("apply") }}
             </app-button>
-            <b-button variant="outline-danger" class="pull-left" @click="onReset">{{ $t("reset") }}</b-button>
+            <app-button variant="outline-danger" class="pull-left" @click="onReset">{{ $t("reset") }}</app-button>
             <div class="clear"></div>
           </b-col>
         </b-row>

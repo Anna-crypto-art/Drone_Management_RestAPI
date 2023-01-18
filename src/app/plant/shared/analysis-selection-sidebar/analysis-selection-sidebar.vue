@@ -12,20 +12,13 @@
           </b-checkbox>
         </div>
         <app-table-container>
-          <b-table
+          <app-table
             ref="analysesTable"
-            :items="analysesTableItems"
-            :fields="analysesTableColumns"
-            :select-mode="selectMode"
-            selectable
-            hover
-            head-variant="light"
-            @row-selected="onAnalysisSelected"
+            :rows="analysesTableItems"
+            :columns="analysesTableColumns"
+            :selectMode="selectMode"
+            @rowSelected="onAnalysisSelected"
           >
-            <template #head(selected)></template>
-            <template #cell(selected)="{ rowSelected }">
-              <b-checkbox v-if="compareMode" :checked="rowSelected" disabled class="b-table-selectable-checkbox"></b-checkbox>
-            </template>
             <template #cell(name)="row">
               {{ row.item.date }} 
               <app-icon v-if="!row.item.hasResults"
@@ -45,7 +38,7 @@
                 <app-order-pps-view :orderProductPackages="row.item.orderPPs" :lefted="true" />
               </div>
             </template>
-          </b-table>
+          </app-table>
         </app-table-container>
       </div>
     </app-sidebar>
@@ -57,7 +50,6 @@ import AppExplanation from "@/app/shared/components/app-explanation/app-explanat
 import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { BvTableFieldArray } from "bootstrap-vue";
 import { Component, Prop, Ref } from "vue-property-decorator";
 import { State } from "vuex-class";
 import { analysisSelectEventService } from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-service";
@@ -67,9 +59,10 @@ import { RouteQueryHelper } from "../helper/route-query-helper";
 import AppOrderPpsView from "@/app/shared/components/app-order-pps-view/app-order-pps-view.vue";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import AppIcon from "@/app/shared/components/app-icon/app-icon.vue";
+import AppTable from "@/app/shared/components/app-table/app-table.vue";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { waitFor } from "@/app/shared/services/helper/debounce-helper";
+import { AppTableColumns, IAppSelectTable } from "@/app/shared/components/app-table/types";
 
 @Component({
   name: "app-analysis-selection-sidebar",
@@ -80,16 +73,16 @@ import { waitFor } from "@/app/shared/services/helper/debounce-helper";
     AppOrderPpsView,
     AppIcon,
     AppSuperAdminMarker,
+    AppTable,
   },
 })
 export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
-  @Ref() analysesTable!: any; // b-table
+  @Ref() analysesTable!: IAppSelectTable;
   @State(state => state.sidebar["analysis"]) sidebarOpen!: boolean;
 
-  analysesTableColumns: BvTableFieldArray = [
-    { key: "selected", label: "",  },
+  analysesTableColumns: AppTableColumns = [
     { key: "name", label: this.$t("analysis").toString() },
   ];
   analysesTableItems: Record<string, unknown>[] = [];
@@ -300,10 +293,6 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
   }
   &-kpi-badge {
     padding-right: 5px;
-  }
-
-  .b-table-details {
-    cursor: default !important;
   }
 }
 </style>

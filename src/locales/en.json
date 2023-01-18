@@ -483,6 +483,7 @@
   "modification-history": "Modification history",
   "changed-at": "Changed at",
   "previous-value": "Prev. value",
+  "no-files-uploaded": "No files uploaded",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

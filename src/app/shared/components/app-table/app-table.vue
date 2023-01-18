@@ -1,6 +1,7 @@
 <template>
   <div class="app-table">
     <b-table
+      :id="id"
       ref="appTable"
       :fields="fields"
       :items="rows"
@@ -11,10 +12,13 @@
       :select-mode="selectMode"
       @row-selected="onRowSelected"
 
+      :per-page="perPage"
+      :current-page="currentPage"
+
       head-variant="light"
       show-empty
     >
-      <template #table-busy>
+      <template v-if="loading !== null" #table-busy>
         <div class="text-center">
           <b-spinner class="align-middle"></b-spinner>
         </div>
@@ -57,7 +61,7 @@
 import Vue from "vue";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 import { Component, Prop, Ref, Watch } from "vue-property-decorator";
-import { AppTableColumns, IAppSelectTable } from "./types";
+import { AppTableColumns, IAppSelectTable, IAppTable } from "./types";
 
 @Component({
   name: "app-table",
@@ -65,23 +69,25 @@ import { AppTableColumns, IAppSelectTable } from "./types";
     AppSuperAdminMarker,
   }
 })
-export default class AppTable extends Vue implements IAppSelectTable {
+export default class AppTable extends Vue implements IAppSelectTable, IAppTable {
   @Prop({ required: true }) columns!: AppTableColumns;
   @Prop({ default: [] }) rows!: Array<any>;
+  @Prop({ default: null }) id!: string | null;
   @Prop({ default: true }) hover!: boolean;
   @Prop({ default: "" }) emptyText!: string;
-  @Prop({ default: false }) loading!: boolean;
+  @Prop({ default: false }) loading!: boolean | null;
   @Prop({ default: false }) hoverActions!: boolean;
+
+  @Prop({ default: null }) perPage!: number | null;
+  @Prop({ default: null }) currentPage!: number | null;
   
   @Prop({ default: null }) selectMode!: 'single' | 'multi' | null;
   @Prop({ default: 0 }) maxRowSelectoin!: number;
   @Prop({ default: false }) selectAllColumns!: boolean;
 
-  @Ref() appTable!: IAppSelectTable;
+  @Ref() appTable!: IAppSelectTable & IAppTable;
 
   fields!: AppTableColumns;
-
-  allFilesSelected = false;
 
   created() {
     this.onColumnsChanged();
@@ -132,6 +138,9 @@ export default class AppTable extends Vue implements IAppSelectTable {
   selectAllRows() {
     this.appTable.selectAllRows()
   }
+  async refresh() {
+    this.appTable.refresh();
+  }
 }
 </script>
 
@@ -145,6 +154,7 @@ export default class AppTable extends Vue implements IAppSelectTable {
     border: 1px solid $border-color-grey;
     border-top: none;
     background-color: $white;
+    
   }
   .table.no-border {
     border: none !important;
@@ -159,8 +169,11 @@ export default class AppTable extends Vue implements IAppSelectTable {
       }
     }
     
-    tbody tr:hover {
+    tbody tr:hover:not(.b-table-empty-row) {
       border-left: 2px solid $blue-60pc;
+    }
+    tbody > tr.b-table-empty-row {
+      cursor: default;
     }
   }
 

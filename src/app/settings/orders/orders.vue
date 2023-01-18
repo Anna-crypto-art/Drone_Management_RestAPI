@@ -1,9 +1,9 @@
 <template>
   <div class="app-settings-orders">
     <div class="app-settings-orders-table-toolbar">
-      <b-button variant="primary" @click="onCreateOrderClick">
+      <app-button variant="primary" @click="onCreateOrderClick">
         {{ $t("create-order") }}
-      </b-button>
+      </app-button>
       <app-table-filter>
         <label for="plants">{{ $t("plant") }}</label>
         <b-form-select
@@ -24,12 +24,7 @@
       </app-table-filter>
     </div>
     <app-table-container size="sm">
-      <b-table :fields="columns" :items="rows" head-variant="light" hover :busy="loading">
-        <template #table-busy>
-          <div class="text-center">
-            <b-spinner class="align-middle"></b-spinner>
-          </div>
-        </template>
+      <app-table :columns="columns" :rows="rows" :loading="loading" :hoverActions="true">
         <template #cell(orderType)="row">
           {{ orderTypes[row.item.orderType] }}
         </template>
@@ -39,27 +34,23 @@
         <template #cell(userCreatedUpdated)="row">
           <small class="text-grey" v-html="row.item.userCreatedUpdated"></small>
         </template>
-        <template #cell(actions)="row">
-          <div class="hover-cell pull-right">
-            <b-button
-              @click="onEditOrderClick(row.item)"
-              variant="secondary"
-              size="sm"
-              :title="$t('edit-order')"
-            >
-              <b-icon icon="wrench" />
-            </b-button>
-            <b-button
-              @click="onDeleteOrderClick(row.item)"
-              variant="outline-danger"
-              size="sm"
-              :title="$t('delete-order')"
-            >
-              <b-icon icon="trash"></b-icon>
-            </b-button>
-          </div>
+        <template #hoverActions="row">
+          <app-button
+            @click="onEditOrderClick(row.item)"
+            variant="secondary"
+            size="sm"
+            :title="$t('edit-order')"
+            icon="wrench"
+          />
+          <app-button
+            @click="onDeleteOrderClick(row.item)"
+            variant="outline-danger"
+            size="sm"
+            :title="$t('delete-order')"
+            icon="trash"
+          />
         </template>
-      </b-table>
+      </app-table>
     </app-table-container>
     <app-modal-form
       id="edit-order-modal"
@@ -141,7 +132,6 @@ import AppTableFilter from "@/app/shared/components/app-table-filter/app-table-f
 import AppOrderPpsView from "@/app/shared/components/app-order-pps-view/app-order-pps-view.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
-import { BvTableFieldArray } from "bootstrap-vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
@@ -153,6 +143,8 @@ import { ProductPackagesQuantities } from "./types";
 import { MultiselectOption } from "@/app/shared/components/app-multiselect/types";
 import { ProductPackageWithKeyFiguresSchema } from "@/app/shared/services/volateq-api/api-schemas/product-package";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
+import AppTable from "@/app/shared/components/app-table/app-table.vue";
+import { AppTableColumns } from "@/app/shared/components/app-table/types";
 
 @Component({
   name: "app-settings-orders",
@@ -163,10 +155,11 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
     AppTableFilter,
     AppOrderPpsView,
     AppButton,
+    AppTable,
   },
 })
 export default class AppSettingsOrders extends BaseAuthComponent {
-  columns: BvTableFieldArray = [];
+  columns: AppTableColumns = [];
   rows: any[] = [];
 
   orderTypes: Record<OrderType, string> | null = null;
@@ -211,7 +204,6 @@ export default class AppSettingsOrders extends BaseAuthComponent {
       { key: "endDate", label: this.$t("end-date").toString() },
       { key: "productPackages", label: this.$t("product-packages").toString() },
       { key: "userCreatedUpdated", label: this.$t("last-changed").toString() },
-      { key: "actions", label: "" },
     ];
     
     this.productPackages = await volateqApi.getProductPackagesWithKeyFigures();

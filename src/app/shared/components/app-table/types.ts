@@ -12,3 +12,7 @@ export interface IAppSelectTable {
   clearSelected(): void;
   selectAllRows(): void;
 }
+
+export interface IAppTable {
+  refresh(): Promise<void>;
+}

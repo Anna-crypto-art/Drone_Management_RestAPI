@@ -9,15 +9,14 @@
         />
       </b-col>
       <b-col cols="2">
-        <b-button variant="outline-danger" size="sm" @click="onRemove(filterField)"><b-icon icon="x" /></b-button>
+        <app-button variant="outline-danger" size="sm" @click="onRemove(filterField)" icon="x" />
       </b-col>
     </b-row>
     <b-row class="mar-bottom">
       <b-col v-show="addable">
-        <b-button variant="secondary" @click="onAdd" size="sm">
-          <b-icon icon="plus" />
+        <app-button variant="secondary" @click="onAdd" size="sm" icon="plus">
           <slot name="addButton" />
-        </b-button>
+        </app-button>
       </b-col>
     </b-row>
   </div>
@@ -34,7 +33,7 @@ import AppFilterField from "@/app/plant/shared/filter-fields/filter-field.vue";
   name: "app-filter-fields",
   components: {
     AppButton,
-    AppFilterField
+    AppFilterField,
   },
 })
 export default class AppFilterFields extends Vue {

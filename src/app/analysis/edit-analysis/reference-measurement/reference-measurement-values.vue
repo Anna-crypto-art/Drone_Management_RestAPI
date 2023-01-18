@@ -1,33 +1,23 @@
 <template>
   <div v-show="refMeasureId">
     <app-table-container>
-      <b-table
-        :items="refMeasureValueItems"
-        :fields="refMeasureValueColumns"
-        hover
-        head-variant="light"
-        :busy="loading"
+      <app-table
+        :rows="refMeasureValueItems"
+        :columns="refMeasureValueColumns"
+        :loading="loading"
+        :hoverActions="true"
       >
-        <template #table-busy>
-          <div class="text-center">
-            <b-spinner class="align-middle"></b-spinner>
-          </div>
+        <template #hoverActions="row">
+          <app-button
+            v-show="isSuperAdmin"
+            @click="onIgnoreClick(row.item)"
+            variant="secondary"
+            size="sm"
+            :title="row.item.ignored ? $t('ignore-value-undo') : $t('ignore-value')"
+            :icon="row.item.ignored ? 'plus-circle' : 'dash-circle'"
+          />
         </template>
-        <template #cell(actions)="row">
-          <div class="hover-cell pull-right">
-            <b-button
-              v-show="isSuperAdmin"
-              @click="onIgnoreClick(row.item)"
-              variant="secondary"
-              size="sm"
-              :title="row.item.ignored ? $t('ignore-value-undo') : $t('ignore-value')"
-            >
-              <b-icon v-if="row.item.ignored" icon="plus-circle"></b-icon>
-              <b-icon v-if="!row.item.ignored" icon="dash-circle"></b-icon>
-            </b-button>
-          </div>
-        </template>
-      </b-table>
+      </app-table>
     </app-table-container>
   </div>
 </template>
@@ -36,14 +26,17 @@
 import { Component, Prop, Ref, Watch } from "vue-property-decorator";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
-import { BvTableFieldArray } from "bootstrap-vue";
+import AppTable from "@/app/shared/components/app-table/app-table.vue";
+import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { ReferenceMeasurementSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
+import { AppTableColumns } from "@/app/shared/components/app-table/types";
 
 @Component({
   name: "app-reference-measurement-values",
   components: {
-    AppTableContainer
+    AppTableContainer,
+    AppTable,
+    AppButton,
   }
 })
 export default class AppReferenceMeasurementValues extends BaseAuthComponent {
@@ -52,13 +45,12 @@ export default class AppReferenceMeasurementValues extends BaseAuthComponent {
   loading = false;
 
   refMeasureValueItems: Array<any> = [];
-  refMeasureValueColumns: BvTableFieldArray = [
+  refMeasureValueColumns: AppTableColumns = [
     { key: "pcs", label: this.$t("pcs").toString() },
     { key: "absorberTemperature", label: this.$t("glass-tube-temperature").toString() },
     { key: "brokenGlass", label: this.$t("missing-gct").toString() },
     { key: "notes", label: this.$t("notes").toString() },
     { key: "ignored", label: this.$t("ignored").toString() },
-    { key: "actions", label: "" },
   ];
 
   async created() {

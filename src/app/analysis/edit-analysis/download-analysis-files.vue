@@ -33,6 +33,7 @@
         :loading="isFilesLoading"
         selectMode="multi"
         :selectAllColumns="true"
+        :emptyText="$t('no-files-uploaded')"
         @rowSelected="onDownloadFilesSelected"
       >
         <template #cell(uploadedAt)="row">
@@ -63,7 +64,6 @@ import AppTableContainer from "@/app/shared/components/app-table-container/app-t
 import AppTable from "@/app/shared/components/app-table/app-table.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
-import { BvTableFieldArray } from "bootstrap-vue";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { getReadableFileSize } from "@/app/shared/services/helper/file-helper";
@@ -75,6 +75,7 @@ import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import { analysisEventService } from "../shared/analysis-event-service";
 import { AnalysisEvent } from "../shared/types";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
+import { AppTableColumns } from "@/app/shared/components/app-table/types";
 
 @Component({
   name: "app-download-analysis-files",
@@ -93,8 +94,7 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
   isDownloadButtonDisabled = true;
   downloadButtonLoading = false;
 
-  downloadFilesTableColumns: BvTableFieldArray = [
-    { key: "selected", label: "" },
+  downloadFilesTableColumns: AppTableColumns = [
     { key: "name", label: this.$t("name").toString() },
     { key: "size", label: this.$t("size").toString() },
     { key: "uploadedAt", label: this.$t("uploaded-at").toString() },
