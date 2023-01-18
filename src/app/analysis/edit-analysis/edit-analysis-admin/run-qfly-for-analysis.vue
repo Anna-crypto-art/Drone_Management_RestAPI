@@ -85,8 +85,8 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
       return this.$t(`SERVER_STATE_${this.qFlyServer.state}`, { server: this.qFlyServer.server?.name }).toString() +
         (!this.serverStateUnallocated &&
           " " + this.$t('SERVER_INSTANCE_TYPE_VOLUME_SIZE_STRING', {
-            instance_type: this.qFlyServer.instance_type,
-            volume_size: this.qFlyServer.volume_size?.toString() }).toString() ||
+            instance_type: this.qFlyServer.server?.instance_type,
+            volume_size: this.qFlyServer.server?.volume_size.toString() }).toString() ||
         "") +
         (this.serverStateUnallocated && 
           "<br>" + this.$t('servers-available', { count: this.qFlyServer.servers_available }).toString() ||
