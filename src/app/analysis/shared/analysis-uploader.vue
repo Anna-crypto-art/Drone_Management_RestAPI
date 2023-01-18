@@ -31,7 +31,7 @@ import { AnalysisUploaderService } from "@/app/analysis/shared/analysis-uploader
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { Component, Prop, Ref, Watch } from "vue-property-decorator";
-import { AnalysisEventService } from "./analysis-event-service";
+import { analysisEventService } from "./analysis-event-service";
 import { AnalysisEvent } from "./types";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 
@@ -136,7 +136,7 @@ export default class AppAnalysisUploader extends BaseAuthComponent {
 
     await volateqApi.updateAnalysis(analysis.id, { data_complete: this.dataComplete });
 
-    AnalysisEventService.emit(analysis.id, AnalysisEvent.UPDATE_ANALYSIS); 
+    analysisEventService.emit(analysis.id, AnalysisEvent.UPDATE_ANALYSIS); 
   }
 
   @CatchError()

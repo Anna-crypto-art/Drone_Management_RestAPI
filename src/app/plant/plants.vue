@@ -4,35 +4,12 @@
       <app-button variant="secondary" @click="onCreatePlantClick()" :superAdminProtected="true">{{ $t('create-plant') }}</app-button>
     </div>
     <app-table-container>
-      <b-table
-        hover
-        :fields="columns"
-        :items="plants"
-        head-variant="light"
-        show-empty
-        :emptyText="$t('no-data')"
-        :busy="tableLoading"
+      <app-table
+        :columns="columns"
+        :rows="plants"
+        :loading="tableLoading"
+        :hoverActions="true"
       >
-        <template #table-busy>
-          <div class="text-center">
-            <b-spinner class="align-middle"></b-spinner>
-          </div>
-        </template>
-
-        <template #head(customerNames)>
-          {{ $t("customers") }} <app-super-admin-marker />
-        </template>
-        <template #head(established)>
-          {{ $t("established") }} <app-super-admin-marker />
-        </template>
-        <template #head(technology)>
-          {{ $t("technology") }} <app-super-admin-marker />
-        </template>
-
-        <template #head(actions)>
-          <span class="hidden">{{ $t("actions") }}</span>
-        </template>
-
         <template #cell(name)="row">
           <router-link v-show="row.item.digitized" :to="{ name: 'Plant', params: { id: row.item.id } }">
             <span translate="no">{{ row.item.name }}</span>
@@ -49,47 +26,44 @@
         </template>
 
         <template #cell(digitized)="row">
-          <b-icon :class="row.item.digitized ? 'green' : 'red'" :icon="row.item.digitized ? 'check2' : 'x'"></b-icon>
+          <app-icon :cls="row.item.digitized ? 'green' : 'red'" :icon="row.item.digitized ? 'check2' : 'x'" />
         </template>
         <template #cell(established)="row">
-          <b-icon
-            :class="row.item.established ? 'green' : 'red'"
+          <app-icon
+            :cls="row.item.established ? 'green' : 'red'"
             :icon="row.item.established ? 'check2' : 'x'"
-          ></b-icon>
+          />
         </template>
-        <template #cell(actions)="row">
-          <div class="hover-cell pull-right">
-            <app-button
-              v-show="isSuperAdmin"
-              @click="onManagePlantClick(row.item)"
-              variant="secondary"
-              size="sm"
-              :title="$t('upload-dt')"
-              icon="hammer"
-              :superAdminProtected="true"
-            />
-            <app-button
-              v-show="isSuperAdmin"
-              @click="onEditPlantClick(row.item)"
-              variant="secondary"
-              size="sm"
-              :title="$t('edit-plant')"
-              icon="wrench"
-              :superAdminProtected="true"
-            />
-            <app-button
-              v-show="isSuperAdmin"
-              @click="onDeletePlantClick(row.item)"
-              variant="outline-danger"
-              size="sm"
-              :title="$t('delete-plant')"
-              icon="trash"
-              :superAdminProtected="true"
-            />
-          </div>
-          <div class="clearfix"></div>
+        <template #hoverActions="row">
+          <app-button
+            v-show="isSuperAdmin"
+            @click="onManagePlantClick(row.item)"
+            variant="secondary"
+            size="sm"
+            :title="$t('upload-dt')"
+            icon="hammer"
+            :superAdminProtected="true"
+          />
+          <app-button
+            v-show="isSuperAdmin"
+            @click="onEditPlantClick(row.item)"
+            variant="secondary"
+            size="sm"
+            :title="$t('edit-plant')"
+            icon="wrench"
+            :superAdminProtected="true"
+          />
+          <app-button
+            v-show="isSuperAdmin"
+            @click="onDeletePlantClick(row.item)"
+            variant="outline-danger"
+            size="sm"
+            :title="$t('delete-plant')"
+            icon="trash"
+            :superAdminProtected="true"
+          />
         </template>
-      </b-table>
+      </app-table>
     </app-table-container>
 
     <app-modal-form
@@ -178,7 +152,6 @@
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
-import { BvTableFieldArray } from "bootstrap-vue";
 import { Component, Ref } from "vue-property-decorator";
 import { IAppModalForm } from "../shared/components/app-modal/types";
 import { BaseAuthComponent } from "../shared/components/base-auth-component/base-auth-component";
@@ -187,6 +160,8 @@ import { FieldgeometrySchema } from "../shared/services/volateq-api/api-schemas/
 import volateqApi from "../shared/services/volateq-api/volateq-api";
 import { EditPlant, PlantItem } from "./types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue"
+import AppTable from "@/app/shared/components/app-table/app-table.vue"
+import AppIcon from "@/app/shared/components/app-icon/app-icon.vue"
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 import AppModalFormInfoArea from "../shared/components/app-modal/app-modal-form-info-area.vue";
 import AppOrderPpsView from "@/app/shared/components/app-order-pps-view/app-order-pps-view.vue";
@@ -194,6 +169,7 @@ import { sortAlphabetical } from "../shared/services/helper/sort-helper";
 import { CatchError } from "../shared/services/helper/catch-helper";
 import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
 import { OrderProductPackageSchema, OrderSchema } from "../shared/services/volateq-api/api-schemas/order-schema";
+import { AppTableColumns } from "../shared/components/app-table/types";
 
 @Component({
   name: "app-plants",
@@ -205,13 +181,15 @@ import { OrderProductPackageSchema, OrderSchema } from "../shared/services/volat
     AppSuperAdminMarker,
     AppModalFormInfoArea,
     AppOrderPpsView,
+    AppTable,
+    AppIcon,
   },
 })
 export default class AppPlants extends BaseAuthComponent {
   @Ref() managePlantModal!: IAppModalForm;
   plantModalLoading = false;
 
-  columns: BvTableFieldArray | null = null;
+  columns: AppTableColumns | null = null;
   plants: PlantItem[] | null = null;
 
   tableLoading = false;
@@ -242,11 +220,9 @@ export default class AppPlants extends BaseAuthComponent {
     ];
 
     if (this.isSuperAdmin) {
-      this.columns.push({ key: "established", label: this.$t("established").toString() });
-      this.columns.push({ key: "technology", label: this.$t("technology").toString() });
-      this.columns.push({ key: "customerNames", label: this.$t("customers").toString() });
-      this.columns.push({ key: "actions" });
-
+      this.columns.push({ key: "established", label: this.$t("established").toString(), superAdminOnly: true });
+      this.columns.push({ key: "technology", label: this.$t("technology").toString(), superAdminOnly: true });
+      this.columns.push({ key: "customerNames", label: this.$t("customers").toString(), superAdminOnly: true });
 
       this.customers = [
         { value: null, text: "" },

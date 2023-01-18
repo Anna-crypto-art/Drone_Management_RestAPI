@@ -13,17 +13,14 @@
           </b-form-checkbox>
         </template>
       </app-table-component-filter>
-      <b-table
+      <app-table
         :id="tableName"
-        hover
-        :fields="columns"
-        :items="dataProvider"
-        class="bordered"
+        :columns="columns"
+        :rows="dataProvider"
         ref="table"
-        head-variant="light"
-        :emptyText="$t('no-data')"
-        :per-page="pagination.perPage"
-        :current-page="pagination.currentPage"
+        :perPage="pagination.perPage"
+        :currentPage="pagination.currentPage"
+        :loading="null"
       >
         <template #head()="column">
           {{ column.label }}
@@ -35,7 +32,7 @@
           {{ data.value }}
           <span v-if="compareAnalysisResult" v-html="getComparedCellValue(data)"></span>
         </template>
-      </b-table>
+      </app-table>
     </app-table-component-container>
   </div>
 </template>
@@ -45,13 +42,14 @@ import { Component, Prop, Ref, Watch } from "vue-property-decorator";
 import { BvTableCtxObject } from "bootstrap-vue";
 import AppTableComponentContainer from "@/app/plant/shared/table-component/table-component-container.vue";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
+import AppTable from "@/app/shared/components/app-table/app-table.vue";
 import { ITableComponentContainer } from "./types";
 import { IActiveComponent } from "../types";
 import { ITableComponent } from "./types";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
-import { AnalysisResultMappings, BvTableFieldExtArray } from "@/app/shared/services/volateq-api/api-results-mappings/types";
+import { AnalysisResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { TableFilterRequest, TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import AppTableComponentFilter from "@/app/plant/shared/table-component/table-filter.vue";
@@ -60,6 +58,7 @@ import { MathHelper } from "@/app/shared/services/helper/math-helper";
 import { TableResultSchema } from "@/app/shared/services/volateq-api/api-schemas/table-result-schema";
 import { BvTableCellData } from "@/app/shared/types";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { AppTableColumns, IAppTable } from "@/app/shared/components/app-table/types";
 
 @Component({
   name: "app-table-component",
@@ -67,6 +66,7 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
     AppTableComponentContainer,
     AppExplanation,
     AppTableComponentFilter,
+    AppTable,
   },
 })
 export default class AppTableComponent extends BaseAuthComponent implements ITableComponent {
@@ -75,9 +75,9 @@ export default class AppTableComponent extends BaseAuthComponent implements ITab
   @Prop({ required: true }) activeComponent!: IActiveComponent;
   @Prop({ default: null }) compareAnalysisResult!: AnalysisResultDetailedSchema | null;
   @Ref() container!: ITableComponentContainer;
-  @Ref() table!: any;
+  @Ref() table!: IAppTable;
 
-  columns: BvTableFieldExtArray = [];
+  columns: AppTableColumns = [];
   tableName!: string;
 
   pagination = { currentPage: 1, perPage: 10, total: 0 };

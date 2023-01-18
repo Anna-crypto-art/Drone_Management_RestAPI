@@ -9,7 +9,7 @@ import { AddReferenceMeasurmentValue, CreateReferenceMeasurement, NewAnalysis, N
 import { CreatePlantRequest, UpdatePlantRequest } from "./api-requests/plant-requests";
 import { AnalysisFileInfoSchema, AnalysisForViewSchema, AnalysisSchema, SimpleAnalysisSchema } from "./api-schemas/analysis-schema";
 import { PlantSchema } from "./api-schemas/plant-schema";
-import { AnalysisResultDetailedSchema } from "./api-schemas/analysis-result-schema";
+import { AnalysisResultChangeHistorySchema, AnalysisResultDetailedSchema } from "./api-schemas/analysis-result-schema";
 import { TableFilterRequest, TableRequest } from "./api-requests/common/table-requests";
 import { AnalysisResultFileSchema } from "./api-schemas/analysis-result-file-schema";
 import { ApiComponent } from "./api-components/api-components";
@@ -33,6 +33,7 @@ import { MultiselectOption } from "../../components/app-multiselect/types";
 import { MyUploadingUpload, SecuredFilename, Upload, UploadChunkResult } from "./api-schemas/upload-schemas";
 import { CreateAnalysisUploadRequest } from "./api-requests/upload-requests";
 import { ja, th } from "date-fns/locale";
+import { AnalysisResultSetNullRequest } from "./api-requests/analysis-result-requests";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -764,6 +765,18 @@ export class VolateqAPI extends HttpClientBase {
       security_code: securityCode,
       new_security_code: newSecurityCode,
     });
+  }
+
+  public async setAnalysisResultValueToNull(analysisResultId: string, setNullRequest: AnalysisResultSetNullRequest): Promise<void> {
+    await this.post(`/auth/analysis-result/${analysisResultId}/set-null`, setNullRequest);
+  }
+
+  public async getAnalysisResultChangeHistory(analysisResultId: string): Promise<AnalysisResultChangeHistorySchema[]> {
+    return await this.get(`/auth/analysis-result/${analysisResultId}/change-history`);
+  }
+
+  public async undoAnalysisResultValueChange(analysisResultChangeHistoryId: string): Promise<void> {
+    await this.post(`/auth/analysis-result-change-history/${analysisResultChangeHistoryId}/undo`);
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {

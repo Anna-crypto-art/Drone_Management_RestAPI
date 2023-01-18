@@ -20,9 +20,8 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
-import { AnalysisEventService } from "../../shared/analysis-event-service";
+import { analysisEventService } from "../../shared/analysis-event-service";
 import { AnalysisEvent } from "../../shared/types";
 
 @Component({
@@ -59,7 +58,7 @@ export default class AppDeleteAnalysis extends BaseAuthComponent {
     try {
       await volateqApi.finishRunningTask(this.analysis.id);
 
-      AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
+      analysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
 
       this.showSuccess(this.$t('successfully-finished-running-task').toString())
     } catch (e) {

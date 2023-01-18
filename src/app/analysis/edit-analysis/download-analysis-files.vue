@@ -27,32 +27,19 @@
       {{ $t("delete-selected-files") }}
     </app-button>
     <app-table-container>
-      <b-table
-        ref="downloadFilesTable"
-        :items="downloadFilesTableItems"
-        :fields="downloadFilesTableColumns"
-        select-mode="multi"
-        selectable
-        hover
-        head-variant="light"
-        @row-selected="onDownloadFilesSelected"
-        :busy="isFilesLoading"
+      <app-table
+        :rows="downloadFilesTableItems"
+        :columns="downloadFilesTableColumns"
+        :loading="isFilesLoading"
+        selectMode="multi"
+        :selectAllColumns="true"
+        :emptyText="$t('no-files-uploaded')"
+        @rowSelected="onDownloadFilesSelected"
       >
-        <template #table-busy>
-          <div class="text-center">
-            <b-spinner class="align-middle"></b-spinner>
-          </div>
-        </template>
-        <template #head(selected)
-          ><b-checkbox :checked="allDownloadFilesSelected" @change="onSelectAllDownloadFiles"></b-checkbox>
-        </template>
-        <template #cell(selected)="{ rowSelected }">
-          <b-checkbox :checked="rowSelected" disabled class="b-table-selectable-checkbox"> </b-checkbox>
-        </template>
         <template #cell(uploadedAt)="row">
           {{ getReadableDate(row.item.uploadedAt) }}
         </template>
-      </b-table>
+      </app-table>
     </app-table-container>
 
     <app-modal-form id="moveSelectedFilesModal"
@@ -74,9 +61,9 @@
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { Component, Ref, Prop, Watch } from "vue-property-decorator";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
+import AppTable from "@/app/shared/components/app-table/app-table.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
-import { BvTableFieldArray } from "bootstrap-vue";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { getReadableFileSize } from "@/app/shared/services/helper/file-helper";
@@ -85,8 +72,10 @@ import { AppContentEventService } from "@/app/shared/components/app-content/app-
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
-import { AnalysisEventService } from "../shared/analysis-event-service";
+import { analysisEventService } from "../shared/analysis-event-service";
 import { AnalysisEvent } from "../shared/types";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
+import { AppTableColumns } from "@/app/shared/components/app-table/types";
 
 @Component({
   name: "app-download-analysis-files",
@@ -94,26 +83,24 @@ import { AnalysisEvent } from "../shared/types";
     AppTableContainer,
     AppButton,
     AppModalForm,
+    AppTable,
   },
 })
 export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
   @Prop({ required: true }) analysis!: AnalysisSchema;
 
-  @Ref() downloadFilesTable!: any; // b-table
   @Ref() moveSelectedFilesModal!: IAppModalForm;
 
   isDownloadButtonDisabled = true;
   downloadButtonLoading = false;
 
-  downloadFilesTableColumns: BvTableFieldArray = [
-    { key: "selected", label: "" },
+  downloadFilesTableColumns: AppTableColumns = [
     { key: "name", label: this.$t("name").toString() },
     { key: "size", label: this.$t("size").toString() },
     { key: "uploadedAt", label: this.$t("uploaded-at").toString() },
   ];
   downloadFilesTableItems: { name: string, size: string | null, uploadedAt: number | null }[] = [];
 
-  allDownloadFilesSelected = false;
   private selectedDonwloadFiles: { name: string }[] = [];
 
   isFilesLoading = false;
@@ -138,50 +125,31 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
     this.isDownloadButtonDisabled = this.selectedDonwloadFiles.length === 0;
   }
 
+  @CatchError("downloadButtonLoading")
   async onDownloadSelectedFilesClick() {
-    try {
-      this.downloadButtonLoading = true;
+    if (this.selectedDonwloadFiles.length === 1) {
+      const downloadUrl = await volateqApi.getAnalysisFileDownloadUrl(
+        this.analysis!.id,
+        this.selectedDonwloadFiles[0].name
+      );
 
-      if (this.selectedDonwloadFiles.length === 1) {
-        const downloadUrl = await volateqApi.getAnalysisFileDownloadUrl(
-          this.analysis!.id,
-          this.selectedDonwloadFiles[0].name
-        );
-
-        AppDownloader.download(downloadUrl.url, this.selectedDonwloadFiles[0].name);
-      } else {
-        const archiveName = `analysis-${this.analysis.name}-selected-files.zip`;
-
-        // If the analysis has a lot of files we get HTTP ERROR 413 (request header too large)
-        // To allow to download all files anyway, we set filenames to "all"
-        const filenames: string[] | "all" = this.downloadFilesTableItems.length === this.selectedDonwloadFiles.length ?
-          "all" : this.selectedDonwloadFiles.map(downloadFile => downloadFile.name);
-
-        const downloadUrl = await volateqApi.generateDownloadUrl(
-          volateqApi.downloadMultipleAnalysisFilesUrl(
-            this.analysis.id,
-            filenames
-          )
-        );
-
-        AppDownloader.download(downloadUrl, archiveName);
-      }
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.downloadButtonLoading = false;
-    }
-  }
-
-  onSelectAllDownloadFiles(selected: boolean) {
-    if (selected) {
-      this.downloadFilesTable.selectAllRows();
+      AppDownloader.download(downloadUrl.url, this.selectedDonwloadFiles[0].name);
     } else {
-      // this.downloadFilesTable.clearSelection(); leads to "clearSelection is not a function"
-      // so lets work around...
-      for (let i = 0; i < this.downloadFilesTableItems.length; i++) {
-        this.downloadFilesTable.unselectRow(i);
-      }
+      const archiveName = `analysis-${this.analysis.name}-selected-files.zip`;
+
+      // If the analysis has a lot of files we get HTTP ERROR 413 (request header too large)
+      // To allow to download all files anyway, we set filenames to "all"
+      const filenames: string[] | "all" = this.downloadFilesTableItems.length === this.selectedDonwloadFiles.length ?
+        "all" : this.selectedDonwloadFiles.map(downloadFile => downloadFile.name);
+
+      const downloadUrl = await volateqApi.generateDownloadUrl(
+        volateqApi.downloadMultipleAnalysisFilesUrl(
+          this.analysis.id,
+          filenames
+        )
+      );
+
+      AppDownloader.download(downloadUrl, archiveName);
     }
   }
 
@@ -189,132 +157,111 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
     return date && dateHelper.toDateTime(date) || "";
   }
 
+  @CatchError()
   async onMoveSelectedFilesClick() {
-    try {
-      this.moveAnalysisSelection = (await volateqApi.getAllAnalysis({ plant_id: this.analysis.plant.id }))
-        .filter(analysis => analysis.id !== this.analysis.id)
-        .map(analysis => ({ value: analysis.id, text: analysis.name }));
-  
-      this.moveSelectedFilesModal.show();
-    } catch (e) {
-      this.showError(e);
-    }
+    this.moveAnalysisSelection = (await volateqApi.getAllAnalysis({ plant_id: this.analysis.plant.id }))
+      .filter(analysis => analysis.id !== this.analysis.id)
+      .map(analysis => ({ value: analysis.id, text: analysis.name }));
+
+    this.moveSelectedFilesModal.show();
   }
 
+  @CatchError("moveSelectedFilesLoading")
   async onMoveSelectedFiles() {
-    try {
-      this.moveSelectedFilesLoading = true;
+    await volateqApi.moveAnalysisFiles(
+      this.analysis.id, 
+      this.targetAnalysisId!,
+      this.selectedDonwloadFiles.map(downloadFile => downloadFile.name)
+    );
 
-      await volateqApi.moveAnalysisFiles(
-        this.analysis.id, 
-        this.targetAnalysisId!,
-        this.selectedDonwloadFiles.map(downloadFile => downloadFile.name)
-      );
+    this.moveSelectedFilesModal.hide();
 
-      this.moveSelectedFilesModal.hide();
+    this.showSuccess(this.$t("selected-files-moved-success").toString())
 
-      this.showSuccess(this.$t("selected-files-moved-success").toString())
-
-      AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.moveSelectedFilesLoading = false;
-    }
+    analysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
   }
 
+  @CatchError("deleteSelectedFilesLoading")
   async onDeleteSelectedFilesClick() {
-    try {
-      if (!confirm(this.$t("delete-selected-files-sure").toString())) {
-        return;
-      }
-
-      this.deleteSelectedFilesLoading = true;
-
-      await volateqApi.deleteAnalysisFiles(
-        this.analysis.id, 
-        this.selectedDonwloadFiles.map(downloadFile => downloadFile.name)
-      );
-
-      this.showSuccess(this.$t("selected-files-deleted-success").toString())
-
-      AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.deleteSelectedFilesLoading = false;
+    if (!confirm(this.$t("delete-selected-files-sure").toString())) {
+      return;
     }
+
+    this.deleteSelectedFilesLoading = true;
+
+    await volateqApi.deleteAnalysisFiles(
+      this.analysis.id, 
+      this.selectedDonwloadFiles.map(downloadFile => downloadFile.name)
+    );
+
+    this.showSuccess(this.$t("selected-files-deleted-success").toString())
+
+    analysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
   }
 
+  @CatchError("isFilesLoading")
   private async loadFiles() {
-    this.isFilesLoading = true;
-    try {
-      let files: string[] = [];
-      this.downloadFilesTableItems = [];
+    let files: string[] = [];
+    this.downloadFilesTableItems = [];
 
-      if (!this.analysis.files){
-        return;
+    if (!this.analysis.files){
+      return;
+    }
+
+    for (const key of Object.keys(this.analysis.files)) {
+      files = files.concat(this.analysis!.files[key]);
+    }
+
+    this.downloadFilesTableItems = [];
+
+    const fileInfos = await volateqApi.getAnalysisFiles(this.analysis.id, files);
+    for (const fileName of Object.keys(fileInfos)) {
+      const fileInfo = fileInfos[fileName];
+      
+      if (!fileInfo) {
+        this.downloadFilesTableItems.push({ name: fileName, size: null, uploadedAt: null });
+      } else {
+        this.downloadFilesTableItems.push({ 
+          name: fileName, 
+          size: getReadableFileSize(fileInfo.size),
+          uploadedAt: Date.parse(fileInfo.uploaded_at),
+        });
       }
+    }
 
-      for (const key of Object.keys(this.analysis.files)) {
-        files = files.concat(this.analysis!.files[key]);
+    this.downloadFilesTableItems.sort((a, b) => {
+      const uploadedAtA = a.uploadedAt || 1;
+      const uploadedAtB = b.uploadedAt || 1;
+
+      if (uploadedAtA < uploadedAtB) {
+        return 1;
+      } else if (uploadedAtA > uploadedAtB) {
+        return -1;
       }
+      return 0;
+    });
 
-      this.downloadFilesTableItems = [];
+    if (this.analysis.current_state.state.id === ApiStates.UPLOADING) {        
+      let uploadingUsers = await volateqApi.getUploadingUsers(this.analysis.id);
+      if (uploadingUsers.length > 0) {
+        const me = await volateqApi.getMe();
+        uploadingUsers = uploadingUsers.filter(userInfo => userInfo.email != me.email);
 
-      const fileInfos = await volateqApi.getAnalysisFiles(this.analysis.id, files);
-      for (const fileName of Object.keys(fileInfos)) {
-        const fileInfo = fileInfos[fileName];
-        
-        if (!fileInfo) {
-          this.downloadFilesTableItems.push({ name: fileName, size: null, uploadedAt: null });
-        } else {
-          this.downloadFilesTableItems.push({ 
-            name: fileName, 
-            size: getReadableFileSize(fileInfo.size),
-            uploadedAt: Date.parse(fileInfo.uploaded_at),
-          });
-        }
-      }
-
-      this.downloadFilesTableItems.sort((a, b) => {
-        const uploadedAtA = a.uploadedAt || 1;
-        const uploadedAtB = b.uploadedAt || 1;
-
-        if (uploadedAtA < uploadedAtB) {
-          return 1;
-        } else if (uploadedAtA > uploadedAtB) {
-          return -1;
-        }
-        return 0;
-      });
-
-      if (this.analysis.current_state.state.id === ApiStates.UPLOADING) {        
-        let uploadingUsers = await volateqApi.getUploadingUsers(this.analysis.id);
         if (uploadingUsers.length > 0) {
-          const me = await volateqApi.getMe();
-          uploadingUsers = uploadingUsers.filter(userInfo => userInfo.email != me.email);
-
-          if (uploadingUsers.length > 0) {
-            const uploadingUsersMessages: string[] = [];
-            for (const userInfo of uploadingUsers) {
-              uploadingUsersMessages.push(this.$t("user-is-uploading", {
-                user: ((userInfo.first_name || "") + " " + (userInfo.last_name || "")).trim() || userInfo.email,
-              }).toString());
-            }
-            uploadingUsersMessages.push(this.$t("files-of-files-uploaded", {
-              current_files: Object.keys(fileInfos).filter(fileName => !!fileInfos[fileName]).length,
-              max_files: Object.keys(fileInfos).length,
+          const uploadingUsersMessages: string[] = [];
+          for (const userInfo of uploadingUsers) {
+            uploadingUsersMessages.push(this.$t("user-is-uploading", {
+              user: ((userInfo.first_name || "") + " " + (userInfo.last_name || "")).trim() || userInfo.email,
             }).toString());
-
-            AppContentEventService.showInfo(this.analysis.id, uploadingUsersMessages.join('<br>'));
           }
+          uploadingUsersMessages.push(this.$t("files-of-files-uploaded", {
+            current_files: Object.keys(fileInfos).filter(fileName => !!fileInfos[fileName]).length,
+            max_files: Object.keys(fileInfos).length,
+          }).toString());
+
+          AppContentEventService.showInfo(this.analysis.id, uploadingUsersMessages.join('<br>'));
         }
       }
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.isFilesLoading = false;
     }
   }
 }

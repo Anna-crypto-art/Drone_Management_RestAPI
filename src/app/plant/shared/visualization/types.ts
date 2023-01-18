@@ -36,6 +36,7 @@ export interface IPlantVisualization {
   openLayers: IOpenLayersComponent | undefined;
   onLayerSelected(selected: boolean, legend: Legend | undefined): Promise<void>;
   hideToast: () => void;
+  enableResultsModification: boolean;
 }
 
 export interface FeatureProperties {
@@ -53,7 +54,7 @@ export interface FeatureInfos {
   title: string;
   records: FeatureInfo[];
   images?: FeatureImage[];
-  actions?: FeatureActions;
+  actionsSummaries?: FeatureActionsSummary[];
 }
 
 export interface FeatureInfo {
@@ -65,10 +66,11 @@ export interface FeatureInfo {
   superAdminOnly?: boolean;
 }
 
-export interface FeatureActions {
+export interface FeatureActionsSummary {
   buttonVariant: string;
   name: string;
   actions: FeatureAction[];
+  superAdminOnly?: boolean;
 }
 
 export interface FeatureAction {

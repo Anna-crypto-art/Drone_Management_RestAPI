@@ -32,7 +32,7 @@ import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/an
 import { apiStateNames, ApiStates } from "@/app/shared/services/volateq-api/api-states";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { Component, Prop, Watch } from "vue-property-decorator";
-import { AnalysisEventService } from "../../shared/analysis-event-service";
+import { analysisEventService } from "../../shared/analysis-event-service";
 import { AnalysisEvent } from "../../shared/types";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
 
@@ -89,7 +89,7 @@ export default class AppUpdateAnalysisState extends BaseAuthComponent {
         force: true,
       });
 
-      AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
+      analysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
 
       this.showSuccess(this.$t("update-analysis-state-success").toString());
     } catch (e) {

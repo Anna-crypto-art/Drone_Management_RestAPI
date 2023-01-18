@@ -93,6 +93,10 @@ export default class AppButton extends BaseAuthComponent {
     padding-left: 5px;
     vertical-align: text-bottom;
     display: inline-block;
+
+    &:empty {
+      padding-left: 0;
+    }
   }
 
   &-content.text-hidden {

@@ -14,6 +14,8 @@ import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/g
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { OrhtoImageMixin } from "../mixins/ortho-image-mixin";
 import { IOrthoImageMixin } from "../mixins/types";
+import { analysisResultEventService } from "../../plant-admin-view/analysis-result-event-service";
+import { AnalysisResultEvent } from "../../plant-admin-view/types";
 
 export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends LayerBase implements IOrthoImageMixin {
   protected abstract readonly analysisResultMapping: AnalysisResultMappings<T>;
@@ -200,6 +202,10 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
 
             this.orhtoImageMixin.addShowOrthoImageActions(featureInfos);
 
+            if (this.vueComponent.enableResultsModification) {
+              await this.addResultsModificationFeatureAction(featureInfos!);
+            }
+
             return featureInfos;
           }
         }
@@ -257,5 +263,45 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
   
   public getComponentId() {
     return this.keyFigure.component_id;
+  }
+
+  private async addResultsModificationFeatureAction(featureInfos: FeatureInfos) {
+    if (!featureInfos.actionsSummaries) {
+      featureInfos.actionsSummaries = [];
+    }
+
+    featureInfos.actionsSummaries.push({
+      superAdminOnly: true,
+      buttonVariant: "secondary",
+      name: this.vueComponent.$t("modify").toString(),
+      actions: [
+        {
+          name: this.vueComponent.$t("set-to-null").toString(),
+          action: async () => {
+            if (!confirm(this.vueComponent.$t("apply-are-you-sure").toString())) {
+              return;
+            }
+
+            const transName = this.keyFigureInfo.keyName || this.keyFigureInfo.displayName;
+            const mappingHelper = new AnalysisResultMappingHelper(this.analysisResultMapping, this.analysisResult);
+            const entry = mappingHelper.getEntries().find(e => e.transName === transName);
+
+            await volateqApi.setAnalysisResultValueToNull(this.analysisResult.id, {
+              key_figure_id: this.keyFigureId,
+              kks: featureInfos.title,
+              property_name: entry ? mappingHelper.getPropertyName(entry) : undefined,
+            });
+
+            this.reloadLayer();
+            await this.setSelected(false);
+            await this.setSelected(true);
+
+            this.vueComponent.hideToast();
+
+            analysisResultEventService.emit(this.analysisResult.id, AnalysisResultEvent.MODIFIED);
+          }
+        }
+      ]
+    });
   }
 }

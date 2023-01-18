@@ -208,6 +208,10 @@ export default class AppVisualCspPtc
     this.visualization?.hideToast();
   }
 
+  public get enableResultsModification(): boolean {
+    return this.visualization!.enableResultsModification;
+  }
+
   @CatchError()
   async onStartReferenceMeasurement(event: ReferenceMeasurementEventObject) {
     for (const componentLayer of event.componentLayers) {

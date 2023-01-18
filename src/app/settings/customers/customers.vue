@@ -1,43 +1,34 @@
 <template>
   <div class="app-settings-customers">
     <div class="app-settings-customers-table-toolbar">
-      <b-button variant="primary" @click="onCreateCustomerClick" v-b-modal.edit-customer-modal>
+      <app-button variant="primary" @click="onCreateCustomerClick" v-b-modal.edit-customer-modal>
         {{ $t("create-customer") }}
-      </b-button>
+      </app-button>
     </div>
     <app-table-container>
-      <b-table :fields="columns" :items="rows" head-variant="light" hover :busy="loading">
-        <template #table-busy>
-          <div class="text-center">
-            <b-spinner class="align-middle"></b-spinner>
-          </div>
-        </template>
+      <app-table :columns="columns" :rows="rows" :loading="loading" :hoverActions="true">
         <template #cell(plants)="row">
           <span class="grayed">
             {{ row.item.plants.map(plant => plant.name).join(", ") }}
           </span>
         </template>
-        <template #cell(actions)="row">
-          <div class="hover-cell pull-right">
-            <b-button
-              @click="onEditCustomerClick(row.item)"
-              variant="secondary"
-              size="sm"
-              :title="$t('edit-customer')"
-            >
-              <b-icon icon="wrench" />
-            </b-button>
-            <b-button
-              @click="onDeleteCustomerClick(row.item)"
-              variant="outline-danger"
-              size="sm"
-              :title="$t('delete-customer')"
-            >
-              <b-icon icon="trash"></b-icon>
-            </b-button>
-          </div>
+        <template #hoverActions="row">
+          <app-button
+            @click="onEditCustomerClick(row.item)"
+            variant="secondary"
+            size="sm"
+            :title="$t('edit-customer')"
+            icon="wrench"
+          />
+          <app-button
+            @click="onDeleteCustomerClick(row.item)"
+            variant="outline-danger"
+            size="sm"
+            :title="$t('delete-customer')"
+            icon="trash"
+          />
         </template>
-      </b-table>
+      </app-table>
     </app-table-container>
     <app-modal-form
       id="edit-customer-modal"
@@ -90,16 +81,18 @@
 <script lang="ts">
 import { Component, Ref } from "vue-property-decorator";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
+import AppTable from "@/app/shared/components/app-table/app-table.vue";
+import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
-import { BvTableFieldArray } from "bootstrap-vue";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { SelectPlant } from "../types";
 import { CustomerItem } from "./types";
 import { CustomerRole, CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { AppTableColumns } from "@/app/shared/components/app-table/types";
 
 
 @Component({
@@ -107,10 +100,12 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
   components: {
     AppTableContainer,
     AppModalForm,
+    AppTable,
+    AppButton,
   },
 })
 export default class AppSettingsCustomers extends BaseAuthComponent {
-  columns: BvTableFieldArray = [];
+  columns: AppTableColumns = [];
   rows: CustomerItem[] = [];
 
   plants!: PlantSchema[];
@@ -130,7 +125,6 @@ export default class AppSettingsCustomers extends BaseAuthComponent {
       { key: "name", label: this.$t("name").toString() },
       { key: "role", label: this.$t("role").toString() },
       { key: "plants", label: this.$t("plants").toString() },
-      { key: "actions", label: "" },
     ];
 
     this.roles = [

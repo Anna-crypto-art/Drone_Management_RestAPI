@@ -5,7 +5,7 @@
     :superAdminProtected="true"
   >
     <div class="monitoring-toolbar">
-      <b-button @click="loadAnalysisStatus()">{{ $t("reload") }}</b-button>
+      <app-button @click="loadAnalysisStatus()">{{ $t("reload") }}</app-button>
       <div class="monitoring-toolbar-loading"><b-spinner v-if="loading" /></div>
       <b-checkbox switch v-model="autoReload" @change="changeAutoReload">
         {{ $t("auto-reload") }}
@@ -73,6 +73,7 @@
 import { Component } from "vue-property-decorator";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
+import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { AnalysisMonitoring } from "@/app/shared/services/volateq-api/api-schemas/analysis-monitoring";
 import { TaskSchema } from "@/app/shared/services/volateq-api/api-schemas/task-schema";
@@ -83,6 +84,7 @@ const AUTORELOAD_INTERVAL = 10e3;
   name: "app-analysis-monitoring",
   components: {
     AppContent,
+    AppButton
   },
 })
 export default class AppAnalysisMonitoring extends BaseAuthComponent {

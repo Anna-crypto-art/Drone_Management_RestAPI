@@ -1,23 +1,26 @@
 
-import { SeqEventCallbackFunction, SequentialEventEmitter } from "@/app/shared/services/sequential-event-emitter/sequential-event-emitter";
+import { AppEventServiceBase } from "@/app/shared/services/app-event-service/app-event-service";
+import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/sequential-event-emitter";
+import { EventCallbackFunction } from "@/app/shared/services/app-event-service/types";
+
 import { AnalysisSelectionEvent } from "./types";
 
 const invisibleAnalysisSelectionEvents = [AnalysisSelectionEvent.SIDEBAR_ABSOLUTE];
 
-class AnalysisSelectionBus extends SequentialEventEmitter {
+class AnalysisSelectionEventEmitter extends SequentialEventEmitter {
   lastEvent: AnalysisSelectionEvent | null = null;
   lastArgs: any | null = null;
 
-  async emit(event: AnalysisSelectionEvent, ...args: any[]) {
+  async emit(event: AnalysisSelectionEvent, ...args: any[]): Promise<boolean> {
     if (!invisibleAnalysisSelectionEvents.includes(event)) {
       this.lastEvent = event;
       this.lastArgs = args;
     }
 
-    await super.emit(event, ...args);
+    return await super.emit(event, ...args);
   }
   
-  on(event: AnalysisSelectionEvent, func: SeqEventCallbackFunction) {
+  on(event: AnalysisSelectionEvent, func: EventCallbackFunction) {
     super.on(event, func);
   }
 
@@ -28,27 +31,17 @@ class AnalysisSelectionBus extends SequentialEventEmitter {
   }
 }
 
-export class AnalysisSelectionService {
-  private static anaylsisSelectionBusses: Record<string, AnalysisSelectionBus> = {};
-
-  public static getAnalysisSelectionEventBus(plantId: string): AnalysisSelectionBus {
-    if (!(plantId in AnalysisSelectionService.anaylsisSelectionBusses)) {
-      AnalysisSelectionService.anaylsisSelectionBusses[plantId] = new AnalysisSelectionBus();
-    }
-
-    return AnalysisSelectionService.anaylsisSelectionBusses[plantId];
-  }
-  
-  public static on(
-    plantId: string,
-    analysisSelectionEvent: AnalysisSelectionEvent,
-    callbackFn: SeqEventCallbackFunction
-  ) {
-    AnalysisSelectionService.getAnalysisSelectionEventBus(plantId).on(analysisSelectionEvent, callbackFn);
+class AnalysisSelectionEventService extends AppEventServiceBase<AnalysisSelectionEvent, AnalysisSelectionEventEmitter> {
+  protected createEventEmitter(): AnalysisSelectionEventEmitter {
+    return new AnalysisSelectionEventEmitter();
   }
 
-  public static async emit(plantId: string, analysisSelectionEvent: AnalysisSelectionEvent, ...args: any[]) {
-    await AnalysisSelectionService.getAnalysisSelectionEventBus(plantId).emit(analysisSelectionEvent, ...args);
+  public on(plantId: string, event: AnalysisSelectionEvent, func: EventCallbackFunction): void {
+    super.on(plantId, event, func);
+  }
+
+  public async emit(plantId: string, event: AnalysisSelectionEvent, ...args: any[]): Promise<boolean> {
+    return await this.getEventEmitter(plantId).emit(event, ...args);
   }
 
   /**
@@ -58,7 +51,9 @@ export class AnalysisSelectionService {
    * Re-emits last emitted event for latecomers
    * @param plantId 
    */
-  public static async whazzup(plantId: string) {
-    await AnalysisSelectionService.getAnalysisSelectionEventBus(plantId).reemit();
+  public async whazzup(plantId: string) {
+    await this.getEventEmitter(plantId).reemit();
   }
 }
+
+export const analysisSelectEventService = new AnalysisSelectionEventService();

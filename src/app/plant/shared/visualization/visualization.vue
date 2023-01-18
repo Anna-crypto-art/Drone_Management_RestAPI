@@ -16,6 +16,9 @@
           <b-form-checkbox v-model="satelliteView" switch @change="onSatelliteViewChanged">
             {{ $t("satellite-view") }}
           </b-form-checkbox>
+          <b-form-checkbox v-if="isSuperAdmin" v-model="enableResultsModification" switch>
+            {{ $t("enable-results-modification") }} <app-super-admin-marker />
+          </b-form-checkbox>
           <hr v-show="hasLoadedOrthoImages">
           <app-button v-show="hasLoadedOrthoImages"
             variant="secondary"
@@ -92,12 +95,14 @@ import { OrhtoImageMixin } from "./mixins/ortho-image-mixin";
 import AppReferenceMeasurements from "../reference-measurements/reference-measurements.vue";
 import { RouteQueryHelper } from "../helper/route-query-helper";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
-import { SequentialEventEmitter } from "@/app/shared/services/sequential-event-emitter/sequential-event-emitter";
+import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/sequential-event-emitter";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { ReferenceMeasurementEventObject } from "../reference-measurements/types";
 import AppFeatureInfosToast from "./feature-infos-toast.vue";
 import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-dropdown-button.vue";
-import { waitFor } from "@/app/shared/services/helper/debounce-helper";
+import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
+import { analysisResultEventService } from "../plant-admin-view/analysis-result-event-service";
+import { AnalysisResultEvent } from "../plant-admin-view/types";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -112,6 +117,7 @@ const STORAGE_KEY_SATELLITEVIEW = "storage-key-satelliteview";
     AppReferenceMeasurements,
     AppFeatureInfosToast,
     AppDropdownButton,
+    AppSuperAdminMarker,
   },
 })
 export default class AppVisualization
@@ -157,6 +163,8 @@ export default class AppVisualization
   availableOrthoImages: OrthoImage[] = [];
   loadAllOrhtoImagesLoading = false;
 
+  enableResultsModification = false;
+
   private isMounted = false;
   private firstLoad = true;
 
@@ -177,6 +185,14 @@ export default class AppVisualization
     layerEvents.onRemoveOrthoImages(() => {
       this.hasLoadedOrthoImages = false;
     });
+
+    for (const analysis of this.analyses) {
+      if (analysis.analysis_result) {
+        analysisResultEventService.on(analysis.analysis_result.id, AnalysisResultEvent.MODIFIED, async () => {
+          await this.piLayersHierarchy!.reselectAllLayers(this.enableMultiSelection);
+        });
+      }
+    }
 
     this.routeQueryHelper.queryChanged(async () => { await this.loadQueryPi(); });
   }

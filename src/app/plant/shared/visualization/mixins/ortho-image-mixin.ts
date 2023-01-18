@@ -45,11 +45,15 @@ export class OrhtoImageMixin {
         }));
       
       if (actions.length > 0) {
-        featureInfos.actions = {
+        if (!featureInfos.actionsSummaries) {
+          featureInfos.actionsSummaries = [];  
+        }
+
+        featureInfos.actionsSummaries.push({
           name: this.layer.vueComponent.$t("show-ortho-image").toString(),
           buttonVariant: 'secondary',
           actions: actions,
-        };
+        });
       }
     }
 

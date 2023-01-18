@@ -1,18 +1,13 @@
 <template>
   <div class="app-settings-users">
     <div class="app-settings-users-table-toolbar">
-      <b-button variant="primary" class="btn-invite" @click="showInviteUserModal()" v-b-modal.invite-modal>
+      <app-button variant="primary" class="btn-invite" @click="showInviteUserModal()" v-b-modal.invite-modal>
         {{ $t("invite") }}
-      </b-button>
+      </app-button>
     </div>
     <div class="clearfix"></div>
     <app-table-container>
-      <b-table :fields="columns" :items="rows" head-variant="light" hover :busy="loading">
-        <template #table-busy>
-          <div class="text-center">
-            <b-spinner class="align-middle"></b-spinner>
-          </div>
-        </template>
+      <app-table :columns="columns" :rows="rows" :loading="loading" :hoverActions="true">
         <template #cell(name)="row">
           <span v-if="row.item.name.userName">
             {{ row.item.name.userName }}<br />
@@ -40,45 +35,39 @@
             {{ plant.name }}
           </div>
         </template>
-        <template #cell(actions)="row">
-          <div class="hover-cell pull-right">
-            <b-button
-              v-show="row.item.role !== 'SUPER_ADMIN'"
-              @click="onEditUserClick(row.item)"
-              variant="secondary"
-              size="sm"
-              :title="$t('edit-user')"
-            >
-              <b-icon icon="wrench" />
-            </b-button>
-            <b-button
-              v-show="row.item.state.userState == 'pending'"
-              @click="onResendInvitationClick(row.item)"
-              variant="secondary"
-              size="sm"
-              :title="$t('resend-invitation')"
-            >
-              <b-icon icon="envelope"></b-icon>
-            </b-button>
-            <b-button
-              @click="onUnLockClick(row.item)"
-              variant="secondary"
-              size="sm"
-              :title="$t(row.item.state.userState === 'locked' ? 'unlock' : 'lock')"
-            >
-              <b-icon :icon="row.item.state.userState === 'locked' ? 'unlock' : 'lock'"></b-icon>
-            </b-button>
-            <b-button
-              @click="onDeleteUserClick(row.item)"
-              variant="outline-danger"
-              size="sm"
-              :title="$t('delete-user')"
-            >
-              <b-icon icon="trash"></b-icon>
-            </b-button>
-          </div>
+        <template #hoverActions="row">
+          <app-button
+            v-show="row.item.role !== 'SUPER_ADMIN'"
+            @click="onEditUserClick(row.item)"
+            variant="secondary"
+            size="sm"
+            :title="$t('edit-user')"
+            icon="wrench"
+          />
+          <app-button
+            v-show="row.item.state.userState == 'pending'"
+            @click="onResendInvitationClick(row.item)"
+            variant="secondary"
+            size="sm"
+            :title="$t('resend-invitation')"
+            icon="envelope"
+          />
+          <app-button
+            @click="onUnLockClick(row.item)"
+            variant="secondary"
+            size="sm"
+            :title="$t(row.item.state.userState === 'locked' ? 'unlock' : 'lock')"
+            :icon="row.item.state.userState === 'locked' ? 'unlock' : 'lock'"
+          />
+          <app-button
+            @click="onDeleteUserClick(row.item)"
+            variant="outline-danger"
+            size="sm"
+            :title="$t('delete-user')"
+            icon="trash"
+          />
         </template>
-      </b-table>
+      </app-table>
     </app-table-container>
     <app-modal-form
       id="inivite-modal"
@@ -174,18 +163,20 @@ import { Component, Ref } from "vue-property-decorator";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import AppIcon from "@/app/shared/components/app-icon/app-icon.vue";
+import AppButton from "@/app/shared/components/app-button/app-button.vue";
+import AppTable from "@/app/shared/components/app-table/app-table.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { UserAuthMethod, UserSchema, UserStateSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import { InviteUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
 import { apiRoleNames, ApiRoles } from "@/app/shared/services/volateq-api/api-roles";
-import { BvTableFieldArray } from "bootstrap-vue";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import { EditUser, UserItem } from "@/app/settings/users/types";
 import { SelectPlant } from "@/app/settings/types";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import dateHelper from "@/app/shared/services/helper/date-helper";
+import { AppTableColumns } from "@/app/shared/components/app-table/types";
 
 
 const MAX_USERS_PER_CUSTOMER = 10;
@@ -197,10 +188,12 @@ const MAX_USERS_PER_CUSTOMER = 10;
     AppTableContainer,
     AppModalForm,
     AppIcon,
+    AppButton,
+    AppTable,
   },
 })
 export default class AppSettingsUsers extends BaseAuthComponent {
-  columns: BvTableFieldArray = [];
+  columns: AppTableColumns = [];
   rows: UserItem[] = [];
 
   plants!: PlantSchema[];
@@ -228,7 +221,6 @@ export default class AppSettingsUsers extends BaseAuthComponent {
       { key: "role", label: this.$t("role").toString() },
       { key: "authMethod", label: this.$t("mfa-method").toString() },
       { key: "plants", label: this.$t("plants").toString() },
-      { key: "actions", label: "" },
     ];
 
     await this.updateUserRows();

@@ -1,22 +1,14 @@
-import { AnalysisEventBus } from "./analysis-event-bus";
+import { AppEventService } from "@/app/shared/services/app-event-service/app-event-service";
+import { EventCallbackFunction } from "@/app/shared/services/app-event-service/types";
 import { AnalysisEvent } from "./types";
 
-export class AnalysisEventService {
-  private static anaylsisEventBusses: Record<string, AnalysisEventBus> = {};
-
-  private static getAnalysisEventBus(analysisId: string): AnalysisEventBus {
-    if (!(analysisId in AnalysisEventService.anaylsisEventBusses)) {
-      AnalysisEventService.anaylsisEventBusses[analysisId] = new AnalysisEventBus();
-    }
-
-    return AnalysisEventService.anaylsisEventBusses[analysisId];
+class AnalysisEventService extends AppEventService<AnalysisEvent> {
+  public on(analysisId: string, event: AnalysisEvent, func: EventCallbackFunction): void {
+    super.on(analysisId, event, func);
   }
-  
-  public static on(analysisId: string, analysisEvent: AnalysisEvent, callbackFn: any) {
-    AnalysisEventService.getAnalysisEventBus(analysisId).on(analysisEvent, callbackFn);
-  }
-
-  public static emit(analysisId: string, analysisEvent: AnalysisEvent, ...args: any[]) {
-    AnalysisEventService.getAnalysisEventBus(analysisId).emit(analysisEvent, args);
+  public emit(analysisId: string, event: AnalysisEvent, ...args: any[]): boolean {
+    return super.emit(analysisId, event, ...args);
   }
 }
+
+export const analysisEventService = new AnalysisEventService();

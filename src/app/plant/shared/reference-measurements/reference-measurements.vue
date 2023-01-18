@@ -68,7 +68,7 @@ import AppModalForm from '@/app/shared/components/app-modal/app-modal-form.vue';
 import { CatchError } from '@/app/shared/services/helper/catch-helper';
 import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
 import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
-import { AnalysisSelectionService } from '../analysis-selection-sidebar/analysis-selection-service';
+import { analysisSelectEventService } from '../analysis-selection-sidebar/analysis-selection-service';
 import { State } from "vuex-class";
 import { AnalysisSelectionEvent } from '../analysis-selection-sidebar/types';
 import { PILayersHierarchy } from '../visualization/pi-layers-hierarchy';
@@ -166,7 +166,7 @@ export default class AppReferenceMeasurements extends BaseAuthComponent {
 
     const refMeasureValues = await volateqApi.getReferencMeasurementValues(this.refMeasureId);
 
-    await AnalysisSelectionService.emit(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL);
+    await analysisSelectEventService.emit(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL);
     if (this.sidebarOpen) {
       this.$store.direct.commit.sidebar.toggle({ name: "analysis" });
     }
@@ -198,7 +198,7 @@ export default class AppReferenceMeasurements extends BaseAuthComponent {
       this.refMeasureId = null;
       this.refMeasure = null;
 
-      await AnalysisSelectionService.emit(this.plant.id, AnalysisSelectionEvent.SELECT_FIRST);
+      await analysisSelectEventService.emit(this.plant.id, AnalysisSelectionEvent.SELECT_FIRST);
       if (!this.sidebarOpen) {
         this.$store.direct.commit.sidebar.toggle({ name: "analysis" });
       }

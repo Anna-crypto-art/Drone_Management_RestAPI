@@ -4,7 +4,7 @@ import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { AnalysisSelectionService } from "./analysis-selection-service";
+import { analysisSelectEventService } from "./analysis-selection-service";
 import { AnalysisSelectionEvent } from "./types";
 
 export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
@@ -17,7 +17,7 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
   async created() {
     super.created();
 
-    AnalysisSelectionService.on(
+    analysisSelectEventService.on(
       this.plant.id,
       AnalysisSelectionEvent.ANALYSIS_SELECTED,
       async (selectedAnalysisId: string | undefined) => {
@@ -34,7 +34,7 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
       }
     );
 
-    AnalysisSelectionService.on(
+    analysisSelectEventService.on(
       this.plant.id,
       AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED,
       async (selectedAnalysesIds: string[] | undefined) => {

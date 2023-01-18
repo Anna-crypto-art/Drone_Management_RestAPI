@@ -7,7 +7,7 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import { Geolocation, Feature } from "ol";
 import CircleStyle from "ol/style/Circle";
 import { Point } from "ol/geom";
-import { SequentialEventEmitter } from "@/app/shared/services/sequential-event-emitter/sequential-event-emitter";
+import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/sequential-event-emitter";
 import { LayerEvent } from "@/app/shared/components/app-geovisualization/types/events";
 
 export const GEO_JSON_OPTIONS = { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" };

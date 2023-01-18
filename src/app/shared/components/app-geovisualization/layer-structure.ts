@@ -4,7 +4,7 @@ import Source from "ol/source/Source";
 import { VNode } from "vue/types/umd";
 import LayerLoader from "./loader/layer-loader";
 import LayerRenderer from "ol/renderer/Layer";
-import { SequentialEventEmitter } from "../../services/sequential-event-emitter/sequential-event-emitter";
+import { SequentialEventEmitter } from "../../services/app-event-service/sequential-event-emitter";
 import { LayerEvent } from "./types/events";
 
 export class LayerStructure extends SequentialEventEmitter {

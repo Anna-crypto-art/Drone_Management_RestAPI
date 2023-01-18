@@ -7,7 +7,7 @@ import { GroupKPILayer, InvisibleAutoSelectionLayer, KeyFigureTypeMap } from "./
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { apiComponentNames } from "@/app/shared/services/volateq-api/api-components/api-components-name";
-import { SequentialEventEmitter } from "@/app/shared/services/sequential-event-emitter/sequential-event-emitter";
+import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/sequential-event-emitter";
 import { LayerEvent } from "@/app/shared/components/app-geovisualization/types/events";
 
 /**

@@ -33,7 +33,7 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { AnalysisEventService } from "../../shared/analysis-event-service";
+import { analysisEventService } from "../../shared/analysis-event-service";
 import { AnalysisEvent } from "../../shared/types";
 import { TaskSchema } from "@/app/shared/services/volateq-api/api-schemas/task-schema";
 import { ApiTasks } from "@/app/shared/services/volateq-api/api-tasks";
@@ -64,10 +64,10 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
   async created() {
     await this.updateQFlyServer();
 
-    AnalysisEventService.on(this.analysis.id, AnalysisEvent.RUN_ANALYSIS_TASK, (task: TaskSchema) => {
+    analysisEventService.on(this.analysis.id, AnalysisEvent.RUN_ANALYSIS_TASK, (task: TaskSchema) => {
       this.taskSelectionDisabled = true;
     });
-    AnalysisEventService.on(this.analysis.id, AnalysisEvent.FINISHED_ANALYSIS_TASK, (task: TaskSchema) => {
+    analysisEventService.on(this.analysis.id, AnalysisEvent.FINISHED_ANALYSIS_TASK, (task: TaskSchema) => {
       this.taskSelectionDisabled = false;
 
       if (task.state === "SUCCESSFUL") {
@@ -101,7 +101,7 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
       const newQFlyServer = await volateqApi.getQFlyServer(this.analysis.id);
 
       if (!this.qFlyServer || this.qFlyServer.state !== newQFlyServer.state) {
-        AnalysisEventService.emit(
+        analysisEventService.emit(
           this.analysis.id,
           AnalysisEvent.QFLY_SERVER_STATE_CHANGED,
           newQFlyServer.state,
@@ -179,7 +179,7 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
 
         await this.updateQFlyServer();
 
-        AnalysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
+        analysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
       }
     } catch (e) {
       this.showError(e);

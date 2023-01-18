@@ -6,12 +6,7 @@
       </app-button>
     </div>
     <app-table-container>
-      <b-table :fields="columns" :items="rows" head-variant="light" hover :busy="loading">
-        <template #table-busy>
-          <div class="text-center">
-            <b-spinner class="align-middle"></b-spinner>
-          </div>
-        </template>
+      <app-table :columns="columns" :rows="rows" :loading="loading" :hoverActions="true">
         <template #cell(fileName)="row">
           <a href="#" @click.prevent="onFileClick(row.item)">{{ row.item.title || row.item.fileName }}</a>
           <div class="grayed" v-show="row.item.description">
@@ -24,34 +19,32 @@
         <template #cell(updatedAtBy)="row">
           <small v-html="row.item.updatedAtBy"></small>
         </template>
-        <template #cell(actions)="row">
-          <div class="hover-cell pull-right">
-            <app-button
-              @click="onCopyDocFileClick(row.item)"
-              variant="secondary"
-              size="sm"
-              :title="$t('copy-file-link')"
-              icon="clipboard"
-            />
-            <app-button
-              @click="onEditDocFileClick(row.item)"
-              variant="secondary"
-              size="sm"
-              :title="$t('edit-doc-file')"
-              :superAdminProtected="true"
-              icon="wrench"
-            />
-            <app-button
-              @click="onDeleteDocFileClick(row.item)"
-              variant="outline-danger"
-              size="sm"
-              :title="$t('delete-doc-file')"
-              :superAdminProtected="true"
-              icon="trash"
-            />
-          </div>
+        <template #hoverActions="row">
+          <app-button
+            @click="onCopyDocFileClick(row.item)"
+            variant="secondary"
+            size="sm"
+            :title="$t('copy-file-link')"
+            icon="clipboard"
+          />
+          <app-button
+            @click="onEditDocFileClick(row.item)"
+            variant="secondary"
+            size="sm"
+            :title="$t('edit-doc-file')"
+            :superAdminProtected="true"
+            icon="wrench"
+          />
+          <app-button
+            @click="onDeleteDocFileClick(row.item)"
+            variant="outline-danger"
+            size="sm"
+            :title="$t('delete-doc-file')"
+            :superAdminProtected="true"
+            icon="trash"
+          />
         </template>
-      </b-table>
+      </app-table>
     </app-table-container>
     <app-modal-form
       id="edit-doc-file-modal"
@@ -87,7 +80,6 @@ import AppTableContainer from "@/app/shared/components/app-table-container/app-t
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
-import { BvTableFieldArray } from "bootstrap-vue";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { DocFileItem } from "@/app/doc/types";
@@ -100,6 +92,8 @@ import { getReadableFileSize } from "../shared/services/helper/file-helper";
 import { AppDownloader } from "../shared/services/app-downloader/app-downloader";
 import { baseUrl } from "@/environment/environment";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
+import AppTable from "@/app/shared/components/app-table/app-table.vue";
+import { AppTableColumns } from "../shared/components/app-table/types";
 
 
 @Component({
@@ -110,10 +104,11 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
     AppModalForm,
     AppSimpleFileUpload,
     AppButton,
+    AppTable,
   },
 })
 export default class AppDocFiles extends BaseAuthComponent {
-  columns: BvTableFieldArray = [];
+  columns: AppTableColumns = [];
   rows: DocFileItem[] = [];
 
   loading = false;
@@ -133,7 +128,6 @@ export default class AppDocFiles extends BaseAuthComponent {
       { key: "fileName", label: this.$t("document").toString() },
       { key: "updatedAtBy", label: this.$t("changed").toString() },
       { key: "size", label: this.$t("size").toString() },
-      { key: "actions", label: "" },
     ];
 
     await this.updateDocFileRows();
