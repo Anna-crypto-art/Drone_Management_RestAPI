@@ -768,7 +768,7 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public async setAnalysisResultValueToNullOrFalse(analysisResultId: string, setNullRequest: AnalysisResultSetNullOrFalseRequest): Promise<void> {
-    await this.post(`/auth/analysis-result/${analysisResultId}/set-null`, setNullRequest);
+    await this.post(`/auth/analysis-result/${analysisResultId}/set-null-or-false`, setNullRequest);
   }
 
   public async getAnalysisResultChangeHistory(analysisResultId: string): Promise<AnalysisResultChangeHistorySchema[]> {
