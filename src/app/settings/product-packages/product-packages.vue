@@ -8,12 +8,16 @@
     <app-table-container>
       <app-table :columns="columns" :rows="rows" :loading="loading" :hoverActions="true">
         <template #cell(name)="row">
-          <span>{{ row.item.product_package.name }}</span>
+          <span class="product-package-table-name">{{ row.item.product_package.name }}</span>
         </template>
         <template #cell(key_figures)="row">
           <span class="grayed">
+            <!-- {{ row.item }} -->
             {{ row.item.product_package.key_figures.map(key_figure => key_figure.name).join(", ") }}
           </span>
+        </template>
+        <template #cell(technology)="row">
+          {{ row.item.technology }}
         </template>
         <template #hoverActions="row">
           <app-button
@@ -39,14 +43,22 @@
     <app-modal-form
       id="create-product-package-modal"
       ref="appCreateProductPackageModal"
+      :title="$t('create-product-package')"
       :ok-title="$t('create')"
       :modalLoading="createProductPackageModalLoading"
       @submit="onSubmitCreateProductPackage"
     >
-      <template #modal-title>
-        <h4>{{ $t("create-product-package") }}</h4>
-      </template>
-      
+      <b-form-group :label="$t('name')">
+        <b-form-input id="new-product-package-name" v-model="newProductPackage.name" required :placeholder="$t('name')" />
+      </b-form-group>
+      <b-form-group :label="$t('technology')">
+        <b-form-select id="new-plant-technology" v-model="newProductPackage.technology_id" :options="technologies" required />
+      </b-form-group>
+      <b-form-group :label="$t('performance-indicators')">
+        <app-multiselect 
+          v-model="newProductPackage.key_figures"
+          :options="keyFigureOptions" />
+      </b-form-group>
     </app-modal-form>
 
     
@@ -129,6 +141,7 @@ import { Component, Ref } from "vue-property-decorator";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import AppTable from "@/app/shared/components/app-table/app-table.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
+import AppMultiselect from "@/app/shared/components/app-multiselect/app-multiselect.vue";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
@@ -139,7 +152,10 @@ import { ProductPackageItem } from "./types";
 import { CustomerRole, CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { AppTableColumns } from "@/app/shared/components/app-table/types";
-import { ProductPackageWithKeyFiguresSchema } from "@/app/shared/services/volateq-api/api-schemas/product-package";
+import { ProductPackageSchema, ProductPackageWithKeyFiguresSchema } from "@/app/shared/services/volateq-api/api-schemas/product-package";
+import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
+import { MultiselectOption } from "@/app/shared/components/app-multiselect/types";
+import { ApiTechnology } from "@/app/shared/services/volateq-api/api-technologies";
 
 
 @Component({
@@ -149,14 +165,25 @@ import { ProductPackageWithKeyFiguresSchema } from "@/app/shared/services/volate
     AppModalForm,
     AppTable,
     AppButton,
+    AppMultiselect,
   },
 })
 export default class AppSettingsProductPackages extends BaseAuthComponent {
   columns: AppTableColumns = [];
   rows: ProductPackageItem[] = [];
 
-  // plants!: PlantSchema[];
-  // roles!: Array<any>;
+  all_key_figures: KeyFigureSchema[] = [];
+  keyFigureOptions: Array<MultiselectOption> = [];
+  selected_key_figures: KeyFigureSchema[] = [];
+  
+  technologies: Array<any> = [];
+
+  newProductPackage: { name: string, technology_id: number, key_figures: KeyFigureSchema[] } =
+    {name: "", technology_id: 0, key_figures: []};
+
+
+  // newPlant: { name: string, technology_id: number | null, customer_id: string | null } | null = 
+  //   { name: "", technology_id: null, customer_id: null };
 
   loading = false;
 
@@ -174,6 +201,7 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
   async created() {
     this.columns = [
       { key: "name", label: this.$t("name").toString() },
+      { key: "technology", label: this.$t("technology").toString(), superAdminOnly: true },
       { key: "key_figures", label: this.$t("performance-indicators").toString() },
     ];
 
@@ -182,10 +210,19 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
     //   ...Object.keys(CustomerRole).map(roleKey => ({ value: CustomerRole[roleKey], text: CustomerRole[roleKey] })),
     // ]
 
-    await this.updateCustomerRows();
-
-    // try {
-    //   this.plants = (await volateqApi.getAllPlants()).sort((a, b) => {
+    this.technologies = (await volateqApi.getTechnologies()).map(tech => ({ value: tech.id, text: tech.abbrev }))
+    await this.updateProductPackageRows();
+    // this.newProductPackage = this.createEmptyProductPackage();
+    this.all_key_figures = await volateqApi.getAllKeyFigures();
+    this.updateKeyFigureOptions();
+    // this.all_key_figures = volateqApi.getAllKeyFigures();
+    // this.all_key_figures = (await volateqApi.getAllKeyFigures()).map((key_figure: KeyFigureSchema) => ({
+    //     id: key_figure.id,
+    //     name: key_figure.name,
+    //     component_id: key_figure.component_id,
+    //     description: key_figure.description,
+    //     component: key_figure.component,
+    //   })).sort((a, b) => {
     //     const nameA = a.name.toLowerCase();
     //     const nameB = b.name.toLowerCase();
 
@@ -198,17 +235,30 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
 
     //     return 0;
     //   });
-    // } catch (e) {
-    //   this.showError(e);
-    // }
   }
 
-  async updateCustomerRows() {
+  private updateKeyFigureOptions() {
+    const keyFigureOptions: MultiselectOption[] = [];
+
+    for (const key_figure of this.all_key_figures) {
+      // if (key_figure.id !== 1) { // Skip CSP_PTC Base
+        keyFigureOptions.push({ 
+          id: key_figure.id + "", 
+          label: key_figure.name,
+        });
+      // }
+    }
+
+    this.keyFigureOptions = keyFigureOptions;
+  }
+
+  async updateProductPackageRows() {
     this.loading = true;
     try {
       this.rows = (await volateqApi.getProductPackagesWithKeyFigures()).map((product_package: ProductPackageWithKeyFiguresSchema) => ({
         id: product_package.id,
         name: product_package.name,
+        technology: ApiTechnology[product_package.technology_id],
         product_package: product_package,
         number_currently_booked: 0,
       })).sort((a, b) => {
@@ -232,12 +282,16 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
   }
 
   onCreateProductPackageClick() {
+    this.newProductPackage = {name: "", technology_id: 0, key_figures: []};
+
     this.currentProductPackage = {
       id: 0,
       name: "",
+      technology: "",
       product_package: {
         id: 0,
         name: "",
+        technology_id: 0,
         key_figures: [],
       },
       number_currently_booked: 0
@@ -258,30 +312,18 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
   async onSubmitCreateProductPackage() {
     this.createProductPackageModalLoading = true;
     try {
-      // const selectedPlantIds: string[] = this.selectPlants.filter(selectPlant => selectPlant.selected)
-      //   .map(selectPlant => selectPlant.plant.id);
-
-      // if (this.currentCustomer!.id === null) {
-      //   await volateqApi.createCustomer({
-      //     name: this.currentCustomer!.name,
-      //     role: this.currentCustomer!.role || undefined,
-      //     plant_ids: selectedPlantIds,
-      //   });
-
-      //   this.showSuccess(this.$t("customer-created-success").toString());
-      // } else {
-      //   await volateqApi.updateCustomer(this.currentCustomer!.id, {
-      //     name: this.currentCustomer!.name,
-      //     role: this.currentCustomer!.role || undefined,
-      //     plant_ids: selectedPlantIds,
-      //   });
-
-      //   this.showSuccess(this.$t("customer-updated-success").toString());
-      // }
+      console.log(this.newProductPackage)
+      await volateqApi.createProductPackage({
+        name: this.newProductPackage!.name,
+        technology_id: this.newProductPackage.technology_id!,
+        key_figures: this.newProductPackage.key_figures.map(kf => kf.id),
+      });
 
       this.appCreateProductPackageModal.hide();
 
-      await this.updateCustomerRows();
+      this.showSuccess(this.$t("product-package-created-success").toString());
+      
+      await this.updateProductPackageRows();
     } catch (e) {
       this.showError(e);
     } finally {
@@ -311,7 +353,7 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
 
       this.appEditProductPackageModal.hide();
 
-      await this.updateCustomerRows();
+      await this.updateProductPackageRows();
     } catch (e) {
       this.showError(e);
     } finally {
@@ -319,7 +361,7 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
     }
   }
 
-  async onDeleteCustomerClick(productPackageItem: ProductPackageWithKeyFiguresSchema) {
+  async onDeleteProductPackageClick(productPackageItem: ProductPackageWithKeyFiguresSchema) {
     this.loading = true;
     try {
     //   if (!confirm(this.$t("sure-delete-customer", { customer: customerItem.name }).toString())) {
@@ -330,7 +372,7 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
 
     //   this.showSuccess(this.$t("customer-deleted-success", {customer: customerItem.name }).toString());
 
-      await this.updateCustomerRows();
+      await this.updateProductPackageRows();
     } catch (e) {
       this.showError(e as ApiException);
     } finally {
@@ -345,4 +387,9 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
 //   max-height: 400px;
 //   overflow-y: auto;
 // }
+.product-package-table-name {
+  @media (min-width: 992px) {
+    white-space: nowrap;
+  }
+}
 </style>

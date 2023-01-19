@@ -3,6 +3,7 @@ import { ProductPackageWithKeyFiguresSchema } from "@/app/shared/services/volate
 export interface ProductPackageItem {
   id: number;
   name: string;
+  technology: string;
   product_package: ProductPackageWithKeyFiguresSchema;
   number_currently_booked: number;
 }

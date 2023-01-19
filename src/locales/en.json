@@ -141,6 +141,7 @@
   "edit-product-package": "Edit product package",
   "delete-product-package": "Delete product package",
   "update-product-package": "Update product package {product_package}",
+  "product-package-created-success": "Product package created successfully",
   "pi": "PI",
   "missing-gct": "Broken glass",
   "missing-gct_expl": "Missing glass tube",
