@@ -14,7 +14,7 @@ import { TableFilterRequest, TableRequest } from "./api-requests/common/table-re
 import { AnalysisResultFileSchema } from "./api-schemas/analysis-result-file-schema";
 import { ApiComponent } from "./api-components/api-components";
 import { ApiKeyFigure } from "./api-key-figures";
-import { GeoVisualQuery } from "./api-requests/geo-visual-query-requests";
+import { GeoVisualCspPtcQuery, GeoVisualPvQuery, GeoVisualQuery } from "./api-requests/geo-visual-query-requests";
 import { RouteSchema } from "./api-schemas/route-schema";
 import { TableResultSchema } from "./api-schemas/table-result-schema";
 import { TaskSchema } from "./api-schemas/task-schema";
@@ -337,7 +337,7 @@ export class VolateqAPI extends HttpClientBase {
     plantId: string,
     analysisResultId: string,
     keyFiguresId: ApiKeyFigure,
-    query_params?: GeoVisualQuery
+    query_params?: GeoVisualCspPtcQuery | GeoVisualPvQuery
   ): Promise<any> {
     return this.get(`/auth/geo-visual/${plantId}/${analysisResultId}/key-figure/${keyFiguresId}`, query_params);
   }

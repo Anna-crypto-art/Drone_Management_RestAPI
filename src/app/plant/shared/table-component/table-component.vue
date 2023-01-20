@@ -22,12 +22,6 @@
         :currentPage="pagination.currentPage"
         :loading="null"
       >
-        <template #head()="column">
-          {{ column.label }}
-          <app-explanation v-if="column.field.labelExpl">
-            <span v-html="$t(column.field.labelExpl)"></span>
-          </app-explanation>
-        </template>
         <template #cell()="data">
           {{ data.value }}
           <span v-if="compareAnalysisResult" v-html="getComparedCellValue(data)"></span>
@@ -43,8 +37,7 @@ import { BvTableCtxObject } from "bootstrap-vue";
 import AppTableComponentContainer from "@/app/plant/shared/table-component/table-component-container.vue";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppTable from "@/app/shared/components/app-table/app-table.vue";
-import { ITableComponentContainer } from "./types";
-import { IActiveComponent } from "../types";
+import { ITableComponentContainer, TableResultMappingComponent } from "./types";
 import { ITableComponent } from "./types";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
@@ -72,7 +65,7 @@ import { AppTableColumns, IAppTable } from "@/app/shared/components/app-table/ty
 export default class AppTableComponent extends BaseAuthComponent implements ITableComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) analysisResult!: AnalysisResultDetailedSchema;
-  @Prop({ required: true }) activeComponent!: IActiveComponent;
+  @Prop({ required: true }) activeComponent!: TableResultMappingComponent;
   @Prop({ default: null }) compareAnalysisResult!: AnalysisResultDetailedSchema | null;
   @Ref() container!: ITableComponentContainer;
   @Ref() table!: IAppTable;

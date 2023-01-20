@@ -45,7 +45,6 @@ import { Component, Prop } from "vue-property-decorator";
 import AppCollapse from "@/app/shared/components/app-collapse/app-collapse.vue";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
-import { IActiveComponent } from "../types";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppFilterFields from "@/app/plant/shared/filter-fields/filter-fields.vue";
@@ -56,6 +55,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { TableFilterRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { TableResultMappingComponent } from "./types";
 
 @Component({
   name: "app-table-component-filter",
@@ -68,7 +68,7 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 export default class AppTableComponentFilter extends BaseAuthComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) analysisResult!: AnalysisResultDetailedSchema;
-  @Prop({ required: true }) activeComponent!: IActiveComponent;
+  @Prop({ required: true }) activeComponent!: TableResultMappingComponent;
 
   loading = false;
 

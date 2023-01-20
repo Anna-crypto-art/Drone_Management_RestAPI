@@ -3,7 +3,6 @@ import { AnalysisResultSchemaBase } from "./analysis-result-schema-base";
 export interface AnalysisResultCspPtcHceSchema extends AnalysisResultSchemaBase {
   ir_intensity: number;
   htf_temperature: number;
-  comment?: string;
   timestamp: string;
   ambient_temperature: number;
   wind_speed: number;

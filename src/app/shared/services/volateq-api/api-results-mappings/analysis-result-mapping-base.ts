@@ -7,6 +7,12 @@ const analysisResultMappingBase: AnalysisResultMappings<AnalysisResultSchemaBase
     transName: "pcs",
     transDescr: "pcs_expl",
   },
+  {
+    getValue: r => r.comment,
+    transName: "comment",
+    disableForTable: true,
+    superAdminOnly: true,
+  },
 ];
 
 export default analysisResultMappingBase;

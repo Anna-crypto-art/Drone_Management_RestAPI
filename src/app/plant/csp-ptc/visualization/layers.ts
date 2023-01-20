@@ -16,6 +16,7 @@ import { GlassTemperatureKeyFigureLayer } from "./key-figure-layers/hce/glass-te
 import { ScaAverageTrackingKeyFigureLayer } from "./key-figure-layers/sca/sca-average-tracking-key-figure-layer";
 import { RecommendedActionKeyFigureLayer } from "./key-figure-layers/hce/recommended-action-key-figure-layer";
 import { HcePositionCenterKeyFigureLayer, HcePositionSupportKeyFigureLayer } from "./key-figure-layers/hce/hce-position-key-figure-layer";
+import { GeoVisualCspPtcQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 
 export const COMPONENT_LAYERS: typeof ComponentLayer[] = [
   AbsorberComponentLayer,
@@ -25,7 +26,7 @@ export const COMPONENT_LAYERS: typeof ComponentLayer[] = [
   SceComponentLayer,
 ];
 
-export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
+export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
   {
     keyFigureId: ApiKeyFigure.MISSING_GLASS_TUBE_ID,
     layerType: BoolUndefinedHceKeyFigureLayer,

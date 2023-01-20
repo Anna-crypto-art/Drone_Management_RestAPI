@@ -71,12 +71,6 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
     unit: "[mrad]",
   },
   {
-    getValue: r => r.comment,
-    transName: "comment",
-    disableForTable: true,
-    superAdminOnly: true,
-  },
-  {
     getValue: r => r.is_damaged_ball_joint_south,
     transName: "ball-joint-south-damaged",
     transDescr: "ball-joint-damaged_descr",

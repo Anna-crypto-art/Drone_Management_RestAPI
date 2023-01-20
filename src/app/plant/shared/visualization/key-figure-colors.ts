@@ -1,7 +1,7 @@
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
-import { KeyFigureColors } from "../shared/visualization/layers/types";
+import { KeyFigureColors } from "./layers/types";
 
-export const cspPtcKeyFigureRainbowColors: Record<ApiKeyFigure, KeyFigureColors> = {
+export const keyFigureRainbowColors: Record<ApiKeyFigure, KeyFigureColors> = {
   // HCE
   [ApiKeyFigure.MISSING_GLASS_TUBE_ID]: KeyFigureColors.BLUE_iurple,
   [ApiKeyFigure.OXYGEN_PENETRATION_ID]: KeyFigureColors.RED_coffeeWithChili,
@@ -19,6 +19,7 @@ export const cspPtcKeyFigureRainbowColors: Record<ApiKeyFigure, KeyFigureColors>
   [ApiKeyFigure.SCA_FRICTION_ID]: KeyFigureColors.BLUE_gafaw,
   [ApiKeyFigure.SCA_SDX_ID]: KeyFigureColors.BLUE_berryLover,
   [ApiKeyFigure.SCA_ORTHO_IMAGES_SDX_ID]: KeyFigureColors.BLUE_berryLover,
+  // Not implemented
   [ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_ONLINE_ID]: KeyFigureColors.black,
   [ApiKeyFigure.SCA_ORTHO_IMAGES_IR_ID]: KeyFigureColors.black,
   [ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_OFFLINE_ID]: KeyFigureColors.black,
@@ -27,8 +28,27 @@ export const cspPtcKeyFigureRainbowColors: Record<ApiKeyFigure, KeyFigureColors>
   // SCE
   [ApiKeyFigure.SCE_ALIGNMENT_ID]: KeyFigureColors.GREEN_toxicCoconut,
   [ApiKeyFigure.SCE_ORIENTATION_ID]: KeyFigureColors.GREEN_toxicCoconut,
+  // Not implemented
   [ApiKeyFigure.SCE_SDX_ID]: KeyFigureColors.black,
 
   // MIRROR
   [ApiKeyFigure.MISSING_MIRROR_ID]: KeyFigureColors.orange,
+
+  // TRACKER
+  [ApiKeyFigure.TRACKER_SOILING_LEVEL_ID]: KeyFigureColors.RED_retroBerry,
+
+  // Not implemented
+  [ApiKeyFigure.MODULE_BROKEN_GLASS_ID]: KeyFigureColors.black,
+  [ApiKeyFigure.MODULE_SHORT_CIRCUIT_ID]: KeyFigureColors.black,
+  [ApiKeyFigure.MODULE_OPEN_CIRCUIT_ID]: KeyFigureColors.black,
+  [ApiKeyFigure.SUBSTRING_SHORT_CIRCUIT_ID]: KeyFigureColors.black,
+  [ApiKeyFigure.SUBSTRING_OPEN_CIRCUIT_ID]: KeyFigureColors.black,
+  [ApiKeyFigure.CELL_BROKEN_ID]: KeyFigureColors.black,
+  [ApiKeyFigure.CELL_TRANSFER_RESISTANCE_ID]: KeyFigureColors.black,
+  [ApiKeyFigure.TRACKING_DEVIATION_ID]: KeyFigureColors.black,
+  [ApiKeyFigure.MODULE_SOILING_LEVEL_ID]: KeyFigureColors.black,
+  [ApiKeyFigure.TRACKER_ORTHO_IMAGES_RGB_ID]: KeyFigureColors.black,
+  [ApiKeyFigure.TRACKER_ORTHO_IMAGES_IR_ID]: KeyFigureColors.black,
+  [ApiKeyFigure.MODULE_ORTHO_IMAGES_RGB_ID]: KeyFigureColors.black,
+  [ApiKeyFigure.MODULE_ORTHO_IMAGES_IR_ID]: KeyFigureColors.black,
 };

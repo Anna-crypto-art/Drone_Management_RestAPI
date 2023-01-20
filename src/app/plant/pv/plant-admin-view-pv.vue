@@ -1,5 +1,5 @@
 <template>
-  <div class="plant-view-csp-ptc-admin-panel">
+  <div class="plant-view-pv-admin-panel">
     <b-container>
       <app-plant-admin-view-release-result :plant="plant" :analysisResult="selectedAnalysisResult" />
       <app-plant-admin-view-change-history :analysisResult="selectedAnalysisResult" :layers="layers" />
@@ -17,13 +17,13 @@ import AppPlantAdminViewChangeHistory from "@/app/plant/shared/plant-admin-view/
 import { KEY_FIGURE_LAYERS } from "./visualization/layers";
 
 @Component({
-  name: "app-plant-admin-view-csp-ptc",
+  name: "app-plant-admin-view-pv",
   components: {
     AppPlantAdminViewReleaseResult,
     AppPlantAdminViewChangeHistory,
   },
 })
-export default class AppPlantAdminViewCspPtc extends BaseAuthComponent {
+export default class AppPlantAdminViewPv extends BaseAuthComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ default: null }) selectedAnalysisResult!: AnalysisResultDetailedSchema | null; 
   

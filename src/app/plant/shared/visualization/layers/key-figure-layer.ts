@@ -4,7 +4,7 @@ import { LayerBase } from "./layer-base";
 import { FeatureLike } from "ol/Feature";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { KeyFigureColors, KeyFigureColorScheme, KeyFigureInfo, OrthoImage } from "./types";
-import { FeatureInfo, FeatureInfos, FeatureProperties, Legend, IPlantVisualization, FeatureAction, PropsFeature, FeatureActionsSummary } from "../types";
+import { FeatureInfo, FeatureInfos, FeatureProperties, Legend, IPlantVisualization, FeatureAction, PropsFeature, FeatureActionsSummary, ComparedFeatureType, ComparedFeatures } from "../types";
 import { AnalysisResultMappingEntry, AnalysisResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
@@ -17,13 +17,13 @@ import { IOrthoImageMixin } from "../mixins/types";
 import { analysisResultEventService } from "../../plant-admin-view/analysis-result-event-service";
 import { AnalysisResultEvent } from "../../plant-admin-view/types";
 import { FilterFieldType } from "../../filter-fields/types";
+import { keyFigureRainbowColors } from "@/app/plant/shared/visualization/key-figure-colors";
 
-export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends LayerBase implements IOrthoImageMixin {
+export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q extends GeoVisualQuery> extends LayerBase implements IOrthoImageMixin {
   protected abstract readonly analysisResultMapping: AnalysisResultMappings<T>;
   protected readonly name: string;
   protected readonly description?: string;
 
-  protected abstract get color(): string;
   public colorScheme = KeyFigureColorScheme.TRAFFIC_LIGHT;
   public enableCompare = false;
   public compareAnalysisResult: AnalysisResultDetailedSchema | null = null;
@@ -42,7 +42,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     public readonly analysisResult: AnalysisResultDetailedSchema,
     public readonly keyFigureId: ApiKeyFigure,
     public readonly keyFigureInfo: KeyFigureInfo,
-    public readonly query?: GeoVisualQuery,
+    public readonly query?: Q,
     protected readonly initColor?: KeyFigureColors,
     public readonly invisibleAutoSelection?: boolean,
   ) {
@@ -320,5 +320,117 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase> extends
     this.vueComponent.hideToast();
 
     analysisResultEventService.emit(this.analysisResult.id, AnalysisResultEvent.MODIFIED);
+  }
+
+  protected get color(): string {
+    if (this.initColor) {
+      return this.initColor;
+    }
+
+    if (this.colorScheme === KeyFigureColorScheme.RAINBOW) {
+      return keyFigureRainbowColors[this.keyFigureId];
+    }
+
+    if (this.colorScheme === KeyFigureColorScheme.TRAFFIC_LIGHT) {
+      return KeyFigureColors.red;
+    }
+
+    throw new Error("Unexpected colorScheme: " + this.colorScheme);
+  }
+
+  public getClassColor(classValue: number | undefined): string {
+    if (this.colorScheme === KeyFigureColorScheme.RAINBOW) {
+      if (classValue === 1) {
+        return this.getColorWithAlpha(KeyFigureColors.green, 0.3);
+      }
+  
+      if (classValue === 2) {
+        return this.getColorWithAlpha(this.color!, 0.5);
+      }
+    }
+
+    if (this.colorScheme === KeyFigureColorScheme.TRAFFIC_LIGHT) {
+      if (classValue === 1) {
+        return KeyFigureColors.green;
+      }
+      
+      if (classValue === 2) {
+        return KeyFigureColors.yellow;
+      }
+    }
+
+    return this.color!;
+  }
+
+  public getDiffColorByComparedFeatureType(comparedFeatureType: ComparedFeatureType): string {
+    switch (comparedFeatureType) {
+      case ComparedFeatureType.NO_CHANGE:
+        return KeyFigureColors.black;
+
+      case ComparedFeatureType.GONE_IMPROVED:
+        return KeyFigureColors.green;
+
+      case ComparedFeatureType.NEW_WORSENED:
+        return KeyFigureColors.red;
+
+      case ComparedFeatureType.GONE_WORSENED:
+      case ComparedFeatureType.NEW_IMPROVED:
+        return this.getColorWithAlpha('#fff', 0); // transparent -> invisible
+    }
+  }
+
+  public getComparedFeatures(currentClass: number): ComparedFeatures {
+    const comparedFeatures: ComparedFeatures = {
+      [ComparedFeatureType.NO_CHANGE]: [],
+      [ComparedFeatureType.GONE_IMPROVED]: [],
+      [ComparedFeatureType.GONE_WORSENED]: [],
+      [ComparedFeatureType.NEW_IMPROVED]: [],
+      [ComparedFeatureType.NEW_WORSENED]: [],
+    };
+
+    for (const propFeature of this.geoJSON!.features) {
+      const comparedFeatureType = this.getComparedFeatureType(propFeature.properties, currentClass);
+      comparedFeatures[comparedFeatureType].push(propFeature);
+    }
+
+    return comparedFeatures;
+  }
+
+  public getComparedFeatureType(properties: FeatureProperties, currentClass: number): ComparedFeatureType {
+    const featureValue: number = properties.value! as number;
+    const featureDiffValue: number = properties.diff_value! as number;
+
+    if (featureValue !== currentClass) {
+      // featureValue is now (new analysis) in another class than the current class,
+      // but was before (old analysis) in the current class.
+
+      if (featureValue < currentClass) {
+        // featureValue is now in a lower class than the current class.
+        return ComparedFeatureType.GONE_IMPROVED;
+      }
+
+      if (featureValue > currentClass) {
+        // featureValue is now in a higher class than the current class.
+        // case goes under the radar for simplicity
+        return ComparedFeatureType.GONE_WORSENED;
+      }
+    } 
+    if (featureValue === currentClass && featureDiffValue !== 0) {
+      // featureValue is now in the same class as the current class,
+      // but was before (old analysis) in another class.
+      
+      if (featureDiffValue > 0) {
+        // class before was lower than the current class
+        return ComparedFeatureType.NEW_WORSENED
+      }
+
+      if (featureDiffValue < 0) {
+        // class before was higher than the current class
+        // case goes under the radar for simplicity
+        return ComparedFeatureType.NEW_IMPROVED
+      }
+    }
+
+    return ComparedFeatureType.NO_CHANGE;
   }
 }
