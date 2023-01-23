@@ -61,14 +61,14 @@ const analysisResultPvMappingModule: AnalysisResultMappings<
   {
     keyFigureId: ApiKeyFigure.SUBSTRING_SHORT_CIRCUIT_ID,
     getValue: r => r.substring_short_circuit_class,
-    transName: "pv-module-substring_short_circuit",
+    transName: "pv-module-substring-short-circuit",
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     getDiffValue: r => r.substring_short_circuit_class__diff,
   },
   {
     keyFigureId: ApiKeyFigure.SUBSTRING_OPEN_CIRCUIT_ID,
     getValue: r => r.substring_open_circuit_class,
-    transName: "pv-module-substring_open_circuit",
+    transName: "pv-module-substring-open-circuit",
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     getDiffValue: r => r.substring_open_circuit_class__diff,
   },
@@ -78,13 +78,6 @@ const analysisResultPvMappingModule: AnalysisResultMappings<
     transName: "pv-module-cell-broken",
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     getDiffValue: r => r.cell_broken_class__diff,
-  },
-  {
-    keyFigureId: ApiKeyFigure.CELL_TRANSFER_RESISTANCE_ID,
-    getValue: r => r.cell_transfer_resistance_class,
-    transName: "pv-module-cell-transfer-resistance",
-    filterType: FilterFieldType.NUMERIC_EXTENDED,
-    getDiffValue: r => r.cell_transfer_resistance_class__diff,
   },
   {
     keyFigureId: ApiKeyFigure.CELL_TRANSFER_RESISTANCE_ID,
