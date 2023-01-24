@@ -46,7 +46,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualPvQuery>[] = [
   {
     keyFigureId: ApiKeyFigure.MODULE_SOILING_LEVEL_ID,
     layerType: ModuleSoilingKeyFigure,
-    keyFigureInfo: { keyName: "pv-module-soiling-level", description: "pv-module-soiling-level_descr" },
+    keyFigureInfo: { keyName: "pv-module-soiling-level", description: "pv-module-soiling-level_expl" },
     subLayers: [
       {
         keyFigureInfo: { displayName: "pv-module-soiling-level-3", zIndex: 13 },
