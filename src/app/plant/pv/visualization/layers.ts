@@ -124,10 +124,6 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualPvQuery>[] = [
     keyFigureInfo: { keyName: "pv-module-open-circuit" },
     subLayers: [
       {
-        keyFigureInfo: { displayName: "pv-module-open-circuit-class-3", zIndex: 13 },
-        query: { module_open_circuit_class: 3 },
-      },
-      {
         keyFigureInfo: { displayName: "pv-module-open-circuit-class-2", zIndex: 12 },
         query: { module_open_circuit_class: 2 },
       },

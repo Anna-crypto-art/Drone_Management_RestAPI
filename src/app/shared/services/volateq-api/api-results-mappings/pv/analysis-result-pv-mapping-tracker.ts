@@ -41,6 +41,7 @@ const analysisResultPvMappingTracker: AnalysisResultMappings<
     keyFigureId: ApiKeyFigure.TRACKER_SOILING_LEVEL_ID,
     getValue: r => r.soiling_level,
     transName: "pv-tracker-soiling-level",
+    transDescr: "pv-tracker-soiling-level_expl",
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     getDiffValue: r => r.soiling_level__diff,
   },
