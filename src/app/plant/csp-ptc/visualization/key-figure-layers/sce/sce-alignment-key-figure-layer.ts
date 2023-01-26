@@ -61,6 +61,6 @@ export class SceAlignmentKeyFigureLayer extends SceKeyFigureLayer implements ICo
   }
   
   protected getColor(): string {
-    return this.getClassColor(this.query?.torsion_class);
+    return this.getClassColor(this.getQueryClass());
   }
 }

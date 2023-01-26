@@ -30,7 +30,11 @@ export class SceSdxKeyFigureLayer extends SceKeyFigureLayer {
     return { key_figure_image_url: ApiKeyFigure.SCA_ORTHO_IMAGES_SDX_ID };
   }
 
+  public getQueryClass(): number | undefined {
+    return this.query?.sdx_class;
+  }
+
   protected getColor(): string {
-    return this.getClassColor(this.query?.sdx_class);
+    return this.getClassColor(this.getQueryClass());
   }
 }
