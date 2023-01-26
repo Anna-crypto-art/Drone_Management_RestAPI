@@ -132,12 +132,14 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
       } else if (entry.keyFigureId === ApiKeyFigure.SCA_TRACKING_DEVIATION_ID || 
         entry.keyFigureId === ApiKeyFigure.SCE_ALIGNMENT_ID || 
         entry.keyFigureId === ApiKeyFigure.SCA_SDX_ID ||
+        entry.keyFigureId === ApiKeyFigure.SCE_SDX_ID ||
         entry.keyFigureId === ApiKeyFigure.SCA_FRICTION_ID)
       {
         const classLimits = {
           [ApiKeyFigure.SCA_TRACKING_DEVIATION_ID]: this.firstAnalysisResult!.csp_ptc.sca_tracking_encoder_offset_class_limits,
           [ApiKeyFigure.SCE_ALIGNMENT_ID]: this.firstAnalysisResult!.csp_ptc.sce_alignment_deviation_to_drive_class_limits,
           [ApiKeyFigure.SCA_SDX_ID]: this.firstAnalysisResult!.csp_ptc.sdx_rms_class_limits,
+          [ApiKeyFigure.SCE_SDX_ID]: this.firstAnalysisResult!.csp_ptc.sdx_rms_class_limits,
           [ApiKeyFigure.SCA_FRICTION_ID]: this.firstAnalysisResult!.csp_ptc.sca_torsion_class_limits,
         }[entry.keyFigureId];
 
@@ -233,7 +235,8 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
             color: colorMap[offsetClass],
           });
         }
-      } else if (entry.keyFigureId === ApiKeyFigure.SCA_SDX_ID) {
+      } else if (entry.keyFigureId === ApiKeyFigure.SCA_SDX_ID ||
+          entry.keyFigureId === ApiKeyFigure.SCE_SDX_ID) {
         const classLimits = this.firstAnalysisResult!.csp_ptc.sdx_rms_class_limits
 
         numberBox.nums = [];

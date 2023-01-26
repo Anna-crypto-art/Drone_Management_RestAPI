@@ -28,8 +28,7 @@ export const keyFigureRainbowColors: Record<ApiKeyFigure, KeyFigureColors> = {
   // SCE
   [ApiKeyFigure.SCE_ALIGNMENT_ID]: KeyFigureColors.GREEN_toxicCoconut,
   [ApiKeyFigure.SCE_ORIENTATION_ID]: KeyFigureColors.GREEN_toxicCoconut,
-  // Not implemented
-  [ApiKeyFigure.SCE_SDX_ID]: KeyFigureColors.black,
+  [ApiKeyFigure.SCE_SDX_ID]: KeyFigureColors.GREEN_minecraftStevesTShirt,
 
   // MIRROR
   [ApiKeyFigure.MISSING_MIRROR_ID]: KeyFigureColors.orange,

@@ -62,8 +62,8 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
   },
   {
     getValue: r => r.sdx_rms_value,
-    transName: "slope-deviation",
-    transDescr: "slope-deviation_expl",
+    transName: "sca-slope-deviation",
+    transDescr: "sca-slope-deviation_expl",
     keyFigureId: ApiKeyFigure.SCA_SDX_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,

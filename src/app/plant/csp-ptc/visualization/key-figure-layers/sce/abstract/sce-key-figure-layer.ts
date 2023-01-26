@@ -15,9 +15,35 @@ export abstract class SceKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisRes
   public getStyle(feature: FeatureLike): Style {
     return new Style({
       fill: new Fill({
-        color: this.color,
+        color: this.getColor(),
       }),
       text: this.showText(feature),
     });
   }
+
+  protected getLegendEntryTransName(
+    transClassName: string,
+    classLimits: number[] | null,
+    currentClass: 1 | 2 | 3 | undefined,
+    unit: string
+  ): string {
+    if (!currentClass) {
+      return this.vueComponent.$t(this.keyFigureInfo.displayName!).toString();
+    }
+
+    let limitRange = "";
+    if (classLimits) {
+      if (currentClass === 1) {
+        limitRange = `0${unit} - ${classLimits[0]}${unit}: `;
+      } else if (currentClass === 2) {
+        limitRange = `${classLimits[0]}${unit} - ${classLimits[1]}${unit}: `;
+      } else if (currentClass === 3) {
+        limitRange = `${classLimits[1]}${unit} - &infin;${unit}: `;
+      }
+    }
+
+    return limitRange + this.vueComponent.$t(transClassName + "-" + currentClass).toString();
+  }
+
+  protected abstract getColor(): string;
 }

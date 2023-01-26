@@ -9,4 +9,5 @@ export interface AnalysisResultCspPtcSceSchema extends AnalysisResultSchemaBase 
 
 export interface AnalysisResultCspPtcSceComparedSchema extends AnalysisResultCspPtcSceSchema {
   alignment_deviation_to_drive__diff: number;
+  sdx_rms_value__diff: number;
 }
