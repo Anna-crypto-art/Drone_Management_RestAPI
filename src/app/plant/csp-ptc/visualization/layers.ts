@@ -18,6 +18,7 @@ import { ScaAverageTrackingKeyFigureLayer } from "./key-figure-layers/sca/sca-av
 import { RecommendedActionKeyFigureLayer } from "./key-figure-layers/hce/recommended-action-key-figure-layer";
 import { HcePositionCenterKeyFigureLayer, HcePositionSupportKeyFigureLayer } from "./key-figure-layers/hce/hce-position-key-figure-layer";
 import { GeoVisualCspPtcQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
+import { SwivelComponentLayer } from "./component-layers/swivel-component-layer";
 
 export const COMPONENT_LAYERS: typeof ComponentLayer[] = [
   AbsorberComponentLayer,
@@ -25,6 +26,7 @@ export const COMPONENT_LAYERS: typeof ComponentLayer[] = [
   // MirrorComponentLayer, Too many mirrors (>200k) leads to OutOfMemory
   ScaComponentLayer,
   SceComponentLayer,
+  SwivelComponentLayer,
 ];
 
 export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [

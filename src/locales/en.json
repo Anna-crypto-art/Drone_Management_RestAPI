@@ -491,7 +491,6 @@
   "previous-value": "Prev. value",
   "no-files-uploaded": "No files uploaded",
   "undo": "Undo",
-  
   "tracker-tracking-angle": "Tracking angle",
   "tracker-tracking-angle_expl": "The PI quantifies the difference between measured and ideal tracking angles.",
   "pv-module-soiling-level": "Soiling level",
@@ -537,6 +536,7 @@
   "pv-tracker-soiling-level-class-1": "Soiling induced production loss below 5%",
   "pv-tracker-soiling-level-class-2": "Soiling induced production loss between 5-15%",
   "pv-tracker-soiling-level-class-3": "Soiling induced production loss above 15%",
+  "swivels": "Swivels",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",
