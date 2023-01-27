@@ -1,6 +1,4 @@
 import { Legend } from "@/app/plant/shared/visualization/types";
-import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
-import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { SceKeyFigureLayer } from "./abstract/sce-key-figure-layer";
 
 export class SceSdxKeyFigureLayer extends SceKeyFigureLayer {
@@ -24,10 +22,6 @@ export class SceSdxKeyFigureLayer extends SceKeyFigureLayer {
         },
       ],
     };
-  }
-
-  protected getMoreSpecificAnalysisResultParams(): TableRequest {
-    return { key_figure_image_url: ApiKeyFigure.SCA_ORTHO_IMAGES_SDX_ID };
   }
 
   public getQueryClass(): number | undefined {
