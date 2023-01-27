@@ -1,12 +1,42 @@
-import { Legend } from "@/app/plant/shared/visualization/types";
+import { ComparedFeatureType, FeatureProperties, Legend } from "@/app/plant/shared/visualization/types";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
+import { FeatureLike } from "ol/Feature";
+import { Style } from "ol/style";
+import { CompareClassLimitsKeyFigureMixin } from "../key-figure-mixins/compare-class-limits-key-figure-mixin";
+import { ICompareClassLimitsKeyFigureMixin } from "../key-figure-mixins/types";
 import { ScaKeyFigureLayer } from "./abstract/sca-key-figure-layer";
 
-export class ScaSdxKeyFigureLayer extends ScaKeyFigureLayer {
+export class ScaSdxKeyFigureLayer extends ScaKeyFigureLayer implements ICompareClassLimitsKeyFigureMixin {
+  private compareClassLimitsKeyFigureMixin!: CompareClassLimitsKeyFigureMixin;
+  
+  protected created(): void {
+    this.compareClassLimitsKeyFigureMixin = new CompareClassLimitsKeyFigureMixin(this);
+
+    this.enableCompare = true;
+  }
+
+  public getStyle(feature: FeatureLike): Style {
+    const style = super.getStyle(feature);
+
+    if (this.enableCompare && this.compareAnalysisResult) {
+      style.getFill().setColor(
+        this.compareClassLimitsKeyFigureMixin.getDiffColor(
+          this.getProperties(feature)
+        )
+      );
+    }
+
+    return style;
+  }
+
   protected getLegend(): Legend | undefined {
     if (!this.geoJSON) {
       return undefined;
+    }
+
+    if (this.enableCompare && this.compareAnalysisResult) {
+      return this.compareClassLimitsKeyFigureMixin.getDiffLegend();
     }
 
     return {
@@ -14,13 +44,7 @@ export class ScaSdxKeyFigureLayer extends ScaKeyFigureLayer {
       entries: [
         {
           color: this.getColor(),
-          name:
-            this.getLegendEntryTransName(
-              "slope-deviation-class",
-              this.analysisResult.csp_ptc.sdx_rms_class_limits,
-              this.query?.sdx_class,
-              "[mrad]"
-            ) + this.getLegendEntryCount(),
+          name: this.getLegendName(),
         },
       ],
     };
@@ -31,6 +55,34 @@ export class ScaSdxKeyFigureLayer extends ScaKeyFigureLayer {
   }
 
   protected getColor(): string {
-    return this.getClassColor(this.query?.sdx_class);
+    return this.getClassColor(this.getQueryClass());
+  }
+
+  public getClassLimits(): number[] {
+    return this.analysisResult.csp_ptc.sdx_rms_class_limits;
+  }
+
+  public getQueryClass(): number | undefined {
+    return this.query?.sdx_class
+  }
+
+  public getDiffLegendName(): string {
+    return this.getLegendName();
+  }
+
+  private getLegendName(): string {
+    return this.getLegendEntryTransName(
+      "slope-deviation-class",
+      this.analysisResult.csp_ptc.sdx_rms_class_limits,
+      this.query?.sdx_class,
+      "[mrad]"
+    ) + this.getLegendEntryCount();
+  }
+
+  public getComparedFeatureType(properties: FeatureProperties, currentClass: number): ComparedFeatureType {
+    return super.getComparedFeatureType(
+      this.compareClassLimitsKeyFigureMixin.getFeaturePropertiesClassValue(properties),
+      currentClass
+    );
   }
 }
