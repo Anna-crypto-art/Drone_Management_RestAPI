@@ -142,7 +142,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualPvQuery>[] = [
   {
     keyFigureId: ApiKeyFigure.SUBSTRING_SHORT_CIRCUIT_ID,
     layerType: ModuleSubstringShortCircuitKeyFigure,
-    keyFigureInfo: { keyName: "pv-module-substring_short_circuit" },
+    keyFigureInfo: { keyName: "pv-module-substring-short-circuit" },
     subLayers: [
       {
         keyFigureInfo: { displayName: "pv-module-substring-short-circuit-class-3", zIndex: 13 },
