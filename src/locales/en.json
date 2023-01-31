@@ -537,6 +537,8 @@
   "pv-tracker-soiling-level-class-2": "Soiling induced production loss between 5-15%",
   "pv-tracker-soiling-level-class-3": "Soiling induced production loss above 15%",
   "swivels": "Swivels",
+  "swivel-friction": "swivel-friction",
+  "has-friction-potential": "has-friction-potential",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

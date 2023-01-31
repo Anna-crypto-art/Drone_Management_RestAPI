@@ -33,6 +33,9 @@ export const keyFigureRainbowColors: Record<ApiKeyFigure, KeyFigureColors> = {
   // MIRROR
   [ApiKeyFigure.MISSING_MIRROR_ID]: KeyFigureColors.orange,
 
+  // SWIVEL
+  [ApiKeyFigure.SWIVEL_FRICTION_POTENTIAL_ID]: KeyFigureColors.BLUE_liturgicalTemptation,
+
   // TRACKER
   [ApiKeyFigure.TRACKER_SOILING_LEVEL_ID]: KeyFigureColors.RED_retroBerry,
 

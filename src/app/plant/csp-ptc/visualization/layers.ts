@@ -19,6 +19,7 @@ import { RecommendedActionKeyFigureLayer } from "./key-figure-layers/hce/recomme
 import { HcePositionCenterKeyFigureLayer, HcePositionSupportKeyFigureLayer } from "./key-figure-layers/hce/hce-position-key-figure-layer";
 import { GeoVisualCspPtcQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 import { SwivelComponentLayer } from "./component-layers/swivel-component-layer";
+import { SwivelFrictionKeyFigureLayer } from "./key-figure-layers/swivel/swivel-friction-key-figure-layer";
 
 export const COMPONENT_LAYERS: typeof ComponentLayer[] = [
   AbsorberComponentLayer,
@@ -329,6 +330,12 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
     keyFigureId: ApiKeyFigure.MISSING_MIRROR_ID,
     layerType: MissingMirrorKeyFigureLayer,
     keyFigureInfo: { keyName: "missing-mirror" },
+    query: { undefined: 1 },
+  },
+  {
+    keyFigureId: ApiKeyFigure.SWIVEL_FRICTION_POTENTIAL_ID,
+    layerType: SwivelFrictionKeyFigureLayer,
+    keyFigureInfo: { keyName: "swivel-friction" },
     query: { undefined: 1 },
   },
 ];
