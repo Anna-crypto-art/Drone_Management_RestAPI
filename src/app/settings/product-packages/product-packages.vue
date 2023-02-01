@@ -10,14 +10,16 @@
         <template #cell(name)="row">
           <span class="product-package-table-name">{{ row.item.product_package.name }}</span>
         </template>
+        <template #cell(technology)="row">
+          {{ row.item.technology }}
+        </template>
         <template #cell(key_figures)="row">
           <span class="grayed">
-            <!-- {{ row.item }} -->
             {{ row.item.product_package.key_figures.map(key_figure => key_figure.name).join(", ") }}
           </span>
         </template>
-        <template #cell(technology)="row">
-          {{ row.item.technology }}
+        <template #cell(number_currently_booked)="row">
+          {{ row.item.number_currently_booked }}
         </template>
         <template #hoverActions="row">
           <app-button
@@ -25,14 +27,14 @@
             @click="onEditProductPackageClick(row.item)"
             variant="secondary"
             size="sm"
-            :title="$t('edit-product-package')"
+            :title="$t('edit-product-package', { product_package: row.item.product_package.name })"
             icon="wrench"
           />
           <app-button
             @click="onDeleteProductPackageClick(row.item)"
             variant="outline-danger"
             size="sm"
-            :title="$t('delete-product-package')"
+            :title="$t('delete-product-package', { product_package: row.item.product_package.name })"
             icon="trash"
           />
         </template>
@@ -72,67 +74,22 @@
       <template #modal-title>
         <h4>{{ $t("update-product-package", { product_package: currentProductPackage.name }) }}</h4>
       </template>
-      <!-- <b-row v-if="editUser">
-        <b-col>
-          <b-form-group :label="$t('role')" label-for="role">
-            <b-form-select
-              id="role"
-              v-model="editUser.roleId"
-              :options="roles"
-            ></b-form-select>
-          </b-form-group>
-        </b-col>
-        <b-col>
-          <div><b>{{ $t("plants") }}</b></div>
-          <div v-for="customerPlant in editUser.customerPlants" :key="customerPlant.plant.id">
-            <b-checkbox 
-              v-model="customerPlant.selected"
-            >
-              {{ customerPlant.plant.name }}
-              <small class="grayed" v-if="customerPlant.otherCustomers">{{ customerPlant.otherCustomers }}</small>
-            </b-checkbox>
-          </div>
-        </b-col>
-      </b-row> -->
-    </app-modal-form>
-
-
-    <!-- <app-modal-form
-      id="edit-product-package-modal"
-      ref="appProductPackageModal"
-      :title="productPackageModalTitle"
-      :ok-title="productPackageModalOkTitle"
-      :modalLoading="productPackageModalLoading"
-      @submit="onSubmitProductPackage"
-    >
-      <b-row v-if="currentProductPackage">
-        <b-col>
-          <b-form-group :label="$t('name')" label-for="name">
-            <b-form-input
-              id="productPackageName"
-              v-model="currentProductPackage.name"
-              :placeholder="$t('name')"
-              required
-            ></b-form-input>
-          </b-form-group>
-        </b-col>
-      </b-row>
       <b-row>
         <b-col>
-          <div><b>{{ $t("performance-indicators") }}</b></div>
-          <div class="app-settings-product-package-performance-indicator-selection">
-            <div v-for="selectPlant in selectPlants" :key="selectPlant.plant.id">
-              <b-checkbox 
-                v-model="selectPlant.selected"
-              >
-                {{ selectPlant.plant.name }}
-                <small class="grayed" v-if="selectPlant.otherCustomers">{{ selectPlant.otherCustomers }}</small>
-              </b-checkbox>
-            </div>
-          </div>
+          <b-form-group :label="$t('name')">
+            <b-form-input id="edit-product-package-name" v-model="currentProductPackage.name" required />
+          </b-form-group>
+          <b-form-group :label="$t('technology')">
+            <b-form-select id="new-plant-technology" v-model="currentProductPackage.technology_id" :options="technologies" required />
+          </b-form-group>
+          <b-form-group :label="$t('performance-indicators')">
+            <app-multiselect 
+              v-model="currentProductPackage.key_figures"
+              :options="keyFigureOptions" />
+          </b-form-group>
         </b-col>
       </b-row>
-    </app-modal-form>     -->
+    </app-modal-form>
   </div>
 </template>
 
@@ -178,12 +135,11 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
   
   technologies: Array<any> = [];
 
-  newProductPackage: { name: string, technology_id: number, key_figures: KeyFigureSchema[] } =
+  newProductPackage: { name: string, technology_id: number, key_figures: number[] } =
+    {name: "", technology_id: 0, key_figures: []};
+  currentProductPackage: { name: string, technology_id: number, key_figures: number[] } =
     {name: "", technology_id: 0, key_figures: []};
 
-
-  // newPlant: { name: string, technology_id: number | null, customer_id: string | null } | null = 
-  //   { name: "", technology_id: null, customer_id: null };
 
   loading = false;
 
@@ -196,45 +152,32 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
   editProductPackageModalLoading = false;
   editProductPackageModalTitle = "";
   editProductPackageModalOkTitle = "";
-  currentProductPackage: ProductPackageItem | null = null;
+  currentProductPackageItem: ProductPackageItem = {
+    id: 0,
+    name: "",
+    technology: "",
+    product_package: {
+      id: 0,
+      name: "",
+      technology_id: 0,
+      key_figures: [],
+    },
+    number_currently_booked: 0
+  };
+
 
   async created() {
     this.columns = [
       { key: "name", label: this.$t("name").toString() },
-      { key: "technology", label: this.$t("technology").toString(), superAdminOnly: true },
+      { key: "technology", label: this.$t("technology").toString() },
       { key: "key_figures", label: this.$t("performance-indicators").toString() },
+      { key: "number_currently_booked", label: this.$t("product-package-number-currently-booked").toString() },
     ];
-
-    // this.roles = [
-    //   { value: null, text: "" },
-    //   ...Object.keys(CustomerRole).map(roleKey => ({ value: CustomerRole[roleKey], text: CustomerRole[roleKey] })),
-    // ]
 
     this.technologies = (await volateqApi.getTechnologies()).map(tech => ({ value: tech.id, text: tech.abbrev }))
     await this.updateProductPackageRows();
-    // this.newProductPackage = this.createEmptyProductPackage();
     this.all_key_figures = await volateqApi.getAllKeyFigures();
     this.updateKeyFigureOptions();
-    // this.all_key_figures = volateqApi.getAllKeyFigures();
-    // this.all_key_figures = (await volateqApi.getAllKeyFigures()).map((key_figure: KeyFigureSchema) => ({
-    //     id: key_figure.id,
-    //     name: key_figure.name,
-    //     component_id: key_figure.component_id,
-    //     description: key_figure.description,
-    //     component: key_figure.component,
-    //   })).sort((a, b) => {
-    //     const nameA = a.name.toLowerCase();
-    //     const nameB = b.name.toLowerCase();
-
-    //     if (nameA < nameB) {
-    //       return -1;
-    //     }
-    //     if (nameA > nameB) {
-    //       return 1;
-    //     }
-
-    //     return 0;
-    //   });
   }
 
   private updateKeyFigureOptions() {
@@ -265,6 +208,16 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
         const nameA = a.product_package.name.toLowerCase();
         const nameB = b.product_package.name.toLowerCase();
 
+        const techA = a.product_package.technology_id;
+        const techB = b.product_package.technology_id;
+
+        if (techA < techB) {
+          return -1;
+        }
+        if (techA > techB) {
+          return 1;
+        }
+
         if (nameA < nameB) {
           return -1;
         }
@@ -274,6 +227,13 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
 
         return 0;
       });
+
+      // load and set the number of orders
+      for (let i = 0; i < this.rows.length; i++) {
+          let number_of_orders = await volateqApi.getProductPackageNumberOfOrders(this.rows[i].product_package.id);
+          this.rows[i].number_currently_booked = number_of_orders;
+      }
+
     } catch (e) {
       this.showError(e);
     } finally {
@@ -284,25 +244,6 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
   onCreateProductPackageClick() {
     this.newProductPackage = {name: "", technology_id: 0, key_figures: []};
 
-    this.currentProductPackage = {
-      id: 0,
-      name: "",
-      technology: "",
-      product_package: {
-        id: 0,
-        name: "",
-        technology_id: 0,
-        key_figures: [],
-      },
-      number_currently_booked: 0
-    }
-
-    // this.selectPlants = this.plants.map(plant => ({
-    //   plant: plant,
-    //   selected: false,
-    //   otherCustomers: plant.customers!.map(customer => customer.name).join(", "),
-    // }));
-
     this.createProductPackageModalTitle = this.$t("create-product-package").toString();
     this.createProductPackageModalOkTitle = this.$t("create").toString();
 
@@ -312,16 +253,15 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
   async onSubmitCreateProductPackage() {
     this.createProductPackageModalLoading = true;
     try {
-      console.log(this.newProductPackage)
       await volateqApi.createProductPackage({
         name: this.newProductPackage!.name,
         technology_id: this.newProductPackage.technology_id!,
-        key_figures: this.newProductPackage.key_figures.map(kf => kf.id),
+        key_figures: this.newProductPackage.key_figures,
       });
 
       this.appCreateProductPackageModal.hide();
 
-      this.showSuccess(this.$t("product-package-created-success").toString());
+      this.showSuccess(this.$t("product-package-created-success", { product_package: this.newProductPackage!.name }).toString());
       
       await this.updateProductPackageRows();
     } catch (e) {
@@ -332,17 +272,13 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
   }
 
   onEditProductPackageClick(productPackageItem: ProductPackageItem) {
-    this.currentProductPackage = productPackageItem;
+    this.currentProductPackageItem = productPackageItem;
 
-    // this.selectPlants = this.plants.map(plant => ({
-    //   plant: plant,
-    //   selected: !!customerItem.plants.find(customerPlant => customerPlant.id === plant.id),
-    //   otherCustomers: plant.customers!.filter(customer => customer.id !== customerItem.id)
-    //     .map(customer => customer.name).join(", "),
-    // }));
-
-    // this.customerModalTitle = this.$t("edit-customer").toString() + ": " + customerItem.name;
-    // this.customerModalOkTitle = this.$t("apply").toString();
+    this.currentProductPackage = {
+      name: productPackageItem.name,
+      technology_id: productPackageItem.product_package.technology_id,
+      key_figures: productPackageItem.product_package.key_figures.map(kf => kf.id),
+    };
 
     this.appEditProductPackageModal.show();
   }
@@ -353,6 +289,16 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
 
       this.appEditProductPackageModal.hide();
 
+      await volateqApi.updateProductPackage(
+        this.currentProductPackageItem!.id,
+        {
+          name: this.currentProductPackage.name,
+          technology_id: this.currentProductPackage.technology_id,
+          key_figures: this.currentProductPackage.key_figures,
+        }
+      );
+
+      this.showSuccess(this.$t("product-package-edited-successfully", { product_package: this.newProductPackage.name }).toString());
       await this.updateProductPackageRows();
     } catch (e) {
       this.showError(e);
@@ -364,13 +310,12 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
   async onDeleteProductPackageClick(productPackageItem: ProductPackageWithKeyFiguresSchema) {
     this.loading = true;
     try {
-    //   if (!confirm(this.$t("sure-delete-customer", { customer: customerItem.name }).toString())) {
-    //     return;
-    //   }
+      if (!confirm(this.$t("sure-delete-product-package", { product_package: productPackageItem.name }).toString())) {
+        return;
+      }
+      await volateqApi.deleteProductPackage(productPackageItem.id!);
 
-    //   await volateqApi.deleteCustomer(customerItem.id!);
-
-    //   this.showSuccess(this.$t("customer-deleted-success", {customer: customerItem.name }).toString());
+      this.showSuccess(this.$t("product-package-deleted-successfully", { product_package: productPackageItem.name }).toString());
 
       await this.updateProductPackageRows();
     } catch (e) {

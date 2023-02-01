@@ -3,7 +3,7 @@ import { KeyFigureSchema } from "./key-figure-schema";
 export interface ProductPackageSchema {
   id: number;
   name: string;
-  technology_id;
+  technology_id: number;
 }
 
 export interface ProductPackageWithKeyFiguresSchema {

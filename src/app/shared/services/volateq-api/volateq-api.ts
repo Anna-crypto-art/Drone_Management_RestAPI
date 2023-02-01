@@ -35,7 +35,7 @@ import { CreateAnalysisUploadRequest } from "./api-requests/upload-requests";
 import { ja, th } from "date-fns/locale";
 import { AnalysisResultSetNullRequest } from "./api-requests/analysis-result-requests";
 import { KeyFigureSchema } from "./api-schemas/key-figure-schema";
-import { CreateProductPackageRequest } from "./api-requests/product-package-requests";
+import { CreateProductPackageRequest, UpdateProductPackageRequest } from "./api-requests/product-package-requests";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -649,10 +649,25 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/product-packages`);
   }
 
+  public async getProductPackageNumberOfOrders(productPackageId: number): Promise<number> {
+      return this.get(`/auth/product-package/${productPackageId}/number-of-orders`)
+  }
+
   public async createProductPackage(
     createProductPackageRequest: CreateProductPackageRequest,
   ): Promise<void> {
-    return this.post('/auth/create-product-package', createProductPackageRequest)
+    return this.post(`/auth/create-product-package`, createProductPackageRequest)
+  }
+
+  public async updateProductPackage(
+    productPackageId: number,
+    updateProductPackageRequest: UpdateProductPackageRequest,
+  ): Promise<void> {
+    return this.post(`/auth/product-package/${productPackageId}`, updateProductPackageRequest)
+  }
+
+  public async deleteProductPackage(productPackageId: number): Promise<void> {
+    await this.delete(`/auth/product-package/${productPackageId}`);
   }
 
   public async getProductPackagesWithKeyFigures(): Promise<ProductPackageWithKeyFiguresSchema[]> {
