@@ -93,12 +93,23 @@ export default class AppDiagramHistory extends BaseAuthComponent {
       datalabels: {
         align: "top",
       },
+      tooltip: {
+        padding: 10,
+        boxPadding: 7,
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        borderWidth: 0.3,
+        borderColor: '#444',
+        cornerRadius: 0,
+        titleColor: '#212529',
+        bodyColor: '#212529',
+      },
     },
     scales: {
       x: {
         type: "time",
         time: {
           unit: "month",
+          tooltipFormat: 'MMM dd, yyyy',
         },
         bounds: "data",
         grid: {
@@ -119,7 +130,10 @@ export default class AppDiagramHistory extends BaseAuthComponent {
           text: "",
           align: "end",
         },
-      },
+        ticks: {
+          precision: 0,
+        },
+      }
     },
     responsive: false,
   };
