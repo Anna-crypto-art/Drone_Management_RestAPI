@@ -278,13 +278,15 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
     height: 100%;
     width: 100%;
     border-right: $border-color-grey 1px solid;
+    display: flex;
+    flex-flow: column;
 
     .app-table-container {
       margin-top: 0;
     }
 
     &-settings {
-      margin: 15px 0;
+      margin-bottom: 15px;
     }
 
     &-title {

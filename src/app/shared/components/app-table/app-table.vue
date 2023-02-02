@@ -166,7 +166,9 @@ export default class AppTable extends Vue implements IAppSelectTable, IAppTable 
   }
   .table.b-table.b-table-selectable {
     .b-table-row-selected {
-      border-left: 2px solid $blue-60pc;
+      -webkit-box-shadow: inset 2px 0px 0px 0px $blue-60pc;
+      -moz-box-shadow: inset 2px 0px 0px 0px $blue-60pc;
+      box-shadow: inset 2px 0px 0px 0px $blue-60pc;
       font-weight: bold;
 
       small {
@@ -175,7 +177,9 @@ export default class AppTable extends Vue implements IAppSelectTable, IAppTable 
     }
     
     tbody tr:hover:not(.b-table-empty-row) {
-      border-left: 2px solid $blue-60pc;
+      -webkit-box-shadow: inset 2px 0px 0px 0px $blue-60pc;
+      -moz-box-shadow: inset 2px 0px 0px 0px $blue-60pc;
+      box-shadow: inset 2px 0px 0px 0px $blue-60pc;
     }
     tbody > tr.b-table-empty-row {
       cursor: default;
