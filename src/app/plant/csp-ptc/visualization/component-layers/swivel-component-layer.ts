@@ -6,7 +6,7 @@ import { KeyFigureColors } from "@/app/plant/shared/visualization/layers/types";
 
 export class SwivelComponentLayer extends ComponentLayer {
   protected readonly componentId = ApiComponent.CSP_PTC_SWIVEL;
-  public readonly name = "swivels";
+  public readonly name = "rotation-joints";
 
   protected showPcsZoomLevel = 19;
   protected zIndex = 5;

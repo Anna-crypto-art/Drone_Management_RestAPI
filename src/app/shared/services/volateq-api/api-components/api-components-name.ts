@@ -10,7 +10,7 @@ export const apiComponentNames: Record<ApiComponent, string> = {
   [ApiComponent.CSP_PTC_SCA]: "solar-collector-assembly",
   [ApiComponent.CSP_PTC_LOOP]: "loop",
   [ApiComponent.CSP_PTC_SUBFIELD]: "subfield",
-  [ApiComponent.CSP_PTC_SWIVEL]: "swivels",
+  [ApiComponent.CSP_PTC_SWIVEL]: "rotation-joints",
 
   [ApiComponent.PV_MODULE]: "pv-module",
   [ApiComponent.PV_TRACKER]: "pv-tracker",

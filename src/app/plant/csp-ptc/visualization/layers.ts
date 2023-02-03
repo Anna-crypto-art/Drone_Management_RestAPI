@@ -19,7 +19,7 @@ import { RecommendedActionKeyFigureLayer } from "./key-figure-layers/hce/recomme
 import { HcePositionCenterKeyFigureLayer, HcePositionSupportKeyFigureLayer } from "./key-figure-layers/hce/hce-position-key-figure-layer";
 import { GeoVisualCspPtcQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 import { SwivelComponentLayer } from "./component-layers/swivel-component-layer";
-import { SwivelFrictionKeyFigureLayer } from "./key-figure-layers/swivel/swivel-friction-key-figure-layer";
+import { SwivelGrippingPotentialKeyFigureLayer } from "./key-figure-layers/swivel/swivel-gripping-potential-key-figure-layer";
 
 export const COMPONENT_LAYERS: typeof ComponentLayer[] = [
   AbsorberComponentLayer,
@@ -333,9 +333,28 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
     query: { undefined: 1 },
   },
   {
-    keyFigureId: ApiKeyFigure.SWIVEL_FRICTION_POTENTIAL_ID,
-    layerType: SwivelFrictionKeyFigureLayer,
-    keyFigureInfo: { keyName: "swivel-friction" },
-    query: { undefined: 1 },
+    keyFigureId: ApiKeyFigure.SWIVEL_GRIPPING_POTENTIAL_CLASS_ID,
+    layerType: SwivelGrippingPotentialKeyFigureLayer,
+    keyFigureInfo: { keyName: "rotation-joint-gripping-potential-class", description: "rotation-joint-gripping-potential-class_expl" },
+    subLayers: [
+      {
+        keyFigureInfo: { displayName: "rotation-joint-gripping-potential-class-3", zIndex: 13 },
+        query: { gripping_potential_class: 3 },
+      },
+      {
+        keyFigureInfo: { displayName: "rotation-joint-gripping-potential-class-2", zIndex: 12 },
+        query: { gripping_potential_class: 2 },
+      },
+      {
+        keyFigureInfo: { displayName: "rotation-joint-gripping-potential-class-1", zIndex: 10 },
+        query: { gripping_potential_class: 1 },
+      },
+      {
+        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
+        query: { undefined: 1 },
+        color: KeyFigureColors.grey,
+        invisibleAutoSelection: true,
+      },
+    ],
   },
 ];

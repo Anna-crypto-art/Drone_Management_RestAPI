@@ -8,7 +8,7 @@ import { CspPtcKeyFigureLayer } from "../../csp-ptc-key-figure-layer";
 export abstract class HceKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisResultCspPtcHceSchema> {
   protected readonly analysisResultMapping = analysisResultCspPtcMappingHce;
 
-  protected readonly stokeWidth = 5;
+  protected readonly strokeWidth = 5;
   protected showPcsZoomLevel = 19;
 
   public getStyle(feature: FeatureLike): Style {
@@ -16,7 +16,7 @@ export abstract class HceKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisRes
       stroke: new Stroke({
         color: this.enableCompare && this.compareAnalysisResult && this.getDiffColor(this.getProperties(feature))
           || this.getColor(),
-        width: this.stokeWidth,
+        width: this.strokeWidth,
       }),
       text: this.showText(feature),
     });

@@ -8,12 +8,37 @@ const analysisResultCspPtcMappingSwivel: AnalysisResultMappings<
   AnalysisResultCspPtcSwivelSchema, AnalysisResultCspPtcSwivelComparedSchema> = [
   ...analysisResultMappingBase,
   {
-    getValue: r => r.has_friction_potential,
-    transName: "has-friction-potential",
-    keyFigureId: ApiKeyFigure.SWIVEL_FRICTION_POTENTIAL_ID,
-    filterType: FilterFieldType.BOOLEAN,
+    getValue: r => r.htf_temperature_both_motions,
+    transName: "htf-temperature-both-motions",
+    keyFigureId: ApiKeyFigure.SWIVEL_GRIPPING_POTENTIAL_CLASS_ID,
+    filterType: FilterFieldType.ARRAY,
+    unit: "°C",
+    superAdminOnly: true
+  },
+  {
+    getValue: r => r.htf_temperature_avg,
+    transName: "htf-temperature-avg",
+    keyFigureId: ApiKeyFigure.SWIVEL_GRIPPING_POTENTIAL_CLASS_ID,
+    filterType: FilterFieldType.NUMERIC_EXTENDED,
+    unit: "°C"
+  },
+  {
+    getValue: r => r.gripping_potential_class,
+    transName: "rotation-joint-gripping-potential-class",
+    transDescr: "rotation-joint-gripping-potential-class_expl",
+    keyFigureId: ApiKeyFigure.SWIVEL_GRIPPING_POTENTIAL_CLASS_ID,
+    filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
-    getDiffValue: r => r.has_friction_potential__diff,
+    getDiffValue: r => r.gripping_potential_class__diff,
+  },
+  {
+    getValue: r => r.hce_displacement,
+    transName: "hce-displacement",
+    transDescr: "hce-displacement_expl",
+    keyFigureId: ApiKeyFigure.SWIVEL_GRIPPING_POTENTIAL_CLASS_ID,
+    filterType: FilterFieldType.NUMERIC_EXTENDED,
+    unit: "mm",
+    superAdminOnly: true
   },
 ];
 

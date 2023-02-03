@@ -19,6 +19,7 @@ export interface GeoVisualCspPtcQuery extends GeoVisualQuery {
   orientation_offset_class?: 1 | 2 | 3;
   torsion_class?: 1 | 2 | 3;
   sdx_class?: 1 | 2 | 3;
+  gripping_potential_class?: 1 | 2 | 3;
   
   hce_position_support_offset_class?: 1 | 2 | 3;
   hce_position_center_offset_class?: 1 | 2 | 3;
