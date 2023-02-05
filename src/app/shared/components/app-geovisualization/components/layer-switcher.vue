@@ -172,6 +172,7 @@ $sidebar-width: min(425px, min(70vw, calc(100vw - 50px)));
   top: 0;
   height: 100%;
   width: $sidebar-width;
+  z-index: 1;
 
   background: white;
   transform: translateX(100%);

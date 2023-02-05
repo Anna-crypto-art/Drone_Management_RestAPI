@@ -624,7 +624,9 @@ export default class AppVisualization
     left: 0.5em;
 
     &.sidebar-open {
-      left: calc($sidebar-width + 0.5em);
+      @media(min-width: 526px) {
+        left: calc($sidebar-width + 0.5em);
+      }
     }
   }
 
@@ -659,9 +661,12 @@ export default class AppVisualization
         height: 15px;
         margin-right: 10px;
         margin-top: 5px;
+        flex-shrink: 0;
       }
       &-name {
         width: auto;
+        word-break: break-all;
+        overflow: hidden;
       }
     }
   }
@@ -681,6 +686,13 @@ export default class AppVisualization
 
   &:hover {
     background-color: $background-grey !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .toggle-button.show-label .toggle-button-text,
+	.toggle-button:hover .toggle-button-text {
+    display: none;
   }
 }
 
