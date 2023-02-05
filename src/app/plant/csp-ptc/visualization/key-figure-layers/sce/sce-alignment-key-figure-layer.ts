@@ -59,4 +59,8 @@ export class SceAlignmentKeyFigureLayer extends SceKeyFigureLayer implements ICo
   public getDiffLegendName(): string {
     return this.offsetClassKeyFigureMixin.getDiffLegendName();
   }
+  
+  protected getColor(): string {
+    return this.getClassColor(this.getQueryClass());
+  }
 }

@@ -86,7 +86,7 @@ export default class AppAnalysisReferenceMeasurements extends BaseAuthComponent 
     { key: "measureDate", label: this.$t("measure-date").toString() },
     { key: "measureNotes", label: this.$t("notes").toString() },
     { key: "user_created", label: this.$t("acquired-by").toString() },
-    { key: "user_updated", label: this.$t("up0dated-by").toString() },
+    { key: "user_updated", label: this.$t("updated-by").toString() },
   ];
   selectedRefMeasureId: string | null = null;
 

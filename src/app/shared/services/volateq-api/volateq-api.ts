@@ -14,7 +14,7 @@ import { TableFilterRequest, TableRequest } from "./api-requests/common/table-re
 import { AnalysisResultFileSchema } from "./api-schemas/analysis-result-file-schema";
 import { ApiComponent } from "./api-components/api-components";
 import { ApiKeyFigure } from "./api-key-figures";
-import { GeoVisualQuery } from "./api-requests/geo-visual-query-requests";
+import { GeoVisualCspPtcQuery, GeoVisualPvQuery, GeoVisualQuery } from "./api-requests/geo-visual-query-requests";
 import { RouteSchema } from "./api-schemas/route-schema";
 import { TableResultSchema } from "./api-schemas/table-result-schema";
 import { TaskSchema } from "./api-schemas/task-schema";
@@ -33,7 +33,7 @@ import { MultiselectOption } from "../../components/app-multiselect/types";
 import { MyUploadingUpload, SecuredFilename, Upload, UploadChunkResult } from "./api-schemas/upload-schemas";
 import { CreateAnalysisUploadRequest } from "./api-requests/upload-requests";
 import { ja, th } from "date-fns/locale";
-import { AnalysisResultSetNullRequest } from "./api-requests/analysis-result-requests";
+import { AnalysisResultSetNullOrFalseRequest } from "./api-requests/analysis-result-requests";
 import { KeyFigureSchema } from "./api-schemas/key-figure-schema";
 import { CreateProductPackageRequest, UpdateProductPackageRequest } from "./api-requests/product-package-requests";
 
@@ -343,7 +343,7 @@ export class VolateqAPI extends HttpClientBase {
     plantId: string,
     analysisResultId: string,
     keyFiguresId: ApiKeyFigure,
-    query_params?: GeoVisualQuery
+    query_params?: GeoVisualCspPtcQuery | GeoVisualPvQuery
   ): Promise<any> {
     return this.get(`/auth/geo-visual/${plantId}/${analysisResultId}/key-figure/${keyFiguresId}`, query_params);
   }
@@ -794,8 +794,8 @@ export class VolateqAPI extends HttpClientBase {
     });
   }
 
-  public async setAnalysisResultValueToNull(analysisResultId: string, setNullRequest: AnalysisResultSetNullRequest): Promise<void> {
-    await this.post(`/auth/analysis-result/${analysisResultId}/set-null`, setNullRequest);
+  public async setAnalysisResultValueToNullOrFalse(analysisResultId: string, setNullRequest: AnalysisResultSetNullOrFalseRequest): Promise<void> {
+    await this.post(`/auth/analysis-result/${analysisResultId}/set-null-or-false`, setNullRequest);
   }
 
   public async getAnalysisResultChangeHistory(analysisResultId: string): Promise<AnalysisResultChangeHistorySchema[]> {

@@ -18,7 +18,7 @@ import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualizati
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Component, Prop, Ref } from "vue-property-decorator";
 import { AnalysisSelectionBaseComponent } from "../../shared/analysis-selection-sidebar/analysis-selection-base-component";
-import { COMPONENT_LAYERS } from "./layers";
+import { COMPONENT_LAYERS, KEY_FIGURE_LAYERS } from "./layers";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 
 @Component({
@@ -32,7 +32,7 @@ export default class AppVisualPv
   implements IPlantVisualization
 {
   componentLayerTypes = COMPONENT_LAYERS;
-  keyFigureLayers = [];
+  keyFigureLayers = KEY_FIGURE_LAYERS;
 
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];

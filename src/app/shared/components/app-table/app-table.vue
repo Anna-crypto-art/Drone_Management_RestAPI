@@ -28,9 +28,12 @@
         <span class="grayed">{{ scope.emptyText }}</span>
       </template>
 
-      <template #head()="data">
-        {{ data.label }}
-        <app-super-admin-marker v-if="data.field.superAdminOnly" />
+      <template #head()="column">
+        {{ column.label }}
+        <app-super-admin-marker v-if="column.field.superAdminOnly" />
+        <app-explanation v-if="column.field.labelExpl">
+          <span v-html="$t(column.field.labelExpl)"></span>
+        </app-explanation>
       </template>
 
       <template #head(selected)>
@@ -60,6 +63,7 @@
 <script lang="ts">
 import Vue from "vue";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
+import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import { Component, Prop, Ref, Watch } from "vue-property-decorator";
 import { AppTableColumns, IAppSelectTable, IAppTable } from "./types";
 
@@ -67,6 +71,7 @@ import { AppTableColumns, IAppSelectTable, IAppTable } from "./types";
   name: "app-table",
   components: {
     AppSuperAdminMarker,
+    AppExplanation,
   }
 })
 export default class AppTable extends Vue implements IAppSelectTable, IAppTable {
@@ -161,7 +166,9 @@ export default class AppTable extends Vue implements IAppSelectTable, IAppTable 
   }
   .table.b-table.b-table-selectable {
     .b-table-row-selected {
-      border-left: 2px solid $blue-60pc;
+      -webkit-box-shadow: inset 2px 0px 0px 0px $blue-60pc;
+      -moz-box-shadow: inset 2px 0px 0px 0px $blue-60pc;
+      box-shadow: inset 2px 0px 0px 0px $blue-60pc;
       font-weight: bold;
 
       small {
@@ -170,7 +177,9 @@ export default class AppTable extends Vue implements IAppSelectTable, IAppTable 
     }
     
     tbody tr:hover:not(.b-table-empty-row) {
-      border-left: 2px solid $blue-60pc;
+      -webkit-box-shadow: inset 2px 0px 0px 0px $blue-60pc;
+      -moz-box-shadow: inset 2px 0px 0px 0px $blue-60pc;
+      box-shadow: inset 2px 0px 0px 0px $blue-60pc;
     }
     tbody > tr.b-table-empty-row {
       cursor: default;

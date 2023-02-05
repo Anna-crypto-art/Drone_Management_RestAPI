@@ -9,6 +9,7 @@ import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures"
 import { apiComponentNames } from "@/app/shared/services/volateq-api/api-components/api-components-name";
 import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/sequential-event-emitter";
 import { LayerEvent } from "@/app/shared/components/app-geovisualization/types/events";
+import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 
 /**
  * Component -> PIGroup -> PICheckbox
@@ -27,7 +28,7 @@ export class PILayersHierarchy {
   constructor(
     private readonly vueComponent: Vue,
     private readonly analysisResults: AnalysisResultDetailedSchema[],
-    private readonly keyFigureLayers: KeyFigureTypeMap[],
+    private readonly keyFigureLayers: KeyFigureTypeMap<GeoVisualQuery>[],
     private showUndefined: boolean,
     private multiSelection: boolean,
   ) {
@@ -52,8 +53,8 @@ export class PILayersHierarchy {
     return false;
   }
 
-  public getAllChildLayers(): KeyFigureLayer<AnalysisResultSchemaBase>[] {
-    const allChildLayers: KeyFigureLayer<AnalysisResultSchemaBase>[] = [];
+  public getAllChildLayers(): KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>[] {
+    const allChildLayers: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>[] = [];
 
     function getAllChildLayersRec(groupKpiLayers: GroupKPILayer[]) {
       for (const groupKpiLayer of groupKpiLayers) {
@@ -298,7 +299,7 @@ export class PILayersHierarchy {
     }
   }
 
-  public getSelectedLayers(): KeyFigureLayer<AnalysisResultSchemaBase>[] {
+  public getSelectedLayers(): KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>[] {
     return this.getAllChildLayers().filter(childLayer => childLayer.getSelected())
   }
 
@@ -340,8 +341,8 @@ export class PILayersHierarchy {
 
   private createKPILayers(
     anaysisResult: AnalysisResultDetailedSchema,
-    keyFigureLayer: KeyFigureTypeMap
-  ): KeyFigureLayer<AnalysisResultSchemaBase> | GroupKPILayer {
+    keyFigureLayer: KeyFigureTypeMap<GeoVisualQuery>
+  ): KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery> | GroupKPILayer {
     if (!keyFigureLayer.subLayers) {
       return new keyFigureLayer.layerType(
         this.vueComponent,
@@ -378,7 +379,7 @@ export class PILayersHierarchy {
           childLayer.keyFigureInfo!.displayName || keyFigureLayer.keyFigureInfo?.displayName;
         childKeyFigureInfo.keyName = keyFigureLayer.keyFigureInfo?.keyName;
 
-        const kpiLayer: KeyFigureLayer<AnalysisResultSchemaBase> = new keyFigureLayer.layerType(
+        const kpiLayer: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery> = new keyFigureLayer.layerType(
           this.vueComponent,
           anaysisResult,
           keyFigureLayer.keyFigureId,

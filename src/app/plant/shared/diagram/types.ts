@@ -1,7 +1,7 @@
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { TableFilterRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
-import { AnalysisResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
+import { AnalysisResultMappings, ComponentResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 
@@ -45,9 +45,7 @@ export interface DiagramNumberBoxComponentGroup {
   numberBoxes: DiagramNumberBox[];
 }
 
-export interface DiagramResultMappings {
-  componentId: ApiComponent;
-  resultMapping: AnalysisResultMappings<any>;
+export interface DiagramResultMappings extends ComponentResultMappings {
   tableFilter?: TableFilterRequest;
   numberBoxes?: DiagramNumberBox[];
 }

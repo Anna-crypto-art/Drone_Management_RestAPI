@@ -1,8 +1,9 @@
 import { AnalysisResultSchemaBase } from "../api-schemas/analysis-result-schema-base";
 import { AnalysisResultDetailedSchema } from "../api-schemas/analysis-result-schema";
-import { AnalysisResultMappingEntry, AnalysisResultMappings, BvTableFieldExtArray } from "./types";
+import { AnalysisResultMappingEntry, AnalysisResultMappings } from "./types";
 import VueI18n from "vue-i18n";
 import { FilterFieldType } from "@/app/plant/shared/filter-fields/types";
+import { AppTableColumns } from "@/app/shared/components/app-table/types";
 
 export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
   private compareAnalysisResult: AnalysisResultDetailedSchema | null = null;
@@ -42,7 +43,7 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
     }));
   }
 
-  public getColumns(transFunc: (transName: string) => VueI18n.TranslateResult): BvTableFieldExtArray {
+  public getColumns(transFunc: (transName: string) => VueI18n.TranslateResult): AppTableColumns {
     return this.getEntries().map(mappingEntry => ({
       key: mappingEntry.transName,
       label: transFunc(mappingEntry.transName).toString() + 

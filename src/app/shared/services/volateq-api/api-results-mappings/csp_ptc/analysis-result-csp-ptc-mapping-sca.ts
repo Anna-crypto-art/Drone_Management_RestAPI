@@ -62,19 +62,13 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
   },
   {
     getValue: r => r.sdx_rms_value,
-    transName: "slope-deviation",
-    transDescr: "slope-deviation_expl",
+    transName: "sca-slope-deviation",
+    transDescr: "sca-slope-deviation_expl",
     keyFigureId: ApiKeyFigure.SCA_SDX_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
     getDiffValue: r => r.sdx_rms_value__diff,
     unit: "[mrad]",
-  },
-  {
-    getValue: r => r.comment,
-    transName: "comment",
-    disableForTable: true,
-    superAdminOnly: true,
   },
   {
     getValue: r => r.is_damaged_ball_joint_south,

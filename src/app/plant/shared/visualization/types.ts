@@ -28,7 +28,7 @@ export interface GroupKPILayer {
   componentId?: ApiComponent;
   groupLayer: GroupLayer;
   subGroupLayers?: GroupKPILayer[];
-  keyFigureLayers: KeyFigureLayer<AnalysisResultSchemaBase>[];
+  keyFigureLayers: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>[];
 }
 
 export interface IPlantVisualization {
@@ -92,7 +92,7 @@ export enum ComparedFeatureType {
   NEW_WORSENED,
 }
 
-export type KeyFigureTypeMap = {
+export type KeyFigureTypeMap<T extends GeoVisualQuery> = {
   keyFigureId: ApiKeyFigure;
   /**
    * (typeof KeyFigureLayer) leads to: Type "T" is not assignable to type "AnalysisResultCspPtcHceSchema"
@@ -105,7 +105,7 @@ export type KeyFigureTypeMap = {
   /**
    * URL query parameters
    */
-  query?: GeoVisualQuery;
+  query?: T;
   /**
    * Leave color undefined to take the default color mapped to the key figure.
    */
@@ -118,7 +118,7 @@ export type KeyFigureTypeMap = {
     /**
      * URL query parameters
      */
-    query?: GeoVisualQuery;
+    query?: T;
     /**
      * Leave color undefined to take the default color mapped to the key figure.
      */
@@ -137,6 +137,6 @@ export type KeyFigureTypeMap = {
 
 
 export interface InvisibleAutoSelectionLayer {
-  layer: KeyFigureLayer<AnalysisResultSchemaBase>,
+  layer: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>,
   hasSelectedSiblings: boolean,
 }

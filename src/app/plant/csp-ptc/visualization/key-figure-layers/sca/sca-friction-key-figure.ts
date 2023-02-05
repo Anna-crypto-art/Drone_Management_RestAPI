@@ -1,4 +1,4 @@
-import { FeatureInfos, Legend } from "@/app/plant/shared/visualization/types";
+import { ComparedFeatureType, FeatureInfos, FeatureProperties, Legend } from "@/app/plant/shared/visualization/types";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { AnalysisResultCspPtcScaSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-sca-schema";
 import { FeatureLike } from "ol/Feature";
@@ -74,7 +74,7 @@ export class ScaFrictionKeyFigureLayer extends ScaKeyFigureLayer implements ICom
   }
 
   protected getColor(): string {
-    return this.getClassColor(this.query?.torsion_class);
+    return this.getClassColor(this.getQueryClass());
   }
 
   public getDiffLegendName(): string {
@@ -87,5 +87,12 @@ export class ScaFrictionKeyFigureLayer extends ScaKeyFigureLayer implements ICom
 
   public getClassLimits(): number[] {
     return this.analysisResult.csp_ptc.sca_torsion_class_limits;
+  }
+
+  public getComparedFeatureType(properties: FeatureProperties, currentClass: number): ComparedFeatureType {
+    return super.getComparedFeatureType(
+      this.compareClassLimitsKeyFigureMixin.getFeaturePropertiesClassValue(properties),
+      currentClass
+    );
   }
 }

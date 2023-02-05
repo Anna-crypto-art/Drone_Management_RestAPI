@@ -48,13 +48,14 @@ import AppSearchInput from "@/app/shared/components/app-search-input/app-search-
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
 import dateHelper from "@/app/shared/services/helper/date-helper";
+import { apiComponentNames } from "@/app/shared/services/volateq-api/api-components/api-components-name";
+import { ComponentResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { Component, Prop } from "vue-property-decorator";
 import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
-import { IActiveComponent, IActiveTabComponent } from "../types";
-import { ITableComponent } from "./types";
+import { ITableComponent, TableResultComponent, TableResultMappingTabComponent } from "./types";
 
 @Component({
   name: "app-tables-component",
@@ -67,14 +68,15 @@ import { ITableComponent } from "./types";
   },
 })
 export default class AppTablesComponent extends AnalysisSelectionBaseComponent {
-  @Prop() plant!: PlantSchema;
-  @Prop() analyses!: AnalysisForViewSchema[];
-  @Prop() activeComponents!: IActiveComponent[];
+  @Prop({ required: true }) plant!: PlantSchema;
+  @Prop({ required: true }) analyses!: AnalysisForViewSchema[];
+  @Prop({ required: true }) componentResultMappings!: ComponentResultMappings[];
+  @Prop({ required: true }) tableResultComponents!: TableResultComponent[];
 
   csvExportLoading = false;
   tabIndex = 0;
   activeTabLabel = "";
-  readonly activeTabComponents: IActiveTabComponent[] = [];
+  readonly activeTabComponents: TableResultMappingTabComponent[] = [];
 
   async created() {
     await super.created();
@@ -94,13 +96,16 @@ export default class AppTablesComponent extends AnalysisSelectionBaseComponent {
     if (this.hasAnyAnalysisSelected()) {
       let tabIdx = 0;
 
-      for (const activeComponent of this.activeComponents) {
+      for (const tableResultComponent of this.tableResultComponents) {
         const keyFigure = this.getKeyFigures().find(
-          keyFigure => keyFigure.component.id === activeComponent.componentId
+          keyFigure => keyFigure.component.id === tableResultComponent.componentId
         );
         if (keyFigure) {
           this.activeTabComponents.push({
-            ...activeComponent,
+            ...tableResultComponent,
+            mapping: this.componentResultMappings
+              .find(m => m.componentId === tableResultComponent.componentId)!.resultMapping,
+            label: apiComponentNames[tableResultComponent.componentId],
             tabIndex: tabIdx++,
           });
         }
@@ -111,7 +116,7 @@ export default class AppTablesComponent extends AnalysisSelectionBaseComponent {
   }
 
   onSearch(searchText: string) {
-    for (const activeComponent of this.activeComponents) {
+    for (const activeComponent of this.tableResultComponents) {
       const tableComponent = this.getRefTableComponent(activeComponent);
       if (tableComponent) {
         tableComponent.search(searchText);
@@ -149,7 +154,7 @@ export default class AppTablesComponent extends AnalysisSelectionBaseComponent {
           "_" +
           this.plant.name +
           "_" +
-          dateHelper.toDate(this.firstAnalysisResult!.csp_ptc.created_at) +
+          dateHelper.toDate(this.firstAnalysisResult!.created_at) +
           "_" +
           activeComponent.label +
           ".csv";
@@ -163,15 +168,15 @@ export default class AppTablesComponent extends AnalysisSelectionBaseComponent {
     }
   }
 
-  private getRefTableComponent(activeTabComponent: IActiveComponent): ITableComponent {
+  private getRefTableComponent(activeTabComponent: TableResultComponent): ITableComponent {
     return (this.$refs[this.generateRefTableName(activeTabComponent)] as any[])[0];
   }
 
-  private generateRefTableName(activeTabComponent: IActiveComponent): string {
+  private generateRefTableName(activeTabComponent: TableResultComponent): string {
     return ["tableComponent", this.firstAnalysisResult!.id, activeTabComponent.componentId].join("_");
   }
 
-  private getSelectedActiveComponent(): IActiveTabComponent | undefined {
+  private getSelectedActiveComponent(): TableResultMappingTabComponent | undefined {
     return Object.values(this.activeTabComponents).find(comp => comp.tabIndex === this.tabIndex);
   }
 }

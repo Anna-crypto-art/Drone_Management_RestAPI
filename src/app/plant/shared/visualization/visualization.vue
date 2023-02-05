@@ -103,6 +103,7 @@ import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-d
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 import { analysisResultEventService } from "../plant-admin-view/analysis-result-event-service";
 import { AnalysisResultEvent } from "../plant-admin-view/types";
+import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -127,7 +128,7 @@ export default class AppVisualization
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
   @Prop() componentLayerTypes!: typeof ComponentLayer[];
-  @Prop() keyFigureLayers!: KeyFigureTypeMap[];
+  @Prop() keyFigureLayers!: KeyFigureTypeMap<GeoVisualQuery>[];
 
   @State(state => state.sidebar["analysis"]) sidebarOpen!: boolean;
 

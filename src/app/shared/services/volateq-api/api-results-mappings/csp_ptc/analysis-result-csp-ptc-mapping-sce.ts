@@ -35,17 +35,15 @@ const analysisResultCspPtcMappingSce: AnalysisResultMappings<
   },
   {
     getValue: r => r.sdx_rms_value,
-    transName: "sdx-rms",
-    transDescr: "sce-sdx-rms_expl",
+    transName: "sce-slope-deviation",
+    transDescr: "sce-slope-deviation_expl",
     keyFigureId: ApiKeyFigure.SCE_SDX_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
+    enableForDiagram: true,
+    getDiffValue: r => r.sdx_rms_value__diff,
+    unit: "[mrad]",
   },
-  {
-    getValue: r => r.comment,
-    transName: "comment",
-    disableForTable: true,
-    superAdminOnly: true,
-  },
+  
 ];
 
 export default analysisResultCspPtcMappingSce;

@@ -166,12 +166,6 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.HCE_POSITION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
   },
-  {
-    getValue: r => r.comment,
-    transName: "comment",
-    disableForTable: true,
-    superAdminOnly: true,
-  },
 ];
 
 export default analysisResultCspPtcMappingHce;

@@ -8,6 +8,7 @@ import { MissingMirrorKeyFigureLayer } from "./key-figure-layers/mirror/missing-
 import { ScaFrictionKeyFigureLayer } from "./key-figure-layers/sca/sca-friction-key-figure";
 import { ScaTrackingKeyFigureLayer } from "./key-figure-layers/sca/sca-tracking-key-figure-layer";
 import { ScaSdxKeyFigureLayer } from "./key-figure-layers/sca/sca-sdx-key-figure-layer";
+import { SceSdxKeyFigureLayer } from "./key-figure-layers/sce/sce-sdx-key-figure-layer";
 import { SceAlignmentKeyFigureLayer } from "./key-figure-layers/sce/sce-alignment-key-figure-layer";
 import { BoolUndefinedHceKeyFigureLayer } from "./key-figure-layers/hce/bool-hce-key-figure-layer";
 import { KeyFigureTypeMap } from "../../shared/visualization/types";
@@ -16,6 +17,8 @@ import { GlassTemperatureKeyFigureLayer } from "./key-figure-layers/hce/glass-te
 import { ScaAverageTrackingKeyFigureLayer } from "./key-figure-layers/sca/sca-average-tracking-key-figure-layer";
 import { RecommendedActionKeyFigureLayer } from "./key-figure-layers/hce/recommended-action-key-figure-layer";
 import { HcePositionCenterKeyFigureLayer, HcePositionSupportKeyFigureLayer } from "./key-figure-layers/hce/hce-position-key-figure-layer";
+import { GeoVisualCspPtcQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
+import { SwivelComponentLayer } from "./component-layers/swivel-component-layer";
 
 export const COMPONENT_LAYERS: typeof ComponentLayer[] = [
   AbsorberComponentLayer,
@@ -23,9 +26,10 @@ export const COMPONENT_LAYERS: typeof ComponentLayer[] = [
   // MirrorComponentLayer, Too many mirrors (>200k) leads to OutOfMemory
   ScaComponentLayer,
   SceComponentLayer,
+  SwivelComponentLayer,
 ];
 
-export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
+export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
   {
     keyFigureId: ApiKeyFigure.MISSING_GLASS_TUBE_ID,
     layerType: BoolUndefinedHceKeyFigureLayer,
@@ -197,6 +201,31 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
     ],
   },
   {
+    keyFigureId: ApiKeyFigure.SCE_SDX_ID,
+    layerType: SceSdxKeyFigureLayer,
+    keyFigureInfo: { keyName: "sce-slope-deviation", description: "sce-slope-deviation_expl" },
+    subLayers: [
+      {
+        keyFigureInfo: { displayName: "slope-deviation-class-3", zIndex: 13 },
+        query: { sdx_class: 3 },
+      },
+      {
+        keyFigureInfo: { displayName: "slope-deviation-class-2", zIndex: 12 },
+        query: { sdx_class: 2 },
+      },
+      {
+        keyFigureInfo: { displayName: "slope-deviation-class-1", zIndex: 10 },
+        query: { sdx_class: 1 },
+      },
+      {
+        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
+        query: { undefined: 1 },
+        color: KeyFigureColors.grey,
+        invisibleAutoSelection: true,
+      },
+    ],
+  },
+  {
     keyFigureId: ApiKeyFigure.SCA_TRACKING_DEVIATION_ID,
     layerType: ScaTrackingKeyFigureLayer,
     keyFigureInfo: { keyName: "tracking-offset", description: "tracking-offset_expl" },
@@ -274,7 +303,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap[] = [
   {
     keyFigureId: ApiKeyFigure.SCA_SDX_ID,
     layerType: ScaSdxKeyFigureLayer,
-    keyFigureInfo: { keyName: "slope-deviation", description: "slope-deviation_expl" },
+    keyFigureInfo: { keyName: "sca-slope-deviation", description: "sca-slope-deviation_expl" },
     subLayers: [
       {
         keyFigureInfo: { displayName: "slope-deviation-class-3", zIndex: 13 },

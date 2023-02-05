@@ -37,6 +37,7 @@ import { CatchError } from '@/app/shared/services/helper/catch-helper';
 import { analysisResultEventService } from './analysis-result-event-service';
 import { AnalysisResultEvent } from './types';
 import { AppTableColumns } from '@/app/shared/components/app-table/types';
+import { GeoVisualQuery } from '@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests';
 
 
 @Component({
@@ -49,7 +50,7 @@ import { AppTableColumns } from '@/app/shared/components/app-table/types';
 })
 export default class AppPlantAdminViewChangeHistory extends BaseAuthComponent {
   @Prop({ default: null }) analysisResult!: AnalysisResultDetailedSchema | null;
-  @Prop({ required: true }) layers!: KeyFigureTypeMap[];
+  @Prop({ required: true }) layers!: KeyFigureTypeMap<GeoVisualQuery>[];
   
   analysisResultChangeHistoryRows: any[] = [];
   analysisResultChangeHistoryColumns: AppTableColumns = [];

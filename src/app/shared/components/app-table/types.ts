@@ -1,6 +1,7 @@
 import { BvTableField } from "bootstrap-vue";
 
 export interface AppTableColumnOptions extends BvTableField {
+  labelExpl?: string;
   superAdminOnly?: boolean;
 }
 

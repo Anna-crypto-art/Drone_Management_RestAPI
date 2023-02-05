@@ -100,6 +100,16 @@ export default class AppDiagramAreas extends BaseAuthComponent {
       datalabels: {
         color: "#fff",
       },
+      tooltip: {
+        padding: 10,
+        boxPadding: 5,
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        borderWidth: 0.3,
+        borderColor: '#444',
+        cornerRadius: 0,
+        titleColor: '#212529',
+        bodyColor: '#212529',
+      },
     },
     scales: {
       x: {

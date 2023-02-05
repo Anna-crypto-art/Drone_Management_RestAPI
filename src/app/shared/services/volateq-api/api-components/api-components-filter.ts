@@ -6,6 +6,11 @@ import { ApiComponent } from "./api-components"
 export type ComponentsMapping = Record<ApiComponent, ApiComponent[] | null>;
 
 export const apiComponentsFilter: ComponentsMapping = {
+  [ApiComponent.CSP_PTC_SWIVEL]: [
+    ApiComponent.CSP_PTC_SCA,
+    ApiComponent.CSP_PTC_LOOP,
+    ApiComponent.CSP_PTC_SUBFIELD,
+  ],
   [ApiComponent.CSP_PTC_ABSORBER]: [
     ApiComponent.CSP_PTC_SCA,
     ApiComponent.CSP_PTC_LOOP,

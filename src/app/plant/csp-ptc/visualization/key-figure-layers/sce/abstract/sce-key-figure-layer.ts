@@ -15,9 +15,11 @@ export abstract class SceKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisRes
   public getStyle(feature: FeatureLike): Style {
     return new Style({
       fill: new Fill({
-        color: this.color,
+        color: this.getColor(),
       }),
       text: this.showText(feature),
     });
   }
+
+  protected abstract getColor(): string;
 }

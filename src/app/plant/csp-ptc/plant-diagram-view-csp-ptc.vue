@@ -25,6 +25,7 @@ import { FilterFieldType } from "../shared/filter-fields/types";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { KeyFigureColors } from "../shared/visualization/layers/types";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
     
 
 @Component({
@@ -37,6 +38,8 @@ import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-sch
 export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComponent {
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
+
+  resultMappings: DiagramResultMappings[] = [];
 
   numberBoxes: DiagramNumberBox[] | null = null;
   tableFilter: TableFilterRequest | null = null;
@@ -53,39 +56,45 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
     this.updateMappings();
   }
 
+  @CatchError()
   private updateMappings() {
-    try {
-      if (!this.firstAnalysisResult) {
-        return;
+    if (!this.firstAnalysisResult) {
+      return;
+    }
+
+    const resultMappings: DiagramResultMappings[] = [];
+
+    for (const cspPtcMapping of allCspPtcMappings) {
+      const resultMapping: DiagramResultMappings = cspPtcMapping;
+
+      const analysisResultMappingHelper = new AnalysisResultMappingHelper(
+          resultMapping.resultMapping,
+          this.firstAnalysisResult,
+        );
+
+      analysisResultMappingHelper.setCompareAnalysisResult(this.compareAnalysisResult);
+
+      const columnsMapping = analysisResultMappingHelper.getColumnsMapping();
+      const diagramEntries = analysisResultMappingHelper.getDiagramEntries();
+            
+      const columnsSelection = this.getColumnsSelection(diagramEntries, columnsMapping);
+
+      resultMapping.tableFilter = {
+        component_filter: { component_id: 0 /* plant */, grouped: true },
+        columns_selection: { columns: columnsSelection },
+      };
+
+      if (resultMapping.componentId === ApiComponent.CSP_PTC_MIRROR) {
+        // Speeds up query for table analysis_result_csp_ptc_mirror
+        resultMapping.tableFilter.filters = { is_missing: true };
       }
 
-      for (const cspPtcMapping of allCspPtcMappings) {
-        const analysisResultMappingHelper = new AnalysisResultMappingHelper(
-            cspPtcMapping.resultMapping,
-            this.firstAnalysisResult,
-          );
-  
-        analysisResultMappingHelper.setCompareAnalysisResult(this.compareAnalysisResult);
-  
-        const columnsMapping = analysisResultMappingHelper.getColumnsMapping();
-        const diagramEntries = analysisResultMappingHelper.getDiagramEntries();
-              
-        const columnsSelection = this.getColumnsSelection(diagramEntries, columnsMapping);
-        cspPtcMapping.tableFilter = {
-          component_filter: { component_id: 0 /* plant */, grouped: true },
-          columns_selection: { columns: columnsSelection },
-        };
-  
-        if (cspPtcMapping.componentId === ApiComponent.CSP_PTC_MIRROR) {
-          // Speeds up query for table analysis_result_csp_ptc_mirror
-          cspPtcMapping.tableFilter.filters = { is_missing: true };
-        }
-  
-        cspPtcMapping.numberBoxes = this.getNumberBoxes(diagramEntries, columnsMapping);
-      }
-    } catch (e) {
-      this.showError(e);
+      resultMapping.numberBoxes = this.getNumberBoxes(diagramEntries, columnsMapping);
+
+      resultMappings.push(resultMapping);
     }
+
+    this.resultMappings = resultMappings;
   }
 
   private getColumnsSelection(
@@ -123,12 +132,14 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
       } else if (entry.keyFigureId === ApiKeyFigure.SCA_TRACKING_DEVIATION_ID || 
         entry.keyFigureId === ApiKeyFigure.SCE_ALIGNMENT_ID || 
         entry.keyFigureId === ApiKeyFigure.SCA_SDX_ID ||
+        entry.keyFigureId === ApiKeyFigure.SCE_SDX_ID ||
         entry.keyFigureId === ApiKeyFigure.SCA_FRICTION_ID)
       {
         const classLimits = {
           [ApiKeyFigure.SCA_TRACKING_DEVIATION_ID]: this.firstAnalysisResult!.csp_ptc.sca_tracking_encoder_offset_class_limits,
           [ApiKeyFigure.SCE_ALIGNMENT_ID]: this.firstAnalysisResult!.csp_ptc.sce_alignment_deviation_to_drive_class_limits,
           [ApiKeyFigure.SCA_SDX_ID]: this.firstAnalysisResult!.csp_ptc.sdx_rms_class_limits,
+          [ApiKeyFigure.SCE_SDX_ID]: this.firstAnalysisResult!.csp_ptc.sdx_rms_class_limits,
           [ApiKeyFigure.SCA_FRICTION_ID]: this.firstAnalysisResult!.csp_ptc.sca_torsion_class_limits,
         }[entry.keyFigureId];
 
@@ -224,7 +235,8 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
             color: colorMap[offsetClass],
           });
         }
-      } else if (entry.keyFigureId === ApiKeyFigure.SCA_SDX_ID) {
+      } else if (entry.keyFigureId === ApiKeyFigure.SCA_SDX_ID ||
+          entry.keyFigureId === ApiKeyFigure.SCE_SDX_ID) {
         const classLimits = this.firstAnalysisResult!.csp_ptc.sdx_rms_class_limits
 
         numberBox.nums = [];
@@ -264,10 +276,6 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
 
   get componentIdSelection(): ApiComponent[] {
     return [ApiComponent.CSP_PTC_SUBFIELD, ApiComponent.CSP_PTC_LOOP, ApiComponent.CSP_PTC_SCA];
-  }
-
-  get resultMappings(): DiagramResultMappings[] {
-    return allCspPtcMappings;
   }
 }
 </script>
