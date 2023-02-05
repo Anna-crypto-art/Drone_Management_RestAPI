@@ -209,5 +209,11 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
 .plant-view-tabs {
   height: 100%;
   width: 100%;
+
+  @media (max-width: 576px) {
+    .nav-item .nav-link:not(.active) span {
+      display: none;
+    }
+  }
 }
 </style>
