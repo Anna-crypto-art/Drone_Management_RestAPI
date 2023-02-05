@@ -50,10 +50,19 @@
       <b-row v-if="currentProductPackage">
         <b-col>
         <b-form-group :label="$t('name')">
-          <b-form-input id="new-product-package-name" v-model="currentProductPackage.name" required :placeholder="$t('name')" />
+          <b-form-input
+            id="new-product-package-name"
+            v-model="currentProductPackage.name"
+            required
+            :placeholder="$t('name')" />
         </b-form-group>
         <b-form-group :label="$t('technology')">
-          <b-form-select id="new-plant-technology" v-model="currentProductPackage.technology_id" :options="technologies" required />
+          <b-form-select
+            id="new-plant-technology"
+            v-model="currentProductPackage.technology_id"
+            :options="technologies"
+            required
+            @change="onTechnologySelectionChanged" />
         </b-form-group>
         <b-form-group :label="$t('performance-indicators')">
           <app-multiselect 
@@ -85,6 +94,7 @@ import { ProductPackageWithKeyFiguresSchema } from "@/app/shared/services/volate
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { MultiselectOption } from "@/app/shared/components/app-multiselect/types";
 import { ApiTechnology } from "@/app/shared/services/volateq-api/api-technologies";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
 
 
 @Component({
@@ -141,6 +151,11 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
     const keyFigureOptions: MultiselectOption[] = [];
 
     for (const key_figure of this.all_key_figures) {
+      if (this.currentProductPackage.technology_id != 0) {
+        if (this.currentProductPackage.technology_id != key_figure.component.technology_id) {
+          continue
+        }
+      }
       keyFigureOptions.push({ 
         id: key_figure.id.toString(), 
         label: key_figure.name,
@@ -199,6 +214,9 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
       technology_id: 0,
       key_figures: [],
     }
+
+    this.updateKeyFigureOptions();
+
     this.productPackageModalTitle = this.$t("create-product-package").toString();
     this.productPackageModalOkTitle = this.$t("create").toString();
 
@@ -247,6 +265,8 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
       key_figures: productPackageItem.key_figures.map(kf => kf.id.toString()),
     };
 
+    this.updateKeyFigureOptions();
+
     this.productPackageModalTitle = this.$t("update-product-package", { product_package: this.currentProductPackage.name }).toString();
     this.productPackageModalOkTitle = this.$t('apply').toString();
 
@@ -269,6 +289,11 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
     } finally {
       this.loading = false;
     }
+  }
+
+  @CatchError("loading")
+  async onTechnologySelectionChanged() {
+    this.updateKeyFigureOptions();
   }
 }
 </script>
