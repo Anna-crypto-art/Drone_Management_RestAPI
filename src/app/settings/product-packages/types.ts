@@ -1,14 +1,8 @@
-import { ProductPackageWithKeyFiguresSchema } from "@/app/shared/services/volateq-api/api-schemas/product-package";
+import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 
-export interface ProductPackageItem {
+export interface ProductPackageWithKeyFiguresSchemaItem {
   id: number;
   name: string;
-  technology: string;
-  product_package: ProductPackageWithKeyFiguresSchema;
-  number_currently_booked: number;
-}
-
-export interface EditProductPackage {
-  id: number;
-  product_package: ProductPackageWithKeyFiguresSchema;
+  technology_id: number;
+  key_figures: KeyFigureSchema[];
 }

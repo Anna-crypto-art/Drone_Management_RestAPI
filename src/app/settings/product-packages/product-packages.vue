@@ -8,18 +8,15 @@
     <app-table-container>
       <app-table :columns="columns" :rows="rows" :loading="loading" :hoverActions="true">
         <template #cell(name)="row">
-          <span class="product-package-table-name">{{ row.item.product_package.name }}</span>
+          <span class="product-package-table-name">{{ row.item.name }}</span>
         </template>
         <template #cell(technology)="row">
-          {{ row.item.technology }}
+          {{ row.item.technology_name }}
         </template>
         <template #cell(key_figures)="row">
           <span class="grayed">
-            {{ row.item.product_package.key_figures.map(key_figure => key_figure.name).join(", ") }}
+            {{ row.item.key_figures.map(key_figure => key_figure.name).join(", ") }}
           </span>
-        </template>
-        <template #cell(number_currently_booked)="row">
-          {{ row.item.number_currently_booked }}
         </template>
         <template #hoverActions="row">
           <app-button
@@ -27,14 +24,14 @@
             @click="onEditProductPackageClick(row.item)"
             variant="secondary"
             size="sm"
-            :title="$t('edit-product-package', { product_package: row.item.product_package.name })"
+            :title="$t('edit-product-package', { product_package: row.item.name })"
             icon="wrench"
           />
           <app-button
             @click="onDeleteProductPackageClick(row.item)"
             variant="outline-danger"
             size="sm"
-            :title="$t('delete-product-package', { product_package: row.item.product_package.name })"
+            :title="$t('delete-product-package', { product_package: row.item.name })"
             icon="trash"
           />
         </template>
@@ -43,53 +40,31 @@
 
     
     <app-modal-form
-      id="create-product-package-modal"
-      ref="appCreateProductPackageModal"
-      :title="$t('create-product-package')"
-      :ok-title="$t('create')"
-      :modalLoading="createProductPackageModalLoading"
-      @submit="onSubmitCreateProductPackage"
+      id="product-package-modal"
+      ref="appProductPackageModal"
+      :title="productPackageModalTitle"
+      :ok-title="productPackageModalOkTitle"
+      :modalLoading="productPackageModalLoading"
+      @submit="onSubmitProductPackage"
     >
-      <b-form-group :label="$t('name')">
-        <b-form-input id="new-product-package-name" v-model="newProductPackage.name" required :placeholder="$t('name')" />
-      </b-form-group>
-      <b-form-group :label="$t('technology')">
-        <b-form-select id="new-plant-technology" v-model="newProductPackage.technology_id" :options="technologies" required />
-      </b-form-group>
-      <b-form-group :label="$t('performance-indicators')">
-        <app-multiselect 
-          v-model="newProductPackage.key_figures"
-          :options="keyFigureOptions" />
-      </b-form-group>
-    </app-modal-form>
-
-    
-    <app-modal-form
-      id="edit-product-package-modal"
-      ref="appEditProductPackageModal"
-      :ok-title="$t('apply')"
-      :modalLoading="editProductPackageModalLoading"
-      @submit="onSubmitEditProductPackage"
-    >
-      <template #modal-title>
-        <h4>{{ $t("update-product-package", { product_package: currentProductPackage.name }) }}</h4>
-      </template>
-      <b-row>
+      <b-row v-if="currentProductPackage">
         <b-col>
-          <b-form-group :label="$t('name')">
-            <b-form-input id="edit-product-package-name" v-model="currentProductPackage.name" required />
-          </b-form-group>
-          <b-form-group :label="$t('technology')">
-            <b-form-select id="new-plant-technology" v-model="currentProductPackage.technology_id" :options="technologies" required />
-          </b-form-group>
-          <b-form-group :label="$t('performance-indicators')">
-            <app-multiselect 
-              v-model="currentProductPackage.key_figures"
-              :options="keyFigureOptions" />
-          </b-form-group>
+        <b-form-group :label="$t('name')">
+          <b-form-input id="new-product-package-name" v-model="currentProductPackage.name" required :placeholder="$t('name')" />
+        </b-form-group>
+        <b-form-group :label="$t('technology')">
+          <b-form-select id="new-plant-technology" v-model="currentProductPackage.technology_id" :options="technologies" required />
+        </b-form-group>
+        <b-form-group :label="$t('performance-indicators')">
+          <app-multiselect 
+            v-model="currentProductPackage.key_figures"
+            :options="keyFigureOptions"
+            required />
+        </b-form-group>
         </b-col>
-      </b-row>
+      </b-row>      
     </app-modal-form>
+  
   </div>
 </template>
 
@@ -103,13 +78,10 @@ import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
-import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { SelectPlant } from "../types";
-import { ProductPackageItem } from "./types";
-import { CustomerRole, CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
+import { ProductPackageWithKeyFiguresSchemaItem } from "./types";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { AppTableColumns } from "@/app/shared/components/app-table/types";
-import { ProductPackageSchema, ProductPackageWithKeyFiguresSchema } from "@/app/shared/services/volateq-api/api-schemas/product-package";
+import { ProductPackageWithKeyFiguresSchema } from "@/app/shared/services/volateq-api/api-schemas/product-package";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { MultiselectOption } from "@/app/shared/components/app-multiselect/types";
 import { ApiTechnology } from "@/app/shared/services/volateq-api/api-technologies";
@@ -127,56 +99,41 @@ import { ApiTechnology } from "@/app/shared/services/volateq-api/api-technologie
 })
 export default class AppSettingsProductPackages extends BaseAuthComponent {
   columns: AppTableColumns = [];
-  rows: ProductPackageItem[] = [];
+  rows: ProductPackageWithKeyFiguresSchemaItem[] = [];
 
-  all_key_figures: KeyFigureSchema[] = [];
   keyFigureOptions: Array<MultiselectOption> = [];
   selected_key_figures: KeyFigureSchema[] = [];
   
   technologies: Array<any> = [];
-
-  newProductPackage: { name: string, technology_id: number, key_figures: number[] } =
-    {name: "", technology_id: 0, key_figures: []};
-  currentProductPackage: { name: string, technology_id: number, key_figures: number[] } =
-    {name: "", technology_id: 0, key_figures: []};
-
+  all_key_figures: Array<any> = [];
 
   loading = false;
 
-  @Ref() appCreateProductPackageModal!: IAppModalForm;
-  createProductPackageModalLoading = false;
-  createProductPackageModalTitle = "";
-  createProductPackageModalOkTitle = "";
-
-  @Ref() appEditProductPackageModal!: IAppModalForm;
-  editProductPackageModalLoading = false;
-  editProductPackageModalTitle = "";
-  editProductPackageModalOkTitle = "";
-  currentProductPackageItem: ProductPackageItem = {
-    id: 0,
-    name: "",
-    technology: "",
-    product_package: {
+  @Ref() appProductPackageModal!: IAppModalForm;
+  productPackageModalLoading = false;
+  productPackageModalTitle = "";
+  productPackageModalOkTitle = "";
+  
+  // need to set to "any" because we kind of faking key_figures to be String[] instead of KeyFigureSchema[]
+  currentProductPackage: any = {
       id: 0,
       name: "",
       technology_id: 0,
       key_figures: [],
-    },
-    number_currently_booked: 0
-  };
-
+    }
 
   async created() {
     this.columns = [
       { key: "name", label: this.$t("name").toString() },
       { key: "technology", label: this.$t("technology").toString() },
       { key: "key_figures", label: this.$t("performance-indicators").toString() },
-      { key: "number_currently_booked", label: this.$t("product-package-number-currently-booked").toString() },
     ];
 
-    this.technologies = (await volateqApi.getTechnologies()).map(tech => ({ value: tech.id, text: tech.abbrev }))
+    this.technologies = (await volateqApi.getTechnologies()).map(tech => ({ value: tech.id, text: tech.abbrev }));
+
     await this.updateProductPackageRows();
-    this.all_key_figures = await volateqApi.getAllKeyFigures();
+
+    this.all_key_figures = (await volateqApi.getAllKeyFigures());
     this.updateKeyFigureOptions();
   }
 
@@ -184,12 +141,10 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
     const keyFigureOptions: MultiselectOption[] = [];
 
     for (const key_figure of this.all_key_figures) {
-      // if (key_figure.id !== 1) { // Skip CSP_PTC Base
-        keyFigureOptions.push({ 
-          id: key_figure.id + "", 
-          label: key_figure.name,
-        });
-      // }
+      keyFigureOptions.push({ 
+        id: key_figure.id.toString(), 
+        label: key_figure.name,
+      });
     }
 
     this.keyFigureOptions = keyFigureOptions;
@@ -201,16 +156,17 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
       this.rows = (await volateqApi.getProductPackagesWithKeyFigures()).map((product_package: ProductPackageWithKeyFiguresSchema) => ({
         id: product_package.id,
         name: product_package.name,
-        technology: ApiTechnology[product_package.technology_id],
-        product_package: product_package,
-        number_currently_booked: 0,
+        technology_name: ApiTechnology[product_package.technology_id], // TODO: not sure if this is the clean way to go from id to abbrev
+        technology_id: product_package.technology_id,
+        key_figures: product_package.key_figures,
       })).sort((a, b) => {
-        const nameA = a.product_package.name.toLowerCase();
-        const nameB = b.product_package.name.toLowerCase();
+        const nameA = a.name.toLowerCase();
+        const nameB = b.name.toLowerCase();
 
-        const techA = a.product_package.technology_id;
-        const techB = b.product_package.technology_id;
+        const techA = a.technology_id;
+        const techB = b.technology_id;
 
+        // first sort by technology
         if (techA < techB) {
           return -1;
         }
@@ -218,6 +174,7 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
           return 1;
         }
 
+        // then sort by name
         if (nameA < nameB) {
           return -1;
         }
@@ -228,12 +185,6 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
         return 0;
       });
 
-      // load and set the number of orders
-      for (let i = 0; i < this.rows.length; i++) {
-          let number_of_orders = await volateqApi.getProductPackageNumberOfOrders(this.rows[i].product_package.id);
-          this.rows[i].number_currently_booked = number_of_orders;
-      }
-
     } catch (e) {
       this.showError(e);
     } finally {
@@ -242,72 +193,67 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
   }
 
   onCreateProductPackageClick() {
-    this.newProductPackage = {name: "", technology_id: 0, key_figures: []};
-
-    this.createProductPackageModalTitle = this.$t("create-product-package").toString();
-    this.createProductPackageModalOkTitle = this.$t("create").toString();
-
-    this.appCreateProductPackageModal.show();
-  }
-
-  async onSubmitCreateProductPackage() {
-    this.createProductPackageModalLoading = true;
-    try {
-      await volateqApi.createProductPackage({
-        name: this.newProductPackage!.name,
-        technology_id: this.newProductPackage.technology_id!,
-        key_figures: this.newProductPackage.key_figures,
-      });
-
-      this.appCreateProductPackageModal.hide();
-
-      this.showSuccess(this.$t("product-package-created-success", { product_package: this.newProductPackage!.name }).toString());
-      
-      await this.updateProductPackageRows();
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.createProductPackageModalLoading = false;
-    }
-  }
-
-  onEditProductPackageClick(productPackageItem: ProductPackageItem) {
-    this.currentProductPackageItem = productPackageItem;
-
     this.currentProductPackage = {
-      name: productPackageItem.name,
-      technology_id: productPackageItem.product_package.technology_id,
-      key_figures: productPackageItem.product_package.key_figures.map(kf => kf.id),
-    };
+      id: 0,
+      name: "",
+      technology_id: 0,
+      key_figures: [],
+    }
+    this.productPackageModalTitle = this.$t("create-product-package").toString();
+    this.productPackageModalOkTitle = this.$t("create").toString();
 
-    this.appEditProductPackageModal.show();
+    this.appProductPackageModal.show();
   }
 
-  async onSubmitEditProductPackage() {
-    this.editProductPackageModalLoading = true;
+  async onSubmitProductPackage() {
+    this.productPackageModalLoading = true;
+    
     try {
 
-      this.appEditProductPackageModal.hide();
-
-      await volateqApi.updateProductPackage(
-        this.currentProductPackageItem!.id,
-        {
+      if (this.currentProductPackage.id === 0) {
+        await volateqApi.createProductPackage({
           name: this.currentProductPackage.name,
           technology_id: this.currentProductPackage.technology_id,
-          key_figures: this.currentProductPackage.key_figures,
-        }
-      );
+          key_figures: this.currentProductPackage.key_figures.map(kf => Number(kf)),
+        });
+        this.showSuccess(this.$t("product-package-created-success", { product_package: this.currentProductPackage!.name }).toString());
+      } else {
+        await volateqApi.updateProductPackage(
+          this.currentProductPackage.id,
+          {
+            name: this.currentProductPackage.name,
+            technology_id: this.currentProductPackage.technology_id,
+            key_figures: this.currentProductPackage.key_figures.map(kf => Number(kf)),
+          }
+        );
+        this.showSuccess(this.$t("product-package-edited-successfully", { product_package: this.currentProductPackage!.name }).toString());
+      }
+      
+      this.appProductPackageModal.hide();
 
-      this.showSuccess(this.$t("product-package-edited-successfully", { product_package: this.newProductPackage.name }).toString());
       await this.updateProductPackageRows();
     } catch (e) {
       this.showError(e);
     } finally {
-      this.editProductPackageModalLoading = false;
+      this.productPackageModalLoading = false;
     }
   }
 
-  async onDeleteProductPackageClick(productPackageItem: ProductPackageWithKeyFiguresSchema) {
+  onEditProductPackageClick(productPackageItem: ProductPackageWithKeyFiguresSchemaItem) {
+    this.currentProductPackage = {
+      id: productPackageItem.id,
+      name: productPackageItem.name,
+      technology_id: productPackageItem.technology_id,
+      key_figures: productPackageItem.key_figures.map(kf => kf.id.toString()),
+    };
+
+    this.productPackageModalTitle = this.$t("update-product-package", { product_package: this.currentProductPackage.name }).toString();
+    this.productPackageModalOkTitle = this.$t('apply').toString();
+
+    this.appProductPackageModal.show();
+  }
+
+  async onDeleteProductPackageClick(productPackageItem: ProductPackageWithKeyFiguresSchemaItem) {
     this.loading = true;
     try {
       if (!confirm(this.$t("sure-delete-product-package", { product_package: productPackageItem.name }).toString())) {
@@ -328,10 +274,6 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
 </script>
 
 <style lang="scss">
-// .app-settings-customers-plants-selection {
-//   max-height: 400px;
-//   overflow-y: auto;
-// }
 .product-package-table-name {
   @media (min-width: 992px) {
     white-space: nowrap;

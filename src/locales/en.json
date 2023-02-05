@@ -145,7 +145,6 @@
   "product-package-deleted-successfully": "{product_package} deleted successfully",
   "update-product-package": "Update {product_package}",
   "product-package-created-success": "{product_package} created successfully",
-  "product-package-number-currently-booked": "Number of orders",
   "pi": "PI",
   "missing-gct": "Broken glass",
   "missing-gct_expl": "Missing glass tube",
