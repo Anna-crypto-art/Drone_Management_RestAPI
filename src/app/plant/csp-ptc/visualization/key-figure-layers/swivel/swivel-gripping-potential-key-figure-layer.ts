@@ -12,7 +12,7 @@ export class SwivelGrippingPotentialKeyFigureLayer extends ClassSwivelKeyFigureL
     super.created();
     this.compareClassLimitsKeyFigureMixin = new CompareClassLimitsKeyFigureMixin(this)
 
-    this.enableCompare = false;
+    this.enableCompare = true;
   }
 
   public getClassLimits(): number[] {
@@ -42,6 +42,10 @@ export class SwivelGrippingPotentialKeyFigureLayer extends ClassSwivelKeyFigureL
       ],
     };
   }
+
+  protected getDiffColor(featureProperties: FeatureProperties): string {
+    return this.compareClassLimitsKeyFigureMixin.getDiffColor(featureProperties);
+  }
  
   protected getLegendName(): string {
     return this.getLegendEntryTransName(
@@ -66,16 +70,7 @@ export class SwivelGrippingPotentialKeyFigureLayer extends ClassSwivelKeyFigureL
     return featureInfos;
   }
 
-  
-
   public getDiffLegendName(): string {
     return this.getLegendName();
-  }
-
-  public getComparedFeatureType(properties: FeatureProperties, currentClass: number): ComparedFeatureType {
-    return super.getComparedFeatureType(
-      this.compareClassLimitsKeyFigureMixin.getFeaturePropertiesClassValue(properties),
-      currentClass
-    );
   }
 }

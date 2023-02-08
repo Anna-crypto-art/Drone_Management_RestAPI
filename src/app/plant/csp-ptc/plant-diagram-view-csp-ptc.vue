@@ -162,6 +162,18 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
           },
           label: columnName + "_" + 2,
         });
+      } else if (entry.keyFigureId === ApiKeyFigure.SWIVEL_GRIPPING_POTENTIAL_CLASS_ID) {
+        for (const swivelClass of [3, 2]) {
+          columnsSelection.push({
+            name: columnName,
+            func: "count",
+            func_condition: {
+              compare_mode: "equal",
+              compare_values: [swivelClass],
+            },
+            label: columnName + "_" + swivelClass,
+          });
+        }
       } else if (entry.filterType === FilterFieldType.BOOLEAN) {
         columnsSelection.push({
           name: columnName,

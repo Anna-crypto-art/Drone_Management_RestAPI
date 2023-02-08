@@ -10,16 +10,12 @@ const analysisResultCspPtcMappingSwivel: AnalysisResultMappings<
   {
     getValue: r => r.htf_temperature_both_motions,
     transName: "htf-temperature-both-motions",
-    keyFigureId: ApiKeyFigure.SWIVEL_GRIPPING_POTENTIAL_CLASS_ID,
-    filterType: FilterFieldType.ARRAY,
     unit: "°C",
     superAdminOnly: true
   },
   {
     getValue: r => r.htf_temperature_avg,
     transName: "htf-temperature-avg",
-    keyFigureId: ApiKeyFigure.SWIVEL_GRIPPING_POTENTIAL_CLASS_ID,
-    filterType: FilterFieldType.NUMERIC_EXTENDED,
     unit: "°C"
   },
   {
