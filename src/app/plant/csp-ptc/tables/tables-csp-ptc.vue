@@ -36,6 +36,7 @@ export default class AppTablesCspPtc extends BaseAuthComponent implements ITable
     { componentId: ApiComponent.CSP_PTC_SCE, descr: "sce_expl" },
     { componentId: ApiComponent.CSP_PTC_SCA, descr: "sca_expl" },
     { componentId: ApiComponent.CSP_PTC_MIRROR },
+    { componentId: ApiComponent.CSP_PTC_SWIVEL },
   ];
 }
 </script>

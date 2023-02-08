@@ -141,6 +141,7 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
           [ApiKeyFigure.SCA_SDX_ID]: this.firstAnalysisResult!.csp_ptc.sdx_rms_class_limits,
           [ApiKeyFigure.SCE_SDX_ID]: this.firstAnalysisResult!.csp_ptc.sdx_rms_class_limits,
           [ApiKeyFigure.SCA_FRICTION_ID]: this.firstAnalysisResult!.csp_ptc.sca_torsion_class_limits,
+          [ApiKeyFigure.SWIVEL_GRIPPING_POTENTIAL_CLASS_ID]: this.firstAnalysisResult!.csp_ptc.swivel_gripping_potential_class_limits,
         }[entry.keyFigureId];
 
         columnsSelection.push({
@@ -161,6 +162,18 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
           },
           label: columnName + "_" + 2,
         });
+      } else if (entry.keyFigureId === ApiKeyFigure.SWIVEL_GRIPPING_POTENTIAL_CLASS_ID) {
+        for (const swivelClass of [3, 2]) {
+          columnsSelection.push({
+            name: columnName,
+            func: "count",
+            func_condition: {
+              compare_mode: "equal",
+              compare_values: [swivelClass],
+            },
+            label: columnName + "_" + swivelClass,
+          });
+        }
       } else if (entry.filterType === FilterFieldType.BOOLEAN) {
         columnsSelection.push({
           name: columnName,
@@ -264,6 +277,21 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
             }).toString(),
             columnName: numberBox.columnName + "_" + torsClass,
             color: colorMap[torsClass],
+          });
+        }
+      } else if (entry.keyFigureId === ApiKeyFigure.SWIVEL_GRIPPING_POTENTIAL_CLASS_ID) {
+        const classLimits = this.firstAnalysisResult!.csp_ptc.swivel_gripping_potential_class_limits
+
+        numberBox.nums = [];
+
+        for (const gripClass of [3, 2]) {
+          numberBox.nums.push({
+            displayName: this.$t("rotation-joint-gripping-potential-class-" + gripClass, {
+              limit0: classLimits[0],
+              limit1: classLimits[1],
+            }).toString(),
+            columnName: numberBox.columnName + "_" + gripClass,
+            color: colorMap[gripClass],
           });
         }
       }

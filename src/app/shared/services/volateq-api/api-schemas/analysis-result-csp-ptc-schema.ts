@@ -9,5 +9,6 @@ export interface AnalysisResultCspPtcSchema {
   sdx_rms_class_limits: number[];
   glass_tube_temperature_class_count: 3 | 4;
   hce_position_total_class_limits: number[];
+  swivel_gripping_potential_class_limits: number[];
   created_at: string;
 }

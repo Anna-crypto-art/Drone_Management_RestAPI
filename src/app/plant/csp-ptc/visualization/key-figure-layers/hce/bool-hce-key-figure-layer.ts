@@ -14,7 +14,7 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
       return new Style({
         stroke: new Stroke({
           color: KeyFigureColors.grey,
-          width: this.stokeWidth,
+          width: this.strokeWidth,
         }),
         text: this.showText(feature),
       });
