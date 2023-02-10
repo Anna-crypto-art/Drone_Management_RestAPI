@@ -14,10 +14,8 @@
       @loading="toggleLoading"
     >
       <!-- Pass slots through -->
-      <template v-for="(_, slot) in $slots">
-        <template :slot="slot">
-          <slot :name="slot"></slot>
-        </template>
+      <template v-for="(_, slot) in $slots" :slot="slot">
+        <slot :name="slot" />
       </template>
     </app-geovisual-layer-switcher>
   </div>

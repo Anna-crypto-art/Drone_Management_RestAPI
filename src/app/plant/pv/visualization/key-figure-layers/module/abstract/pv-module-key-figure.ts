@@ -8,7 +8,7 @@ import analysisResultPvMappingModule from "@/app/shared/services/volateq-api/api
 export abstract class ModuleKeyFigureLayer extends PvKeyFigureLayer<AnalysisResultPvModuleSchema> {
   protected readonly analysisResultMapping = analysisResultPvMappingModule;
 
-  protected showPcsZoomLevel = 16;
+  protected showPcsZoomLevel = 21;
 
   public getStyle(feature: FeatureLike): Style {
     return new Style({

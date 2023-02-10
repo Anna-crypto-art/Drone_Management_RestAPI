@@ -21,18 +21,18 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualPvQuery>[] = [
   {
     keyFigureId: ApiKeyFigure.TRACKER_SOILING_LEVEL_ID,
     layerType: TrackerSoilingKeyFigureLayer,
-    keyFigureInfo: { keyName: "tracker-soiling-level", description: "tracker-soiling-level_expl" },
+    keyFigureInfo: { keyName: "pv-tracker-soiling-level", description: "pv-tracker-soiling-level_expl" },
     subLayers: [
       {
-        keyFigureInfo: { displayName: "tracker-soiling-level-3", zIndex: 13 },
+        keyFigureInfo: { templateName: "pvTrackerSolingLevel3", displayName: "pv-tracker-soiling-level-3", zIndex: 13 },
         query: { tracker_soiling_level: 3 },
       },
       {
-        keyFigureInfo: { displayName: "tracker-soiling-level-2", zIndex: 12 },
+        keyFigureInfo: { displayName: "pv-tracker-soiling-level-2", zIndex: 12 },
         query: { tracker_soiling_level: 2 },
       },
       {
-        keyFigureInfo: { displayName: "tracker-soiling-level-1", zIndex: 10 },
+        keyFigureInfo: { displayName: "pv-tracker-soiling-level-1", zIndex: 10 },
         query: { tracker_soiling_level: 1 },
       },
       {

@@ -9,7 +9,7 @@ import { Feature } from "ol";
 export class TrackerComponentLayer extends ComponentLayer {
   protected readonly componentId = ApiComponent.PV_TRACKER;
 
-  protected showPcsZoomLevel = 16.5;
+  protected showPcsZoomLevel = 18.5;
   protected zIndex = 3;
 
   public readonly name = "pv-tracker";

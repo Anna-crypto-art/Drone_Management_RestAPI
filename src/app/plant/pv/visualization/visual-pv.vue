@@ -7,6 +7,13 @@
       :componentLayerTypes="componentLayerTypes"
       :keyFigureLayers="keyFigureLayers"
     >
+      <!-- 
+        this template seems to be quite unnecessary. But keep it anyway!
+        Because if we don't pass any slots, the settings section disappears (Bug of Vue2?)
+       -->
+      <template #pvTrackerSolingLevel3>
+        {{ $t('pv-tracker-soiling-level-3') }}
+      </template>
     </app-visualization>
   </div>
 </template>
