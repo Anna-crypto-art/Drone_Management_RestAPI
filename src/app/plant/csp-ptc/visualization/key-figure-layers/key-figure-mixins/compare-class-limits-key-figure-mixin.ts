@@ -15,15 +15,25 @@ extends CompareClassKeyFigureMixin<ICompareClassLimitsKeyFigureMixin>
   public getFeaturePropertiesClassValue(properties: FeatureProperties): FeatureProperties {
     const featureValue: number = properties.value! as number;
     const featureDiffValue: number = (properties.diff_value || 0) as number;
+    // featureDiffValue *= -1;
+
+    // // if (featureDiffValue < 0) {
+    // // }
 
     const classFeatureValue = this.getFeatureClassValue(featureValue);
-    let classFeatureDiffValue = this.getFeatureClassValue(featureValue + featureDiffValue) - classFeatureValue;
+    let classFeatureDiffValue = this.getFeatureClassValue(featureValue - featureDiffValue) - classFeatureValue;
 
     // keep the diff direction
     if (classFeatureDiffValue < 0 && featureDiffValue > 0 || classFeatureDiffValue > 0 && featureDiffValue < 0) {
       classFeatureDiffValue *= -1;
     }
 
+    console.log(properties)
+    console.log({
+      name: properties.name,
+      value: classFeatureValue,
+      diff_value: classFeatureDiffValue,
+    })
     return {
       name: properties.name,
       value: classFeatureValue,
