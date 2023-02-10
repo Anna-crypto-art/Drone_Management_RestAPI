@@ -1,4 +1,4 @@
-import { Legend } from "@/app/plant/shared/visualization/types";
+import { FeatureProperties, Legend } from "@/app/plant/shared/visualization/types";
 import analysisResultCspPtcMappingMirror from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-mirror";
 import { AnalysisResultCspPtcMirrorSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-mirror-schema";
 import { FeatureLike } from "ol/Feature";
@@ -14,10 +14,12 @@ export class MirrorKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisResultCsp
   public getStyle(feature: FeatureLike): Style {
     return new Style({
       fill: new Fill({
-        color: this.color,
+        color: this.enableCompare && this.compareAnalysisResult && this.getDiffColor(this.getProperties(feature))
+        || this.getColor(),
       }),
       stroke: new Stroke({
-        color: this.color,
+        color: this.enableCompare && this.compareAnalysisResult && this.getDiffColor(this.getProperties(feature))
+          || this.getColor(),
         width: this.strokeWidth,
       }),
       text: this.showText(feature),
@@ -40,5 +42,13 @@ export class MirrorKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisResultCsp
         },
       ],
     };
+  }
+
+  protected getDiffColor(featureProperties: FeatureProperties): string {
+    return this.getColor();
+  }
+
+  protected getColor(): string {
+    return this.color!;
   }
 }
