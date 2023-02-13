@@ -10,8 +10,13 @@
       <b-form @submit.prevent="onApplyFilter">
         <b-row>
           <b-col sm="6">
-            <h5 class="mar-bottom">{{ $t("filter-by-pi") }}</h5>
-            <app-filter-fields v-model="piFilterFieldValues" :filterFields="piFilterFields">
+            <h5 class="mar-bottom" v-html="compareView ? $t('filter-diff-by-pi') : $t('filter-by-pi')"></h5>
+            <app-filter-fields 
+              v-model="piFilterFieldValues"
+              :filterFields="piFilterFields"
+              :filterSelectPlaceholder="$t('select-pi')"
+              :compareView="compareView"
+            >
               <template #addButton>
                 {{ $t("add-pi-filter") }}
               </template>
@@ -23,6 +28,7 @@
               v-model="compFilterFieldValues"
               :filterFields="compFilterFields" 
               :extendable="false"
+              :filterSelectPlaceholder="$t('select-component-type')"
             />
           </b-col>
         </b-row>
@@ -56,6 +62,9 @@ import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant
 import { TableFilterRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { TableResultMappingComponent } from "./types";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
+import { analysisSelectEventService } from "../analysis-selection-sidebar/analysis-selection-service";
+import { AnalysisSelectionEvent } from "../analysis-selection-sidebar/types";
 
 @Component({
   name: "app-table-component-filter",
@@ -77,33 +86,43 @@ export default class AppTableComponentFilter extends BaseAuthComponent {
   compFilterFieldValues: FilterFieldValue[] = [];
   compFilterFields: FilterField[] = [];
 
+  compareView = false;
+
   private mappingHelper!: AnalysisResultMappingHelper<AnalysisResultSchemaBase>;
 
+  @CatchError()
   async created() {
-    try {
-      this.mappingHelper = new AnalysisResultMappingHelper(this.activeComponent.mapping, this.analysisResult);
-  
-      this.piFilterFields = this.mappingHelper.getFields()
-        .filter(field => field.filterType)
-        .map(field => ({
-          key: field.key,
-          name: this.$t(field.key).toString(),
-          type: field.filterType!
-        }));
-  
-      this.compFilterFields = apiComponentsFilter[this.activeComponent.componentId]!.map(compId => ({
-        key: compId,
-        name: this.$t(apiComponentNames[compId]).toString(),
-        type: FilterFieldType.ARRAY,
-        getValues: async () => {
-          return (await volateqApi.getFieldgeometryComponentCodes(this.plant.fieldgeometry!.id, compId))
-            .sort()
-            .map(code => ({ value: code, text: code }));
-        }
+    this.mappingHelper = new AnalysisResultMappingHelper(this.activeComponent.mapping, this.analysisResult);
+
+    this.piFilterFields = this.mappingHelper.getFields()
+      .filter(field => field.filterType)
+      .map(field => ({
+        key: field.key,
+        name: this.$t(field.key).toString(),
+        type: field.filterType!,
       }));
-    } catch (e) {
-      this.showError(e);
-    }
+
+    this.compFilterFields = apiComponentsFilter[this.activeComponent.componentId]!.map(compId => ({
+      key: compId,
+      name: this.$t(apiComponentNames[compId]).toString(),
+      type: FilterFieldType.ARRAY,
+      getValues: async () => {
+        return (await volateqApi.getFieldgeometryComponentCodes(this.plant.fieldgeometry!.id, compId))
+          .sort()
+          .map(code => ({ value: code, text: code }));
+      }
+    }));
+
+    analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED, async () => {
+      this.compareView = true;
+
+      await this.applyFilterAfterCompareViewChanged();
+    });
+    analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.ANALYSIS_SELECTED, async () => {
+      this.compareView = false;
+      
+      await this.applyFilterAfterCompareViewChanged();
+    });
   }
 
   onApplyFilter() {
@@ -115,6 +134,15 @@ export default class AppTableComponentFilter extends BaseAuthComponent {
     this.compFilterFieldValues = [];
 
     this.$emit("filter", this.getTableFilterRequest());
+  }
+
+  private async applyFilterAfterCompareViewChanged() {
+    // Wait for compareView "@Watch"-Events to refresh filter
+    await this.$nextTick();
+    await this.$nextTick();
+    await this.$nextTick();
+
+    this.onApplyFilter();
   }
 
   private getTableFilterRequest(): TableFilterRequest | undefined {

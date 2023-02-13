@@ -6,6 +6,8 @@
           v-model="filterField.value"
           :filterFields="filterFields"
           @input="onInput"
+          :placeholder="filterSelectPlaceholder"
+          :compareView="compareView"
         />
       </b-col>
       <b-col cols="2">
@@ -26,7 +28,7 @@
 import Vue from "vue";
 import { Component, Prop, Watch } from "vue-property-decorator";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
-import { FilterField, FilterFieldValue } from "./types";
+import { FilterField, FilterFieldType, FilterFieldValue } from "./types";
 import AppFilterField from "@/app/plant/shared/filter-fields/filter-field.vue";
 
 @Component({
@@ -40,11 +42,29 @@ export default class AppFilterFields extends Vue {
   @Prop({ required: true }) filterFields!: FilterField[];
   @Prop({ default: () => [] }) value!: FilterFieldValue[];
   @Prop({ default: true }) extendable!: boolean;
+  @Prop({ default: "" }) filterSelectPlaceholder!: string;
+  @Prop({ default: false }) compareView!: boolean;
 
   filterFieldValues: { value: FilterFieldValue, id: number, }[] = [];
 
   @Watch('value') onValueChanged() {
     this.setFilterFieldValues();
+  }
+
+  @Watch('compareView') onCompareViewChanged() {
+    const rmIdx: number[] = [];
+    for (let i = 0; i < this.filterFieldValues.length; i++) {
+      const filterFieldValue = this.filterFieldValues[i];
+      if (filterFieldValue.value?.filterField?.type === FilterFieldType.BOOLEAN) {
+        rmIdx.push(i);
+      }
+    }
+  
+    for (const i of rmIdx) {
+      this.filterFieldValues.splice(i, 1);
+    }
+
+    this.onInput();
   }
 
   created() {

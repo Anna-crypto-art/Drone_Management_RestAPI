@@ -258,7 +258,8 @@
   "satellite-view": "Satellite view",
   "filter": "Filter",
   "filter-by-component": "Filter by component",
-  "filter-by-pi": "Filter by PIs",
+  "filter-by-pi": "Filter by values of performance indicators",
+  "filter-diff-by-pi": "Filter by <b>difference</b> values of performance indicators",
   "reset": "Reset",
   "subfield": "Subfield",
   "add-pi-filter": "Add PI filter",
@@ -546,6 +547,7 @@
   "htf-temperature-avg": "Average HTF temperature",
   "hce-displacement": "HCE displacement",
   "hce-displacement_expl": "I have no idea what this is",
+  "select-component-type": "Select component type",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

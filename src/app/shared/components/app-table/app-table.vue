@@ -11,6 +11,7 @@
       :selectable="selectMode !== null"
       :select-mode="selectMode"
       @row-selected="onRowSelected"
+      :class="{ 'app-table-compact': compact }"
 
       :per-page="perPage"
       :current-page="currentPage"
@@ -82,6 +83,7 @@ export default class AppTable extends Vue implements IAppSelectTable, IAppTable 
   @Prop({ default: "" }) emptyText!: string;
   @Prop({ default: false }) loading!: boolean | null;
   @Prop({ default: false }) hoverActions!: boolean;
+  @Prop({ default: false }) compact!: boolean;
 
   @Prop({ default: null }) perPage!: number | null;
   @Prop({ default: null }) currentPage!: number | null;
@@ -159,10 +161,6 @@ export default class AppTable extends Vue implements IAppSelectTable, IAppTable 
     border: 1px solid $border-color-grey;
     border-top: none;
     background-color: $white;
-    
-  }
-  .table.no-border {
-    border: none !important;
   }
   .table.b-table.b-table-selectable {
     .b-table-row-selected {
@@ -243,6 +241,13 @@ export default class AppTable extends Vue implements IAppSelectTable, IAppTable 
     .custom-control-input:disabled ~ .custom-control-label::before {
       background-color: #fff;
     }
+  }
+
+  .table.app-table-compact > tbody > tr > td, .table.app-table-compact > thead > tr > th {
+    padding: 0.5em;
+  }
+  .table.app-table-compact > tbody > tr > td {
+    white-space: nowrap;
   }
 }
 </style>
