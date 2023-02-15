@@ -21,9 +21,9 @@ export class CompareClassKeyFigureMixin<T extends ICompareClassKeyFigureMixin>  
       entries: [
         {
           color: KeyFigureColors.black,
-          name: this.layer.getDiffLegendName() + this.layer.getLegendEntryCount(
-              comparedFeatures[ComparedFeatureType.NEW_WORSENED].length + 
+          name: this.layer.getDiffLegendName() + this.layer.getLegendEntryCount( 
               comparedFeatures[ComparedFeatureType.NEW_IMPROVED].length +
+              comparedFeatures[ComparedFeatureType.NEW_WORSENED].length +
               comparedFeatures[ComparedFeatureType.NO_CHANGE].length
             ),
         },

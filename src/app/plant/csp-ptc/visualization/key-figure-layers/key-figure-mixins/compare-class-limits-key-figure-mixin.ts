@@ -13,16 +13,19 @@ extends CompareClassKeyFigureMixin<ICompareClassLimitsKeyFigureMixin>
   }
 
   public getFeaturePropertiesClassValue(properties: FeatureProperties): FeatureProperties {
-    const featureValue: number = properties.value! as number;
-    const featureDiffValue: number = (properties.diff_value || 0) as number;
+    /*
+     a: value of new analysis
+     b: value of old analysis
+     formula: c = a - b
+    */
+    
+    const featureValue: number = properties.value! as number; // a
+    const featureDiffValue: number = (properties.diff_value || 0) as number; // c
+    const oldFeatureValue = featureValue - featureDiffValue; // b (= a - c)
 
     const classFeatureValue = this.getFeatureClassValue(featureValue);
-    let classFeatureDiffValue = this.getFeatureClassValue(featureValue + featureDiffValue) - classFeatureValue;
-
-    // keep the diff direction
-    if (classFeatureDiffValue < 0 && featureDiffValue > 0 || classFeatureDiffValue > 0 && featureDiffValue < 0) {
-      classFeatureDiffValue *= -1;
-    }
+    const oldClassFeatureValue = this.getFeatureClassValue(oldFeatureValue);
+    const classFeatureDiffValue = classFeatureValue - oldClassFeatureValue; // c = a - b
 
     return {
       name: properties.name,

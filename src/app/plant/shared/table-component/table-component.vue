@@ -21,6 +21,7 @@
         :perPage="pagination.perPage"
         :currentPage="pagination.currentPage"
         :loading="null"
+        :compact="true"
       >
         <template #cell()="data">
           {{ data.value }}
@@ -94,7 +95,7 @@ export default class AppTableComponent extends BaseAuthComponent implements ITab
   public search(searchText: string) {
     this.searchText = searchText.trim();
 
-    this.table.refresh();
+    this.refresh();
   }
 
   async created() {
@@ -110,17 +111,16 @@ export default class AppTableComponent extends BaseAuthComponent implements ITab
 
   @Watch('compareAnalysisResult') onCompareAnalysisResultChanged() {
     this.mappingHelper.setCompareAnalysisResult(this.compareAnalysisResult);
-    this.refresh();
   }
 
   onFilter(tableFilterRequest?: TableFilterRequest) {
     this.tableFilterRequest = tableFilterRequest;
 
-    this.table.refresh();
+    this.refresh();
   }
 
   onShowSumAvgChange() {
-    this.table.refresh();
+    this.refresh();
   }
 
   getTableRequestParam(): TableRequest {
@@ -224,13 +224,15 @@ export default class AppTableComponent extends BaseAuthComponent implements ITab
         if (mappingEntry) {
           const diffValue: number = data.item[diffKey];
           let textColorClass = "text-grey";
+          let plusSymbol = "";
           if (diffValue < 0) {
             textColorClass = "text-success";
           } else if (diffValue > 0) {
             textColorClass = "text-danger";
+            plusSymbol = "+";
           }
           
-          return `<span class="diff ${textColorClass}">${data.item[diffKey]}</span>`;
+          return `<span class="diff ${textColorClass}">${plusSymbol}${diffValue}</span>`;
         }
       }
     }
@@ -249,6 +251,7 @@ export default class AppTableComponent extends BaseAuthComponent implements ITab
 
   tr > td .diff {
     padding-left: 5px;
+    font-weight: bold;
 
     &.text-grey {
       color: $grey;

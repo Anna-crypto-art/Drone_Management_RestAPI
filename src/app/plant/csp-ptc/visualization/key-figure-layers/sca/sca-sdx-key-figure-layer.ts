@@ -44,7 +44,7 @@ export class ScaSdxKeyFigureLayer extends ScaKeyFigureLayer implements ICompareC
       entries: [
         {
           color: this.getColor(),
-          name: this.getLegendName(),
+          name: this.getLegendName() + this.getLegendEntryCount(),
         },
       ],
     };
@@ -76,7 +76,7 @@ export class ScaSdxKeyFigureLayer extends ScaKeyFigureLayer implements ICompareC
       this.analysisResult.csp_ptc.sdx_rms_class_limits,
       this.query?.sdx_class,
       "[mrad]"
-    ) + this.getLegendEntryCount();
+    );
   }
 
   public getComparedFeatureType(properties: FeatureProperties, currentClass: number): ComparedFeatureType {

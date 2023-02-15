@@ -2,11 +2,18 @@
   <div class="app-table-filter-field">
     <b-row>
       <b-col>
-        <b-form-select v-model="selectedKey" :options="selectOptions" @change="onSelectChange" size="sm">
-        </b-form-select>
+        <b-form-select 
+          v-model="selectedKey"
+          :options="selectOptions"
+          @change="onSelectChange"
+          size="sm" />
       </b-col>
       <b-col>
-        <app-filter-field-value v-if="filterField" v-model="innerValue" @input="onInput" :filterField="filterField" />
+        <app-filter-field-value v-if="filterField"
+          v-model="innerValue"
+          @input="onInput"
+          :filterField="filterField"
+          :compareView="compareView" />
       </b-col>
     </b-row>
   </div>
@@ -30,6 +37,8 @@ import { BvSelectOption } from "@/app/shared/types";
 export default class AppFilterField extends Vue {
   @Prop({ required: true }) filterFields!: FilterField[];
   @Prop({ default: null }) value!: FilterFieldValue | null;
+  @Prop({ default: "" }) placeholder!: string;
+  @Prop({ default: false }) compareView!: boolean;
 
   innerValue: FilterFieldValueType | null = null;
   selectedKey: string | number = "";
@@ -44,10 +53,19 @@ export default class AppFilterField extends Vue {
   }
 
   get selectOptions(): BvSelectOption[] {
-    return this.filterFields.map(filterField => ({
+    const options = this.filterFields.map(filterField => ({
       value: filterField.key,
       text: filterField.name
     }));
+    
+    if (this.placeholder) {
+      return [
+        { value: "", text: this.placeholder, disabled: true },
+        ...options
+      ];
+    }
+
+    return options;
   }
 
   get filterField(): FilterField | undefined {
@@ -70,7 +88,7 @@ export default class AppFilterField extends Vue {
 
   private setFilterFieldValue() {
     this.selectedKey = this.value?.filterField?.key || "";
-    this.innerValue = this.value?.value || null;
+    this.innerValue = this.value?.value !== undefined ? this.value?.value : null;
     
     this.filterFieldValue = { 
       filterField: this.filterField || null,

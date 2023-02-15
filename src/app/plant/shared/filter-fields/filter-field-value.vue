@@ -23,6 +23,12 @@
       required
       :options="filterFieldOptions"
     />
+    <b-form-select v-if="isBooleanInCompareView" v-model="filterFieldValue" 
+      size="sm"
+      @change="onChange"
+      required
+      :options="[{ value: -1, text: '-1' }, { value: 0, text: '0' }, { value: 1, text: '+1' }]" 
+    />
   </div>
 </template>
 
@@ -38,6 +44,7 @@ import { FilterField, FilterFieldType, FilterFieldValueType } from "./types";
 export default class AppFilterFieldValue extends Vue {
   @Prop({ required: true }) filterField!: FilterField;
   @Prop({ default: null }) value!: FilterFieldValueType;
+  @Prop({ default: false }) compareView!: boolean;
 
   filterFieldValue: FilterFieldValueType = null;
 
@@ -66,7 +73,11 @@ export default class AppFilterFieldValue extends Vue {
   }
 
   get isBoolean(): boolean {
-    return this.filterField.type === FilterFieldType.BOOLEAN;
+    return this.filterField.type === FilterFieldType.BOOLEAN && !this.compareView;
+  }
+
+  get isBooleanInCompareView(): boolean {
+    return this.filterField.type === FilterFieldType.BOOLEAN && this.compareView;
   }
 
   get isArray(): boolean {

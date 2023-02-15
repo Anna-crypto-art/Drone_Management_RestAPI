@@ -1,6 +1,7 @@
 export interface BvSelectOption {
   text: string;
   value: any;
+  disabled?: boolean;
 }
 
 export interface BvSelectGroupOption {

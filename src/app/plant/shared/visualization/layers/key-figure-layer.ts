@@ -364,6 +364,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
 
   public getDiffColorByComparedFeatureType(comparedFeatureType: ComparedFeatureType): string {
     switch (comparedFeatureType) {
+      case ComparedFeatureType.NEW_IMPROVED:
       case ComparedFeatureType.NO_CHANGE:
         return KeyFigureColors.black;
 
@@ -374,7 +375,6 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
         return KeyFigureColors.red;
 
       case ComparedFeatureType.GONE_WORSENED:
-      case ComparedFeatureType.NEW_IMPROVED:
         return this.getColorWithAlpha('#fff', 0); // transparent -> invisible
     }
   }
