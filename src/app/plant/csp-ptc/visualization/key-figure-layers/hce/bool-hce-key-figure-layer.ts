@@ -68,9 +68,7 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
       entries: [
         {
           color: this.compareAnalysisResult ? KeyFigureColors.black : this.color!,
-          name:
-            this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
-            this.getLegendEntryCount(featuresCount),
+          name: this.getLegendName() + this.getLegendEntryCount(featuresCount),
         },
         ...compareEntries
       ],

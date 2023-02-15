@@ -72,13 +72,13 @@ export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer imple
       this.analysisResult.csp_ptc.glass_tube_temperature_class_count === 3
     ) {
       // If we have 3 temperature classifications the third class is "Severe heat loss"
-      return "glass-tube-temperature-class-4";
+      return this.vueComponent.$t("glass-tube-temperature-class-4").toString();
     }
 
     return super.getLegendName();
   }
 
   public getDiffLegendName(): string {
-    return this.vueComponent.$t(this.getLegendName()).toString();
+    return this.getLegendName();
   }
 }

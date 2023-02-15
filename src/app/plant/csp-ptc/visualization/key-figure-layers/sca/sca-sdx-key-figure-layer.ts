@@ -70,7 +70,7 @@ export class ScaSdxKeyFigureLayer extends ScaKeyFigureLayer implements ICompareC
     return this.getLegendName();
   }
 
-  private getLegendName(): string {
+  protected getLegendName(): string {
     return this.getLegendEntryTransName(
       "slope-deviation-class",
       this.analysisResult.csp_ptc.sdx_rms_class_limits,

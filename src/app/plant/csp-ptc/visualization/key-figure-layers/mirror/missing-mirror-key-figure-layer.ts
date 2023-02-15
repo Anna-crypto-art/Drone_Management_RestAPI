@@ -11,11 +11,11 @@ export class MissingMirrorKeyFigureLayer extends MirrorKeyFigureLayer {
     const featureValue: boolean | null | undefined = this.getPropertyValue<boolean | null>(feature);
 
     if (featureValue === null) {
-      // With fill a SCE here...
+      // We fill a SCE here...
       return new Style({
         fill: this.query?.undefined && new Fill({
           color: KeyFigureColors.grey,
-        }) || undefined,
+        }) || undefined, // fill: undefined -> invisible
         text: this.showText(feature),
       });
     }
@@ -28,19 +28,46 @@ export class MissingMirrorKeyFigureLayer extends MirrorKeyFigureLayer {
       return undefined;
     }
 
-    const notMeasuredSCEFeaturesCount = this.geoJSON.features.filter(
-      feature => feature.properties.value === null
-    ).length;
-    const notMeasuredMirrorFeaturesCount = notMeasuredSCEFeaturesCount * this.geoJSON.custom.mirrors_per_sce!;
-    let missingMirrorsFeaturesCount = this.geoJSON.features.length - notMeasuredSCEFeaturesCount;
-
-    let compareEntries: LegendEntry[] = [];
     if (this.compareAnalysisResult) {
-      const fixedFeaturesCount = this.geoJSON.features.filter(feature => feature.properties.diff_value === -1).length;
-      const newFeaturesCount = this.geoJSON.features.filter(feature => feature.properties.diff_value === 1).length;
-      missingMirrorsFeaturesCount = missingMirrorsFeaturesCount - fixedFeaturesCount;
+      return this.getDiffLegend();
+    }
 
-      compareEntries = [
+    const notMeasuredMirrorFeaturesCount = this.getNotMeasuredFeaturesCount();
+    const missingMirrorsFeaturesCount = this.getMissingMirrorsFeaturesCount();
+
+    const legend = {
+      id: this.getLegendId(),
+      entries: [
+        {
+          color: this.color!,
+          name: this.getLegendName() + this.getLegendEntryCount(missingMirrorsFeaturesCount, 100),
+        },
+      ],
+    };
+
+    if (this.query?.undefined) {
+      legend.entries.push({
+        color: KeyFigureColors.grey,
+        name: this.vueComponent.$t("not-measured").toString() + 
+          this.getLegendEntryCount(notMeasuredMirrorFeaturesCount),
+      });
+    }
+
+    return legend;
+  }
+
+  protected getDiffLegend(): Legend | undefined {
+    const fixedFeaturesCount = this.geoJSON!.features.filter(feature => feature.properties.diff_value === -1).length;
+    const newFeaturesCount = this.geoJSON!.features.filter(feature => feature.properties.diff_value === 1).length;
+    const missingMirrorsFeaturesCount = this.getMissingMirrorsFeaturesCount() - fixedFeaturesCount;
+
+    return {
+      id: this.getLegendId(),
+      entries: [
+        {
+          color: KeyFigureColors.black,
+          name: this.getLegendName() + this.getLegendEntryCount(missingMirrorsFeaturesCount, 100),
+        },
         {
           color: KeyFigureColors.red,
           name: this.vueComponent.$t("of-which-are-new").toString() + this.getLegendEntryCount(newFeaturesCount),
@@ -50,31 +77,8 @@ export class MissingMirrorKeyFigureLayer extends MirrorKeyFigureLayer {
           color: KeyFigureColors.green,
           name: this.vueComponent.$t("fixed").toString() + this.getLegendEntryCount(fixedFeaturesCount),
         },
-      ]
-    }
-
-    const legend = {
-      id: this.getLegendId(),
-      entries: [
-        {
-          color: this.compareAnalysisResult ? KeyFigureColors.black : this.color!,
-          name:
-            this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
-            this.getLegendEntryCount(missingMirrorsFeaturesCount, 100),
-        },
-        ...compareEntries
       ],
     };
-
-    if (this.query?.undefined && !this.compareAnalysisResult) {
-      legend.entries.push({
-        color: KeyFigureColors.grey,
-        name: this.vueComponent.$t("not-measured").toString() + 
-          this.getLegendEntryCount(notMeasuredMirrorFeaturesCount),
-      });
-    }
-
-    return legend;
   }
 
   protected getDiffColor(featureProperties: FeatureProperties): string {
@@ -86,5 +90,17 @@ export class MissingMirrorKeyFigureLayer extends MirrorKeyFigureLayer {
       return KeyFigureColors.red;
     }
     return KeyFigureColors.black;
+  }
+
+  private getNotMeasuredSCEFeaturesCount(): number {
+    return this.geoJSON!.features.filter(f => f.properties.value === null).length;
+  }
+
+  private getNotMeasuredFeaturesCount(): number {
+    return this.getNotMeasuredSCEFeaturesCount() * this.geoJSON!.custom.mirrors_per_sce!;
+  }
+
+  private getMissingMirrorsFeaturesCount(): number {
+    return this.geoJSON!.features.length - this.getNotMeasuredSCEFeaturesCount();
   }
 }

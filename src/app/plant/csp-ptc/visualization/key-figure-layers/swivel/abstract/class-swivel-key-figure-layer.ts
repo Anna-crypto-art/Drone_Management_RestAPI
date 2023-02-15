@@ -18,13 +18,9 @@ export abstract class ClassSwivelKeyFigureLayer extends SwivelKeyFigureLayer {
       entries: [
         {
           color: this.color!,
-          name: this.vueComponent.$t(this.getLegendName()).toString() + this.getLegendEntryCount(),
+          name: this.getLegendName() + this.getLegendEntryCount(),
         },
       ],
     };
-  }
-
-  protected getLegendName(): string {
-    return (this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!;
   }
 }

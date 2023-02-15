@@ -12,14 +12,15 @@ export class MirrorKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisResultCsp
   protected readonly strokeWidth = 3;
 
   public getStyle(feature: FeatureLike): Style {
+    const color = this.enableCompare && this.compareAnalysisResult && this.getDiffColor(this.getProperties(feature))
+      || this.getColor();
+
     return new Style({
       fill: new Fill({
-        color: this.enableCompare && this.compareAnalysisResult && this.getDiffColor(this.getProperties(feature))
-        || this.getColor(),
+        color: color
       }),
       stroke: new Stroke({
-        color: this.enableCompare && this.compareAnalysisResult && this.getDiffColor(this.getProperties(feature))
-          || this.getColor(),
+        color: color,
         width: this.strokeWidth,
       }),
       text: this.showText(feature),
@@ -36,9 +37,7 @@ export class MirrorKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisResultCsp
       entries: [
         {
           color: this.color!,
-          name:
-            this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
-            this.getLegendEntryCount(),
+          name: this.getLegendName() + this.getLegendEntryCount(),
         },
       ],
     };

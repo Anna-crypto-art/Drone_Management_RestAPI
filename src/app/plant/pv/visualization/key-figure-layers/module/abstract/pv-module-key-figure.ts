@@ -29,9 +29,7 @@ export abstract class ModuleKeyFigureLayer extends PvKeyFigureLayer<AnalysisResu
       entries: [
         {
           color: this.color,
-          name:
-            this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
-            this.getLegendEntryCount(),
+          name: this.getLegendName() + this.getLegendEntryCount(),
         },
       ],
     };

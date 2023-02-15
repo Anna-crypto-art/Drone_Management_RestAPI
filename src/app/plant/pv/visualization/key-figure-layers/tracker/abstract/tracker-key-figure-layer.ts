@@ -29,9 +29,7 @@ export abstract class TrackerKeyFigureLayer extends PvKeyFigureLayer<AnalysisRes
       entries: [
         {
           color: this.getColor(),
-          name:
-            this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString() +
-            this.getLegendEntryCount(),
+          name: this.getLegendName() + this.getLegendEntryCount(),
         },
       ],
     };

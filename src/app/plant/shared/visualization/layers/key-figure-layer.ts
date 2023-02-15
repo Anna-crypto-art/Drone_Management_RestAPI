@@ -74,6 +74,10 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     return `${this.analysisResult.id}__${this.keyFigureId}__${this.keyFigureInfo.displayName || this.keyFigureInfo.keyName || this.keyFigureInfo.templateName || ""}`;
   }
 
+  protected getLegendName(): string {
+    return this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString()
+  }
+
   protected async onSelected(selected: boolean): Promise<void> {
     super.onSelected(selected);
 

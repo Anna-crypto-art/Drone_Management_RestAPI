@@ -50,7 +50,7 @@ export class ScaFrictionKeyFigureLayer extends ScaKeyFigureLayer implements ICom
     };
   }
 
-  private getLegendName(): string {
+  protected getLegendName(): string {
     return this.getLegendEntryTransName(
       "sca-torsion-class",
       this.analysisResult.csp_ptc.sca_torsion_class_limits,
