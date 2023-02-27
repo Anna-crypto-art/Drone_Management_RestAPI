@@ -18,16 +18,3 @@ export interface UpdateAnalysisState {
   /* Only for SUPER_ADMINs. Allows to set to data_complete, even if analysis.data_complete is false. */
   force?: boolean;
 }
-
-export interface CreateReferenceMeasurement {
-  measure_date: string;
-  notes?: string;
-}
-
-export interface AddReferenceMeasurmentValue {
-  pcs: string;
-  notes?: string;
-  hce_temperature?: number;
-  hce_broken_glass?: boolean;
-  hce_coating_degraded?: boolean;
-}

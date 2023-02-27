@@ -1,13 +1,13 @@
 import store from "@/app/app-state";
 import { InviteUser, RegisterUser } from "@/app/shared/services/volateq-api/api-requests/user-requests";
-import { ConfirmLoginResult, TokenResult } from "@/app/shared/services/volateq-api/api-schemas/auth-schema";
+import { TokenResult } from "@/app/shared/services/volateq-api/api-schemas/auth-schema";
 import { CustomerNameSchema, CustomerSchema } from "@/app/shared/services/volateq-api/api-schemas/customer-schemas";
 import { SimpleUserSchema, UserAuthMethod, UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 import { HttpClientBase } from "@/app/shared/services/volateq-api/http-client-base";
 import { apiBaseUrl, baseUrl } from "@/environment/environment";
-import { AddReferenceMeasurmentValue, CreateReferenceMeasurement, NewAnalysis, NewEmptyAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
+import { NewEmptyAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
 import { CreatePlantRequest, UpdatePlantRequest } from "./api-requests/plant-requests";
-import { AnalysisFileInfoSchema, AnalysisForViewSchema, AnalysisSchema, SimpleAnalysisSchema } from "./api-schemas/analysis-schema";
+import { AnalysisFileInfoSchema, AnalysisForViewSchema, AnalysisSchema } from "./api-schemas/analysis-schema";
 import { PlantSchema } from "./api-schemas/plant-schema";
 import { AnalysisResultChangeHistorySchema, AnalysisResultDetailedSchema } from "./api-schemas/analysis-result-schema";
 import { TableFilterRequest, TableRequest } from "./api-requests/common/table-requests";
@@ -24,16 +24,16 @@ import { TechnologySchema } from "./api-schemas/technology-schema";
 import { AnalysisMonitoring } from "./api-schemas/analysis-monitoring";
 import { QFlyServerSchema } from "./api-schemas/server-schemas";
 import { QFlyServerActionRequest } from "./api-requests/server-requests";
-import { ReferenceMeasurementSchema, ReferenceMeasurementValueSchema } from "./api-schemas/reference-measurement-schema";
+import { ReferenceMeasurementEntriesSchema, ReferenceMeasurementSchema } from "./api-schemas/reference-measurement-schema";
 import { DocFile } from "./api-schemas/doc-file-schema";
 import { ProductPackageSchema, ProductPackageWithKeyFiguresSchema } from "./api-schemas/product-package";
 import { CreateOrderRequest, UpdateOrderRequest } from "./api-requests/order-requests";
 import { OrderPPKeyFiguresDisabledSchema, OrderProductPackageSchema, OrderSchema } from "./api-schemas/order-schema";
 import { MultiselectOption } from "../../components/app-multiselect/types";
-import { MyUploadingUpload, SecuredFilename, Upload, UploadChunkResult } from "./api-schemas/upload-schemas";
+import { SecuredFilename, Upload, UploadChunkResult } from "./api-schemas/upload-schemas";
 import { CreateAnalysisUploadRequest } from "./api-requests/upload-requests";
-import { ja, th } from "date-fns/locale";
 import { AnalysisResultSetNullOrFalseRequest } from "./api-requests/analysis-result-requests";
+import { AddReferenceMeasurementRequest } from "./api-requests/ref-measure-requests";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -522,38 +522,19 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/analysis/${analysisId}/uploading-users`);
   }
 
-  public async findAnalysisForNewReferenceMeasurement(plantId: string): Promise <undefined | SimpleAnalysisSchema> {
-    return this.get(`/auth/reference-measurement/find-analysis/${plantId}`);
-  }
-
-  public async createReferenceMeasurement(analysisId: string, createReferenceMeasurement: CreateReferenceMeasurement): Promise<{ id: string }> {
-    return this.post(`/auth/analysis/${analysisId}/reference-measurement`, createReferenceMeasurement);
-  }
-
   public async getReferenceMeasurements(analysisId: string): Promise<ReferenceMeasurementSchema[]> {
     return await this.get(`/auth/analysis/${analysisId}/reference-measurements`);
   }
 
-  public async addReferencMeasurementValue(referenceMeasurementId: string, addReferenceMeasurmentValue: AddReferenceMeasurmentValue): Promise<void> {
-    await this.post(`/auth/reference-measurement/${referenceMeasurementId}/value`, addReferenceMeasurmentValue);
+  public async addReferenceMeasurement(analysisId: string, addRefMeasureRequest: AddReferenceMeasurementRequest): Promise<void> {
+    await this.post(`/auth/analysis/${analysisId}/reference-measurement`, addRefMeasureRequest);
   }
 
-  public async getReferencMeasurementValue(
-    referenceMeasurementId: string,
-    pcs: string
-  ): Promise<ReferenceMeasurementValueSchema | undefined> {
-    const refMeasureValues: ReferenceMeasurementValueSchema[] = await this.get(`/auth/reference-measurement/${referenceMeasurementId}/values`, { pcs });
-    if (refMeasureValues.length > 0) {
-      return refMeasureValues[0];
-    }
-
-    return undefined;
-  }
-
-  public async getReferencMeasurementValues(
-    referenceMeasurementId: string
-  ): Promise<ReferenceMeasurementValueSchema[]> {
-    return await this.get(`/auth/reference-measurement/${referenceMeasurementId}/values`);
+  public async getReferenceMeasurementEntries(
+    analysisId: string,
+    params?: { reference_measurement_id?: string, pcs?: string; }
+  ): Promise<ReferenceMeasurementEntriesSchema> {
+    return this.get(`/auth/analysis/${analysisId}/reference-measurement/entries`, params);
   }
 
   public async moveReferenceMeasurement(referenceMeasurementId: string, targetAnalysisId: string): Promise<void> {
@@ -566,15 +547,15 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public async ignoreReferenceMeasurementValue(referenceMeasurementValueId: string, ignore: boolean): Promise<void> {
-    await this.post(`/auth/reference-measurement/value/${referenceMeasurementValueId}/ignore`, { ignore });
+    await this.post(`/auth/reference-measurement/entry/${referenceMeasurementValueId}/ignore`, { ignore });
   }
 
   public async deleteReferenceMeasurementValue(referenceMeasurementValueId: string): Promise<void> {
-    await this.delete(`/auth/reference-measurement/value/${referenceMeasurementValueId}/delete`);
+    await this.delete(`/auth/reference-measurement/entry/${referenceMeasurementValueId}/delete`);
   }
 
   public async getReferenceMeasurementValuesGeoVisual(referenceMeasurementId: string): Promise<any> {
-    return this.get(`/auth/geo-visual/${referenceMeasurementId}/reference-measuurement-values`);
+    return this.get(`/auth/geo-visual/${referenceMeasurementId}/reference-measuurement-entries`);
   }
 
   public async getDronePlantCoverage(analysisId: string): Promise<void> {
