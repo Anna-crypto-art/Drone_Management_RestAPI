@@ -212,6 +212,8 @@ export default class AppVisualCspPtc
     return this.visualization!.enableResultsModification;
   }
 
+  // TODO: remove ref measure functions
+
   @CatchError()
   async onStartReferenceMeasurement(event: ReferenceMeasurementEventObject) {
     for (const componentLayer of event.componentLayers) {

@@ -36,6 +36,8 @@ export class AbsorberComponentLayer extends ComponentLayer {
     return super.load();
   }
 
+  // TODO: Finish analysing code and move it to componentlayer
+
   public getStyle(feature: FeatureLike): Style {
     const color = this.coloredPcsCodes && this.coloredPcsCodes.find(pcs => pcs === this.getPcs(feature)) ? 
       KeyFigureColors.volateqBlue :

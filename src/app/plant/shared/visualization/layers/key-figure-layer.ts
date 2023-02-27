@@ -116,6 +116,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     const featureInfos: FeatureInfos = {
       title: result.fieldgeometry_component.kks,
       records: recordFeatureInfos,
+      fieldgeoComponent: result.fieldgeometry_component,
     };
 
     return featureInfos;

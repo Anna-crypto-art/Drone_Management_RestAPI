@@ -34,6 +34,7 @@ import { SecuredFilename, Upload, UploadChunkResult } from "./api-schemas/upload
 import { CreateAnalysisUploadRequest } from "./api-requests/upload-requests";
 import { AnalysisResultSetNullOrFalseRequest } from "./api-requests/analysis-result-requests";
 import { AddReferenceMeasurementRequest } from "./api-requests/ref-measure-requests";
+import { FieldgeometryComponentSchema } from "./api-schemas/fieldgeometry-component-schema";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -476,6 +477,10 @@ export class VolateqAPI extends HttpClientBase {
 
   public getFieldgeometryComponentCodes(fieldgeometryId: string, componentId: ApiComponent): Promise<string[]> {
     return this.get(`/auth/fieldgeometry/${fieldgeometryId}/${componentId}/component-codes`);
+  }
+
+  public getFieldgeometryComponent(fieldgeometryId: string, pcs: string): Promise<FieldgeometryComponentSchema> {
+    return this.get(`/auth/fieldgeometry/${fieldgeometryId}/component/${encodeURIComponent(pcs)}`)
   }
 
   public getCustomers(): Promise<CustomerSchema[]> {

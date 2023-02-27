@@ -143,6 +143,9 @@ export default class AppVisualization
   worldMapLayer!: OSMLayer;
   piHeadGroup: GroupLayer | null = null;
 
+  // referenced by all component layers. Avoid referencation!
+  refMeasuredPcsCodes: string[] = [];
+
   legends: Legend[] = [];
   
   piToastInfo: FeatureInfos = { title: "", records: [{ name: "", descr: "", value: "" }] };
@@ -358,7 +361,9 @@ export default class AppVisualization
 
   @CatchError("loading")
   async onOpenLayersClick(features: FeatureLike[]) {
-    let mergedFeatureInfos = await this.clickKeyFigureLayers(features);
+    let mergedFeatureInfos: FeatureInfos | undefined = undefined;
+    // mergedFeatureInfos = 
+    mergedFeatureInfos = await this.clickKeyFigureLayers(features, mergedFeatureInfos);
     mergedFeatureInfos = await this.clickRefMeasureLayers(features, mergedFeatureInfos);
 
     if (mergedFeatureInfos) {
@@ -372,9 +377,9 @@ export default class AppVisualization
   }
 
   private async clickKeyFigureLayers(
-    features: FeatureLike[]
+    features: FeatureLike[],
+    mergedFeatureInfos: FeatureInfos | undefined,
   ): Promise<FeatureInfos | undefined> {
-    let mergedFeatureInfos: FeatureInfos | undefined;
     for (const kpiLayer of this.piLayersHierarchy!.getAllChildLayers()) {
       if (kpiLayer.isVisible) {
         const featureInfos = await kpiLayer.onClick(features);
@@ -393,6 +398,19 @@ export default class AppVisualization
     for (const refMeasurerLayer of this.refMeasureLayers!.referenceMeasurementLayers) {
       const featureInfos = await refMeasurerLayer.onClick(features)
 
+      mergedFeatureInfos = this.mergeFeatureInfos(mergedFeatureInfos, featureInfos);
+    }
+
+    return mergedFeatureInfos;
+  }
+
+  private async clickComponentLayers(
+    features: FeatureLike[],
+    mergedFeatureInfos: FeatureInfos | undefined
+  ): Promise<FeatureInfos | undefined> {
+    for (const componentLayer of this.componentLayers) {
+      const featureInfos = await componentLayer.onClick(features, mergedFeatureInfos?.fieldgeoComponent);
+      
       mergedFeatureInfos = this.mergeFeatureInfos(mergedFeatureInfos, featureInfos);
     }
 
@@ -588,6 +606,17 @@ export default class AppVisualization
         ]
       },
     );
+  }
+
+  private createComponentLayers() {
+    this.componentLayers = this.componentLayerTypes.map(componentType => {
+      const componentLayer: ComponentLayer = new (componentType as any)(this, this.refMeasuredPcsCodes);
+      componentLayer.onAddReferenceMeasurement((fieldgeo) => {
+        // TODO: show ref measure modal
+      });
+      return componentLayer;
+    });
+    
   }
 
   public hideToast() {
