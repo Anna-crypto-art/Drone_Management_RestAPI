@@ -649,10 +649,6 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/product-packages`);
   }
 
-  public async getProductPackageNumberOfOrders(productPackageId: number): Promise<number> {
-      return this.get(`/auth/product-package/${productPackageId}/number-of-orders`)
-  }
-
   public async createProductPackage(
     createProductPackageRequest: CreateProductPackageRequest,
   ): Promise<void> {
