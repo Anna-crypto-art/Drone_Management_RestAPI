@@ -65,9 +65,9 @@
           </b-form-group>
           <b-form-group :label="$t('performance-indicators')">
               <app-multiselect
-              v-model="selectedKeyFigureIds"
-              :options="keyFigureOptions"
-              required />
+                v-model="selectedKeyFigureIds"
+                :options="keyFigureOptions"
+                required />
           </b-form-group>
         </b-col>
       </b-row>      
@@ -163,47 +163,38 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
     this.keyFigureOptions = keyFigureOptions;
   }
 
-  @CatchError("loading")
   async updateProductPackageRows() {
-    this.loading = true;
-    try {
-      this.rows = (await volateqApi.getProductPackagesWithKeyFigures()).map((product_package: ProductPackageWithKeyFiguresSchema) => ({
-        id: product_package.id,
-        name: product_package.name,
-        technology_name: ApiTechnology[product_package.technology_id],
-        technology_id: product_package.technology_id,
-        key_figures: product_package.key_figures,
-      })).sort((a, b) => {
-        const nameA = a.name.toLowerCase();
-        const nameB = b.name.toLowerCase();
+    this.rows = (await volateqApi.getProductPackagesWithKeyFigures()).map((product_package: ProductPackageWithKeyFiguresSchema) => ({
+      id: product_package.id,
+      name: product_package.name,
+      technology_name: ApiTechnology[product_package.technology_id],
+      technology_id: product_package.technology_id,
+      key_figures: product_package.key_figures,
+    })).sort((a, b) => {
+      const nameA = a.name.toLowerCase();
+      const nameB = b.name.toLowerCase();
 
-        const techA = a.technology_id;
-        const techB = b.technology_id;
+      const techA = a.technology_id;
+      const techB = b.technology_id;
 
-        // first sort by technology
-        if (techA < techB) {
-          return -1;
-        }
-        if (techA > techB) {
-          return 1;
-        }
+      // first sort by technology
+      if (techA < techB) {
+        return -1;
+      }
+      if (techA > techB) {
+        return 1;
+      }
 
-        // then sort by name
-        if (nameA < nameB) {
-          return -1;
-        }
-        if (nameA > nameB) {
-          return 1;
-        }
+      // then sort by name
+      if (nameA < nameB) {
+        return -1;
+      }
+      if (nameA > nameB) {
+        return 1;
+      }
 
-        return 0;
-      });
-
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.loading = false;
-    }
+      return 0;
+    });
   }
 
   @CatchError()
@@ -280,24 +271,17 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
 
   @CatchError("loading")
   async onDeleteProductPackageClick(productPackageItem: ProductPackageWithKeyFiguresSchemaItem) {
-    this.loading = true;
-    try {
-      if (!confirm(this.$t("sure-delete-product-package", { product_package: productPackageItem.name }).toString())) {
-        return;
-      }
-      await volateqApi.deleteProductPackage(productPackageItem.id!);
-
-      this.showSuccess(this.$t("product-package-deleted-successfully", { product_package: productPackageItem.name }).toString());
-
-      await this.updateProductPackageRows();
-    } catch (e) {
-      this.showError(e as ApiException);
-    } finally {
-      this.loading = false;
+    if (!confirm(this.$t("sure-delete-product-package", { product_package: productPackageItem.name }).toString())) {
+      return;
     }
+    await volateqApi.deleteProductPackage(productPackageItem.id!);
+
+    this.showSuccess(this.$t("product-package-deleted-successfully", { product_package: productPackageItem.name }).toString());
+
+    await this.updateProductPackageRows();
   }
 
-  @CatchError("loading")
+  @CatchError()
   async onTechnologySelectionChanged() {
     this.currentProductPackage.key_figures = [];
     this.selectedKeyFigureIds = [];
