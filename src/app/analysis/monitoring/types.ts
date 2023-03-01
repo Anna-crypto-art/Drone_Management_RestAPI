@@ -2,6 +2,7 @@ import { ServerSchema, QFlyServerState, QFlyServerAction, ServerTag } from "@/ap
 
 export interface QFlyServerSchemaItem {
   name: string;
+  server: ServerSchema;
   analysis_name: string;
   state: QFlyServerState;
   instance_type: string;

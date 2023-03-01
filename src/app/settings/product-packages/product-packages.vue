@@ -70,7 +70,7 @@
                 required />
           </b-form-group>
         </b-col>
-      </b-row>      
+      </b-row>
     </app-modal-form>
   
   </div>

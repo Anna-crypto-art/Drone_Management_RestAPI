@@ -73,6 +73,7 @@
           </div>
         </div>
       </b-tab>
+      
       <b-tab class="app-server-monitoring-tab">
         <template #title>
           <b-icon icon="server" /><span class="pad-left">{{ $t("qfly-servers") }}</span>
@@ -115,26 +116,64 @@
             </template>
           </app-table>
         </app-table-container>
+        <app-modal-form
+          id="qfly-server-modal"
+          ref="appQFlyServerModal"
+          :title="qflyServerModalTitle"
+          :ok-title="qflyServerModalOkTitle"
+          :modalLoading="qflyServerModalLoading"
+          @submit="onSubmitQFlyServer"
+        >
+          <b-row>
+            <b-col>
+              <b-form-group :label="$t('name')">
+                <b-form-input
+                  id="new-qfly-server-name"
+                  v-model="currentQFlyServer.server.name"
+                  required
+                  :placeholder="$t('name')"
+                   @change="onTagChanged" />
+              </b-form-group>
+              <b-form-group :label="$t('current-analysis')">
+                <b-form-input
+                  id="new-qfly-server-name"
+                  v-model="currentQFlyServer.analysis_name"
+                  @change="onTagChanged"/>
+              </b-form-group>
+              
+              <b-form-group :label="$t('run-server-action')">
+                <b-form-select v-model="selectedServerAction" :options="qFlyServerActionSelection" />
+              </b-form-group>
+
+              <b-form-group :label="$t('run-task')">
+                <b-form-select v-model="selectedTask" :options="runTaskSelection" :disabled="taskSelectionDisabled" />
+              </b-form-group>
+            </b-col>
+          </b-row>
+        </app-modal-form>
       </b-tab>
     </b-tabs>
   </app-content>
 </template>
 
 <script lang="ts">
-import { Component } from "vue-property-decorator";
+import { Component, Ref } from "vue-property-decorator";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppContent from "@/app/shared/components/app-content/app-content.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { AnalysisMonitoring } from "@/app/shared/services/volateq-api/api-schemas/analysis-monitoring";
 import { TaskSchema } from "@/app/shared/services/volateq-api/api-schemas/task-schema";
-import { QFlyServerSchema, ServerTag } from "@/app/shared/services/volateq-api/api-schemas/server-schemas";
+import { QFlyServerAction, QFlyServerSchema, ServerTag } from "@/app/shared/services/volateq-api/api-schemas/server-schemas";
 import { QFlyServerSchemaItem } from "@/app/analysis/monitoring/types";
 import { AppTableColumns } from "@/app/shared/components/app-table/types";
 import AppTable from "@/app/shared/components/app-table/app-table.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { QFlyServerState } from "@/app/shared/services/volateq-api/api-schemas/server-schemas"
+import { IAppModalForm } from "@/app/shared/components/app-modal/types";
+import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
+import { ApiTasks } from "@/app/shared/services/volateq-api/api-tasks";
 
 const AUTORELOAD_INTERVAL = 10e3; // milliseconds
 
@@ -144,7 +183,8 @@ const AUTORELOAD_INTERVAL = 10e3; // milliseconds
     AppContent,
     AppButton,
     AppTableContainer,
-    AppTable
+    AppTable,
+    AppModalForm
   },
 })
 export default class AppAnalysisMonitoring extends BaseAuthComponent {
@@ -157,6 +197,31 @@ export default class AppAnalysisMonitoring extends BaseAuthComponent {
   qfly_servers: QFlyServerSchema[] | null = null;
 
   loading = true;
+
+  @Ref() appQFlyServerModal!: IAppModalForm;
+  qflyServerModalLoading = false;
+  qflyServerModalTitle = this.$t("edit-server").toString();
+  qflyServerModalOkTitle = this.$t("apply").toString();
+
+  currentQFlyServer: QFlyServerSchema = {
+    server: {
+      id: "",
+      name: "",
+      tags: [],
+      instance_type: "",
+      volume_size: 0 // 0 -> nothing
+    },
+    analysis_name: "",
+    state: QFlyServerState.UNALLOCATED,
+    actions: []
+  }
+  qFlyServerActionSelection: { text: string, value: string | null }[] = [];
+  runTaskSelection: { text: string, value: string | null }[] = [];
+  selectedServerAction: string | null = null;
+  selectedTask: string | null = null;
+  taskSelectionDisabled = false;
+  tagsChanged = false;
+
   autoReload = false;
 
   reloadInterval?: ReturnType<typeof setInterval>; // the NodeJS.Timer type is undefined for some reason ¯\_(ツ)_/¯
@@ -194,10 +259,10 @@ export default class AppAnalysisMonitoring extends BaseAuthComponent {
   @CatchError("loading")
   async loadQFlyServerStatus() {
     this.qfly_servers = await volateqApi.getQFlyServers();
-    console.log(this.qfly_servers);
 
     this.rows = this.qfly_servers.map((qfly_server: QFlyServerSchema) => ({
       name: qfly_server.server!.name,
+      server: qfly_server.server!,
       analysis_name: qfly_server.analysis_name,
       state: qfly_server.state,
       instance_type: qfly_server.server!.instance_type,
@@ -271,7 +336,67 @@ export default class AppAnalysisMonitoring extends BaseAuthComponent {
   }
 
   onEditServerClick(qfly_server: QFlyServerSchemaItem) {
-    return
+    this.currentQFlyServer = {
+      server: qfly_server.server,
+      analysis_name: qfly_server.analysis_name,
+      state: qfly_server.state,
+      actions: qfly_server.actions
+    };
+    
+    this.selectedServerAction = null;
+    this.selectedTask = null;    
+
+    this.qFlyServerActionSelection = [
+      { value: null, text: "" },
+      ...this.currentQFlyServer.actions.map(action => ({
+        value: action,
+        text: this.$t(`SERVER_ACTION_${action}`).toString(),
+      }))
+    ];
+
+    this.runTaskSelection = [
+      { value: null, text: "" },
+      {
+        text: this.$t('validate-file-completeness').toString(),
+        value: ApiTasks.validate_plant_metadata,
+      },
+      {
+        text: this.$t('run-qfly-wizard').toString(),
+        value: ApiTasks.run_qfly_wizard,
+      },
+    ];
+
+    this.appQFlyServerModal.show();
+  }
+
+  @CatchError("qflyServerModalLoading")
+  async onSubmitQFlyServer() {
+    const new_tags: ServerTag[] = [
+      {
+        Key: "Name",
+        Value: this.currentQFlyServer.server!.name,
+      },
+      {
+        Key: "CurrentAnalysis",
+        Value: this.currentQFlyServer.analysis_name,
+      },
+    ];
+
+    await volateqApi.applyQFlyServerChangesAndRunActions(this.currentQFlyServer.server!.id, {
+      action: this.selectedServerAction && QFlyServerAction[this.selectedServerAction] || undefined,
+      start_task: this.selectedTask && ApiTasks[this.selectedTask] || undefined,
+      tags: this.tagsChanged ? new_tags : undefined,
+    });
+
+    this.showSuccess(this.$t("qfly-server-edited-successfully", { server_name: this.currentQFlyServer.server!.name }).toString());
+    this.appQFlyServerModal.hide();
+    this.loadQFlyServerStatus();
+
+    this.tagsChanged = false;
+  }
+
+  onTagChanged() {
+    this.tagsChanged = true;
   }
 }
 </script>

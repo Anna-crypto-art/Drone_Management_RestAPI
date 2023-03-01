@@ -524,6 +524,10 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/qfly-server/${instanceId}/stop`);
   }
 
+  public async applyQFlyServerChangesAndRunActions(instanceId: string, qFlyServerAction: QFlyServerActionRequest): Promise<void> {
+    await this.post(`/auth/qfly-server/${instanceId}`, qFlyServerAction);
+  }
+
   public async getQFlyServerForAnalysis(analysisId: string): Promise<QFlyServerSchema> {
     return this.get(`/auth/analysis/${analysisId}/qfly-server`);
   }
