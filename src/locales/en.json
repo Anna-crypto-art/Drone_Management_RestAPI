@@ -592,5 +592,8 @@
   "SERVER_ACTION_STOP_AND_RELEASE": "Stop and release server",
   "SERVER_ACTION_SET_SERVER_SIZE_SMALL": "Set server size to small (development, review)",
   "SERVER_ACTION_SET_SERVER_SIZE_MEDIUM": "Set server size to medium",
-  "SERVER_ACTION_SET_SERVER_SIZE_LARGE": "Set server size to large (parallel eval)"
+  "SERVER_ACTION_SET_SERVER_SIZE_LARGE": "Set server size to large (parallel eval)",
+  "SERVER_ACTION_INCREASE_EBS_SIZE_100GB": "Increase the volume size by 100 GB",
+  "SERVER_ACTION_INCREASE_EBS_SIZE_250GB": "Increase the volume size by 250 GB",
+  "SERVER_ACTION_INCREASE_EBS_SIZE_500GB": "Increase the volume size by 500 GB"
 }

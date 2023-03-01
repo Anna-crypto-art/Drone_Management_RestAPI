@@ -15,10 +15,15 @@ export enum QFlyServerAction {
   SET_SERVER_SIZE_SMALL = 'SET_SERVER_SIZE_SMALL', // corresponds to AWS EC2 c6a.2xlarge
   SET_SERVER_SIZE_MEDIUM = 'SET_SERVER_SIZE_MEDIUM', // corresponds to AWS EC2 c6a.8xlarge
   SET_SERVER_SIZE_LARGE = 'SET_SERVER_SIZE_LARGE', // corresponds to AWS EC2 c6a.12xlarge
-  
+
   // For state == RUNNING
   STOP = 'STOP',
   STOP_AND_RELEASE = 'STOP_AND_RELEASE',
+
+  // For state == RUNNING and state == STOPPED
+  INCREASE_EBS_SIZE_100GB = 'INCREASE_EBS_SIZE_100GB',
+  INCREASE_EBS_SIZE_250GB = 'INCREASE_EBS_SIZE_250GB',
+  INCREASE_EBS_SIZE_500GB = 'INCREASE_EBS_SIZE_500GB',
 }
 
 export interface ServerTag {
