@@ -34,6 +34,8 @@ import { MyUploadingUpload, SecuredFilename, Upload, UploadChunkResult } from ".
 import { CreateAnalysisUploadRequest } from "./api-requests/upload-requests";
 import { ja, th } from "date-fns/locale";
 import { AnalysisResultSetNullOrFalseRequest } from "./api-requests/analysis-result-requests";
+import { KeyFigureSchema } from "./api-schemas/key-figure-schema";
+import { CreateProductPackageRequest, UpdateProductPackageRequest } from "./api-requests/product-package-requests";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -331,6 +333,10 @@ export class VolateqAPI extends HttpClientBase {
 
   public getComponentsGeoVisual(plantId: string, componentIds: ApiComponent[]): Promise<any> {
     return this.get(`/auth/geo-visual/${plantId}/components`, { ids: componentIds });
+  }
+
+  public getAllKeyFigures(): Promise<KeyFigureSchema[]> {
+    return this.get('/auth/key-figures');
   }
 
   public getKeyFiguresGeoVisual(
@@ -641,6 +647,23 @@ export class VolateqAPI extends HttpClientBase {
 
   public async getProductPackages(): Promise<ProductPackageSchema[]> {
     return this.get(`/auth/product-packages`);
+  }
+
+  public async createProductPackage(
+    createProductPackageRequest: CreateProductPackageRequest,
+  ): Promise<void> {
+    return this.post(`/auth/create-product-package`, createProductPackageRequest)
+  }
+
+  public async updateProductPackage(
+    productPackageId: number,
+    updateProductPackageRequest: UpdateProductPackageRequest,
+  ): Promise<void> {
+    return this.post(`/auth/product-package/${productPackageId}`, updateProductPackageRequest)
+  }
+
+  public async deleteProductPackage(productPackageId: number): Promise<void> {
+    await this.delete(`/auth/product-package/${productPackageId}`);
   }
 
   public async getProductPackagesWithKeyFigures(): Promise<ProductPackageWithKeyFiguresSchema[]> {
