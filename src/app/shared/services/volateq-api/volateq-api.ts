@@ -512,7 +512,19 @@ export class VolateqAPI extends HttpClientBase {
     await this.delete(`/auth/plant/${plantId}`);
   }
 
-  public async getQFlyServer(analysisId: string): Promise<QFlyServerSchema> {
+  public async getQFlyServers(): Promise<QFlyServerSchema[]> {
+    return this.get(`/auth/qfly-servers`);
+  }
+
+  public async startQFlyServerByInstanceId(instanceId: string): Promise<void> {
+    return this.get(`/auth/qfly-server/${instanceId}/start`);
+  }
+
+  public async stopQFlyServerByInstanceId(instanceId: string): Promise<void> {
+    return this.get(`/auth/qfly-server/${instanceId}/stop`);
+  }
+
+  public async getQFlyServerForAnalysis(analysisId: string): Promise<QFlyServerSchema> {
     return this.get(`/auth/analysis/${analysisId}/qfly-server`);
   }
 
