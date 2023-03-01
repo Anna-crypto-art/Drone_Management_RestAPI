@@ -53,6 +53,7 @@ import AppDiagramHistory from "@/app/plant/shared/diagram/diagram-history.vue";
 import AppDiagramAreas from "@/app/plant/shared/diagram/diagram-areas.vue";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { RouteQueryHelper } from "../helper/route-query-helper";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
 
 @Component({
   name: "app-diagram-overview",
@@ -146,56 +147,49 @@ export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
     }
   }
   
+  @CatchError("loading")
   private async updateNumberBoxes(): Promise<void> {
-    this.loading = true;
-    
-    try {
-      const numberBoxes: DiagramNumberBox[] = [];
-      for (const resultMapping of this.resultMappings) {
-        const analysisResultMappingHelper = new AnalysisResultMappingHelper(
-          resultMapping.resultMapping,
-          this.firstAnalysisResult!
-        );
+    const numberBoxes: DiagramNumberBox[] = [];
+    for (const resultMapping of this.resultMappings) {
+      const analysisResultMappingHelper = new AnalysisResultMappingHelper(
+        resultMapping.resultMapping,
+        this.firstAnalysisResult!
+      );
 
-        analysisResultMappingHelper.setCompareAnalysisResult(this.compareAnalysisResult);
+      analysisResultMappingHelper.setCompareAnalysisResult(this.compareAnalysisResult);
 
-        const groupedResult: GroupedAnalysisResult = (this.compareAnalysisResult ?
-          await volateqApi.getSpecificAnalysisResultCompared<GroupedAnalysisResult>(
-            this.firstAnalysisResult!.id,
-            resultMapping.componentId,
-            this.compareAnalysisResult.id,
-            { limit: 1 },
-            resultMapping.tableFilter
-          ) :
-          await volateqApi.getSpecificAnalysisResult<GroupedAnalysisResult>(
-            this.firstAnalysisResult!.id,
-            resultMapping.componentId,
-            { limit: 1 },
-            resultMapping.tableFilter
-          )
-        ).items[0];
+      const groupedResult: GroupedAnalysisResult = (this.compareAnalysisResult ?
+        await volateqApi.getSpecificAnalysisResultCompared<GroupedAnalysisResult>(
+          this.firstAnalysisResult!.id,
+          resultMapping.componentId,
+          this.compareAnalysisResult.id,
+          { limit: 1 },
+          resultMapping.tableFilter
+        ) :
+        await volateqApi.getSpecificAnalysisResult<GroupedAnalysisResult>(
+          this.firstAnalysisResult!.id,
+          resultMapping.componentId,
+          { limit: 1 },
+          resultMapping.tableFilter
+        )
+      ).items[0];
 
-        for (const numberBox of resultMapping.numberBoxes!) {
-          if (numberBox.nums) {
-            for (const numberBoxNum of numberBox.nums) {
-              this.setNumberBoxNum(numberBox, numberBoxNum, groupedResult);
-            }
-          } else {
-            this.setNumberBoxNum(numberBox, numberBox, groupedResult);
+      for (const numberBox of resultMapping.numberBoxes!) {
+        if (numberBox.nums) {
+          for (const numberBoxNum of numberBox.nums) {
+            this.setNumberBoxNum(numberBox, numberBoxNum, groupedResult);
           }
-          
-          numberBox.loaded = true;
+        } else {
+          this.setNumberBoxNum(numberBox, numberBox, groupedResult);
         }
-
-        numberBoxes.push(...resultMapping.numberBoxes!);
+        
+        numberBox.loaded = true;
       }
 
-      this.numberBoxes = numberBoxes;
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.loading = false;
+      numberBoxes.push(...resultMapping.numberBoxes!);
     }
+
+    this.numberBoxes = numberBoxes;
   }
 
   private setNumberBoxNum(

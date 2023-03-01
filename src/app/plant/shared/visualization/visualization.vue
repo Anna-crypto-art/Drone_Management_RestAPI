@@ -104,6 +104,7 @@ import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/
 import { analysisResultEventService } from "../plant-admin-view/analysis-result-event-service";
 import { AnalysisResultEvent } from "../plant-admin-view/types";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
+import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -208,6 +209,7 @@ export default class AppVisualization
     this.isMounted = true;
   }
 
+  @CatchError("loading")
   protected async onAnalysisSelected() {
     const analysisSelectionChanged = 
       this.piLayersHierarchy!.getSelectedAnalysisResultId() !== this.firstAnalysisResult?.id;
@@ -233,6 +235,8 @@ export default class AppVisualization
       if (!this.firstLoad) {
         await this.piLayersHierarchy!.reselectAllLayers(this.enableMultiSelection);
       }
+
+      await this.reloadRefMeasureComponents();
     }
 
     this.piLayersHierarchy!.updateVisibility();
@@ -251,6 +255,7 @@ export default class AppVisualization
     this.hideToast();
   }
 
+  @CatchError("loading")
   protected async onMultiAnalysesSelected() {
     const selectionChanged = this.piLayersHierarchy!.getSelectedAnalysisResultId() !== this.firstAnalysisResult?.id ||
       this.piLayersHierarchy!.getCompareAnalysisResultId() !== this.compareAnalysisResult?.id;
@@ -281,6 +286,8 @@ export default class AppVisualization
     const hasPISelected = await this.onFirstLoad();
     if (!hasPISelected && selectionChanged) {
       await this.piLayersHierarchy!.collapseFirstParentComponentLayer();
+
+      await this.reloadRefMeasureComponents();
     }
 
     this.piHeadGroup!.visible = !!this.firstAnalysisResult;
@@ -617,6 +624,29 @@ export default class AppVisualization
       return componentLayer;
     });
     
+  }
+
+  private async loadRefMeasurePcsCodes() {
+    // clear array without loosing the reference
+    this.refMeasuredPcsCodes.length = 0;
+
+    const refMeasureEntries = await volateqApi.getReferenceMeasurementEntries(this.firstAnalysis!.id);
+    for (const refMeasureEntry of refMeasureEntries.entries) {
+      this.refMeasuredPcsCodes.push(refMeasureEntry.pcs);
+    }
+  }
+
+  private async rerenderComponentLayers() {
+    for (const componentLayer of this.componentLayers) {
+      if (componentLayer.isVisible && componentLayer.getSelected()) {
+        await componentLayer.rerender();
+      }
+    }
+  }
+
+  private async reloadRefMeasureComponents() {
+    await this.loadRefMeasurePcsCodes();
+    await this.rerenderComponentLayers();
   }
 
   public hideToast() {
