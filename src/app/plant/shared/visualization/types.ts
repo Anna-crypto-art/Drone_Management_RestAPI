@@ -11,7 +11,7 @@ import { ReferenceMeasurementValueSchema } from "@/app/shared/services/volateq-a
 import { FeatureLike } from "ol/Feature";
 import { ComponentLayer } from "./layers/component-layer";
 import { KeyFigureLayer } from "./layers/key-figure-layer";
-import { KeyFigureColors, KeyFigureInfo, SubKeyFigureInfo } from "./layers/types";
+import { LayerColor, KeyFigureInfo, SubKeyFigureInfo } from "./layers/types";
 import { PILayersHierarchy } from "./pi-layers-hierarchy";
 
 export interface LegendEntry {
@@ -51,9 +51,14 @@ export interface FeatureImage {
   url: string;
 }
 
-export interface FeatureInfos {
+export interface FeatureInfoGroup {
   title: string;
   records: FeatureInfo[];
+}
+
+export interface FeatureInfos {
+  title: string;
+  groups: FeatureInfoGroup[];
   images?: FeatureImage[];
   actionsSummaries?: FeatureActionsSummary[];
   fieldgeoComponent?: FieldgeometryComponentSchema;
@@ -111,7 +116,7 @@ export type KeyFigureTypeMap<T extends GeoVisualQuery> = {
   /**
    * Leave color undefined to take the default color mapped to the key figure.
    */
-  color?: KeyFigureColors;
+  color?: LayerColor;
   /**
    * If the layer has subLayers it will be handled as a group layer.
    */
@@ -124,7 +129,7 @@ export type KeyFigureTypeMap<T extends GeoVisualQuery> = {
     /**
      * Leave color undefined to take the default color mapped to the key figure.
      */
-    color?: KeyFigureColors;
+    color?: LayerColor;
     /**
      * Optional condition, to define whether the PI should be displayed or not
      */

@@ -1,4 +1,4 @@
-import { KeyFigureColors } from "@/app/plant/shared/visualization/layers/types";
+import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
 import { FeatureProperties, Legend } from "@/app/plant/shared/visualization/types";
 import analysisResultCspPtcMappingSwivel from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-swivel";
 import { AnalysisResultCspPtcSwivelSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-swivel-schema";
@@ -18,7 +18,7 @@ export class SwivelKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisResultCsp
         fill: new Fill({ 
           color: this.enableCompare && this.compareAnalysisResult && this.getDiffColor(this.getProperties(feature)) || this.getColor() }),
         stroke: new Stroke({
-          color: KeyFigureColors.black,
+          color: LayerColor.black,
           width: 1,
         }),
       }),

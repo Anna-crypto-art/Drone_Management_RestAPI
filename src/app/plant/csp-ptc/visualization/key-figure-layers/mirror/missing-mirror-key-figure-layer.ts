@@ -1,4 +1,4 @@
-import { KeyFigureColors } from "@/app/plant/shared/visualization/layers/types";
+import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
 import { FeatureProperties, Legend, LegendEntry } from "@/app/plant/shared/visualization/types";
 import { FeatureLike } from "ol/Feature";
 import { Fill, Style } from "ol/style";
@@ -14,7 +14,7 @@ export class MissingMirrorKeyFigureLayer extends MirrorKeyFigureLayer {
       // We fill a SCE here...
       return new Style({
         fill: this.query?.undefined && new Fill({
-          color: KeyFigureColors.grey,
+          color: LayerColor.grey,
         }) || undefined, // fill: undefined -> invisible
         text: this.showText(feature),
       });
@@ -47,7 +47,7 @@ export class MissingMirrorKeyFigureLayer extends MirrorKeyFigureLayer {
 
     if (this.query?.undefined) {
       legend.entries.push({
-        color: KeyFigureColors.grey,
+        color: LayerColor.grey,
         name: this.vueComponent.$t("not-measured").toString() + 
           this.getLegendEntryCount(notMeasuredMirrorFeaturesCount),
       });
@@ -65,16 +65,16 @@ export class MissingMirrorKeyFigureLayer extends MirrorKeyFigureLayer {
       id: this.getLegendId(),
       entries: [
         {
-          color: KeyFigureColors.black,
+          color: LayerColor.black,
           name: this.getLegendName() + this.getLegendEntryCount(missingMirrorsFeaturesCount, 100),
         },
         {
-          color: KeyFigureColors.red,
+          color: LayerColor.red,
           name: this.vueComponent.$t("of-which-are-new").toString() + this.getLegendEntryCount(newFeaturesCount),
           indent: true,
         },
         {
-          color: KeyFigureColors.green,
+          color: LayerColor.green,
           name: this.vueComponent.$t("fixed").toString() + this.getLegendEntryCount(fixedFeaturesCount),
         },
       ],
@@ -84,12 +84,12 @@ export class MissingMirrorKeyFigureLayer extends MirrorKeyFigureLayer {
   protected getDiffColor(featureProperties: FeatureProperties): string {
     const diffValue = featureProperties.diff_value
     if (diffValue === -1) { // Fixed
-      return KeyFigureColors.green;
+      return LayerColor.green;
     }
     if (diffValue === 1) { // New
-      return KeyFigureColors.red;
+      return LayerColor.red;
     }
-    return KeyFigureColors.black;
+    return LayerColor.black;
   }
 
   private getNotMeasuredSCEFeaturesCount(): number {

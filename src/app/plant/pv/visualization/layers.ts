@@ -1,7 +1,7 @@
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { GeoVisualPvQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 import { ComponentLayer } from "../../shared/visualization/layers/component-layer";
-import { KeyFigureColors } from "../../shared/visualization/layers/types";
+import { LayerColor } from "../../shared/visualization/layers/types";
 import { KeyFigureTypeMap } from "../../shared/visualization/types";
 import { TrackerComponentLayer } from "./component-layers/tracker-component-layer";
 import { ModuleBrokenGlassKeyFigure } from "./key-figure-layers/module/module-broken-glass-key-figure";
@@ -38,7 +38,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualPvQuery>[] = [
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
-        color: KeyFigureColors.grey,
+        color: LayerColor.grey,
         invisibleAutoSelection: true,
       },
     ]
@@ -63,7 +63,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualPvQuery>[] = [
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
-        color: KeyFigureColors.grey,
+        color: LayerColor.grey,
         invisibleAutoSelection: true,
       },
     ]
@@ -88,7 +88,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualPvQuery>[] = [
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
-        color: KeyFigureColors.grey,
+        color: LayerColor.grey,
         invisibleAutoSelection: true,
       },
     ]
@@ -113,7 +113,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualPvQuery>[] = [
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
-        color: KeyFigureColors.grey,
+        color: LayerColor.grey,
         invisibleAutoSelection: true,
       },
     ]
@@ -134,7 +134,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualPvQuery>[] = [
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
-        color: KeyFigureColors.grey,
+        color: LayerColor.grey,
         invisibleAutoSelection: true,
       },
     ]
@@ -159,7 +159,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualPvQuery>[] = [
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
-        color: KeyFigureColors.grey,
+        color: LayerColor.grey,
         invisibleAutoSelection: true,
       },
     ]
@@ -184,7 +184,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualPvQuery>[] = [
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
-        color: KeyFigureColors.grey,
+        color: LayerColor.grey,
         invisibleAutoSelection: true,
       },
     ]
@@ -209,7 +209,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualPvQuery>[] = [
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
-        color: KeyFigureColors.grey,
+        color: LayerColor.grey,
         invisibleAutoSelection: true,
       },
     ]

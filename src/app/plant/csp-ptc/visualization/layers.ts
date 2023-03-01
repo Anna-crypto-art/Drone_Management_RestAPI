@@ -12,7 +12,7 @@ import { SceSdxKeyFigureLayer } from "./key-figure-layers/sce/sce-sdx-key-figure
 import { SceAlignmentKeyFigureLayer } from "./key-figure-layers/sce/sce-alignment-key-figure-layer";
 import { BoolUndefinedHceKeyFigureLayer } from "./key-figure-layers/hce/bool-hce-key-figure-layer";
 import { KeyFigureTypeMap } from "../../shared/visualization/types";
-import { KeyFigureColors } from "../../shared/visualization/layers/types";
+import { LayerColor } from "../../shared/visualization/layers/types";
 import { GlassTemperatureKeyFigureLayer } from "./key-figure-layers/hce/glass-temperature-key-figure-layer";
 import { ScaAverageTrackingKeyFigureLayer } from "./key-figure-layers/sca/sca-average-tracking-key-figure-layer";
 import { RecommendedActionKeyFigureLayer } from "./key-figure-layers/hce/recommended-action-key-figure-layer";
@@ -84,7 +84,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
       {
         keyFigureInfo: { templateName: "glassTubeTemperatureNotMeasured", displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
-        color: KeyFigureColors.grey,
+        color: LayerColor.grey,
         invisibleAutoSelection: true,
       },
     ],
@@ -121,7 +121,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
-        color: KeyFigureColors.grey,
+        color: LayerColor.grey,
         invisibleAutoSelection: true,
       },
     ],
@@ -146,7 +146,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { key_figure_class_name: "HcePositionSupportKeyFigure", undefined: 1 },
-        color: KeyFigureColors.grey,
+        color: LayerColor.grey,
         invisibleAutoSelection: true,
       },
     ]
@@ -171,7 +171,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { key_figure_class_name: "HcePositionCenterKeyFigure", undefined: 1 },
-        color: KeyFigureColors.grey,
+        color: LayerColor.grey,
         invisibleAutoSelection: true,
       },
     ]
@@ -196,7 +196,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
-        color: KeyFigureColors.grey,
+        color: LayerColor.grey,
         invisibleAutoSelection: true,
       },
     ],
@@ -221,7 +221,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
-        color: KeyFigureColors.grey,
+        color: LayerColor.grey,
         invisibleAutoSelection: true,
       },
     ],
@@ -246,7 +246,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { key_figure_class_name: "ScaTrackingKeyFigure", undefined: 1 },
-        color: KeyFigureColors.grey,
+        color: LayerColor.grey,
         invisibleAutoSelection: true,
       },
     ],
@@ -271,7 +271,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { key_figure_class_name: "ScaAverageTrackingKeyFigure", undefined: 1 },
-        color: KeyFigureColors.grey,
+        color: LayerColor.grey,
         invisibleAutoSelection: true,
       },
     ],
@@ -296,7 +296,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
-        color: KeyFigureColors.grey,
+        color: LayerColor.grey,
         invisibleAutoSelection: true,
       },
     ],
@@ -321,7 +321,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
-        color: KeyFigureColors.grey,
+        color: LayerColor.grey,
         invisibleAutoSelection: true,
       },
     ],
@@ -352,7 +352,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
-        color: KeyFigureColors.grey,
+        color: LayerColor.grey,
         invisibleAutoSelection: true,
       },
     ],

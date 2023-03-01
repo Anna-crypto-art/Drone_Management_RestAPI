@@ -11,7 +11,7 @@ import { OrhtoImageMixin } from "../mixins/ortho-image-mixin";
 import { IOrthoImageMixin } from "../mixins/types";
 import { FeatureInfo, FeatureInfos, IPlantVisualization } from "../types";
 import { LayerBase } from "./layer-base";
-import { KeyFigureColors, OrthoImage } from "./types";
+import { LayerColor, OrthoImage } from "./types";
 
 export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageMixin {
   protected zIndex = 9;
@@ -61,7 +61,7 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
   public getStyle(feature: FeatureLike): Style {
     return new Style({
       stroke: new Stroke({
-        color: KeyFigureColors.volateqBlue,
+        color: LayerColor.volateqBlue,
         width: 3,
       }),
     });

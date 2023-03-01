@@ -3,7 +3,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { LayerBase } from "./layer-base";
 import { FeatureLike } from "ol/Feature";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
-import { KeyFigureColors, KeyFigureColorScheme, KeyFigureInfo, OrthoImage } from "./types";
+import { LayerColor, KeyFigureColorScheme, KeyFigureInfo, OrthoImage } from "./types";
 import { FeatureInfo, FeatureInfos, FeatureProperties, Legend, IPlantVisualization, FeatureAction, PropsFeature, FeatureActionsSummary, ComparedFeatureType, ComparedFeatures } from "../types";
 import { AnalysisResultMappingEntry, AnalysisResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
@@ -43,7 +43,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     public readonly keyFigureId: ApiKeyFigure,
     public readonly keyFigureInfo: KeyFigureInfo,
     public readonly query?: Q,
-    protected readonly initColor?: KeyFigureColors,
+    protected readonly initColor?: LayerColor,
     public readonly invisibleAutoSelection?: boolean,
   ) {
     super(vueComponent);
@@ -337,7 +337,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     }
 
     if (this.colorScheme === KeyFigureColorScheme.TRAFFIC_LIGHT) {
-      return KeyFigureColors.red;
+      return LayerColor.red;
     }
 
     throw new Error("Unexpected colorScheme: " + this.colorScheme);
@@ -346,7 +346,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
   public getClassColor(classValue: number | undefined): string {
     if (this.colorScheme === KeyFigureColorScheme.RAINBOW) {
       if (classValue === 1) {
-        return this.getColorWithAlpha(KeyFigureColors.green, 0.3);
+        return this.getColorWithAlpha(LayerColor.green, 0.3);
       }
   
       if (classValue === 2) {
@@ -356,11 +356,11 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
 
     if (this.colorScheme === KeyFigureColorScheme.TRAFFIC_LIGHT) {
       if (classValue === 1) {
-        return KeyFigureColors.green;
+        return LayerColor.green;
       }
       
       if (classValue === 2) {
-        return KeyFigureColors.yellow;
+        return LayerColor.yellow;
       }
     }
 
@@ -371,13 +371,13 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     switch (comparedFeatureType) {
       case ComparedFeatureType.NEW_IMPROVED:
       case ComparedFeatureType.NO_CHANGE:
-        return KeyFigureColors.black;
+        return LayerColor.black;
 
       case ComparedFeatureType.GONE_IMPROVED:
-        return KeyFigureColors.green;
+        return LayerColor.green;
 
       case ComparedFeatureType.NEW_WORSENED:
-        return KeyFigureColors.red;
+        return LayerColor.red;
 
       case ComparedFeatureType.GONE_WORSENED:
         return this.getColorWithAlpha('#fff', 0); // transparent -> invisible

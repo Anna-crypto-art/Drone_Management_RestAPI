@@ -1,4 +1,4 @@
-import { KeyFigureColors, KeyFigureColorScheme } from "@/app/plant/shared/visualization/layers/types";
+import { LayerColor, KeyFigureColorScheme } from "@/app/plant/shared/visualization/layers/types";
 import { FeatureProperties, Legend, LegendEntry } from "@/app/plant/shared/visualization/types";
 import { complimentaryColor } from "@/app/shared/services/helper/color-helper";
 import { FeatureLike } from "ol/Feature";
@@ -61,7 +61,7 @@ export class OffsetClassKeyFigureMixin extends CompareClassLimitsKeyFigureMixin 
 
   private getOffsetColor(complementary = false): string {
     if (this.layer.query?.undefined === 1) {
-      return KeyFigureColors.grey;
+      return LayerColor.grey;
     }
 
     let color = this.layer.getClassColor(this.layer.getQueryClass());
@@ -70,13 +70,13 @@ export class OffsetClassKeyFigureMixin extends CompareClassLimitsKeyFigureMixin 
         color = complimentaryColor(color);
       } else if (this.layer.colorScheme === KeyFigureColorScheme.TRAFFIC_LIGHT) {
         if (this.layer.getQueryClass() === 2) {
-          color = this.layer.getColorWithAlpha(KeyFigureColors.blue, 0.4);
+          color = this.layer.getColorWithAlpha(LayerColor.blue, 0.4);
         } else if (this.layer.getQueryClass() === 3) {
-          color = KeyFigureColors.blue;
+          color = LayerColor.blue;
         }
       }
     } else if (!complementary && this.layer.getQueryClass() && this.layer.getQueryClass() === 2) {
-      color = this.layer.getColorWithAlpha(KeyFigureColors.red, 0.4);
+      color = this.layer.getColorWithAlpha(LayerColor.red, 0.4);
     }
 
     return color;

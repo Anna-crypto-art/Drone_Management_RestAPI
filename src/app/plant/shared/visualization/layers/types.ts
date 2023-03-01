@@ -65,7 +65,7 @@ export enum KeyFigureColorScheme {
  *
  * All names of the colors defined via https://colornames.org/
  */
-export enum KeyFigureColors {
+export enum LayerColor {
   RED_retroBerry = "#af0000",
   RED_laveniumRed = "#af2c00",
   RED_coffeeWithChili = "#af5800",
@@ -93,10 +93,14 @@ export enum KeyFigureColors {
   red = "#ff0000",
   darkRed = "#880000",
   grey = "#666666",
+  middleLightGrey = "#aaaaaa",
   lightGrey = "#cccccc",
+  darkGrey = "#888888",
   black = "#000000",
   orange = "#ef7700",
   blue = "#0000ff",
+
+  metallicBlue = "#c2cfff",
 
   diagramYellow = "#d4b504",
   diagramRed = "#b50e02",

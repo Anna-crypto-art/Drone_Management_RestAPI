@@ -2,21 +2,32 @@ import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/a
 import { ComponentLayer } from "../../../shared/visualization/layers/component-layer";
 import { Style, Fill, Stroke } from "ol/style";
 import { FeatureLike } from "ol/Feature";
+import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
 
 export class MirrorComponentLayer extends ComponentLayer {
   protected readonly componentId = ApiComponent.CSP_PTC_MIRROR;
+  protected readonly color = LayerColor.metallicBlue;
+  protected readonly allowRefMeasures = true;
   public readonly name = "mirrors";
 
   protected showPcsZoomLevel = 22;
 
+  protected zoomWidths = {
+    18: 2,
+    18.5: 3,
+    19: 5,
+    19.5: 7,
+    20: 12,
+  }
+
   public getStyle(feature: FeatureLike): Style {
     return new Style({
       fill: new Fill({
-        color: "#c2cfff",
+        color: this.getColor(feature),
       }),
       stroke: new Stroke({
-        color: "#888888",
-        width: 1,
+        color: LayerColor.darkGrey,
+        width: this.getWidth(),
       }),
       text: this.showText(feature),
     });

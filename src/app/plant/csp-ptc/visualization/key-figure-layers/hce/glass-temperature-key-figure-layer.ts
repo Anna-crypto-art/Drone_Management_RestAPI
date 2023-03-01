@@ -1,4 +1,4 @@
-import { KeyFigureColors, KeyFigureColorScheme } from "@/app/plant/shared/visualization/layers/types";
+import { LayerColor, KeyFigureColorScheme } from "@/app/plant/shared/visualization/layers/types";
 import { FeatureProperties, Legend, LegendEntry } from "@/app/plant/shared/visualization/types";
 import { CompareClassKeyFigureMixin } from "../key-figure-mixins/compare-class-key-figure-mixin";
 import { ICompareClassKeyFigureMixin } from "../key-figure-mixins/types";
@@ -37,7 +37,7 @@ export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer imple
     if (this.colorScheme === KeyFigureColorScheme.TRAFFIC_LIGHT && this.analysisResult.csp_ptc.glass_tube_temperature_class_count === 4
       && classValue === 3)
     {
-      return KeyFigureColors.orange;
+      return LayerColor.orange;
     }
 
     return super.getClassColor(classValue);

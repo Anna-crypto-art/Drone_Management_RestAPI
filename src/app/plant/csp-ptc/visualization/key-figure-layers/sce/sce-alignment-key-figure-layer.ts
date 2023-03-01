@@ -1,4 +1,4 @@
-import { KeyFigureColors, KeyFigureColorScheme } from "@/app/plant/shared/visualization/layers/types";
+import { LayerColor, KeyFigureColorScheme } from "@/app/plant/shared/visualization/layers/types";
 import { SceKeyFigureLayer } from "./abstract/sce-key-figure-layer";
 import { OffsetClassKeyFigureMixin } from "../key-figure-mixins/offset-class-key-figure-mixin";
 import { ICompareClassLimitsKeyFigureMixin } from "../key-figure-mixins/types";
@@ -45,7 +45,7 @@ export class SceAlignmentKeyFigureLayer extends SceKeyFigureLayer implements ICo
   public getClassColor(classValue?: number): string {
     if (this.colorScheme === KeyFigureColorScheme.RAINBOW) {
       if (classValue === 1) {
-        return this.getColorWithAlpha(KeyFigureColors.green, 0.1);
+        return this.getColorWithAlpha(LayerColor.green, 0.1);
       }
   
       if (classValue === 2) {
