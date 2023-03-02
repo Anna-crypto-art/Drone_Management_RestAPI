@@ -174,6 +174,7 @@ import { QFlyServerState } from "@/app/shared/services/volateq-api/api-schemas/s
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import { ApiTasks } from "@/app/shared/services/volateq-api/api-tasks";
+import { QFlyServerUpdateRequest } from "@/app/shared/services/volateq-api/api-requests/server-requests";
 
 const AUTORELOAD_INTERVAL = 10e3; // milliseconds
 
@@ -323,7 +324,15 @@ export default class AppAnalysisMonitoring extends BaseAuthComponent {
     if (!confirm(confirmText)) {
       return;
     }
-    return volateqApi.startQFlyServerByInstanceId(qfly_server.instance_id)
+    const qflyServerUpdateRequest: QFlyServerUpdateRequest =  {
+      instance_id: qfly_server.instance_id,
+      server_name: qfly_server.server.name,
+      analysis_name: qfly_server.analysis_name,
+      new_tags: undefined,
+      action: undefined,
+      task: undefined
+    }
+    return volateqApi.startQFlyServer(qflyServerUpdateRequest)
   }
 
   @CatchError()
@@ -332,7 +341,15 @@ export default class AppAnalysisMonitoring extends BaseAuthComponent {
     if (!confirm(confirmText)) {
       return;
     }
-    return volateqApi.stopQFlyServerByInstanceId(qfly_server.instance_id)
+    const qflyServerUpdateRequest: QFlyServerUpdateRequest =  {
+      instance_id: qfly_server.instance_id,
+      server_name: qfly_server.server.name,
+      analysis_name: qfly_server.analysis_name,
+      new_tags: undefined,
+      action: undefined,
+      task: undefined
+    }
+    return volateqApi.stopQFlyServer(qflyServerUpdateRequest)
   }
 
   onEditServerClick(qfly_server: QFlyServerSchemaItem) {
@@ -382,11 +399,16 @@ export default class AppAnalysisMonitoring extends BaseAuthComponent {
       },
     ];
 
-    await volateqApi.applyQFlyServerChangesAndRunActions(this.currentQFlyServer.server!.id, {
+    const qflyServerUpdateRequest: QFlyServerUpdateRequest =  {
+      instance_id: this.currentQFlyServer.server!.id,
+      server_name: this.currentQFlyServer.server!.name,
+      analysis_name: this.currentQFlyServer.analysis_name,
+      new_tags: this.tagsChanged ? new_tags : undefined,
       action: this.selectedServerAction && QFlyServerAction[this.selectedServerAction] || undefined,
-      start_task: this.selectedTask && ApiTasks[this.selectedTask] || undefined,
-      tags: this.tagsChanged ? new_tags : undefined,
-    });
+      task: this.selectedTask && ApiTasks[this.selectedTask] || undefined
+    }
+
+    await volateqApi.updateQFlyServer(qflyServerUpdateRequest);
 
     this.showSuccess(this.$t("qfly-server-edited-successfully", { server_name: this.currentQFlyServer.server!.name }).toString());
     this.appQFlyServerModal.hide();

@@ -23,7 +23,7 @@ import { CustomerRequest } from "./api-requests/customer-requests";
 import { TechnologySchema } from "./api-schemas/technology-schema";
 import { AnalysisMonitoring } from "./api-schemas/analysis-monitoring";
 import { QFlyServerSchema } from "./api-schemas/server-schemas";
-import { QFlyServerActionRequest } from "./api-requests/server-requests";
+import { AnalysisQFlyServerActionRequest, QFlyServerUpdateRequest } from "./api-requests/server-requests";
 import { ReferenceMeasurementSchema, ReferenceMeasurementValueSchema } from "./api-schemas/reference-measurement-schema";
 import { DocFile } from "./api-schemas/doc-file-schema";
 import { ProductPackageSchema, ProductPackageWithKeyFiguresSchema } from "./api-schemas/product-package";
@@ -516,23 +516,23 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/qfly-servers`);
   }
 
-  public async startQFlyServerByInstanceId(instanceId: string): Promise<void> {
-    return this.get(`/auth/qfly-server/${instanceId}/start`);
+  public async startQFlyServer(qflyServerUpdateRequest: QFlyServerUpdateRequest): Promise<void> {
+    await this.post(`/auth/qfly-server/start`, qflyServerUpdateRequest);
   }
 
-  public async stopQFlyServerByInstanceId(instanceId: string): Promise<void> {
-    return this.get(`/auth/qfly-server/${instanceId}/stop`);
+  public async stopQFlyServer(qflyServerUpdateRequest: QFlyServerUpdateRequest): Promise<void> {
+    await this.post(`/auth/qfly-server/stop`, qflyServerUpdateRequest);
   }
 
-  public async applyQFlyServerChangesAndRunActions(instanceId: string, qFlyServerAction: QFlyServerActionRequest): Promise<void> {
-    await this.post(`/auth/qfly-server/${instanceId}`, qFlyServerAction);
+  public async updateQFlyServer(qflyServerUpdateRequest: QFlyServerUpdateRequest): Promise<void> {
+    await this.post(`/auth/qfly-server/update`, qflyServerUpdateRequest);
   }
 
   public async getQFlyServerForAnalysis(analysisId: string): Promise<QFlyServerSchema> {
     return this.get(`/auth/analysis/${analysisId}/qfly-server`);
   }
 
-  public async runQFlyServerAction(analysisId: string, qFlyServerAction: QFlyServerActionRequest): Promise<void> {
+  public async runQFlyServerAction(analysisId: string, qFlyServerAction: AnalysisQFlyServerActionRequest): Promise<void> {
     await this.post(`/auth/analysis/${analysisId}/qfly-server`, qFlyServerAction);
   }
 
