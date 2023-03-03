@@ -146,8 +146,8 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
   public toFeatureInfo(
     mappingEntry: AnalysisResultMappingEntry<T>,
     value: string,
-    bold: boolean = false,
-    hidden: boolean = false,
+    bold = false,
+    hidden = false,
   ): FeatureInfo {
     return {
       name: i18n.t(mappingEntry.transName).toString(),
@@ -156,6 +156,7 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
       descr: mappingEntry.transDescr,
       unit: value !== "" ? mappingEntry.unit : undefined,
       superAdminOnly: mappingEntry.superAdminOnly,
+      hidden: hidden,
     }
   }
 }

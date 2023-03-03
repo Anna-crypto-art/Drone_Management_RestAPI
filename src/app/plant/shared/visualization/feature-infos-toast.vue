@@ -7,7 +7,7 @@
       <div class="toaster-images" v-if="featureInfos.images">
         <img v-for="image in featureInfos.images" :key="image.title" :title="image.title" :src="image.url" />
       </div>
-      <div class="app-feature-infos-toast-group" v-for="group in featureInfo.groups" :key="group.title">
+      <div class="app-feature-infos-toast-group" v-for="group in featureInfos.groups" :key="group.title">
         <div class="app-feature-infos-toast-group-title">{{ group.title }}</div>
         <b-row
           v-for="featureInfo in group.records"

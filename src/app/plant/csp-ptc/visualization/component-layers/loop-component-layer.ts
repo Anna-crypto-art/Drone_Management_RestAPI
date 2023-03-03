@@ -21,9 +21,9 @@ export class LoopComponentLayer extends ComponentLayer {
     if ("value" in props) {
       width = 2;
       if (props["value"] === "inlet") {
-        color = LayerColor.blue
+        color = LayerColor.blue;
       } else if (props["value"] === "outlet") {
-        color = LayerColor.red;;
+        color = LayerColor.red;
       }
     }
 

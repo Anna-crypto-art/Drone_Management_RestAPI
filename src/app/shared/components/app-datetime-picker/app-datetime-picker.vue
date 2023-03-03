@@ -24,10 +24,10 @@ import { CatchError } from "../../services/helper/catch-helper";
 export default class AppDatetimePicker extends Vue {
   @Prop({ default: "" }) value!: string;
 
-  dateValue: string = "";
-  timeValue: string = "";
+  dateValue = "";
+  timeValue = "";
 
-  dateTime: string = "";
+  dateTime = "";
 
   @CatchError()
   created() {

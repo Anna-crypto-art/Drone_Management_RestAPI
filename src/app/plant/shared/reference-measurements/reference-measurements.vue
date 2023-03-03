@@ -5,7 +5,7 @@
       ref="refMeasureModal"
       :title="$t('add-reference-measurement')"
       :subtitle="pcs || ''"
-      :ok-title="$('apply')"
+      :ok-title="$t('apply')"
       :modalLoading="loading"
       @submit="onAddRefMeasure"
     >
