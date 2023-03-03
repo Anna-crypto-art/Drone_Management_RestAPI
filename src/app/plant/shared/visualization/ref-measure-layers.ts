@@ -42,7 +42,7 @@ export class RefMeasureLayers {
     }
 
     for (const refMeasure of this.selectedAnalysis.reference_measurements) {
-      const refMeasureLayer = new ReferenceMeasurementLayer(this.vueComponent, this.selectedAnalysis.analysis_result || null, refMeasure);
+      const refMeasureLayer = new ReferenceMeasurementLayer(this.vueComponent, this.selectedAnalysis || null, refMeasure);
       this.referenceMeasurementLayers.push(refMeasureLayer);
       this.geoJsonLayers.push(refMeasureLayer.toGeoLayer());
     }

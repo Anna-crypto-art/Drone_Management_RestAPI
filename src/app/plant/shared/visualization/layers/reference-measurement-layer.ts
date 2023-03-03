@@ -3,6 +3,8 @@ import dateHelper from "@/app/shared/services/helper/date-helper";
 import { MathHelper } from "@/app/shared/services/helper/math-helper";
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
+import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
 import { ReferenceMeasurementSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { FeatureLike } from "ol/Feature";
@@ -22,12 +24,16 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
 
   constructor(
     public readonly vueComponent: BaseAuthComponent & IPlantVisualization,
-    public readonly analysisResult: AnalysisResultDetailedSchema | null,
+    public readonly analysis: AnalysisForViewSchema,
     public readonly referenceMeasurement: ReferenceMeasurementSchema,
   ) {
     super(vueComponent);
 
     this.orhtoImageMixin = new OrhtoImageMixin(this);
+  }
+
+  public get analysisResult(): AnalysisResultDetailedSchema | null {
+    return this.analysis.analysis_result || null;
   }
 
   protected getPcs(feature: FeatureLike): string | undefined {
@@ -39,13 +45,15 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
   }
 
   protected get name(): string {
+    const user = this.referenceMeasurement.user_created
+    const userName = (user.first_name + " " + user.last_name).trim() || user.email;
+
     let notes = this.referenceMeasurement.notes || "";
     if (notes.length > 20) {
       notes = notes.substring(0, 30) + "...";
     }
 
-    return dateHelper.toDate(this.referenceMeasurement.measure_date) + 
-      (notes ? " - " + notes : "")
+    return userName + (notes ? " - " + notes : "")
   }
 
   protected async load(): Promise<Record<string, unknown> | undefined> {
@@ -67,56 +75,32 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
     });
   }
 
-  public async onClick(features: FeatureLike[]): Promise<FeatureInfos | undefined> {
-    if (this.selected) {
-      for (const feature of features) {
-        const childFeatureInfos: FeatureInfo[] = [];
-
-        const hceTemperature: number | undefined = feature.get("hce_temperature");
-        if (hceTemperature) {
-          childFeatureInfos.push({
-            name: this.vueComponent.$t("glass-tube-temperature").toString(),
-            value: MathHelper.roundTo(hceTemperature, 2) + " °C",
-          });
-        }
-
-        const hceBrokenGlass: true | undefined = feature.get("hce_broken_glass");
-        if (hceBrokenGlass) {
-          childFeatureInfos.push({
-            name: this.vueComponent.$t("missing-gct").toString(),
-            value: "true",
-          });
-        }
-
-        const notes: string | undefined = feature.get("notes");
-        if (notes) {
-          childFeatureInfos.push({
-            name: this.vueComponent.$t("notes").toString(),
-            value: notes,
-          });
-        }
-        
-        if (childFeatureInfos.length > 0) {
-          const featureInfos: FeatureInfos = {
-            title: this.getPcs(feature)!,
-            records: childFeatureInfos,
-          };
-          
-          this.orhtoImageMixin.addShowOrthoImageActions(featureInfos)
-
-          return featureInfos;
-        }
-      }
+  public async onClick(features: FeatureLike[], fieldgeoComponent?: FieldgeometryComponentSchema): Promise<FeatureInfos | undefined> {
+    if (!this.selected) {
+      return undefined;
     }
 
-    return undefined;
-  }
+    const feature = this.findMyFeature(features);
+    if (!feature) {
+      return undefined;
+    }
 
-  public getComponentId(): ApiComponent {
-    return ApiComponent.CSP_PTC_ABSORBER;
-  }
+    const pcs = this.getPcs(feature);
+    if (!pcs) {
+      return undefined;
+    }
 
-  protected getDescription(): string | undefined {
-    return this.referenceMeasurement.notes;
+    if (!fieldgeoComponent) {
+      fieldgeoComponent = await volateqApi.getFieldgeometryComponent(
+        this.vueComponent.plant.fieldgeometry!.id,
+        pcs,
+      );
+    }
+
+    const featureInfos = await this.getRefMeasureFeatureInfos(fieldgeoComponent, this.analysis.id)
+    
+    this.orhtoImageMixin.addShowOrthoImageActions(featureInfos, fieldgeoComponent.component_id);
+
+    return featureInfos;
   }
 }

@@ -26,6 +26,7 @@ export interface RefMeasureEntry {
   measure_time: string;
   notes?: string;
   values: Record<string, RefMeasureEntryValue>;
+  editable: boolean,
 }
 
 export interface ReferenceMeasurementEntriesSchema {

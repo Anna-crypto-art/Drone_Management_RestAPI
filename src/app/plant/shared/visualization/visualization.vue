@@ -105,6 +105,8 @@ import { analysisResultEventService } from "../plant-admin-view/analysis-result-
 import { AnalysisResultEvent } from "../plant-admin-view/types";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
+import { ReferenceMeasurementEntriesSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -149,7 +151,7 @@ export default class AppVisualization
 
   legends: Legend[] = [];
   
-  piToastInfo: FeatureInfos = { title: "", records: [{ name: "", descr: "", value: "" }] };
+  piToastInfo: FeatureInfos = { title: "", groups: [] };
   
   loading = false;
 
@@ -369,8 +371,9 @@ export default class AppVisualization
   @CatchError("loading")
   async onOpenLayersClick(features: FeatureLike[]) {
     let mergedFeatureInfos: FeatureInfos | undefined = undefined;
-    // mergedFeatureInfos = 
+
     mergedFeatureInfos = await this.clickKeyFigureLayers(features, mergedFeatureInfos);
+    mergedFeatureInfos = await this.clickComponentLayers(features, mergedFeatureInfos);
     mergedFeatureInfos = await this.clickRefMeasureLayers(features, mergedFeatureInfos);
 
     if (mergedFeatureInfos) {
@@ -378,9 +381,7 @@ export default class AppVisualization
       this.$bvToast.show("piInfoToast");
     } else {
       this.hideToast();
-
-      await this.clickComponentLayers(features);
-    } 
+    }
   }
 
   private async clickKeyFigureLayers(
@@ -403,7 +404,7 @@ export default class AppVisualization
     mergedFeatureInfos: FeatureInfos | undefined
   ): Promise<FeatureInfos | undefined> {
     for (const refMeasurerLayer of this.refMeasureLayers!.referenceMeasurementLayers) {
-      const featureInfos = await refMeasurerLayer.onClick(features)
+      const featureInfos = await refMeasurerLayer.onClick(features, mergedFeatureInfos?.fieldgeoComponent)
 
       mergedFeatureInfos = this.mergeFeatureInfos(mergedFeatureInfos, featureInfos);
     }
@@ -424,35 +425,36 @@ export default class AppVisualization
     return mergedFeatureInfos;
   }
 
-  private mergeFeatureInfos(mergedFeatureInfos: FeatureInfos | undefined, featureInfos: FeatureInfos | undefined): FeatureInfos | undefined {
-    if (featureInfos) {
+  private mergeFeatureInfos(mergedFeatureInfos: FeatureInfos | undefined, newFeatureInfos: FeatureInfos | undefined): FeatureInfos | undefined {
+    if (newFeatureInfos) {
       if (!mergedFeatureInfos) {
-        mergedFeatureInfos = featureInfos;
-      } else if (mergedFeatureInfos.title === featureInfos.title) {
-        mergedFeatureInfos.records.forEach((featureInfo, index) => {
-          if (!featureInfo.bold && featureInfos.records[index].bold) {
-            featureInfo.bold = true;
-          }
-        });
+        return newFeatureInfos;
       }
-    }
 
-    return mergedFeatureInfos;
-  }
+      if (mergedFeatureInfos.title === newFeatureInfos.title) {
+        for (const newFeatureInfoGroup of newFeatureInfos.groups) {
+          const existInMerged = !!newFeatureInfos.groups.find(g => mergedFeatureInfos.groups.find(mg => mg.title === g.title));
+          if (!existInMerged) {
+            mergedFeatureInfos.groups.push(newFeatureInfoGroup);
+          }
+        }
 
-  private async clickComponentLayers(features: FeatureLike[]): Promise<void> {
-    for (const componentLayer of this.componentLayers) {
-      if (componentLayer.isVisible) {
-        const layer = componentLayer.getVectorGeoLayer();
-        if (layer) {
-          const feature = features.find(feature => 
-            layer.getSource()?.getFeatures().find(layerFeature => layerFeature.get('name') === feature.get('name')));
-          if (feature) {
-            await componentLayer.onClick(feature);
+        if (newFeatureInfos.actionsSummaries) {
+          if (!mergedFeatureInfos.actionsSummaries) {
+            mergedFeatureInfos.actionsSummaries = newFeatureInfos.actionsSummaries;
+          } else {
+            for (const newFeatureInfoActions of newFeatureInfos.actionsSummaries) {
+              const existInMerged = !!mergedFeatureInfos.actionsSummaries.find(a => newFeatureInfoActions.name === a.name);
+              if (!existInMerged) {
+                mergedFeatureInfos.actionsSummaries.push(newFeatureInfoActions);
+              }
+            }
           }
         }
       }
     }
+
+    return mergedFeatureInfos;
   }
 
   private disableMultiSelection() {
@@ -547,7 +549,9 @@ export default class AppVisualization
 
   @CatchError()
   private createLayers(): void {
-    this.componentLayers = this.componentLayerTypes.map(componentType => new (componentType as any)(this));
+    this.componentLayers = this.componentLayerTypes
+      .map(componentType => new (componentType as any)(this, this.refMeasuredPcsCodes)); 
+
     this.piLayersHierarchy = new PILayersHierarchy(
       this,
       this.analysisResults,
@@ -615,17 +619,6 @@ export default class AppVisualization
     );
   }
 
-  private createComponentLayers() {
-    this.componentLayers = this.componentLayerTypes.map(componentType => {
-      const componentLayer: ComponentLayer = new (componentType as any)(this, this.refMeasuredPcsCodes);
-      componentLayer.onAddReferenceMeasurement((fieldgeo) => {
-        // TODO: show ref measure modal
-      });
-      return componentLayer;
-    });
-    
-  }
-
   private async loadRefMeasurePcsCodes() {
     // clear array without loosing the reference
     this.refMeasuredPcsCodes.length = 0;
@@ -651,6 +644,13 @@ export default class AppVisualization
 
   public hideToast() {
     this.$bvToast.hide("piInfoToast");
+  }
+
+  public showRefMeasureModal(
+    fieldgeoComponent: FieldgeometryComponentSchema,
+    refMeasureEntries: ReferenceMeasurementEntriesSchema | null
+  ) {
+    // TODO: do it!
   }
 
   onStartReferenceMeasurement(e: ReferenceMeasurementEventObject) {

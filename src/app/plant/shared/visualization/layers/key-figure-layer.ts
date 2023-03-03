@@ -103,19 +103,13 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
         recordValue = "";
       }
       
-      recordFeatureInfos.push({
-        name: this.vueComponent.$t(entry.transName).toString(),
-        value: recordValue,
-        bold: entry.transName === this.keyFigureInfo.keyName,
-        descr: entry.transDescr,
-        unit: recordValue !== "" ? entry.unit : undefined,
-        superAdminOnly: entry.superAdminOnly,
-      });
+      const isKeyFigureEntry = entry.transName === this.keyFigureInfo.keyName;
+      recordFeatureInfos.push(mappingHelper.toFeatureInfo(entry, recordValue, isKeyFigureEntry, !isKeyFigureEntry));
     }
 
     const featureInfos: FeatureInfos = {
       title: result.fieldgeometry_component.kks,
-      records: recordFeatureInfos,
+      groups: [{ title: this.vueComponent.$t("performance-indicators").toString(), records: recordFeatureInfos }],
       fieldgeoComponent: result.fieldgeometry_component,
     };
 
@@ -199,14 +193,15 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
 
   public async onClick(features: FeatureLike[]): Promise<FeatureInfos | undefined> {
     if (this.selected) {
-      for (const feature of features) {
+      const feature = this.findMyFeature(features);
+      if (feature) {
         const result = await this.getResultDetails(feature);
         if (result) {
           const fieldgeo_component = result.fieldgeometry_component;
           if (fieldgeo_component && fieldgeo_component.component_id === this.keyFigure.component.id) {
             const featureInfos = this.mapResultToFeatureInfos(result);
 
-            this.orhtoImageMixin.addShowOrthoImageActions(featureInfos);
+            this.orhtoImageMixin.addShowOrthoImageActions(featureInfos, this.keyFigure.component_id);
 
             if (this.vueComponent.enableResultsModification) {
               await this.addResultsModificationFeatureAction(featureInfos!);
@@ -267,10 +262,6 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     this.orhtoImageMixin.removeOrthoImageFeatures();
   }
   
-  public getComponentId() {
-    return this.keyFigure.component_id;
-  }
-
   private async addResultsModificationFeatureAction(featureInfos: FeatureInfos) {
     if (!featureInfos.actionsSummaries) {
       featureInfos.actionsSummaries = [];

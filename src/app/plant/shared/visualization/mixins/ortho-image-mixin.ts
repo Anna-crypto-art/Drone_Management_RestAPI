@@ -36,12 +36,12 @@ export class OrhtoImageMixin {
     }
   }
 
-  public addShowOrthoImageActions(featureInfos: FeatureInfos | undefined) {
+  public addShowOrthoImageActions(featureInfos: FeatureInfos | undefined, componentId: ApiComponent) {
     if (featureInfos && this.layer.orthoImages) {
       const actions: FeatureAction[] = this.layer.orthoImages.filter(orthoImage => orthoImage.available)
         .map(orthoImage => ({
           name: orthoImage.name,
-          action: async () => { await this.loadOrthoImage(orthoImage, featureInfos); }
+          action: async () => { await this.loadOrthoImage(orthoImage, featureInfos, componentId); }
         }));
       
       if (actions.length > 0) {
@@ -136,13 +136,17 @@ export class OrhtoImageMixin {
     img.src = feature.get("image");
   }
 
-  protected async loadOrthoImage(orthoImage: OrthoImage, featureInfos: FeatureInfos): Promise<void> {
+  protected async loadOrthoImage(
+    orthoImage: OrthoImage,
+    featureInfos: FeatureInfos,
+    componentId: ApiComponent,
+  ): Promise<void> {
     try {
       await OrhtoImageMixin.loadOrthoImage(
         orthoImage,
         this.layer.vueComponent.plant,
         this.layer.analysisResult!.id,
-        this.layer.getComponentId(),
+        componentId,
         featureInfos.title,
       );
 

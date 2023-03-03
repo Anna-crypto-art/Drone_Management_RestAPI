@@ -7,12 +7,10 @@ import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { ReferenceMeasurementValueSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
+import { ReferenceMeasurementEntriesSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
 import { FeatureLike } from "ol/Feature";
-import { ComponentLayer } from "./layers/component-layer";
 import { KeyFigureLayer } from "./layers/key-figure-layer";
 import { LayerColor, KeyFigureInfo, SubKeyFigureInfo } from "./layers/types";
-import { PILayersHierarchy } from "./pi-layers-hierarchy";
 
 export interface LegendEntry {
   color: string;
@@ -38,6 +36,10 @@ export interface IPlantVisualization {
   onLayerSelected(selected: boolean, legend: Legend | undefined): Promise<void>;
   hideToast: () => void;
   enableResultsModification: boolean;
+  showRefMeasureModal(
+    fieldgeoComponent: FieldgeometryComponentSchema,
+    refMeasureEntries: ReferenceMeasurementEntriesSchema | null
+  ): void;
 }
 
 export interface FeatureProperties {
@@ -71,6 +73,7 @@ export interface FeatureInfo {
   unit?: string;
   bold?: boolean;
   superAdminOnly?: boolean;
+  hidden?: boolean;
 }
 
 export interface FeatureActionsSummary {
@@ -140,8 +143,6 @@ export type KeyFigureTypeMap<T extends GeoVisualQuery> = {
     invisibleAutoSelection?: boolean;
   }[];
 };
-
-
 
 export interface InvisibleAutoSelectionLayer {
   layer: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>,

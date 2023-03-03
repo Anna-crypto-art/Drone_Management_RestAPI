@@ -7,29 +7,40 @@
       <div class="toaster-images" v-if="featureInfos.images">
         <img v-for="image in featureInfos.images" :key="image.title" :title="image.title" :src="image.url" />
       </div>
-      <b-row
-        v-for="featureInfo in featureInfos.records"
-        :key="featureInfo.name"
-        :class="featureInfo.bold && 'font-weight-bold'"
-      >
-        <b-col>
-          {{ featureInfo.name }}
-          <app-super-admin-marker v-if="featureInfo.superAdminOnly" />
-          <app-explanation v-if="featureInfo.descr">
-            <span v-html="$t(featureInfo.descr)"></span>
-          </app-explanation>
-        </b-col>
-        <b-col>
-          {{ featureInfo.value }}
-          <span v-if="featureInfo.unit">
-            {{ featureInfo.unit }}
-          </span>
-        </b-col>
-      </b-row>
+      <div class="app-feature-infos-toast-group" v-for="group in featureInfo.groups" :key="group.title">
+        <div class="app-feature-infos-toast-group-title">{{ group.title }}</div>
+        <b-row
+          v-for="featureInfo in group.records"
+          :key="featureInfo.name"
+          :class="featureInfo.bold && 'font-weight-bold'"
+        >
+          <b-col>
+            {{ featureInfo.name }}
+            <app-super-admin-marker v-if="featureInfo.superAdminOnly" />
+            <app-explanation v-if="featureInfo.descr">
+              <span v-html="$t(featureInfo.descr)"></span>
+            </app-explanation>
+          </b-col>
+          <b-col>
+            {{ featureInfo.value }}
+            <span v-if="featureInfo.unit">
+              {{ featureInfo.unit }}
+            </span>
+          </b-col>
+        </b-row>
+      </div>
     </div>
     <div v-if="featureInfos.actionsSummaries">
       <div v-for="actionsSummery in featureInfos.actionsSummaries" :key="actionsSummery.name" class="mar-top">
-        <app-dropdown-button
+        <app-button v-if="isSingleAction(actionsSummery)"
+          :variant="actionsSummery.buttonVariant"
+          :loading="toastDropdownButtonLoadings[actionsSummery.name]"
+          @click="onClickFeatureAction(actionsSummery.actions[0])"
+          size="sm"
+        >
+          {{ actionsSummery.name }}
+        </app-button>
+        <app-dropdown-button v-if="!isSingleAction(actionsSummery)"
           :variant="actionsSummery.buttonVariant"
           :title="actionsSummery.name"
           :loading="toastDropdownButtonLoadings[actionsSummery.name]"
@@ -52,7 +63,7 @@
 <script lang="ts">
 import { CatchError } from '@/app/shared/services/helper/catch-helper';
 import { Component, Prop } from "vue-property-decorator";
-import { FeatureAction, FeatureInfos } from './types';
+import { FeatureAction, FeatureActionsSummary, FeatureInfos } from './types';
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-dropdown-button.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
@@ -85,6 +96,10 @@ export default class AppFeatureInfosToast extends BaseComponent {
   @CatchError("toastDropdownButtonLoading")
   async onClickFeatureAction(action: FeatureAction) {
     await action.action();
+  }
+
+  isSingleAction(actionsSummery: FeatureActionsSummary) {
+    return actionsSummery.actions.length === 1 && actionsSummery.actions[0].name === actionsSummery.name;
   }
 }
 </script>

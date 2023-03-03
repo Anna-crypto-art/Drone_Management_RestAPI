@@ -1,7 +1,7 @@
 import { FeatureLike } from "ol/Feature";
 import { Style, Stroke, Text, Fill } from "ol/style";
 import { asArray, asString } from "ol/color";
-import { IPlantVisualization } from "../types";
+import { FeatureInfoGroup, FeatureInfos, IPlantVisualization } from "../types";
 import { GeoJSONLayer, VectorGeoLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { Geolocation, Feature } from "ol";
@@ -9,6 +9,12 @@ import CircleStyle from "ol/style/Circle";
 import { Point } from "ol/geom";
 import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/sequential-event-emitter";
 import { LayerEvent } from "@/app/shared/components/app-geovisualization/types/events";
+import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
+import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
+import { ReferenceMeasurementEntriesSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
+import { SimpleAnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import dateHelper from "@/app/shared/services/helper/date-helper";
 
 export const GEO_JSON_OPTIONS = { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" };
 
@@ -232,5 +238,90 @@ export abstract class LayerBase {
 
   public rerenderMap() {
     this.getVectorGeoLayer()?.changed();
+  }
+
+  protected findMyFeature(features: FeatureLike[]): FeatureLike | undefined {
+    const layer = this.getVectorGeoLayer()!;
+
+    return features.find(feature => 
+      layer.getSource()?.getFeatures().find(layerFeature => layerFeature.get('name') === feature.get('name')));
+  }
+
+  protected async getRefMeasureFeatureInfos(
+    fieldgeoComponent: FieldgeometryComponentSchema,
+    analysisId: string | null,
+    refMeasuredPcsCodes?: string[],
+  ): Promise<FeatureInfos> {
+    const featureInfoGroups: FeatureInfoGroup[] = [];
+    const mappings = AnalysisResultMappingHelper.getMappingsByComponentId(fieldgeoComponent.component_id);
+
+    let refMeasureEntries: ReferenceMeasurementEntriesSchema | null = null;
+    let refMeasureEditable: boolean = false;
+
+    if (analysisId && mappings && (!refMeasuredPcsCodes || refMeasuredPcsCodes.includes(fieldgeoComponent.kks))) {
+      const mappingHelper = new AnalysisResultMappingHelper(mappings)
+      
+      refMeasureEntries = await volateqApi.getReferenceMeasurementEntries(analysisId, { pcs: fieldgeoComponent.kks });
+      for (const refMeasureEntry of refMeasureEntries.entries) {
+        const featureInfoGroup: FeatureInfoGroup = {
+          title: this.vueComponent.$t("reference-measurement-of", { user: refMeasureEntry.user.name }).toString(),
+          records: [
+            { 
+              name: this.vueComponent.$t("measure-time").toString(), 
+              value: dateHelper.toDateTime(refMeasureEntry.measure_time),
+            }
+          ],
+        };
+
+        if (refMeasureEntry.notes) {
+          featureInfoGroup.records.push({
+            name: this.vueComponent.$t("notes").toString(),
+            value: refMeasureEntry.notes,
+          });
+        }
+
+        for (const rmKeyFigure of refMeasureEntries.key_figures) {
+          if (rmKeyFigure.entry_key_name in refMeasureEntry.values) {
+            const mappingEntry = mappingHelper.findEntry(rmKeyFigure.column_name, rmKeyFigure.key_figure_id);
+            if (mappingEntry) {
+              featureInfoGroup.records.push(
+                mappingHelper.toFeatureInfo(
+                  mappingEntry,
+                  refMeasureEntry.values[rmKeyFigure.entry_key_name].toString()
+                )
+              );
+            }
+          }
+        }
+
+        featureInfoGroups.push(featureInfoGroup);
+
+        if (refMeasureEntry.editable) {
+          refMeasureEditable = true;
+        }
+      }
+    }
+
+    const actionName = refMeasureEditable ? "edit-reference-measurement" : "add-reference-measurement";
+
+    return {
+      title: fieldgeoComponent.kks,
+      groups: featureInfoGroups,
+      fieldgeoComponent: fieldgeoComponent,
+      actionsSummaries: [
+        { 
+          buttonVariant: "secondary",
+          name: this.vueComponent.$t(actionName).toString(),
+          actions: [
+            {
+              name: this.vueComponent.$t(actionName).toString(),
+              action: async () => {
+                this.vueComponent.showRefMeasureModal(fieldgeoComponent!, refMeasureEntries);
+              }
+            }
+          ]
+        }
+      ]
+    }
   }
 }

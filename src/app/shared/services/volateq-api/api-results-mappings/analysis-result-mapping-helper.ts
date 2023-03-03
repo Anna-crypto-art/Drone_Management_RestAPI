@@ -4,14 +4,31 @@ import { AnalysisResultMappingEntry, AnalysisResultMappings } from "./types";
 import VueI18n from "vue-i18n";
 import { FilterFieldType } from "@/app/plant/shared/filter-fields/types";
 import { AppTableColumns } from "@/app/shared/components/app-table/types";
+import { ApiComponent } from "../api-components/api-components";
+import { allCspPtcMappings } from "./csp_ptc/analysis-result-csp-ptc-mapping";
+import { allPvMappings } from "./pv/analysis-result-pv-mapping";
+import { ApiKeyFigure } from "../api-key-figures";
+import { FeatureInfo } from "@/app/plant/shared/visualization/types";
+import { i18n } from "@/main";
 
 export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
   private compareAnalysisResult: AnalysisResultDetailedSchema | null = null;
   private tableView = false;
 
+  public static getMappingsByComponentId(componentId: ApiComponent): AnalysisResultMappings<any, any> | null {
+    for (const mappings of [allCspPtcMappings, allPvMappings]) {
+      const compResultMapping = mappings.find(m => m.componentId === componentId);
+      if (compResultMapping) {
+        return compResultMapping.resultMapping;
+      }
+    }
+
+    return null;
+  }
+
   constructor(
     private readonly analysisResultMapping: AnalysisResultMappings<T>,
-    private readonly analysisResult: AnalysisResultDetailedSchema,
+    private readonly analysisResult: AnalysisResultDetailedSchema | null = null,
     private readonly isSuperAdmin: boolean = false,
   ) {}
 
@@ -29,6 +46,11 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
         (!this.tableView || !entry.disableForTable) &&
         (!entry.superAdminOnly || this.isSuperAdmin);
     });
+  }
+
+  public findEntry(propertyName: string, keyFigureId: ApiKeyFigure): AnalysisResultMappingEntry<T> | null {
+    return this.getEntries()
+      .find(e => this.getPropertyName(e) === propertyName && e.keyFigureId === keyFigureId) || null;
   }
 
   public getDiagramEntries(): AnalysisResultMappings<T> {
@@ -99,7 +121,7 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
   public hasKeyFigure(mappingEntry: AnalysisResultMappingEntry<T>): boolean {
     return (
       mappingEntry.keyFigureId === undefined ||
-      (
+      this.analysisResult !== null && ((
         this.compareAnalysisResult === null &&
         !!this.analysisResult.key_figures.find(keyFigure => keyFigure.id === mappingEntry.keyFigureId)
       ) ||
@@ -107,7 +129,8 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
         this.compareAnalysisResult !== null &&
         !!this.analysisResult.key_figures.find(keyFigure => keyFigure.id === mappingEntry.keyFigureId) &&
         !!this.compareAnalysisResult.key_figures.find(keyFigure => keyFigure.id === mappingEntry.keyFigureId)
-      )
+      ))
+      || this.analysisResult === null
     );
   }
 
@@ -118,5 +141,21 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
     }
 
     return mappingEntry.getValue.toString().match(/({|=>)[^.]*\.([^;}]*)/)![2];
+  }
+
+  public toFeatureInfo(
+    mappingEntry: AnalysisResultMappingEntry<T>,
+    value: string,
+    bold: boolean = false,
+    hidden: boolean = false,
+  ): FeatureInfo {
+    return {
+      name: i18n.t(mappingEntry.transName).toString(),
+      value: value,
+      bold: bold,
+      descr: mappingEntry.transDescr,
+      unit: value !== "" ? mappingEntry.unit : undefined,
+      superAdminOnly: mappingEntry.superAdminOnly,
+    }
   }
 }

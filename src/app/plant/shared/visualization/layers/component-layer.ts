@@ -3,10 +3,16 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { LayerBase } from "./layer-base";
 import { FeatureLike } from "ol/Feature";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { FeatureInfo, FeatureInfos, IPlantVisualization } from "../types";
+import { FeatureInfo, FeatureInfoGroup, FeatureInfos, IPlantVisualization } from "../types";
 import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
-import { LayerColor } from "./types";
-import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import { LayerColor, OrthoImage } from "./types";
+import { AnalysisForViewSchema, AnalysisSchema, SimpleAnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
+import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
+import dateHelper from "@/app/shared/services/helper/date-helper";
+import { ReferenceMeasurementEntriesSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
+import { OrhtoImageMixin } from "../mixins/ortho-image-mixin";
+import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 
 export abstract class ComponentLayer extends LayerBase {
   protected abstract readonly componentId: ApiComponent;
@@ -18,11 +24,17 @@ export abstract class ComponentLayer extends LayerBase {
   protected readonly zoomWidths: Record<number, number> | null = null;
 
   protected readonly allowRefMeasures: boolean = false;
-  protected onAddRefMeasureCallback: ((fieldgeoComponent: FieldgeometryComponentSchema) => void) | undefined = undefined;
+  protected onAddRefMeasureCallback: (
+      (fieldgeoComponent: FieldgeometryComponentSchema, refMeasureEntries: ReferenceMeasurementEntriesSchema | null) => void
+    ) | undefined = undefined;
 
   protected zoomWidth: number | null = null;
 
-  protected analysis: AnalysisSchema | null = null;
+  protected analysis: AnalysisForViewSchema | null = null;
+
+  public orthoImages: OrthoImage[] | null = null;
+
+  private readonly orhtoImageMixin: OrhtoImageMixin;
 
   constructor(
     vueComponent: BaseAuthComponent & IPlantVisualization,
@@ -30,13 +42,9 @@ export abstract class ComponentLayer extends LayerBase {
   ) {
     super(vueComponent);
 
-    this.created();
-  }
+    this.orhtoImageMixin = new OrhtoImageMixin(this);
 
-  public onAddReferenceMeasurement(callback: (fieldgeoComponent: FieldgeometryComponentSchema) => void) {
-    if (this.allowRefMeasures) {
-      this.onAddRefMeasureCallback = callback;
-    }
+    this.created();
   }
 
   protected created(): void {/* override me */}
@@ -103,13 +111,17 @@ export abstract class ComponentLayer extends LayerBase {
     return undefined;
   }
 
-  public setSelectedAnalysis(analysis: AnalysisSchema | null) {
+  public setSelectedAnalysis(analysis: AnalysisForViewSchema | null) {
     this.analysis = analysis;
+  }
+
+  public get analysisResult(): AnalysisResultDetailedSchema | null {
+    return this.analysis?.analysis_result || null;
   }
 
   public async onClick(
     features: FeatureLike[],
-    fieldgeoComponent: FieldgeometryComponentSchema | undefined
+    fieldgeoComponent?: FieldgeometryComponentSchema,
   ): Promise<FeatureInfos | undefined> { 
     if (!this.allowRefMeasures || !this.isVisible || !this.selected) {
       return undefined;
@@ -124,14 +136,6 @@ export abstract class ComponentLayer extends LayerBase {
     }
 
     const pcs = this.getPcs(feature)!;
-    const featureInfoRecords: FeatureInfo[] = [];
-
-    if (this.analysis && this.refMeasuredPcsCodes.includes(pcs)) {
-      const refMeasureEntries = await volateqApi.getReferenceMeasurementEntries(this.analysis.id, { pcs });
-
-      
-      // TODO: load ref measure entry by pcs codel
-    }
 
     if (!fieldgeoComponent) {
       fieldgeoComponent = await volateqApi.getFieldgeometryComponent(
@@ -144,23 +148,14 @@ export abstract class ComponentLayer extends LayerBase {
       return undefined;
     }
 
-    return {
-      title: pcs,
-      records: [],
-      actionsSummaries: [
-        { 
-          buttonVariant: "secondary",
-          name: this.vueComponent.$t("add-reference-measurement").toString(),
-          actions: [
-            {
-              name: this.vueComponent.$t("add-reference-measurement").toString(),
-              action: async () => {
-                this.onAddRefMeasureCallback && this.onAddRefMeasureCallback(fieldgeoComponent!);
-              }
-            }
-          ]
-        }
-      ]
+    if (!this.analysis) {
+      return undefined;
     }
+
+    const featureInfos = await this.getRefMeasureFeatureInfos(fieldgeoComponent, this.analysis.id, this.refMeasuredPcsCodes);
+    
+    this.orhtoImageMixin.addShowOrthoImageActions(featureInfos, this.componentId);
+
+    return featureInfos;
   }
 }
