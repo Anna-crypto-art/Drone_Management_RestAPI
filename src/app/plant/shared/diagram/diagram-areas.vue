@@ -59,7 +59,7 @@ import { MathHelper } from "@/app/shared/services/helper/math-helper";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppLoading from "@/app/shared/components/app-loading/app-loading.vue";
-import { KeyFigureColors } from "../visualization/layers/types";
+import { LayerColor } from "../visualization/layers/types";
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ChartDataLables);
 
@@ -228,18 +228,18 @@ export default class AppDiagramAreas extends BaseAuthComponent {
 
           return {
             data: absData,
-            backgroundColor: KeyFigureColors.lightGrey,
+            backgroundColor: LayerColor.lightGrey,
             stack: num.columnName,
             datalabels: {
               font: { weight: "bold" },
               color: data.map(val => {
                 if (val === 0) {
-                  return KeyFigureColors.lightGrey;
+                  return LayerColor.lightGrey;
                 }
                 if (val > 0) {
-                  return KeyFigureColors.diagramBad;
+                  return LayerColor.diagramBad;
                 }
-                return KeyFigureColors.diagramGood;
+                return LayerColor.diagramGood;
               }),
               formatter: (value: any, context: Context) => {
                 if (data[context.dataIndex] > 0) {

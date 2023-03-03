@@ -12,7 +12,7 @@
         <b-row
           v-for="featureInfo in group.records"
           :key="featureInfo.name"
-          :class="featureInfo.bold && 'font-weight-bold'"
+          :class="{ 'font-weight-bold': featureInfo.bold, 'hidden-feature': featureInfo.hidden && featureInfo._visible }"
         >
           <b-col>
             {{ featureInfo.name }}
@@ -28,6 +28,11 @@
             </span>
           </b-col>
         </b-row>
+        <div v-if="hasHiddenFeatures(group)" class="app-feature-infos-toast-group-show-more">
+          <a href="#" @click.prevent="onShowMoreClick(group)">
+            {{ hiddenFeaturesVisible ? $t("hide") : $t("show-more") }}
+          </a>
+        </div>
       </div>
     </div>
     <div v-if="featureInfos.actionsSummaries">
@@ -63,7 +68,7 @@
 <script lang="ts">
 import { CatchError } from '@/app/shared/services/helper/catch-helper';
 import { Component, Prop } from "vue-property-decorator";
-import { FeatureAction, FeatureActionsSummary, FeatureInfos } from './types';
+import { FeatureAction, FeatureActionsSummary, FeatureInfoGroup, FeatureInfos } from './types';
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-dropdown-button.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
@@ -85,6 +90,8 @@ export default class AppFeatureInfosToast extends BaseComponent {
 
   toastDropdownButtonLoadings: Record<string, boolean> = {};
 
+  hiddenFeaturesVisible = false;
+
   created() {
     if (this.featureInfos.actionsSummaries) {
       for (const actionsSummery of this.featureInfos.actionsSummaries) {
@@ -98,17 +105,40 @@ export default class AppFeatureInfosToast extends BaseComponent {
     await action.action();
   }
 
-  isSingleAction(actionsSummery: FeatureActionsSummary) {
+  isSingleAction(actionsSummery: FeatureActionsSummary): boolean {
     return actionsSummery.actions.length === 1 && actionsSummery.actions[0].name === actionsSummery.name;
+  }
+
+  hasHiddenFeatures(group: FeatureInfoGroup): boolean {
+    return !!group.records.find(r => r.hidden);
+  }
+
+  @CatchError()
+  onShowMoreClick(group: FeatureInfoGroup) {
+    this.hiddenFeaturesVisible = !this.hiddenFeaturesVisible;
+
+    for (const featureInfo of group.records) {
+      featureInfo._visible = this.hiddenFeaturesVisible;
+    }
   }
 }
 </script>
 
 <style lang="scss">
+@import "@/scss/_colors.scss";
+@import "@/scss/_variables.scss";
+
 .app-feature-infos-toast {
   &.toast {
     /* Fix ortho images dropdown visibility */
     overflow: visible;
+  }
+
+  &-group-title {
+    background-color: $grey;
+  }
+  &-group-show-more {
+    text-align: center;
   }
 
   .toaster-images {

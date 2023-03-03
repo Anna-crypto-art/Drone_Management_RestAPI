@@ -1,13 +1,10 @@
 <template>
   <div class="visual-csp-ptc">
     <app-visualization
-      ref="visualization"
       :plant="plant"
       :analyses="analyses"
       :componentLayerTypes="componentLayerTypes"
       :keyFigureLayers="keyFigureLayers"
-      @startReferenceMeasurement="onStartReferenceMeasurement"
-      @finishReferenceMeasurement="onFinishReferenceMeasurement"
     >
       <template #glassTubeTemperatureClass3>
         {{
@@ -64,59 +61,19 @@
         {{ getTransAlignmentOffsetClassLimit("hce", 1) }}
       </template>
     </app-visualization>
-
-    <app-modal-form
-      id="reference-measurement-value-modal"
-      ref="refMeasureValueModal"
-      :title="$t('add-reference-measurement-value')"
-      :subtitle="(refMeasureValue ? refMeasureValue.pcs : '')"
-      :ok-title="$t('apply')"
-      :modalLoading="refMeasureValueModalLoading"
-      @submit="onAddRefMeasureValue"
-    >
-      <div v-if="refMeasureValue">
-        <b-form-group :label="$t('glass-tube-temperature')">
-          <b-form-input type="number" v-model="refMeasureValue.hceTemperature" />
-        </b-form-group>
-        <b-form-group>
-          <b-form-checkbox v-model="refMeasureValue.hceBrokenGlass">{{ $t("missing-gct") }}</b-form-checkbox>
-        </b-form-group>
-        <b-form-group :label="$t('notes')">
-          <b-textarea v-model="refMeasureValue.notes" />
-        </b-form-group>
-        <app-button v-if="refMeasureValue.id"
-          variant="danger"
-          icon="trash"
-          @click="onDeleteRefMeasureValue"
-          :loading="refMeasureDeleteLoading"
-        >
-          {{ $t("delete") }}
-        </app-button>
-      </div>
-    </app-modal-form>
   </div>
 </template>
 
 <script lang="ts">
-import { IPlantVisualization, Legend } from "@/app/plant/shared/visualization/types";
 import AppVisualization from "@/app/plant/shared/visualization/visualization.vue";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
-import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualization/types/components";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { Component, Prop, Ref } from "vue-property-decorator";
+import { Component, Prop } from "vue-property-decorator";
 import { AnalysisSelectionBaseComponent } from "../../shared/analysis-selection-sidebar/analysis-selection-base-component";
 import { COMPONENT_LAYERS, KEY_FIGURE_LAYERS } from "./layers";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue"
 import AppButton from "@/app/shared/components/app-button/app-button.vue"
-import { IAppModalForm } from "@/app/shared/components/app-modal/types";
-import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { ReferenceMeasurementValueSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
-import { AbsorberComponentLayer } from "./component-layers/absorber-component-layer";
-import { ScaComponentLayer } from "./component-layers/sca-component-layer";
-import { SceComponentLayer } from "./component-layers/sce-component-layer";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
-import { CatchError } from "@/app/shared/services/helper/catch-helper";
-import { ReferenceMeasurementEventObject } from "../../shared/reference-measurements/types";
 
 @Component({
   name: "app-visual-csp-ptc",
@@ -127,39 +84,15 @@ import { ReferenceMeasurementEventObject } from "../../shared/reference-measurem
     AppButton,
   },
 })
-export default class AppVisualCspPtc
-  extends AnalysisSelectionBaseComponent
-  implements IPlantVisualization
-{
+export default class AppVisualCspPtc extends AnalysisSelectionBaseComponent {
   componentLayerTypes = COMPONENT_LAYERS;
   keyFigureLayers = KEY_FIGURE_LAYERS;
 
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
-  @Ref() visualization: IPlantVisualization | undefined;
-  @Ref() refMeasureValueModal!: IAppModalForm;
-
-  refMeasureEventObject: ReferenceMeasurementEventObject | null = null;
-  refMeasureValueModalLoading = false;
-  refMeasureValue: { 
-      pcs: string,
-      hceTemperature: number | null,
-      hceBrokenGlass: boolean | null,
-      notes: string | null,
-      id: string | null,
-    } | null = null;
-  refMeasureDeleteLoading = false;
 
   async created() {
     await super.created();
-  }
-
-  get openLayers(): IOpenLayersComponent | undefined {
-    return this.visualization?.openLayers;
-  }
-
-  async onLayerSelected(selected: boolean, legend: Legend | undefined) {
-    return await this.visualization?.onLayerSelected(selected, legend);
   }
 
   getTransAlignmentOffsetClassLimit(componentType: "sce" | "sca" | "hce", classLimit: 1 | 2 | 3): string {
@@ -202,116 +135,6 @@ export default class AppVisualCspPtc
     }
 
     throw new Error("class_limit not allowed");
-  }
-
-  public hideToast(): void {
-    this.visualization?.hideToast();
-  }
-
-  public get enableResultsModification(): boolean {
-    return this.visualization!.enableResultsModification;
-  }
-
-  // TODO: remove ref measure functions
-
-  @CatchError()
-  async onStartReferenceMeasurement(event: ReferenceMeasurementEventObject) {
-    for (const componentLayer of event.componentLayers) {
-      if (componentLayer instanceof SceComponentLayer) {
-        if (!componentLayer.getSelected()) {
-          await componentLayer.setSelected(true);
-        }
-      } else if (componentLayer instanceof ScaComponentLayer) {
-        if (!componentLayer.getSelected()) {
-          await componentLayer.setSelected(true);
-        }
-
-        componentLayer.addGeolocationFeature();
-      } else if (componentLayer instanceof AbsorberComponentLayer) {
-        const existingPcsCodes = event.refMeasureValues.map(val => val.fieldgeometry_component!.kks) || [];
-        await componentLayer.startReferenceMeasurement(existingPcsCodes, async (pcs) => {
-          try {
-            const refMeasureValue: ReferenceMeasurementValueSchema | undefined = 
-              await volateqApi.getReferencMeasurementValue(event.refMeasureId, pcs);
-            
-            if (refMeasureValue) {
-              this.refMeasureValue = {
-                pcs: pcs,
-                hceTemperature: refMeasureValue.hce_temperature || null,
-                hceBrokenGlass: refMeasureValue.hce_broken_glass || null,
-                notes: refMeasureValue.notes || null,
-                id: refMeasureValue.id,
-              };
-            } else {
-              this.refMeasureValue = {
-                pcs: pcs,
-                hceTemperature: null,
-                hceBrokenGlass: null,
-                notes: null,
-                id: null,
-              };
-            }
-
-            this.refMeasureValueModal.show();
-          } catch (e) {
-            this.showError(e);
-          }
-        });
-      }
-    }
-
-    this.refMeasureEventObject = event;
-  }
-
-  @CatchError()
-  async onFinishReferenceMeasurement(event: ReferenceMeasurementEventObject) {
-    for (const componentLayer of event.componentLayers) {
-      if (componentLayer instanceof ScaComponentLayer) {
-        componentLayer.removeGeolocationFeature();
-      } else if (componentLayer instanceof AbsorberComponentLayer) {
-        await componentLayer.finishReferenceMeasurement();
-        this.refMeasureValue = null;
-      }
-    }
-
-    this.refMeasureEventObject = null;
-  }
-
-  @CatchError('refMeasureValueModalLoading')
-  async onAddRefMeasureValue() {
-    await volateqApi.addReferencMeasurementValue(this.refMeasureEventObject!.refMeasureId, {
-      pcs: this.refMeasureValue!.pcs,
-      notes: this.refMeasureValue!.notes || undefined,
-      hce_temperature: this.refMeasureValue!.hceTemperature || undefined,
-      hce_broken_glass: this.refMeasureValue!.hceBrokenGlass || undefined,
-    });
-
-    const absorberComponentLayer = this.refMeasureEventObject!.componentLayers
-      .find(compLayer => compLayer instanceof AbsorberComponentLayer) as AbsorberComponentLayer | undefined;
-    if (absorberComponentLayer) {
-      await absorberComponentLayer.changeColor(this.refMeasureValue!.pcs);
-    }
-
-    this.refMeasureValueModal.hide();
-  }
-
-  async onDeleteRefMeasureValue() {
-    this.refMeasureDeleteLoading = true;
-    try {
-      await volateqApi.deleteReferenceMeasurementValue(this.refMeasureValue!.id!);
-
-      const absorberComponentLayer = this.refMeasureEventObject!.componentLayers
-        .find(compLayer => compLayer instanceof AbsorberComponentLayer) as AbsorberComponentLayer | undefined;
-      if (absorberComponentLayer) {
-        absorberComponentLayer.undoChangeColor(this.refMeasureValue!.pcs);
-      }
-
-      this.refMeasureValueModal.hide();
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.refMeasureDeleteLoading = false;
-    }
   }
 }
 </script>

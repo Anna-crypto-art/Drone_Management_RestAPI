@@ -11,11 +11,12 @@
     <b-alert
       v-model="showAlert"
       :variant="alertVariant"
-      v-html="alertMsg"
       class="app-modal-form-alert"
       dismissible
-    ></b-alert>
-    <form @submit="onSubmit">
+    >
+      <div v-html="alertMsg"></div>
+    </b-alert>
+    <form @submit.prevent="onSubmit">
       <slot></slot>
     </form>
     <template v-slot:modal-footer>

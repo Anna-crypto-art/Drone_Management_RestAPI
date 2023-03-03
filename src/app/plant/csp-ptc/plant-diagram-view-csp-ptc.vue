@@ -23,7 +23,7 @@ import AppDiagramOverview from "@/app/plant/shared/diagram/diagram-overview.vue"
 import { DiagramNumberBox, DiagramResultMappings } from "../shared/diagram/types";
 import { FilterFieldType } from "../shared/filter-fields/types";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
-import { KeyFigureColors } from "../shared/visualization/layers/types";
+import { LayerColor } from "../shared/visualization/layers/types";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
     
@@ -198,18 +198,18 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
         columnName: columnsMapping[entry.transName],
         precision: 0,
         loaded: false,
-        color: KeyFigureColors.diagramRed,
+        color: LayerColor.diagramRed,
         historyActive: false,
         areasActive: false,
       };
 
-      let colorMap: Record<number, string> = { 3: KeyFigureColors.diagramRed, 2: KeyFigureColors.diagramYellow };
+      let colorMap: Record<number, string> = { 3: LayerColor.diagramRed, 2: LayerColor.diagramYellow };
 
       if (entry.keyFigureId === ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID) {
         numberBox.nums = [];
 
         if (this.firstAnalysisResult!.csp_ptc.glass_tube_temperature_class_count === 4) {
-          colorMap = { 4: KeyFigureColors.diagramRed, 3: KeyFigureColors.orange, 2: KeyFigureColors.diagramYellow };
+          colorMap = { 4: LayerColor.diagramRed, 3: LayerColor.orange, 2: LayerColor.diagramYellow };
         }
         
         for (let i = this.firstAnalysisResult!.csp_ptc.glass_tube_temperature_class_count; i > 1; i--) {

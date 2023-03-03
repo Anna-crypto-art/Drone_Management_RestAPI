@@ -11,7 +11,7 @@ import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/
 import { LayerEvent } from "@/app/shared/components/app-geovisualization/types/events";
 import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
-import { ReferenceMeasurementEntriesSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
+import { ReferenceMeasurementEntriesSchema, RefMeasureEntry } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
 import { SimpleAnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import dateHelper from "@/app/shared/services/helper/date-helper";
@@ -255,13 +255,12 @@ export abstract class LayerBase {
     const featureInfoGroups: FeatureInfoGroup[] = [];
     const mappings = AnalysisResultMappingHelper.getMappingsByComponentId(fieldgeoComponent.component_id);
 
-    let refMeasureEntries: ReferenceMeasurementEntriesSchema | null = null;
-    let refMeasureEditable: boolean = false;
+    let myRefMeasureEntry: RefMeasureEntry | null = null;
 
     if (analysisId && mappings && (!refMeasuredPcsCodes || refMeasuredPcsCodes.includes(fieldgeoComponent.kks))) {
       const mappingHelper = new AnalysisResultMappingHelper(mappings)
       
-      refMeasureEntries = await volateqApi.getReferenceMeasurementEntries(analysisId, { pcs: fieldgeoComponent.kks });
+      const refMeasureEntries = await volateqApi.getReferenceMeasurementEntries(analysisId, { pcs: fieldgeoComponent.kks });
       for (const refMeasureEntry of refMeasureEntries.entries) {
         const featureInfoGroup: FeatureInfoGroup = {
           title: this.vueComponent.$t("reference-measurement-of", { user: refMeasureEntry.user.name }).toString(),
@@ -297,12 +296,12 @@ export abstract class LayerBase {
         featureInfoGroups.push(featureInfoGroup);
 
         if (refMeasureEntry.editable) {
-          refMeasureEditable = true;
+          myRefMeasureEntry = refMeasureEntry;
         }
       }
     }
 
-    const actionName = refMeasureEditable ? "edit-reference-measurement" : "add-reference-measurement";
+    const actionName = myRefMeasureEntry ? "edit-reference-measurement" : "add-reference-measurement";
 
     return {
       title: fieldgeoComponent.kks,
@@ -316,7 +315,7 @@ export abstract class LayerBase {
             {
               name: this.vueComponent.$t(actionName).toString(),
               action: async () => {
-                this.vueComponent.showRefMeasureModal(fieldgeoComponent!, refMeasureEntries);
+                this.vueComponent.showRefMeasureModal(fieldgeoComponent.kks, myRefMeasureEntry);
               }
             }
           ]

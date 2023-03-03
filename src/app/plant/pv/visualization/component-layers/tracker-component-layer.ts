@@ -5,9 +5,11 @@ import { FeatureLike } from "ol/Feature";
 import { layerEvents } from "@/app/plant/shared/visualization/layer-events";
 import { Geometry } from "ol/geom";
 import { Feature } from "ol";
+import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
 
 export class TrackerComponentLayer extends ComponentLayer {
   protected readonly componentId = ApiComponent.PV_TRACKER;
+  protected readonly color = LayerColor.darkGrey;
 
   protected showPcsZoomLevel = 18.5;
   protected zIndex = 3;
@@ -33,7 +35,7 @@ export class TrackerComponentLayer extends ComponentLayer {
   public getStyle(feature: FeatureLike): Style {
     return new Style({
       stroke: new Stroke({
-        color: "#888888",
+        color: this.getColor(feature),
         width: 1,
       }),
       text: this.showText(feature),

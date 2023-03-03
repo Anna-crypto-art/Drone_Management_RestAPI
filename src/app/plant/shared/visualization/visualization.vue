@@ -58,16 +58,15 @@
         <div class="visualization-legend-entry-name" v-html="entry.name"></div>
       </div>
     </div>
-    <div v-show="!hasLegend" :class="'visualization-actions' + (sidebarOpen ? ' sidebar-open' : '')">
-      <app-reference-measurements 
-        :plant="plant"
-        :componentLayers="componentLayers"
-        :piLayersHierarchy="piLayersHierarchy"
-        @startReferenceMeasurement="onStartReferenceMeasurement"
-        @finishReferenceMeasurement="onFinishReferenceMeasurement" />
-    </div>
 
     <app-feature-infos-toast toastId="piInfoToast" :featureInfos="piToastInfo" />
+    <app-reference-measurements
+      ref="appReferenceMeasurements"
+      :analysisId="refMeasureAnalysisId"
+      :pcs="refMeasurePcs"
+      :refMeasureEntry="existingRefMeasureEntry"
+      @referenceMeasurmentAdded="onReferenceMeasurmentAdded"
+      @referenceMeasurmentRemoved="onReferenceMeasurmentRemoved" />
   </div>
 </template>
 
@@ -87,7 +86,6 @@ import { State } from "vuex-class";
 import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
-import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import { RefMeasureLayers } from "./ref-measure-layers";
 import { layerEvents } from "./layer-events";
 import { OrthoImage } from "./layers/types";
@@ -97,7 +95,7 @@ import { RouteQueryHelper } from "../helper/route-query-helper";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/sequential-event-emitter";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
-import { ReferenceMeasurementEventObject } from "../reference-measurements/types";
+import { IAppRefMeasure } from "../reference-measurements/types";
 import AppFeatureInfosToast from "./feature-infos-toast.vue";
 import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-dropdown-button.vue";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
@@ -105,8 +103,7 @@ import { analysisResultEventService } from "../plant-admin-view/analysis-result-
 import { AnalysisResultEvent } from "../plant-admin-view/types";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
-import { ReferenceMeasurementEntriesSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
+import { RefMeasureEntry } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -136,7 +133,7 @@ export default class AppVisualization
   @State(state => state.sidebar["analysis"]) sidebarOpen!: boolean;
 
   @Ref() openLayers!: IOpenLayersComponent;
-  @Ref() refMeasureModal!: IAppModalForm;
+  @Ref() appReferenceMeasurements!: IAppRefMeasure;
 
   piLayersHierarchy: PILayersHierarchy | null = null;
   refMeasureLayers: RefMeasureLayers | null = null;
@@ -148,6 +145,10 @@ export default class AppVisualization
 
   // referenced by all component layers. Avoid referencation!
   refMeasuredPcsCodes: string[] = [];
+
+  refMeasureAnalysisId: string | null = null;
+  refMeasurePcs: string | null = null;
+  existingRefMeasureEntry: RefMeasureEntry | null = null;
 
   legends: Legend[] = [];
   
@@ -646,18 +647,29 @@ export default class AppVisualization
     this.$bvToast.hide("piInfoToast");
   }
 
-  public showRefMeasureModal(
-    fieldgeoComponent: FieldgeometryComponentSchema,
-    refMeasureEntries: ReferenceMeasurementEntriesSchema | null
-  ) {
-    // TODO: do it!
+  public showRefMeasureModal(pcs: string, myRefMeasureEntry: RefMeasureEntry | null) {
+    this.refMeasureAnalysisId = this.firstAnalysis!.id;
+    this.refMeasurePcs = pcs;
+    this.existingRefMeasureEntry = myRefMeasureEntry;
+
+    this.appReferenceMeasurements.show();
+  }
+  
+  @CatchError()
+  async onReferenceMeasurmentRemoved(pcs: string) {
+    const rmIndex = this.refMeasuredPcsCodes.findIndex(c => c === pcs)
+    if (rmIndex >= 0) {
+      this.refMeasuredPcsCodes.splice(rmIndex, 1);
+    }
+
+    await this.rerenderComponentLayers();
   }
 
-  onStartReferenceMeasurement(e: ReferenceMeasurementEventObject) {
-    this.$emit("startReferenceMeasurement", e);
-  }
-  onFinishReferenceMeasurement(e: ReferenceMeasurementEventObject) {
-    this.$emit("finishReferenceMeasurement", e);
+  @CatchError()
+  async onReferenceMeasurmentAdded(pcs: string) {
+    this.refMeasuredPcsCodes.push(pcs);
+
+    await this.rerenderComponentLayers();
   }
 }
 </script>

@@ -47,13 +47,13 @@ export default class AppReferenceMeasurementValues extends BaseAuthComponent {
   refMeasureValueItems: Array<any> = [];
   refMeasureValueColumns: AppTableColumns = [
     { key: "pcs", label: this.$t("pcs").toString() },
-    { key: "absorberTemperature", label: this.$t("glass-tube-temperature").toString() },
-    { key: "brokenGlass", label: this.$t("missing-gct").toString() },
     { key: "notes", label: this.$t("notes").toString() },
     { key: "ignored", label: this.$t("ignored").toString() },
   ];
 
   async created() {
+    // TODO: add dynamic columns
+
     await this.updateRefMeasurementValues();
   }
 
@@ -64,7 +64,7 @@ export default class AppReferenceMeasurementValues extends BaseAuthComponent {
 
   async onIgnoreClick(refMeasureItem: any) {
     try {
-      await volateqApi.ignoreReferenceMeasurementValue(refMeasureItem.id, !refMeasureItem.ignored);
+      await volateqApi.ignoreReferenceMeasurementEntry(refMeasureItem.id, !refMeasureItem.ignored);
 
       this.showSuccess(this.$t("reference-measurement-value-change-success").toString())
 
@@ -82,26 +82,28 @@ export default class AppReferenceMeasurementValues extends BaseAuthComponent {
         this.refMeasureValueItems = [];
         return;
       }
-      
-      this.refMeasureValueItems = (await volateqApi.getReferencMeasurementValues(this.refMeasureId)).map(refMeasureValue => ({
-        id: refMeasureValue.id,
-        pcs: refMeasureValue.fieldgeometry_component!.kks,
-        absorberTemperature: refMeasureValue.hce_temperature,
-        brokenGlass: refMeasureValue.hce_broken_glass,
-        notes: refMeasureValue.notes,
-        ignored: refMeasureValue.ignore,
-      })).sort((a, b) => {
-        const nameA = a.pcs.toLowerCase();
-        const nameB = b.pcs.toLowerCase();
 
-        if (nameA < nameB) {
-          return -1;
-        }
-        if (nameA > nameB) {
-          return 1;
-        }
-        return 0;
-      });
+      // TODO do it
+      
+      // this.refMeasureValueItems = (await volateqApi.getReferenceMeasurementEntries(this.refMeasureId)).map(refMeasureValue => ({
+      //   id: refMeasureValue.id,
+      //   pcs: refMeasureValue.fieldgeometry_component!.kks,
+      //   absorberTemperature: refMeasureValue.hce_temperature,
+      //   brokenGlass: refMeasureValue.hce_broken_glass,
+      //   notes: refMeasureValue.notes,
+      //   ignored: refMeasureValue.ignore,
+      // })).sort((a, b) => {
+      //   const nameA = a.pcs.toLowerCase();
+      //   const nameB = b.pcs.toLowerCase();
+
+      //   if (nameA < nameB) {
+      //     return -1;
+      //   }
+      //   if (nameA > nameB) {
+      //     return 1;
+      //   }
+      //   return 0;
+      // });
     } catch (e) {
       this.showError(e);
     } finally {

@@ -86,7 +86,6 @@ export default class AppAnalysisReferenceMeasurements extends BaseAuthComponent 
     { key: "measureDate", label: this.$t("measure-date").toString() },
     { key: "measureNotes", label: this.$t("notes").toString() },
     { key: "user_created", label: this.$t("acquired-by").toString() },
-    { key: "user_updated", label: this.$t("updated-by").toString() },
   ];
   selectedRefMeasureId: string | null = null;
 
@@ -158,14 +157,11 @@ export default class AppAnalysisReferenceMeasurements extends BaseAuthComponent 
   private async updateRefMeasurements() {
     this.refMeasureItems = (await volateqApi.getReferenceMeasurements(this.analysis.id)).map(refMeasure => ({
       id: refMeasure.id,
-      measureDate: dateHelper.toDate(refMeasure.measure_date),
+      measureDate: dateHelper.toDateTime(refMeasure.measure_time_from) + " - " +
+        dateHelper.toDateTime(refMeasure.measure_time_to),
       measureNotes: refMeasure.notes,
       user_created: refMeasure.user_created ? 
-        (refMeasure.user_created.first_name + " " + refMeasure.user_created.last_name).trim() || refMeasure.user_created.email : "",
-      user_updated: refMeasure.user_updated ? 
-        ((refMeasure.user_updated.first_name + " " + refMeasure.user_updated.last_name).trim() 
-          || refMeasure.user_updated.email) + " " + this.$t(...dateHelper.getTimeDiff(refMeasure.updated_at)).toString() :
-        ""
+        (refMeasure.user_created.first_name + " " + refMeasure.user_created.last_name).trim() || refMeasure.user_created.email : ""
     }));
   }
 }
