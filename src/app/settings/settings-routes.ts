@@ -1,6 +1,7 @@
 import { RouteConfig } from "vue-router";
 const AppSettingsUsers = () => import("@/app/settings/users/users.vue");
 const AppSettingsCustomers = () => import("@/app/settings/customers/customers.vue");
+const AppSettingsProductPackages = () => import("@/app/settings/product-packages/product-packages.vue");
 const AppSettingsOrders = () => import("@/app/settings/orders/orders.vue");
 const AppSettings = () => import("@/app/settings/settings.vue");
 const AppUserProfile = () => import("@/app/settings/user-profile/user-profile.vue");
@@ -30,6 +31,16 @@ const settingsRoutes: RouteConfig[] = [
           title: "customers",
           subtitle: "customers_descr",
         }
+      },
+      {
+        path: "product-packages",
+        name: "ProductPackages",
+        component: AppSettingsProductPackages,
+        meta: {
+          role: ApiRoles.SUPER_ADMIN,
+          title: "product-packages",
+          subtitle: "product-packages_descr",
+        },
       },
       {
         path: "orders",
