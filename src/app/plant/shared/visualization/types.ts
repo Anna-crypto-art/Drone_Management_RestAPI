@@ -56,11 +56,11 @@ export interface FeatureInfoGroup {
 }
 
 export interface FeatureInfos {
-  title: string;
+  fieldgeoComponent?: FieldgeometryComponentSchema;
   groups: FeatureInfoGroup[];
+  title?: string;
   images?: FeatureImage[];
   actionsSummaries?: FeatureActionsSummary[];
-  fieldgeoComponent?: FieldgeometryComponentSchema;
 }
 
 export interface FeatureInfo {

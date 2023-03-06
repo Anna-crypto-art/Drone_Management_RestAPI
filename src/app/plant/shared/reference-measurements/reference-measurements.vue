@@ -9,12 +9,12 @@
       :modalLoading="loading"
       @submit="onAddRefMeasure"
     >
-      <div v-if="pcs && analysis">
+      <div v-if="pcs && analysisId">
         <b-form-group :label="$t('measure-timestamp')">
-          <app-datetime-picker v-model="refMeasure.measureDate" required />
+          <app-datetime-picker v-model="refMeasureEntryModel.measureTime" required />
         </b-form-group>
         <b-form-group :label="$t('notes')">
-          <b-textarea v-model="refMeasure.notes" />
+          <b-textarea v-model="refMeasureEntryModel.notes" />
         </b-form-group>
       </div>
     </app-modal-form>
@@ -25,7 +25,7 @@
 import { IAppModalForm } from '@/app/shared/components/app-modal/types';
 import volateqApi from '@/app/shared/services/volateq-api/volateq-api';
 import { Component, Prop, Ref } from "vue-property-decorator";
-import { IAppRefMeasure } from './types';
+import { IAppRefMeasure, RefMeasureEntryModel } from './types';
 import AppButton from '@/app/shared/components/app-button/app-button.vue';
 import AppModalForm from '@/app/shared/components/app-modal/app-modal-form.vue';
 import AppDatetimePicker from '@/app/shared/components/app-datetime-picker/app-datetime-picker.vue';
@@ -50,6 +50,12 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
 
   loading = false;
   loadingRemoveButton = false;
+
+  refMeasureEntryModel: RefMeasureEntryModel | null = null;
+
+  async created() {
+    super.created()
+  }
   
   get title(): string {
     return this.refMeasureEntry === null ? this.$t('add-reference-measurement').toString() : 
@@ -71,6 +77,20 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
   }
 
   show() {
+    if (this.refMeasureEntry) {
+      this.refMeasureEntryModel = {
+        measureTime: this.refMeasureEntry.measure_time,
+        notes: this.refMeasureEntry.notes || null,
+        values: this.refMeasureEntry.values || null,
+      };
+    } else {
+      this.refMeasureEntryModel = {
+        measureTime: "",
+        notes: null,
+        values: null,
+      };
+    }
+
     this.refMeasureModal.show();
   }
 }

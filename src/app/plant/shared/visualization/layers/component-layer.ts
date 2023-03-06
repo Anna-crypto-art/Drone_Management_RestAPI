@@ -120,18 +120,10 @@ export abstract class ComponentLayer extends LayerBase {
   }
 
   public async onClick(
-    features: FeatureLike[],
+    feature: FeatureLike,
     fieldgeoComponent?: FieldgeometryComponentSchema,
   ): Promise<FeatureInfos | undefined> { 
     if (!this.allowRefMeasures || !this.isVisible || !this.selected) {
-      return undefined;
-    }
-
-    const layer = this.getVectorGeoLayer()!;
-    const feature = features.find(feature => 
-      layer.getSource()?.getFeatures().find(layerFeature => layerFeature.get('name') === feature.get('name')));
-
-    if (!feature) {
       return undefined;
     }
 
@@ -145,7 +137,10 @@ export abstract class ComponentLayer extends LayerBase {
     }
 
     if (fieldgeoComponent.component_id !== this.componentId) {
-      return undefined;
+      return {
+        fieldgeoComponent: fieldgeoComponent,
+        groups: [],
+      }
     }
 
     if (!this.analysis) {

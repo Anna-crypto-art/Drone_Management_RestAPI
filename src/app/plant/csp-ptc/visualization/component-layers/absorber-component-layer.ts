@@ -6,7 +6,7 @@ import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
 
 export class AbsorberComponentLayer extends ComponentLayer {
   protected readonly componentId = ApiComponent.CSP_PTC_ABSORBER;
-  protected readonly color = LayerColor.darkGrey;
+  protected readonly color = LayerColor.black;
   protected readonly allowRefMeasures = true;
   public readonly name = "absorber-tubes";
   protected readonly width = 3;

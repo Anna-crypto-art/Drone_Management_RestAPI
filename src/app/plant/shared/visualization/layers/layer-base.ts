@@ -241,10 +241,15 @@ export abstract class LayerBase {
   }
 
   protected findMyFeature(features: FeatureLike[]): FeatureLike | undefined {
-    const layer = this.getVectorGeoLayer()!;
+    const myFeatures = this.getVectorGeoLayer()!.getSource()?.getFeatures();
+    if (!myFeatures) {
+      return undefined;
+    }
 
-    return features.find(feature => 
-      layer.getSource()?.getFeatures().find(layerFeature => layerFeature.get('name') === feature.get('name')));
+    console.log("MyFeatures: ")
+    console.log(myFeatures);
+
+    return features.find(feature => myFeatures.find(myF => myF.get('name') === feature.get('name')));
   }
 
   protected async getRefMeasureFeatureInfos(
@@ -280,7 +285,7 @@ export abstract class LayerBase {
         }
 
         for (const rmKeyFigure of refMeasureEntries.key_figures) {
-          if (rmKeyFigure.entry_key_name in refMeasureEntry.values) {
+          if (refMeasureEntry.values && rmKeyFigure.entry_key_name in refMeasureEntry.values) {
             const mappingEntry = mappingHelper.findEntry(rmKeyFigure.column_name, rmKeyFigure.key_figure_id);
             if (mappingEntry) {
               featureInfoGroup.records.push(

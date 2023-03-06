@@ -9,7 +9,7 @@
           </template>
           <slot v-if="childLayer.customSlot" :name="childLayer.customSlot" />
           <app-geovisual-layer-display
-            :level="isRoot ? 'subroot' : 'other'"
+            level="subroot"
             :layer="childLayer"
             :key="layerIndex"
           >
@@ -53,7 +53,7 @@
         <b-collapse v-if="layer.collapsable" v-model="collapsed" :id="layer.id">
           <app-geovisual-layer-display
             v-for="(childLayer, layerIndex) in layer.getChildLayers()"
-            :level="level === 'root' ? 'subroot' : 'other'"
+            level="other"
             :layer="childLayer"
             :key="layerIndex"
           >
@@ -67,10 +67,10 @@
         </b-collapse>
         <div v-if="!layer.collapsable">
           <app-geovisual-layer-display
-            v-for="(childLayer, layerIndex) in layer.getChildLayers()"
-            :level="level === 'root' ? 'subroot' : 'other'"
+            v-for="childLayer in layer.getChildLayers()"
+            level="other"
             :layer="childLayer"
-            :key="layerIndex"
+            :key="childLayer.id"
           >
             <!-- Pass slots through -->
             <template v-for="(_, slot) in $slots">
@@ -119,7 +119,7 @@ export default class AppGeovisualLayerDisplay extends Vue {
 
     this.layer.on(LayerEvent.SET_SELECTED, async (selected: boolean) => {
       this.selected = selected;
-
+      
       // Special case: Selected programmatically, does not select layerType...
       if (this.layer.selected !== selected) {
         if (this.layer.layerLoader) {

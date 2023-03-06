@@ -191,24 +191,21 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     return this.geoJSON;
   }
 
-  public async onClick(features: FeatureLike[]): Promise<FeatureInfos | undefined> {
+  public async onClick(feature: FeatureLike): Promise<FeatureInfos | undefined> {
     if (this.selected) {
-      const feature = this.findMyFeature(features);
-      if (feature) {
-        const result = await this.getResultDetails(feature);
-        if (result) {
-          const fieldgeo_component = result.fieldgeometry_component;
-          if (fieldgeo_component && fieldgeo_component.component_id === this.keyFigure.component.id) {
-            const featureInfos = this.mapResultToFeatureInfos(result);
+      const result = await this.getResultDetails(feature);
+      if (result) {
+        const fieldgeo_component = result.fieldgeometry_component;
+        if (fieldgeo_component && fieldgeo_component.component_id === this.keyFigure.component.id) {
+          const featureInfos = this.mapResultToFeatureInfos(result);
 
-            this.orhtoImageMixin.addShowOrthoImageActions(featureInfos, this.keyFigure.component_id);
+          this.orhtoImageMixin.addShowOrthoImageActions(featureInfos, this.keyFigure.component_id);
 
-            if (this.vueComponent.enableResultsModification) {
-              await this.addResultsModificationFeatureAction(featureInfos!);
-            }
-
-            return featureInfos;
+          if (this.vueComponent.enableResultsModification) {
+            await this.addResultsModificationFeatureAction(featureInfos!);
           }
+
+          return featureInfos;
         }
       }
     }
@@ -304,7 +301,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
 
     await volateqApi.setAnalysisResultValueToNullOrFalse(this.analysisResult.id, {
       key_figure_id: this.keyFigureId,
-      kks: featureInfos.title,
+      kks: featureInfos.fieldgeoComponent!.kks,
       property_name: entry ? mappingHelper.getPropertyName(entry) : undefined,
       new_value: newValue,
     });

@@ -152,7 +152,7 @@ export default class AppVisualization
 
   legends: Legend[] = [];
   
-  piToastInfo: FeatureInfos = { title: "", groups: [] };
+  piToastInfo: FeatureInfos = { groups: [] };
   
   loading = false;
 
@@ -373,11 +373,20 @@ export default class AppVisualization
   async onOpenLayersClick(features: FeatureLike[]) {
     let mergedFeatureInfos: FeatureInfos | undefined = undefined;
 
-    mergedFeatureInfos = await this.clickKeyFigureLayers(features, mergedFeatureInfos);
-    mergedFeatureInfos = await this.clickComponentLayers(features, mergedFeatureInfos);
-    mergedFeatureInfos = await this.clickRefMeasureLayers(features, mergedFeatureInfos);
+    // Multiselection is not supported
+    if (features.length > 1 || features.length === 0) {
+      return;
+    }
 
-    if (mergedFeatureInfos) {
+    const feature = features[0];
+
+    console.log("onOpenLayersClick");
+
+    mergedFeatureInfos = await this.clickKeyFigureLayers(feature, mergedFeatureInfos);
+    mergedFeatureInfos = await this.clickComponentLayers(feature, mergedFeatureInfos);
+    mergedFeatureInfos = await this.clickRefMeasureLayers(feature, mergedFeatureInfos);
+
+    if (mergedFeatureInfos && mergedFeatureInfos.title) {
       this.piToastInfo = mergedFeatureInfos;
       this.$bvToast.show("piInfoToast");
     } else {
@@ -386,12 +395,12 @@ export default class AppVisualization
   }
 
   private async clickKeyFigureLayers(
-    features: FeatureLike[],
+    feature: FeatureLike,
     mergedFeatureInfos: FeatureInfos | undefined,
   ): Promise<FeatureInfos | undefined> {
     for (const kpiLayer of this.piLayersHierarchy!.getAllChildLayers()) {
       if (kpiLayer.isVisible) {
-        const featureInfos = await kpiLayer.onClick(features);
+        const featureInfos = await kpiLayer.onClick(feature);
 
         mergedFeatureInfos = this.mergeFeatureInfos(mergedFeatureInfos, featureInfos);
       }
@@ -401,11 +410,11 @@ export default class AppVisualization
   }
 
   private async clickRefMeasureLayers(
-    features: FeatureLike[],
+    feature: FeatureLike,
     mergedFeatureInfos: FeatureInfos | undefined
   ): Promise<FeatureInfos | undefined> {
     for (const refMeasurerLayer of this.refMeasureLayers!.referenceMeasurementLayers) {
-      const featureInfos = await refMeasurerLayer.onClick(features, mergedFeatureInfos?.fieldgeoComponent)
+      const featureInfos = await refMeasurerLayer.onClick(feature, mergedFeatureInfos?.fieldgeoComponent)
 
       mergedFeatureInfos = this.mergeFeatureInfos(mergedFeatureInfos, featureInfos);
     }
@@ -414,11 +423,11 @@ export default class AppVisualization
   }
 
   private async clickComponentLayers(
-    features: FeatureLike[],
+    feature: FeatureLike,
     mergedFeatureInfos: FeatureInfos | undefined
   ): Promise<FeatureInfos | undefined> {
     for (const componentLayer of this.componentLayers) {
-      const featureInfos = await componentLayer.onClick(features, mergedFeatureInfos?.fieldgeoComponent);
+      const featureInfos = await componentLayer.onClick(feature, mergedFeatureInfos?.fieldgeoComponent);
       
       mergedFeatureInfos = this.mergeFeatureInfos(mergedFeatureInfos, featureInfos);
     }
@@ -432,23 +441,25 @@ export default class AppVisualization
         return newFeatureInfos;
       }
 
-      if (mergedFeatureInfos.title === newFeatureInfos.title) {
-        for (const newFeatureInfoGroup of newFeatureInfos.groups) {
-          const existInMerged = !!newFeatureInfos.groups.find(g => mergedFeatureInfos.groups.find(mg => mg.title === g.title));
-          if (!existInMerged) {
-            mergedFeatureInfos.groups.push(newFeatureInfoGroup);
-          }
-        }
+      if (!mergedFeatureInfos.title) {
+        mergedFeatureInfos.title = newFeatureInfos.title;
+      }
 
-        if (newFeatureInfos.actionsSummaries) {
-          if (!mergedFeatureInfos.actionsSummaries) {
-            mergedFeatureInfos.actionsSummaries = newFeatureInfos.actionsSummaries;
-          } else {
-            for (const newFeatureInfoActions of newFeatureInfos.actionsSummaries) {
-              const existInMerged = !!mergedFeatureInfos.actionsSummaries.find(a => newFeatureInfoActions.name === a.name);
-              if (!existInMerged) {
-                mergedFeatureInfos.actionsSummaries.push(newFeatureInfoActions);
-              }
+      for (const newFeatureInfoGroup of newFeatureInfos.groups) {
+        const existInMerged = !!newFeatureInfos.groups.find(g => mergedFeatureInfos.groups.find(mg => mg.title === g.title));
+        if (!existInMerged) {
+          mergedFeatureInfos.groups.push(newFeatureInfoGroup);
+        }
+      }
+
+      if (newFeatureInfos.actionsSummaries) {
+        if (!mergedFeatureInfos.actionsSummaries) {
+          mergedFeatureInfos.actionsSummaries = newFeatureInfos.actionsSummaries;
+        } else {
+          for (const newFeatureInfoActions of newFeatureInfos.actionsSummaries) {
+            const existInMerged = !!mergedFeatureInfos.actionsSummaries.find(a => newFeatureInfoActions.name === a.name);
+            if (!existInMerged) {
+              mergedFeatureInfos.actionsSummaries.push(newFeatureInfoActions);
             }
           }
         }
@@ -638,7 +649,14 @@ export default class AppVisualization
     }
   }
 
+  private selectAnalysisForComponents() {
+    for (const componentLayer of this.componentLayers) {
+      componentLayer.setSelectedAnalysis(this.firstAnalysis);
+    }
+  }
+
   private async reloadRefMeasureComponents() {
+    this.selectAnalysisForComponents();
     await this.loadRefMeasurePcsCodes();
     await this.rerenderComponentLayers();
   }

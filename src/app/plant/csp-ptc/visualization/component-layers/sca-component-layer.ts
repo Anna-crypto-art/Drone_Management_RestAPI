@@ -12,6 +12,7 @@ export class ScaComponentLayer extends ComponentLayer {
   protected readonly color = LayerColor.darkGrey;
   protected readonly allowRefMeasures = true;
 
+  protected selected = true;
   protected showPcsZoomLevel = 16.5;
   protected zIndex = 3;
 
@@ -24,7 +25,6 @@ export class ScaComponentLayer extends ComponentLayer {
   }
 
   public readonly name = "solar-collector-assembly";
-  public readonly selected = true;
   public readonly autoZoom = true;
 
   protected created(): void {

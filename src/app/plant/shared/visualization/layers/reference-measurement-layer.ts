@@ -75,13 +75,8 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
     });
   }
 
-  public async onClick(features: FeatureLike[], fieldgeoComponent?: FieldgeometryComponentSchema): Promise<FeatureInfos | undefined> {
+  public async onClick(feature: FeatureLike, fieldgeoComponent?: FieldgeometryComponentSchema): Promise<FeatureInfos | undefined> {
     if (!this.selected) {
-      return undefined;
-    }
-
-    const feature = this.findMyFeature(features);
-    if (!feature) {
       return undefined;
     }
 

@@ -2,8 +2,7 @@
   <div class="app-datetime-picker">
     <b-row>
       <b-col cols="8">
-        <b-form-datepicker v-model="dateValue">
-        </b-form-datepicker>
+        <app-datepicker v-model="dateValue" />
       </b-col>
       <b-col cols="4">
         <b-form-timepicker v-model="timeValue">
@@ -17,9 +16,13 @@
 import Vue from "vue";
 import { Component, Prop, Watch } from "vue-property-decorator";
 import { CatchError } from "../../services/helper/catch-helper";
+import AppDatepicker from "@/app/shared/components/app-datepicker/app-datepicker.vue";
 
 @Component({
   name: "app-datetime-picker",
+  components: {
+    AppDatepicker,
+  }
 })
 export default class AppDatetimePicker extends Vue {
   @Prop({ default: "" }) value!: string;
