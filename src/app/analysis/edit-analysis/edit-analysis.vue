@@ -28,7 +28,7 @@
               <app-box :title="$t('edit-analysis')">
                 <b-form @submit.prevent="onSubmitEditAnalysis">
                   <b-form-group :label="$t('acquisition-date')" label-cols-sm="4" label-cols-lg="2">
-                    <b-datepicker v-model="flownAt" required /> 
+                    <app-datepicker v-model="flownAt" required /> 
                   </b-form-group>
                   <b-form-group :label="$t('product-packages')" label-cols-sm="4" label-cols-lg="2">
                     <app-multiselect 
@@ -85,6 +85,7 @@ import { ProgressStep } from "@/app/shared/components/app-step-progress/types";
 import AppStepProgress from "@/app/shared/components/app-step-progress/app-step-progress.vue";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import AppMultiselect from "@/app/shared/components/app-multiselect/app-multiselect.vue";
+import AppDatepicker from "@/app/shared/components/app-datepicker/app-datepicker.vue";
 import { MultiselectOption } from "@/app/shared/components/app-multiselect/types";
 
 @Component({
@@ -100,6 +101,7 @@ import { MultiselectOption } from "@/app/shared/components/app-multiselect/types
     AppSuperAdminMarker,
     AppStepProgress,
     AppMultiselect,
+    AppDatepicker,
   },
 })
 export default class AppEditAnalysis extends BaseAuthComponent {

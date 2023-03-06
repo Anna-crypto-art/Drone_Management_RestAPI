@@ -1,12 +1,15 @@
 <template>
-  <div class="app-datetime-picker">
-    <b-row>
-      <b-col cols="8">
+  <div class="app-datetimepicker">
+    <b-row no-gutters>
+      <b-col cols="7">
         <app-datepicker v-model="dateValue" />
       </b-col>
-      <b-col cols="4">
-        <b-form-timepicker v-model="timeValue">
-        </b-form-timepicker>
+      <b-col cols="5">
+        <b-form-timepicker v-model="timeValue"
+          class="app-datetimepicker-time"
+          :locale="timeLocale"
+          placeholder="HH:mm"
+        />
       </b-col>
     </b-row>
   </div>
@@ -24,13 +27,15 @@ import AppDatepicker from "@/app/shared/components/app-datepicker/app-datepicker
     AppDatepicker,
   }
 })
-export default class AppDatetimePicker extends Vue {
+export default class AppDatetimepicker extends Vue {
   @Prop({ default: "" }) value!: string;
 
   dateValue = "";
   timeValue = "";
 
   dateTime = "";
+
+  timeLocale = navigator.language
 
   @CatchError()
   created() {
@@ -66,7 +71,7 @@ export default class AppDatetimePicker extends Vue {
     } else {
       this.dateValue = this.value.substring(0, 10);
       if (this.value.length > 10) {
-        this.timeValue = this.value.substring(11);
+        this.timeValue = this.value.substring(11, 16) + ":00";
       }
     }
   }
@@ -74,4 +79,9 @@ export default class AppDatetimePicker extends Vue {
 </script>
 
 <style lang="scss">
+.app-datetimepicker {
+  &-time {
+    margin-left: -1px;
+  }
+}
 </style>

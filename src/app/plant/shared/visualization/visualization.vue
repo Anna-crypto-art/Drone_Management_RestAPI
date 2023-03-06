@@ -380,8 +380,6 @@ export default class AppVisualization
 
     const feature = features[0];
 
-    console.log("onOpenLayersClick");
-
     mergedFeatureInfos = await this.clickKeyFigureLayers(feature, mergedFeatureInfos);
     mergedFeatureInfos = await this.clickComponentLayers(feature, mergedFeatureInfos);
     mergedFeatureInfos = await this.clickRefMeasureLayers(feature, mergedFeatureInfos);
@@ -671,6 +669,8 @@ export default class AppVisualization
     this.existingRefMeasureEntry = myRefMeasureEntry;
 
     this.appReferenceMeasurements.show();
+
+    this.hideToast();
   }
   
   @CatchError()

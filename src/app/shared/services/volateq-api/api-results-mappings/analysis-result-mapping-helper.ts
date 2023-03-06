@@ -146,17 +146,19 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
   public toFeatureInfo(
     mappingEntry: AnalysisResultMappingEntry<T>,
     value: string,
-    bold = false,
-    hidden = false,
+    currentKeyFigureId?: ApiKeyFigure,
   ): FeatureInfo {
     return {
       name: i18n.t(mappingEntry.transName).toString(),
       value: value,
-      bold: bold,
+      bold: currentKeyFigureId === mappingEntry.keyFigureId,
       descr: mappingEntry.transDescr,
       unit: value !== "" ? mappingEntry.unit : undefined,
       superAdminOnly: mappingEntry.superAdminOnly,
-      hidden: hidden,
+      hidden: currentKeyFigureId && 
+        currentKeyFigureId !== mappingEntry.keyFigureId &&
+        !mappingEntry.superAdminOnly
+        || false,
     }
   }
 }

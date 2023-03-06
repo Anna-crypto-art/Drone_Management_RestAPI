@@ -98,10 +98,10 @@
           </app-button>
         </b-form-group>
         <b-form-group :label="$t('start-date')">
-          <b-datepicker v-model="currentOrder.startDate" required />
+          <app-datepicker v-model="currentOrder.startDate" required />
         </b-form-group>
         <b-form-group :label="$t('end-date')">
-          <b-datepicker v-model="currentOrder.endDate" required />
+          <app-datepicker v-model="currentOrder.endDate" required />
         </b-form-group>
       </div>
     </app-modal-form>    
@@ -144,6 +144,7 @@ import { MultiselectOption } from "@/app/shared/components/app-multiselect/types
 import { ProductPackageWithKeyFiguresSchema } from "@/app/shared/services/volateq-api/api-schemas/product-package";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppTable from "@/app/shared/components/app-table/app-table.vue";
+import AppDatepicker from "@/app/shared/components/app-datepicker/app-datepicker.vue";
 import { AppTableColumns } from "@/app/shared/components/app-table/types";
 
 @Component({
@@ -156,6 +157,7 @@ import { AppTableColumns } from "@/app/shared/components/app-table/types";
     AppOrderPpsView,
     AppButton,
     AppTable,
+    AppDatepicker,
   },
 })
 export default class AppSettingsOrders extends BaseAuthComponent {

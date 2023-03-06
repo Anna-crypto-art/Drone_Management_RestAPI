@@ -104,7 +104,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
       }
       
       const isKeyFigureEntry = entry.transName === this.keyFigureInfo.keyName;
-      recordFeatureInfos.push(mappingHelper.toFeatureInfo(entry, recordValue, isKeyFigureEntry, !isKeyFigureEntry));
+      recordFeatureInfos.push(mappingHelper.toFeatureInfo(entry, recordValue, this.keyFigureId));
     }
 
     const featureInfos: FeatureInfos = {

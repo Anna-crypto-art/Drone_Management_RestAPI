@@ -12,7 +12,7 @@
         <b-row
           v-for="featureInfo in group.records"
           :key="featureInfo.name"
-          :class="{ 'font-weight-bold': featureInfo.bold, 'hidden-feature': featureInfo.hidden && featureInfo._visible }"
+          :class="{ 'font-weight-bold': featureInfo.bold, 'hidden-feature': featureInfo.hidden && !featureInfo._visible }"
         >
           <b-col>
             {{ featureInfo.name }}
@@ -35,7 +35,7 @@
         </div>
       </div>
     </div>
-    <div v-if="featureInfos.actionsSummaries">
+    <div v-if="featureInfos.actionsSummaries" class="pad-top">
       <div v-for="actionsSummery in featureInfos.actionsSummaries" :key="actionsSummery.name" class="mar-top">
         <app-button v-if="isSingleAction(actionsSummery)"
           :variant="actionsSummery.buttonVariant"
@@ -134,18 +134,33 @@ export default class AppFeatureInfosToast extends BaseComponent {
     overflow: visible;
   }
 
-  &-group-title {
-    background-color: $grey;
+  &-group {
+    margin-bottom: 5px;
+
+    &-title {
+      background-color: $grey;
+      margin: 0 -0.75rem 5px -0.75rem;
+      padding: 5px 0.75rem;
+      font-size: 1rem;
+    }
+
+    &-show-more {
+      text-align: center;
+      font-size: 1rem;
+      padding: 5px;
+    }
   }
-  &-group-show-more {
-    text-align: center;
-  }
+
 
   .toaster-images {
     img {
       max-width: calc(500px - 1.5rem);
     }
     margin-bottom: 0.75rem;
+  }
+
+  .hidden-feature {
+    display: none;
   }
 }
 </style>

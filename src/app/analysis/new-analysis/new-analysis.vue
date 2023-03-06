@@ -5,7 +5,7 @@
         <b-form-select required v-model="selectedPlantId" :options="plantOptions"></b-form-select>
       </b-form-group>
       <b-form-group label-cols-lg="2" :label="$t('acquisition-date')">
-        <b-datepicker v-model="flownAt" required /> 
+        <app-datepicker v-model="flownAt" required /> 
       </b-form-group>
       <b-form-group v-show="productPackagesSelection.length > 0" label-cols-lg="2" :label="$t('product-packages')">
         <app-multiselect 
@@ -27,11 +27,13 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppAnalysisUploader from "@/app/analysis/shared/analysis-uploader.vue";
 import AppMultiselect from "@/app/shared/components/app-multiselect/app-multiselect.vue";
+import AppDatepicker from "@/app/shared/components/app-datepicker/app-datepicker.vue";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { MultiselectOption } from "@/app/shared/components/app-multiselect/types";
+
 
 @Component({
   name: "app-new-analysis",
@@ -40,6 +42,7 @@ import { MultiselectOption } from "@/app/shared/components/app-multiselect/types
     AppButton,
     AppAnalysisUploader,
     AppMultiselect,
+    AppDatepicker,
   },
 })
 export default class AppNewAnalysis extends BaseAuthComponent {

@@ -57,6 +57,8 @@ export default class AppDatetimePicker extends Vue {
 </script>
 
 <style lang="scss">
+@import "@/scss/_colors.scss";
+
 .app-datepicker {
   position: relative;
 
@@ -81,7 +83,12 @@ export default class AppDatetimePicker extends Vue {
     right: 0;
     bottom: 0;
     left: 0;
-    text-indent: 40px;
+    text-indent: 50px;
+    font-weight: bold;
+
+    &::placeholder {
+      color: $dark-60pc;
+    }
   }
 }
 </style>

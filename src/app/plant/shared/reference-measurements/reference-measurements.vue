@@ -11,7 +11,7 @@
     >
       <div v-if="pcs && analysisId">
         <b-form-group :label="$t('measure-timestamp')">
-          <app-datetime-picker v-model="refMeasureEntryModel.measureTime" required />
+          <app-datetimepicker v-model="refMeasureEntryModel.measureTime" />
         </b-form-group>
         <b-form-group :label="$t('notes')">
           <b-textarea v-model="refMeasureEntryModel.notes" />
@@ -28,7 +28,7 @@ import { Component, Prop, Ref } from "vue-property-decorator";
 import { IAppRefMeasure, RefMeasureEntryModel } from './types';
 import AppButton from '@/app/shared/components/app-button/app-button.vue';
 import AppModalForm from '@/app/shared/components/app-modal/app-modal-form.vue';
-import AppDatetimePicker from '@/app/shared/components/app-datetime-picker/app-datetime-picker.vue';
+import AppDatetimepicker from '@/app/shared/components/app-datetimepicker/app-datetimepicker.vue';
 import { CatchError } from '@/app/shared/services/helper/catch-helper';
 import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
 import { RefMeasureEntry } from '@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema';
@@ -38,7 +38,7 @@ import { RefMeasureEntry } from '@/app/shared/services/volateq-api/api-schemas/r
   components: {
     AppButton,
     AppModalForm,
-    AppDatetimePicker,
+    AppDatetimepicker,
   },
 })
 export default class AppReferenceMeasurements extends BaseAuthComponent implements IAppRefMeasure {
@@ -85,7 +85,7 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
       };
     } else {
       this.refMeasureEntryModel = {
-        measureTime: "",
+        measureTime: (new Date()).toISOString(),
         notes: null,
         values: null,
       };
