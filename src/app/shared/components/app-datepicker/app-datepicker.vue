@@ -61,8 +61,11 @@ export default class AppDatetimePicker extends Vue {
 
 .app-datepicker {
   position: relative;
+  height: 38px;
 
   &-date {
+    height: 100% !important;
+
     label.form-control {
       opacity: 0;
     }

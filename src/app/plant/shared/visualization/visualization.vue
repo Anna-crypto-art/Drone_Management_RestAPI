@@ -62,9 +62,6 @@
     <app-feature-infos-toast toastId="piInfoToast" :featureInfos="piToastInfo" />
     <app-reference-measurements
       ref="appReferenceMeasurements"
-      :analysisId="refMeasureAnalysisId"
-      :pcs="refMeasurePcs"
-      :refMeasureEntry="existingRefMeasureEntry"
       @referenceMeasurmentAdded="onReferenceMeasurmentAdded"
       @referenceMeasurmentRemoved="onReferenceMeasurmentRemoved" />
   </div>
@@ -72,7 +69,7 @@
 
 <script lang="ts">
 import { PILayersHierarchy } from "@/app/plant/shared/visualization/pi-layers-hierarchy";
-import { FeatureInfos, IPlantVisualization, KeyFigureTypeMap, Legend } from "@/app/plant/shared/visualization/types";
+import { FeatureInfos, FeatureInfosMeta, IPlantVisualization, KeyFigureTypeMap, Legend } from "@/app/plant/shared/visualization/types";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppGeovisualization from "@/app/shared/components/app-geovisualization/app-geovisualization.vue";
 import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualization/types/components";
@@ -103,7 +100,9 @@ import { analysisResultEventService } from "../plant-admin-view/analysis-result-
 import { AnalysisResultEvent } from "../plant-admin-view/types";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { RefMeasureEntry } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
+import { RefMeasureEntry, RefMeasureEntryKeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
+import { LayerBase } from "./layers/layer-base";
+import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -145,10 +144,6 @@ export default class AppVisualization
 
   // referenced by all component layers. Avoid referencation!
   refMeasuredPcsCodes: string[] = [];
-
-  refMeasureAnalysisId: string | null = null;
-  refMeasurePcs: string | null = null;
-  existingRefMeasureEntry: RefMeasureEntry | null = null;
 
   legends: Legend[] = [];
   
@@ -372,6 +367,7 @@ export default class AppVisualization
   @CatchError("loading")
   async onOpenLayersClick(features: FeatureLike[]) {
     let mergedFeatureInfos: FeatureInfos | undefined = undefined;
+    const featureInfosMeta: FeatureInfosMeta = {};
 
     // Multiselection is not supported
     if (features.length > 1 || features.length === 0) {
@@ -380,9 +376,9 @@ export default class AppVisualization
 
     const feature = features[0];
 
-    mergedFeatureInfos = await this.clickKeyFigureLayers(feature, mergedFeatureInfos);
-    mergedFeatureInfos = await this.clickComponentLayers(feature, mergedFeatureInfos);
-    mergedFeatureInfos = await this.clickRefMeasureLayers(feature, mergedFeatureInfos);
+    mergedFeatureInfos = await this.clickLayers(feature, this.piLayersHierarchy!.getAllChildLayers(), mergedFeatureInfos, featureInfosMeta);
+    mergedFeatureInfos = await this.clickLayers(feature, this.componentLayers, mergedFeatureInfos, featureInfosMeta);
+    mergedFeatureInfos = await this.clickLayers(feature, this.refMeasureLayers!.referenceMeasurementLayers, mergedFeatureInfos, featureInfosMeta);
 
     if (mergedFeatureInfos && mergedFeatureInfos.title) {
       this.piToastInfo = mergedFeatureInfos;
@@ -392,41 +388,15 @@ export default class AppVisualization
     }
   }
 
-  private async clickKeyFigureLayers(
+  private async clickLayers(
     feature: FeatureLike,
+    layers: LayerBase[],
     mergedFeatureInfos: FeatureInfos | undefined,
+    featureInfosMeta: FeatureInfosMeta,
   ): Promise<FeatureInfos | undefined> {
-    for (const kpiLayer of this.piLayersHierarchy!.getAllChildLayers()) {
-      if (kpiLayer.isVisible) {
-        const featureInfos = await kpiLayer.onClick(feature);
+    for (const layer of layers) {
+      const featureInfos = await layer.onClick(feature, featureInfosMeta);
 
-        mergedFeatureInfos = this.mergeFeatureInfos(mergedFeatureInfos, featureInfos);
-      }
-    }
-
-    return mergedFeatureInfos;
-  }
-
-  private async clickRefMeasureLayers(
-    feature: FeatureLike,
-    mergedFeatureInfos: FeatureInfos | undefined
-  ): Promise<FeatureInfos | undefined> {
-    for (const refMeasurerLayer of this.refMeasureLayers!.referenceMeasurementLayers) {
-      const featureInfos = await refMeasurerLayer.onClick(feature, mergedFeatureInfos?.fieldgeoComponent)
-
-      mergedFeatureInfos = this.mergeFeatureInfos(mergedFeatureInfos, featureInfos);
-    }
-
-    return mergedFeatureInfos;
-  }
-
-  private async clickComponentLayers(
-    feature: FeatureLike,
-    mergedFeatureInfos: FeatureInfos | undefined
-  ): Promise<FeatureInfos | undefined> {
-    for (const componentLayer of this.componentLayers) {
-      const featureInfos = await componentLayer.onClick(feature, mergedFeatureInfos?.fieldgeoComponent);
-      
       mergedFeatureInfos = this.mergeFeatureInfos(mergedFeatureInfos, featureInfos);
     }
 
@@ -663,19 +633,24 @@ export default class AppVisualization
     this.$bvToast.hide("piInfoToast");
   }
 
-  public showRefMeasureModal(pcs: string, myRefMeasureEntry: RefMeasureEntry | null) {
-    this.refMeasureAnalysisId = this.firstAnalysis!.id;
-    this.refMeasurePcs = pcs;
-    this.existingRefMeasureEntry = myRefMeasureEntry;
-
-    this.appReferenceMeasurements.show();
+  public showRefMeasureModal(
+    fieldgeometryComponent: FieldgeometryComponentSchema,
+    myRefMeasureEntry: RefMeasureEntry | null,
+    myRefMeasureEntryKeyFigures: RefMeasureEntryKeyFigureSchema[] | null,
+  ) {
+    this.appReferenceMeasurements.show(
+      this.firstAnalysis!.id,
+      fieldgeometryComponent,
+      myRefMeasureEntry,
+      myRefMeasureEntryKeyFigures,
+    );
 
     this.hideToast();
   }
   
   @CatchError()
-  async onReferenceMeasurmentRemoved(pcs: string) {
-    const rmIndex = this.refMeasuredPcsCodes.findIndex(c => c === pcs)
+  async onReferenceMeasurmentRemoved(fieldgeometryComponent: FieldgeometryComponentSchema) {
+    const rmIndex = this.refMeasuredPcsCodes.findIndex(c => c === fieldgeometryComponent.kks)
     if (rmIndex >= 0) {
       this.refMeasuredPcsCodes.splice(rmIndex, 1);
     }
@@ -684,8 +659,8 @@ export default class AppVisualization
   }
 
   @CatchError()
-  async onReferenceMeasurmentAdded(pcs: string) {
-    this.refMeasuredPcsCodes.push(pcs);
+  async onReferenceMeasurmentAdded(fieldgeometryComponent: FieldgeometryComponentSchema) {
+    this.refMeasuredPcsCodes.push(fieldgeometryComponent.kks);
 
     await this.rerenderComponentLayers();
   }

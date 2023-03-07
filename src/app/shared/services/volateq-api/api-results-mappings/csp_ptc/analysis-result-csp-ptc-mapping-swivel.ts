@@ -26,6 +26,7 @@ const analysisResultCspPtcMappingSwivel: AnalysisResultMappings<
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     enableForDiagram: true,
     getDiffValue: r => r.gripping_potential_class__diff,
+    enableForRefMeasure: true,
   },
   {
     getValue: r => r.hce_displacement,

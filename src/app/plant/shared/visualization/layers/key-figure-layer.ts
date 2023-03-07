@@ -4,7 +4,7 @@ import { LayerBase } from "./layer-base";
 import { FeatureLike } from "ol/Feature";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { LayerColor, KeyFigureColorScheme, KeyFigureInfo, OrthoImage } from "./types";
-import { FeatureInfo, FeatureInfos, FeatureProperties, Legend, IPlantVisualization, FeatureAction, PropsFeature, FeatureActionsSummary, ComparedFeatureType, ComparedFeatures } from "../types";
+import { FeatureInfo, FeatureInfos, FeatureProperties, Legend, IPlantVisualization, FeatureAction, PropsFeature, FeatureActionsSummary, ComparedFeatureType, ComparedFeatures, FeatureInfosMeta } from "../types";
 import { AnalysisResultMappingEntry, AnalysisResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
@@ -18,6 +18,7 @@ import { analysisResultEventService } from "../../plant-admin-view/analysis-resu
 import { AnalysisResultEvent } from "../../plant-admin-view/types";
 import { FilterFieldType } from "../../filter-fields/types";
 import { keyFigureRainbowColors } from "@/app/plant/shared/visualization/key-figure-colors";
+import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
 
 export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q extends GeoVisualQuery> extends LayerBase implements IOrthoImageMixin {
   protected abstract readonly analysisResultMapping: AnalysisResultMappings<T>;
@@ -103,14 +104,12 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
         recordValue = "";
       }
       
-      const isKeyFigureEntry = entry.transName === this.keyFigureInfo.keyName;
       recordFeatureInfos.push(mappingHelper.toFeatureInfo(entry, recordValue, this.keyFigureId));
     }
 
     const featureInfos: FeatureInfos = {
       title: result.fieldgeometry_component.kks,
       groups: [{ title: this.vueComponent.$t("performance-indicators").toString(), records: recordFeatureInfos }],
-      fieldgeoComponent: result.fieldgeometry_component,
     };
 
     return featureInfos;
@@ -191,26 +190,50 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     return this.geoJSON;
   }
 
-  public async onClick(feature: FeatureLike): Promise<FeatureInfos | undefined> {
-    if (this.selected) {
-      const result = await this.getResultDetails(feature);
-      if (result) {
-        const fieldgeo_component = result.fieldgeometry_component;
-        if (fieldgeo_component && fieldgeo_component.component_id === this.keyFigure.component.id) {
-          const featureInfos = this.mapResultToFeatureInfos(result);
+  public async onClick(feature: FeatureLike, featureInfosMeta: FeatureInfosMeta): Promise<FeatureInfos | undefined> {
+    if (!this.isVisible || !this.selected) {
+      return undefined;
+    }
 
-          this.orhtoImageMixin.addShowOrthoImageActions(featureInfos, this.keyFigure.component_id);
+    if (featureInfosMeta.fieldgeoComponent && featureInfosMeta.fieldgeoComponent.component_id !== this.keyFigure.component.id) {
+      return undefined;
+    }
 
-          if (this.vueComponent.enableResultsModification) {
-            await this.addResultsModificationFeatureAction(featureInfos!);
-          }
+    const result = await this.getResultDetails(feature);
+    if (!result) {
+      return undefined;
+    }
 
-          return featureInfos;
-        }
+    if (!featureInfosMeta.fieldgeoComponent) {
+      featureInfosMeta.fieldgeoComponent = result.fieldgeometry_component;
+
+      if (featureInfosMeta.fieldgeoComponent.component_id !== this.keyFigure.component.id) {
+        return undefined;
       }
     }
 
-    return undefined;
+    let featureInfos = this.mapResultToFeatureInfos(result);
+
+    const refFeatureInfos = await this.getRefMeasureFeatureInfos(featureInfosMeta, this.analysisResult.analysis_id);
+
+    if (!featureInfos) {
+      featureInfos = refFeatureInfos
+    } else if (refFeatureInfos) {
+      featureInfos.groups.push(...refFeatureInfos.groups);
+      if (!featureInfos.actionsSummaries) {
+        featureInfos.actionsSummaries = refFeatureInfos.actionsSummaries;
+      } else {
+        featureInfos.actionsSummaries.push(...refFeatureInfos.actionsSummaries!);
+      }
+    }
+
+    this.orhtoImageMixin.addShowOrthoImageActions(featureInfos, this.keyFigure.component_id);
+
+    if (this.vueComponent.enableResultsModification) {
+      await this.addResultsModificationFeatureAction(featureInfos!);
+    }
+
+    return featureInfos;
   }
 
   public setColorScheme(colorScheme: KeyFigureColorScheme) {
@@ -301,7 +324,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
 
     await volateqApi.setAnalysisResultValueToNullOrFalse(this.analysisResult.id, {
       key_figure_id: this.keyFigureId,
-      kks: featureInfos.fieldgeoComponent!.kks,
+      kks: featureInfos.title!,
       property_name: entry ? mappingHelper.getPropertyName(entry) : undefined,
       new_value: newValue,
     });

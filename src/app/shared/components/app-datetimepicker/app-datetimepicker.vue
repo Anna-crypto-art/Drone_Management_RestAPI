@@ -80,8 +80,11 @@ export default class AppDatetimepicker extends Vue {
 
 <style lang="scss">
 .app-datetimepicker {
+  height: 38px;
+
   &-time {
     margin-left: -1px;
+    margin-right: -1px;
   }
 }
 </style>

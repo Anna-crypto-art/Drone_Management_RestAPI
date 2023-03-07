@@ -44,6 +44,7 @@ const analysisResultPvMappingTracker: AnalysisResultMappings<
     transDescr: "pv-tracker-soiling-level_expl",
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     getDiffValue: r => r.soiling_level__diff,
+    enableForRefMeasure: true,
   },
 ];
 

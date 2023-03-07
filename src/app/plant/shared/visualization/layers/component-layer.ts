@@ -3,7 +3,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { LayerBase } from "./layer-base";
 import { FeatureLike } from "ol/Feature";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { FeatureInfo, FeatureInfoGroup, FeatureInfos, IPlantVisualization } from "../types";
+import { FeatureInfo, FeatureInfoGroup, FeatureInfos, FeatureInfosMeta, IPlantVisualization } from "../types";
 import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
 import { LayerColor, OrthoImage } from "./types";
 import { AnalysisForViewSchema, AnalysisSchema, SimpleAnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
@@ -38,7 +38,6 @@ export abstract class ComponentLayer extends LayerBase {
 
   constructor(
     vueComponent: BaseAuthComponent & IPlantVisualization,
-    protected readonly refMeasuredPcsCodes: string[],
   ) {
     super(vueComponent);
 
@@ -62,7 +61,7 @@ export abstract class ComponentLayer extends LayerBase {
 
   protected getColor(feature: FeatureLike): string {
     const pcs = this.getPcs(feature);
-    if (pcs && this.allowRefMeasures && this.refMeasuredPcsCodes.includes(pcs)) {
+    if (pcs && this.allowRefMeasures && this.vueComponent.refMeasuredPcsCodes.includes(pcs)) {
       return this.refMeasureColor;
     }
 
@@ -121,7 +120,7 @@ export abstract class ComponentLayer extends LayerBase {
 
   public async onClick(
     feature: FeatureLike,
-    fieldgeoComponent?: FieldgeometryComponentSchema,
+    featureInfosMeta: FeatureInfosMeta,
   ): Promise<FeatureInfos | undefined> { 
     if (!this.allowRefMeasures || !this.isVisible || !this.selected) {
       return undefined;
@@ -129,25 +128,22 @@ export abstract class ComponentLayer extends LayerBase {
 
     const pcs = this.getPcs(feature)!;
 
-    if (!fieldgeoComponent) {
-      fieldgeoComponent = await volateqApi.getFieldgeometryComponent(
+    if (!featureInfosMeta.fieldgeoComponent) {
+      featureInfosMeta.fieldgeoComponent = await volateqApi.getFieldgeometryComponent(
         this.vueComponent.plant.fieldgeometry!.id,
         pcs,
       )
     }
 
-    if (fieldgeoComponent.component_id !== this.componentId) {
-      return {
-        fieldgeoComponent: fieldgeoComponent,
-        groups: [],
-      }
+    if (featureInfosMeta.fieldgeoComponent!.component_id !== this.componentId) {
+      return undefined;
     }
 
     if (!this.analysis) {
       return undefined;
     }
 
-    const featureInfos = await this.getRefMeasureFeatureInfos(fieldgeoComponent, this.analysis.id, this.refMeasuredPcsCodes);
+    const featureInfos = await this.getRefMeasureFeatureInfos(featureInfosMeta, this.analysis.id);
     
     this.orhtoImageMixin.addShowOrthoImageActions(featureInfos, this.componentId);
 

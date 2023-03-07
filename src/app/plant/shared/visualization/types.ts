@@ -7,7 +7,7 @@ import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { ReferenceMeasurementEntriesSchema, RefMeasureEntry } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
+import { ReferenceMeasurementEntriesSchema, RefMeasureEntry, RefMeasureEntryKeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
 import { FeatureLike } from "ol/Feature";
 import { KeyFigureLayer } from "./layers/key-figure-layer";
 import { LayerColor, KeyFigureInfo, SubKeyFigureInfo } from "./layers/types";
@@ -36,7 +36,12 @@ export interface IPlantVisualization {
   onLayerSelected(selected: boolean, legend: Legend | undefined): Promise<void>;
   hideToast: () => void;
   enableResultsModification: boolean;
-  showRefMeasureModal(pcs: string, myRefMeasureEntry: RefMeasureEntry | null): void;
+  showRefMeasureModal(
+    fieldgeometryComponent: FieldgeometryComponentSchema,
+    myRefMeasureEntry: RefMeasureEntry | null,
+    myRefMeasureEntryKeyFigures: RefMeasureEntryKeyFigureSchema[] | null,
+  ): void;
+  refMeasuredPcsCodes: string[];
 }
 
 export interface FeatureProperties {
@@ -56,11 +61,15 @@ export interface FeatureInfoGroup {
 }
 
 export interface FeatureInfos {
-  fieldgeoComponent?: FieldgeometryComponentSchema;
   groups: FeatureInfoGroup[];
   title?: string;
   images?: FeatureImage[];
   actionsSummaries?: FeatureActionsSummary[];
+}
+
+export interface FeatureInfosMeta {
+  fieldgeoComponent?: FieldgeometryComponentSchema;
+  refMeasureEntries?: ReferenceMeasurementEntriesSchema;
 }
 
 export interface FeatureInfo {

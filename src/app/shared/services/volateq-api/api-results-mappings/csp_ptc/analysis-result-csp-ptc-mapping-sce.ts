@@ -14,6 +14,7 @@ const analysisResultCspPtcMappingSce: AnalysisResultMappings<
     keyFigureId: ApiKeyFigure.SCE_ORIENTATION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     unit: "°",
+    enableForRefMeasure: true,
   },
   {
     getValue: r => r.alignment_deviation_to_drive,

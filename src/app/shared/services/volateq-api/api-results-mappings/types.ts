@@ -3,6 +3,7 @@ import { BvTableField } from "bootstrap-vue";
 import { ApiComponent } from "../api-components/api-components";
 import { ApiKeyFigure } from "../api-key-figures";
 import { AnalysisResultSchemaBase } from "../api-schemas/analysis-result-schema-base";
+import { RefMeasureEntryValue } from "../api-schemas/reference-measurement-schema";
 
 export interface AnalysisResultMappingEntry<T extends AnalysisResultSchemaBase, C = any> {
   getValue: (result: T) => unknown;
@@ -16,6 +17,7 @@ export interface AnalysisResultMappingEntry<T extends AnalysisResultSchemaBase, 
   formatter?: (value: unknown) => string;
   disableForTable?: boolean;
   superAdminOnly?: boolean;
+  enableForRefMeasure?: boolean;
 }
 
 export type AnalysisResultMappings<T extends AnalysisResultSchemaBase, C = any> = AnalysisResultMappingEntry<T, C>[];
@@ -23,4 +25,9 @@ export type AnalysisResultMappings<T extends AnalysisResultSchemaBase, C = any> 
 export interface ComponentResultMappings {
   componentId: ApiComponent;
   resultMapping: AnalysisResultMappings<any>;
+}
+
+export interface RefMeasureMappingEntryValue { 
+  entry: AnalysisResultMappingEntry<any>, 
+  value: RefMeasureEntryValue 
 }

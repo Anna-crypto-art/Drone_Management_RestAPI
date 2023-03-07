@@ -22,6 +22,7 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
     keyFigureId: ApiKeyFigure.SCA_ORIENTATION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     unit: "°",
+    enableForRefMeasure: true,
   },
   {
     getValue: r => r.uncertainty_at_drive,
@@ -76,7 +77,7 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
     transDescr: "ball-joint-damaged_descr",
     keyFigureId: ApiKeyFigure.SCA_BALL_JOINT_FRICTION_ID,
     filterType: FilterFieldType.BOOLEAN,
-    // formatter: ''
+    enableForRefMeasure: true,
   },
   {
     getValue: r => r.is_damaged_ball_joint_north,
@@ -84,6 +85,7 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
     transDescr: "ball-joint-damaged_descr",
     keyFigureId: ApiKeyFigure.SCA_BALL_JOINT_FRICTION_ID,
     filterType: FilterFieldType.BOOLEAN,
+    enableForRefMeasure: true,
   }
 ];
 

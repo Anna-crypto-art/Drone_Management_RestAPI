@@ -1,6 +1,6 @@
 import { AnalysisResultSchemaBase } from "../api-schemas/analysis-result-schema-base";
 import { AnalysisResultDetailedSchema } from "../api-schemas/analysis-result-schema";
-import { AnalysisResultMappingEntry, AnalysisResultMappings } from "./types";
+import { AnalysisResultMappingEntry, AnalysisResultMappings, RefMeasureMappingEntryValue } from "./types";
 import VueI18n from "vue-i18n";
 import { FilterFieldType } from "@/app/plant/shared/filter-fields/types";
 import { AppTableColumns } from "@/app/shared/components/app-table/types";
@@ -10,6 +10,7 @@ import { allPvMappings } from "./pv/analysis-result-pv-mapping";
 import { ApiKeyFigure } from "../api-key-figures";
 import { FeatureInfo } from "@/app/plant/shared/visualization/types";
 import { i18n } from "@/main";
+import { RefMeasureEntry, RefMeasureEntryKeyFigureSchema, RefMeasureEntryValue } from "../api-schemas/reference-measurement-schema";
 
 export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
   private compareAnalysisResult: AnalysisResultDetailedSchema | null = null;
@@ -161,4 +162,25 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
         || false,
     }
   }
+
+  public getRefMeasureEntries(
+    refMeasureEntry: RefMeasureEntry,
+    refMeasureKeyFigures: RefMeasureEntryKeyFigureSchema[]
+  ): RefMeasureMappingEntryValue[] {
+    const rmMappingEntriesValues: RefMeasureMappingEntryValue[] = [];
+
+    for (const rmKeyFigure of refMeasureKeyFigures) {
+      if (refMeasureEntry.values && rmKeyFigure.entry_key_name in refMeasureEntry.values) {
+        const mappingEntry = this.findEntry(rmKeyFigure.column_name, rmKeyFigure.key_figure_id);
+        if (mappingEntry) {
+          rmMappingEntriesValues.push({
+            entry: mappingEntry,
+            value: refMeasureEntry.values[rmKeyFigure.entry_key_name]
+          });
+        }
+      }
+    }
+
+    return rmMappingEntriesValues;
+  }     
 }

@@ -38,6 +38,7 @@ const analysisResultPvMappingModule: AnalysisResultMappings<
     transDescr: "pv-module-soiling-level_expl",
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     getDiffValue: r => r.soiling_level__diff,
+    enableForRefMeasure: true,
   },
   {
     keyFigureId: ApiKeyFigure.MODULE_BROKEN_GLASS_ID,

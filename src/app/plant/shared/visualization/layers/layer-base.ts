@@ -1,7 +1,7 @@
 import { FeatureLike } from "ol/Feature";
 import { Style, Stroke, Text, Fill } from "ol/style";
 import { asArray, asString } from "ol/color";
-import { FeatureInfoGroup, FeatureInfos, IPlantVisualization } from "../types";
+import { FeatureInfoGroup, FeatureInfos, FeatureInfosMeta, IPlantVisualization } from "../types";
 import { GeoJSONLayer, VectorGeoLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { Geolocation, Feature } from "ol";
@@ -11,7 +11,7 @@ import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/
 import { LayerEvent } from "@/app/shared/components/app-geovisualization/types/events";
 import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
-import { ReferenceMeasurementEntriesSchema, RefMeasureEntry } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
+import { ReferenceMeasurementEntriesSchema, RefMeasureEntry, RefMeasureEntryKeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
 import { SimpleAnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import dateHelper from "@/app/shared/services/helper/date-helper";
@@ -240,32 +240,36 @@ export abstract class LayerBase {
     this.getVectorGeoLayer()?.changed();
   }
 
-  protected findMyFeature(features: FeatureLike[]): FeatureLike | undefined {
-    const myFeatures = this.getVectorGeoLayer()!.getSource()?.getFeatures();
-    if (!myFeatures) {
-      return undefined;
-    }
-
-    console.log("MyFeatures: ")
-    console.log(myFeatures);
-
-    return features.find(feature => myFeatures.find(myF => myF.get('name') === feature.get('name')));
+  public async onClick(
+    feature: FeatureLike,
+    featureInfosMeta: FeatureInfosMeta,
+  ): Promise<FeatureInfos | undefined> { 
+    return undefined;
   }
 
   protected async getRefMeasureFeatureInfos(
-    fieldgeoComponent: FieldgeometryComponentSchema,
+    featureInfosMeta: FeatureInfosMeta,
     analysisId: string | null,
-    refMeasuredPcsCodes?: string[],
-  ): Promise<FeatureInfos> {
+  ): Promise<FeatureInfos | undefined> {
+    if (featureInfosMeta.refMeasureEntries) { // add ref measure action has been added, already
+      return undefined
+    }
+
     const featureInfoGroups: FeatureInfoGroup[] = [];
-    const mappings = AnalysisResultMappingHelper.getMappingsByComponentId(fieldgeoComponent.component_id);
+    const mappings = AnalysisResultMappingHelper.getMappingsByComponentId(featureInfosMeta.fieldgeoComponent!.component_id);
 
     let myRefMeasureEntry: RefMeasureEntry | null = null;
+    let myRefMeasureEntryKeyFigures: RefMeasureEntryKeyFigureSchema[] | null = null;
 
-    if (analysisId && mappings && (!refMeasuredPcsCodes || refMeasuredPcsCodes.includes(fieldgeoComponent.kks))) {
+    if (analysisId && mappings && this.vueComponent.refMeasuredPcsCodes.includes(featureInfosMeta.fieldgeoComponent!.kks)) {
       const mappingHelper = new AnalysisResultMappingHelper(mappings)
       
-      const refMeasureEntries = await volateqApi.getReferenceMeasurementEntries(analysisId, { pcs: fieldgeoComponent.kks });
+      const refMeasureEntries = await volateqApi.getReferenceMeasurementEntries(
+        analysisId, 
+        { pcs: featureInfosMeta.fieldgeoComponent!.kks }
+      );
+      featureInfosMeta.refMeasureEntries = refMeasureEntries;
+
       for (const refMeasureEntry of refMeasureEntries.entries) {
         const featureInfoGroup: FeatureInfoGroup = {
           title: this.vueComponent.$t("reference-measurement-of", { user: refMeasureEntry.user.name }).toString(),
@@ -284,24 +288,21 @@ export abstract class LayerBase {
           });
         }
 
-        for (const rmKeyFigure of refMeasureEntries.key_figures) {
-          if (refMeasureEntry.values && rmKeyFigure.entry_key_name in refMeasureEntry.values) {
-            const mappingEntry = mappingHelper.findEntry(rmKeyFigure.column_name, rmKeyFigure.key_figure_id);
-            if (mappingEntry) {
-              featureInfoGroup.records.push(
-                mappingHelper.toFeatureInfo(
-                  mappingEntry,
-                  refMeasureEntry.values[rmKeyFigure.entry_key_name].toString()
-                )
-              );
-            }
-          }
+        const rmMappingEntries = mappingHelper.getRefMeasureEntries(refMeasureEntry, refMeasureEntries.key_figures)
+        for (const rmMappingEntry of rmMappingEntries) {
+          featureInfoGroup.records.push(
+            mappingHelper.toFeatureInfo(
+              rmMappingEntry.entry,
+              rmMappingEntry.value.toString(),
+            )
+          );
         }
 
         featureInfoGroups.push(featureInfoGroup);
 
         if (refMeasureEntry.editable) {
           myRefMeasureEntry = refMeasureEntry;
+          myRefMeasureEntryKeyFigures = refMeasureEntries.key_figures;
         }
       }
     }
@@ -309,9 +310,8 @@ export abstract class LayerBase {
     const actionName = myRefMeasureEntry ? "edit-reference-measurement" : "add-reference-measurement";
 
     return {
-      title: fieldgeoComponent.kks,
+      title: featureInfosMeta.fieldgeoComponent!.kks,
       groups: featureInfoGroups,
-      fieldgeoComponent: fieldgeoComponent,
       actionsSummaries: [
         { 
           buttonVariant: "secondary",
@@ -320,7 +320,7 @@ export abstract class LayerBase {
             {
               name: this.vueComponent.$t(actionName).toString(),
               action: async () => {
-                this.vueComponent.showRefMeasureModal(fieldgeoComponent.kks, myRefMeasureEntry);
+                this.vueComponent.showRefMeasureModal(featureInfosMeta.fieldgeoComponent!, myRefMeasureEntry, myRefMeasureEntryKeyFigures);
               }
             }
           ]

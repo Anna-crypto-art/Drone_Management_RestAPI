@@ -57,6 +57,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     unit: "°C",
     getDiffValue: r => r.glass_tube_temperature__diff,
+    enableForRefMeasure: true,
   },
   {
     getValue: r => r.glass_tube_temperature_class,
@@ -75,6 +76,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     filterType: FilterFieldType.BOOLEAN,
     enableForDiagram: true,
     getDiffValue: r => r.missing_glass_tube__diff,
+    enableForRefMeasure: true,
   },
   {
     getValue: r => r.oxygen_penetration,
@@ -84,6 +86,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     filterType: FilterFieldType.BOOLEAN,
     enableForDiagram: true,
     getDiffValue: r => r.oxygen_penetration__diff,
+    enableForRefMeasure: true,
   },
   {
     getValue: r => r.h2_concentration,
@@ -93,6 +96,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     filterType: FilterFieldType.BOOLEAN,
     enableForDiagram: true,
     getDiffValue: r => r.h2_concentration__diff,
+    enableForRefMeasure: true,
   },
   {
     getValue: r => r.coating_degraded,
@@ -100,6 +104,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     transDescr: "coating-degration_expl",
     keyFigureId: ApiKeyFigure.COATING_DEGRADATION_ID,
     filterType: FilterFieldType.BOOLEAN,
+    enableForRefMeasure: true,
   },
   {
     getValue: r => r.hot_glass_tube_ends,
@@ -109,6 +114,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     filterType: FilterFieldType.BOOLEAN,
     enableForDiagram: true,
     getDiffValue: r => r.hot_glass_tube_ends__diff,
+    enableForRefMeasure: true,
   },
   {
     getValue: r => r.recommended_action_class,

@@ -11,7 +11,7 @@ import { FeatureLike } from "ol/Feature";
 import { Stroke, Style } from "ol/style";
 import { OrhtoImageMixin } from "../mixins/ortho-image-mixin";
 import { IOrthoImageMixin } from "../mixins/types";
-import { FeatureInfo, FeatureInfos, IPlantVisualization } from "../types";
+import { FeatureInfo, FeatureInfos, FeatureInfosMeta, IPlantVisualization } from "../types";
 import { LayerBase } from "./layer-base";
 import { LayerColor, OrthoImage } from "./types";
 
@@ -75,7 +75,7 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
     });
   }
 
-  public async onClick(feature: FeatureLike, fieldgeoComponent?: FieldgeometryComponentSchema): Promise<FeatureInfos | undefined> {
+  public async onClick(feature: FeatureLike, featureInfosMeta: FeatureInfosMeta): Promise<FeatureInfos | undefined> {
     if (!this.selected) {
       return undefined;
     }
@@ -85,16 +85,16 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
       return undefined;
     }
 
-    if (!fieldgeoComponent) {
-      fieldgeoComponent = await volateqApi.getFieldgeometryComponent(
+    if (!featureInfosMeta.fieldgeoComponent) {
+      featureInfosMeta.fieldgeoComponent = await volateqApi.getFieldgeometryComponent(
         this.vueComponent.plant.fieldgeometry!.id,
         pcs,
       );
     }
 
-    const featureInfos = await this.getRefMeasureFeatureInfos(fieldgeoComponent, this.analysis.id)
+    const featureInfos = await this.getRefMeasureFeatureInfos(featureInfosMeta, this.analysis.id)
     
-    this.orhtoImageMixin.addShowOrthoImageActions(featureInfos, fieldgeoComponent.component_id);
+    this.orhtoImageMixin.addShowOrthoImageActions(featureInfos, featureInfosMeta.fieldgeoComponent.component_id);
 
     return featureInfos;
   }

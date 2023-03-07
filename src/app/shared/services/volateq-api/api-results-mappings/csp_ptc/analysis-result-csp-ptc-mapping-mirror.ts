@@ -14,6 +14,7 @@ const analysisResultCspPtcMappingMirror: AnalysisResultMappings<
     filterType: FilterFieldType.BOOLEAN,
     enableForDiagram: true,
     getDiffValue: r => r.is_missing__diff,
+    enableForRefMeasure: true,
   },
 ];
 
