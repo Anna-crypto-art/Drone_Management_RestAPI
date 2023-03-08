@@ -3,7 +3,7 @@
     <app-modal-form
       id="reference-measurement-modal"
       ref="refMeasureModal"
-      :title="$t('add-reference-measurement')"
+      :title="title"
       :subtitle="fieldgeometryComponent && fieldgeometryComponent.kks || ''"
       :ok-title="$t('apply')"
       :modalLoading="loading"
@@ -23,7 +23,7 @@
         </app-modal-form-info-area>
         <div v-if="entry">
           <app-button variant="danger" icon="trash" @click="onRmRefMeasure">
-            {{ $t("delete-reference-measurement-entry") }}
+            {{ $t("delete-reference-measurement") }}
           </app-button>
         </div>        
       </div>
@@ -44,7 +44,7 @@ import { CatchError } from '@/app/shared/services/helper/catch-helper';
 import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
 import { RefMeasureEntry, RefMeasureEntryKeyFigureSchema } from '@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema';
 import AppFilterFields from '@/app/plant/shared/filter-fields/filter-fields.vue';
-import { FilterField, FilterFieldType, FilterFieldValue } from '../filter-fields/types';
+import { FilterField, FilterFieldType } from '../filter-fields/types';
 import { FieldgeometryComponentSchema } from '@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema';
 import { AnalysisResultMappingHelper } from '@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper';
 
@@ -77,8 +77,8 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
   }
   
   get title(): string {
-    return this.entry === null ? this.$t('add-reference-measurement').toString() : 
-      this.$t('edit-reference-measurement').toString();
+    return this.entry === null ? this.$t("add-reference-measurement").toString() : 
+      this.$t("edit-reference-measurement").toString();
   }
 
   @CatchError("loading")
@@ -91,11 +91,17 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
       notes: this.entryModel!.notes || undefined,
       key_figure_ids: this.entryModel!.values
         .map(v => mappingHelper.getEntries().find(e => e.transName === v.filterField!.key)!.keyFigureId!),
+      key_figure_names: this.entryModel!.values
+        .map(v => mappingHelper.getPropertyName(mappingHelper.getEntries().find(e => e.transName === v.filterField!.key)!)),
       key_figure_values: this.entryModel!.values
         .map(v => v.value!.toString()),
     });
 
+    this.showSuccess(this.$t("ref-measures-created-success").toString());
+
     this.$emit("referenceMeasurmentAdded", this.fieldgeometryComponent);
+
+    this.refMeasureModal.hide();
   }
 
   @CatchError("loadingRemoveButton")
@@ -106,7 +112,11 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
 
     await volateqApi.deleteReferenceMeasurementEntry(this.entry!.entry_id);
 
+    this.showSuccess(this.$t("ref-measures-removed-success").toString());
+
     this.$emit("referenceMeasurmentRemoved", this.fieldgeometryComponent);
+
+    this.refMeasureModal.hide();
   }
 
   show(
@@ -131,9 +141,6 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
           value: e.value,
         })),
       };
-
-      console.log("this.entryModel.values:")
-      console.log(this.entryModel.values)
     } else {
       this.entryModel = {
         measureTime: (new Date()).toISOString(),

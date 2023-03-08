@@ -275,7 +275,7 @@ export abstract class LayerBase {
           title: this.vueComponent.$t("reference-measurement-of", { user: refMeasureEntry.user.name }).toString(),
           records: [
             { 
-              name: this.vueComponent.$t("measure-time").toString(), 
+              name: this.vueComponent.$t("measure-timestamp").toString(), 
               value: dateHelper.toDateTime(refMeasureEntry.measure_time),
             }
           ],

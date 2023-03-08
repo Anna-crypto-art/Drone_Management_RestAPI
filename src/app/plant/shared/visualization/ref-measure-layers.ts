@@ -1,6 +1,8 @@
 import { GeoJSONLayer, GroupLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import { ReferenceMeasurementSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
+import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { ReferenceMeasurementLayer } from "./layers/reference-measurement-layer";
 import { IPlantVisualization } from "./types";
 
@@ -36,16 +38,60 @@ export class RefMeasureLayers {
     }
   }
 
-  private async addLayers(): Promise<void> {
+  public async updateRefMeasuresOfSelectedAnalysis() {
+    if (!this.selectedAnalysis) {
+      throw new Error("Cannot update reference measurements. No analysis selected");
+    }
+
+    const refMeasures = await volateqApi.getReferenceMeasurements(this.selectedAnalysis.id);
+    for (const refMeasure of refMeasures) {
+      const existingRefMeasureLayer = this.referenceMeasurementLayers
+        .find(rml => rml.referenceMeasurement.id === refMeasure.id);
+      
+      if (existingRefMeasureLayer) {
+        if (existingRefMeasureLayer.getSelected()) {
+          existingRefMeasureLayer.rerender();
+        }
+      } else {
+        this.addLayer(refMeasure);
+      }
+    }
+
+    let deletedRefMeasureLayerId: string | undefined = undefined;
+    let deletedRefMeasureLayerIndex = -1;
+    this.referenceMeasurementLayers.forEach((rml, i) => {
+      if (!refMeasures.find(rm => rm.id === rml.referenceMeasurement.id)) {
+        deletedRefMeasureLayerId = rml.id;
+        deletedRefMeasureLayerIndex = i;
+
+        return;
+      }
+    });
+
+    if (deletedRefMeasureLayerId && deletedRefMeasureLayerIndex != -1) {
+      this.referenceMeasurementLayers.splice(deletedRefMeasureLayerIndex, 1);
+      
+      const layerIndex = this.geoJsonLayers.findIndex(l => l.id === deletedRefMeasureLayerId);
+      if (layerIndex != -1) {
+        this.geoJsonLayers.splice(layerIndex, 1);
+      }
+    }
+  }
+
+  private addLayers() {
     if (!this.selectedAnalysis) {
       return;
     }
 
     for (const refMeasure of this.selectedAnalysis.reference_measurements) {
-      const refMeasureLayer = new ReferenceMeasurementLayer(this.vueComponent, this.selectedAnalysis || null, refMeasure);
-      this.referenceMeasurementLayers.push(refMeasureLayer);
-      this.geoJsonLayers.push(refMeasureLayer.toGeoLayer());
+      this.addLayer(refMeasure);
     }
+  }
+
+  private addLayer(refMeasure: ReferenceMeasurementSchema) {
+    const refMeasureLayer = new ReferenceMeasurementLayer(this.vueComponent, this.selectedAnalysis!, refMeasure);
+    this.referenceMeasurementLayers.push(refMeasureLayer);
+    this.geoJsonLayers.push(refMeasureLayer.toGeoLayer());
   }
 
   public updateVisibility(): void {

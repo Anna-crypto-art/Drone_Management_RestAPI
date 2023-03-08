@@ -530,7 +530,7 @@ export default class AppVisualization
   @CatchError()
   private createLayers(): void {
     this.componentLayers = this.componentLayerTypes
-      .map(componentType => new (componentType as any)(this, this.refMeasuredPcsCodes)); 
+      .map(componentType => new (componentType as any)(this)); 
 
     this.piLayersHierarchy = new PILayersHierarchy(
       this,
@@ -656,6 +656,7 @@ export default class AppVisualization
     }
 
     await this.rerenderComponentLayers();
+    await this.refMeasureLayers!.updateRefMeasuresOfSelectedAnalysis();
   }
 
   @CatchError()
@@ -663,6 +664,7 @@ export default class AppVisualization
     this.refMeasuredPcsCodes.push(fieldgeometryComponent.kks);
 
     await this.rerenderComponentLayers();
+    await this.refMeasureLayers!.updateRefMeasuresOfSelectedAnalysis();
   }
 }
 </script>
