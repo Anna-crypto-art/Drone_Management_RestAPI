@@ -285,10 +285,7 @@ export default class AppAnalysisMonitoring extends BaseAuthComponent {
       { key: "state", label: this.$t("state").toString() },
       { key: "instance_type", label: this.$t("instance-type").toString() },
       { key: "volume_size", label: this.$t("volume-size").toString() },
-      // { key: "tags", label: this.$t("tags").toString() },
       { key: "git_branch", label: this.$t("git-branch").toString() },
-      // { key: "git_pull_on_startup", label: this.$t("git-pull-on-startup").toString() },
-      // { key: "start_worker_on_startup", label: this.$t("start-worker-on-startup").toString() },
     ];
 
     this.updateOperationsStatus();
