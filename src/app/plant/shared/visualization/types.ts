@@ -21,6 +21,12 @@ export interface LegendEntry {
 export interface Legend {
   id: string;
   entries: LegendEntry[];
+  merge?: {
+    name: string;
+    count: number;
+    metaSum?: number;
+    metaIds?: string[];
+  }
 }
 
 export interface GroupKPILayer {

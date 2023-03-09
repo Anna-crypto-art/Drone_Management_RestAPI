@@ -49,6 +49,7 @@ export class RefMeasureLayers {
         .find(rml => rml.referenceMeasurement.id === refMeasure.id);
       
       if (existingRefMeasureLayer) {
+        existingRefMeasureLayer.reloadLayer();
         if (existingRefMeasureLayer.getSelected()) {
           existingRefMeasureLayer.rerender();
         }

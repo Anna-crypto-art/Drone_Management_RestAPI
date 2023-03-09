@@ -459,16 +459,53 @@ export default class AppVisualization
 
   async onLayerSelected(selected: boolean, legend: Legend | undefined) {
     if (legend) {
-      const legendIndex = this.legends.findIndex(l => l.id === legend.id);
+      let existingLegend = this.legends.find(l => l.id === legend.id || l.merge?.metaIds?.includes(legend.id));
+
       if (selected) {
-        if (legendIndex === -1) {
+        if (legend.merge) {
+          // Merge multiple Legends that have "merge" property and the same color.
+          // Currently used by ReferenceMeasurementLayer, only
+
+          legend.merge.metaSum = legend.merge.count;
+          legend.merge.metaIds = [];
+
+          const mergeLegend = this.legends.find(l => l.merge && l.entries[0].color === legend.entries[0].color);
+          if (mergeLegend) {
+            legend.merge.metaSum += mergeLegend.merge!.metaSum || mergeLegend.merge!.count;
+            legend.merge.metaIds.push(mergeLegend.id);
+            
+            const mergeLegendIndex = this.legends.findIndex(l => l.id === mergeLegend.id);
+
+            this.legends.splice(mergeLegendIndex, 1);
+          }
+
+          legend.entries[0].name = legend.merge.metaSum + " " + legend.merge.name;
+        }
+
+        if (!existingLegend) {
           this.legends.push(legend);
         } else {
           throw Error("Legend id " + legend.id + " already added");
         }
       } else {
-        if (legendIndex != -1) {
-          this.legends.splice(legendIndex, 1);
+        if (existingLegend) {
+          if (legend.merge && existingLegend.merge!.metaSum! > legend.merge.count) {
+            // The ("legend.merge")-code mutated to a complex thing.... 
+            // I feel sorry for the developer, who is trying to understand...
+
+            existingLegend.merge!.metaSum! -= legend.merge.count;
+
+            const metaIdIndex = existingLegend.merge!.metaIds!.findIndex(id => id === legend.id);
+            if (metaIdIndex != -1) {
+              existingLegend.merge!.metaIds!.splice(metaIdIndex, 1);
+            } else {
+              existingLegend.id = existingLegend.merge!.metaIds![0];
+            }
+            
+            existingLegend.entries[0].name = existingLegend.merge!.metaSum + " " + existingLegend.merge!.name;
+          } else {
+            this.legends.splice(this.legends.findIndex(l => l.id === existingLegend!.id), 1);
+          }
         }
       }
     }

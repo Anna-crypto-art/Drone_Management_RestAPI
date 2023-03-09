@@ -13,6 +13,7 @@ import dateHelper from "@/app/shared/services/helper/date-helper";
 import { ReferenceMeasurementEntriesSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
 import { OrhtoImageMixin } from "../mixins/ortho-image-mixin";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
+import { transformExtent } from "ol/proj";
 
 export abstract class ComponentLayer extends LayerBase {
   protected abstract readonly componentId: ApiComponent;
@@ -74,7 +75,9 @@ export abstract class ComponentLayer extends LayerBase {
 
   public async load(): Promise<Record<string, unknown> | undefined> {
     if (this.zoomWidths) {
-      this.onZoom((zoomlevel) => {
+      this.onZoom((zoomlevel, extent) => {
+        console.log(extent);
+
         if (zoomlevel) {
           let matchingZoomLevel: string | null = null;
 

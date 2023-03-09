@@ -1,7 +1,8 @@
 import { FeatureLike } from "ol/Feature";
+import { Extent } from "ol/extent";
 import { Style, Stroke, Text, Fill } from "ol/style";
 import { asArray, asString } from "ol/color";
-import { FeatureInfoGroup, FeatureInfos, FeatureInfosMeta, IPlantVisualization } from "../types";
+import { FeatureInfoGroup, FeatureInfos, FeatureInfosMeta, IPlantVisualization, Legend } from "../types";
 import { GeoJSONLayer, VectorGeoLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { Geolocation, Feature } from "ol";
@@ -15,6 +16,7 @@ import { ReferenceMeasurementEntriesSchema, RefMeasureEntry, RefMeasureEntryKeyF
 import { SimpleAnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import dateHelper from "@/app/shared/services/helper/date-helper";
+import { transformExtent } from "ol/proj";
 
 export const GEO_JSON_OPTIONS = { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" };
 
@@ -53,16 +55,28 @@ export abstract class LayerBase {
     });
   }
 
+  protected getLegend(): Legend | undefined {
+    return undefined;
+  }
+
   protected onSelected(selected: boolean): void { 
     this.selected = selected;
   }
 
-  protected onZoom(onZoomCallback: (zoomLevel: number | undefined) => void): void {
-    const view = this.vueComponent.openLayers?.getMap().getView();
-
-    if (view) {
+  protected onZoom(onZoomCallback: (zoomLevel: number | undefined, extend: Extent) => void): void {
+    const map = this.vueComponent.openLayers?.getMap();
+    if (map) {
+      const view = map.getView();
       view.on("change:resolution", (e) => {
-        onZoomCallback(view.getZoom());
+        const extent = transformExtent(
+          view.calculateExtent(map.getSize()),
+          GEO_JSON_OPTIONS.featureProjection,
+          GEO_JSON_OPTIONS.dataProjection
+        );
+
+        const zoom = view.getZoom(); 
+
+        onZoomCallback(zoom, extent);
       });
     }
   }

@@ -4,7 +4,7 @@ import { LayerBase } from "./layer-base";
 import { FeatureLike } from "ol/Feature";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { LayerColor, KeyFigureColorScheme, KeyFigureInfo, OrthoImage } from "./types";
-import { FeatureInfo, FeatureInfos, FeatureProperties, Legend, IPlantVisualization, FeatureAction, PropsFeature, FeatureActionsSummary, ComparedFeatureType, ComparedFeatures, FeatureInfosMeta } from "../types";
+import { FeatureInfo, FeatureInfos, FeatureProperties, IPlantVisualization, PropsFeature, FeatureActionsSummary, ComparedFeatureType, ComparedFeatures, FeatureInfosMeta } from "../types";
 import { AnalysisResultMappingEntry, AnalysisResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
@@ -18,7 +18,6 @@ import { analysisResultEventService } from "../../plant-admin-view/analysis-resu
 import { AnalysisResultEvent } from "../../plant-admin-view/types";
 import { FilterFieldType } from "../../filter-fields/types";
 import { keyFigureRainbowColors } from "@/app/plant/shared/visualization/key-figure-colors";
-import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
 
 export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q extends GeoVisualQuery> extends LayerBase implements IOrthoImageMixin {
   protected abstract readonly analysisResultMapping: AnalysisResultMappings<T>;
@@ -65,10 +64,6 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
 
   protected getDescription(): string | undefined {
     return this.description && this.vueComponent.$t(this.description).toString();
-  }
-
-  protected getLegend(): Legend | undefined {
-    return undefined;
   }
 
   public getLegendId(): string {

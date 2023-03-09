@@ -1,22 +1,18 @@
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import dateHelper from "@/app/shared/services/helper/date-helper";
-import { MathHelper } from "@/app/shared/services/helper/math-helper";
-import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
-import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
 import { ReferenceMeasurementSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { FeatureLike } from "ol/Feature";
 import { Stroke, Style } from "ol/style";
 import { OrhtoImageMixin } from "../mixins/ortho-image-mixin";
 import { IOrthoImageMixin } from "../mixins/types";
-import { FeatureInfo, FeatureInfos, FeatureInfosMeta, IPlantVisualization } from "../types";
+import { FeatureInfos, FeatureInfosMeta, IPlantVisualization, Legend } from "../types";
 import { LayerBase } from "./layer-base";
 import { LayerColor, OrthoImage } from "./types";
 
 export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageMixin {
-  protected zIndex = 9;
+  protected zIndex = 20;
 
   public orthoImages: OrthoImage[] | null = null;
 
@@ -42,6 +38,12 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
 
   public get id(): string | undefined {
     return `reference-measurement-${this.referenceMeasurement.id}`;
+  }
+
+  protected async onSelected(selected: boolean): Promise<void> {
+    super.onSelected(selected);
+
+    await this.vueComponent.onLayerSelected(selected, this.getLegend());
   }
 
   protected get name(): string {
@@ -73,6 +75,24 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
         width: 3,
       }),
     });
+  }
+
+  protected getLegend(): Legend | undefined {
+    const features = this.getVectorGeoLayer().getSource()?.getFeatures() || [];
+
+    return {
+      id: "legend-" + this.id,
+      entries: [
+        {
+          color: LayerColor.volateqBlue,
+          name: features.length + " " + this.vueComponent.$t("reference-measurements").toString(),
+        }
+      ],
+      merge: {
+        name: this.vueComponent.$t("reference-measurements").toString(),
+        count: features.length,
+      }
+    };
   }
 
   public async onClick(feature: FeatureLike, featureInfosMeta: FeatureInfosMeta): Promise<FeatureInfos | undefined> {
