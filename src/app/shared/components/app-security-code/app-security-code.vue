@@ -5,6 +5,7 @@
     </div>
     <b-form-group :label="inputLabel">
       <b-form-input
+        ref="securityCodeInput"
         v-model="code"
         type="text"
         :placeholder="placeholderText"
@@ -18,7 +19,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Ref } from "vue-property-decorator";
 import Vue from "vue";
 import { UserAuthMethod } from "../../services/volateq-api/api-schemas/user-schemas";
 import AppIcon from "@/app/shared/components/app-icon/app-icon.vue";
@@ -33,10 +34,16 @@ export default class AppSecurityCode extends Vue {
   @Prop({ required: true }) authMethod!: UserAuthMethod;
   @Prop({ default: null }) value!: string | null;
 
+  @Ref() securityCodeInput!: HTMLInputElement;
+
   code: string | null = null;
 
   created() {
     this.code = this.value;
+  }
+
+  mounted() {
+    this.securityCodeInput.focus();
   }
 
   onChange() {

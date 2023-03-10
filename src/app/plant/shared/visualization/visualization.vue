@@ -213,6 +213,7 @@ export default class AppVisualization
       this.piLayersHierarchy!.getSelectedAnalysisResultId() !== this.firstAnalysisResult?.id;
 
     this.piLayersHierarchy!.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
+    this.refMeasureLayers!.addAndSelectAnalysis(this.firstAnalysis?.id);
     
     const multiAnalysesSelectedBefore = !!this.piLayersHierarchy!.getCompareAnalysisResultId();
     this.piLayersHierarchy!.setCompareAnalysisResult(null);
@@ -232,6 +233,7 @@ export default class AppVisualization
     if (analysisSelectionChanged || multiAnalysesSelectedBefore) {
       if (!this.firstLoad) {
         await this.piLayersHierarchy!.reselectAllLayers(this.enableMultiSelection);
+        await this.refMeasureLayers!.reselectAllLayers();
       }
 
       await this.reloadRefMeasureComponents();
@@ -239,8 +241,7 @@ export default class AppVisualization
 
     this.piLayersHierarchy!.updateVisibility();
     this.availableOrthoImages = this.piLayersHierarchy!.getAvailableOrthoImages();
-
-    await this.refMeasureLayers!.addAndSelectAnalysis(this.firstAnalysis?.id);
+    
     this.refMeasureLayers!.updateVisibility();
 
     const hasPISelected = await this.onFirstLoad();
@@ -260,6 +261,8 @@ export default class AppVisualization
     
     this.piLayersHierarchy!.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     this.piLayersHierarchy!.setCompareAnalysisResult(this.compareAnalysisResult || null);
+
+    this.refMeasureLayers!.addAndSelectAnalysis(undefined);
     
     // "Multi selection" and "show could not be measured" is not allowed for compare mode
     this.disableMultiSelection();
@@ -272,13 +275,14 @@ export default class AppVisualization
       await this.piLayersHierarchy!.toggleShowUndefined(false, false);
 
       await this.piLayersHierarchy!.reselectAllLayers(false);
+
+      await this.refMeasureLayers!.reselectAllLayers();
     }
     
     this.piLayersHierarchy!.updateVisibility();
 
     this.availableOrthoImages = this.piLayersHierarchy!.getAvailableOrthoImages();
 
-    await this.refMeasureLayers!.addAndSelectAnalysis(undefined);
     this.refMeasureLayers!.updateVisibility();
 
     const hasPISelected = await this.onFirstLoad();
@@ -693,6 +697,7 @@ export default class AppVisualization
     }
 
     await this.rerenderComponentLayers();
+    await this.piLayersHierarchy!.rerenderSelectedLayers();
     await this.refMeasureLayers!.updateRefMeasuresOfSelectedAnalysis();
   }
 
@@ -701,6 +706,7 @@ export default class AppVisualization
     this.refMeasuredPcsCodes.push(fieldgeometryComponent.kks);
 
     await this.rerenderComponentLayers();
+    await this.piLayersHierarchy!.rerenderSelectedLayers();
     await this.refMeasureLayers!.updateRefMeasuresOfSelectedAnalysis();
   }
 }

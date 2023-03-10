@@ -18,6 +18,7 @@ import { analysisResultEventService } from "../../plant-admin-view/analysis-resu
 import { AnalysisResultEvent } from "../../plant-admin-view/types";
 import { FilterFieldType } from "../../filter-fields/types";
 import { keyFigureRainbowColors } from "@/app/plant/shared/visualization/key-figure-colors";
+import { Stroke, Style } from "ol/style";
 
 export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q extends GeoVisualQuery> extends LayerBase implements IOrthoImageMixin {
   protected abstract readonly analysisResultMapping: AnalysisResultMappings<T>;
@@ -30,6 +31,8 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
 
   protected readonly orhtoImageMixin: OrhtoImageMixin;
   public orthoImages: OrthoImage[] | null = null;
+
+  protected readonly refMeasureFeatureStrokeWidth: number = 3;
 
   public geoJSON?: {
     type: string;
@@ -61,6 +64,20 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
   }
 
   protected created(): void {/* override me */}
+
+  protected getAddStyles(feature: FeatureLike): Style[] | undefined {
+    const pcs = this.getPcs(feature);
+    if (pcs && this.vueComponent.refMeasuredPcsCodes.includes(pcs)) {
+      return [new Style({
+        stroke: new Stroke({
+          width: this.refMeasureFeatureStrokeWidth,
+          color: LayerColor.volateqBlue,
+        }),
+      })];
+    }
+
+    return super.getAddStyles(feature);
+  }
 
   protected getDescription(): string | undefined {
     return this.description && this.vueComponent.$t(this.description).toString();

@@ -78,7 +78,7 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
   }
 
   protected getLegend(): Legend | undefined {
-    const features = this.getVectorGeoLayer().getSource()?.getFeatures() || [];
+    const features = this.getVectorGeoLayer()?.getSource()?.getFeatures() || [];
 
     return {
       id: "legend-" + this.id,

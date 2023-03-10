@@ -21,13 +21,15 @@ export class TrackerComponentLayer extends ComponentLayer {
   protected created(): void {
     layerEvents.onOrthoImageLoaded((features: Feature<Geometry>[]) => {
       const vectorGeoLayer = this.getVectorGeoLayer();
-      vectorGeoLayer.getSource()!.addFeatures(features);
+      vectorGeoLayer?.getSource()!.addFeatures(features);
     });
 
     layerEvents.onRemoveOrthoImages((features: Feature<Geometry>[]) => {
-      const layerSource = this.getVectorGeoLayer().getSource()!;
-      for (const feature of features) {
-        layerSource.removeFeature(feature);
+      const layerSource = this.getVectorGeoLayer()?.getSource();
+      if (layerSource) {
+        for (const feature of features) {
+          layerSource.removeFeature(feature);
+        }
       }
     });
   }

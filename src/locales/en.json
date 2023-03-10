@@ -565,6 +565,8 @@
   "reference-measurement-of": "Reference measurement of {user}",
   "measure-timestamp": "Measuring time",
   "delete-reference-measurement": "Delete reference measurement",
+  "show-more": "Show more",
+  "hide": "Hide",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

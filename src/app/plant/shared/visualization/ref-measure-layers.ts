@@ -28,13 +28,13 @@ export class RefMeasureLayers {
     };
   }
 
-  public async addAndSelectAnalysis(analysisId: string | undefined) {
+  public addAndSelectAnalysis(analysisId: string | undefined) {
     this.selectedAnalysis = this.analyses.find(analysis => analysis.id === analysisId);
     
     if (analysisId && !this.analysesIds.find(id => id === analysisId)) {
       this.analysesIds.push(analysisId);
 
-      await this.addLayers();
+      this.addLayers();
     }
   }
 
@@ -108,5 +108,24 @@ export class RefMeasureLayers {
     }
 
     this.groupLayer.visible = !allInvisble;
+  }
+
+  public async reselectAllLayers(): Promise<void> {
+    const reselectUserMails = this.referenceMeasurementLayers
+      .filter(l => l.getSelected())
+      .map(l => l.referenceMeasurement.user_created.email);
+
+    for (const refMeasureLayer of this.referenceMeasurementLayers) {
+      const isLayerOfSelectedAnalysis = refMeasureLayer.referenceMeasurement.analysis_id === this.selectedAnalysis?.id;
+
+      if (!isLayerOfSelectedAnalysis && refMeasureLayer.getSelected()) {
+        await refMeasureLayer.setSelected(false);
+      }
+      if (isLayerOfSelectedAnalysis && 
+        reselectUserMails.includes(refMeasureLayer.referenceMeasurement.user_created.email)) 
+      {
+        await refMeasureLayer.setSelected(true);  
+      }
+    }
   }
 }

@@ -10,6 +10,7 @@ export abstract class HceKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisRes
 
   protected readonly strokeWidth = 5;
   protected showPcsZoomLevel = 19;
+  protected readonly refMeasureFeatureStrokeWidth = 8;
 
   public getStyle(feature: FeatureLike): Style {
     return new Style({

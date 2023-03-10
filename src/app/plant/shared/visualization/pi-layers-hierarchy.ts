@@ -140,6 +140,13 @@ export class PILayersHierarchy {
     }
   }
 
+  public async rerenderSelectedLayers() {
+    const selectedLayers = this.getAllChildLayers().filter(childLayer => childLayer.getSelected());
+    for (const selectedLayer of selectedLayers) {
+      await selectedLayer.rerender();
+    }
+  }
+
   public async toggleShowUndefined(showUndefined: boolean, reselectLayer = true): Promise<void> {
     this.showUndefined = showUndefined
 

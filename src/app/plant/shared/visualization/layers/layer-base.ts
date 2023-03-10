@@ -49,10 +49,23 @@ export abstract class LayerBase {
   protected abstract load(): Promise<Record<string, unknown> | undefined>;
   public abstract get id(): string | undefined;
 
+  protected getAddStyles(feature: FeatureLike): Style[] | undefined {
+    return undefined;
+  }
+
   protected getStyle(feature: FeatureLike): Style {
     return new Style({
       text: this.showText(feature),
     });
+  }
+
+  private style(feature: FeatureLike): Style | Style[] {
+    const addStyles = this.getAddStyles(feature);
+    if (addStyles) {
+      return [...addStyles, this.getStyle(feature)];
+    }
+
+    return this.getStyle(feature);
   }
 
   protected getLegend(): Legend | undefined {
@@ -114,7 +127,7 @@ export abstract class LayerBase {
         autoZoom: this.autoZoom,
         geoJSONLoader: () => this.load(),
         geoJSONOptions: GEO_JSON_OPTIONS,
-        style: (feature: FeatureLike) => this.getStyle(feature),
+        style: (feature: FeatureLike) => this.style(feature),
         onSelected: (selected: boolean) => this.onSelected(selected),
         visible: this.visible && !this.invisibleAutoSelection,
         zIndex: this.zIndex,
@@ -173,7 +186,7 @@ export abstract class LayerBase {
     return asString([r, g, b, alpha]);
   }
 
-  public getVectorGeoLayer(): VectorGeoLayer {
+  public getVectorGeoLayer(): VectorGeoLayer | undefined {
     return this.vueComponent.openLayers!.getMap().getAllLayers().find(layer => layer.getProperties()['id'] === this.id) as VectorGeoLayer;
   }
 
@@ -219,7 +232,7 @@ export abstract class LayerBase {
       this.positionFeature!.setGeometry(coordinates ? new Point(coordinates) : undefined);
     });
     
-    this.getVectorGeoLayer().getSource()?.addFeatures([this.accuracyFeature, this.positionFeature]);
+    this.getVectorGeoLayer()?.getSource()?.addFeatures([this.accuracyFeature, this.positionFeature]);
 
     this.geolocation.setTracking(true);
   }
@@ -231,12 +244,12 @@ export abstract class LayerBase {
     }
 
     if (this.positionFeature) {
-      this.getVectorGeoLayer().getSource()?.removeFeature(this.positionFeature);
+      this.getVectorGeoLayer()?.getSource()?.removeFeature(this.positionFeature);
       this.positionFeature = undefined;
     }
 
     if (this.accuracyFeature) {
-      this.getVectorGeoLayer().getSource()?.removeFeature(this.accuracyFeature);
+      this.getVectorGeoLayer()?.getSource()?.removeFeature(this.accuracyFeature);
       this.accuracyFeature = undefined;
     }
   }
