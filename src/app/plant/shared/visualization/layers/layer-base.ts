@@ -40,6 +40,7 @@ export abstract class LayerBase {
   protected showPcsZoomLevel = 15;
   protected refreshLayer = false;
   protected readonly events = new SequentialEventEmitter();
+  protected readonly minZoom: number | undefined = undefined;
 
   public invisibleAutoSelection?: boolean;
 
@@ -135,6 +136,7 @@ export abstract class LayerBase {
         reloadLayer: this.refreshLayer,
         id: this.id,
         events: this.events,
+        minZoom: this.minZoom,
       };
     }
 
