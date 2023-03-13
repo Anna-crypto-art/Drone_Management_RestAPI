@@ -1,3 +1,4 @@
+import { GeoJSON } from "@/app/shared/components/app-geovisualization/types/layers";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
@@ -7,7 +8,7 @@ import { FeatureLike } from "ol/Feature";
 import { Stroke, Style } from "ol/style";
 import { OrhtoImageMixin } from "../mixins/ortho-image-mixin";
 import { IOrthoImageMixin } from "../mixins/types";
-import { FeatureInfos, FeatureInfosMeta, IPlantVisualization, Legend } from "../types";
+import { FeatureInfos, FeatureInfosMeta, IPlantVisualization, Legend, PropsFeature } from "../types";
 import { LayerBase } from "./layer-base";
 import { LayerColor, OrthoImage } from "./types";
 
@@ -58,7 +59,7 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
     return userName + (notes ? " - " + notes : "")
   }
 
-  protected async load(): Promise<Record<string, unknown> | undefined> {
+  protected async load(): Promise<GeoJSON<PropsFeature> | undefined> {
     try {
       return await volateqApi.getReferenceMeasurementValuesGeoVisual(this.referenceMeasurement.id);
     } catch (e) {

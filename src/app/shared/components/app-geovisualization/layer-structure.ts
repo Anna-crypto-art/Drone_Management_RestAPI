@@ -6,6 +6,7 @@ import LayerLoader from "./loader/layer-loader";
 import LayerRenderer from "ol/renderer/Layer";
 import { SequentialEventEmitter } from "../../services/app-event-service/sequential-event-emitter";
 import { LayerEvent } from "./types/events";
+import { Watch } from "vue-property-decorator";
 
 export class LayerStructure extends SequentialEventEmitter {
   private readonly childLayers: LayerStructure[];
@@ -15,6 +16,8 @@ export class LayerStructure extends SequentialEventEmitter {
   public ignoreSelectedWatcher = false;
 
   public collapsed = false;
+
+  private selectWorkingQueue: number[] = [];
 
   constructor(
     public readonly layerLoader?: LayerLoader<Layer<Source, LayerRenderer<any>> | undefined>,
@@ -33,7 +36,7 @@ export class LayerStructure extends SequentialEventEmitter {
       await this.emit(LayerEvent.SET_SELECTED, selected);
     });
     this.on(LayerEvent.SET_SELECTED, async (selected: boolean) => {
-      await this.selectLayer(selected) 
+      await this.selectLayer(selected);
     });
 
     this.getLayerType()?.events?.on(LayerEvent.COLLAPSE, async (collapse: boolean) => {
@@ -42,6 +45,8 @@ export class LayerStructure extends SequentialEventEmitter {
   }
 
   private async selectLayer(selected: boolean) {
+    await this.queueUp();
+
     if (selected) {
       await this.unselectParentLayers();
     }
@@ -55,6 +60,31 @@ export class LayerStructure extends SequentialEventEmitter {
         await childLayer.setSelected(selected);
       }
     }
+
+    await this.next();    
+  }
+
+  private async queueUp() {
+    const ticketNumber = this.selectWorkingQueue.length > 0 ? this.selectWorkingQueue[0] + 1 : 0;
+    this.selectWorkingQueue.unshift(ticketNumber);
+
+    return await new Promise<void>((resolve) => {
+      if (this.selectWorkingQueue.length === 1) {
+        resolve();
+      }
+
+      this.on("enqueueNextSelect", (nextTicket) => {
+        if (nextTicket === undefined || nextTicket === ticketNumber) {
+          resolve();
+        }
+      });
+    })
+  }
+
+  private async next() {
+    this.selectWorkingQueue.pop();
+    await this.emit("enqueueNextSelect", 
+      this.selectWorkingQueue.length > 0 ? this.selectWorkingQueue[this.selectWorkingQueue.length - 1] : undefined);
   }
 
   private getLayerType(): BaseLayerType | undefined {

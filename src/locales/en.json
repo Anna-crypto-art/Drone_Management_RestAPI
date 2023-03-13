@@ -567,6 +567,8 @@
   "delete-reference-measurement": "Delete reference measurement",
   "show-more": "Show more",
   "hide": "Hide",
+  "fetching-data": "Fetching data...",
+  "drawing-features": "Drawing {features} features...",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

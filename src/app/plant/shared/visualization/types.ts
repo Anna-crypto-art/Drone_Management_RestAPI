@@ -48,6 +48,7 @@ export interface IPlantVisualization {
     myRefMeasureEntryKeyFigures: RefMeasureEntryKeyFigureSchema[] | null,
   ): void;
   refMeasuredPcsCodes: string[];
+  updateLoadingStatus(loadingStatus: string): void;
 }
 
 export interface FeatureProperties {
@@ -101,7 +102,7 @@ export interface FeatureAction {
   action: () => Promise<void>;
 }
 
-export type PropsFeature = FeatureLike & {
+export type PropsFeature = {
   properties: FeatureProperties;
 }
 

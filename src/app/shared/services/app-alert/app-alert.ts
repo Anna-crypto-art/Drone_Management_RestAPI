@@ -10,6 +10,9 @@ export interface AppAlert {
 export enum AppAlertEvents {
   showAlert = "show-alert",
   clearAlert = "clear-alert",
+  showLoadingOverlay = "show-loading-overlay",
+  updateLoadingOverly = "update-loading-overlay",
+  hideLoadingOverlay = "hide-loading-overlay",
 }
 
 export class AppAlertEventBus extends Vue {

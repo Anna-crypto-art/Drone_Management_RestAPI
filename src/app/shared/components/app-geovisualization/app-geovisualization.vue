@@ -1,11 +1,11 @@
 <template>
   <div class="openlayers-map">
     <div class="openlayers-map-content" />
-    <div v-show="isLoading" class="openlayers-map-loading">
+    <!-- <div v-show="isLoading" class="openlayers-map-loading">
       <div class="openlayers-map-loading-icon">
         <b-spinner />
       </div>
-    </div>
+    </div> -->
 
     <app-geovisual-layer-switcher
       :layers="layers"
@@ -23,7 +23,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Watch } from "vue-property-decorator";
 
 import Map from "ol/Map";
 import View from "ol/View";
@@ -34,6 +34,9 @@ import "ol/ol.css";
 import AppGeovisualLayerSwitcher from "./components/layer-switcher.vue";
 import { LayerType } from "./types/layers";
 import { IOpenLayersComponent } from "./types/components";
+import { LoadingEvent } from "./types/events";
+import { plantViewEventService } from "@/app/plant/plant-view-event-service";
+import { PlantViewEvent } from "@/app/plant/types";
 
 @Component({
   name: "app-geovisualization",
@@ -42,6 +45,7 @@ import { IOpenLayersComponent } from "./types/components";
   },
 })
 export default class AppGeovisualization extends Vue implements IOpenLayersComponent {
+  @Prop() plantId!: string;
   @Prop() layers!: LayerType[];
   @Prop() zoom?: number;
   @Prop() center?: [number, number];
@@ -51,6 +55,7 @@ export default class AppGeovisualization extends Vue implements IOpenLayersCompo
   map: Map | null = null;
   
   layerLoading = false;
+  loadingStatus = "";
 
   created(): void {
     this.mapSetup();
@@ -60,12 +65,19 @@ export default class AppGeovisualization extends Vue implements IOpenLayersCompo
     this.map?.setTarget(this.$el.firstChild as HTMLElement);
   }
 
-  toggleLoading<Evt extends { loading: boolean }>(e: Evt): void {
+  async toggleLoading(e: LoadingEvent) {
     this.layerLoading = e.loading;
+    this.loadingStatus = e.loading && e.state || "";
+
+    await plantViewEventService.emit(this.plantId, PlantViewEvent.TOGGLE_LOADING, this.isLoading, this.loadingStatus);
   }
 
   get isLoading(): boolean {
     return this.layerLoading || this.loading;
+  }
+
+  @Watch("loading") async onLoadingChanged() {
+    await plantViewEventService.emit(this.plantId, PlantViewEvent.TOGGLE_LOADING, this.isLoading);
   }
 
   private mapSetup(): void {

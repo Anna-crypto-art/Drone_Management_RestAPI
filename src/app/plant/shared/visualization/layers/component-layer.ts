@@ -3,17 +3,14 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { LayerBase } from "./layer-base";
 import { FeatureLike } from "ol/Feature";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { FeatureInfo, FeatureInfoGroup, FeatureInfos, FeatureInfosMeta, IPlantVisualization } from "../types";
+import { FeatureInfos, FeatureInfosMeta, IPlantVisualization, PropsFeature } from "../types";
 import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
 import { LayerColor, OrthoImage } from "./types";
-import { AnalysisForViewSchema, AnalysisSchema, SimpleAnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
-import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
-import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
-import dateHelper from "@/app/shared/services/helper/date-helper";
+import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { ReferenceMeasurementEntriesSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
 import { OrhtoImageMixin } from "../mixins/ortho-image-mixin";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-import { transformExtent } from "ol/proj";
+import { GeoJSON } from "@/app/shared/components/app-geovisualization/types/layers";
 
 export abstract class ComponentLayer extends LayerBase {
   protected abstract readonly componentId: ApiComponent;
@@ -73,7 +70,7 @@ export abstract class ComponentLayer extends LayerBase {
     return this.zoomWidth || this.width;
   }
 
-  public async load(): Promise<Record<string, unknown> | undefined> {
+  public async load(): Promise<GeoJSON<PropsFeature> | undefined> {
     if (this.zoomWidths) {
       this.onZoom((zoomlevel, extent) => {
         console.log(extent);
@@ -105,7 +102,7 @@ export abstract class ComponentLayer extends LayerBase {
     }
 
     try {
-      return volateqApi.getComponentsGeoVisual(this.vueComponent.plant.id, [this.componentId]);
+      return await volateqApi.getComponentsGeoVisual(this.vueComponent.plant.id, [this.componentId]);
     } catch (e) {
       this.vueComponent.showError(e);
     }

@@ -2,8 +2,8 @@ import { FeatureLike } from "ol/Feature";
 import { Extent } from "ol/extent";
 import { Style, Stroke, Text, Fill } from "ol/style";
 import { asArray, asString } from "ol/color";
-import { FeatureInfoGroup, FeatureInfos, FeatureInfosMeta, IPlantVisualization, Legend } from "../types";
-import { GeoJSONLayer, VectorGeoLayer } from "@/app/shared/components/app-geovisualization/types/layers";
+import { FeatureInfoGroup, FeatureInfos, FeatureInfosMeta, IPlantVisualization, Legend, PropsFeature } from "../types";
+import { GeoJSON, GeoJSONLayer, VectorGeoLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { Geolocation, Feature } from "ol";
 import CircleStyle from "ol/style/Circle";
@@ -47,7 +47,7 @@ export abstract class LayerBase {
   constructor(public readonly vueComponent: BaseAuthComponent & IPlantVisualization) {}
 
   protected abstract getPcs(feature: FeatureLike): string | undefined;
-  protected abstract load(): Promise<Record<string, unknown> | undefined>;
+  protected abstract load(): Promise<GeoJSON<PropsFeature> | undefined>;
   public abstract get id(): string | undefined;
 
   protected getAddStyles(feature: FeatureLike): Style[] | undefined {

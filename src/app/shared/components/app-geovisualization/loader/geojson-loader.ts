@@ -12,6 +12,8 @@ import VectorSource from "ol/source/Vector";
 import { Style } from "ol/style";
 import LayerLoader from "./layer-loader";
 import * as ExtentFunctions from "ol/extent";
+import { i18n } from "@/main";
+import { waitFor } from "@/app/shared/services/helper/debounce-helper";
 
 export class GeoJSONLoader extends LayerLoader<
   VectorLayer<VectorSource<Geometry>> | VectorImageLayer<VectorSource<Geometry>>
@@ -21,11 +23,25 @@ export class GeoJSONLoader extends LayerLoader<
   }
 
   async doLoad(): Promise<VectorLayer<VectorSource<Geometry>> | VectorImageLayer<VectorSource<Geometry>> | undefined> {
+    this.loadingCallback!({
+      loading: true,
+      state: i18n.t("fetching-data").toString(),
+    });
+
     const features = await this.layerType.geoJSONLoader();
     if (features === undefined) {
       return undefined;
     }
-    
+
+    this.loadingCallback!({
+      loading: true,
+      state: i18n.t("drawing-features", { features: features.features.length }).toString()
+    });
+
+    // We have to wait for the $emit call of the loadingCallback with drawing features message. 
+    // Otherwise the loading state will not be updated
+    await waitFor(30);
+
     const source = new VectorSource({
       features: new GeoJSON().readFeatures(features, {
         ...this.layerType.geoJSONOptions,

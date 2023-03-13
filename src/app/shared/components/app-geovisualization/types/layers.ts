@@ -4,6 +4,12 @@ import VectorImageLayer from "ol/layer/VectorImage";
 import VectorSource from "ol/source/Vector";
 import { StyleFunction } from "ol/style/Style";
 import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/sequential-event-emitter";
+import { FeatureLike } from "ol/Feature";
+
+export interface GeoJSON<T> {
+  type: string;
+  features: (FeatureLike & T)[] ;
+}
 
 export interface BaseLayerType {
   name: string;
@@ -20,7 +26,7 @@ export interface BaseLayerType {
 
 export interface GeoJSONLayer extends BaseLayerType {
   type: "geojson";
-  geoJSONLoader: () => Record<string, unknown> | undefined | Promise<Record<string, unknown> | undefined>;
+  geoJSONLoader: () => GeoJSON<unknown> | undefined | Promise<GeoJSON<unknown> | undefined>;
   geoJSONOptions?: {
     dataProjection: string;
     featureProjection: string;

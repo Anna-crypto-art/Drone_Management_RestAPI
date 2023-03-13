@@ -3,7 +3,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { LayerBase } from "./layer-base";
 import { FeatureLike } from "ol/Feature";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
-import { LayerColor, KeyFigureColorScheme, KeyFigureInfo, OrthoImage } from "./types";
+import { LayerColor, KeyFigureColorScheme, KeyFigureInfo, OrthoImage, KeyFigureGeoJSON } from "./types";
 import { FeatureInfo, FeatureInfos, FeatureProperties, IPlantVisualization, PropsFeature, FeatureActionsSummary, ComparedFeatureType, ComparedFeatures, FeatureInfosMeta } from "../types";
 import { AnalysisResultMappingEntry, AnalysisResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
@@ -19,6 +19,7 @@ import { AnalysisResultEvent } from "../../plant-admin-view/types";
 import { FilterFieldType } from "../../filter-fields/types";
 import { keyFigureRainbowColors } from "@/app/plant/shared/visualization/key-figure-colors";
 import { Stroke, Style } from "ol/style";
+import { GeoJSON } from "@/app/shared/components/app-geovisualization/types/layers";
 
 export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q extends GeoVisualQuery> extends LayerBase implements IOrthoImageMixin {
   protected abstract readonly analysisResultMapping: AnalysisResultMappings<T>;
@@ -34,11 +35,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
 
   protected readonly refMeasureFeatureStrokeWidth: number = 3;
 
-  public geoJSON?: {
-    type: string;
-    features: PropsFeature[];
-    custom: { components_total_count: number; mirrors_per_sce?: number };
-  };
+  public geoJSON?: KeyFigureGeoJSON;
 
   constructor(
     vueComponent: BaseAuthComponent & IPlantVisualization,
@@ -177,7 +174,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     return undefined;
   }
 
-  public async load(): Promise<Record<string, unknown> | undefined> {
+  public async load(): Promise<GeoJSON<PropsFeature> | undefined> {
     try {
       if (this.enableCompare && this.compareAnalysisResult) {
         this.geoJSON = await volateqApi.getKeyFiguresGeoVisualCompare(
@@ -194,7 +191,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
           this.keyFigure.id,
           this.query
         );
-      }      
+      }
     } catch (e) {
       this.vueComponent.showError(e);
     }
@@ -282,6 +279,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
   }
 
   public getLegendEntryCount(featureCount?: number, precision = 10): string {
+    
     featureCount = featureCount !== undefined ? featureCount : this.geoJSON!.features.length;
     const totalCount = this.geoJSON!.custom.components_total_count;
 

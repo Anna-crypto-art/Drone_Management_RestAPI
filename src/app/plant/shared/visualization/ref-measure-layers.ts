@@ -77,6 +77,9 @@ export class RefMeasureLayers {
         this.geoJsonLayers.splice(layerIndex, 1);
       }
     }
+
+    this.groupLayer.visible = this.referenceMeasurementLayers
+      .filter(l => l.referenceMeasurement.analysis_id === this.selectedAnalysis!.id).length > 0;
   }
 
   private addLayers() {

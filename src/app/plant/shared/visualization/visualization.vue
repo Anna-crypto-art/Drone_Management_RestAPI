@@ -1,6 +1,13 @@
 <template>
   <div class="visualization">
-    <app-geovisualization ref="openLayers" v-if="hasLayers" :layers="layers" :loading="loading" @click="onOpenLayersClick">
+    <app-geovisualization 
+      ref="openLayers"
+      v-if="hasLayers"
+      :plantId="plant.id"
+      :layers="layers"
+      :loading="loading"
+      @click="onOpenLayersClick"
+    >
       <template #pcs>
         {{ $t("pcs") }} <app-explanation>{{ $t("pcs_expl") }}</app-explanation>
       </template>
@@ -103,6 +110,8 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { RefMeasureEntry, RefMeasureEntryKeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
 import { LayerBase } from "./layers/layer-base";
 import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
+import { plantViewEventService } from "../../plant-view-event-service";
+import { PlantViewEvent } from "../../types";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -231,12 +240,12 @@ export default class AppVisualization
     }
 
     if (analysisSelectionChanged || multiAnalysesSelectedBefore) {
+      await this.reloadRefMeasureComponents();
+      
       if (!this.firstLoad) {
         await this.piLayersHierarchy!.reselectAllLayers(this.enableMultiSelection);
         await this.refMeasureLayers!.reselectAllLayers();
       }
-
-      await this.reloadRefMeasureComponents();
     }
 
     this.piLayersHierarchy!.updateVisibility();
@@ -269,6 +278,8 @@ export default class AppVisualization
     this.disableShowCouldNotBeMeasured();
     
     if (selectionChanged) {
+      await this.reloadRefMeasureComponents();
+
       this.piLayersHierarchy!.toggleMultiSelection(false);
       this.piLayersHierarchy!.toggleMultiSelectionDeep(false);
 
@@ -288,8 +299,6 @@ export default class AppVisualization
     const hasPISelected = await this.onFirstLoad();
     if (!hasPISelected && selectionChanged) {
       await this.piLayersHierarchy!.collapseFirstParentComponentLayer();
-
-      await this.reloadRefMeasureComponents();
     }
 
     this.piHeadGroup!.visible = !!this.firstAnalysisResult;
@@ -644,16 +653,19 @@ export default class AppVisualization
     // clear array without loosing the reference
     this.refMeasuredPcsCodes.length = 0;
 
-    const refMeasureEntries = await volateqApi.getReferenceMeasurementEntries(this.firstAnalysis!.id);
-    for (const refMeasureEntry of refMeasureEntries.entries) {
-      this.refMeasuredPcsCodes.push(refMeasureEntry.pcs);
+    if (this.firstAnalysis) {
+      const refMeasureEntries = await volateqApi.getReferenceMeasurementEntries(this.firstAnalysis!.id);
+      for (const refMeasureEntry of refMeasureEntries.entries) {
+        this.refMeasuredPcsCodes.push(refMeasureEntry.pcs);
+      }
     }
   }
 
   private async rerenderComponentLayers() {
     for (const componentLayer of this.componentLayers) {
       if (componentLayer.isVisible && componentLayer.getSelected()) {
-        await componentLayer.rerender();
+        // await componentLayer.rerender();
+        componentLayer.rerenderMap();
       }
     }
   }
@@ -687,6 +699,10 @@ export default class AppVisualization
     );
 
     this.hideToast();
+  }
+
+  public updateLoadingStatus(loadingStatus: string) {
+    plantViewEventService.emit(this.plant.id, PlantViewEvent.UPDATE_LOADING_STATUS, loadingStatus);
   }
   
   @CatchError()
