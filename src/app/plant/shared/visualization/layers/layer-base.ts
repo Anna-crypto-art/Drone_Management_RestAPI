@@ -4,6 +4,7 @@ import { Style, Stroke, Text, Fill } from "ol/style";
 import { asArray, asString } from "ol/color";
 import { FeatureInfoGroup, FeatureInfos, FeatureInfosMeta, IPlantVisualization, Legend, PropsFeature } from "../types";
 import { GeoJSON, GeoJSONLayer, VectorGeoLayer } from "@/app/shared/components/app-geovisualization/types/layers";
+import GeoJSONFeatures from "ol/format/GeoJSON";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { Geolocation, Feature } from "ol";
 import CircleStyle from "ol/style/Circle";
@@ -17,6 +18,7 @@ import { SimpleAnalysisSchema } from "@/app/shared/services/volateq-api/api-sche
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import { transformExtent } from "ol/proj";
+import { debounce } from "@/app/shared/services/helper/debounce-helper";
 
 export const GEO_JSON_OPTIONS = { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" };
 
@@ -40,14 +42,16 @@ export abstract class LayerBase {
   protected showPcsZoomLevel = 15;
   protected refreshLayer = false;
   protected readonly events = new SequentialEventEmitter();
-  protected readonly minZoom: number | undefined = undefined;
+
+  protected readonly minZoomLevel: number | undefined = undefined;
+  protected zoomLoadedPcsCodes: Record<string, true> | undefined = undefined;
 
   public invisibleAutoSelection?: boolean;
 
   constructor(public readonly vueComponent: BaseAuthComponent & IPlantVisualization) {}
 
   protected abstract getPcs(feature: FeatureLike): string | undefined;
-  protected abstract load(): Promise<GeoJSON<PropsFeature> | undefined>;
+  protected abstract load(extent?: Extent): Promise<GeoJSON<PropsFeature> | undefined>;
   public abstract get id(): string | undefined;
 
   protected getAddStyles(feature: FeatureLike): Style[] | undefined {
@@ -77,22 +81,63 @@ export abstract class LayerBase {
     this.selected = selected;
   }
 
-  protected onZoom(onZoomCallback: (zoomLevel: number | undefined, extend: Extent) => void): void {
+  protected onZoom(onZoomCallback: (zoomLevel: number | undefined) => void): void {
     const map = this.vueComponent.openLayers?.getMap();
     if (map) {
       const view = map.getView();
       view.on("change:resolution", (e) => {
-        const extent = transformExtent(
-          view.calculateExtent(map.getSize()),
-          GEO_JSON_OPTIONS.featureProjection,
-          GEO_JSON_OPTIONS.dataProjection
-        );
-
         const zoom = view.getZoom(); 
 
-        onZoomCallback(zoom, extent);
+        onZoomCallback(zoom);
       });
     }
+  }
+
+  private async doLoad(): Promise<GeoJSON<PropsFeature> | undefined> {
+    if (this.minZoomLevel) {
+      const map = this.vueComponent.openLayers?.getMap();
+      if (map) {
+        this.zoomLoadedPcsCodes = {};
+
+        const view = map.getView();
+
+        view.on("change:center", debounce(async () => {
+          const zoomLevel = view.getZoom();
+          console.log(zoomLevel);
+
+          if (zoomLevel! >= this.minZoomLevel!) {
+            const extent = transformExtent(
+              view.calculateExtent(map.getSize()),
+              GEO_JSON_OPTIONS.featureProjection,
+              GEO_JSON_OPTIONS.dataProjection
+            );
+
+            const geoJson = await this.load(extent);
+            if (geoJson) {
+              const newFeatures: (FeatureLike & PropsFeature)[] = [];
+              for (const feature of geoJson.features) {
+                const pcs = feature.properties.name;
+                if (pcs) {
+                  if (!(pcs in this.zoomLoadedPcsCodes!)) {
+                    newFeatures.push(feature);
+                    this.zoomLoadedPcsCodes![pcs] = true;
+                  }
+                }
+              }
+
+              geoJson.features = newFeatures;
+
+              const geometryFeatures = new GeoJSONFeatures(GEO_JSON_OPTIONS).readFeatures(geoJson);
+              this.getVectorGeoLayer()?.getSource()?.addFeatures(geometryFeatures);
+            }
+          }
+        }, 100));
+      }
+
+      return { type: "FeatureCollection", features: [] }; // Empty layer
+    }
+
+    return this.load();
   }
 
   protected getName(): string {
@@ -126,7 +171,7 @@ export abstract class LayerBase {
         description: this.getDescription(),
         selected: this.selected,
         autoZoom: this.autoZoom,
-        geoJSONLoader: () => this.load(),
+        geoJSONLoader: () => this.doLoad(),
         geoJSONOptions: GEO_JSON_OPTIONS,
         style: (feature: FeatureLike) => this.style(feature),
         onSelected: (selected: boolean) => this.onSelected(selected),
@@ -136,7 +181,6 @@ export abstract class LayerBase {
         reloadLayer: this.refreshLayer,
         id: this.id,
         events: this.events,
-        minZoom: this.minZoom,
       };
     }
 

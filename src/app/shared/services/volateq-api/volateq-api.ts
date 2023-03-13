@@ -332,8 +332,12 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/plant/${plantId}`);
   }
 
-  public getComponentsGeoVisual(plantId: string, componentIds: ApiComponent[]): Promise<any> {
-    return this.get(`/auth/geo-visual/${plantId}/components`, { ids: componentIds });
+  public getComponentsGeoVisual(
+    plantId: string,
+    componentIds: ApiComponent[],
+    extent?: { min_long: number, max_long: number, min_lat: number, max_lat: number },
+  ): Promise<any> {
+    return this.get(`/auth/geo-visual/${plantId}/components`, { ids: componentIds, ...(extent ? extent : {}) });
   }
 
   public getAllKeyFigures(): Promise<KeyFigureSchema[]> {

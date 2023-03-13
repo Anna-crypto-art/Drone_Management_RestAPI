@@ -11,6 +11,7 @@ import { ReferenceMeasurementEntriesSchema } from "@/app/shared/services/volateq
 import { OrhtoImageMixin } from "../mixins/ortho-image-mixin";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { GeoJSON } from "@/app/shared/components/app-geovisualization/types/layers";
+import { Extent } from "ol/extent";
 
 export abstract class ComponentLayer extends LayerBase {
   protected abstract readonly componentId: ApiComponent;
@@ -70,11 +71,9 @@ export abstract class ComponentLayer extends LayerBase {
     return this.zoomWidth || this.width;
   }
 
-  public async load(): Promise<GeoJSON<PropsFeature> | undefined> {
+  public async load(extent: Extent): Promise<GeoJSON<PropsFeature> | undefined> {
     if (this.zoomWidths) {
-      this.onZoom((zoomlevel, extent) => {
-        console.log(extent);
-
+      this.onZoom((zoomlevel) => {
         if (zoomlevel) {
           let matchingZoomLevel: string | null = null;
 
@@ -102,7 +101,16 @@ export abstract class ComponentLayer extends LayerBase {
     }
 
     try {
-      return await volateqApi.getComponentsGeoVisual(this.vueComponent.plant.id, [this.componentId]);
+      return await volateqApi.getComponentsGeoVisual(
+        this.vueComponent.plant.id,
+        [this.componentId],
+        extent ? {
+          min_long: extent[0], 
+          min_lat: extent[1],
+          max_long: extent[2],
+          max_lat: extent[3],
+        } : undefined,
+      );
     } catch (e) {
       this.vueComponent.showError(e);
     }

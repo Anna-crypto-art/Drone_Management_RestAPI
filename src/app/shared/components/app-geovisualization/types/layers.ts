@@ -35,7 +35,6 @@ export interface GeoJSONLayer extends BaseLayerType {
   autoZoom?: boolean;
   zIndex?: number;
   layerType?: "VectorLayer" | "VectorImageLayer";
-  minZoom?: number;
 }
 
 export interface OSMLayer extends BaseLayerType {

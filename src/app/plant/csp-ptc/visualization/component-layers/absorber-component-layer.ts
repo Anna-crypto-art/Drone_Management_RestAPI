@@ -10,13 +10,12 @@ export class AbsorberComponentLayer extends ComponentLayer {
   protected readonly allowRefMeasures = true;
   public readonly name = "absorber-tubes";
   protected readonly width = 3;
-  protected readonly minZoom = 19;
+  protected readonly minZoomLevel = 18;
 
   protected showPcsZoomLevel = 19.5;
   protected zIndex = 5;
 
   protected zoomWidths = {
-    17.5: 5,
     18: 10,
     18.5: 15,
     19: 20,
