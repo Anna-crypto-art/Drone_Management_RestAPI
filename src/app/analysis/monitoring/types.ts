@@ -13,4 +13,5 @@ export interface QFlyServerSchemaItem {
   start_worker_on_startup: string;
   actions: QFlyServerAction[];
   instance_id: string;
+  notes: string;
 }
