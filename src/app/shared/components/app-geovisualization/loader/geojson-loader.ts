@@ -65,6 +65,7 @@ export class GeoJSONLoader extends LayerLoader<
         // A larger ratio avoids cut images during panning, but will cause a decrease in performance.
         // See https://openlayers.org/en/latest/apidoc/module-ol_layer_VectorImage-VectorImageLayer.html
         imageRatio: 1,
+        minZoom: this.layerType.minZoom,
       });
     } else {
       throw new Error("Unknown layerType: " + this.layerType.layerType);

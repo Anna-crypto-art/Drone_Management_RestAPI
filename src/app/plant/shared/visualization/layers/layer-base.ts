@@ -1,12 +1,13 @@
 import { FeatureLike } from "ol/Feature";
 import { Extent } from "ol/extent";
+import { Map } from "ol";
 import { Style, Stroke, Text, Fill } from "ol/style";
 import { asArray, asString } from "ol/color";
 import { FeatureInfoGroup, FeatureInfos, FeatureInfosMeta, IPlantVisualization, Legend, PropsFeature } from "../types";
 import { GeoJSON, GeoJSONLayer, VectorGeoLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 import GeoJSONFeatures from "ol/format/GeoJSON";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { Geolocation, Feature } from "ol";
+import { Geolocation, Feature, View } from "ol";
 import CircleStyle from "ol/style/Circle";
 import { Point } from "ol/geom";
 import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/sequential-event-emitter";
@@ -95,49 +96,62 @@ export abstract class LayerBase {
 
   private async doLoad(): Promise<GeoJSON<PropsFeature> | undefined> {
     if (this.minZoomLevel) {
-      const map = this.vueComponent.openLayers?.getMap();
-      if (map) {
+      if (this.zoomLoadedPcsCodes === undefined) { // is "change:center" event is already registered
         this.zoomLoadedPcsCodes = {};
-
-        const view = map.getView();
-
-        view.on("change:center", debounce(async () => {
-          const zoomLevel = view.getZoom();
-          console.log(zoomLevel);
-
-          if (zoomLevel! >= this.minZoomLevel!) {
-            const extent = transformExtent(
-              view.calculateExtent(map.getSize()),
-              GEO_JSON_OPTIONS.featureProjection,
-              GEO_JSON_OPTIONS.dataProjection
-            );
-
-            const geoJson = await this.load(extent);
-            if (geoJson) {
-              const newFeatures: (FeatureLike & PropsFeature)[] = [];
-              for (const feature of geoJson.features) {
-                const pcs = feature.properties.name;
-                if (pcs) {
-                  if (!(pcs in this.zoomLoadedPcsCodes!)) {
-                    newFeatures.push(feature);
-                    this.zoomLoadedPcsCodes![pcs] = true;
-                  }
-                }
-              }
-
-              geoJson.features = newFeatures;
-
-              const geometryFeatures = new GeoJSONFeatures(GEO_JSON_OPTIONS).readFeatures(geoJson);
-              this.getVectorGeoLayer()?.getSource()?.addFeatures(geometryFeatures);
-            }
-          }
-        }, 100));
+        
+        const map = this.vueComponent.openLayers!.getMap()!;
+        map.getView().on("change:center", debounce(async () => { await this.loadExtent(map); }, 100));
       }
 
       return { type: "FeatureCollection", features: [] }; // Empty layer
     }
 
     return this.load();
+  }
+
+  protected async loadExtent(map: Map) {
+    try {
+      this.vueComponent.setLoading(true);
+      
+      const view = map.getView();
+      const zoomLevel = view.getZoom();
+
+      if (zoomLevel! >= this.minZoomLevel!) {
+        const source = this.getVectorGeoLayer()?.getSource();
+        if (!source) {
+          throw Error("Missing layer source for loading geo data within extent")
+        }
+
+        const extent = transformExtent(
+          view.calculateExtent(map.getSize()),
+          GEO_JSON_OPTIONS.featureProjection,
+          GEO_JSON_OPTIONS.dataProjection
+        );
+
+        const geoJson = await this.load(extent);
+        if (geoJson) {
+          const newFeatures: (FeatureLike & PropsFeature)[] = [];
+          for (const feature of geoJson.features) {
+            const pcs = feature.properties.name;
+            if (pcs) {
+              if (!(pcs in this.zoomLoadedPcsCodes!)) {
+                newFeatures.push(feature);
+                this.zoomLoadedPcsCodes![pcs] = true;
+              }
+            }
+          }
+
+          geoJson.features = newFeatures;
+
+          const geometryFeatures = new GeoJSONFeatures(GEO_JSON_OPTIONS).readFeatures(geoJson);
+          source.addFeatures(geometryFeatures);
+        }
+      }
+    } catch (e) {
+      this.vueComponent.showError(e);
+    } finally {
+      this.vueComponent.setLoading(false);
+    }
   }
 
   protected getName(): string {
@@ -181,6 +195,7 @@ export abstract class LayerBase {
         reloadLayer: this.refreshLayer,
         id: this.id,
         events: this.events,
+        minZoom: this.minZoomLevel,
       };
     }
 

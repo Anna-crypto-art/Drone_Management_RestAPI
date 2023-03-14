@@ -701,8 +701,8 @@ export default class AppVisualization
     this.hideToast();
   }
 
-  public updateLoadingStatus(loadingStatus: string) {
-    plantViewEventService.emit(this.plant.id, PlantViewEvent.UPDATE_LOADING_STATUS, loadingStatus);
+  public setLoading(loading: boolean) {
+    this.loading = loading;
   }
   
   @CatchError()

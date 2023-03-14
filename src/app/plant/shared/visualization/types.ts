@@ -48,7 +48,7 @@ export interface IPlantVisualization {
     myRefMeasureEntryKeyFigures: RefMeasureEntryKeyFigureSchema[] | null,
   ): void;
   refMeasuredPcsCodes: string[];
-  updateLoadingStatus(loadingStatus: string): void;
+  setLoading(loading: boolean): void;
 }
 
 export interface FeatureProperties {

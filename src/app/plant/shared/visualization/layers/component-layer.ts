@@ -73,31 +73,8 @@ export abstract class ComponentLayer extends LayerBase {
 
   public async load(extent: Extent): Promise<GeoJSON<PropsFeature> | undefined> {
     if (this.zoomWidths) {
-      this.onZoom((zoomlevel) => {
-        if (zoomlevel) {
-          let matchingZoomLevel: string | null = null;
-
-          const zoomWidthLevels = Object.keys(this.zoomWidths!);
-          for (let i = 0; i < zoomWidthLevels.length; i++) {
-            const zoomWidthLevel = +zoomWidthLevels[i];
-            if (zoomWidthLevel > zoomlevel) {
-              if ((i + 1) === zoomWidthLevels.length) {
-                matchingZoomLevel = zoomWidthLevels[i];
-              }
-
-              break;
-            }
-
-            matchingZoomLevel = zoomWidthLevels[i];
-          }
-
-          if (matchingZoomLevel !== null) {
-            this.zoomWidth = this.zoomWidths![matchingZoomLevel];
-          } else {
-            this.zoomWidth = null;
-          }
-        }
-      });
+      this.onZoom((zoomlevel) => this.calculateZoomWidth(zoomlevel));
+      this.calculateZoomWidth(this.vueComponent.openLayers?.getMap()?.getView().getZoom());
     }
 
     try {
@@ -116,6 +93,32 @@ export abstract class ComponentLayer extends LayerBase {
     }
 
     return undefined;
+  }
+
+  protected calculateZoomWidth(zoomlevel: number | undefined) {
+    if (zoomlevel) {
+      let matchingZoomLevel: string | null = null;
+
+      const zoomWidthLevels = Object.keys(this.zoomWidths!);
+      for (let i = 0; i < zoomWidthLevels.length; i++) {
+        const zoomWidthLevel = +zoomWidthLevels[i];
+        if (zoomWidthLevel > zoomlevel) {
+          if ((i + 1) === zoomWidthLevels.length) {
+            matchingZoomLevel = zoomWidthLevels[i];
+          }
+
+          break;
+        }
+
+        matchingZoomLevel = zoomWidthLevels[i];
+      }
+
+      if (matchingZoomLevel !== null) {
+        this.zoomWidth = this.zoomWidths![matchingZoomLevel];
+      } else {
+        this.zoomWidth = null;
+      }
+    }
   }
 
   public setSelectedAnalysis(analysis: AnalysisForViewSchema | null) {
