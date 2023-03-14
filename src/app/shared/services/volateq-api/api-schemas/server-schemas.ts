@@ -45,4 +45,5 @@ export interface QFlyServerSchema {
   state: QFlyServerState;
   actions: QFlyServerAction[];
   servers_available?: number;
+  notes?: string;
 }

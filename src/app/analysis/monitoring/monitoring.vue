@@ -140,11 +140,16 @@
                   v-model="currentQFlyServer.analysis_name"
                   @change="onTagChanged"/>
               </b-form-group>
-              
+              <b-form-group :label="$t('Notes')">
+                <b-form-textarea
+                  id="new-qfly-server-notes"
+                  rows="4"
+                  v-model="currentQFlyServer.notes"
+                  @change="onTagChanged"/>
+              </b-form-group>
               <b-form-group :label="$t('run-server-action')">
                 <b-form-select v-model="selectedServerAction" :options="qFlyServerActionSelection" />
               </b-form-group>
-
               <b-form-group :label="$t('run-task')">
                 <b-form-select v-model="selectedTask" :options="runTaskSelection" :disabled="taskSelectionDisabled" />
               </b-form-group>
@@ -214,7 +219,8 @@ export default class AppAnalysisMonitoring extends BaseAuthComponent {
     },
     analysis_name: "",
     state: QFlyServerState.UNALLOCATED,
-    actions: []
+    actions: [],
+    notes: ""
   }
   qFlyServerActionSelection: { text: string, value: string | null }[] = [];
   runTaskSelection: { text: string, value: string | null }[] = [];
@@ -273,7 +279,8 @@ export default class AppAnalysisMonitoring extends BaseAuthComponent {
       git_pull_on_startup: qfly_server.server!.tags.find((item: ServerTag) => item.Key === "GitPullOnStartup")!.Value,
       start_worker_on_startup: qfly_server.server!.tags.find((item: ServerTag) => item.Key === "StartWorkerOnStartup")!.Value,
       actions: qfly_server.actions,
-      instance_id: qfly_server.server!.id
+      instance_id: qfly_server.server!.id,
+      notes: qfly_server.notes!
     }));
   }
 
@@ -282,6 +289,7 @@ export default class AppAnalysisMonitoring extends BaseAuthComponent {
     this.columns = [
       { key: "name", label: this.$t("name").toString() },
       { key: "analysis_name", label: this.$t("current-analysis").toString() },
+      { key: "notes", label: this.$t("notes").toString() },
       { key: "state", label: this.$t("state").toString() },
       { key: "instance_type", label: this.$t("instance-type").toString() },
       { key: "volume_size", label: this.$t("volume-size").toString() },
@@ -354,7 +362,8 @@ export default class AppAnalysisMonitoring extends BaseAuthComponent {
       server: qfly_server.server,
       analysis_name: qfly_server.analysis_name,
       state: qfly_server.state,
-      actions: qfly_server.actions
+      actions: qfly_server.actions,
+      notes: qfly_server.notes
     };
     
     this.selectedServerAction = null;
@@ -393,6 +402,10 @@ export default class AppAnalysisMonitoring extends BaseAuthComponent {
       {
         Key: "CurrentAnalysis",
         Value: this.currentQFlyServer.analysis_name,
+      },
+      {
+        Key: "Notes",
+        Value: this.currentQFlyServer.notes!,
       },
     ];
 
