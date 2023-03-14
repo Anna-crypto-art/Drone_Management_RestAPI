@@ -6,7 +6,7 @@
       </app-button>
     </div>
     <app-table-container>
-      <app-table :columns="columns" :rows="rows" :loading="loading" :hoverActions="true" noLineBreaks>
+      <app-table :columns="columns" :rows="rows" :loading="loading" :hoverActions="true">
         <template #cell(name)="row">
           <span class="product-package-table-name">{{ row.item.name }}</span>
         </template>
@@ -88,7 +88,7 @@
                 required />
           </b-form-group>
         </b-col>
-      </b-row>      
+      </b-row>
     </app-modal-form>
   
   </div>
