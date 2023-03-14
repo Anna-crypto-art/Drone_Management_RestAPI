@@ -586,6 +586,7 @@
   "sure-start-server": "Do you want to start {server_name}?",
   "sure-stop-server": "Do you want to stop {server_name}?",
   "qfly-server-edited-successfully": "{server_name} edited successfully",
+  "zoom-in-to-see-features": "Zoom in to see {features}",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

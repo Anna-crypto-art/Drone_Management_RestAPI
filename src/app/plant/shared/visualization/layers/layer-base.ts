@@ -46,6 +46,7 @@ export abstract class LayerBase {
 
   protected readonly minZoomLevel: number | undefined = undefined;
   protected zoomLoadedPcsCodes: Record<string, true> | undefined = undefined;
+  protected loadedExtent: Extent | undefined = undefined;
 
   public invisibleAutoSelection?: boolean;
 
@@ -99,9 +100,25 @@ export abstract class LayerBase {
       if (this.zoomLoadedPcsCodes === undefined) { // is "change:center" event is already registered
         this.zoomLoadedPcsCodes = {};
         
-        const map = this.vueComponent.openLayers!.getMap()!;
-        map.getView().on("change:center", debounce(async () => { await this.loadExtent(map); }, 100));
+        this.getMap()!.getView().on("change:center", debounce(async () => { 
+          const geoJson = await this.loadExtent();
+          if (geoJson) {
+            this.addLoadedFeatures(geoJson);
+          }
+        }, 100));
       }
+
+      const geoJson = await this.loadExtent();
+      if (geoJson) {
+        return geoJson;
+      }
+
+      this.vueComponent.showInfo(
+        this.vueComponent.$t(
+          "zoom-in-to-see-features", 
+          { features: this.vueComponent.$t("absorber-tubes").toString() },
+        ).toString(),
+      );
 
       return { type: "FeatureCollection", features: [] }; // Empty layer
     }
@@ -109,49 +126,101 @@ export abstract class LayerBase {
     return this.load();
   }
 
-  protected async loadExtent(map: Map) {
+  protected async addLoadedFeatures(geoJson: GeoJSON<PropsFeature>) {
+    const source = this.getVectorGeoLayer()?.getSource();
+    if (!source) {
+      throw Error("Missing layer source for loading geo data within extent")
+    }
+
+    const geometryFeatures = new GeoJSONFeatures(GEO_JSON_OPTIONS).readFeatures(geoJson);
+    source.addFeatures(geometryFeatures);
+  }
+
+  protected async loadExtent(): Promise<GeoJSON<PropsFeature> | undefined> {
     try {
       this.vueComponent.setLoading(true);
       
+      const map = this.getMap()!;
       const view = map.getView();
       const zoomLevel = view.getZoom();
 
       if (zoomLevel! >= this.minZoomLevel!) {
-        const source = this.getVectorGeoLayer()?.getSource();
-        if (!source) {
-          throw Error("Missing layer source for loading geo data within extent")
-        }
-
         const extent = transformExtent(
           view.calculateExtent(map.getSize()),
           GEO_JSON_OPTIONS.featureProjection,
           GEO_JSON_OPTIONS.dataProjection
         );
 
-        const geoJson = await this.load(extent);
-        if (geoJson) {
-          const newFeatures: (FeatureLike & PropsFeature)[] = [];
-          for (const feature of geoJson.features) {
-            const pcs = feature.properties.name;
-            if (pcs) {
-              if (!(pcs in this.zoomLoadedPcsCodes!)) {
-                newFeatures.push(feature);
-                this.zoomLoadedPcsCodes![pcs] = true;
+        if (this.isOutsideOfLoadedExtent(extent)) {
+          this.enlargeExtent(extent);
+
+          const geoJson = await this.load(extent);
+          if (geoJson) {
+            const newFeatures: (FeatureLike & PropsFeature)[] = [];
+            for (const feature of geoJson.features) {
+              const pcs = feature.properties.name;
+              if (pcs) {
+                if (!(pcs in this.zoomLoadedPcsCodes!)) {
+                  newFeatures.push(feature);
+                  this.zoomLoadedPcsCodes![pcs] = true;
+                }
               }
             }
+  
+            geoJson.features = newFeatures;
+  
+            return geoJson;
           }
-
-          geoJson.features = newFeatures;
-
-          const geometryFeatures = new GeoJSONFeatures(GEO_JSON_OPTIONS).readFeatures(geoJson);
-          source.addFeatures(geometryFeatures);
         }
       }
+
+      return undefined;
     } catch (e) {
       this.vueComponent.showError(e);
     } finally {
       this.vueComponent.setLoading(false);
     }
+  }
+
+  private isOutsideOfLoadedExtent(extent: Extent): boolean {
+    const min_long = extent[0];
+    const min_lat = extent[1];
+    const max_long = extent[2];
+    const max_lat = extent[3];
+
+    return this.loadedExtent === undefined || 
+      this.loadedExtent[0] > min_long ||
+      this.loadedExtent[1] > min_lat ||
+      this.loadedExtent[2] < max_long ||
+      this.loadedExtent[3] < max_lat;
+  }
+  
+  private enlargeExtent(extent: Extent) {
+    const min_long = extent[0];
+    const min_lat = extent[1];
+    const max_long = extent[2];
+    const max_lat = extent[3];
+
+    if (this.loadedExtent === undefined) {
+      this.loadedExtent = extent;
+    } else {
+      if (this.loadedExtent[0] > min_long) {
+        this.loadedExtent[0] = min_long
+      }
+      if (this.loadedExtent[1] > min_lat) {
+        this.loadedExtent[1] = min_lat
+      }
+      if (this.loadedExtent[2] < max_long) {
+        this.loadedExtent[2] = max_long
+      }
+      if (this.loadedExtent[3] < max_lat) {
+        this.loadedExtent[3] = max_lat
+      }
+    }
+  }
+
+  protected getMap(): Map | undefined {
+    return this.vueComponent.openLayers?.getMap();
   }
 
   protected getName(): string {

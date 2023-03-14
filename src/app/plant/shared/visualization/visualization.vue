@@ -110,8 +110,6 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { RefMeasureEntry, RefMeasureEntryKeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
 import { LayerBase } from "./layers/layer-base";
 import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
-import { plantViewEventService } from "../../plant-view-event-service";
-import { PlantViewEvent } from "../../types";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";

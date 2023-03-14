@@ -188,6 +188,14 @@ $theme-colors: (
   border-radius: 0 !important;
   max-width: 500px;
 }
+.b-toast.b-toast-info > .toast, .b-toast.b-toast-info > .toast > .toast-header {
+  background-color: $blue-60pc;
+  color: $white;
+  border-color: $blue;
+}
+.b-toast.b-toast-info > .toast > .toast-header > button.close {
+  color: $white;
+}
 
 .b-toaster.b-toaster-top-right .b-toaster-slot,
 .b-toaster.b-toaster-top-left .b-toaster-slot,

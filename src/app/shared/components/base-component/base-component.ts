@@ -49,4 +49,16 @@ export abstract class BaseComponent extends Vue {
       noAutoHide: !autoHide,
     });
   }
+
+  public showInfo(msg: string, autoHide = true) {
+    this.$bvToast.toast(" ", {
+      title: msg,
+      variant: "info",
+      bodyClass: "base-toast-body",
+      headerClass: "base-toast-header",
+      toaster: "b-toaster-bottom-center",
+      solid: true,
+      noAutoHide: !autoHide,
+    });
+  }
 }
