@@ -30,7 +30,10 @@
       </app-table>
     </app-table-container>
 
-    <app-reference-measurement-values :refMeasureId="selectedRefMeasureId" />
+    <app-reference-measurement-values 
+      :analysis="analysis"
+      :refMeasureId="selectedRefMeasureId"
+    />
 
     <app-modal-form
       id="move-modal"

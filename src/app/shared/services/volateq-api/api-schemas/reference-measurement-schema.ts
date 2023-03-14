@@ -27,6 +27,7 @@ export interface RefMeasureEntry {
   notes?: string;
   values?: Record<string, RefMeasureEntryValue>;
   editable: boolean,
+  ignore: boolean,
 }
 
 export interface ReferenceMeasurementEntriesSchema {

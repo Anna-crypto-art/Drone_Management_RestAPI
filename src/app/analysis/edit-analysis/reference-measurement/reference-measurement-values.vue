@@ -7,6 +7,10 @@
         :loading="loading"
         :hoverActions="true"
       >
+        <template #cell(values)="row">
+          <span v-html="row.item.values"></span>
+        </template>
+
         <template #hoverActions="row">
           <app-button
             v-show="isSuperAdmin"
@@ -30,6 +34,12 @@ import AppTable from "@/app/shared/components/app-table/app-table.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { AppTableColumns } from "@/app/shared/components/app-table/types";
+import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
+import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
+import { RefMeasureEntry, RefMeasureEntryKeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
+import { RefMeasureMappingEntryValue } from "@/app/shared/services/volateq-api/api-results-mappings/types";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
 
 @Component({
   name: "app-reference-measurement-values",
@@ -40,6 +50,7 @@ import { AppTableColumns } from "@/app/shared/components/app-table/types";
   }
 })
 export default class AppReferenceMeasurementValues extends BaseAuthComponent {
+  @Prop({ required: true }) analysis!: AnalysisSchema;
   @Prop({ default: null }) refMeasureId!: string | null;
 
   loading = false;
@@ -48,12 +59,11 @@ export default class AppReferenceMeasurementValues extends BaseAuthComponent {
   refMeasureValueColumns: AppTableColumns = [
     { key: "pcs", label: this.$t("pcs").toString() },
     { key: "notes", label: this.$t("notes").toString() },
+    { key: "values", label: this.$t("values").toString() },
     { key: "ignored", label: this.$t("ignored").toString() },
   ];
 
   async created() {
-    // TODO: add dynamic columns
-
     await this.updateRefMeasurementValues();
   }
 
@@ -62,53 +72,82 @@ export default class AppReferenceMeasurementValues extends BaseAuthComponent {
     await this.updateRefMeasurementValues();
   }
 
+  @CatchError()
   async onIgnoreClick(refMeasureItem: any) {
-    try {
-      await volateqApi.ignoreReferenceMeasurementEntry(refMeasureItem.id, !refMeasureItem.ignored);
+    await volateqApi.ignoreReferenceMeasurementEntry(refMeasureItem.id, !refMeasureItem.ignored);
 
-      this.showSuccess(this.$t("reference-measurement-value-change-success").toString())
+    refMeasureItem.ignored = !refMeasureItem.ignored;
 
-      await this.updateRefMeasurementValues();
-    } catch (e) {
-      this.showError(e);
-    }
+    this.showSuccess(this.$t("reference-measurement-value-change-success").toString());
   }
 
+  @CatchError("loading")
   private async updateRefMeasurementValues() {
-    try {
-      this.loading = true;
-
-      if (!this.refMeasureId) {
-        this.refMeasureValueItems = [];
-        return;
-      }
-
-      // TODO do it
-      
-      // this.refMeasureValueItems = (await volateqApi.getReferenceMeasurementEntries(this.refMeasureId)).map(refMeasureValue => ({
-      //   id: refMeasureValue.id,
-      //   pcs: refMeasureValue.fieldgeometry_component!.kks,
-      //   absorberTemperature: refMeasureValue.hce_temperature,
-      //   brokenGlass: refMeasureValue.hce_broken_glass,
-      //   notes: refMeasureValue.notes,
-      //   ignored: refMeasureValue.ignore,
-      // })).sort((a, b) => {
-      //   const nameA = a.pcs.toLowerCase();
-      //   const nameB = b.pcs.toLowerCase();
-
-      //   if (nameA < nameB) {
-      //     return -1;
-      //   }
-      //   if (nameA > nameB) {
-      //     return 1;
-      //   }
-      //   return 0;
-      // });
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.loading = false;
+    if (!this.refMeasureId) {
+      this.refMeasureValueItems = [];
+      return;
     }
+
+    const entries = await volateqApi.getReferenceMeasurementEntries(this.analysis.id, {
+      reference_measurement_id: this.refMeasureId,
+    });
+
+    const allKeyFigures = await volateqApi.getAllKeyFigures();
+
+    const refMeasureValueItems: Array<any> = [];
+    for (const entry of entries.entries) {
+      const entryValues = this.getRefMeasureEntryValues(allKeyFigures, entry, entries.key_figures);
+      const values = entryValues.map(ev => `${this.$t(ev.entry.transName).toString()}: ${ev.value}`).join('<br>');
+      
+      refMeasureValueItems.push({
+        id: entry.entry_id,
+        pcs: entry.pcs,
+        notes: entry.notes,
+        ignored: entry.ignore,
+        values: values,
+      });
+    }
+
+    this.refMeasureValueItems = refMeasureValueItems.sort((a, b) => {
+      const nameA = a.pcs.toLowerCase();
+      const nameB = b.pcs.toLowerCase();
+
+      if (nameA < nameB) {
+        return -1;
+      }
+      if (nameA > nameB) {
+        return 1;
+      }
+      return 0;
+    });
+  }
+
+  private getRefMeasureEntryValues(
+    allKeyFigures: KeyFigureSchema[],
+    refMeasureEntry: RefMeasureEntry,
+    refMeasureKeyFigures: RefMeasureEntryKeyFigureSchema[]
+  ) {
+    const entryValues: RefMeasureMappingEntryValue[] = [];
+
+    if (refMeasureEntry.values) {
+      const fetchedComponentIds: number[] = [];
+
+      for (const rmKeyFigure of refMeasureKeyFigures) {
+        if (rmKeyFigure.entry_key_name in refMeasureEntry.values) {
+          const componentId = allKeyFigures.find(kf => kf.id === rmKeyFigure.key_figure_id)!.component_id;
+          if (!fetchedComponentIds.includes(componentId)) {
+            fetchedComponentIds.push(componentId);
+            
+            const mappings = AnalysisResultMappingHelper.getMappingsByComponentId(componentId)!;
+            const mappingHelper = new AnalysisResultMappingHelper(mappings);
+
+            entryValues.push(...mappingHelper.getRefMeasureEntries(refMeasureEntry, refMeasureKeyFigures));
+          }
+        }
+      }
+    }
+
+    return entryValues;
   }
 }
 </script>
