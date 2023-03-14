@@ -32,6 +32,7 @@ export interface ServerTag {
 }
 
 export interface ServerSchema {
+  id: string;
   name: string;
   tags: ServerTag[];
   instance_type: string;

@@ -39,6 +39,7 @@ import { TaskSchema } from "@/app/shared/services/volateq-api/api-schemas/task-s
 import { ApiTasks } from "@/app/shared/services/volateq-api/api-tasks";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import { QFlyServerAction, QFlyServerSchema, QFlyServerState } from "@/app/shared/services/volateq-api/api-schemas/server-schemas";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
 
 @Component({
   name: "app-run-qfly-for-analysis",
@@ -98,7 +99,7 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
 
   private async updateQFlyServer() {
     try {
-      const newQFlyServer = await volateqApi.getQFlyServer(this.analysis.id);
+      const newQFlyServer = await volateqApi.getQFlyServerForAnalysis(this.analysis.id);
 
       if (!this.qFlyServer || this.qFlyServer.state !== newQFlyServer.state) {
         analysisEventService.emit(
@@ -150,41 +151,34 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
     return this.qFlyServer!.state == QFlyServerState.RUNNING;
   }
 
+  @CatchError("loading")
   async runServerAction() {
-    this.loading = true;
-    try {
-
-      let confirm_text = "";
-      if (!this.tagsChanged && !this.selectedServerAction && !this.selectedTask) {
-        throw { error: "NOTHING_CHANGED_OR_SELECTED", message: "You did not change any tag or select anything to run/do." };
-      } else {
-        if (this.tagsChanged) {
-          confirm_text += this.$t('apply-tags-changed').toString() + "\n\n";
-        }
-        if (this.selectedServerAction) {
-            confirm_text += "\n\n" + this.$t('apply-selected-server-action').toString() + QFlyServerAction[this.selectedServerAction] + "\n\n";
-        }
-        if (this.selectedTask) {
-            confirm_text += "\n\n" + this.$t('apply-selected-task-to-run').toString() + ApiTasks[this.selectedTask] + "\n\n";
-        }
-        confirm_text += this.$t('apply-are-you-sure').toString();
+    let confirm_text = "";
+    if (!this.tagsChanged && !this.selectedServerAction && !this.selectedTask) {
+      throw { error: "NOTHING_CHANGED_OR_SELECTED", message: "You did not change any tag or select anything to run/do." };
+    } else {
+      if (this.tagsChanged) {
+        confirm_text += this.$t('apply-tags-changed').toString() + "\n\n";
       }
-
-      if (confirm(confirm_text)) {
-        await volateqApi.runQFlyServerAction(this.analysis.id, {
-          action: this.selectedServerAction && QFlyServerAction[this.selectedServerAction] || undefined,
-          start_task: this.selectedTask && ApiTasks[this.selectedTask] || undefined,
-          tags: this.tagsChanged ? this.qFlyServer!.server?.tags : undefined,
-        });
-
-        await this.updateQFlyServer();
-
-        analysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
+      if (this.selectedServerAction) {
+          confirm_text += "\n\n" + this.$t('apply-selected-server-action').toString() + QFlyServerAction[this.selectedServerAction] + "\n\n";
       }
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.loading = false;
+      if (this.selectedTask) {
+          confirm_text += "\n\n" + this.$t('apply-selected-task-to-run').toString() + ApiTasks[this.selectedTask] + "\n\n";
+      }
+      confirm_text += this.$t('apply-are-you-sure').toString();
+    }
+
+    if (confirm(confirm_text)) {
+      await volateqApi.runQFlyServerAction(this.analysis.id, {
+        action: this.selectedServerAction && QFlyServerAction[this.selectedServerAction] || undefined,
+        start_task: this.selectedTask && ApiTasks[this.selectedTask] || undefined,
+        tags: this.tagsChanged ? this.qFlyServer!.server?.tags : undefined,
+      });
+
+      await this.updateQFlyServer();
+
+      analysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
     }
   }
 }

@@ -23,8 +23,8 @@ import { CustomerRequest } from "./api-requests/customer-requests";
 import { TechnologySchema } from "./api-schemas/technology-schema";
 import { AnalysisMonitoring } from "./api-schemas/analysis-monitoring";
 import { QFlyServerSchema } from "./api-schemas/server-schemas";
-import { QFlyServerActionRequest } from "./api-requests/server-requests";
 import { ReferenceMeasurementEntriesSchema, ReferenceMeasurementSchema } from "./api-schemas/reference-measurement-schema";
+import { AnalysisQFlyServerActionRequest, QFlyServerUpdateRequest } from "./api-requests/server-requests";
 import { DocFile } from "./api-schemas/doc-file-schema";
 import { ProductPackageSchema, ProductPackageWithKeyFiguresSchema } from "./api-schemas/product-package";
 import { CreateOrderRequest, UpdateOrderRequest } from "./api-requests/order-requests";
@@ -37,6 +37,7 @@ import { AddReferenceMeasurementRequest } from "./api-requests/ref-measure-reque
 import { FieldgeometryComponentSchema } from "./api-schemas/fieldgeometry-component-schema";
 import { KeyFigureSchema } from "./api-schemas/key-figure-schema";
 import { CreateProductPackageRequest, UpdateProductPackageRequest } from "./api-requests/product-package-requests";
+import { PlantStatusSchema } from "./api-schemas/plant-status-schema";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -521,11 +522,27 @@ export class VolateqAPI extends HttpClientBase {
     await this.delete(`/auth/plant/${plantId}`);
   }
 
-  public async getQFlyServer(analysisId: string): Promise<QFlyServerSchema> {
+  public async getQFlyServers(): Promise<QFlyServerSchema[]> {
+    return this.get(`/auth/qfly-servers`);
+  }
+
+  public async startQFlyServer(qflyServerUpdateRequest: QFlyServerUpdateRequest): Promise<void> {
+    await this.post(`/auth/qfly-server/start`, qflyServerUpdateRequest);
+  }
+
+  public async stopQFlyServer(qflyServerUpdateRequest: QFlyServerUpdateRequest): Promise<void> {
+    await this.post(`/auth/qfly-server/stop`, qflyServerUpdateRequest);
+  }
+
+  public async updateQFlyServer(qflyServerUpdateRequest: QFlyServerUpdateRequest): Promise<void> {
+    await this.post(`/auth/qfly-server/update`, qflyServerUpdateRequest);
+  }
+
+  public async getQFlyServerForAnalysis(analysisId: string): Promise<QFlyServerSchema> {
     return this.get(`/auth/analysis/${analysisId}/qfly-server`);
   }
 
-  public async runQFlyServerAction(analysisId: string, qFlyServerAction: QFlyServerActionRequest): Promise<void> {
+  public async runQFlyServerAction(analysisId: string, qFlyServerAction: AnalysisQFlyServerActionRequest): Promise<void> {
     await this.post(`/auth/analysis/${analysisId}/qfly-server`, qFlyServerAction);
   }
 
@@ -633,6 +650,10 @@ export class VolateqAPI extends HttpClientBase {
 
   public async switchCustomer(toCustomerId: string | undefined, showAllKeyFigures: boolean): Promise<CustomerNameSchema> {
     return this.post(`/auth/user/switch-customer`, { customer_id: toCustomerId, show_all_key_figures: showAllKeyFigures });
+  }
+
+  public getAllPlantStatus(): Promise<PlantStatusSchema[]> {
+    return this.get('/auth/plant-status');
   }
 
   public async getProductPackages(): Promise<ProductPackageSchema[]> {
