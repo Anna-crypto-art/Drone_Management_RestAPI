@@ -36,6 +36,7 @@ import { ja, th } from "date-fns/locale";
 import { AnalysisResultSetNullOrFalseRequest } from "./api-requests/analysis-result-requests";
 import { KeyFigureSchema } from "./api-schemas/key-figure-schema";
 import { CreateProductPackageRequest, UpdateProductPackageRequest } from "./api-requests/product-package-requests";
+import { PlantStatusSchema } from "./api-schemas/plant-status-schema";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -659,6 +660,10 @@ export class VolateqAPI extends HttpClientBase {
 
   public async switchCustomer(toCustomerId: string | undefined, showAllKeyFigures: boolean): Promise<CustomerNameSchema> {
     return this.post(`/auth/user/switch-customer`, { customer_id: toCustomerId, show_all_key_figures: showAllKeyFigures });
+  }
+
+  public getAllPlantStatus(): Promise<PlantStatusSchema[]> {
+    return this.get('/auth/plant-status');
   }
 
   public async getProductPackages(): Promise<ProductPackageSchema[]> {

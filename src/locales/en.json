@@ -145,6 +145,7 @@
   "product-package-deleted-successfully": "{product_package} deleted successfully",
   "update-product-package": "Update {product_package}",
   "product-package-created-success": "{product_package} created successfully",
+  "required-plant-status": "Required plant status",
   "pi": "PI",
   "missing-gct": "Broken glass",
   "missing-gct_expl": "Missing glass tube",

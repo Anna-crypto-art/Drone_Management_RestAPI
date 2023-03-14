@@ -18,6 +18,18 @@
             {{ row.item.key_figures.map(key_figure => key_figure.name).join(", ") }}
           </span>
         </template>
+        <template #cell(plant_status)="row">
+          <span :id="'plantStatusExplTarget' + row.item.id">
+            {{ row.item.plant_status.map(plant_status => plant_status.name).join(", ") }}
+          </span>
+          <b-popover :target="'plantStatusExplTarget' + row.item.id" triggers="hover" placement="top">
+            <span v-for="(plant_status, index) in row.item.plant_status" :key="plant_status.name">
+              <b>{{ plant_status.name }}: </b>
+              {{ plant_status.description }}
+              <br v-if="index < row.item.plant_status.length - 1"><br v-if="index < row.item.plant_status.length - 1"> <!-- only break row if not last element -->
+            </span>
+          </b-popover>
+        </template>
         <template #hoverActions="row">
           <app-button
             @click="onEditProductPackageClick(row.item)"
@@ -69,6 +81,12 @@
                 :options="keyFigureOptions"
                 required />
           </b-form-group>
+          <b-form-group :label="$t('required-plant-status')">
+              <app-multiselect
+                v-model="selectedPlantStatusIds"
+                :options="plantStatusOptions"
+                required />
+          </b-form-group>
         </b-col>
       </b-row>
     </app-modal-form>
@@ -85,7 +103,6 @@ import AppMultiselect from "@/app/shared/components/app-multiselect/app-multisel
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
-import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import { ProductPackageWithKeyFiguresSchemaItem } from "./types";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { AppTableColumns } from "@/app/shared/components/app-table/types";
@@ -95,6 +112,7 @@ import { MultiselectOption } from "@/app/shared/components/app-multiselect/types
 import { ApiTechnology } from "@/app/shared/services/volateq-api/api-technologies";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { BvSelectOption } from "@/app/shared/types";
+import { PlantStatusSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-status-schema";
 
 
 @Component({
@@ -111,11 +129,15 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
   columns: AppTableColumns = [];
   rows: ProductPackageWithKeyFiguresSchemaItem[] = [];
 
-  keyFigureOptions: Array<MultiselectOption> = [];
   selectedKeyFigureIds: string[] | null = null;
+  keyFigureOptions: Array<MultiselectOption> = [];
+
+  selectedPlantStatusIds: string[] | null = null;
+  plantStatusOptions: Array<MultiselectOption> = [];
   
   technologies: Array<BvSelectOption> = [];
   allKeyFigures: Array<KeyFigureSchema> = [];
+  allPlantStatus: Array<PlantStatusSchema> = [];
 
   loading = false;
 
@@ -129,6 +151,7 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
       name: "",
       technology_id: 0, // 0 -> nothing
       key_figures: [],
+      plant_status: [],
     }
 
   @CatchError("loading")
@@ -137,6 +160,7 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
       { key: "name", label: this.$t("name").toString() },
       { key: "technology", label: this.$t("technology").toString() },
       { key: "key_figures", label: this.$t("performance-indicators").toString() },
+      { key: "plant_status", label: this.$t("required-plant-status").toString() },
     ];
 
     this.technologies = (await volateqApi.getTechnologies()).map(tech => ({ value: tech.id, text: tech.abbrev }));
@@ -144,7 +168,9 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
     await this.updateProductPackageRows();
 
     this.allKeyFigures = (await volateqApi.getAllKeyFigures());
+    this.allPlantStatus = (await volateqApi.getAllPlantStatus());
     this.updateKeyFigureOptions();
+    this.updatePlantStatusOptions();
   }
 
   private updateKeyFigureOptions() {
@@ -163,6 +189,22 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
     this.keyFigureOptions = keyFigureOptions;
   }
 
+  private updatePlantStatusOptions() {
+    const plantStatusOptions: MultiselectOption[] = [];
+
+    for (const plant_status of this.allPlantStatus) {
+      if (!this.currentProductPackage.technology_id || // we want all key figures if no technology ID is set (e.g. creating new product package)
+          this.currentProductPackage.technology_id == plant_status.technology_id) {
+        plantStatusOptions.push({
+          id: plant_status.id.toString(),
+          label: plant_status.name,
+        });
+      }
+    }
+
+    this.plantStatusOptions = plantStatusOptions;
+  }
+
   async updateProductPackageRows() {
     this.rows = (await volateqApi.getProductPackagesWithKeyFigures()).map((product_package: ProductPackageWithKeyFiguresSchema) => ({
       id: product_package.id,
@@ -170,6 +212,7 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
       technology_name: ApiTechnology[product_package.technology_id],
       technology_id: product_package.technology_id,
       key_figures: product_package.key_figures,
+      plant_status: product_package.plant_status,
     })).sort((a, b) => {
       const nameA = a.name.toLowerCase();
       const nameB = b.name.toLowerCase();
@@ -204,10 +247,13 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
       name: "",
       technology_id: 0, // 0 -> nothing
       key_figures: [],
+      plant_status: [],
     }
     this.selectedKeyFigureIds = [];
+    this.selectedPlantStatusIds = [];
 
     this.updateKeyFigureOptions();
+    this.updatePlantStatusOptions();
 
     this.productPackageModalTitle = this.$t("create-product-package").toString();
     this.productPackageModalOkTitle = this.$t("create").toString();
@@ -226,6 +272,7 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
           name: this.currentProductPackage.name,
           technology_id: this.currentProductPackage.technology_id,
           key_figures: this.selectedKeyFigureIds!.map(kf => Number(kf)),
+          plant_status: this.selectedPlantStatusIds!.map(ps => Number(ps)),
         });
         this.showSuccess(this.$t("product-package-created-success", { product_package: this.currentProductPackage!.name }).toString());
       } else {
@@ -235,6 +282,7 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
             name: this.currentProductPackage.name,
             technology_id: this.currentProductPackage.technology_id,
             key_figures: this.selectedKeyFigureIds!.map(kf => Number(kf)),
+            plant_status: this.selectedPlantStatusIds!.map(ps => Number(ps)),
           }
         );
         this.showSuccess(this.$t("product-package-edited-successfully", { product_package: this.currentProductPackage!.name }).toString());
@@ -253,15 +301,18 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
   @CatchError()
   onEditProductPackageClick(productPackageItem: ProductPackageWithKeyFiguresSchemaItem) {
     this.selectedKeyFigureIds = productPackageItem.key_figures.map(kf => kf.id.toString());
+    this.selectedPlantStatusIds = productPackageItem.plant_status.map(ps => ps.id.toString());
 
     this.currentProductPackage = {
       id: productPackageItem.id,
       name: productPackageItem.name,
       technology_id: productPackageItem.technology_id,
       key_figures: productPackageItem.key_figures,
+      plant_status: productPackageItem.plant_status,
     };
 
     this.updateKeyFigureOptions();
+    this.updatePlantStatusOptions();
 
     this.productPackageModalTitle = this.$t("update-product-package", { product_package: this.currentProductPackage.name }).toString();
     this.productPackageModalOkTitle = this.$t('apply').toString();
@@ -285,7 +336,9 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
   async onTechnologySelectionChanged() {
     this.currentProductPackage.key_figures = [];
     this.selectedKeyFigureIds = [];
+    this.selectedPlantStatusIds = [];
     this.updateKeyFigureOptions();
+    this.updatePlantStatusOptions();
   }
 }
 </script>
