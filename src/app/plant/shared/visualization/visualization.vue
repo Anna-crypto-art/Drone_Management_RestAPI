@@ -83,7 +83,7 @@ import { FeatureInfos, FeatureInfosMeta, IPlantVisualization, KeyFigureTypeMap, 
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppGeovisualization from "@/app/shared/components/app-geovisualization/app-geovisualization.vue";
 import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualization/types/components";
-import { GroupLayer, LayerType, OSMLayer } from "@/app/shared/components/app-geovisualization/types/layers";
+import { CustomLayer, GroupLayer, LayerType, OSMLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import Feature, { FeatureLike } from "ol/Feature";
@@ -189,8 +189,6 @@ export default class AppVisualization
 
   private routeQueryHelper = new RouteQueryHelper(this);
 
-  private isMobile = false;
-
   private geolocation: Geolocation | undefined = undefined;
   private geolocationLayer: VectorLayer<VectorSource> | undefined = undefined;
   private accuracyFeature: Feature | undefined = undefined;
@@ -198,18 +196,16 @@ export default class AppVisualization
 
   async created() {
     await super.created();
-
-    window.matchMedia("screen and (max-width: 1000px)").addEventListener("change", (e) => {
-      this.isMobile = e.matches;
-    });
     
-    window.addEventListener("app-visualization:go-to-me", () => {
-      if (this.geolocation) {
-        const position = this.geolocation.getPosition();
-        if (position) {
-          this.openLayers.getMap().getView().setCenter(position);
-          this.openLayers.getMap().getView().setZoom(18);
-        }
+    window.addEventListener("app-visualization:go-to-me", async () => {
+      if (!this.geolocation) {
+        await this.addGeolocationFeature();
+      }
+
+      const position = this.geolocation!.getPosition();
+      if (position) {
+        this.openLayers.getMap().getView().setCenter(position);
+        this.openLayers.getMap().getView().setZoom(18);
       }
     });
 
@@ -673,82 +669,77 @@ export default class AppVisualization
             selected: false,
           },
           this.worldMapLayer,
-          {
-            name: "my-location",
-            type: "custom",
-            customLoader: () => { return; },
-            onSelected: (selected: boolean) => {
-              if (selected) {
-                this.addGeolocationFeature();
-              } else {
-                this.removeGeolocationFeature();
-              }
-            },
-            selected: this.isMobile
-          },
         ]
       },
     );
   }
 
-  public addGeolocationFeature(): void {
-    if (this.geolocation) {
-      return;
-    }
+  @CatchError("loading")
+  private addGeolocationFeature(): Promise<void> {
+    return new Promise<void>((resolve) => {
+      if (this.geolocation) {
+        resolve();
 
-    // Code stolen and adapted from https://openlayers.org/en/latest/examples/geolocation.html
+        return;
+      }
 
-    this.geolocation = new Geolocation({
-      // enableHighAccuracy must be set to true to have the heading value.
-      trackingOptions: {
-        enableHighAccuracy: true,
-      },
-      projection: this.openLayers!.getMap().getView().getProjection(),
-    });
-    
-    this.geolocation.on('error', function (error) {
-      console.error("Geolocation error...");
-      console.error(error);
-    });
-    
-    this.accuracyFeature = new Feature();
-    this.geolocation.on('change:accuracyGeometry', () => {
-      this.accuracyFeature!.setGeometry(this.geolocation!.getAccuracyGeometry() || undefined);
-    });
-    
-    this.positionFeature = new Feature();
-    this.positionFeature.setStyle(
-      new Style({
-        image: new CircleStyle({
-          radius: 6,
-          fill: new Fill({
-            color: '#3399CC',
-          }),
-          stroke: new Stroke({
-            color: '#fff',
-            width: 2,
-          }),
-        }),
-      })
-    );
-    
-    this.geolocation.on('change:position', () => {
-      const coordinates = this.geolocation!.getPosition();
-      this.positionFeature!.setGeometry(coordinates ? new Point(coordinates) : undefined);
-    });
-    
-    if (this.geolocationLayer === undefined) {
-      this.geolocationLayer = new VectorLayer({
-        map: this.openLayers.getMap(),
-        source: new VectorSource(),
+      // Code stolen and adapted from https://openlayers.org/en/latest/examples/geolocation.html
+
+      this.geolocation = new Geolocation({
+        // enableHighAccuracy must be set to true to have the heading value.
+        trackingOptions: {
+          enableHighAccuracy: true,
+        },
+        projection: this.openLayers!.getMap().getView().getProjection(),
       });
-    }
-    this.geolocationLayer.getSource()!.addFeatures([this.accuracyFeature, this.positionFeature])
+      
+      this.geolocation.on('error', function (error) {
+        console.error("Geolocation error...");
+        console.error(error);
+      });
+      
+      this.accuracyFeature = new Feature();
+      this.geolocation.on('change:accuracyGeometry', () => {
+        this.accuracyFeature!.setGeometry(this.geolocation!.getAccuracyGeometry() || undefined);
+      });
+      
+      this.positionFeature = new Feature();
+      this.positionFeature.setStyle(
+        new Style({
+          image: new CircleStyle({
+            radius: 6,
+            fill: new Fill({
+              color: '#3399CC',
+            }),
+            stroke: new Stroke({
+              color: '#fff',
+              width: 2,
+            }),
+          }),
+        })
+      );
+      
+      this.geolocation.on('change:position', () => {
+        const coordinates = this.geolocation!.getPosition();
+        this.positionFeature!.setGeometry(coordinates ? new Point(coordinates) : undefined);
 
-    this.geolocation.setTracking(true);
+        resolve();
+      });
+      
+      if (this.geolocationLayer === undefined) {
+        this.geolocationLayer = new VectorLayer({
+          map: this.openLayers.getMap(),
+          source: new VectorSource(),
+        });
+      }
+      this.geolocationLayer.getSource()!.addFeatures([this.accuracyFeature, this.positionFeature])
+
+      this.geolocation.setTracking(true);
+    });
   }
 
-  public removeGeolocationFeature(): void {
+  // Yeah... I know.. it is unused... but keep it anyway, please
+  private removeGeolocationFeature(): void {
     if (this.geolocation) {
       this.geolocation!.setTracking(false);
       this.geolocation = undefined;
