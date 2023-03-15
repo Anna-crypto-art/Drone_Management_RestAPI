@@ -114,6 +114,7 @@ export enum ComparedFeatureType {
   GONE_WORSENED,
   NEW_IMPROVED,
   NEW_WORSENED,
+  UNDEFINED,
 }
 
 export type KeyFigureTypeMap<T extends GeoVisualQuery> = {

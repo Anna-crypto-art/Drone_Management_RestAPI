@@ -295,7 +295,7 @@ export default class AppVisualization
     this.piLayersHierarchy!.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     this.piLayersHierarchy!.setCompareAnalysisResult(this.compareAnalysisResult || null);
 
-    this.refMeasureLayers!.addAndSelectAnalysis(undefined);
+    this.refMeasureLayers!.addAndSelectAnalysis(this.firstAnalysis?.id);
     
     // "Multi selection" and "show could not be measured" is not allowed for compare mode
     this.disableMultiSelection();

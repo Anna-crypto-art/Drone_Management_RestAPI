@@ -19,15 +19,11 @@ export abstract class ComponentLayer extends LayerBase {
   
   protected readonly width: number = 1;
   protected readonly refMeasureColor = LayerColor.volateqBlue;
-  // zoomlevel: width
-  protected readonly zoomWidths: Record<number, number> | null = null;
 
   protected readonly allowRefMeasures: boolean = false;
   protected onAddRefMeasureCallback: (
       (fieldgeoComponent: FieldgeometryComponentSchema, refMeasureEntries: ReferenceMeasurementEntriesSchema | null) => void
     ) | undefined = undefined;
-
-  protected zoomWidth: number | null = null;
 
   protected analysis: AnalysisForViewSchema | null = null;
 
@@ -72,11 +68,6 @@ export abstract class ComponentLayer extends LayerBase {
   }
 
   public async load(extent: Extent): Promise<GeoJSON<PropsFeature> | undefined> {
-    if (this.zoomWidths) {
-      this.onZoom((zoomlevel) => this.calculateZoomWidth(zoomlevel));
-      this.calculateZoomWidth(this.vueComponent.openLayers?.getMap()?.getView().getZoom());
-    }
-
     try {
       return await volateqApi.getComponentsGeoVisual(
         this.vueComponent.plant.id,
@@ -93,32 +84,6 @@ export abstract class ComponentLayer extends LayerBase {
     }
 
     return undefined;
-  }
-
-  protected calculateZoomWidth(zoomlevel: number | undefined) {
-    if (zoomlevel) {
-      let matchingZoomLevel: string | null = null;
-
-      const zoomWidthLevels = Object.keys(this.zoomWidths!);
-      for (let i = 0; i < zoomWidthLevels.length; i++) {
-        const zoomWidthLevel = +zoomWidthLevels[i];
-        if (zoomWidthLevel > zoomlevel) {
-          if ((i + 1) === zoomWidthLevels.length) {
-            matchingZoomLevel = zoomWidthLevels[i];
-          }
-
-          break;
-        }
-
-        matchingZoomLevel = zoomWidthLevels[i];
-      }
-
-      if (matchingZoomLevel !== null) {
-        this.zoomWidth = this.zoomWidths![matchingZoomLevel];
-      } else {
-        this.zoomWidth = null;
-      }
-    }
   }
 
   public setSelectedAnalysis(analysis: AnalysisForViewSchema | null) {

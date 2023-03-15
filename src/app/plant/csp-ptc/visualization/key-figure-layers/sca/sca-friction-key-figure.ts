@@ -13,7 +13,7 @@ export class ScaFrictionKeyFigureLayer extends ScaKeyFigureLayer implements ICom
   protected created(): void {
     this.compareClassLimitsKeyFigureMixin = new CompareClassLimitsKeyFigureMixin(this)
 
-    this.enableCompare = true;
+    this.enableCompare = (this.query?.torsion_class || -1) > 1 || false;
   }
 
   public getStyle(feature: FeatureLike): Style {

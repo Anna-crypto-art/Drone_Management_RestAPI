@@ -37,7 +37,12 @@ export class CompareClassKeyFigureMixin<T extends ICompareClassKeyFigureMixin>  
           color: LayerColor.green,
           name: this.layer.vueComponent.$t("improved").toString() +
             this.layer.getLegendEntryCount(comparedFeatures[ComparedFeatureType.GONE_IMPROVED].length),
-        }
+        },
+        ...(comparedFeatures[ComparedFeatureType.UNDEFINED].length > 0 ? [{
+          color: LayerColor.grey,
+          name: this.layer.vueComponent.$t("not-measured").toString() + 
+          this.layer.getLegendEntryCount(comparedFeatures[ComparedFeatureType.UNDEFINED].length)
+        }] : []),
       ],
     };
   }

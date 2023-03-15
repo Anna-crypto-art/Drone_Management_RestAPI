@@ -85,7 +85,7 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
   }
 
   protected get firstAnalysis(): AnalysisForViewSchema | null {
-    return this.selectedAnalysis;
+    return this.selectedAnalysis || (this.selectedAnalyses && this.selectedAnalyses[0]) || null;
   }
 
   protected get analysisResults(): AnalysisResultDetailedSchema[] {

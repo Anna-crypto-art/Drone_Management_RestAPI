@@ -13,7 +13,7 @@ export class ScaSdxKeyFigureLayer extends ScaKeyFigureLayer implements ICompareC
   protected created(): void {
     this.compareClassLimitsKeyFigureMixin = new CompareClassLimitsKeyFigureMixin(this);
 
-    this.enableCompare = true;
+    this.enableCompare = (this.query?.sdx_class || -1) > 1 || false;
   }
 
   public getStyle(feature: FeatureLike): Style {

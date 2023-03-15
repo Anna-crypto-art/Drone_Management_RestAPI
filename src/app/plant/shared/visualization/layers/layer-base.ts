@@ -43,6 +43,10 @@ export abstract class LayerBase {
   protected zoomLoadedPcsCodes: Record<string, true> | undefined = undefined;
   protected loadedExtent: Extent | undefined = undefined;
 
+  // zoomlevel: width
+  protected readonly zoomWidths: Record<number, number> | null = null;
+  protected zoomWidth: number | null = null;
+
   public invisibleAutoSelection?: boolean;
 
   constructor(public readonly vueComponent: BaseAuthComponent & IPlantVisualization) {}
@@ -91,6 +95,11 @@ export abstract class LayerBase {
   }
 
   private async doLoad(): Promise<GeoJSON<PropsFeature> | undefined> {
+    if (this.zoomWidths) {
+      this.onZoom((zoomlevel) => this.calculateZoomWidth(zoomlevel));
+      this.calculateZoomWidth(this.vueComponent.openLayers?.getMap()?.getView().getZoom());
+    }
+    
     if (this.minZoomLevel) {
       if (this.zoomLoadedPcsCodes === undefined) { // is "change:center" event is already registered
         this.zoomLoadedPcsCodes = {};
@@ -210,6 +219,32 @@ export abstract class LayerBase {
       }
       if (this.loadedExtent[3] < max_lat) {
         this.loadedExtent[3] = max_lat
+      }
+    }
+  }
+
+  protected calculateZoomWidth(zoomlevel: number | undefined) {
+    if (zoomlevel) {
+      let matchingZoomLevel: string | null = null;
+
+      const zoomWidthLevels = Object.keys(this.zoomWidths!);
+      for (let i = 0; i < zoomWidthLevels.length; i++) {
+        const zoomWidthLevel = +zoomWidthLevels[i];
+        if (zoomWidthLevel > zoomlevel) {
+          if ((i + 1) === zoomWidthLevels.length) {
+            matchingZoomLevel = zoomWidthLevels[i];
+          }
+
+          break;
+        }
+
+        matchingZoomLevel = zoomWidthLevels[i];
+      }
+
+      if (matchingZoomLevel !== null) {
+        this.zoomWidth = this.zoomWidths![matchingZoomLevel];
+      } else {
+        this.zoomWidth = null;
       }
     }
   }

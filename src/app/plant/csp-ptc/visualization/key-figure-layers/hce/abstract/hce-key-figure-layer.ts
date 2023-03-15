@@ -12,12 +12,20 @@ export abstract class HceKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisRes
   protected showPcsZoomLevel = 19;
   protected readonly refMeasureFeatureStrokeWidth = 8;
 
+  protected zoomWidths = {
+    18: 10,
+    18.5: 15,
+    19: 20,
+    19.5: 25,
+    20: 30,
+  }
+
   public getStyle(feature: FeatureLike): Style {
     return new Style({
       stroke: new Stroke({
         color: this.enableCompare && this.compareAnalysisResult && this.getDiffColor(this.getProperties(feature))
           || this.getColor(),
-        width: this.strokeWidth,
+        width: this.zoomWidth || this.strokeWidth,
       }),
       text: this.showText(feature),
     });

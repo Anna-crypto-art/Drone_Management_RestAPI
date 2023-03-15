@@ -405,6 +405,9 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
 
       case ComparedFeatureType.GONE_WORSENED:
         return this.getColorWithAlpha('#fff', 0); // transparent -> invisible
+
+      case ComparedFeatureType.UNDEFINED:
+        return LayerColor.grey;
     }
   }
 
@@ -415,6 +418,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
       [ComparedFeatureType.GONE_WORSENED]: [],
       [ComparedFeatureType.NEW_IMPROVED]: [],
       [ComparedFeatureType.NEW_WORSENED]: [],
+      [ComparedFeatureType.UNDEFINED]: [],
     };
 
     for (const propFeature of this.geoJSON!.features) {
@@ -426,8 +430,12 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
   }
 
   public getComparedFeatureType(properties: FeatureProperties, currentClass: number): ComparedFeatureType {
-    const featureValue: number = properties.value! as number;
+    const featureValue: number | null = properties.value! as (number | null);
     const featureDiffValue: number = properties.diff_value! as number;
+
+    if (featureValue === null) {
+      return ComparedFeatureType.UNDEFINED;
+    }
 
     if (featureValue !== currentClass) {
       // featureValue is now (new analysis) in another class than the current class,
