@@ -182,6 +182,10 @@ export class LayerStructure extends SequentialEventEmitter {
     return (this.layerType as GroupLayer)?.collapsable || false;
   }
 
+  public get disabled(): boolean {
+    return this.getLayerType()?.disabled || false;
+  }
+
   public hasChildLayer(id: string): boolean {
     return !!this.getChildLayer(id);
   }

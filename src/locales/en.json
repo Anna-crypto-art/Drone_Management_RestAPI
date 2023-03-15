@@ -358,7 +358,6 @@
   "no-files-for-uploaded-selected": "No files for upload selected",
   "acquire-reference-measurement": "Acquire reference measurement",
   "start": "Start",
-  "use-gps": "Use GPS",
   "create-empty-analysis": "Create new and empty analysis",
   "select-analysis": "Select analysis",
   "measure-date": "Measurement date",
@@ -587,6 +586,7 @@
   "sure-stop-server": "Do you want to stop {server_name}?",
   "qfly-server-edited-successfully": "{server_name} edited successfully",
   "zoom-in-to-see-features": "Zoom in to see {features}",
+  "my-location": "Show my location",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

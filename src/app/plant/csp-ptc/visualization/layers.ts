@@ -20,11 +20,12 @@ import { HcePositionCenterKeyFigureLayer, HcePositionSupportKeyFigureLayer } fro
 import { GeoVisualCspPtcQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 import { SwivelComponentLayer } from "./component-layers/swivel-component-layer";
 import { SwivelGrippingPotentialKeyFigureLayer } from "./key-figure-layers/swivel/swivel-gripping-potential-key-figure-layer";
+import { MirrorComponentLayer } from "./component-layers/mirror-component-layer";
 
 export const COMPONENT_LAYERS: typeof ComponentLayer[] = [
   AbsorberComponentLayer,
   LoopComponentLayer,
-  // MirrorComponentLayer, Too many mirrors (>200k) leads to OutOfMemory
+  MirrorComponentLayer,
   ScaComponentLayer,
   SceComponentLayer,
   SwivelComponentLayer,

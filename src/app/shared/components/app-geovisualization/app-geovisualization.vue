@@ -1,11 +1,6 @@
 <template>
   <div class="openlayers-map">
     <div class="openlayers-map-content" />
-    <!-- <div v-show="isLoading" class="openlayers-map-loading">
-      <div class="openlayers-map-loading-icon">
-        <b-spinner />
-      </div>
-    </div> -->
 
     <app-geovisual-layer-switcher
       :layers="layers"

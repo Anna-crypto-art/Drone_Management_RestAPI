@@ -90,6 +90,13 @@ export class GeoJSONLoader extends LayerLoader<
       });
     };
 
+    const zoomToMyLocation = () => {
+      if (this.layerType.myLocation) {
+        this.map.getView().setCenter(this.layerType.myLocation);
+        this.map.getView().setZoom(18);
+      }
+    }
+
     // Automatic zoom to features
     if (this.layerType.autoZoom === true) {
       zoomToHome();

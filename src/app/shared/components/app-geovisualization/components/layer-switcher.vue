@@ -7,6 +7,10 @@
            background for hovered buttons, in this case not, use a white
            or gray one instead -->
 
+      <b-button size="sm" @click="showMyLocation">
+        <b-icon-geo-alt />
+      </b-button>
+
       <b-button size="sm" @click="goHome">
         <b-icon-house />
       </b-button>
@@ -157,6 +161,10 @@ export default class AppGeovisualLayerSwitcher extends Vue {
 
   goHome() {
     window.dispatchEvent(new CustomEvent("app-visualization:go-home"));
+  }
+
+  showMyLocation() {
+    window.dispatchEvent(new CustomEvent("app-visualization:go-to-me"));
   }
 }
 </script>

@@ -8,18 +8,11 @@ export class SceComponentLayer extends ComponentLayer {
   protected readonly componentId = ApiComponent.CSP_PTC_SCE;
   protected readonly color = LayerColor.middleLightGrey;
   protected readonly allowRefMeasures = true;
+  protected readonly minZoomLevel = 18;
   public readonly name = "single-collector-elements";
 
   protected showPcsZoomLevel = 18;
   protected zIndex = 4;
-
-  protected zoomWidths = {
-    18: 2,
-    18.5: 3,
-    19: 5,
-    19.5: 7,
-    20: 12,
-  }
 
   public getStyle(feature: FeatureLike): Style {
     return new Style({

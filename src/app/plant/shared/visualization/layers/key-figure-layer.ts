@@ -278,14 +278,17 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     return this.analysisResult.key_figures.find(keyFigure => keyFigure.id === this.keyFigureId)!;
   }
 
-  public getLegendEntryCount(featureCount?: number, precision = 10): string {
+  public getLegendEntryCount(featureCount?: number, precision = 100): string {
     
     featureCount = featureCount !== undefined ? featureCount : this.geoJSON!.features.length;
     const totalCount = this.geoJSON!.custom.components_total_count;
 
-    return ` (<b>${(
-      Math.round((featureCount / totalCount) * 100 * precision) / precision
-    ).toString()}%</b> - <small>${featureCount}</small>)`;
+    let percentage = Math.round((featureCount / totalCount) * 100 * precision) / precision;
+    if (percentage === 0 && featureCount > 0) {
+      percentage = Math.round((featureCount / totalCount) * 100 * (precision * 10)) / (precision * 10);
+    }
+
+    return ` (<b>${percentage.toString()}%</b> - <small>${featureCount}</small>)`;
   }
 
   public removeOrthoImageFeatures() {

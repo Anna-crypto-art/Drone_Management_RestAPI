@@ -15,6 +15,7 @@ export class ScaComponentLayer extends ComponentLayer {
   protected selected = true;
   protected showPcsZoomLevel = 16.5;
   protected zIndex = 3;
+  protected disabled = true;
 
   protected zoomWidths = {
     18: 2,

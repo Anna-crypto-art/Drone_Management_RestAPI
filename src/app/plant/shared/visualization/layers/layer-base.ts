@@ -7,15 +7,13 @@ import { FeatureInfoGroup, FeatureInfos, FeatureInfosMeta, IPlantVisualization, 
 import { GeoJSON, GeoJSONLayer, VectorGeoLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 import GeoJSONFeatures from "ol/format/GeoJSON";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { Geolocation, Feature, View } from "ol";
+import { Geolocation, Feature } from "ol";
 import CircleStyle from "ol/style/Circle";
 import { Point } from "ol/geom";
 import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/sequential-event-emitter";
 import { LayerEvent } from "@/app/shared/components/app-geovisualization/types/events";
-import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
-import { ReferenceMeasurementEntriesSchema, RefMeasureEntry, RefMeasureEntryKeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
-import { SimpleAnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import { RefMeasureEntry, RefMeasureEntryKeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import { transformExtent } from "ol/proj";
@@ -29,10 +27,6 @@ export const GEO_JSON_OPTIONS = { dataProjection: "EPSG:4326", featureProjection
 export abstract class LayerBase {
   private _showPCS = false;
 
-  private accuracyFeature?: Feature;
-  private positionFeature?: Feature;
-  private geolocation?: Geolocation;
-
   protected geoLayerObject?: GeoJSONLayer;
 
   protected abstract readonly name: string;
@@ -43,6 +37,7 @@ export abstract class LayerBase {
   protected showPcsZoomLevel = 15;
   protected refreshLayer = false;
   protected readonly events = new SequentialEventEmitter();
+  protected disabled = false;
 
   protected readonly minZoomLevel: number | undefined = undefined;
   protected zoomLoadedPcsCodes: Record<string, true> | undefined = undefined;
@@ -116,7 +111,7 @@ export abstract class LayerBase {
       this.vueComponent.showInfo(
         this.vueComponent.$t(
           "zoom-in-to-see-features", 
-          { features: this.vueComponent.$t("absorber-tubes").toString() },
+          { features: this.vueComponent.$t(this.name).toString() },
         ).toString(),
       );
 
@@ -231,6 +226,10 @@ export abstract class LayerBase {
     return undefined;
   }
 
+  public getDisabled(): boolean | undefined {
+    return this.disabled;
+  }
+
   public showPCS(show: boolean): void {
     this._showPCS = show;
   }
@@ -265,6 +264,7 @@ export abstract class LayerBase {
         id: this.id,
         events: this.events,
         minZoom: this.minZoomLevel,
+        disabled: this.disabled,
       };
     }
 
@@ -318,70 +318,6 @@ export abstract class LayerBase {
 
   public getVectorGeoLayer(): VectorGeoLayer | undefined {
     return this.vueComponent.openLayers!.getMap().getAllLayers().find(layer => layer.getProperties()['id'] === this.id) as VectorGeoLayer;
-  }
-
-  public addGeolocationFeature(): void {
-    // Code stolen and adapted from https://openlayers.org/en/latest/examples/geolocation.html
-
-    this.geolocation = new Geolocation({
-      // enableHighAccuracy must be set to true to have the heading value.
-      trackingOptions: {
-        enableHighAccuracy: true,
-      },
-      projection: this.vueComponent.openLayers!.getMap().getView().getProjection(),
-    });
-    
-    this.geolocation.on('error', function (error) {
-      console.error("Geolocation error...");
-      console.error(error);
-    });
-    
-    this.accuracyFeature = new Feature();
-    this.geolocation.on('change:accuracyGeometry', () => {
-      this.accuracyFeature!.setGeometry(this.geolocation!.getAccuracyGeometry() || undefined);
-    });
-    
-    this.positionFeature = new Feature();
-    this.positionFeature.setStyle(
-      new Style({
-        image: new CircleStyle({
-          radius: 6,
-          fill: new Fill({
-            color: '#3399CC',
-          }),
-          stroke: new Stroke({
-            color: '#fff',
-            width: 2,
-          }),
-        }),
-      })
-    );
-    
-    this.geolocation.on('change:position', () => {
-      const coordinates = this.geolocation!.getPosition();
-      this.positionFeature!.setGeometry(coordinates ? new Point(coordinates) : undefined);
-    });
-    
-    this.getVectorGeoLayer()?.getSource()?.addFeatures([this.accuracyFeature, this.positionFeature]);
-
-    this.geolocation.setTracking(true);
-  }
-
-  public removeGeolocationFeature(): void {
-    if (this.geolocation) {
-      this.geolocation!.setTracking(false);
-      this.geolocation = undefined;
-    }
-
-    if (this.positionFeature) {
-      this.getVectorGeoLayer()?.getSource()?.removeFeature(this.positionFeature);
-      this.positionFeature = undefined;
-    }
-
-    if (this.accuracyFeature) {
-      this.getVectorGeoLayer()?.getSource()?.removeFeature(this.accuracyFeature);
-      this.accuracyFeature = undefined;
-    }
   }
 
   public async rerender() {

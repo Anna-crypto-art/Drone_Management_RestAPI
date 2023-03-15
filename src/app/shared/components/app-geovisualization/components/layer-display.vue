@@ -32,7 +32,7 @@
         (layer.isGroup ? ' layer-display-group' : '')
       "
     >
-      <b-form-checkbox v-if="!layer.isGroup" :checked="selected" @change="onChange">
+      <b-form-checkbox v-if="!layer.isGroup" :checked="selected" @change="onChange" :disabled="layer.disabled">
         <slot :name="layer.name">
           {{ layer.name }}
           <app-explanation v-if="layer.description"><span v-html="layer.description"></span></app-explanation>

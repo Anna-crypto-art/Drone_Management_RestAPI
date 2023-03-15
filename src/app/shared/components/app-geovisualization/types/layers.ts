@@ -5,6 +5,7 @@ import VectorSource from "ol/source/Vector";
 import { StyleFunction } from "ol/style/Style";
 import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/sequential-event-emitter";
 import { FeatureLike } from "ol/Feature";
+import { Coordinate } from "ol/coordinate";
 
 export interface GeoJSON<T> {
   type: string;
@@ -22,6 +23,7 @@ export interface BaseLayerType {
   id?: string;
   events?: SequentialEventEmitter;
   description?: string;
+  disabled?: boolean;
 }
 
 export interface GeoJSONLayer extends BaseLayerType {
@@ -36,6 +38,7 @@ export interface GeoJSONLayer extends BaseLayerType {
   zIndex?: number;
   layerType?: "VectorLayer" | "VectorImageLayer";
   minZoom?: number;
+  myLocation?: Coordinate;
 }
 
 export interface OSMLayer extends BaseLayerType {

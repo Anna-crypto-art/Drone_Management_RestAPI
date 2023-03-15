@@ -8,17 +8,11 @@ export class MirrorComponentLayer extends ComponentLayer {
   protected readonly componentId = ApiComponent.CSP_PTC_MIRROR;
   protected readonly color = LayerColor.metallicBlue;
   protected readonly allowRefMeasures = true;
+  protected readonly minZoomLevel = 19;
   public readonly name = "mirrors";
 
   protected showPcsZoomLevel = 22;
-
-  protected zoomWidths = {
-    18: 2,
-    18.5: 3,
-    19: 5,
-    19.5: 7,
-    20: 12,
-  }
+  protected zIndex = 5;
 
   public getStyle(feature: FeatureLike): Style {
     return new Style({

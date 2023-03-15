@@ -11,6 +11,9 @@
       <template #pcs>
         {{ $t("pcs") }} <app-explanation>{{ $t("pcs_expl") }}</app-explanation>
       </template>
+      <template #my-location>
+        {{ $t("my-location") }}
+      </template>
 
       <template #displaySettings>
         <div class="visualization-display-settings-container">
@@ -83,7 +86,8 @@ import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualizati
 import { GroupLayer, LayerType, OSMLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { FeatureLike } from "ol/Feature";
+import Feature, { FeatureLike } from "ol/Feature";
+import { Geolocation } from "ol";
 import { Component, Prop, Ref } from "vue-property-decorator";
 import { ComponentLayer } from "./layers/component-layer";
 import { State } from "vuex-class";
@@ -110,6 +114,11 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { RefMeasureEntry, RefMeasureEntryKeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
 import { LayerBase } from "./layers/layer-base";
 import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
+import { Fill, Stroke, Style } from "ol/style";
+import CircleStyle from "ol/style/Circle";
+import { Point } from "ol/geom";
+import VectorLayer from "ol/layer/Vector";
+import VectorSource from "ol/source/Vector";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -180,8 +189,29 @@ export default class AppVisualization
 
   private routeQueryHelper = new RouteQueryHelper(this);
 
+  private isMobile = false;
+
+  private geolocation: Geolocation | undefined = undefined;
+  private geolocationLayer: VectorLayer<VectorSource> | undefined = undefined;
+  private accuracyFeature: Feature | undefined = undefined;
+  private positionFeature: Feature | undefined = undefined;
+
   async created() {
     await super.created();
+
+    window.matchMedia("screen and (max-width: 1000px)").addEventListener("change", (e) => {
+      this.isMobile = e.matches;
+    });
+    
+    window.addEventListener("app-visualization:go-to-me", () => {
+      if (this.geolocation) {
+        const position = this.geolocation.getPosition();
+        if (position) {
+          this.openLayers.getMap().getView().setCenter(position);
+          this.openLayers.getMap().getView().setZoom(18);
+        }
+      }
+    });
 
     this.doEnableMultiSelection();
     this.showCouldNotBeMeasured = appLocalStorage.getItem(STORAGE_KEY_SHOWUNDEFINED) || this.showCouldNotBeMeasured;
@@ -592,6 +622,7 @@ export default class AppVisualization
     this.worldMapLayer = {
       name: this.$t("world-map").toString(),
       type: "osm",
+      id: "world-map",
       selected: true,
       satellite: this.satelliteView,
       events: new SequentialEventEmitter(),
@@ -642,9 +673,96 @@ export default class AppVisualization
             selected: false,
           },
           this.worldMapLayer,
+          {
+            name: "my-location",
+            type: "custom",
+            customLoader: () => { return; },
+            onSelected: (selected: boolean) => {
+              if (selected) {
+                this.addGeolocationFeature();
+              } else {
+                this.removeGeolocationFeature();
+              }
+            },
+            selected: this.isMobile
+          },
         ]
       },
     );
+  }
+
+  public addGeolocationFeature(): void {
+    if (this.geolocation) {
+      return;
+    }
+
+    // Code stolen and adapted from https://openlayers.org/en/latest/examples/geolocation.html
+
+    this.geolocation = new Geolocation({
+      // enableHighAccuracy must be set to true to have the heading value.
+      trackingOptions: {
+        enableHighAccuracy: true,
+      },
+      projection: this.openLayers!.getMap().getView().getProjection(),
+    });
+    
+    this.geolocation.on('error', function (error) {
+      console.error("Geolocation error...");
+      console.error(error);
+    });
+    
+    this.accuracyFeature = new Feature();
+    this.geolocation.on('change:accuracyGeometry', () => {
+      this.accuracyFeature!.setGeometry(this.geolocation!.getAccuracyGeometry() || undefined);
+    });
+    
+    this.positionFeature = new Feature();
+    this.positionFeature.setStyle(
+      new Style({
+        image: new CircleStyle({
+          radius: 6,
+          fill: new Fill({
+            color: '#3399CC',
+          }),
+          stroke: new Stroke({
+            color: '#fff',
+            width: 2,
+          }),
+        }),
+      })
+    );
+    
+    this.geolocation.on('change:position', () => {
+      const coordinates = this.geolocation!.getPosition();
+      this.positionFeature!.setGeometry(coordinates ? new Point(coordinates) : undefined);
+    });
+    
+    if (this.geolocationLayer === undefined) {
+      this.geolocationLayer = new VectorLayer({
+        map: this.openLayers.getMap(),
+        source: new VectorSource(),
+      });
+    }
+    this.geolocationLayer.getSource()!.addFeatures([this.accuracyFeature, this.positionFeature])
+
+    this.geolocation.setTracking(true);
+  }
+
+  public removeGeolocationFeature(): void {
+    if (this.geolocation) {
+      this.geolocation!.setTracking(false);
+      this.geolocation = undefined;
+    }
+
+    if (this.positionFeature) {
+      this.geolocationLayer!.getSource()!.removeFeature(this.positionFeature);
+      this.positionFeature = undefined;
+    }
+
+    if (this.accuracyFeature) {
+      this.geolocationLayer!.getSource()!.removeFeature(this.accuracyFeature);
+      this.accuracyFeature = undefined;
+    }
   }
 
   private async loadRefMeasurePcsCodes() {
