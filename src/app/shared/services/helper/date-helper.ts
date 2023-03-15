@@ -64,5 +64,9 @@ export default {
   },
   toDateTime(date: string | number | Date): string {
     return this.toDate(date) + " " + this.toTime(date);
+  },
+  now(): string {
+    const d = new Date();
+    return (new Date(d.getTime() - (d.getTimezoneOffset() * 60 * 1000))).toISOString();
   }
 };

@@ -47,6 +47,7 @@ import AppFilterFields from '@/app/plant/shared/filter-fields/filter-fields.vue'
 import { FilterField, FilterFieldType } from '../filter-fields/types';
 import { FieldgeometryComponentSchema } from '@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema';
 import { AnalysisResultMappingHelper } from '@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper';
+import dateHelper from '@/app/shared/services/helper/date-helper';
 
 @Component({
   name: "app-reference-measurements",
@@ -143,7 +144,7 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
       };
     } else {
       this.entryModel = {
-        measureTime: (new Date()).toISOString(),
+        measureTime: dateHelper.now(),
         notes: null,
         values: [],
       };
