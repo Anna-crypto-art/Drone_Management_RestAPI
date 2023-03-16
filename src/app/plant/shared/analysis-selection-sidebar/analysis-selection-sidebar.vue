@@ -21,7 +21,7 @@
           >
             <template #cell(name)="row">
               {{ row.item.date }} 
-              <app-icon v-if="!row.item.hasResults"
+              <app-icon v-if="!isPilot && !row.item.hasResults"
                 icon="cone-striped" 
                 class="mar-left-half orange" 
                 v-b-popover.hover.top="$t('no-pis-available-yet')"

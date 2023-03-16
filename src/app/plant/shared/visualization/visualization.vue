@@ -83,7 +83,7 @@ import { FeatureInfos, FeatureInfosMeta, IPlantVisualization, KeyFigureTypeMap, 
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppGeovisualization from "@/app/shared/components/app-geovisualization/app-geovisualization.vue";
 import { IOpenLayersComponent } from "@/app/shared/components/app-geovisualization/types/components";
-import { CustomLayer, GroupLayer, LayerType, OSMLayer } from "@/app/shared/components/app-geovisualization/types/layers";
+import { GroupLayer, LayerType, OSMLayer } from "@/app/shared/components/app-geovisualization/types/layers";
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import Feature, { FeatureLike } from "ol/Feature";
@@ -263,9 +263,12 @@ export default class AppVisualization
       await this.piLayersHierarchy!.toggleShowUndefined(this.showCouldNotBeMeasured, false);
     }
 
+    if (analysisSelectionChanged || multiAnalysesSelectedBefore || 
+      (!this.firstAnalysisResult && this.firstAnalysis)) {
+        await this.reloadRefMeasureComponents();
+    }
+
     if (analysisSelectionChanged || multiAnalysesSelectedBefore) {
-      await this.reloadRefMeasureComponents();
-      
       if (!this.firstLoad) {
         await this.piLayersHierarchy!.reselectAllLayers(this.enableMultiSelection);
         await this.refMeasureLayers!.reselectAllLayers();
@@ -416,6 +419,9 @@ export default class AppVisualization
     mergedFeatureInfos = await this.clickLayers(feature, this.piLayersHierarchy!.getAllChildLayers(), mergedFeatureInfos, featureInfosMeta);
     mergedFeatureInfos = await this.clickLayers(feature, this.componentLayers, mergedFeatureInfos, featureInfosMeta);
     mergedFeatureInfos = await this.clickLayers(feature, this.refMeasureLayers!.referenceMeasurementLayers, mergedFeatureInfos, featureInfosMeta);
+
+    console.log("mergedFeatureInfos")
+    console.log(mergedFeatureInfos)
 
     if (mergedFeatureInfos && mergedFeatureInfos.title) {
       this.piToastInfo = mergedFeatureInfos;

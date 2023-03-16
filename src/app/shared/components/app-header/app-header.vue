@@ -19,7 +19,7 @@
 
     <b-collapse class="app-header-menu" id="nav-collapse" is-nav>
       <b-navbar-nav>
-        <b-nav-item v-if="!isPilot" class="link" href="/plants" :active="isActiveRoute(['/plants', '/plant/*'])">
+        <b-nav-item class="link" href="/plants" :active="isActiveRoute(['/plants', '/plant/*'])">
           <span class="nav-item-text">{{ $t("plants") }}</span>
         </b-nav-item>
 
@@ -76,7 +76,7 @@
       :okTitle="$t('apply')"
       @submit="onCustomerSwitchSubmit"
     >
-      <b-alert variant="info" :show="!selectedCustomerId" v-html="$t('info-no-customer-selected')"></b-alert>
+      <b-alert variant="info" :show="!selectedCustomerId"><span v-html="$t('info-no-customer-selected')"></span></b-alert>
       <b-form-group :label="$t('select-target-customer')">
         <b-form-select v-model="selectedCustomerId" :options="customerSelection" />
       </b-form-group>
