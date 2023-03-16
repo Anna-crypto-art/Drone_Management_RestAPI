@@ -682,7 +682,7 @@ export default class AppVisualization
 
   @CatchError("loading")
   private addGeolocationFeature(): Promise<void> {
-    return new Promise<void>((resolve) => {
+    return new Promise<void>((resolve, reject) => {
       if (this.geolocation) {
         resolve();
 
@@ -702,6 +702,8 @@ export default class AppVisualization
       this.geolocation.on('error', function (error) {
         console.error("Geolocation error...");
         console.error(error);
+        
+        reject(error);
       });
       
       this.accuracyFeature = new Feature();
