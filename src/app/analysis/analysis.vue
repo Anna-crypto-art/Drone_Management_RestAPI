@@ -2,7 +2,7 @@
   <app-content :title="$t('analysis-overview')" :subtitle="$t('analysis-overview_descr')">
     <div class="app-analysis">
       <app-button variant="primary" v-if="hasCompleteAnalysesOnly" @click="onNewDataUploadClick">
-        {{ $t("new-data-upload") }}
+        {{ $t("create-new-analysis") }}
       </app-button>
       <b-alert :show="!!incompleteAnalysis" variant="info" class="mar-bottom-2x">
         <span v-if="incompleteAnalysis" v-html="$t('new-upload-not-allowed_descr', { analysis: incompleteAnalysis.name })"></span>
@@ -104,6 +104,9 @@ import volateqApi from "../shared/services/volateq-api/volateq-api";
 import { AppTableColumns } from "../shared/components/app-table/types";
 import { CatchError } from "../shared/services/helper/catch-helper";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
+import { appLocalStorage } from "../shared/services/app-storage/app-storage";
+
+const SELECTED_PLANT_KEY = "app-analysis:selectedPlantId"
 
 @Component({
   name: "app-analysis",
@@ -170,6 +173,8 @@ export default class AppAnalysis extends BaseAuthComponent {
   }
 
   async onPlantSelectionChanged() {
+    appLocalStorage.setItem(SELECTED_PLANT_KEY, this.selectedPlantId);
+
     await this.updateAnalysisRows();
   }
 
@@ -254,6 +259,11 @@ export default class AppAnalysis extends BaseAuthComponent {
     if (this.plants.length > 1) {
       this.plantSelection = this.plants.map(plant => ({ value: plant.id, text: plant.name }));
       this.plantSelection.unshift({ value: null, text: "" });
+
+      const selectedPlantId = appLocalStorage.getItem(SELECTED_PLANT_KEY);
+      if (selectedPlantId && this.plantSelection.find(p => p.value === selectedPlantId)) {
+        this.selectedPlantId = selectedPlantId;
+      }
     }
   }
 }

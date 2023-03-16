@@ -5,7 +5,8 @@ import { analysisEventService } from "./analysis-event-service";
 import { AnalysisEvent } from "./types";
 
 export class AnalysisUploaderService extends UploaderService {
-  private flownAt: string | undefined;
+  private flownAt: string | undefined = undefined
+  private orderProductPackageIds: string[] | undefined = undefined;
 
   constructor(
     private plantId?: string,
@@ -77,6 +78,10 @@ export class AnalysisUploaderService extends UploaderService {
     this.plantId = plantId;
   }
 
+  public setOrderProductPackageIds(orderProductPackageIds: string[]) {
+    this.orderProductPackageIds = orderProductPackageIds;
+  }
+
   private async createAnalysisUpload(): Promise<void> {
     if (!this.upload) {
       const upload = await volateqApi.createAnalysisUpload({
@@ -86,6 +91,7 @@ export class AnalysisUploaderService extends UploaderService {
         create_analysis: !this.analysisId && {
           flown_at: this.flownAt!,
           plant_id: this.plantId!,
+          order_product_package_ids: this.orderProductPackageIds,
         } || undefined,
       });
 

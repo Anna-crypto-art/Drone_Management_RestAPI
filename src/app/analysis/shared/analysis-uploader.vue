@@ -13,7 +13,12 @@
       :uploaderService="uploaderService"
       :title="$t('browse-or-drag-drop-files')" 
       :disableAfterUpload="!analysis"
-    />
+    >
+      <!-- Pass slots through -->
+      <template v-for="(_, slot) in $slots" :slot="slot">
+        <slot :name="slot" />
+      </template>
+    </app-uploader>
     <div class="pull-right mar-top mar-bottom" v-if="gotoNewAnalysis">
       <app-button @click="onGotoNewAnalysisClick">{{ $t("goto-analysis", { analysis: gotoNewAnalysis.name }) }}</app-button>
     </div>
@@ -30,7 +35,7 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import { AnalysisUploaderService } from "@/app/analysis/shared/analysis-uploader-service";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { Component, Prop, Ref, Watch } from "vue-property-decorator";
+import { Component, Prop, Watch } from "vue-property-decorator";
 import { analysisEventService } from "./analysis-event-service";
 import { AnalysisEvent } from "./types";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
@@ -48,6 +53,7 @@ export default class AppAnalysisUploader extends BaseAuthComponent {
   @Prop({ default: null }) plantId!: string | null;
   @Prop({ default: null }) flownAt!: string | null;
   @Prop({ default: null }) analysis!: AnalysisSchema | null;
+  @Prop({ default: null }) orderProductPackageIds!: string[] | null;
 
   dataComplete = false;
   hasPlantMetadata = false;
@@ -87,6 +93,12 @@ export default class AppAnalysisUploader extends BaseAuthComponent {
   @Watch("flownAt") onFlownAtChanged() {
     if (this.flownAt) {
       this.uploaderService!.setFlownAt(this.flownAt);
+    }
+  }
+
+  @Watch("orderProductPackageIds") onOrderProductPackageIdsChanged() {
+    if (this.orderProductPackageIds) {
+      this.uploaderService!.setOrderProductPackageIds(this.orderProductPackageIds);
     }
   }
 

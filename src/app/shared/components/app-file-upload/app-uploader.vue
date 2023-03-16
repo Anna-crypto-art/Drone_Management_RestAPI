@@ -39,9 +39,15 @@
       </template>
     </app-files-selection>
 
-    <app-button v-show="showUploadButton" :loading="uploading" :disabled="uploadButtonDisabled" @click="onStartUpload" cls="pull-right mar-top mar-bottom">
-      {{ $t("upload") }}
-    </app-button>
+    <div class="pull-right mar-top mar-bottom" v-show="showUploadButton">
+      <app-button :loading="uploading" :disabled="uploadButtonDisabled" @click="onStartUpload" cls="mar-left pull-right">
+        {{ $t("upload") }}
+      </app-button>
+      <div v-show="!uploading" class="pull-right">
+        <slot name="addActions" />
+      </div>
+    </div>
+
   </div>
 </template>
 

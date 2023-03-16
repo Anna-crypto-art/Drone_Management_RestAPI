@@ -12,11 +12,12 @@
 import Vue from "vue";
 import { Component, Prop, Watch } from "vue-property-decorator";
 import { CatchError } from "../../services/helper/catch-helper";
+import { BaseComponent } from "../base-component/base-component";
 
 @Component({
   name: "app-datepicker",
 })
-export default class AppDatetimePicker extends Vue {
+export default class AppDatetimePicker extends BaseComponent {
   @Prop({ default: "" }) value!: string;
   @Prop({ default: false }) required!: boolean;
 
@@ -37,9 +38,8 @@ export default class AppDatetimePicker extends Vue {
     this.updateDate();
   }
 
-
   private isValidDate(d: string): boolean {
-    return !!d.match(/^[0-4]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/);
+    return d && !!d.match(/^[0-4]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/) || false;
   }
 
   private updateInnerDate() {

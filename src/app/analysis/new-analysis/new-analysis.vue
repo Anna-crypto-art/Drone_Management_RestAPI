@@ -10,12 +10,22 @@
       <b-form-group v-show="productPackagesSelection.length > 0" label-cols-lg="2" :label="$t('product-packages')">
         <app-multiselect 
           v-model="selectedProductPackages"
-          :options="productPackagesSelection" 
-          :readonly="!isSuperAdmin"
+          :options="productPackagesSelection"
         />
       </b-form-group>
     </div>
-    <app-analysis-uploader :plantId="selectedPlantId" :analysis="analysis" :flownAt="flownAt" />
+    <app-analysis-uploader
+      :plantId="selectedPlantId"
+      :analysis="analysis"
+      :flownAt="flownAt"
+      :orderProductPackageIds="selectedProductPackages"
+    >
+      <template #addActions>
+        <app-button variant="secondary" @click="onCreateEmptyAnalysisClick" :loading="loadingEmptyAnalysis">
+          {{ $t("create-empty-analysis") }}
+        </app-button>
+      </template>
+    </app-analysis-uploader>
   </app-content>
 </template>
 
@@ -58,6 +68,8 @@ export default class AppNewAnalysis extends BaseAuthComponent {
   productPackagesSelection: MultiselectOption[] = [];
   selectedProductPackages: string[] | null = null;
 
+  loadingEmptyAnalysis = false;
+
   @CatchError()
   async created() {
     this.preparePlantSelection();
@@ -82,6 +94,35 @@ export default class AppNewAnalysis extends BaseAuthComponent {
     }
 
     return "";
+  }
+
+  @CatchError("loadingEmptyAnalysis")
+  async onCreateEmptyAnalysisClick() {
+    if (!this.flownAt) {
+      throw { 
+        error: 'INVALID_OR_MISSING_PARAMS', 
+        message: this.$t('missing').toString() + " " + this.$t('acquisition-date').toString() 
+      };
+    }
+
+    if (!this.selectedPlantId) {
+      throw { 
+        error: 'INVALID_OR_MISSING_PARAMS', 
+        message: this.$t('missing').toString() + " " + this.$t('plant').toString() 
+      };
+    }
+
+    const analysisId = await volateqApi.createEmptyAnalysis({
+      flown_at: this.flownAt,
+      plant_id: this.selectedPlantId,
+      order_product_package_ids: this.selectedProductPackages || undefined,
+    });
+
+    this.showSuccess(this.$t("analysis-created-success").toString());
+
+    await this.$nextTick();
+
+    this.$router.push({ name: "EditAnalysis", params: { id: analysisId.id }});
   }
 
   private async preparePlantSelection() {

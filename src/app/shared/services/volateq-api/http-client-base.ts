@@ -2,7 +2,6 @@ import Axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } f
 import { apiBaseUrl } from "@/environment/environment";
 import store from "@/app/app-state";
 import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
-import { eachQuarterOfInterval } from "date-fns";
 
 export class HttpClientBase {
   private readonly httpClient: AxiosInstance;

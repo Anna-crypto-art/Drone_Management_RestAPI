@@ -30,7 +30,10 @@
                   <b-form-group :label="$t('acquisition-date')" label-cols-sm="4" label-cols-lg="2">
                     <app-datepicker v-model="flownAt" required /> 
                   </b-form-group>
-                  <b-form-group :label="$t('product-packages')" label-cols-sm="4" label-cols-lg="2">
+                  <b-form-group label-cols-sm="4" label-cols-lg="2">
+                    <template #label>
+                      {{ $t('product-packages') }} <app-super-admin-marker />
+                    </template>
                     <app-multiselect 
                       v-model="selectedProductPackageIds"
                       :options="productPackagesSelection"

@@ -358,7 +358,7 @@
   "no-files-for-uploaded-selected": "No files for upload selected",
   "acquire-reference-measurement": "Acquire reference measurement",
   "start": "Start",
-  "create-empty-analysis": "Create new and empty analysis",
+  "create-empty-analysis": "Create empty analysis",
   "select-analysis": "Select analysis",
   "measure-date": "Measurement date",
   "notes": "Notes",
@@ -587,6 +587,7 @@
   "qfly-server-edited-successfully": "{server_name} edited successfully",
   "zoom-in-to-see-features": "Zoom in to see {features}",
   "my-location": "Show my location",
+  "analysis-created-success": "New analysis created successfully",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",
