@@ -102,8 +102,6 @@ export abstract class ComponentLayer extends LayerBase {
       return undefined;
     }
 
-    console.log("onClick ComponentLayer")
-
     const pcs = this.getPcs(feature)!;
 
     if (!featureInfosMeta.fieldgeoComponent) {
@@ -120,8 +118,6 @@ export abstract class ComponentLayer extends LayerBase {
     if (!this.analysis) {
       return undefined;
     }
-
-    console.log("onClick ComponentLayer, blub")
 
     const featureInfos = await this.getRefMeasureFeatureInfos(featureInfosMeta, this.analysis.id);
     

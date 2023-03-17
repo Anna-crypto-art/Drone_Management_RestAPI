@@ -148,6 +148,8 @@ export abstract class LayerBase {
       const view = map.getView();
       const zoomLevel = view.getZoom();
 
+      console.log("zoomlevel: " + zoomLevel);
+
       if (zoomLevel! >= this.minZoomLevel!) {
         const extent = transformExtent(
           view.calculateExtent(map.getSize()),

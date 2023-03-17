@@ -420,9 +420,6 @@ export default class AppVisualization
     mergedFeatureInfos = await this.clickLayers(feature, this.componentLayers, mergedFeatureInfos, featureInfosMeta);
     mergedFeatureInfos = await this.clickLayers(feature, this.refMeasureLayers!.referenceMeasurementLayers, mergedFeatureInfos, featureInfosMeta);
 
-    console.log("mergedFeatureInfos")
-    console.log(mergedFeatureInfos)
-
     if (mergedFeatureInfos && mergedFeatureInfos.title) {
       this.piToastInfo = mergedFeatureInfos;
       this.$bvToast.show("piInfoToast");
