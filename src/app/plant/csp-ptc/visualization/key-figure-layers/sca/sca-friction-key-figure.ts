@@ -53,7 +53,7 @@ export class ScaFrictionKeyFigureLayer extends ScaKeyFigureLayer implements ICom
   protected getLegendName(): string {
     return this.getLegendEntryTransName(
       "sca-torsion-class",
-      this.analysisResult.csp_ptc.sca_torsion_class_limits,
+      this.getClassLimits(),
       this.query?.torsion_class,
       "°"
     )
@@ -86,7 +86,7 @@ export class ScaFrictionKeyFigureLayer extends ScaKeyFigureLayer implements ICom
   }
 
   public getClassLimits(): number[] {
-    return this.analysisResult.csp_ptc.sca_torsion_class_limits;
+    return this.analysisResult.csp_ptc!.sca_torsion_class_limits;
   }
 
   public getComparedFeatureType(properties: FeatureProperties, currentClass: number): ComparedFeatureType {

@@ -391,6 +391,30 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     return this.color!;
   }
 
+  protected getLegendEntryTransName(
+    transClassName: string,
+    classLimits: number[] | null,
+    currentClass: 1 | 2 | 3 | undefined,
+    unit: string
+  ): string {
+    if (!currentClass) {
+      return this.vueComponent.$t(this.keyFigureInfo.displayName!).toString();
+    }
+
+    let limitRange = "";
+    if (classLimits) {
+      if (currentClass === 1) {
+        limitRange = `0${unit} - ${classLimits[0]}${unit}: `;
+      } else if (currentClass === 2) {
+        limitRange = `${classLimits[0]}${unit} - ${classLimits[1]}${unit}: `;
+      } else if (currentClass === 3) {
+        limitRange = `${classLimits[1]}${unit} - &infin;${unit}: `;
+      }
+    }
+
+    return limitRange + this.vueComponent.$t(transClassName + "-" + currentClass).toString();
+  }
+
   public getDiffColorByComparedFeatureType(comparedFeatureType: ComparedFeatureType): string {
     switch (comparedFeatureType) {
       case ComparedFeatureType.NEW_IMPROVED:

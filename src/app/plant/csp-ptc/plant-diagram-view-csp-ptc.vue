@@ -106,7 +106,7 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
       const columnName = columnsMapping[entry.transName];
 
       if (entry.keyFigureId === ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID) {
-        for (let i = this.firstAnalysisResult!.csp_ptc.glass_tube_temperature_class_count; i > 1; i--) {
+        for (let i = this.firstAnalysisResult!.csp_ptc!.glass_tube_temperature_class_count; i > 1; i--) {
           columnsSelection.push({
             name: columnName,
             func: "count",
@@ -136,12 +136,12 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
         entry.keyFigureId === ApiKeyFigure.SCA_FRICTION_ID)
       {
         const classLimits = {
-          [ApiKeyFigure.SCA_TRACKING_DEVIATION_ID]: this.firstAnalysisResult!.csp_ptc.sca_tracking_encoder_offset_class_limits,
-          [ApiKeyFigure.SCE_ALIGNMENT_ID]: this.firstAnalysisResult!.csp_ptc.sce_alignment_deviation_to_drive_class_limits,
-          [ApiKeyFigure.SCA_SDX_ID]: this.firstAnalysisResult!.csp_ptc.sdx_rms_class_limits,
-          [ApiKeyFigure.SCE_SDX_ID]: this.firstAnalysisResult!.csp_ptc.sdx_rms_class_limits,
-          [ApiKeyFigure.SCA_FRICTION_ID]: this.firstAnalysisResult!.csp_ptc.sca_torsion_class_limits,
-          [ApiKeyFigure.SWIVEL_GRIPPING_POTENTIAL_CLASS_ID]: this.firstAnalysisResult!.csp_ptc.swivel_gripping_potential_class_limits,
+          [ApiKeyFigure.SCA_TRACKING_DEVIATION_ID]: this.firstAnalysisResult!.csp_ptc!.sca_tracking_encoder_offset_class_limits,
+          [ApiKeyFigure.SCE_ALIGNMENT_ID]: this.firstAnalysisResult!.csp_ptc!.sce_alignment_deviation_to_drive_class_limits,
+          [ApiKeyFigure.SCA_SDX_ID]: this.firstAnalysisResult!.csp_ptc!.sdx_rms_class_limits,
+          [ApiKeyFigure.SCE_SDX_ID]: this.firstAnalysisResult!.csp_ptc!.sdx_rms_class_limits,
+          [ApiKeyFigure.SCA_FRICTION_ID]: this.firstAnalysisResult!.csp_ptc!.sca_torsion_class_limits,
+          [ApiKeyFigure.SWIVEL_GRIPPING_POTENTIAL_CLASS_ID]: this.firstAnalysisResult!.csp_ptc!.swivel_gripping_potential_class_limits,
         }[entry.keyFigureId];
 
         columnsSelection.push({
@@ -208,11 +208,11 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
       if (entry.keyFigureId === ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID) {
         numberBox.nums = [];
 
-        if (this.firstAnalysisResult!.csp_ptc.glass_tube_temperature_class_count === 4) {
+        if (this.firstAnalysisResult!.csp_ptc!.glass_tube_temperature_class_count === 4) {
           colorMap = { 4: LayerColor.diagramRed, 3: LayerColor.orange, 2: LayerColor.diagramYellow };
         }
         
-        for (let i = this.firstAnalysisResult!.csp_ptc.glass_tube_temperature_class_count; i > 1; i--) {
+        for (let i = this.firstAnalysisResult!.csp_ptc!.glass_tube_temperature_class_count; i > 1; i--) {
           numberBox.nums.push({
             displayName: this.$t("glass-tube-temperature-class-" + i).toString(),
             columnName: numberBox.columnName + "_" + i,
@@ -233,8 +233,8 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
         entry.keyFigureId === ApiKeyFigure.SCE_ALIGNMENT_ID) 
       {
         const classLimits = entry.keyFigureId === ApiKeyFigure.SCA_TRACKING_DEVIATION_ID ?
-          this.firstAnalysisResult!.csp_ptc.sca_tracking_encoder_offset_class_limits :
-          this.firstAnalysisResult!.csp_ptc.sce_alignment_deviation_to_drive_class_limits;
+          this.firstAnalysisResult!.csp_ptc!.sca_tracking_encoder_offset_class_limits :
+          this.firstAnalysisResult!.csp_ptc!.sce_alignment_deviation_to_drive_class_limits;
 
         numberBox.nums = [];
 
@@ -250,7 +250,7 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
         }
       } else if (entry.keyFigureId === ApiKeyFigure.SCA_SDX_ID ||
           entry.keyFigureId === ApiKeyFigure.SCE_SDX_ID) {
-        const classLimits = this.firstAnalysisResult!.csp_ptc.sdx_rms_class_limits
+        const classLimits = this.firstAnalysisResult!.csp_ptc!.sdx_rms_class_limits
 
         numberBox.nums = [];
 
@@ -265,7 +265,7 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
           });
         }
       } else if (entry.keyFigureId === ApiKeyFigure.SCA_FRICTION_ID) {
-        const classLimits = this.firstAnalysisResult!.csp_ptc.sca_torsion_class_limits
+        const classLimits = this.firstAnalysisResult!.csp_ptc!.sca_torsion_class_limits
 
         numberBox.nums = [];
 
@@ -280,7 +280,7 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
           });
         }
       } else if (entry.keyFigureId === ApiKeyFigure.SWIVEL_GRIPPING_POTENTIAL_CLASS_ID) {
-        const classLimits = this.firstAnalysisResult!.csp_ptc.swivel_gripping_potential_class_limits
+        const classLimits = this.firstAnalysisResult!.csp_ptc!.swivel_gripping_potential_class_limits
 
         numberBox.nums = [];
 

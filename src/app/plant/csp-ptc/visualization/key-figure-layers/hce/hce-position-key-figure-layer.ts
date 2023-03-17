@@ -17,7 +17,7 @@ abstract class HcePositionKeyFigureLayer extends HceKeyFigureLayer implements IC
   }
 
   public getClassLimits(): number[] {
-    return this.analysisResult.csp_ptc.hce_position_total_class_limits;
+    return this.analysisResult.csp_ptc!.hce_position_total_class_limits;
   }
 
   public getQueryClass(): number | undefined {

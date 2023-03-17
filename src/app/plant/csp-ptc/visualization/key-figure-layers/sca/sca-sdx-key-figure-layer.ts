@@ -59,10 +59,10 @@ export class ScaSdxKeyFigureLayer extends ScaKeyFigureLayer implements ICompareC
   }
 
   public getClassLimits(): number[] {
-    return this.analysisResult.csp_ptc.sdx_rms_class_limits;
+    return this.analysisResult.csp_ptc!.sdx_rms_class_limits;
   }
 
-  public getQueryClass(): number | undefined {
+  public getQueryClass(): 1 | 2 | 3 | undefined {
     return this.query?.sdx_class
   }
 
@@ -73,8 +73,8 @@ export class ScaSdxKeyFigureLayer extends ScaKeyFigureLayer implements ICompareC
   protected getLegendName(): string {
     return this.getLegendEntryTransName(
       "slope-deviation-class",
-      this.analysisResult.csp_ptc.sdx_rms_class_limits,
-      this.query?.sdx_class,
+      this.getClassLimits(),
+      this.getQueryClass(),
       "[mrad]"
     );
   }

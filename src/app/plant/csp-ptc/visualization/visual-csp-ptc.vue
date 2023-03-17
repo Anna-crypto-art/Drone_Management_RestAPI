@@ -103,13 +103,13 @@ export default class AppVisualCspPtc extends AnalysisSelectionBaseComponent {
     let offsetClassLimits: number[] | null = null;
     let unit = "";
     if (componentType === "sce") {
-      offsetClassLimits = this.firstAnalysisResult.csp_ptc.sce_alignment_deviation_to_drive_class_limits;
+      offsetClassLimits = this.firstAnalysisResult.csp_ptc!.sce_alignment_deviation_to_drive_class_limits;
       unit = "°";
     } else if (componentType === "sca") {
-      offsetClassLimits = this.firstAnalysisResult.csp_ptc.sca_tracking_encoder_offset_class_limits;
+      offsetClassLimits = this.firstAnalysisResult.csp_ptc!.sca_tracking_encoder_offset_class_limits;
       unit = "°";
     } else if (componentType === "hce") {
-      offsetClassLimits = this.firstAnalysisResult.csp_ptc.hce_position_total_class_limits;
+      offsetClassLimits = this.firstAnalysisResult.csp_ptc!.hce_position_total_class_limits;
       unit = "[mm]";
     }
 

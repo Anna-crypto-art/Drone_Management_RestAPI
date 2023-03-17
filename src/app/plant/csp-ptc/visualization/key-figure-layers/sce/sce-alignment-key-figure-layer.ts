@@ -28,7 +28,7 @@ export class SceAlignmentKeyFigureLayer extends SceKeyFigureLayer implements ICo
   }
 
   public getClassLimits() {
-    return this.analysisResult.csp_ptc.sce_alignment_deviation_to_drive_class_limits;
+    return this.analysisResult.csp_ptc!.sce_alignment_deviation_to_drive_class_limits;
   }
 
   public getQueryClass(): number | undefined {

@@ -1,5 +1,6 @@
 import { ApiKeyFigure } from "../api-key-figures";
 import { AnalysisResultCspPtcSchema } from "./analysis-result-csp-ptc-schema";
+import { AnalysisResultPvSchema } from "./analysis-result-pv-schema";
 import { SimpleAnalysisSchema } from "./analysis-schema";
 import { KeyFigureSchema } from "./key-figure-schema";
 
@@ -13,7 +14,8 @@ export interface AnalysisResultSchema {
 export interface AnalysisResultDetailedSchema extends AnalysisResultSchema {
   analysis_id: string;
   key_figures: KeyFigureSchema[];
-  csp_ptc: AnalysisResultCspPtcSchema;
+  csp_ptc?: AnalysisResultCspPtcSchema;
+  pv?: AnalysisResultPvSchema;
   analysis: SimpleAnalysisSchema;
 }
 

@@ -33,6 +33,7 @@ export interface GeoVisualCspPtcQuery extends GeoVisualQuery {
 
 export interface GeoVisualPvQuery extends GeoVisualQuery {
   tracker_soiling_level?: 1 | 2 | 3;
+  tracker_deviation_class?: 1 | 2 | 3;
   module_soiling_level?: 1 | 2 | 3;
   module_broken_glass_class?: 1 | 2 | 3;
   module_short_circuit_class?: 1 | 2 | 3;

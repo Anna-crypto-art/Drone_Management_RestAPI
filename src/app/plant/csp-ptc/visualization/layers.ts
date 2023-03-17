@@ -62,7 +62,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
     keyFigureInfo: { keyName: "glass-tube-temperature-class", description: "glass-tube-temperature-class_expl" },
     subLayers: [
       {
-        displayCondition: analysisResult => analysisResult.csp_ptc.glass_tube_temperature_class_count === 4,
+        displayCondition: analysisResult => analysisResult.csp_ptc!.glass_tube_temperature_class_count === 4,
         keyFigureInfo: { displayName: "glass-tube-temperature-class-4", zIndex: 14 },
         query: { glass_tube_temperature_class: 4 },
       },

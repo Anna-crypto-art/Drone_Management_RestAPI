@@ -589,6 +589,8 @@
   "my-location": "Show my location",
   "analysis-created-success": "New analysis created successfully",
   "dt-id": "DT ID",
+  "pv-tracker-tracking-deviation": "Tracking deviation",
+  "pv-tracker-tracking-deviation_expl": "The PI quantifies the difference between measured and ideal tracking angles.",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

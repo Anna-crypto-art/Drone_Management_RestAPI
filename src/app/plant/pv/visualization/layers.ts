@@ -12,6 +12,7 @@ import { ModuleShortCircuitKeyFigure } from "./key-figure-layers/module/module-s
 import { ModuleSoilingKeyFigure } from "./key-figure-layers/module/module-soiling-key-figure";
 import { ModuleSubstringShortCircuitKeyFigure } from "./key-figure-layers/module/module-substring-short-circuit-key-figure";
 import { TrackerSoilingKeyFigureLayer } from "./key-figure-layers/tracker/tracker-soiling-key-figure-layer";
+import { TrackingDeviationKeyFigureLayer } from "./key-figure-layers/tracker/tracking-deviation-key-figure-layer";
 
 export const COMPONENT_LAYERS: typeof ComponentLayer[] = [
   TrackerComponentLayer,
@@ -34,6 +35,31 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualPvQuery>[] = [
       {
         keyFigureInfo: { displayName: "pv-tracker-soiling-level-1", zIndex: 10 },
         query: { tracker_soiling_level: 1 },
+      },
+      {
+        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
+        query: { undefined: 1 },
+        color: LayerColor.grey,
+        invisibleAutoSelection: true,
+      },
+    ]
+  },
+  {
+    keyFigureId: ApiKeyFigure.TRACKING_DEVIATION_ID,
+    layerType: TrackingDeviationKeyFigureLayer,
+    keyFigureInfo: { keyName: "pv-tracker-tracking-deviation", description: "pv-tracker-tracking-deviation_expl" },
+    subLayers: [
+      {
+        keyFigureInfo: { templateName: "pvTrackerDeviation3", displayName: "pv-tracker-alignment-offset-class-3", zIndex: 13 },
+        query: { tracker_deviation_class: 3 },
+      },
+      {
+        keyFigureInfo: { templateName: "pvTrackerDeviation2", displayName: "pv-tracker-alignment-offset-class-2", zIndex: 12 },
+        query: { tracker_deviation_class: 2 },
+      },
+      {
+        keyFigureInfo: { templateName: "pvTrackerDeviation1", displayName: "pv-tracker-alignment-offset-class-1", zIndex: 10 },
+        query: { tracker_deviation_class: 1 },
       },
       {
         keyFigureInfo: { displayName: "not-measured", zIndex: 11 },

@@ -13,6 +13,15 @@
       <template #pvTrackerSolingLevel3>
         {{ $t('pv-tracker-soiling-level-3') }}
       </template>
+      <template #pvTrackerDeviation3>
+        {{ getTransAlignmentOffsetClassLimit("tracker", 3) }}
+      </template>
+      <template #pvTrackerDeviation2>
+        {{ getTransAlignmentOffsetClassLimit("tracker", 2) }}
+      </template>
+      <template #pvTrackerDeviation1>
+        {{ getTransAlignmentOffsetClassLimit("tracker", 1) }}
+      </template>
     </app-visualization>
   </div>
 </template>
@@ -40,6 +49,42 @@ export default class AppVisualPv extends AnalysisSelectionBaseComponent {
 
   async created() {
     await super.created();
+  }
+
+  getTransAlignmentOffsetClassLimit(componentType: "tracker", classLimit: 1 | 2 | 3): string {
+    if (!this.firstAnalysisResult) {
+      return "";
+    }
+
+    let offsetClassLimits: number[] | null = null;
+    let unit = "";
+    if (componentType === "tracker") {
+      offsetClassLimits = this.firstAnalysisResult.pv!.tracker_deviation_class_limits;
+      unit = "°";
+    }
+
+    if (offsetClassLimits === null) {
+      return "";
+    }
+
+    if (classLimit === 1) {
+      return this.$t("alignment-offset-class-1", { limit0: offsetClassLimits[0], unit }).toString();
+    }
+    if (classLimit === 2) {
+      return this.$t("alignment-offset-class-2", {
+        limit1: offsetClassLimits[1],
+        limit0: offsetClassLimits[0],
+        unit,
+      }).toString();
+    }
+    if (classLimit === 3) {
+      return this.$t("alignment-offset-class-3", {
+        limit1: offsetClassLimits[1],
+        unit,
+      }).toString();
+    }
+
+    throw new Error("class_limit not allowed");
   }
 }
 </script>

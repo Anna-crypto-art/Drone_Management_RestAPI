@@ -15,7 +15,7 @@ export class SceSdxKeyFigureLayer extends SceKeyFigureLayer {
           name:
             this.getLegendEntryTransName(
               "slope-deviation-class",
-              this.analysisResult.csp_ptc.sdx_rms_class_limits,
+              this.analysisResult.csp_ptc!.sdx_rms_class_limits,
               this.query?.sdx_class,
               "[mrad]"
             ) + this.getLegendEntryCount(),

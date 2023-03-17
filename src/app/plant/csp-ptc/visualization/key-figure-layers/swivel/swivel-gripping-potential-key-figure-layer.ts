@@ -16,7 +16,7 @@ export class SwivelGrippingPotentialKeyFigureLayer extends ClassSwivelKeyFigureL
   }
 
   public getClassLimits(): number[] {
-    return this.analysisResult.csp_ptc.swivel_gripping_potential_class_limits;
+    return this.analysisResult.csp_ptc!.swivel_gripping_potential_class_limits;
   }
   
   public getQueryClass(): number | undefined {
@@ -50,7 +50,7 @@ export class SwivelGrippingPotentialKeyFigureLayer extends ClassSwivelKeyFigureL
   protected getLegendName(): string {
     return this.getLegendEntryTransName(
       "rotation-joint-gripping-potential-class",
-      this.analysisResult.csp_ptc.swivel_gripping_potential_class_limits,
+      this.getClassLimits(),
       this.query?.gripping_potential_class,
       "mm"
     )
