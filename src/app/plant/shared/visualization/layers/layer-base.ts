@@ -103,13 +103,16 @@ export abstract class LayerBase {
     if (this.minZoomLevel) {
       if (this.zoomLoadedPcsCodes === undefined) { // is "change:center" event is already registered
         this.zoomLoadedPcsCodes = {};
-        
-        this.getMap()!.getView().on("change:center", debounce(async () => { 
+
+        const onLoadExtend = debounce(async () => { 
           const geoJson = await this.loadExtent();
           if (geoJson) {
             this.addLoadedFeatures(geoJson);
           }
-        }, 100));
+        }, 100);
+        
+        this.getMap()!.getView().on("change:center", onLoadExtend);
+        this.getMap()!.getView().on("change:resolution", onLoadExtend);
       }
 
       const geoJson = await this.loadExtent();
@@ -147,8 +150,6 @@ export abstract class LayerBase {
       const map = this.getMap()!;
       const view = map.getView();
       const zoomLevel = view.getZoom();
-
-      console.log("zoomlevel: " + zoomLevel);
 
       if (zoomLevel! >= this.minZoomLevel!) {
         const extent = transformExtent(
