@@ -13,6 +13,12 @@ const analysisResultMappingBase: AnalysisResultMappings<AnalysisResultSchemaBase
     disableForTable: true,
     superAdminOnly: true,
   },
+  {
+    getValue: r => r.fieldgeometry_component?.dt_id,
+    transName: "dt-id",
+    disableForTable: true,
+    superAdminOnly: true,
+  }
 ];
 
 export default analysisResultMappingBase;

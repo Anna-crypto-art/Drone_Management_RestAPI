@@ -3,4 +3,5 @@ export interface FieldgeometryComponentSchema {
   fielgeometry_id: string;
   component_id: number;
   kks: string;
+  dt_id: string;
 }
