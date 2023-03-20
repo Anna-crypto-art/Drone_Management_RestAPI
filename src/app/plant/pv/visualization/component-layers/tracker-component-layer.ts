@@ -10,6 +10,7 @@ import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
 export class TrackerComponentLayer extends ComponentLayer {
   protected readonly componentId = ApiComponent.PV_TRACKER;
   protected readonly color = LayerColor.darkGrey;
+  protected readonly allowRefMeasures = true;
   
   protected showPcsZoomLevel = 18.5;
   protected zIndex = 3;

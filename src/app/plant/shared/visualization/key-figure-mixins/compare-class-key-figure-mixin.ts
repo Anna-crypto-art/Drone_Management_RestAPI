@@ -1,6 +1,6 @@
 import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
 import { ComparedFeatureType, FeatureProperties, Legend, LegendEntry } from "@/app/plant/shared/visualization/types";
-import { CspPtcKeyFigureLayer } from "../csp-ptc-key-figure-layer";
+import { CspPtcKeyFigureLayer } from "../../../csp-ptc/visualization/key-figure-layers/csp-ptc-key-figure-layer";
 import { ICompareClassKeyFigureMixin } from "./types";
 
 export class CompareClassKeyFigureMixin<T extends ICompareClassKeyFigureMixin>  {

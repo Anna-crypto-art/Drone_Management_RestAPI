@@ -1,7 +1,7 @@
 import { LayerColor, KeyFigureColorScheme } from "@/app/plant/shared/visualization/layers/types";
 import { SceKeyFigureLayer } from "./abstract/sce-key-figure-layer";
-import { OffsetClassKeyFigureMixin } from "../key-figure-mixins/offset-class-key-figure-mixin";
-import { ICompareClassLimitsKeyFigureMixin } from "../key-figure-mixins/types";
+import { OffsetClassKeyFigureMixin } from "@/app/plant/shared/visualization/key-figure-mixins/offset-class-key-figure-mixin";
+import { ICompareClassLimitsKeyFigureMixin } from "@/app/plant/shared/visualization/key-figure-mixins/types";
 import { FeatureLike } from "ol/Feature";
 import { Style } from "ol/style";
 import { ComparedFeatureType, FeatureProperties, Legend } from "@/app/plant/shared/visualization/types";

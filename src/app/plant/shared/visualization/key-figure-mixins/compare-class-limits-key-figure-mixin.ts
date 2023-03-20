@@ -1,5 +1,5 @@
+import { KeyFigureLayer } from "@/app/plant/shared/visualization/layers/key-figure-layer";
 import { FeatureProperties } from "@/app/plant/shared/visualization/types";
-import { CspPtcKeyFigureLayer } from "../csp-ptc-key-figure-layer";
 import { CompareClassKeyFigureMixin } from "./compare-class-key-figure-mixin";
 import { ICompareClassLimitsKeyFigureMixin } from "./types";
 
@@ -7,7 +7,7 @@ export class CompareClassLimitsKeyFigureMixin
 extends CompareClassKeyFigureMixin<ICompareClassLimitsKeyFigureMixin> 
 {
   public constructor(
-    layer: CspPtcKeyFigureLayer<any> & ICompareClassLimitsKeyFigureMixin
+    layer: KeyFigureLayer<any, any> & ICompareClassLimitsKeyFigureMixin
   ) {
     super(layer);
   }

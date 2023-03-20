@@ -1,8 +1,28 @@
+import { OffsetClassKeyFigureMixin } from "@/app/plant/shared/visualization/key-figure-mixins/offset-class-key-figure-mixin";
+import { ComparedFeatureType, FeatureProperties, Legend } from "@/app/plant/shared/visualization/types";
+import { FeatureLike } from "ol/Feature";
+import { Style } from "ol/style";
 import { TrackerKeyFigureLayer } from "./abstract/tracker-key-figure-layer";
 
 export class TrackingDeviationKeyFigureLayer extends TrackerKeyFigureLayer {
+  private offsetClassKeyFigureMixin!: OffsetClassKeyFigureMixin;
+  
+  protected created(): void {
+    super.created();
+
+    this.offsetClassKeyFigureMixin = new OffsetClassKeyFigureMixin(this);
+  }
+
+  public getStyle(feature: FeatureLike): Style {
+    const style = super.getStyle(feature);
+
+    style.getFill().setColor(this.offsetClassKeyFigureMixin.getColor(feature));
+
+    return style;
+  }
+
   protected getColor(): string {
-    return this.getClassColor(this.getQueryClass());
+    return this.color;
   }
 
   public getClassLimits(): number[] {
@@ -13,18 +33,18 @@ export class TrackingDeviationKeyFigureLayer extends TrackerKeyFigureLayer {
     return this.query?.tracker_deviation_class
   }
 
-  protected getLegendName(): string {
-    if (this.query?.undefined === 1) {
-      return this.vueComponent.$t("not-measured").toString();
-    }
+  public getComparedFeatureType(properties: FeatureProperties, currentClass: number): ComparedFeatureType {
+    return super.getComparedFeatureType(
+      this.offsetClassKeyFigureMixin.getFeaturePropertiesClassValue(properties),
+      currentClass
+    );
+  }
 
-    return this.vueComponent.$t(
-      "alignment-offset-class-" + this.getQueryClass(),
-      { 
-        limit0: this.getClassLimits()[0],
-        limit1: this.getClassLimits()[1],
-        unit: "°",
-      },
-    ).toString();
+  protected getLegend(): Legend | undefined {
+    return this.offsetClassKeyFigureMixin.getLegend();
+  }
+
+  public getDiffLegendName(): string {
+    return this.offsetClassKeyFigureMixin.getDiffLegendName();
   }
 }

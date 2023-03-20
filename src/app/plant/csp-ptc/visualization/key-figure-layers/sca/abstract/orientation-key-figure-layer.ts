@@ -1,8 +1,8 @@
 import { ComparedFeatureType, FeatureProperties, Legend } from "@/app/plant/shared/visualization/types";
 import { FeatureLike } from "ol/Feature";
 import { Style } from "ol/style";
-import { OffsetClassKeyFigureMixin } from "../../key-figure-mixins/offset-class-key-figure-mixin";
-import { ICompareClassLimitsKeyFigureMixin } from "../../key-figure-mixins/types";
+import { OffsetClassKeyFigureMixin } from "@/app/plant/shared/visualization/key-figure-mixins/offset-class-key-figure-mixin";
+import { ICompareClassLimitsKeyFigureMixin } from "@/app/plant/shared/visualization/key-figure-mixins/types";
 import { ScaKeyFigureLayer } from "./sca-key-figure-layer";
 
 export abstract class OrientationKeyFigureLayer extends ScaKeyFigureLayer implements ICompareClassLimitsKeyFigureMixin {

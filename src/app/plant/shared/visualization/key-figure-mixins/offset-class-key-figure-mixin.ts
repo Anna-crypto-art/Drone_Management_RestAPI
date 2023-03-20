@@ -2,7 +2,7 @@ import { LayerColor, KeyFigureColorScheme } from "@/app/plant/shared/visualizati
 import { FeatureProperties, Legend, LegendEntry } from "@/app/plant/shared/visualization/types";
 import { complimentaryColor } from "@/app/shared/services/helper/color-helper";
 import { FeatureLike } from "ol/Feature";
-import { CspPtcKeyFigureLayer } from "../csp-ptc-key-figure-layer";
+import { CspPtcKeyFigureLayer } from "../../../csp-ptc/visualization/key-figure-layers/csp-ptc-key-figure-layer";
 import { CompareClassLimitsKeyFigureMixin } from "./compare-class-limits-key-figure-mixin";
 import { ICompareClassLimitsKeyFigureMixin } from "./types";
 

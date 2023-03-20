@@ -1,7 +1,7 @@
 import { LayerColor, KeyFigureColorScheme } from "@/app/plant/shared/visualization/layers/types";
 import { FeatureProperties, Legend, LegendEntry } from "@/app/plant/shared/visualization/types";
-import { CompareClassKeyFigureMixin } from "../key-figure-mixins/compare-class-key-figure-mixin";
-import { ICompareClassKeyFigureMixin } from "../key-figure-mixins/types";
+import { CompareClassKeyFigureMixin } from "@/app/plant/shared/visualization/key-figure-mixins/compare-class-key-figure-mixin";
+import { ICompareClassKeyFigureMixin } from "@/app/plant/shared/visualization/key-figure-mixins/types";
 import { ClassHceKeyFigureLayer } from "./abstract/class-hce-key-figure-layer";
 
 export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer implements ICompareClassKeyFigureMixin {

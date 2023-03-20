@@ -417,8 +417,22 @@ export default class AppVisualization
     const feature = features[0];
 
     mergedFeatureInfos = await this.clickLayers(feature, this.piLayersHierarchy!.getAllChildLayers(), mergedFeatureInfos, featureInfosMeta);
+
+    console.log("1. mergedFeatureInfos")
+    console.log(mergedFeatureInfos)
+
+    console.log("this.componentLayers")
+    console.log(this.componentLayers)
+
     mergedFeatureInfos = await this.clickLayers(feature, this.componentLayers, mergedFeatureInfos, featureInfosMeta);
+
+    console.log("2. mergedFeatureInfos")
+    console.log(mergedFeatureInfos)
+
     mergedFeatureInfos = await this.clickLayers(feature, this.refMeasureLayers!.referenceMeasurementLayers, mergedFeatureInfos, featureInfosMeta);
+
+    console.log("3. mergedFeatureInfos")
+    console.log(mergedFeatureInfos)
 
     if (mergedFeatureInfos && mergedFeatureInfos.title) {
       this.piToastInfo = mergedFeatureInfos;

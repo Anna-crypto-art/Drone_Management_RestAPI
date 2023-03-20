@@ -3,8 +3,8 @@ import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures"
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { FeatureLike } from "ol/Feature";
 import { Style } from "ol/style";
-import { CompareClassLimitsKeyFigureMixin } from "../key-figure-mixins/compare-class-limits-key-figure-mixin";
-import { ICompareClassLimitsKeyFigureMixin } from "../key-figure-mixins/types";
+import { CompareClassLimitsKeyFigureMixin } from "@/app/plant/shared/visualization/key-figure-mixins/compare-class-limits-key-figure-mixin";
+import { ICompareClassLimitsKeyFigureMixin } from "@/app/plant/shared/visualization/key-figure-mixins/types";
 import { ScaKeyFigureLayer } from "./abstract/sca-key-figure-layer";
 
 export class ScaSdxKeyFigureLayer extends ScaKeyFigureLayer implements ICompareClassLimitsKeyFigureMixin {

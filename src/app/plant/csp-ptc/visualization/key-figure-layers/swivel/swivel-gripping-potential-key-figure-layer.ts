@@ -1,8 +1,8 @@
 import { ComparedFeatureType, FeatureInfos, FeatureProperties, Legend } from "@/app/plant/shared/visualization/types";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { AnalysisResultCspPtcSwivelSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-swivel-schema";
-import { CompareClassLimitsKeyFigureMixin } from "../key-figure-mixins/compare-class-limits-key-figure-mixin";
-import { ICompareClassLimitsKeyFigureMixin } from "../key-figure-mixins/types";
+import { CompareClassLimitsKeyFigureMixin } from "@/app/plant/shared/visualization/key-figure-mixins/compare-class-limits-key-figure-mixin";
+import { ICompareClassLimitsKeyFigureMixin } from "@/app/plant/shared/visualization/key-figure-mixins/types";
 import { ClassSwivelKeyFigureLayer } from "./abstract/class-swivel-key-figure-layer";
 
 export class SwivelGrippingPotentialKeyFigureLayer extends ClassSwivelKeyFigureLayer implements ICompareClassLimitsKeyFigureMixin {
