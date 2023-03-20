@@ -1,4 +1,4 @@
-import { NewEmptyAnalysis } from "./analysis-requests";
+import { NewEmptyAnalysisRequest } from "./analysis-requests";
 
 export interface CreateFileUpload {
   name: string;
@@ -9,5 +9,5 @@ export interface CreateAnalysisUploadRequest {
   chunk_size_in_mb: number;
   files: CreateFileUpload[];
   analysis_id?: string;
-  create_analysis?: NewEmptyAnalysis;
+  create_analysis?: NewEmptyAnalysisRequest;
 }

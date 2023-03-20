@@ -32,12 +32,21 @@
                   </b-form-group>
                   <b-form-group label-cols-sm="4" label-cols-lg="2">
                     <template #label>
-                      {{ $t('product-packages') }} <app-super-admin-marker />
+                      {{ $t('product-packages') }} <app-super-admin-marker v-if="isSuperAdmin" />
                     </template>
                     <app-multiselect 
                       v-model="selectedProductPackageIds"
                       :options="productPackagesSelection"
                       :readonly="!isSuperAdmin"
+                    />
+                  </b-form-group>
+                  <b-form-group label-cols-sm="4" label-cols-lg="2" v-if="isSuperAdmin">
+                    <template #label>
+                      {{ $t('add-pis') }} <app-super-admin-marker />
+                    </template>
+                    <app-multiselect 
+                      v-model="selectedKeyFigureIds"
+                      :options="keyFiguresSelection"
                     />
                   </b-form-group>
                   <app-button type="submit" :loading="loading">{{ $t("apply") }}</app-button>
@@ -90,6 +99,7 @@ import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import AppMultiselect from "@/app/shared/components/app-multiselect/app-multiselect.vue";
 import AppDatepicker from "@/app/shared/components/app-datepicker/app-datepicker.vue";
 import { MultiselectOption } from "@/app/shared/components/app-multiselect/types";
+import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 
 @Component({
   name: "app-edit-analysis",
@@ -117,6 +127,9 @@ export default class AppEditAnalysis extends BaseAuthComponent {
   productPackagesSelection: MultiselectOption[] = [];
   selectedProductPackageIds: string[] | null = null;
   productPackagesSelectionDisabled = false;
+
+  keyFiguresSelection: MultiselectOption[] = [];
+  selectedKeyFigureIds: string[] | null = null;
 
   async created() {
     await this.updateAnalysis(this.$route.params.id);
@@ -191,6 +204,17 @@ export default class AppEditAnalysis extends BaseAuthComponent {
     this.productPackagesSelectionDisabled = !this.isSuperAdmin &&
       this.analysis.current_state.state.id >= ApiStates.DATA_COMPLETE;
 
+    if (this.isSuperAdmin) {
+      this.keyFiguresSelection = (await volateqApi.getAllKeyFigures())
+        .filter(kf => kf.component.technology_id === this.analysis!.plant.technology_id)
+        .map(kf => ({
+          id: kf.id.toString(),
+          label: kf.name,
+        }));
+
+      this.selectedKeyFigureIds = this.analysis.analysis_key_figures?.map(akf => akf.key_figure_id.toString()) || null;
+    }
+
     this.watchAnalysisTask();
 
     if (this.isSuperAdmin && this.analysis.analysis_result && 
@@ -235,6 +259,7 @@ export default class AppEditAnalysis extends BaseAuthComponent {
     await volateqApi.updateAnalysis(this.analysis!.id, { 
       flown_at: this.flownAt?.substring(0, 10),
       order_product_package_ids: this.selectedProductPackageIds || undefined,
+      key_figure_ids: this.selectedKeyFigureIds?.map(k => parseInt(k)) || undefined,
     });
 
     this.showSuccess(this.$t("analysis-updated-successfully").toString());

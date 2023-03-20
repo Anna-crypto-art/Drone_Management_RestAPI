@@ -31,6 +31,11 @@
                 class="mar-left-half blue"
                 v-b-popover.hover.top="$t('has-ref-measures', { count: row.item.refMeasureCount })"
               />
+              <app-icon v-if="row.item.hasGoodies" 
+                icon="gift"
+                class="mar-left-half blue"
+                v-b-popover.hover.top="$t('has-additional-pis')"
+              />
               <app-super-admin-marker v-if="row.item.analysisResultReleased === false" />
               <br>
               <small class="grayed">{{ row.item.name }}</small>
@@ -104,7 +109,8 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
         orderPPs: analysis.order_product_packages,
         refMeasureCount: analysis.reference_measurements.length,
         analysisResultReleased: analysis.analysis_result?.released,
-        hasResults: this.isSuperAdmin ? !!analysis.analysis_result : (analysis.analysis_result?.released || false)
+        hasResults: this.isSuperAdmin ? !!analysis.analysis_result : (analysis.analysis_result?.released || false),
+        hasGoodies: analysis.has_key_figures,
       });
     }
 

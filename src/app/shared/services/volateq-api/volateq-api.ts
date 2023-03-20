@@ -5,7 +5,7 @@ import { CustomerNameSchema, CustomerSchema } from "@/app/shared/services/volate
 import { SimpleUserSchema, UserAuthMethod, UserSchema } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 import { HttpClientBase } from "@/app/shared/services/volateq-api/http-client-base";
 import { apiBaseUrl, baseUrl } from "@/environment/environment";
-import { NewEmptyAnalysis, UpdateAnalysisState } from "./api-requests/analysis-requests";
+import { NewEmptyAnalysisRequest, UpdateAnalysisRequest, UpdateAnalysisStateRequest } from "./api-requests/analysis-requests";
 import { CreatePlantRequest, UpdatePlantRequest } from "./api-requests/plant-requests";
 import { AnalysisFileInfoSchema, AnalysisForViewSchema, AnalysisSchema } from "./api-schemas/analysis-schema";
 import { PlantSchema } from "./api-schemas/plant-schema";
@@ -142,7 +142,7 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/routes`, params);
   }
 
-  public async createEmptyAnalysis(newEmptyAnalyis: NewEmptyAnalysis): Promise<{ id: string }> {
+  public async createEmptyAnalysis(newEmptyAnalyis: NewEmptyAnalysisRequest): Promise<{ id: string }> {
     return this.post(`/auth/analysis/create-empty`, newEmptyAnalyis);
   }
 
@@ -166,7 +166,7 @@ export class VolateqAPI extends HttpClientBase {
     return analyses;
   }
 
-  public async updateAnalysisState(analysisId: string, analysisState: UpdateAnalysisState): Promise<void> {
+  public async updateAnalysisState(analysisId: string, analysisState: UpdateAnalysisStateRequest): Promise<void> {
     await this.post(`/auth/analysis/${analysisId}/state`, analysisState);
   }
 
@@ -217,7 +217,7 @@ export class VolateqAPI extends HttpClientBase {
 
   public async updateAnalysis(
     analysisId: string,
-    updateData: { data_complete?: boolean; flown_at?: string, order_product_package_ids?: string[] },
+    updateData: UpdateAnalysisRequest,
   ): Promise<void> {
     await this.post(`/auth/analysis/${analysisId}`, updateData);
   }

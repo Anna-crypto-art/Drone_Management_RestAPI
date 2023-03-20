@@ -5,6 +5,7 @@ import { AnalysisResultDetailedSchema, AnalysisResultSchema } from "./analysis-r
 import { PlantSchema } from "./plant-schema";
 import { OrderProductPackageSchema } from "./order-schema";
 import { ReferenceMeasurementSchema } from "./reference-measurement-schema";
+import { ApiKeyFigure } from "../api-key-figures";
 
 export interface AnalysisFilesSchema {
   video_files: string[];
@@ -23,6 +24,10 @@ export interface SimpleAnalysisOrderPPSchema extends SimpleAnalysisSchema {
   order_product_packages: OrderProductPackageSchema[];
 }
 
+export interface AnalysisKeyFigureSchema {
+  key_figure_id: ApiKeyFigure;
+}
+
 export interface AnalysisSchema extends SimpleAnalysisSchema {
   current_state: AnalysisStateSchema;
   plant: PlantSchema;
@@ -35,6 +40,7 @@ export interface AnalysisSchema extends SimpleAnalysisSchema {
   has_plant_metadata: boolean;
   task_id: string;
   order_product_packages: OrderProductPackageSchema[];
+  analysis_key_figures: AnalysisKeyFigureSchema[];
 }
 
 export interface AnalysisFileInfoSchema {
@@ -50,4 +56,5 @@ export interface AnalysisForViewSchema {
   flown_at: string;
   order_product_packages: OrderProductPackageSchema[];
   reference_measurements: ReferenceMeasurementSchema[];
+  has_key_figures: boolean;
 }
