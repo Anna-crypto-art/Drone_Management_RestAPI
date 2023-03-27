@@ -67,7 +67,7 @@
 
 <script lang="ts">
 import { CatchError } from '@/app/shared/services/helper/catch-helper';
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Watch } from "vue-property-decorator";
 import { FeatureAction, FeatureActionsSummary, FeatureInfoGroup, FeatureInfos } from './types';
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-dropdown-button.vue";
@@ -100,6 +100,11 @@ export default class AppFeatureInfosToast extends BaseComponent {
     }
   }
 
+  @Watch("featureInfos")
+  onFeatureInfosChanged() {
+    this.setFeatureVisibility();
+  }
+
   @CatchError("toastDropdownButtonLoading")
   async onClickFeatureAction(action: FeatureAction) {
     await action.action();
@@ -117,6 +122,18 @@ export default class AppFeatureInfosToast extends BaseComponent {
   onShowMoreClick(group: FeatureInfoGroup) {
     this.hiddenFeaturesVisible = !this.hiddenFeaturesVisible;
 
+    this.setFeatureGroupVisibility(group);
+  }
+
+  private setFeatureVisibility() {
+    for (const group of this.featureInfos.groups) {
+      if (this.hasHiddenFeatures(group)) {
+        this.setFeatureGroupVisibility(group);
+      }
+    }
+  }
+
+  private setFeatureGroupVisibility(group: FeatureInfoGroup) {
     for (const featureInfo of group.records) {
       featureInfo._visible = this.hiddenFeaturesVisible;
     }

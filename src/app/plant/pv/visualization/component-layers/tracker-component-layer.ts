@@ -1,6 +1,6 @@
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 import { ComponentLayer } from "../../../shared/visualization/layers/component-layer";
-import { Style, Stroke } from "ol/style";
+import { Style, Stroke, Fill } from "ol/style";
 import { FeatureLike } from "ol/Feature";
 import { layerEvents } from "@/app/plant/shared/visualization/layer-events";
 import { Geometry } from "ol/geom";
@@ -15,6 +15,7 @@ export class TrackerComponentLayer extends ComponentLayer {
   protected showPcsZoomLevel = 18.5;
   protected zIndex = 3;
   protected disabled = true;
+  protected width = 1;
 
   public readonly name = "pv-tracker";
   public readonly selected = true;
@@ -40,7 +41,10 @@ export class TrackerComponentLayer extends ComponentLayer {
     return new Style({
       stroke: new Stroke({
         color: this.getColor(feature),
-        width: 1,
+        width: this.getWidth(),
+      }),
+      fill: new Fill({
+        color: LayerColor.metallicBlue,
       }),
       text: this.showText(feature),
     });
