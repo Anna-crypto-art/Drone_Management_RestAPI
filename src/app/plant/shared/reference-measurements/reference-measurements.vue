@@ -148,6 +148,12 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
         notes: null,
         values: [],
       };
+
+      const preselectedFilterFieldNames = ["glass-tube-temperature"];
+      const preFilterField = this.filterFields.find(f => preselectedFilterFieldNames.includes(f.key.toString()));
+      if (preFilterField) {
+        this.entryModel.values = [{ filterField: preFilterField, value: null }];
+      }
     }
 
     this.refMeasureModal.show();

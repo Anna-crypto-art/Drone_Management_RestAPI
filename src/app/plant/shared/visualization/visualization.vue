@@ -735,6 +735,7 @@ export default class AppVisualization
         this.geolocationLayer = new VectorLayer({
           map: this.openLayers.getMap(),
           source: new VectorSource(),
+          zIndex: 2, // keep the position layer behind the SCA/Tracker layer
         });
       }
       this.geolocationLayer.getSource()!.addFeatures([this.accuracyFeature, this.positionFeature])

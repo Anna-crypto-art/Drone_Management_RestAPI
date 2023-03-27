@@ -136,6 +136,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.HCE_POSITION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     unit: "[mm]",
+    enableForRefMeasure: true,
   },
   {
     getValue: r => r.hce_position_support_vertical_offset,
@@ -143,6 +144,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.HCE_POSITION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     unit: "[mm]",
+    enableForRefMeasure: true,
   },
   {
     getValue: r => r.hce_position_support_offset_class,
@@ -157,6 +159,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.HCE_POSITION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     unit: "[mm]",
+    enableForRefMeasure: true,
   },
   {
     getValue: r => r.hce_position_center_vertical_offset,
@@ -164,6 +167,7 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.HCE_POSITION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     unit: "[mm]",
+    enableForRefMeasure: true,
   },
   {
     getValue: r => r.hce_position_center_offset_class,
