@@ -63,7 +63,7 @@ const settingsRoutes: RouteConfig[] = [
         }
       },
       {
-        path: "analysis-monitoring",
+        path: "monitoring",
         name: "AnalysisMonitoring",
         component: AppSettingsMonitoring,
         meta: {

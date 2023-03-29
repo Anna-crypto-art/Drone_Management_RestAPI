@@ -16,7 +16,9 @@
         <div class="app-analysis-monitoring">
           <div v-for="(analysisState, analysisName) in monitoring_json" v-bind:key="analysisName">
             <b-card :class="{ 'app-analysis-monitoring-title': true, closed: !collapsed_states[analysisName] }">
-              <span>{{ analysisName }}</span>
+              <span v-if="qfly_servery_by_analysis_name.has(analysisName)">{{ analysisName + " (" + qfly_servery_by_analysis_name.get(analysisName) + ")" }}</span>
+              <span v-else>{{ analysisName }}</span>
+
               <b-icon
                 icon="chevron-down"
                 font-scale="1.5"
@@ -197,6 +199,7 @@ export default class AppSettingsMonitoring extends BaseAuthComponent {
   collapsed_states: { [k in string]: boolean } = {};
 
   qfly_servers: QFlyServerSchema[] | null = null;
+  qfly_servery_by_analysis_name: Map<string, string> = new Map();
 
   loading = true;
 
@@ -262,6 +265,11 @@ export default class AppSettingsMonitoring extends BaseAuthComponent {
   @CatchError("loading")
   async loadQFlyServerStatus() {
     this.qfly_servers = await volateqApi.getQFlyServers();
+
+    this.qfly_servers.forEach((server) => {
+      if (server.server)
+        this.qfly_servery_by_analysis_name.set(server.analysis_name, server.server.name);
+    });
 
     this.rows = sortAlphabetical(this.qfly_servers.map((qfly_server: QFlyServerSchema) => ({
       name: qfly_server.server!.name,

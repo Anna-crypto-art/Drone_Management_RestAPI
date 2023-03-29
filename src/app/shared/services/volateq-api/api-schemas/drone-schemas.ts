@@ -1,6 +1,4 @@
 import { CustomerPlantTuple } from "@/app/settings/drones/types";
-import { CustomerSchema } from "./customer-schemas";
-import { PlantSchema } from "./plant-schema";
 
 export interface DroneModelSchema {
   id: number;
