@@ -35,14 +35,14 @@
             @click="onEditProductPackageClick(row.item)"
             variant="secondary"
             size="sm"
-            :title="$t('edit-product-package', { product_package: row.item.name })"
+            :title="$t('edit-something', { something: row.item.name })"
             icon="wrench"
           />
           <app-button
             @click="onDeleteProductPackageClick(row.item)"
             variant="outline-danger"
             size="sm"
-            :title="$t('delete-product-package', { product_package: row.item.name })"
+            :title="$t('delete-something', { something: row.item.name })"
             icon="trash"
           />
         </template>
@@ -274,7 +274,7 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
           key_figures: this.selectedKeyFigureIds!.map(kf => Number(kf)),
           plant_status: this.selectedPlantStatusIds!.map(ps => Number(ps)),
         });
-        this.showSuccess(this.$t("product-package-created-success", { product_package: this.currentProductPackage!.name }).toString());
+        this.showSuccess(this.$t("something-created-success", { something: this.currentProductPackage!.name }).toString());
       } else {
         await volateqApi.updateProductPackage(
           this.currentProductPackage.id,
@@ -285,7 +285,7 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
             plant_status: this.selectedPlantStatusIds!.map(ps => Number(ps)),
           }
         );
-        this.showSuccess(this.$t("product-package-edited-successfully", { product_package: this.currentProductPackage!.name }).toString());
+        this.showSuccess(this.$t("something-edited-successfully", { something: this.currentProductPackage!.name }).toString());
       }
       
       this.appProductPackageModal.hide();
@@ -314,7 +314,7 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
     this.updateKeyFigureOptions();
     this.updatePlantStatusOptions();
 
-    this.productPackageModalTitle = this.$t("update-product-package", { product_package: this.currentProductPackage.name }).toString();
+    this.productPackageModalTitle = this.$t("update-something", { something: this.currentProductPackage.name }).toString();
     this.productPackageModalOkTitle = this.$t('apply').toString();
 
     this.appProductPackageModal.show();
@@ -322,12 +322,12 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
 
   @CatchError("loading")
   async onDeleteProductPackageClick(productPackageItem: ProductPackageWithKeyFiguresSchemaItem) {
-    if (!confirm(this.$t("sure-delete-product-package", { product_package: productPackageItem.name }).toString())) {
+    if (!confirm(this.$t("sure-delete-something", { something: productPackageItem.name }).toString())) {
       return;
     }
     await volateqApi.deleteProductPackage(productPackageItem.id!);
 
-    this.showSuccess(this.$t("product-package-deleted-successfully", { product_package: productPackageItem.name }).toString());
+    this.showSuccess(this.$t("something-deleted-successfully", { something: productPackageItem.name }).toString());
 
     await this.updateProductPackageRows();
   }
