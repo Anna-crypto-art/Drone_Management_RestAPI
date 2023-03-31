@@ -23,7 +23,7 @@ export interface UpdateDroneModelRequest {
 
 export interface CreateDroneRequest {
   customer_plant_ids_encoded?: CustomerPlantTuple[];
-  drone_model_id: number;
+  drone_model_id: string;
   custom_name: string;
   serial_number: string;
   number_available_batteries: number;
@@ -32,7 +32,7 @@ export interface CreateDroneRequest {
 
 export interface UpdateDroneRequest {
   customer_plant_ids_encoded?: CustomerPlantTuple[];
-  drone_model_id: number;
+  drone_model_id: string;
   custom_name: string;
   serial_number: string;
   number_available_batteries: number;

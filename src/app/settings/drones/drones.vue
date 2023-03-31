@@ -206,9 +206,9 @@ export default class AppSettingsDrones extends BaseAuthComponent {
   droneModalOkTitle = "";
   
   currentDrone: DroneSchema = {
-    id: 0, // 0 -> nothing
+    id: "",
     drone_model: {
-      id: 0, // 0 -> nothing
+      id: "",
       name: "",
       name_abbrev: "",
       vendor: "",
@@ -219,7 +219,7 @@ export default class AppSettingsDrones extends BaseAuthComponent {
     },
     custom_name: "",
     serial_number: "",
-    number_available_batteries: 0,
+    number_available_batteries: 1,
     retired: false,
   }
 
@@ -338,9 +338,9 @@ export default class AppSettingsDrones extends BaseAuthComponent {
   @CatchError("droneModalLoading")
   async onCreateDroneClick() {
     this.currentDrone = {
-      id: 0, // 0 -> nothing
+      id: "",
       drone_model: {
-        id: 0, // 0 -> nothing
+        id: "",
         name: "",
         name_abbrev: "",
         vendor: "",
@@ -351,7 +351,7 @@ export default class AppSettingsDrones extends BaseAuthComponent {
       },
       custom_name: "",
       serial_number: "",
-      number_available_batteries: 0,
+      number_available_batteries: 1,
       retired: false,
     }
     this.selectedCustomerPlants = [];
@@ -379,7 +379,7 @@ export default class AppSettingsDrones extends BaseAuthComponent {
       }
     }
 
-    if (this.currentDrone.id === 0) {
+    if (!this.currentDrone.id) {
       await volateqApi.createDrone({
         customer_plant_ids_encoded: this.currentDrone.customer_plants,
         custom_name: this.currentDrone.custom_name,

@@ -165,7 +165,7 @@ export default class AppSettingsDroneModels extends BaseAuthComponent {
   droneModelModalOkTitle = "";
   
   currentDroneModel: DroneModelSchema = {
-    id: 0, // 0 -> nothing
+    id: "",
     name: "",
     name_abbrev: "",
     vendor: "",
@@ -228,7 +228,7 @@ export default class AppSettingsDroneModels extends BaseAuthComponent {
   @CatchError()
   onCreateDroneModelClick() {
     this.currentDroneModel = {
-      id: 0, // 0 -> nothing
+      id: "",
       name: "",
       name_abbrev: "",
       vendor: "",
@@ -246,7 +246,7 @@ export default class AppSettingsDroneModels extends BaseAuthComponent {
 
   @CatchError("droneModelModalLoading")
   async onSubmitDroneModel() {
-    if (this.currentDroneModel.id === 0) {
+    if (!this.currentDroneModel.id) {
       await volateqApi.createDroneModel({
         name: this.currentDroneModel.name,
         name_abbrev: this.currentDroneModel.name_abbrev,

@@ -1,7 +1,7 @@
 import { DroneModelSchema } from "@/app/shared/services/volateq-api/api-schemas/drone-schemas";
 
 export interface DroneModelSchemaItem {
-  id: number;
+  id: string;
   name: string;
   name_abbrev: string;
   vendor: string;
@@ -12,7 +12,7 @@ export interface DroneModelSchemaItem {
 }
 
 export interface DroneSchemaItem {
-  id: number;
+  id: string;
   customer_plants?: CustomerPlantTuple[];
   drone_model: DroneModelSchema;
   custom_name: string;

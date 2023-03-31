@@ -687,7 +687,7 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/drone-models`);
   }
 
-  public async getDroneModel(droneModelId: number): Promise<DroneModelSchema> {
+  public async getDroneModel(droneModelId: string): Promise<DroneModelSchema> {
     return this.get(`/auth/drone-model/${droneModelId}`);
   }
 
@@ -698,13 +698,13 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public async updateDroneModel(
-    droneModelId: number,
+    droneModelId: string,
     updateDroneModelRequest: UpdateDroneModelRequest,
   ): Promise<void> {
     return this.post(`/auth/drone-model/${droneModelId}`, updateDroneModelRequest)
   }
 
-  public async deleteDroneModel(droneModelId: number): Promise<void> {
+  public async deleteDroneModel(droneModelId: string): Promise<void> {
     await this.delete(`/auth/drone-model/${droneModelId}`);
   }
 
@@ -719,13 +719,13 @@ export class VolateqAPI extends HttpClientBase {
   }
 
   public async updateDrone(
-    droneId: number,
+    droneId: string,
     updateDroneRequest: UpdateDroneRequest,
   ): Promise<void> {
     return this.post(`/auth/drone/${droneId}`, updateDroneRequest)
   }
 
-  public async deleteDrone(droneId: number): Promise<void> {
+  public async deleteDrone(droneId: string): Promise<void> {
     await this.delete(`/auth/drone/${droneId}`);
   }
 

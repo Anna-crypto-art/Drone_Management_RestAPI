@@ -1,7 +1,7 @@
 import { CustomerPlantTuple } from "@/app/settings/drones/types";
 
 export interface DroneModelSchema {
-  id: number;
+  id: string;
   name: string;
   name_abbrev: string;
   vendor: string;
@@ -12,7 +12,7 @@ export interface DroneModelSchema {
 }
 
 export interface DroneSchema {
-  id: number;
+  id: string;
   customer_plants?: CustomerPlantTuple[];
   drone_model: DroneModelSchema;
   custom_name: string;
