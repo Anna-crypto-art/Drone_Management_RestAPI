@@ -32,7 +32,7 @@ import { OrderPPKeyFiguresDisabledSchema, OrderProductPackageSchema, OrderSchema
 import { MultiselectOption } from "../../components/app-multiselect/types";
 import { SecuredFilename, Upload, UploadChunkResult } from "./api-schemas/upload-schemas";
 import { CreateAnalysisUploadRequest } from "./api-requests/upload-requests";
-import { AnalysisResultSetNullOrFalseRequest } from "./api-requests/analysis-result-requests";
+import { AnalysisResultSetNullOrFalseOrTrueRequest } from "./api-requests/analysis-result-requests";
 import { AddReferenceMeasurementRequest } from "./api-requests/ref-measure-requests";
 import { FieldgeometryComponentSchema } from "./api-schemas/fieldgeometry-component-schema";
 import { KeyFigureSchema } from "./api-schemas/key-figure-schema";
@@ -801,8 +801,8 @@ export class VolateqAPI extends HttpClientBase {
     });
   }
 
-  public async setAnalysisResultValueToNullOrFalse(analysisResultId: string, setNullRequest: AnalysisResultSetNullOrFalseRequest): Promise<void> {
-    await this.post(`/auth/analysis-result/${analysisResultId}/set-null-or-false`, setNullRequest);
+  public async setAnalysisResultValueToNullOrFalseOrTrue(analysisResultId: string, setNullRequest: AnalysisResultSetNullOrFalseOrTrueRequest): Promise<void> {
+    await this.post(`/auth/analysis-result/${analysisResultId}/set-null-or-false-or-true`, setNullRequest);
   }
 
   public async getAnalysisResultChangeHistory(analysisResultId: string): Promise<AnalysisResultChangeHistorySchema[]> {
