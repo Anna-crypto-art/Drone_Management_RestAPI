@@ -321,13 +321,19 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
         action: async () => {
           await this.modfiyFeatureResultAction(featureInfos, "false");
         }
-      })
+      });
+      actionsSummary.actions.push({
+        name: this.vueComponent.$t("set-to-true").toString(),
+        action: async () => {
+          await this.modfiyFeatureResultAction(featureInfos, "true");
+        }
+      });
     }
 
     featureInfos.actionsSummaries.push(actionsSummary);
   }
 
-  private async modfiyFeatureResultAction(featureInfos: FeatureInfos, newValue: "null" | "false") {
+  private async modfiyFeatureResultAction(featureInfos: FeatureInfos, newValue: "null" | "false" | "true") {
     if (!confirm(this.vueComponent.$t("apply-are-you-sure").toString())) {
       return;
     }
@@ -335,7 +341,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     const mappingHelper = new AnalysisResultMappingHelper(this.analysisResultMapping, this.analysisResult);
     const entry = this.getMappingEntry();
 
-    await volateqApi.setAnalysisResultValueToNullOrFalse(this.analysisResult.id, {
+    await volateqApi.setAnalysisResultValueToNullOrFalseOrTrue(this.analysisResult.id, {
       key_figure_id: this.keyFigureId,
       kks: featureInfos.title!,
       property_name: entry ? mappingHelper.getPropertyName(entry) : undefined,
