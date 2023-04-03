@@ -20,6 +20,7 @@ export class OrhtoImageMixin {
   ) {
     this.layer.orthoImages = [
       { name: "RGB_ONLINE", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_ONLINE_ID, available: false },
+      { name: "RGB_ONLINE_NO_REFLEX", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_ONLINE_NO_REFLEX_ID, available: false },
       { name: "RGB_OFFLINE", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_OFFLINE_ID, available: false },
       { name: "IR", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_IR_ID, available: false },
       { name: "SDX", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_SDX_ID, available: false },
