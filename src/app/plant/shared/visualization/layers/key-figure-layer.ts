@@ -34,6 +34,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
   public orthoImages: OrthoImage[] | null = null;
 
   protected readonly refMeasureFeatureStrokeWidth: number = 3;
+  protected readonly refMeasureFeatureStrokeWidthAddOnZoom: number = 6;
 
   public geoJSON?: KeyFigureGeoJSON;
 
@@ -67,7 +68,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     if (pcs && this.vueComponent.refMeasuredPcsCodes.includes(pcs)) {
       return [new Style({
         stroke: new Stroke({
-          width: this.refMeasureFeatureStrokeWidth,
+          width: this.zoomWidth ? this.zoomWidth + this.refMeasureFeatureStrokeWidthAddOnZoom : this.refMeasureFeatureStrokeWidth,
           color: LayerColor.volateqBlue,
         }),
       })];

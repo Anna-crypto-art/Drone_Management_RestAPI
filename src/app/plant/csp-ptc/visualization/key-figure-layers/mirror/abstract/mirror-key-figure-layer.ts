@@ -10,6 +10,7 @@ export class MirrorKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisResultCsp
 
   protected showPcsZoomLevel = 21;
   protected readonly strokeWidth = 3;
+  protected readonly refMeasureFeatureStrokeWidth = 6;
 
   public getStyle(feature: FeatureLike): Style {
     const color = this.enableCompare && this.compareAnalysisResult && this.getDiffColor(this.getProperties(feature))
