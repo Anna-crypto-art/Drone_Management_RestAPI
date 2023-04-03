@@ -9,7 +9,7 @@ const analysisResultCspPtcMappingMirror: AnalysisResultMappings<
   ...analysisResultMappingBase,
   {
     getValue: r => r.is_missing,
-    transName: "is-missing-mirror",
+    transName: "missing-mirror",
     keyFigureId: ApiKeyFigure.MISSING_MIRROR_ID,
     filterType: FilterFieldType.BOOLEAN,
     enableForDiagram: true,
