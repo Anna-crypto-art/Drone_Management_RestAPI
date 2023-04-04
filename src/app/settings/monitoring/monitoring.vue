@@ -76,7 +76,7 @@
           <b-icon icon="server" /><span class="pad-left">{{ $t("qfly-servers") }}</span>
         </template>
         <app-table-container>
-          <app-table :columns="columns" :rows="rows" :loading="loading" :hoverActions="true">
+          <app-table :columns="columns" :rows="rows" :hoverActions="true">
             <template #cell(state)="row">
               <span :class="serverIsRunning(row.item) ? 'blue' : 'grayed'">
                 {{ row.item.state }}
