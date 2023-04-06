@@ -23,6 +23,7 @@ export const keyFigureRainbowColors: Record<ApiKeyFigure, LayerColor> = {
   [ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_ONLINE_ID]: LayerColor.black,
   [ApiKeyFigure.SCA_ORTHO_IMAGES_IR_ID]: LayerColor.black,
   [ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_OFFLINE_ID]: LayerColor.black,
+  [ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_ONLINE_NO_REFLEX_ID]: LayerColor.black,
   [ApiKeyFigure.SCA_BALL_JOINT_FRICTION_ID]: LayerColor.black,
 
   // SCE

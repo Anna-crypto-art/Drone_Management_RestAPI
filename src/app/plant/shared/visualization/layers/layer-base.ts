@@ -99,7 +99,7 @@ export abstract class LayerBase {
       this.onZoom((zoomlevel) => this.calculateZoomWidth(zoomlevel));
       this.calculateZoomWidth(this.vueComponent.openLayers?.getMap()?.getView().getZoom());
     }
-    
+
     if (this.minZoomLevel) {
       if (this.zoomLoadedPcsCodes === undefined) { // is "change:center" event is already registered
         this.zoomLoadedPcsCodes = {};
@@ -145,42 +145,43 @@ export abstract class LayerBase {
 
   protected async loadExtent(): Promise<GeoJSON<PropsFeature> | undefined> {
     try {
-      this.vueComponent.setLoading(true);
-      
-      const map = this.getMap()!;
-      const view = map.getView();
-      const zoomLevel = view.getZoom();
+      if (this.selected) {
+        this.vueComponent.setLoading(true);
 
-      if (zoomLevel! >= this.minZoomLevel!) {
-        const extent = transformExtent(
-          view.calculateExtent(map.getSize()),
-          GEO_JSON_OPTIONS.featureProjection,
-          GEO_JSON_OPTIONS.dataProjection
-        );
+        const map = this.getMap()!;
+        const view = map.getView();
+        const zoomLevel = view.getZoom();
 
-        if (this.isOutsideOfLoadedExtent(extent)) {
-          this.enlargeExtent(extent);
+        if (zoomLevel! >= this.minZoomLevel!) {
+          const extent = transformExtent(
+            view.calculateExtent(map.getSize()),
+            GEO_JSON_OPTIONS.featureProjection,
+            GEO_JSON_OPTIONS.dataProjection
+          );
 
-          const geoJson = await this.load(extent);
-          if (geoJson) {
-            const newFeatures: (FeatureLike & PropsFeature)[] = [];
-            for (const feature of geoJson.features) {
-              const pcs = feature.properties.name;
-              if (pcs) {
-                if (!(pcs in this.zoomLoadedPcsCodes!)) {
-                  newFeatures.push(feature);
-                  this.zoomLoadedPcsCodes![pcs] = true;
+          if (this.isOutsideOfLoadedExtent(extent)) {
+            this.enlargeExtent(extent);
+
+            const geoJson = await this.load(extent);
+            if (geoJson) {
+              const newFeatures: (FeatureLike & PropsFeature)[] = [];
+              for (const feature of geoJson.features) {
+                const pcs = feature.properties.name;
+                if (pcs) {
+                  if (!(pcs in this.zoomLoadedPcsCodes!)) {
+                    newFeatures.push(feature);
+                    this.zoomLoadedPcsCodes![pcs] = true;
+                  }
                 }
               }
+
+              geoJson.features = newFeatures;
+
+              return geoJson;
             }
-  
-            geoJson.features = newFeatures;
-  
-            return geoJson;
           }
         }
       }
-
       return undefined;
     } catch (e) {
       this.vueComponent.showError(e);
