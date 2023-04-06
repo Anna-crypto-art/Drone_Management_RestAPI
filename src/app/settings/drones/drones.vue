@@ -263,7 +263,7 @@ export default class AppSettingsDrones extends BaseAuthComponent {
   }
 
   async updateDroneRows() {
-    const droneFilter: { customer_id?: string } = {};
+    const droneFilter: { customer_id?: string, plant_id?: string } = {};
     if (this.selectedCustomerId) {
       droneFilter.customer_id = this.selectedCustomerId;
     }

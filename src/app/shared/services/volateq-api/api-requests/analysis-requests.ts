@@ -5,6 +5,7 @@ export interface NewEmptyAnalysisRequest {
   plant_id: string;
   flown_at: string;
   order_product_package_ids?: string[];
+  drone_id?: string;
 }
 
 export interface UpdateAnalysisRequest {
@@ -12,6 +13,7 @@ export interface UpdateAnalysisRequest {
   flown_at?: string;
   order_product_package_ids?: string[];
   key_figure_ids?: ApiKeyFigure[];
+  drone_id?: string;
 }
 
 export interface UpdateAnalysisStateRequest {
