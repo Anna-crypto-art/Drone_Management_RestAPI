@@ -166,6 +166,10 @@ export default class AppFeatureInfosToast extends BaseComponent {
       font-size: 1rem;
       padding: 5px;
     }
+
+    .col {
+      word-wrap: anywhere;
+    }
   }
 
 

@@ -38,6 +38,8 @@ import { FieldgeometryComponentSchema } from "./api-schemas/fieldgeometry-compon
 import { KeyFigureSchema } from "./api-schemas/key-figure-schema";
 import { CreateProductPackageRequest, UpdateProductPackageRequest } from "./api-requests/product-package-requests";
 import { PlantStatusSchema } from "./api-schemas/plant-status-schema";
+import { CreateDroneModelRequest, UpdateDroneModelRequest, CreateDroneRequest, UpdateDroneRequest } from "./api-requests/drone-requests";
+import { DroneModelSchema, DroneSchema } from "./api-schemas/drone-schemas";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -679,6 +681,56 @@ export class VolateqAPI extends HttpClientBase {
 
   public async getProductPackagesWithKeyFigures(): Promise<ProductPackageWithKeyFiguresSchema[]> {
     return this.get(`/auth/product-packages-with-key-figures`);
+  }
+
+  public async getDroneModels(): Promise<DroneModelSchema[]> {
+    return this.get(`/auth/drone-models`);
+  }
+
+  public async getDroneModel(droneModelId: string): Promise<DroneModelSchema> {
+    return this.get(`/auth/drone-model/${droneModelId}`);
+  }
+
+  public async createDroneModel(
+    createDroneModelRequest: CreateDroneModelRequest,
+  ): Promise<void> {
+    return this.post(`/auth/create-drone-model`, createDroneModelRequest)
+  }
+
+  public async updateDroneModel(
+    droneModelId: string,
+    updateDroneModelRequest: UpdateDroneModelRequest,
+  ): Promise<void> {
+    return this.post(`/auth/drone-model/${droneModelId}`, updateDroneModelRequest)
+  }
+
+  public async deleteDroneModel(droneModelId: string): Promise<void> {
+    await this.delete(`/auth/drone-model/${droneModelId}`);
+  }
+
+  public async getDrones(queryParams?: { customer_id?: string }): Promise<DroneSchema[]> {
+    return this.get(`/auth/drones`, queryParams);
+  }
+
+  public async createDrone(
+    createDroneRequest: CreateDroneRequest,
+  ): Promise<void> {
+    return this.post(`/auth/create-drone`, createDroneRequest)
+  }
+
+  public async updateDrone(
+    droneId: string,
+    updateDroneRequest: UpdateDroneRequest,
+  ): Promise<void> {
+    return this.post(`/auth/drone/${droneId}`, updateDroneRequest)
+  }
+
+  public async deleteDrone(droneId: string): Promise<void> {
+    await this.delete(`/auth/drone/${droneId}`);
+  }
+
+  public async getAvailableDronesForAnalysis(analysisId: string): Promise<DroneSchema[]> {
+    return this.get(`/auth/drones/${analysisId}`);
   }
 
   public async createOrder(
