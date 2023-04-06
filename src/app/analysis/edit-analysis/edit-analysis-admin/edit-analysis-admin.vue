@@ -1,26 +1,21 @@
 <template>
   <div>
     <b-row>
-      <b-col sm>
+      <b-col cols="12" lg="6">
         <app-update-analysis-state :analysis="analysis" />
       </b-col>
-      <b-col sm>
+      <b-col cols="12" lg="6">
         <app-import-analysis-result :analysis="analysis" />
       </b-col>
-    </b-row>
-    <b-row>
-      <b-col sm>
+      <b-col cols="12" lg="6">
         <app-analysis-file-actions :analysis="analysis" />
       </b-col>
-      <b-col sm>
+      <!-- as we have a complete server monitoring now, we do not need the single server stuff visible per analysis anymore -->
+      <!-- <b-col  cols="12">
         <app-run-q-fly-for-analysis :analysis="analysis" />
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col sm>
+      </b-col> -->
+      <b-col cols="12" lg="6">
         <app-delete-analysis :analysis="analysis" />
-      </b-col>
-      <b-col sm>
       </b-col>
     </b-row>
   </div>
@@ -32,7 +27,6 @@ import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/an
 import AppUpdateAnalysisState from "@/app/analysis/edit-analysis/edit-analysis-admin/update-analysis-state.vue";
 import AppImportAnalysisResult from "@/app/analysis/edit-analysis/edit-analysis-admin/import-analysis-result.vue";
 import AppDeleteAnalysis from "@/app/analysis/edit-analysis/edit-analysis-admin/delete-analysis.vue";
-import AppRunQFlyForAnalysis from "@/app/analysis/edit-analysis/edit-analysis-admin/run-qfly-for-analysis.vue";
 import AppAnalysisFileActions from "@/app/analysis/edit-analysis/edit-analysis-admin/analysis-file-actions.vue";
 
 @Component({
@@ -41,7 +35,6 @@ import AppAnalysisFileActions from "@/app/analysis/edit-analysis/edit-analysis-a
     AppUpdateAnalysisState,
     AppImportAnalysisResult,
     AppDeleteAnalysis,
-    AppRunQFlyForAnalysis,
     AppAnalysisFileActions,
   },
 })

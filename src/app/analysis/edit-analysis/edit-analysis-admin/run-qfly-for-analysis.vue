@@ -48,6 +48,7 @@ import { CatchError } from "@/app/shared/services/helper/catch-helper";
     AppBox,
   },
 })
+// NOT USED ANYMORE. We have a complete server overview in monitoring nowadays
 export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
   @Prop({ required: true }) analysis!: AnalysisSchema;
 
