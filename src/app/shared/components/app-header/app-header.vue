@@ -4,9 +4,11 @@
     <!-- Only for christmas time -->
     <!-- <div class="snow"><div class="snow-more"></div></div> -->
 
+    <!-- Is always true... also on production... feel free find out the value
     <b-badge class="app-header-dev-badge" v-if="isEnvNotProduction" variant="danger">
       DEV
     </b-badge>
+    -->
 
     <b-navbar-brand href="#">
       <b-link to="/">
