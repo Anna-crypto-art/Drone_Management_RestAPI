@@ -4,6 +4,10 @@
     <!-- Only for christmas time -->
     <!-- <div class="snow"><div class="snow-more"></div></div> -->
 
+    <b-badge class="app-header-dev-badge" v-if="isEnvNotProduction" variant="danger">
+      DEV
+    </b-badge>
+
     <b-navbar-brand href="#">
       <b-link to="/">
         <img
@@ -101,6 +105,7 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import AppIcon from "@/app/shared/components/app-icon/app-icon.vue";
 import { IAppModalForm } from "../app-modal/types";
+import { environment } from "@/environment/environment";
 
 @Component({
   name: "app-header",
@@ -139,6 +144,10 @@ export default class AppHeader extends BaseAuthComponent {
         ? this.$router.currentRoute.path.replace(route.replace("*", ""), "").indexOf("/") == -1
         : this.$router.currentRoute.path === route
     );
+  }
+
+  get isEnvNotProduction(): boolean {
+    return environment !== "PRODUCTION"
   }
 
   async onShowSwitchCustomerModal() {
@@ -211,6 +220,12 @@ export default class AppHeader extends BaseAuthComponent {
   color: $white;
 
   @extend %padtopbot-0;
+
+  &-dev-badge {
+    position: absolute;
+    top: 10px;
+    left: 142px;
+  }
 
   .snow {
     position: absolute;
