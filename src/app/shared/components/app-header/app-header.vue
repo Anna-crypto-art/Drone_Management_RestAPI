@@ -3,12 +3,10 @@
     
     <!-- Only for christmas time -->
     <!-- <div class="snow"><div class="snow-more"></div></div> -->
-
-    <!-- Is always true... also on production... feel free find out the value
-    <b-badge class="app-header-dev-badge" v-if="isEnvNotProduction" variant="danger">
+    
+    <b-badge class="app-header-dev-badge" v-if="isEnvDevelopment" variant="danger">
       DEV
     </b-badge>
-    -->
 
     <b-navbar-brand href="#">
       <b-link to="/">
@@ -129,10 +127,6 @@ export default class AppHeader extends BaseAuthComponent {
 
   showAllKeyFigures = false;
 
-  async created() {
-    this.isEnvNotProduction
-  }
-
   async logout(): Promise<void> {
     try {
       await volateqApi.logout();
@@ -152,10 +146,8 @@ export default class AppHeader extends BaseAuthComponent {
     );
   }
 
-  get isEnvNotProduction(): boolean {
-    console.log("Environment: " + environment)
-
-    return environment !== "PRODUCTION"
+  get isEnvDevelopment(): boolean {
+    return environment === "development";
   }
 
   async onShowSwitchCustomerModal() {
