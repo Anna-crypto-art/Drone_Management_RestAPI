@@ -42,7 +42,7 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
   }
 
   protected async onSelected(selected: boolean): Promise<void> {
-    super.onSelected(selected);
+    await super.onSelected(selected);
 
     await this.vueComponent.onLayerSelected(selected, this.getLegend());
   }

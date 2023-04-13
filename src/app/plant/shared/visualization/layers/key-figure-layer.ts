@@ -90,7 +90,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
   }
 
   protected async onSelected(selected: boolean): Promise<void> {
-    super.onSelected(selected);
+    await super.onSelected(selected);
 
     await this.vueComponent.onLayerSelected(selected, this.getLegend());
   }

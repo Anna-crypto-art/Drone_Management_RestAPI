@@ -1,4 +1,4 @@
-import { FeatureProperties, PropsFeature } from "@/app/plant/shared/visualization/types";
+import { FeatureProperties } from "@/app/plant/shared/visualization/types";
 import analysisResultCspPtcMappingHce from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping-hce";
 import { AnalysisResultCspPtcHceSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-hce-schema";
 import { FeatureLike } from "ol/Feature";

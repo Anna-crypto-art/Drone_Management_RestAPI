@@ -16,7 +16,7 @@ export interface BaseLayerType {
   name: string;
   type: "geojson" | "osm" | "group" | "custom";
   selected?: boolean;
-  onSelected?: (selected: boolean) => void;
+  onSelected?: (selected: boolean) => Promise<void> | void;
   visible?: boolean;
   styleClass?: string;
   reloadLayer?: boolean;

@@ -53,7 +53,7 @@ export class LayerStructure extends SequentialEventEmitter {
 
     await this.layerLoader?.setVisible(selected);
 
-    this.layerLoader?.layerType.onSelected && this.layerLoader?.layerType.onSelected(selected);
+    this.layerLoader?.layerType.onSelected && await this.layerLoader?.layerType.onSelected(selected);
 
     if (selected || (!selected && this.isGroup)) {
       for (const childLayer of this.childLayers) {
