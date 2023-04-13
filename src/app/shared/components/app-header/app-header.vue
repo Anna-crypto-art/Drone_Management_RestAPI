@@ -149,6 +149,8 @@ export default class AppHeader extends BaseAuthComponent {
   }
 
   get isEnvNotProduction(): boolean {
+    console.log("Environment: " + environment)
+
     return environment !== "PRODUCTION"
   }
 
