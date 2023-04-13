@@ -18,6 +18,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import { transformExtent } from "ol/proj";
 import { debounce } from "@/app/shared/services/helper/debounce-helper";
+import { isOnMobileDevice } from "@/app/shared/services/helper/mobile-helper";
 
 export const GEO_JSON_OPTIONS = { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" };
 
@@ -44,7 +45,7 @@ export abstract class LayerBase {
   protected loadedExtent: Extent | undefined = undefined;
 
   // zoomlevel: width
-  protected readonly zoomWidths: Record<number, number> | null = null;
+  protected readonly zoomWidths: Record<number, number | { width: number, mobileOnly: boolean }> | null = null;
   protected zoomWidth: number | null = null;
 
   public invisibleAutoSelection?: boolean;
@@ -246,7 +247,16 @@ export abstract class LayerBase {
       }
 
       if (matchingZoomLevel !== null) {
-        this.zoomWidth = this.zoomWidths![matchingZoomLevel];
+        const zoomWidth = this.zoomWidths![matchingZoomLevel];
+        if (zoomWidth instanceof Object) {
+          if (zoomWidth.mobileOnly && !isOnMobileDevice()) {
+            this.zoomWidth = null;
+          } else {
+            this.zoomWidth = zoomWidth.width
+          }
+        } else {
+          this.zoomWidth = zoomWidth
+        }
       } else {
         this.zoomWidth = null;
       }

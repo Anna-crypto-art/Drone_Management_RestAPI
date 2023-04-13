@@ -37,6 +37,7 @@ import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/an
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { AnalysisSelectionEvent } from "../analysis-selection-sidebar/types";
+import { getMobileQuery } from "@/app/shared/services/helper/mobile-helper";
 
 @Component({
   name: "app-plant-view-tabs"
@@ -78,7 +79,7 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
       this.selectedTab = this.queryTab;
     });
 
-    this.isMobileQuery = window.matchMedia("screen and (max-width: 1000px)");
+    this.isMobileQuery = getMobileQuery()
     this.isMobileQuery.addEventListener("change", this.isMobileListener);
     this.isMobileListener(this.isMobileQuery);
   }

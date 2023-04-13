@@ -13,11 +13,11 @@ export abstract class HceKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisRes
   protected readonly refMeasureFeatureStrokeWidth = 8;
 
   protected zoomWidths = {
-    18: 10,
-    18.5: 15,
-    19: 20,
-    19.5: 25,
-    20: 30,
+    18: { width: 10, mobileOnly: true },
+    18.5: { width: 15, mobileOnly: true },
+    19: { width: 20, mobileOnly: true },
+    19.5: { width: 25, mobileOnly: true },
+    20: { width: 30, mobileOnly: true },
   }
 
   public getStyle(feature: FeatureLike): Style {
