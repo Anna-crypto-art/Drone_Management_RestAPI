@@ -129,6 +129,10 @@ export default class AppHeader extends BaseAuthComponent {
 
   showAllKeyFigures = false;
 
+  async created() {
+    this.isEnvNotProduction
+  }
+
   async logout(): Promise<void> {
     try {
       await volateqApi.logout();
