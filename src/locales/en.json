@@ -613,6 +613,10 @@
   "pv-tracker-tracking-deviation_expl": "The PI quantifies the difference between measured and ideal tracking angles.",
   "add-pis": "Add Performance Indicators",
   "has-additional-pis": "Performance Indicators outside of purchased product package(s) available",
+  "append-note": "Append note",
+  "notes-and-history": "Notes and history",
+  "note": "Note",
+  "add-analysis-note-are-you-sure": "Are you sure, that you would like to add a note to the analysis?",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",
