@@ -15,7 +15,10 @@
         </a>
       </b-form-group>
       <b-form-group v-show="analysis.analysis_result">
-        <b-form-checkbox id="removeAllAnalysisResultFiles" v-model="removeAllAnalysisResultFiles">
+        <b-alert :show="analysis.analysis_result.released" variant="info">
+          {{ $t("remove-result-files-not-allowed_descr") }}
+        </b-alert>
+        <b-form-checkbox id="removeAllAnalysisResultFiles" v-model="removeAllAnalysisResultFiles" :disabled="analysis.analysis_result.released">
           {{ $t("remove-result-files") }}
         </b-form-checkbox>
       </b-form-group>
