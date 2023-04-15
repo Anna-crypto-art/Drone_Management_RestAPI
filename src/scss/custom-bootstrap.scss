@@ -196,6 +196,11 @@ $theme-colors: (
 .b-toast.b-toast-info > .toast > .toast-header > button.close {
   color: $white;
 }
+.b-toaster-slot {
+  max-height: calc(100vh - 0.5rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
 
 .b-toaster.b-toaster-top-right .b-toaster-slot,
 .b-toaster.b-toaster-top-left .b-toaster-slot,

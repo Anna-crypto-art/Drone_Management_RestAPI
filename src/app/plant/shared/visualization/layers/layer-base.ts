@@ -18,6 +18,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import { transformExtent } from "ol/proj";
 import { debounce } from "@/app/shared/services/helper/debounce-helper";
+import { isOnMobileDevice } from "@/app/shared/services/helper/mobile-helper";
 
 export const GEO_JSON_OPTIONS = { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" };
 
@@ -44,7 +45,7 @@ export abstract class LayerBase {
   protected loadedExtent: Extent | undefined = undefined;
 
   // zoomlevel: width
-  protected readonly zoomWidths: Record<number, number> | null = null;
+  protected readonly zoomWidths: Record<number, number | { width: number, mobileOnly: boolean }> | null = null;
   protected zoomWidth: number | null = null;
 
   public invisibleAutoSelection?: boolean;
@@ -54,6 +55,13 @@ export abstract class LayerBase {
   protected abstract getPcs(feature: FeatureLike): string | undefined;
   protected abstract load(extent?: Extent): Promise<GeoJSON<PropsFeature> | undefined>;
   public abstract get id(): string | undefined;
+
+  /**
+   * Geo-visualization first loads the data (calls onLoad) and then fires the onSelected event
+   * Because of this order we need this flag if we like to know
+   * when the layer gets loaded the first time...
+   */
+  private initiallyLoadedBeforeSelected = false;
 
   protected getAddStyles(feature: FeatureLike): Style[] | undefined {
     return undefined;
@@ -78,8 +86,33 @@ export abstract class LayerBase {
     return undefined;
   }
 
-  protected onSelected(selected: boolean): void { 
+  protected async onSelected(selected: boolean) { 
     this.selected = selected;
+
+    if (this.minZoomLevel) {
+      // geo-visualization loads the layer only once (calls onLoad) and keeps the geoJSON data.
+      // But in this case we need to add features to the geoJSON data each time
+      // the layer gets selected...
+      if (this.selected && !this.initiallyLoadedBeforeSelected) {
+        const geoJson = await this.loadExtent();
+        if (geoJson) {
+          this.addLoadedFeatures(geoJson);
+        }
+      }
+
+      // Bug: 
+      // 1. select component and load extent for top left corner
+      // 2. unselect component
+      // 3. select component and load extent for bottom right corner
+      // -> Now whole plant is within extent and no further components get loaded...
+      //
+      // Fix: Reset extend each time component gets unselected
+      if (this.loadedExtent && !this.selected) {
+        this.loadedExtent = undefined;
+      }
+    }
+
+    this.initiallyLoadedBeforeSelected = false;
   }
 
   protected onZoom(onZoomCallback: (zoomLevel: number | undefined) => void): void {
@@ -95,20 +128,24 @@ export abstract class LayerBase {
   }
 
   private async doLoad(): Promise<GeoJSON<PropsFeature> | undefined> {
+    this.initiallyLoadedBeforeSelected = !this.selected;
+
     if (this.zoomWidths) {
       this.onZoom((zoomlevel) => this.calculateZoomWidth(zoomlevel));
-      this.calculateZoomWidth(this.vueComponent.openLayers?.getMap()?.getView().getZoom());
+      this.calculateZoomWidth(this.getMap()?.getView().getZoom());
     }
 
     if (this.minZoomLevel) {
       if (this.zoomLoadedPcsCodes === undefined) { // is "change:center" event is already registered
         this.zoomLoadedPcsCodes = {};
 
-        const onLoadExtend = debounce(async () => { 
-          const geoJson = await this.loadExtent();
-          if (geoJson) {
-            this.addLoadedFeatures(geoJson);
-          }
+        const onLoadExtend = debounce(async () => {
+          if (this.selected) {
+            const geoJson = await this.loadExtent();
+            if (geoJson) {
+              this.addLoadedFeatures(geoJson);
+            }
+          } 
         }, 100);
         
         this.getMap()!.getView().on("change:center", onLoadExtend);
@@ -145,43 +182,42 @@ export abstract class LayerBase {
 
   protected async loadExtent(): Promise<GeoJSON<PropsFeature> | undefined> {
     try {
-      if (this.selected) {
-        this.vueComponent.setLoading(true);
+      this.vueComponent.setLoading(true);
 
-        const map = this.getMap()!;
-        const view = map.getView();
-        const zoomLevel = view.getZoom();
+      const map = this.getMap()!;
+      const view = map.getView();
+      const zoomLevel = view.getZoom();
 
-        if (zoomLevel! >= this.minZoomLevel!) {
-          const extent = transformExtent(
-            view.calculateExtent(map.getSize()),
-            GEO_JSON_OPTIONS.featureProjection,
-            GEO_JSON_OPTIONS.dataProjection
-          );
+      if (zoomLevel! >= this.minZoomLevel!) {
+        const extent = transformExtent(
+          view.calculateExtent(map.getSize()),
+          GEO_JSON_OPTIONS.featureProjection,
+          GEO_JSON_OPTIONS.dataProjection
+        );
 
-          if (this.isOutsideOfLoadedExtent(extent)) {
-            this.enlargeExtent(extent);
+        if (this.isOutsideOfLoadedExtent(extent)) {
+          this.enlargeExtent(extent);
 
-            const geoJson = await this.load(extent);
-            if (geoJson) {
-              const newFeatures: (FeatureLike & PropsFeature)[] = [];
-              for (const feature of geoJson.features) {
-                const pcs = feature.properties.name;
-                if (pcs) {
-                  if (!(pcs in this.zoomLoadedPcsCodes!)) {
-                    newFeatures.push(feature);
-                    this.zoomLoadedPcsCodes![pcs] = true;
-                  }
+          const geoJson = await this.load(extent);
+          if (geoJson) {
+            const newFeatures: (FeatureLike & PropsFeature)[] = [];
+            for (const feature of geoJson.features) {
+              const pcs = feature.properties.name;
+              if (pcs) {
+                if (!(pcs in this.zoomLoadedPcsCodes!)) {
+                  newFeatures.push(feature);
+                  this.zoomLoadedPcsCodes![pcs] = true;
                 }
               }
-
-              geoJson.features = newFeatures;
-
-              return geoJson;
             }
+
+            geoJson.features = newFeatures;
+
+            return geoJson;
           }
         }
       }
+
       return undefined;
     } catch (e) {
       this.vueComponent.showError(e);
@@ -246,7 +282,16 @@ export abstract class LayerBase {
       }
 
       if (matchingZoomLevel !== null) {
-        this.zoomWidth = this.zoomWidths![matchingZoomLevel];
+        const zoomWidth = this.zoomWidths![matchingZoomLevel];
+        if (zoomWidth instanceof Object) {
+          if (zoomWidth.mobileOnly && !isOnMobileDevice()) {
+            this.zoomWidth = null;
+          } else {
+            this.zoomWidth = zoomWidth.width
+          }
+        } else {
+          this.zoomWidth = zoomWidth
+        }
       } else {
         this.zoomWidth = null;
       }
@@ -295,7 +340,7 @@ export abstract class LayerBase {
         geoJSONLoader: () => this.doLoad(),
         geoJSONOptions: GEO_JSON_OPTIONS,
         style: (feature: FeatureLike) => this.style(feature),
-        onSelected: (selected: boolean) => this.onSelected(selected),
+        onSelected: async (selected: boolean) => await this.onSelected(selected),
         visible: this.visible && !this.invisibleAutoSelection,
         zIndex: this.zIndex,
         layerType: "VectorImageLayer",

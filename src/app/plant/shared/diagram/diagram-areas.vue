@@ -60,6 +60,7 @@ import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppLoading from "@/app/shared/components/app-loading/app-loading.vue";
 import { LayerColor } from "../visualization/layers/types";
+import { isOnMobileDevice } from "@/app/shared/services/helper/mobile-helper";
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ChartDataLables);
 
@@ -148,7 +149,7 @@ export default class AppDiagramAreas extends BaseAuthComponent {
     this.selectedComponentId = this.componentSelection[0];
     this.selectedOrderByColumn = (this.numberBox.nums || [this.numberBox])[0].columnName
 
-    this.isMobile = window.matchMedia("screen and (max-width: 1000px)").matches;
+    this.isMobile = isOnMobileDevice();
     this.charWidth = this.isMobile ? 300 : 800;
     this.charHeight = this.isMobile ? 150 : 350;
   }

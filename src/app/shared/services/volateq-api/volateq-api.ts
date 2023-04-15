@@ -180,6 +180,14 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/analysis/${analysisId}/file/${fileName}`);
   }
 
+  public getAnalysisNotesAndHistory(analysisId: string): Promise<{ notes_and_history: string }> {
+    return this.get(`/auth/analysis/${analysisId}/notes-and-history`);
+  }
+
+  public appendAnalysisNote(analysisId: string, note: string): Promise<void> {
+    return this.post(`/auth/analysis/${analysisId}/notes-and-history`, { note });
+  }
+
   public forgotPassword(email: string): Promise<void> {
     return this.post(`/forgot-password`, { email });
   }
