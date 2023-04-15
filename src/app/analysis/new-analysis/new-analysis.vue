@@ -88,8 +88,8 @@ export default class AppNewAnalysis extends BaseAuthComponent {
   }
 
   @Watch('flownAt') async onFlownAtChanged() {
-    await this.loadProductPackagesSelection();
-    await this.prepareDroneSelection();
+    // Promise.all waits until both calls are finished so they appear at the same time
+    Promise.all([this.loadProductPackagesSelection(), this.prepareDroneSelection()])
   }
 
   get plantName(): string {
@@ -102,7 +102,7 @@ export default class AppNewAnalysis extends BaseAuthComponent {
       }
     }
 
-    return "";
+    return "&nbsp;"; // with "" instead of "&nbsp;", the page would jump a bit down once the plant name is loaded
   }
 
   @CatchError("loadingEmptyAnalysis")

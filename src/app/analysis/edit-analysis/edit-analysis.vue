@@ -32,7 +32,7 @@
                   </b-form-group>
                   <b-form-group label-cols-sm="4" label-cols-lg="2">
                     <template #label>
-                      {{ $t('product-packages') }} <app-super-admin-marker v-if="isSuperAdmin" />
+                      {{ $t('product-packages') }} <app-super-admin-marker v-if="isSuperAdmin && !changeProductPackagesAndDroneAllowed" />
                     </template>
                     <app-multiselect 
                       v-model="selectedProductPackageIds"
@@ -42,7 +42,7 @@
                   </b-form-group>
                   <b-form-group label-cols-sm="4" label-cols-lg="2">
                     <template #label>
-                      {{ $t('drone') }} <app-super-admin-marker v-if="isSuperAdmin" />
+                      {{ $t('drone') }} <app-super-admin-marker v-if="isSuperAdmin && !changeProductPackagesAndDroneAllowed" />
                     </template>
                     <b-form-select v-model="selectedDroneId" :options="droneOptions" :disabled="!(isSuperAdmin || changeProductPackagesAndDroneAllowed)"></b-form-select>
                   </b-form-group>
