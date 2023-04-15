@@ -19,5 +19,6 @@ export interface DroneSchema {
   serial_number: string;
   number_available_batteries: number;
   retired: boolean;
+  internal_identifier: string;
 }
 

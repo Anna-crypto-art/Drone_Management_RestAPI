@@ -127,6 +127,14 @@
               type="text"
               :placeholder="$t('serial-number')" />
           </b-form-group>
+          <b-form-group :label="$t('internal-identifier')">
+            <b-form-input
+              id="new-drone-internal-identifier"
+              v-model="currentDrone.internal_identifier"
+              required
+              type="text"
+              :placeholder="$t('internal-identifier')" />
+          </b-form-group>
           <b-form-group :label="$t('number-available-batteries')">
             <b-form-input
               id="new-drone-number-available-batteries"
@@ -219,6 +227,7 @@ export default class AppSettingsDrones extends BaseAuthComponent {
     },
     custom_name: "",
     serial_number: "",
+    internal_identifier: "",
     number_available_batteries: 1,
     retired: false,
   }
@@ -230,7 +239,8 @@ export default class AppSettingsDrones extends BaseAuthComponent {
       { key: "drone_model", label: this.$t("drone-type").toString() },
       { key: "custom_name", label: this.$t("name").toString() },
       { key: "serial_number", label: this.$t("serial-number").toString() },
-      { key: "number_available_batteries", label: this.$t("number-available-batteries").toString() },
+      { key: "internal_identifier", label: this.$t("internal-identifier").toString(), labelExpl: this.$t("internal-identifier_expl").toString() },
+      { key: "number_available_batteries", label: this.$t("batteries").toString() },
     ];
 
     await this.updateDroneRows();
@@ -302,6 +312,7 @@ export default class AppSettingsDrones extends BaseAuthComponent {
       drone_model: drone.drone_model,
       custom_name: drone.custom_name,
       serial_number: drone.serial_number,
+      internal_identifier: drone.internal_identifier,
       number_available_batteries: drone.number_available_batteries,
       retired: drone.retired
     })).sort((a, b) => {
@@ -351,6 +362,7 @@ export default class AppSettingsDrones extends BaseAuthComponent {
       },
       custom_name: "",
       serial_number: "",
+      internal_identifier: "",
       number_available_batteries: 1,
       retired: false,
     }
@@ -386,7 +398,8 @@ export default class AppSettingsDrones extends BaseAuthComponent {
         drone_model_id: this.currentDrone.drone_model.id,
         serial_number: this.currentDrone.serial_number,
         number_available_batteries: this.currentDrone.number_available_batteries,
-        retired: this.currentDrone.retired
+        retired: this.currentDrone.retired,
+        internal_identifier: this.currentDrone.internal_identifier
       });
       this.showSuccess(this.$t("something-created-success", { something: this.currentDrone!.custom_name }).toString());
     } else {
@@ -398,7 +411,8 @@ export default class AppSettingsDrones extends BaseAuthComponent {
           drone_model_id: this.currentDrone.drone_model.id,
           serial_number: this.currentDrone.serial_number,
           number_available_batteries: this.currentDrone.number_available_batteries,
-          retired: this.currentDrone.retired
+          retired: this.currentDrone.retired,
+          internal_identifier: this.currentDrone.internal_identifier
         }
       );
       this.showSuccess(this.$t("something-edited-successfully", { something: this.currentDrone!.custom_name }).toString());
@@ -420,6 +434,7 @@ export default class AppSettingsDrones extends BaseAuthComponent {
       custom_name: droneItem.custom_name,
       drone_model: (await volateqApi.getDroneModel(droneItem.drone_model.id)),
       serial_number: droneItem.serial_number,
+      internal_identifier: droneItem.internal_identifier,
       number_available_batteries: droneItem.number_available_batteries,
       retired: droneItem.retired
     };
