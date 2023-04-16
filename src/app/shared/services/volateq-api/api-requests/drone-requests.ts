@@ -29,6 +29,7 @@ export interface CreateDroneRequest {
   number_available_batteries: number;
   retired: boolean;
   internal_identifier: string;
+  notes: string;
 }
 
 export interface UpdateDroneRequest {
@@ -39,4 +40,5 @@ export interface UpdateDroneRequest {
   number_available_batteries: number;
   retired: boolean;
   internal_identifier: string;
+  notes: string;
 }
