@@ -619,6 +619,7 @@
   "note": "Note",
   "add-analysis-note-are-you-sure": "Are you sure, that you would like to add a note to the analysis?",
   "remove-digital-twin-not-allowed_descr": "You can not delete but only update a digital twin as long as analyses with results exist for a plant.",
+  "cannot-upload-further-data-while-data-complete": "You cannot upload further data while analysis has state \"Data complete\". Uncheck \"Uploaded data complete\" before, if you need to upload more data...",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",
