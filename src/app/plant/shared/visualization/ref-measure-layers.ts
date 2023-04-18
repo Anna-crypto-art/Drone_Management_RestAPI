@@ -116,7 +116,7 @@ export class RefMeasureLayers {
   public async reselectAllLayers(): Promise<void> {
     const reselectUserMails = this.referenceMeasurementLayers
       .filter(l => l.getSelected())
-      .map(l => l.referenceMeasurement.user_created.email);
+      .map(l => l.referenceMeasurement.user_created?.email || "unknown");
 
     for (const refMeasureLayer of this.referenceMeasurementLayers) {
       const isLayerOfSelectedAnalysis = refMeasureLayer.referenceMeasurement.analysis_id === this.selectedAnalysis?.id;
@@ -125,7 +125,7 @@ export class RefMeasureLayers {
         await refMeasureLayer.setSelected(false);
       }
       if (isLayerOfSelectedAnalysis && 
-        reselectUserMails.includes(refMeasureLayer.referenceMeasurement.user_created.email)) 
+        reselectUserMails.includes(refMeasureLayer.referenceMeasurement.user_created?.email || "unknown"))
       {
         await refMeasureLayer.setSelected(true);  
       }

@@ -8,7 +8,7 @@ export interface ReferenceMeasurementSchema {
   notes?: string;
   created_at: string;
   updated_at: string;
-  user_created: SimpleUserSchema;
+  user_created?: SimpleUserSchema;
 }
 
 export interface RefMeasureEntryKeyFigureSchema {
