@@ -289,7 +289,7 @@ export default class AppPlants extends BaseAuthComponent {
   @CatchError()
   onManagePlantClick(plant: PlantItem): void {
     this.managePlantModel.plant = plant;
-    this.managePlantModel.clearBefore = false;
+    this.managePlantModel.clearBefore = this.removeDigitalTwinAllowed;
     this.managePlantModel.file = null;
 
     this.managePlantModal.show();
