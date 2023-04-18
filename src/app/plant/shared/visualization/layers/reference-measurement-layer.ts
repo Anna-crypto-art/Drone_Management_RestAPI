@@ -49,6 +49,10 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
 
   protected get name(): string {
     const user = this.referenceMeasurement.user_created
+    if (!user) {
+      return this.vueComponent.$t("unknown").toString();
+    }
+    
     const userName = (user.first_name + " " + user.last_name).trim() || user.email;
 
     let notes = this.referenceMeasurement.notes || "";

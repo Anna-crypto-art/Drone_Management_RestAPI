@@ -18,6 +18,7 @@
             :columns="analysesTableColumns"
             :selectMode="selectMode"
             @rowSelected="onAnalysisSelected"
+            :overlayLoading="loading"
           >
             <template #cell(name)="row">
               {{ row.item.date }} 
@@ -68,6 +69,7 @@ import AppTable from "@/app/shared/components/app-table/app-table.vue";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { AppTableColumns, IAppSelectTable } from "@/app/shared/components/app-table/types";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
 
 @Component({
   name: "app-analysis-selection-sidebar",
@@ -97,6 +99,8 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
   compareMode = false;
   selectMode = "single";
   lastSelectedAnalyses: { id: string }[] = [];
+
+  loading = false;
 
   private routeQueryHelper = new RouteQueryHelper(this);
 
@@ -133,6 +137,7 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
     });
   }
 
+  @CatchError("loading")
   async onAnalysisSelected(selectedAnalyses: { id: string }[]) {
     if (selectedAnalyses.length > 2) {
       const newSelected = selectedAnalyses
