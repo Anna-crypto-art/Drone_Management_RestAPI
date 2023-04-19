@@ -99,7 +99,6 @@ import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import AppMultiselect from "@/app/shared/components/app-multiselect/app-multiselect.vue";
 import AppDatepicker from "@/app/shared/components/app-datepicker/app-datepicker.vue";
 import { MultiselectOption } from "@/app/shared/components/app-multiselect/types";
-import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 
 @Component({
   name: "app-edit-analysis",

@@ -15,12 +15,7 @@
         <app-delete-analysis :analysis="analysis" />
       </b-col>
       <!-- as we have a complete server monitoring now, we do not need the single server stuff visible per analysis anymore -->
-      <!-- <b-col  cols="12">
-        <app-run-q-fly-for-analysis :analysis="analysis" />
-      </b-col> -->
-      <b-col cols="12" lg="6">
-        
-      </b-col>
+      <!-- app-run-q-fly-for-analysis :analysis="analysis" -->      
     </b-row>
   </div>
 </template>
