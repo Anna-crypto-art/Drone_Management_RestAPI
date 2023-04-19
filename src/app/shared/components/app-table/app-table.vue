@@ -42,7 +42,7 @@
       </template>
 
       <template #cell(selected)="{ rowSelected }">
-        <b-checkbox v-show="selectMode === 'multi'" :checked="rowSelected" disabled class="b-table-selectable-checkbox" />
+        <b-checkbox v-show="hasMultiOrRangeSelectMode" :checked="rowSelected" disabled class="b-table-selectable-checkbox" />
       </template>
 
       <template #cell(actions)="row">
@@ -93,7 +93,7 @@ export default class AppTable extends Vue implements IAppSelectTable, IAppTable 
   @Prop({ default: null }) perPage!: number | null;
   @Prop({ default: null }) currentPage!: number | null;
   
-  @Prop({ default: null }) selectMode!: 'single' | 'multi' | null;
+  @Prop({ default: null }) selectMode!: 'single' | 'multi' | 'range' | null;
   @Prop({ default: 0 }) maxRowSelectoin!: number;
   @Prop({ default: false }) selectAllColumns!: boolean;
 
@@ -111,7 +111,7 @@ export default class AppTable extends Vue implements IAppSelectTable, IAppTable 
     if (this.hoverActions) {
       fields.push({ key: "actions", label: "" });
     }
-    if (this.selectMode === "multi") {
+    if (this.hasMultiOrRangeSelectMode) {
       fields.unshift({ key: "selected", label: "" });
     }
     this.fields = fields;
@@ -135,7 +135,11 @@ export default class AppTable extends Vue implements IAppSelectTable, IAppTable 
   }
 
   get enableAllSelection(): boolean {
-    return this.selectMode === "multi" && this.selectAllColumns;
+    return this.hasMultiOrRangeSelectMode && this.selectAllColumns;
+  }
+
+  get hasMultiOrRangeSelectMode(): boolean {
+    return this.selectMode === "multi" || this.selectMode === "range"
   }
 
   selectRow(rowIndex: number) {

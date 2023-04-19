@@ -31,7 +31,7 @@
         :rows="downloadFilesTableItems"
         :columns="downloadFilesTableColumns"
         :loading="isFilesLoading"
-        selectMode="multi"
+        selectMode="range"
         :selectAllColumns="true"
         :emptyText="$t('no-files-uploaded')"
         @rowSelected="onDownloadFilesSelected"
