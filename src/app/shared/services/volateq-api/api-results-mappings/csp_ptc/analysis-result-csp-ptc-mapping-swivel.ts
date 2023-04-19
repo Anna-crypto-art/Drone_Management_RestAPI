@@ -35,7 +35,6 @@ const analysisResultCspPtcMappingSwivel: AnalysisResultMappings<
     keyFigureId: ApiKeyFigure.SWIVEL_GRIPPING_POTENTIAL_CLASS_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     unit: "mm",
-    superAdminOnly: true
   },
 ];
 
