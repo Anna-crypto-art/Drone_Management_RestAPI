@@ -34,7 +34,7 @@ export class CompareClassKeyFigureMixin<T extends ICompareClassKeyFigureMixin>  
           indent: true,
         },
         {
-          color: LayerColor.green,
+          color: LayerColor.strongGreen,
           name: this.layer.vueComponent.$t("improved").toString() +
             this.layer.getLegendEntryCount(comparedFeatures[ComparedFeatureType.GONE_IMPROVED].length),
         },

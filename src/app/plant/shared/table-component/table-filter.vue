@@ -150,7 +150,9 @@ export default class AppTableComponentFilter extends BaseAuthComponent {
 
     const filters: Record<string, FilterFieldValueType> = {};
     for (const piFilterFieldValue of this.piFilterFieldValues) {
-      filters[columnsMapping[piFilterFieldValue.filterField!.key]] = piFilterFieldValue.value;
+      if (piFilterFieldValue.filterField) {
+        filters[columnsMapping[piFilterFieldValue.filterField.key]] = piFilterFieldValue.value;
+      }
     }
 
     const tableFilterRequest: TableFilterRequest = {};
