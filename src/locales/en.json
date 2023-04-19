@@ -411,6 +411,7 @@
   "document": "Document",
   "upload-not-allowed_descr": "It is not allowed to upload further files, because the analysis has a state beyond \"Data complete\".",
   "import-result-files-not-allowed_descr": "You cannot import result files as long as the analysis stays behind \"Data complete verified\".",
+  "remove-result-files-not-allowed_descr": "You cannot remove results as long as they are released.",
   "new-upload-not-allowed_descr": "It is not allowed to start a new data upload, as long as analysis <b>{analysis}</b> is incomplete.",
   "analysis-not-finished_descr": "Dear Admin, you released the analysis result although the analysis is not finished",
   "analysis-not-released_descr": "Dear Admin, the analysis has been finished but the results have not been released yet",
@@ -617,6 +618,8 @@
   "notes-and-history": "Notes and history",
   "note": "Note",
   "add-analysis-note-are-you-sure": "Are you sure, that you would like to add a note to the analysis?",
+  "remove-digital-twin-not-allowed_descr": "You can not delete but only update a digital twin as long as analyses with results exist for a plant.",
+  "cannot-upload-further-data-while-data-complete": "You cannot upload further data while analysis has state \"Data complete\". Uncheck \"Uploaded data complete\" before, if you need to upload more data...",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

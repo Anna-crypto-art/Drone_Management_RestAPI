@@ -9,7 +9,11 @@
         {{ $t("data-complete") }} <app-explanation>{{ dataCompleteMetadataExpl }}</app-explanation>
       </b-form-checkbox>
     </div>
+    <b-alert :show="!allowUploadFurtherData" variant="info">
+      {{ $t("cannot-upload-further-data-while-data-complete") }}
+    </b-alert>
     <app-uploader v-if="uploaderService"
+      v-show="allowUploadFurtherData"
       :uploaderService="uploaderService"
       :title="$t('browse-or-drag-drop-files')" 
       :disableAfterUpload="!analysis"
@@ -133,6 +137,10 @@ export default class AppAnalysisUploader extends BaseAuthComponent {
       (!this.hasPlantMetadata && this.$t("missing-plant-metadata").toString()) ||
       this.$t("data-complete_expl").toString()
     );
+  }
+
+  get allowUploadFurtherData(): boolean {
+    return !!(!this.dataComplete || !this.analysis);
   }
 
   @CatchError()

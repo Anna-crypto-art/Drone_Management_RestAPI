@@ -63,7 +63,13 @@ export class AnalysisUploaderService extends UploaderService {
       analysisEventService.emit(this.analysisId, AnalysisEvent.UPDATE_ANALYSIS);
     }
 
-    await this.startUpload();
+    try {
+      await this.startUpload();
+    } finally {
+      if (this.analysisId) {
+        analysisEventService.emit(this.analysisId, AnalysisEvent.UPDATE_ANALYSIS);
+      }
+    }
   }
 
   public setFlownAt(flownAt: string) {

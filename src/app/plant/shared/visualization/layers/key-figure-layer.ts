@@ -429,7 +429,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
         return LayerColor.black;
 
       case ComparedFeatureType.GONE_IMPROVED:
-        return LayerColor.green;
+        return LayerColor.strongGreen;
 
       case ComparedFeatureType.NEW_WORSENED:
         return LayerColor.red;

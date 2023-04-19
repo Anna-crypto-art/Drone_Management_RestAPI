@@ -151,13 +151,6 @@ export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
   private async updateNumberBoxes(): Promise<void> {
     const numberBoxes: DiagramNumberBox[] = [];
     for (const resultMapping of this.resultMappings) {
-      const analysisResultMappingHelper = new AnalysisResultMappingHelper(
-        resultMapping.resultMapping,
-        this.firstAnalysisResult!
-      );
-
-      analysisResultMappingHelper.setCompareAnalysisResult(this.compareAnalysisResult);
-
       const groupedResult: GroupedAnalysisResult = (this.compareAnalysisResult ?
         await volateqApi.getSpecificAnalysisResultCompared<GroupedAnalysisResult>(
           this.firstAnalysisResult!.id,

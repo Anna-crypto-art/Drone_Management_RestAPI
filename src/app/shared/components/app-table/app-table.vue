@@ -42,7 +42,7 @@
       </template>
 
       <template #cell(selected)="{ rowSelected }">
-        <b-checkbox v-show="selectMode === 'multi'" :checked="rowSelected" disabled class="b-table-selectable-checkbox" />
+        <b-checkbox v-show="hasMultiOrRangeSelectMode" :checked="rowSelected" disabled class="b-table-selectable-checkbox" />
       </template>
 
       <template #cell(actions)="row">
@@ -58,6 +58,8 @@
       </template>
 
     </b-table>
+    
+    <app-loading v-if="overlayLoading" />
   </div>
 </template>
 
@@ -65,6 +67,7 @@
 import Vue from "vue";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
+import AppLoading from "@/app/shared/components/app-loading/app-loading.vue";
 import { Component, Prop, Ref, Watch } from "vue-property-decorator";
 import { AppTableColumns, IAppSelectTable, IAppTable } from "./types";
 
@@ -73,6 +76,7 @@ import { AppTableColumns, IAppSelectTable, IAppTable } from "./types";
   components: {
     AppSuperAdminMarker,
     AppExplanation,
+    AppLoading
   }
 })
 export default class AppTable extends Vue implements IAppSelectTable, IAppTable {
@@ -82,13 +86,14 @@ export default class AppTable extends Vue implements IAppSelectTable, IAppTable 
   @Prop({ default: true }) hover!: boolean;
   @Prop({ default: "" }) emptyText!: string;
   @Prop({ default: false }) loading!: boolean | null;
+  @Prop({ default: false }) overlayLoading!: boolean | null;
   @Prop({ default: false }) hoverActions!: boolean;
   @Prop({ default: false }) compact!: boolean;
 
   @Prop({ default: null }) perPage!: number | null;
   @Prop({ default: null }) currentPage!: number | null;
   
-  @Prop({ default: null }) selectMode!: 'single' | 'multi' | null;
+  @Prop({ default: null }) selectMode!: 'single' | 'multi' | 'range' | null;
   @Prop({ default: 0 }) maxRowSelectoin!: number;
   @Prop({ default: false }) selectAllColumns!: boolean;
 
@@ -106,7 +111,7 @@ export default class AppTable extends Vue implements IAppSelectTable, IAppTable 
     if (this.hoverActions) {
       fields.push({ key: "actions", label: "" });
     }
-    if (this.selectMode === "multi") {
+    if (this.hasMultiOrRangeSelectMode) {
       fields.unshift({ key: "selected", label: "" });
     }
     this.fields = fields;
@@ -130,7 +135,11 @@ export default class AppTable extends Vue implements IAppSelectTable, IAppTable 
   }
 
   get enableAllSelection(): boolean {
-    return this.selectMode === "multi" && this.selectAllColumns;
+    return this.hasMultiOrRangeSelectMode && this.selectAllColumns;
+  }
+
+  get hasMultiOrRangeSelectMode(): boolean {
+    return this.selectMode === "multi" || this.selectMode === "range"
   }
 
   selectRow(rowIndex: number) {
@@ -156,6 +165,8 @@ export default class AppTable extends Vue implements IAppSelectTable, IAppTable 
 @import "@/scss/_variables.scss";
 
 .app-table {
+  position: relative;
+
   .table {
     color: $dark;
     border: 1px solid $border-color-grey;

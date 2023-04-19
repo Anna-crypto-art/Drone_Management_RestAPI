@@ -82,7 +82,10 @@
         </a>
       </b-form-group>
       <b-form-group>
-        <b-form-checkbox id="clear-before-checkbox" v-model="managePlantModel.clearBefore">
+        <b-alert :show="!removeDigitalTwinAllowed" variant="info">
+          {{ $t("remove-digital-twin-not-allowed_descr") }}
+        </b-alert>
+        <b-form-checkbox id="clear-before-checkbox" v-model="managePlantModel.clearBefore" :disabled="!removeDigitalTwinAllowed">
           {{ $t("clear-before") }}
         </b-form-checkbox>
       </b-form-group>
@@ -195,7 +198,7 @@ export default class AppPlants extends BaseAuthComponent {
   tableLoading = false;
   managePlantModel: { plant: PlantItem | null; clearBefore: boolean; file: File | null } = {
     plant: null,
-    clearBefore: true,
+    clearBefore: false,
     file: null,
   };
 
@@ -286,7 +289,7 @@ export default class AppPlants extends BaseAuthComponent {
   @CatchError()
   onManagePlantClick(plant: PlantItem): void {
     this.managePlantModel.plant = plant;
-    this.managePlantModel.clearBefore = true;
+    this.managePlantModel.clearBefore = this.removeDigitalTwinAllowed;
     this.managePlantModel.file = null;
 
     this.managePlantModal.show();
@@ -358,6 +361,13 @@ export default class AppPlants extends BaseAuthComponent {
     this.showSuccess(this.$t("plant-updated-success", { plant: this.editPlant!.name }).toString());
 
     await this.updatePlants();
+  }
+
+  get removeDigitalTwinAllowed(): boolean {
+    if (this.managePlantModel.plant) {
+      return this.managePlantModel.plant.analysesCount == 0;
+    }
+    return true;
   }
 }
 </script>
