@@ -4,12 +4,15 @@
       <b-form-checkbox
         v-model="dataComplete"
         @change="onChangeDataComplete"
-        :disabled="dataCompleteVerified"
+        :disabled="dataCompleteVerified || (analysisHasAvailableDrones ? !analysisHasSelectedDrone : false)"
         v-show="analysis && !analysisIsEmpty"
       >
         {{ $t("data-complete") }} <app-explanation>{{ $t("data-complete_expl") }}</app-explanation>
       </b-form-checkbox>
     </div>
+    <b-alert :show="analysis && allowUploadFurtherData && analysisHasAvailableDrones && !analysisHasSelectedDrone" variant="info">
+      {{ $t("need-to-select-drone-to-set-complete") }}
+    </b-alert>
     <b-alert :show="analysis && analysisIsEmpty" variant="info">
       {{ $t("need-to-upload-data-to-set-complete") }}
     </b-alert>
@@ -48,6 +51,7 @@ import { analysisEventService } from "./analysis-event-service";
 import { AnalysisEvent } from "./types";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
+import { DroneSchema } from "@/app/shared/services/volateq-api/api-schemas/drone-schemas";
 
 @Component({
   name: "app-analysis-uploader",
@@ -63,6 +67,8 @@ export default class AppAnalysisUploader extends BaseAuthComponent {
   @Prop({ default: null }) flownAt!: string | null;
   @Prop({ default: null }) analysis!: AnalysisSchema | null;
   @Prop({ default: null }) orderProductPackageIds!: string[] | null;
+  @Prop({ default: null }) selectedDrone!: DroneSchema | null;
+  @Prop({ default: null }) droneOptions!:  Array<any> | null;
 
   dataComplete = false;
   hasPlantMetadata = false;
@@ -147,6 +153,14 @@ export default class AppAnalysisUploader extends BaseAuthComponent {
 
   get analysisIsEmpty(): boolean {
     return !!(this.analysis && this.analysis.current_state.state.id == ApiStates.EMPTY);
+  }
+
+  get analysisHasAvailableDrones(): boolean {
+    return (this.droneOptions != null && this.droneOptions.length > 0);
+  }
+
+  get analysisHasSelectedDrone(): boolean {
+    return (this.selectedDrone != null && this.selectedDrone.id != null);
   }
 
   @CatchError()

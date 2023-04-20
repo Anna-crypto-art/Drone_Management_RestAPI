@@ -17,7 +17,7 @@
           <template #title>
             <b-icon icon="upload" /><span class="pad-left">{{ $t("upload") }}</span>
           </template>
-          <app-upload-analysis-files :analysis="analysis" />
+          <app-upload-analysis-files :analysis="analysis" :droneOptions="droneOptions" :selectedDrone="selectedDrone" />
         </b-tab>
         <b-tab class="app-edit-analysis-edit-tab">
           <template #title>
@@ -146,7 +146,7 @@ export default class AppEditAnalysis extends BaseAuthComponent {
   keyFiguresSelection: MultiselectOption[] = [];
   selectedKeyFigureIds: string[] | null = null;
 
-  selectedDrone!: DroneSchema;
+  selectedDrone: DroneSchema | null = null;
   selectedDroneId: string | null = null;
   droneOptions: Array<any> = [];
 
@@ -245,7 +245,7 @@ export default class AppEditAnalysis extends BaseAuthComponent {
       AppContentEventService.showInfo(this.analysis!.id, this.$t("analysis-not-released_descr").toString());
     }
 
-    this.droneOptions = (await volateqApi.getAvailableDronesForAnalysis(this.analysis!.id)).map(drone => ({ value: drone.id, text: drone.custom_name }));
+    this.droneOptions = (await volateqApi.getAvailableDronesForAnalysis(this.analysis!.id)).map(drone => ({ value: drone.id, text: drone.custom_name + ' (' + drone.drone_model.name_abbrev + ')' }));
     this.selectedDrone = await volateqApi.getDroneOfAnalysis(this.analysis!.id);
     if (this.selectedDrone) {
       this.selectedDroneId = this.selectedDrone!.id;

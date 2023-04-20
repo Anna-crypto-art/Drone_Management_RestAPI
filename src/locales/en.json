@@ -626,7 +626,8 @@
   "cannot-upload-further-data-while-data-complete": "You cannot upload further data while analysis has state \"Data complete\". Uncheck \"Uploaded data complete\" before, if you need to upload more data...",
   "need-to-upload-data-to-set-complete": "You need to upload data before you can set the state of this analysis to \"Data complete\".",
   "can-only-change-pp-drone-before-data-complete": "You can only edit the Product Packages or Drone while the analysis has a state earlier than \"Data complete\".",
-  "can-only-change-pp-drone-before-data-complete-super-admin": "Only super admins can edit the Product Packages or Drone while the analysis has a state >= \"Data complete\". ",
+  "can-only-change-pp-drone-before-data-complete-super-admin": "Only super admins can edit the Product Packages or Drone while the analysis has a state >= \"Data complete\".",
+  "need-to-select-drone-to-set-complete": "You need to select a drone before you can set the state of this analysis to \"Data complete\".",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",
