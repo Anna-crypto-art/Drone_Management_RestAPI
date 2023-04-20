@@ -74,7 +74,7 @@ export class MissingMirrorKeyFigureLayer extends MirrorKeyFigureLayer {
           indent: true,
         },
         {
-          color: LayerColor.green,
+          color: LayerColor.strongGreen,
           name: this.vueComponent.$t("fixed").toString() + this.getLegendEntryCount(fixedFeaturesCount),
         },
       ],
@@ -84,7 +84,7 @@ export class MissingMirrorKeyFigureLayer extends MirrorKeyFigureLayer {
   protected getDiffColor(featureProperties: FeatureProperties): string {
     const diffValue = featureProperties.diff_value
     if (diffValue === -1) { // Fixed
-      return LayerColor.green;
+      return LayerColor.strongGreen;
     }
     if (diffValue === 1) { // New
       return LayerColor.red;

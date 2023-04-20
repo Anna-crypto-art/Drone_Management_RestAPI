@@ -30,6 +30,16 @@
                   <b-form-group :label="$t('acquisition-date')" label-cols-sm="4" label-cols-lg="2">
                     <app-datepicker v-model="flownAt" required /> 
                   </b-form-group>
+                  <b-form-group label-cols-sm="4" label-cols-lg="2" v-show="!changeProductPackagesAndDroneAllowed">
+                    <template #label>
+                    </template>
+                    <b-alert :show="!changeProductPackagesAndDroneAllowed && !isSuperAdmin" variant="info" class="edit-analysis-info">
+                      {{ $t("can-only-change-pp-drone-before-data-complete") }}
+                    </b-alert>
+                    <b-alert :show="!changeProductPackagesAndDroneAllowed && isSuperAdmin" variant="info" class="edit-analysis-info">
+                      {{ $t("can-only-change-pp-drone-before-data-complete-super-admin") }}
+                    </b-alert>
+                  </b-form-group>
                   <b-form-group label-cols-sm="4" label-cols-lg="2">
                     <template #label>
                       {{ $t('product-packages') }} <app-super-admin-marker v-if="isSuperAdmin && !changeProductPackagesAndDroneAllowed" />
@@ -105,7 +115,6 @@ import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import AppMultiselect from "@/app/shared/components/app-multiselect/app-multiselect.vue";
 import AppDatepicker from "@/app/shared/components/app-datepicker/app-datepicker.vue";
 import { MultiselectOption } from "@/app/shared/components/app-multiselect/types";
-import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { DroneSchema } from "@/app/shared/services/volateq-api/api-schemas/drone-schemas";
 
 @Component({
@@ -295,6 +304,13 @@ export default class AppEditAnalysis extends BaseAuthComponent {
   }
   &-upload-tab {
     margin-top: 30px;
+  }
+
+  .alert-info {
+    &.edit-analysis-info {
+      margin-bottom: 0;
+      margin-top: 1rem;
+    }
   }
 }
 </style>

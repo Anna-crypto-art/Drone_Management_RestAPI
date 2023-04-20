@@ -90,6 +90,7 @@ export enum LayerColor {
   BLUE_liturgicalTemptation = "#af0083",
 
   green = "green",
+  strongGreen = "#00d400",
   yellow = "#ffff00",
   darkYellow = "#888800",
   red = "#ff0000",

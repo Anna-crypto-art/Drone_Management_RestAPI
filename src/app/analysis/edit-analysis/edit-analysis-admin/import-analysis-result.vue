@@ -15,7 +15,10 @@
         </a>
       </b-form-group>
       <b-form-group v-show="analysis.analysis_result">
-        <b-form-checkbox id="removeAllAnalysisResultFiles" v-model="removeAllAnalysisResultFiles">
+        <b-alert :show="isAnalysisResultReleased" variant="info">
+          {{ $t("remove-result-files-not-allowed_descr") }}
+        </b-alert>
+        <b-form-checkbox id="removeAllAnalysisResultFiles" v-model="removeAllAnalysisResultFiles" :disabled="isAnalysisResultReleased">
           {{ $t("remove-result-files") }}
         </b-form-checkbox>
       </b-form-group>
@@ -111,6 +114,10 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
 
   get importResultsAllowed(): boolean {
     return this.analysis.current_state.state.id >= ApiStates.DATA_COMPLETE_VERIFIED;
+  }
+
+  get isAnalysisResultReleased(): boolean {
+    return this.analysis.analysis_result?.released || false
   }
 
   private async setManageImportFiles() {

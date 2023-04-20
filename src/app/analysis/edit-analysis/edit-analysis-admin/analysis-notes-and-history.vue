@@ -68,8 +68,8 @@ export default class AppAnalysisNotesAndHistory extends BaseAuthComponent {
 
   private async updateNotesAndHistory() {
     let notesAndHistory = (await volateqApi.getAnalysisNotesAndHistory(this.analysis.id)).notes_and_history;
-    
-    notesAndHistory = notesAndHistory.replace(/\n/g, "<br>");
+
+    notesAndHistory = notesAndHistory.replace(/(\\n|\n)/g, "<br>");
 
     for (const match of (notesAndHistory.match(/([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2} \| NOTE \|[^<]*)/g) || [])) {
       notesAndHistory = notesAndHistory.replace(match, `<b>${match}</b>`);

@@ -11,10 +11,17 @@ export class SwivelKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisResultCsp
 
   protected showPcsZoomLevel = 19;
 
+  protected zoomWidths: Record<number, number | { width: number; mobileOnly: boolean; }> | null = {
+    17.5: 5,
+    18: 7,
+    18.5: 10,
+    19: 15,
+  }
+
   public getStyle(feature: FeatureLike): Style {
     return new Style({
       image: new Circle({
-        radius: 3,
+        radius: this.zoomWidth || 3,
         fill: new Fill({ 
           color: this.enableCompare && this.compareAnalysisResult && this.getDiffColor(this.getProperties(feature)) || this.getColor() }),
         stroke: new Stroke({

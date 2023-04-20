@@ -170,7 +170,7 @@ export default class AppNewAnalysis extends BaseAuthComponent {
     }
     this.drones = await volateqApi.getDrones(droneFilter);
 
-    this.droneOptions = this.drones.map(drone => ({ value: drone.id, text: drone.custom_name }));
+    this.droneOptions = this.drones.map(drone => ({ value: drone.id, text: drone.custom_name + ' (' + drone.drone_model.name_abbrev + ')' }));
 
     if (this.drones.length === 1) {
       this.selectedDroneId = this.drones[0].id;

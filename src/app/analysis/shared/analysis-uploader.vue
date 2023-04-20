@@ -4,12 +4,20 @@
       <b-form-checkbox
         v-model="dataComplete"
         @change="onChangeDataComplete"
-        :disabled="!hasPlantMetadata"
+        :disabled="dataCompleteVerified"
+        v-show="analysis && !analysisIsEmpty"
       >
-        {{ $t("data-complete") }} <app-explanation>{{ dataCompleteMetadataExpl }}</app-explanation>
+        {{ $t("data-complete") }} <app-explanation>{{ $t("data-complete_expl") }}</app-explanation>
       </b-form-checkbox>
     </div>
+    <b-alert :show="analysis && analysisIsEmpty" variant="info">
+      {{ $t("need-to-upload-data-to-set-complete") }}
+    </b-alert>
+    <b-alert :show="!allowUploadFurtherData" variant="info">
+      {{ $t("cannot-upload-further-data-while-data-complete") }}
+    </b-alert>
     <app-uploader v-if="uploaderService"
+      v-show="allowUploadFurtherData"
       :uploaderService="uploaderService"
       :title="$t('browse-or-drag-drop-files')" 
       :disableAfterUpload="!analysis"
@@ -39,6 +47,7 @@ import { Component, Prop, Watch } from "vue-property-decorator";
 import { analysisEventService } from "./analysis-event-service";
 import { AnalysisEvent } from "./types";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
+import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 
 @Component({
   name: "app-analysis-uploader",
@@ -128,18 +137,23 @@ export default class AppAnalysisUploader extends BaseAuthComponent {
     });
   }
 
-  get dataCompleteMetadataExpl(): string {
-    return (
-      (!this.hasPlantMetadata && this.$t("missing-plant-metadata").toString()) ||
-      this.$t("data-complete_expl").toString()
-    );
+  get allowUploadFurtherData(): boolean {
+    return !!(!this.dataComplete || !this.analysis);
+  }
+
+  get dataCompleteVerified(): boolean {
+    return !!(this.analysis && this.analysis.current_state.state.id >= ApiStates.DATA_COMPLETE_VERIFIED);
+  }
+
+  get analysisIsEmpty(): boolean {
+    return !!(this.analysis && this.analysis.current_state.state.id == ApiStates.EMPTY);
   }
 
   @CatchError()
   async onChangeDataComplete() {
     const analysis = await volateqApi.getAnalysis(this.uploaderService!.analysisId);
 
-    if (analysis.plant.in_setup_phase && this.dataComplete) {
+    if (!analysis.plant.in_setup_phase && this.dataComplete) {
       if (!confirm(this.$t("data-complete-sure-quest").toString())) {
         this.dataComplete = false;
         return;
