@@ -13,6 +13,9 @@
           :options="productPackagesSelection"
         />
       </b-form-group>
+      <b-form-group v-show="droneOptions.length > 0" label-cols-lg="2" :label="$t('drone')">
+        <b-form-select v-model="selectedDroneId" :options="droneOptions"></b-form-select>
+      </b-form-group>
     </div>
     <app-analysis-uploader
       :plantId="selectedPlantId"
@@ -43,6 +46,7 @@ import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant
 import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { MultiselectOption } from "@/app/shared/components/app-multiselect/types";
+import { DroneSchema } from "@/app/shared/services/volateq-api/api-schemas/drone-schemas";
 
 
 @Component({
@@ -57,7 +61,8 @@ import { MultiselectOption } from "@/app/shared/components/app-multiselect/types
 })
 export default class AppNewAnalysis extends BaseAuthComponent {
   plants!: PlantSchema[];
-  
+  drones!: DroneSchema[];
+
   selectedPlantId: string | null = null;
   plantOptions: Array<any> = [];
 
@@ -67,6 +72,9 @@ export default class AppNewAnalysis extends BaseAuthComponent {
 
   productPackagesSelection: MultiselectOption[] = [];
   selectedProductPackages: string[] | null = null;
+
+  selectedDroneId: string | null = null;
+  droneOptions: Array<any> = [];
 
   loadingEmptyAnalysis = false;
 
@@ -80,7 +88,8 @@ export default class AppNewAnalysis extends BaseAuthComponent {
   }
 
   @Watch('flownAt') async onFlownAtChanged() {
-    await this.loadProductPackagesSelection();
+    // Promise.all waits until both calls are finished so they appear at the same time
+    Promise.all([this.loadProductPackagesSelection(), this.prepareDroneSelection()])
   }
 
   get plantName(): string {
@@ -93,7 +102,7 @@ export default class AppNewAnalysis extends BaseAuthComponent {
       }
     }
 
-    return "";
+    return "&nbsp;"; // with "" instead of "&nbsp;", the page would jump a bit down once the plant name is loaded
   }
 
   @CatchError("loadingEmptyAnalysis")
@@ -116,6 +125,7 @@ export default class AppNewAnalysis extends BaseAuthComponent {
       flown_at: this.flownAt,
       plant_id: this.selectedPlantId,
       order_product_package_ids: this.selectedProductPackages || undefined,
+      drone_id: this.selectedDroneId || undefined,
     });
 
     this.showSuccess(this.$t("analysis-created-success").toString());
@@ -149,6 +159,21 @@ export default class AppNewAnalysis extends BaseAuthComponent {
     this.plantOptions = this.plants.map(plant => ({ value: plant.id, text: plant.name }));
     if (this.plants.length === 1) {
       this.selectedPlantId = this.plants[0].id;
+    }
+  }
+
+  @CatchError()
+  private async prepareDroneSelection() {
+    const droneFilter: { customer_id?: string, plant_id?: string } = {};
+    if (this.selectedPlantId) {
+      droneFilter.plant_id = this.selectedPlantId;
+    }
+    this.drones = await volateqApi.getDrones(droneFilter);
+
+    this.droneOptions = this.drones.map(drone => ({ value: drone.id, text: drone.custom_name + ' (' + drone.drone_model.name_abbrev + ')' }));
+
+    if (this.drones.length === 1) {
+      this.selectedDroneId = this.drones[0].id;
     }
   }
 

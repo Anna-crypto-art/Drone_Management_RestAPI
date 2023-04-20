@@ -604,6 +604,10 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/analysis/${analysisId}/drone-plant-coverage`);
   }
 
+  public async getDroneOfAnalysis(analysisId: string): Promise<DroneSchema> {
+    return this.get(`/auth/analysis/${analysisId}/drone`);
+  }
+
   public async getDocFiles(): Promise<DocFile[]> {
     return this.get(`/auth/doc/files`);
   }
@@ -716,7 +720,7 @@ export class VolateqAPI extends HttpClientBase {
     await this.delete(`/auth/drone-model/${droneModelId}`);
   }
 
-  public async getDrones(queryParams?: { customer_id?: string }): Promise<DroneSchema[]> {
+  public async getDrones(queryParams?: { customer_id?: string, plant_id?: string }): Promise<DroneSchema[]> {
     return this.get(`/auth/drones`, queryParams);
   }
 

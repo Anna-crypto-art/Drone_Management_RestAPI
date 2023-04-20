@@ -17,7 +17,7 @@
           <template #title>
             <b-icon icon="upload" /><span class="pad-left">{{ $t("upload") }}</span>
           </template>
-          <app-upload-analysis-files :analysis="analysis" />
+          <app-upload-analysis-files :analysis="analysis" :droneOptions="droneOptions" :selectedDrone="selectedDrone" />
         </b-tab>
         <b-tab class="app-edit-analysis-edit-tab">
           <template #title>
@@ -30,15 +30,31 @@
                   <b-form-group :label="$t('acquisition-date')" label-cols-sm="4" label-cols-lg="2">
                     <app-datepicker v-model="flownAt" required /> 
                   </b-form-group>
+                  <b-form-group label-cols-sm="4" label-cols-lg="2" v-show="!changeProductPackagesAndDroneAllowed">
+                    <template #label>
+                    </template>
+                    <b-alert :show="!changeProductPackagesAndDroneAllowed && !isSuperAdmin" variant="info" class="edit-analysis-info">
+                      {{ $t("can-only-change-pp-drone-before-data-complete") }}
+                    </b-alert>
+                    <b-alert :show="!changeProductPackagesAndDroneAllowed && isSuperAdmin" variant="info" class="edit-analysis-info">
+                      {{ $t("can-only-change-pp-drone-before-data-complete-super-admin") }}
+                    </b-alert>
+                  </b-form-group>
                   <b-form-group label-cols-sm="4" label-cols-lg="2">
                     <template #label>
-                      {{ $t('product-packages') }} <app-super-admin-marker v-if="isSuperAdmin" />
+                      {{ $t('product-packages') }} <app-super-admin-marker v-if="isSuperAdmin && !changeProductPackagesAndDroneAllowed" />
                     </template>
                     <app-multiselect 
                       v-model="selectedProductPackageIds"
                       :options="productPackagesSelection"
-                      :readonly="!isSuperAdmin"
+                      :readonly="!(isSuperAdmin || changeProductPackagesAndDroneAllowed)"
                     />
+                  </b-form-group>
+                  <b-form-group label-cols-sm="4" label-cols-lg="2">
+                    <template #label>
+                      {{ $t('drone') }} <app-super-admin-marker v-if="isSuperAdmin && !changeProductPackagesAndDroneAllowed" />
+                    </template>
+                    <b-form-select v-model="selectedDroneId" :options="droneOptions" :disabled="!(isSuperAdmin || changeProductPackagesAndDroneAllowed)"></b-form-select>
                   </b-form-group>
                   <b-form-group label-cols-sm="4" label-cols-lg="2" v-if="isSuperAdmin">
                     <template #label>
@@ -99,6 +115,7 @@ import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import AppMultiselect from "@/app/shared/components/app-multiselect/app-multiselect.vue";
 import AppDatepicker from "@/app/shared/components/app-datepicker/app-datepicker.vue";
 import { MultiselectOption } from "@/app/shared/components/app-multiselect/types";
+import { DroneSchema } from "@/app/shared/services/volateq-api/api-schemas/drone-schemas";
 
 @Component({
   name: "app-edit-analysis",
@@ -125,10 +142,13 @@ export default class AppEditAnalysis extends BaseAuthComponent {
 
   productPackagesSelection: MultiselectOption[] = [];
   selectedProductPackageIds: string[] | null = null;
-  productPackagesSelectionDisabled = false;
 
   keyFiguresSelection: MultiselectOption[] = [];
   selectedKeyFigureIds: string[] | null = null;
+
+  selectedDrone: DroneSchema | null = null;
+  selectedDroneId: string | null = null;
+  droneOptions: Array<any> = [];
 
   async created() {
     await this.updateAnalysis(this.$route.params.id);
@@ -200,8 +220,6 @@ export default class AppEditAnalysis extends BaseAuthComponent {
       this.analysis.customer.id,
     );
     this.selectedProductPackageIds = this.analysis.order_product_packages.map(orderPP => orderPP.id);
-    this.productPackagesSelectionDisabled = !this.isSuperAdmin &&
-      this.analysis.current_state.state.id >= ApiStates.DATA_COMPLETE;
 
     if (this.isSuperAdmin) {
       this.keyFiguresSelection = (await volateqApi.getAllKeyFigures())
@@ -225,6 +243,12 @@ export default class AppEditAnalysis extends BaseAuthComponent {
       (!this.analysis.analysis_result || !this.analysis.analysis_result.released)
     ) {
       AppContentEventService.showInfo(this.analysis!.id, this.$t("analysis-not-released_descr").toString());
+    }
+
+    this.droneOptions = (await volateqApi.getAvailableDronesForAnalysis(this.analysis!.id)).map(drone => ({ value: drone.id, text: drone.custom_name + ' (' + drone.drone_model.name_abbrev + ')' }));
+    this.selectedDrone = await volateqApi.getDroneOfAnalysis(this.analysis!.id);
+    if (this.selectedDrone) {
+      this.selectedDroneId = this.selectedDrone!.id;
     }
   }
 
@@ -259,11 +283,16 @@ export default class AppEditAnalysis extends BaseAuthComponent {
       flown_at: this.flownAt?.substring(0, 10),
       order_product_package_ids: this.selectedProductPackageIds || undefined,
       key_figure_ids: this.selectedKeyFigureIds?.map(k => parseInt(k)) || undefined,
+      drone_id: this.selectedDroneId || undefined,
     });
 
     this.showSuccess(this.$t("analysis-updated-successfully").toString());
 
     analysisEventService.emit(this.analysis!.id, AnalysisEvent.UPDATE_ANALYSIS);
+  }
+
+  get changeProductPackagesAndDroneAllowed(): boolean {
+    return this.analysis!.current_state.state.id < ApiStates.DATA_COMPLETE;
   }
 }
 </script>
@@ -275,6 +304,13 @@ export default class AppEditAnalysis extends BaseAuthComponent {
   }
   &-upload-tab {
     margin-top: 30px;
+  }
+
+  .alert-info {
+    &.edit-analysis-info {
+      margin-bottom: 0;
+      margin-top: 1rem;
+    }
   }
 }
 </style>

@@ -105,6 +105,7 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import AppIcon from "@/app/shared/components/app-icon/app-icon.vue";
 import { IAppModalForm } from "../app-modal/types";
+import { sortAlphabetical } from "../../services/helper/sort-helper";
 import { environment } from "@/environment/environment";
 
 @Component({
@@ -153,7 +154,7 @@ export default class AppHeader extends BaseAuthComponent {
   async onShowSwitchCustomerModal() {
     this.customerSelection = [
       { value: null, text: "" },
-      ...(await volateqApi.getCustomers()).map(customer => ({
+      ...(sortAlphabetical(await volateqApi.getCustomers(), 'name')).map(customer => ({
         value: customer.id,
         text: customer.name,
       })),

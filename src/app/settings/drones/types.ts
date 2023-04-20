@@ -19,6 +19,7 @@ export interface DroneSchemaItem {
   serial_number: string;
   number_available_batteries: number;
   retired: boolean;
+  internal_identifier: string;
 }
 
 export interface CustomerPlantTuple {
