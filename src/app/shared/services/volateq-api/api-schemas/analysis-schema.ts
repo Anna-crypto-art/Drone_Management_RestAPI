@@ -6,6 +6,7 @@ import { PlantSchema } from "./plant-schema";
 import { OrderProductPackageSchema } from "./order-schema";
 import { ReferenceMeasurementSchema } from "./reference-measurement-schema";
 import { ApiKeyFigure } from "../api-key-figures";
+import { DroneSchema } from "./drone-schemas";
 
 export interface AnalysisFilesSchema {
   video_files: string[];
@@ -41,6 +42,7 @@ export interface AnalysisSchema extends SimpleAnalysisSchema {
   task_id: string;
   order_product_packages: OrderProductPackageSchema[];
   analysis_key_figures: AnalysisKeyFigureSchema[];
+  drone: DroneSchema;
 }
 
 export interface AnalysisFileInfoSchema {
@@ -57,4 +59,5 @@ export interface AnalysisForViewSchema {
   order_product_packages: OrderProductPackageSchema[];
   reference_measurements: ReferenceMeasurementSchema[];
   has_key_figures: boolean;
+  drone: DroneSchema;
 }

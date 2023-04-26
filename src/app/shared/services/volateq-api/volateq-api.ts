@@ -40,6 +40,9 @@ import { CreateProductPackageRequest, UpdateProductPackageRequest } from "./api-
 import { PlantStatusSchema } from "./api-schemas/plant-status-schema";
 import { CreateDroneModelRequest, UpdateDroneModelRequest, CreateDroneRequest, UpdateDroneRequest } from "./api-requests/drone-requests";
 import { DroneModelSchema, DroneSchema } from "./api-schemas/drone-schemas";
+import { FlightCampaignSchema } from "./api-schemas/flight-campaign-schema";
+import { CreateFlightCampaignRequest } from "./api-requests/flight-campaign-requests";
+import { FlightRouteSchema } from "./api-schemas/flight-route-schema";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -743,6 +746,36 @@ export class VolateqAPI extends HttpClientBase {
 
   public async getAvailableDronesForAnalysis(analysisId: string): Promise<DroneSchema[]> {
     return this.get(`/auth/drones/${analysisId}`);
+  }
+
+  public async getFlightCampaigns(): Promise<FlightCampaignSchema[]> {
+    return this.get(`/auth/flight-campaigns`);
+  }
+
+  public async getFlightCampaignsOfAnalysis(analysisId: string): Promise<FlightCampaignSchema[]> {
+    return this.get(`/auth/flight-campaigns/${analysisId}`);
+  }
+
+  public async getFlightCampaign(flightCampaignId: string): Promise<FlightCampaignSchema> {
+    return this.get(`/auth/flight-campaign/${flightCampaignId}`);
+  }
+
+  public async getFlightRoutesOfFlightCampaign(flightCampaignId: string): Promise<FlightRouteSchema[]> {
+    return this.get(`/auth/flight-campaign/${flightCampaignId}/flight-routes`);
+  }
+
+  public async downloadFlightRouteJson(flightRouteId: string): Promise<any> {
+    return this.get(`/auth/flight-route/${flightRouteId}/mission-json-file`)
+  }
+
+  public async createFlightCampaign(
+    createFlightCampaignRequest: CreateFlightCampaignRequest,
+  ): Promise<void> {
+    return this.post(`/auth/create-flight-campaign`, createFlightCampaignRequest)
+  }
+
+  public async deleteFlightCampaign(flightCampaignId: number): Promise<void> {
+    await this.delete(`/auth/flight-campaign/${flightCampaignId}`);
   }
 
   public async createOrder(

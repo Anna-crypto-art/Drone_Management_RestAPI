@@ -71,6 +71,12 @@
             </b-col>
           </b-row>
         </b-tab>
+        <b-tab v-if="isSuperAdmin" class="app-edit-analysis-flights-tab">
+          <template #title>
+            <b-icon icon="calendar-range" /><span class="pad-left">{{ $t("flights") }}</span>
+          </template>
+          <app-analysis-flight-campaigns :analysis="analysis" />
+        </b-tab>
         <b-tab class="app-edit-analysis-ref-measures" v-if="hasReferenceMeasurements">
           <template #title>
             <b-icon icon="clipboard-check" />
@@ -116,6 +122,7 @@ import AppMultiselect from "@/app/shared/components/app-multiselect/app-multisel
 import AppDatepicker from "@/app/shared/components/app-datepicker/app-datepicker.vue";
 import { MultiselectOption } from "@/app/shared/components/app-multiselect/types";
 import { DroneSchema } from "@/app/shared/services/volateq-api/api-schemas/drone-schemas";
+import AppAnalysisFlightCampaigns from "@/app/analysis/edit-analysis/flight-campaign/flight-campaign.vue";
 
 @Component({
   name: "app-edit-analysis",
@@ -131,6 +138,7 @@ import { DroneSchema } from "@/app/shared/services/volateq-api/api-schemas/drone
     AppStepProgress,
     AppMultiselect,
     AppDatepicker,
+    AppAnalysisFlightCampaigns,
   },
 })
 export default class AppEditAnalysis extends BaseAuthComponent {
@@ -303,6 +311,9 @@ export default class AppEditAnalysis extends BaseAuthComponent {
     margin-top: 30px;
   }
   &-upload-tab {
+    margin-top: 30px;
+  }
+  &-flights-tab {
     margin-top: 30px;
   }
 
