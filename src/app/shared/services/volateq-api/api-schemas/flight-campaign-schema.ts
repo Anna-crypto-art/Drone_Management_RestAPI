@@ -12,6 +12,7 @@ export interface FlightCampaignSchema {
   product_package_ids: string[];
   force_add_flight_type_ids: string[];
   plant_status: PlantStatusSchema[];
+  is_being_generated: boolean;
 }
 
 export interface FlightCampaignItemSchema {
@@ -21,4 +22,5 @@ export interface FlightCampaignItemSchema {
   start_date: string;
   original_start_date: string;
   plant_status: PlantStatusSchema[];
+  is_being_generated: boolean;
 }

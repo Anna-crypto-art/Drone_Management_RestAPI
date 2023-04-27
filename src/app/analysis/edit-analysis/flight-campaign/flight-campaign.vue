@@ -14,6 +14,11 @@
         @rowSelected="onFlightCampaignSelected"
         :hoverActions="true"
       >
+        <template #cell(name)="row">
+          <span :class="row.item.is_being_generated ? 'red' : ''">
+            {{ row.item.name }}
+          </span>
+        </template>
         <template #cell(drone)="row">
           {{ appendDroneNameAndModelName(row.item.drone) }}
         </template>
@@ -202,7 +207,8 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
       battery_hotswapping: true,
       product_package_ids: [],
       force_add_flight_type_ids: [],
-      plant_status: []
+      plant_status: [],
+      is_being_generated: true
     }
   flightCampaignItems: Array<FlightCampaignItemSchema> = [];
   flightCampaignColumns: AppTableColumns = [
@@ -263,6 +269,7 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
       product_package_ids: this.analysis.order_product_packages.map(orderPP => orderPP.id),
       force_add_flight_type_ids: [],
       plant_status: [],
+      is_being_generated: true
     }
     this.selectedDroneId = this.analysis.drone.id;
     this.flightCampaignModalTitle = this.$t("create-flight-campaign").toString();
@@ -295,7 +302,8 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
       drone: flight_campaign.drone,
       start_date: dateHelper.toDate(flight_campaign.start_date),
       original_start_date: dateHelper.toDate(flight_campaign.original_start_date),
-      plant_status: flight_campaign.plant_status
+      plant_status: flight_campaign.plant_status,
+      is_being_generated: flight_campaign.is_being_generated
     })).sort((a, b) => {
       const nameA = a.name.toLowerCase();
       const nameB = b.name.toLowerCase();
@@ -321,34 +329,17 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
 
   onFlightCampaignSelected(flightCampaignItems: FlightCampaignItemSchema[]) {
     if (flightCampaignItems.length > 0) {
-      this.selectedFlightCampaign = flightCampaignItems[0];
+      if (flightCampaignItems[0].is_being_generated) {
+        alert('This flight campaign is currently being generated')
+        this.selectedFlightCampaign = null;
+      } else {
+        this.selectedFlightCampaign = flightCampaignItems[0];
+      }
     } else {
       this.selectedFlightCampaign = null;
     }
   }
-  // @CatchError("loading")
-  // async onMoveClick(refMeasureItem: any) {
-  //   this.moveRefMeasureId = refMeasureItem.id;
-  //   this.moveToAnalyses = (await volateqApi.getAllAnalysis({ plant_id: this.analysis.plant.id }))
-  //     .filter(analysis => analysis.id !== this.analysis.id)
-  //     .map(analysis => ({
-  //       value: analysis.id,
-  //       text: analysis.name,
-  //     }));
-  //   this.moveTargetAnalysisId = null;
-  //   this.moveModal.show();
-  // }
-  // @CatchError("moveModalLoading")
-  // async onMove() {
-  //   if (!this.moveTargetAnalysisId) {
-  //     throw { error: "MISSING_TARGET_ANALYSIS", message: "Please select an analysis" }
-  //   }
-  //   await volateqApi.moveReferenceMeasurement(this.moveRefMeasureId!, this.moveTargetAnalysisId);
-  //   this.showSuccess(this.$t("reference-measurement-moved-success").toString())
-  //   await this.updateRefMeasurements();
-  //   analysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
-  //   this.moveModal.hide();
-  // }
+
   @CatchError("loading")
   async onDeleteClick(flightCampaignItem: any) {
     if (!confirm(this.$t("flight-campaign-delete-are-you-sure").toString())) {
@@ -362,17 +353,6 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
   private appendDroneNameAndModelName(drone: DroneSchema) {
     return drone.custom_name + " (" + drone.drone_model.name_abbrev + ")"
   }
-  // @CatchError("loading")
-  // private async updateRefMeasurements() {
-  //   this.refMeasureItems = (await volateqApi.getReferenceMeasurements(this.analysis.id)).map(refMeasure => ({
-  //     id: refMeasure.id,
-  //     measureDate: dateHelper.toDateTime(refMeasure.measure_time_from) + " - " +
-  //       dateHelper.toDateTime(refMeasure.measure_time_to),
-  //     measureNotes: refMeasure.notes,
-  //     user_created: refMeasure.user_created ? 
-  //       (refMeasure.user_created.first_name + " " + refMeasure.user_created.last_name).trim() || refMeasure.user_created.email : ""
-  //   }));
-  // }
 }
 </script>
 

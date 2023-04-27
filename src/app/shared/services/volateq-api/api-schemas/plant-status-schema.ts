@@ -1,5 +1,5 @@
 export interface PlantStatusSchema {
-  id: number;
+  id: string;
   name: string;
   description: string;
   technology_id: number;

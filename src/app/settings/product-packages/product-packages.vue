@@ -196,7 +196,7 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
       if (!this.currentProductPackage.technology_id || // we want all key figures if no technology ID is set (e.g. creating new product package)
           this.currentProductPackage.technology_id == plant_status.technology_id) {
         plantStatusOptions.push({
-          id: plant_status.id.toString(),
+          id: plant_status.id,
           label: plant_status.name,
         });
       }
