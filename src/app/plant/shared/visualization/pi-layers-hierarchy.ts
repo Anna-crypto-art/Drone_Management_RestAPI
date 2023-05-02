@@ -117,8 +117,8 @@ export class PILayersHierarchy {
   public async reselectAllLayers(multiSelection: boolean) {
     const allChildLayers = this.getAllChildLayers();
 
-    const selectedKeyFigureIds = allChildLayers.filter(childLayer => childLayer.getSelected())
-      .map(childLayer => childLayer.keyFigureId);
+    const selectedChildLayerIds = allChildLayers.filter(childLayer => childLayer.getSelected())
+      .map(childLayer => childLayer.id);
         
     for (const childLayer of allChildLayers) {
       childLayer.setColorScheme(multiSelection ? KeyFigureColorScheme.RAINBOW : KeyFigureColorScheme.TRAFFIC_LIGHT);
@@ -128,8 +128,8 @@ export class PILayersHierarchy {
 
     const reselectOneLayerOnly = !multiSelection;
     for (const childLayer of allChildLayers) {
-      if (selectedKeyFigureIds.includes(childLayer.keyFigureId) &&
-        childLayer.analysisResult.id === this.selectedAnalysisResultId)
+      // layers with "invisibleAutoSelection" gets reselected automatically.
+      if (selectedChildLayerIds.includes(childLayer.id) && !childLayer.invisibleAutoSelection)
       {
         await childLayer.setSelected(true);
 
