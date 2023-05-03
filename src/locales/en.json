@@ -529,7 +529,7 @@
   "pv-module-substring-short-circuit-class-1": "No issues",
   "pv-module-substring-short-circuit-class-2": "One bypass diode activated",
   "pv-module-substring-short-circuit-class-3": "More than one bypass diodes activated",
-  "pv-module-substring-open-circuit": "",
+  "pv-module-substring-open-circuit": "Substring disconnected",
   "pv-module-substring-open-circuit_expl": "",
   "pv-module-cell-broken": "Cell hotspot",
   "pv-module-cell-broken_expl": "On of the cells of the modules show elevated operating temperature with more than 15° above normal",

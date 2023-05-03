@@ -29,6 +29,7 @@ const analysisResultPvMappingTracker: AnalysisResultMappings<
     transName: "tracking-angle",
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     getDiffValue: r => r.tracking_angle__diff,
+    enableForRefMeasure: true,
   },
   {
     keyFigureId: ApiKeyFigure.TRACKING_DEVIATION_ID,

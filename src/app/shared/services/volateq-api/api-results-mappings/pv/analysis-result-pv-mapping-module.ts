@@ -47,6 +47,7 @@ const analysisResultPvMappingModule: AnalysisResultMappings<
     transDescr: "pv-module-broken-glass_expl",
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     getDiffValue: r => r.broken_glass_class__diff,
+    enableForRefMeasure: true,
   },
   {
     keyFigureId: ApiKeyFigure.MODULE_SHORT_CIRCUIT_ID,
@@ -55,6 +56,7 @@ const analysisResultPvMappingModule: AnalysisResultMappings<
     transDescr: "pv-module-short-circuit_expl",
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     getDiffValue: r => r.short_circuit_class__diff,
+    enableForRefMeasure: true,
   },
   {
     keyFigureId: ApiKeyFigure.MODULE_OPEN_CIRCUIT_ID,
@@ -63,6 +65,7 @@ const analysisResultPvMappingModule: AnalysisResultMappings<
     transDescr: "pv-module-open-circuit_expl",
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     getDiffValue: r => r.open_circuit_class__diff,
+    enableForRefMeasure: true,
   },
   {
     keyFigureId: ApiKeyFigure.SUBSTRING_SHORT_CIRCUIT_ID,
@@ -71,6 +74,7 @@ const analysisResultPvMappingModule: AnalysisResultMappings<
     transDescr: "pv-module-substring-short-circuit_expl",
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     getDiffValue: r => r.substring_short_circuit_class__diff,
+    enableForRefMeasure: true,
   },
   {
     keyFigureId: ApiKeyFigure.SUBSTRING_OPEN_CIRCUIT_ID,
@@ -87,6 +91,7 @@ const analysisResultPvMappingModule: AnalysisResultMappings<
     transDescr: "pv-module-cell-broken_expl",
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     getDiffValue: r => r.cell_broken_class__diff,
+    enableForRefMeasure: true,
   },
   {
     keyFigureId: ApiKeyFigure.CELL_TRANSFER_RESISTANCE_ID,
@@ -95,6 +100,7 @@ const analysisResultPvMappingModule: AnalysisResultMappings<
     transDescr: "pv-module-cell-transfer-resistance_expl",
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     getDiffValue: r => r.cell_transfer_resistance_class__diff,
+    enableForRefMeasure: true,
   },
 ];
 
