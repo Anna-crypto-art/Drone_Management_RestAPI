@@ -29,6 +29,15 @@ const anaylsisRoutes: RouteConfig[] = [
       role: [ApiRoles.CUSTOMER_ADMIN, ApiRoles.PILOT],
     }
   },
+  {
+    name: "UploadForAnalysis",
+    path: "/analysis/:id",
+    component: AppEditAnalysis,
+    meta: {
+      role: [ApiRoles.CUSTOMER_ADMIN, ApiRoles.PILOT],
+      hash: "#upload",
+    }
+  },
 ];
 
 export default anaylsisRoutes;

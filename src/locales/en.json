@@ -369,6 +369,7 @@
   "acquire-reference-measurement-and-create-analysis": "A new and empty analysis will be created for the reference measurement. If you like to allocate the reference measurement to an existing analysis, make sure the target analysis is incomplete.",
   "continue-reference-measurement": "Continue reference measurement",
   "reference-measurements": "Reference measurements",
+  "values": "Values",
   "continue": "Continue",
   "move-to-another-analysis": "Move to another analysis",
   "move": "Move",
@@ -628,6 +629,7 @@
   "can-only-change-pp-drone-before-data-complete": "You can only edit the Product Packages or Drone while the analysis has a state earlier than \"Data complete\".",
   "can-only-change-pp-drone-before-data-complete-super-admin": "Only super admins can edit the Product Packages or Drone while the analysis has a state >= \"Data complete\".",
   "need-to-select-drone-to-set-complete": "You need to select a drone before you can set the state of this analysis to \"Data complete\".",
+  "previously-selected-drone-not-available": "The previously selected drone is currently not available for this client/plant. Check drone management settings.",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

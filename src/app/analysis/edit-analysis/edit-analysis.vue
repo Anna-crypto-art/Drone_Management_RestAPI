@@ -6,14 +6,14 @@
       </div>
     </template>
     <div class="app-edit-analysis">
-      <b-tabs>
-        <b-tab class="app-edit-analysis-download-tab">
+      <b-tabs v-model="tabIndex">
+        <b-tab class="app-edit-analysis-download-tab" href="#download">
           <template #title>
             <b-icon icon="download" /><span class="pad-left">{{ $t("download") }}</span>
           </template>
           <app-download-analysis-files :analysis="analysis" />
         </b-tab>
-        <b-tab class="app-edit-analysis-upload-tab">
+        <b-tab class="app-edit-analysis-upload-tab" href="#upload">
           <template #title>
             <b-icon icon="upload" /><span class="pad-left">{{ $t("upload") }}</span>
           </template>
@@ -50,11 +50,16 @@
                       :readonly="!(isSuperAdmin || changeProductPackagesAndDroneAllowed)"
                     />
                   </b-form-group>
+                  <b-form-group label-cols-sm="4" label-cols-lg="2" v-show="!selectedDroneIsCurrentlyAvailable">
+                    <b-alert :show="!selectedDroneIsCurrentlyAvailable && isSuperAdmin" variant="info" class="edit-analysis-info">
+                      {{ $t("previously-selected-drone-not-available") }}
+                    </b-alert>
+                  </b-form-group>
                   <b-form-group label-cols-sm="4" label-cols-lg="2">
                     <template #label>
                       {{ $t('drone') }} <app-super-admin-marker v-if="isSuperAdmin && !changeProductPackagesAndDroneAllowed" />
                     </template>
-                    <b-form-select v-model="selectedDroneId" :options="droneOptions" :disabled="!(isSuperAdmin || changeProductPackagesAndDroneAllowed)"></b-form-select>
+                    <b-form-select v-model="selectedDroneId" :options="droneOptions" :disabled="!(isSuperAdmin || changeProductPackagesAndDroneAllowed) || !selectedDroneIsCurrentlyAvailable"></b-form-select>
                   </b-form-group>
                   <b-form-group label-cols-sm="4" label-cols-lg="2" v-if="isSuperAdmin">
                     <template #label>
@@ -148,7 +153,16 @@ export default class AppEditAnalysis extends BaseAuthComponent {
 
   selectedDrone: DroneSchema | null = null;
   selectedDroneId: string | null = null;
+  droneOptionsRaw: Array<any> = [];
   droneOptions: Array<any> = [];
+
+  // tab index stuff currently only needed for direct link from button "upload data for analysis XYZ" to upload tab
+  tabIndex = 0;
+  tabs = ['#download', '#upload'];
+
+  mounted() {
+    this.tabIndex = this.tabs.findIndex(tab => tab === this.$route.meta.hash);
+  }
 
   async created() {
     await this.updateAnalysis(this.$route.params.id);
@@ -245,11 +259,21 @@ export default class AppEditAnalysis extends BaseAuthComponent {
       AppContentEventService.showInfo(this.analysis!.id, this.$t("analysis-not-released_descr").toString());
     }
 
-    this.droneOptions = (await volateqApi.getAvailableDronesForAnalysis(this.analysis!.id)).map(drone => ({ value: drone.id, text: drone.custom_name + ' (' + drone.drone_model.name_abbrev + ')' }));
     this.selectedDrone = await volateqApi.getDroneOfAnalysis(this.analysis!.id);
     if (this.selectedDrone) {
       this.selectedDroneId = this.selectedDrone!.id;
     }
+    this.droneOptionsRaw = (await volateqApi.getAvailableDronesForAnalysis(this.analysis!.id)).map(drone => ({ value: drone.id, text: drone.custom_name + ' (' + drone.drone_model.name_abbrev + ')' }));
+
+    if (!this.selectedDroneIsCurrentlyAvailable) {
+      this.droneOptions = [...this.droneOptionsRaw, {value: this.selectedDrone.id, text: this.selectedDrone.custom_name + ' (' + this.selectedDrone.drone_model.name_abbrev + ')'}]
+    } else {
+      this.droneOptions = this.droneOptionsRaw;
+    }
+  }
+
+  get selectedDroneIsCurrentlyAvailable(): boolean {
+    return !!(this.droneOptionsRaw.find(drone => drone.value == this.selectedDrone?.id));
   }
 
   private watchAnalysisTask() {
