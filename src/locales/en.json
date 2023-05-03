@@ -412,7 +412,7 @@
   "upload-not-allowed_descr": "It is not allowed to upload further files, because the analysis has a state beyond \"Data complete\".",
   "import-result-files-not-allowed_descr": "You cannot import result files as long as the analysis stays behind \"Data complete verified\".",
   "remove-result-files-not-allowed_descr": "You cannot remove results as long as they are released.",
-  "new-upload-not-allowed_descr": "It is not allowed to start a new data upload, as long as analysis <b>{analysis}</b> is incomplete.",
+  "new-upload-not-allowed_descr": "It is not allowed to create a new analysis as long as analysis <b>{analysis}</b> is incomplete.",
   "analysis-not-finished_descr": "Dear Admin, you released the analysis result although the analysis is not finished",
   "analysis-not-released_descr": "Dear Admin, the analysis has been finished but the results have not been released yet",
   "switch": "Switch",
