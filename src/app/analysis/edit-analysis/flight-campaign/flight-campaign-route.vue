@@ -30,7 +30,7 @@
             variant="secondary"
             size="sm"
             :title="$t('download-json')"
-            icon="box-arrow-down"
+            icon="download"
           />
         </template>
       </app-table>

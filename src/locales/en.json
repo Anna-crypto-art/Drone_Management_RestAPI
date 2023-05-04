@@ -633,6 +633,7 @@
   "create-flight-campaign": "Create flight campaign",
   "flight-campaign-delete-are-you-sure": "Delete flight campaign. Are you sure?",
   "flight-campaign-delete-success": "Flight campaign has been deleted successfully",
+  "now-creating-flight-campaign": "Now creating {flight_campaign}, this may take a few minutes.",
   "battery-hotswapping": "Battery hotswapping",
   "flight-types": "Flight types",
   "force-add-flight-types": "Force additional flight types",
@@ -640,6 +641,8 @@
   "plant-area": "Plant area",
   "duration": "Duration",
   "download-json": "Download JSON",
+  "export-to-third-party": "Export to third party",
+  "export": "Export",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

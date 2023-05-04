@@ -26,14 +26,14 @@
           {{ row.item.plant_status.map(plant_status => plant_status.name).join(", ") }}
         </template>
         <template #hoverActions="row">
-          <!-- <app-button
+          <app-button
             v-show="isSuperAdmin"
             icon="arrow-right-circle-fill"
-            @click="onMoveClick(row.item)"
+            @click="onExportClick(row.item)"
             variant="secondary"
             size="sm"
-            :title="$t('move-to-another-analysis')"
-          /> -->
+            :title="$t('export-to-third-party')"
+          />
           <app-button
             v-show="isSuperAdmin"
             @click="onDeleteClick(row.item)"
@@ -85,7 +85,7 @@
         <b-col>
           <b-form-group :label="$t('product-packages')">
             <app-multiselect 
-              v-model="currentFlightCampaign.product_package_ids"
+              v-model="currentFlightCampaign.order_product_package_ids"
               :options="availableProductPackages"
             />
           </b-form-group>
@@ -119,12 +119,12 @@
     />
 
     <!-- <app-modal-form
-      id="move-modal"
-      ref="moveModal"
-      :title="$t('move-to-another-analysis')"
-      :ok-title="$t('move')"
-      :modalLoading="moveModalLoading"
-      @submit="onMove"
+      id="export-modal"
+      ref="exportModal"
+      :title="$t('export-to-third-party')"
+      :ok-title="$t('export')"
+      :modalLoading="exportModalLoading"
+      @submit="onExport"
     >
       <b-form-group :label="$t('select-analysis')">
         <b-form-select v-model="moveTargetAnalysisId" :options="moveToAnalyses" required />
@@ -205,7 +205,7 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
       start_date: "",
       original_start_date: "",
       battery_hotswapping: true,
-      product_package_ids: [],
+      order_product_package_ids: [],
       force_add_flight_type_ids: [],
       plant_status: [],
       is_being_generated: true
@@ -266,7 +266,7 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
       start_date: this.analysis.flown_at,
       original_start_date: "",
       battery_hotswapping: true,
-      product_package_ids: this.analysis.order_product_packages.map(orderPP => orderPP.id),
+      order_product_package_ids: this.analysis.order_product_packages.map(orderPP => orderPP.id),
       force_add_flight_type_ids: [],
       plant_status: [],
       is_being_generated: true
@@ -276,25 +276,31 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
     this.flightCampaignModalOkTitle = this.$t("create").toString();
     this.appFlightCampaignModal.show();
   }
+
   async onSubmitFlightCampaign() {
     const selectedDrone = this.allDrones.filter(drone => drone.id.toString() == this.selectedDroneId);
     if (selectedDrone.length != 1) {
       return
     }
-    await volateqApi.createFlightCampaign({
-      name: this.currentFlightCampaign.name,
-      analysis_id: this.currentFlightCampaign.analysis_id,
-      drone_id: selectedDrone[0].id.toString(),
-      start_date: this.currentFlightCampaign.start_date,
-      original_start_date: this.currentFlightCampaign.start_date,
-      battery_hotswapping: this.currentFlightCampaign.battery_hotswapping,
-      product_package_ids: this.currentFlightCampaign.product_package_ids,
-      force_add_flight_type_ids: this.currentFlightCampaign.force_add_flight_type_ids,
-    });
-    this.showSuccess(this.$t("something-created-success", { something: this.currentFlightCampaign!.name }).toString());
-    this.appFlightCampaignModal.hide();
-    this.updateFlightCampaigns();
+    try {
+      await volateqApi.createFlightCampaign({
+        name: this.currentFlightCampaign.name,
+        analysis_id: this.currentFlightCampaign.analysis_id,
+        drone_id: selectedDrone[0].id.toString(),
+        start_date: this.currentFlightCampaign.start_date,
+        original_start_date: this.currentFlightCampaign.start_date,
+        battery_hotswapping: this.currentFlightCampaign.battery_hotswapping,
+        order_product_package_ids: this.currentFlightCampaign.order_product_package_ids,
+        force_add_flight_type_ids: this.currentFlightCampaign.force_add_flight_type_ids,
+      });
+      this.showSuccess(this.$t("now-creating-flight-campaign", { flight_campaign: this.currentFlightCampaign!.name }).toString());
+      this.appFlightCampaignModal.hide();
+      this.updateFlightCampaigns();
+    } catch (e) {
+      this.showError(e);
+    }
   }
+
   async updateFlightCampaigns() {
     this.flightCampaignItems = (await volateqApi.getFlightCampaignsOfAnalysis(this.analysis.id)).map((flight_campaign: FlightCampaignSchema) => ({
       id: flight_campaign.id,
@@ -352,6 +358,15 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
   }
   private appendDroneNameAndModelName(drone: DroneSchema) {
     return drone.custom_name + " (" + drone.drone_model.name_abbrev + ")"
+  }
+
+  async onExportClick(refMeasureItem: any) {
+
+    this.showError('Not yet implemented')
+    // get export options, e.g. Litchi and Flighthub2
+
+    // show modal with export options
+    // this.exportModal.show();
   }
 }
 </script>

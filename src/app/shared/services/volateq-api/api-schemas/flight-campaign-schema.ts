@@ -9,7 +9,7 @@ export interface FlightCampaignSchema {
   start_date: string;
   original_start_date: string;
   battery_hotswapping: boolean;
-  product_package_ids: string[];
+  order_product_package_ids: string[];
   force_add_flight_type_ids: string[];
   plant_status: PlantStatusSchema[];
   is_being_generated: boolean;
