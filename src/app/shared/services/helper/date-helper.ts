@@ -44,26 +44,32 @@ export default {
     );
   },
 
-  getDate(date: string | number | Date): Date {
+  getDate(date: string | number | Date, ignore_timezone = false): Date {
+    let converted_date: Date | null = null;
+
     if (typeof date === "string") {
-      return new Date(Date.parse(date));
+      converted_date = new Date(Date.parse(date));
+    } else if (typeof date === "number") {
+      converted_date =  new Date(date);
+    } else {
+      converted_date = date;
     }
 
-    if (typeof date === "number") {
-      return new Date(date);
+    if (ignore_timezone) {
+      return new Date(converted_date.getTime() - (converted_date.getTimezoneOffset() * 60 * 1000));
     }
 
-    return date;
+    return converted_date;
   },
 
-  toDate(date: string | number | Date): string {
-    return this.getDate(date).toISOString().substring(0, 10);
+  toDate(date: string | number | Date, ignore_timezone = false): string {
+    return this.getDate(date, ignore_timezone).toISOString().substring(0, 10);
   },
-  toTime(date: string | number | Date): string {
-    return this.getDate(date).toISOString().substring(11, 16);
+  toTime(date: string | number | Date, ignore_timezone = false): string {
+    return this.getDate(date, ignore_timezone).toISOString().substring(11, 16);
   },
-  toDateTime(date: string | number | Date): string {
-    return this.toDate(date) + " " + this.toTime(date);
+  toDateTime(date: string | number | Date, ignore_timezone = false): string {
+    return this.toDate(date, ignore_timezone) + " " + this.toTime(date, ignore_timezone);
   },
   now(): string {
     const d = new Date();

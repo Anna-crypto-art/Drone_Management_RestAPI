@@ -107,7 +107,7 @@ export default class AppFlightCampaignRoutes extends BaseAuthComponent {
     }
     this.flightRouteItems = (await volateqApi.getFlightRoutesOfFlightCampaign(this.flightCampaign.id)).map(flight_route => ({
       id: flight_route.id,
-      start_time: dateHelper.toDateTime(flight_route.start_time),
+      start_time: dateHelper.toDateTime(flight_route.start_time, true),
       drone: flight_route.drone,
       plant_area: flight_route.plant_area,
       plant_status: flight_route.plant_status,
