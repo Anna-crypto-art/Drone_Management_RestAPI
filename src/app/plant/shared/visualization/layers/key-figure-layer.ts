@@ -349,7 +349,6 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
       new_value: newValue,
     });
 
-    this.reloadLayer();
     await this.setSelected(false);
     await this.setSelected(true);
 

@@ -7,7 +7,7 @@
       <b-alert :show="!!incompleteAnalysis" variant="info" class="mar-bottom-2x">
         <span v-if="incompleteAnalysis" v-html="$t('new-upload-not-allowed_descr', { analysis: incompleteAnalysis.name })"></span>
       </b-alert>
-      <router-link v-if="incompleteAnalysis" :to="{ name: 'EditAnalysis', params: { id: incompleteAnalysis.id } }"> 
+      <router-link v-if="incompleteAnalysis" :to="{ name: 'UploadForAnalysis', params: { id: incompleteAnalysis.id } }"> 
         <app-button variant="primary">
           {{ $t("upload-data-for-analysis", { analysis: incompleteAnalysis.name }) }}
         </app-button>

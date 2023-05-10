@@ -13,8 +13,10 @@ import { ModuleSoilingKeyFigure } from "./key-figure-layers/module/module-soilin
 import { ModuleSubstringShortCircuitKeyFigure } from "./key-figure-layers/module/module-substring-short-circuit-key-figure";
 import { TrackerSoilingKeyFigureLayer } from "./key-figure-layers/tracker/tracker-soiling-key-figure-layer";
 import { TrackingDeviationKeyFigureLayer } from "./key-figure-layers/tracker/tracking-deviation-key-figure-layer";
+import { ModuleComponentLayer } from "./component-layers/module-component-layer";
 
 export const COMPONENT_LAYERS: typeof ComponentLayer[] = [
+  ModuleComponentLayer,
   TrackerComponentLayer,
 ];
 
