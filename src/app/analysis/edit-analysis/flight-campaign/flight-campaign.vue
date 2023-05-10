@@ -118,7 +118,12 @@
       :flightCampaign="selectedFlightCampaign"
     />
 
-    <!-- <app-modal-form
+    <!-- <app-flight-campaign-plant-operation-actions 
+      :analysis="analysis"
+      :flightCampaign="selectedFlightCampaign"
+    /> -->
+
+    <app-modal-form
       id="export-modal"
       ref="exportModal"
       :title="$t('export-to-third-party')"
@@ -126,10 +131,16 @@
       :modalLoading="exportModalLoading"
       @submit="onExport"
     >
-      <b-form-group :label="$t('select-analysis')">
-        <b-form-select v-model="moveTargetAnalysisId" :options="moveToAnalyses" required />
+      <b-form-group :label="$t('select-export-target')">
+        <b-form-select v-model="exportTargetId" :options="['Litchi', 'Flighthub 2']" required />
       </b-form-group>
-    </app-modal-form> -->
+      <b-form-group :label="$t('username')">
+        <b-form-input v-model="exportUsername" :placeholder="$t('username')" required />
+      </b-form-group>
+      <b-form-group :label="$t('password')">
+        <b-form-input v-model="exportPassword" :placeholder="$t('password')" required />
+      </b-form-group>
+    </app-modal-form>
   </div>
 </template>
 
@@ -153,6 +164,7 @@ import AppMultiselect from "@/app/shared/components/app-multiselect/app-multisel
 import AppFlightCampaignRoutes from "./flight-campaign-route.vue";
 import { DroneSchema } from "@/app/shared/services/volateq-api/api-schemas/drone-schemas";
 import dateHelper from "@/app/shared/services/helper/date-helper";
+import AppFlightCampaignPlantOperationActions from "./flight-campaign-plant-operation-actions.vue";
 @Component({
   name: "app-analysis-flight-campaigns",
   components: {
@@ -163,7 +175,8 @@ import dateHelper from "@/app/shared/services/helper/date-helper";
     AppDatepicker,
     AppSuperAdminMarker,
     AppMultiselect,
-    AppFlightCampaignRoutes
+    AppFlightCampaignRoutes,
+    AppFlightCampaignPlantOperationActions
   }
 })
 export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
@@ -178,6 +191,11 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
   flightCampaignModalLoading = false;
   flightCampaignModalTitle = "";
   flightCampaignModalOkTitle = "";
+  @Ref() exportModal!: IAppModalForm;
+  exportModalLoading = false;
+  exportTargetId = null;
+  exportUsername = null;
+  exportPassword = null;
   
   currentFlightCampaign: FlightCampaignSchema = {
       id: "",
@@ -336,7 +354,7 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
   onFlightCampaignSelected(flightCampaignItems: FlightCampaignItemSchema[]) {
     if (flightCampaignItems.length > 0) {
       if (flightCampaignItems[0].is_being_generated) {
-        alert('This flight campaign is currently being generated')
+        alert(this.$t('flight-campaign-being-generated'))
         this.selectedFlightCampaign = null;
       } else {
         this.selectedFlightCampaign = flightCampaignItems[0];
@@ -362,11 +380,14 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
 
   async onExportClick(refMeasureItem: any) {
 
-    this.showError('Not yet implemented')
     // get export options, e.g. Litchi and Flighthub2
 
     // show modal with export options
-    // this.exportModal.show();
+    this.exportModal.show();
+  }
+
+  async onExport() {
+    this.showError('Not yet implemented')
   }
 }
 </script>
