@@ -749,16 +749,8 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/drones/${analysisId}`);
   }
 
-  public async getFlightCampaigns(): Promise<FlightCampaignSchema[]> {
-    return this.get(`/auth/flight-campaigns`);
-  }
-
   public async getFlightCampaignsOfAnalysis(analysisId: string): Promise<FlightCampaignSchema[]> {
-    return this.get(`/auth/flight-campaigns/${analysisId}`);
-  }
-
-  public async getFlightCampaign(flightCampaignId: string): Promise<FlightCampaignSchema> {
-    return this.get(`/auth/flight-campaign/${flightCampaignId}`);
+    return this.get(`/auth/analysis/${analysisId}/flight-campaigns`);
   }
 
   public async getFlightRoutesOfFlightCampaign(flightCampaignId: string): Promise<FlightRouteSchema[]> {
@@ -776,15 +768,15 @@ export class VolateqAPI extends HttpClientBase {
   public async createFlightCampaign(
     createFlightCampaignRequest: CreateFlightCampaignRequest,
   ): Promise<void> {
-    return this.post(`/auth/create-flight-campaign`, createFlightCampaignRequest)
+    return this.post(`/auth/flight-campaign`, createFlightCampaignRequest)
   }
 
   public async deleteFlightCampaign(flightCampaignId: string): Promise<void> {
     await this.delete(`/auth/flight-campaign/${flightCampaignId}`);
   }
 
-  public async deleteFlightRoute(flightCampaignId: string, flightRouteId: string): Promise<void> {
-    await this.delete(`/auth/flight-campaign/${flightCampaignId}/delete-flight-route/${flightRouteId}`);
+  public async deleteFlightRoute(flightRouteId: string): Promise<void> {
+    await this.delete(`/auth/flight-route/${flightRouteId}`);
   }
 
   public async deletePlantOperationAction(flightCampaignId: string, plantOperationActionId: string): Promise<void> {

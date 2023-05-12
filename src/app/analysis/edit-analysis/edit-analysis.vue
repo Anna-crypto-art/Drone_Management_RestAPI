@@ -76,13 +76,13 @@
             </b-col>
           </b-row>
         </b-tab>
-        <b-tab v-if="isSuperAdmin" class="app-edit-analysis-flights-tab">
+        <b-tab v-if="isSuperAdmin" class="app-edit-analysis-flights-tab" lazy>
           <template #title>
             <b-icon icon="calendar-range" /><span class="pad-left">{{ $t("flights") }}</span>
           </template>
           <app-analysis-flight-campaigns :analysis="analysis" />
         </b-tab>
-        <b-tab class="app-edit-analysis-ref-measures" v-if="hasReferenceMeasurements">
+        <b-tab class="app-edit-analysis-ref-measures" v-if="hasReferenceMeasurements" lazy>
           <template #title>
             <b-icon icon="clipboard-check" />
             <span class="pad-left">{{ $t("reference-measurements") }}</span>
@@ -90,7 +90,7 @@
           </template>
           <app-analysis-reference-measurements :analysis="analysis" />
         </b-tab>
-        <b-tab v-if="isSuperAdmin" class="app-edit-analysis-admin-tab">
+        <b-tab v-if="isSuperAdmin" class="app-edit-analysis-admin-tab" lazy>
           <template #title>
             <b-icon icon="shield-shaded" /><span class="pad-left">{{ $t("admin-panel") }}</span>
           </template>

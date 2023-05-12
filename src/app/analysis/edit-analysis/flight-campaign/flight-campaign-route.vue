@@ -127,7 +127,7 @@ export default class AppFlightCampaignRoutes extends BaseAuthComponent {
         if (!confirm(this.$t("flight-route-delete-are-you-sure").toString())) {
           return;
         }
-        volateqApi.deleteFlightRoute(this.flightCampaign.id, flightRouteItem.id);
+        volateqApi.deleteFlightRoute(flightRouteItem.id);
         this.showSuccess(this.$t("flight-route-delete-success").toString())
       }
       else {

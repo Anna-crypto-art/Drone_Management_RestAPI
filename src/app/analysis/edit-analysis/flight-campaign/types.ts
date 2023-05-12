@@ -10,3 +10,12 @@ export interface FlightRouteItemSchema {
   duration: number | null;
   action: string | null;
 }
+
+export interface NewFlightCampaign {
+  name: string;
+  analysisId: string;
+  startDate: string;
+  batteryHotswapping: boolean;
+  orderProductPackageIds: string[];
+  forceAddFlightTypeIds: string[];
+}

@@ -54,63 +54,65 @@
       :modalLoading="flightCampaignModalLoading"
       @submit="onSubmitFlightCampaign"
     >
-      <b-row>
-        <b-col>
-          <b-form-group :label="$t('name')">
-            <b-form-input
-              id="new-flight-campaign-name"
-              v-model="currentFlightCampaign.name"
-              required
-              :placeholder="$t('name')" />
-          </b-form-group>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col>
-          <b-form-group :label="$t('drone')">
-            <b-form-select
-              id="drone-selection"
-              v-model="selectedDroneId"
-              :options="droneSelection"
-            ></b-form-select>
-          </b-form-group>
-        </b-col>
-        <b-col>
-          <b-form-group :label="$t('start-date')">
-            <app-datepicker v-model="currentFlightCampaign.start_date" required /> 
-          </b-form-group>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col>
-          <b-form-group :label="$t('product-packages')">
-            <app-multiselect 
-              v-model="currentFlightCampaign.order_product_package_ids"
-              :options="availableProductPackages"
-            />
-          </b-form-group>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col>
-          <b-form-group v-if="isSuperAdmin" :label="$t('force-add-flight-types')">
-            <template #label>
-              {{ $t('force-add-flight-types') }} <app-super-admin-marker />
-            </template>
-            <app-multiselect 
-              v-model="currentFlightCampaign.force_add_flight_type_ids"
-              :options="availableFlightTypes"
-            />
-          </b-form-group>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col>
-          <b-form-checkbox id="new-flight-campaign-battery-hotswapping" v-model="currentFlightCampaign.battery_hotswapping">
-            {{ $t("battery-hotswapping") }}
-          </b-form-checkbox>
-        </b-col>
-      </b-row>
+      <div v-if="newFlightCampaign">
+        <b-row>
+          <b-col>
+            <b-form-group :label="$t('name')">
+              <b-form-input
+                id="new-flight-campaign-name"
+                v-model="newFlightCampaign.name"
+                required
+                :placeholder="$t('name')" />
+            </b-form-group>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col>
+            <b-form-group :label="$t('drone')">
+              <b-form-select
+                id="drone-selection"
+                v-model="selectedDroneId"
+                :options="droneSelection"
+              ></b-form-select>
+            </b-form-group>
+          </b-col>
+          <b-col>
+            <b-form-group :label="$t('start-date')">
+              <app-datepicker v-model="newFlightCampaign.startDate" required /> 
+            </b-form-group>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col>
+            <b-form-group :label="$t('product-packages')">
+              <app-multiselect 
+                v-model="newFlightCampaign.orderProductPackageIds"
+                :options="availableProductPackages"
+              />
+            </b-form-group>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col>
+            <b-form-group v-if="isSuperAdmin" :label="$t('force-add-flight-types')">
+              <template #label>
+                {{ $t('force-add-flight-types') }} <app-super-admin-marker />
+              </template>
+              <app-multiselect 
+                v-model="newFlightCampaign.forceAddFlightTypeIds"
+                :options="availableFlightTypes"
+              />
+            </b-form-group>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col>
+            <b-form-checkbox id="new-flight-campaign-battery-hotswapping" v-model="newFlightCampaign.batteryHotswapping">
+              {{ $t("battery-hotswapping") }}
+            </b-form-checkbox>
+          </b-col>
+        </b-row>
+      </div>
     </app-modal-form>
 
     <app-flight-campaign-routes 
@@ -165,6 +167,8 @@ import AppFlightCampaignRoutes from "./flight-campaign-route.vue";
 import { DroneSchema } from "@/app/shared/services/volateq-api/api-schemas/drone-schemas";
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import AppFlightCampaignPlantOperationActions from "./flight-campaign-plant-operation-actions.vue";
+import { NewFlightCampaign } from "./types";
+import { sortBy } from "@/app/shared/services/helper/sort-helper";
 @Component({
   name: "app-analysis-flight-campaigns",
   components: {
@@ -181,53 +185,28 @@ import AppFlightCampaignPlantOperationActions from "./flight-campaign-plant-oper
 })
 export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
   @Prop({ required: true }) analysis!: AnalysisSchema;
+  
   loading = false;
-  allDrones: DroneSchema[] = [];
+
   droneSelection: any[] = [];
   selectedDroneId: string | null = null;
+  
   availableProductPackages: MultiselectOption[] = [];
   availableFlightTypes: MultiselectOption[] = [];
+  
   @Ref() appFlightCampaignModal!: IAppModalForm;
   flightCampaignModalLoading = false;
   flightCampaignModalTitle = "";
   flightCampaignModalOkTitle = "";
+
   @Ref() exportModal!: IAppModalForm;
   exportModalLoading = false;
   exportTargetId = null;
   exportUsername = null;
   exportPassword = null;
+
+  newFlightCampaign: NewFlightCampaign | null = null;
   
-  currentFlightCampaign: FlightCampaignSchema = {
-      id: "",
-      name: "",
-      analysis_id: this.analysis.id,
-      drone: {
-        id: "",
-        custom_name: "",
-        serial_number: "",
-        number_available_batteries: 0,
-        retired: false,
-        internal_identifier: "",
-        notes: "",
-        drone_model: {
-          id: "",
-          name: "",
-          name_abbrev: "",
-          vendor: "",
-          flight_time: 0,
-          recharge_time: 0,
-          battery_swap_time: 0,
-          supported: true,
-        }
-      },
-      start_date: "",
-      original_start_date: "",
-      battery_hotswapping: true,
-      order_product_package_ids: [],
-      force_add_flight_type_ids: [],
-      plant_status: [],
-      is_being_generated: true
-    }
   flightCampaignItems: Array<FlightCampaignItemSchema> = [];
   flightCampaignColumns: AppTableColumns = [
     { key: "name", label: this.$t("name").toString() },
@@ -237,118 +216,93 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
     // { key: "measureNotes", label: this.$t("notes").toString() },
   ];
   selectedFlightCampaign: FlightCampaignItemSchema | null = null;
+
+  @CatchError()
   async created() {
-    this.allDrones = await volateqApi.getAvailableDronesForAnalysis(this.analysis.id);
-    this.droneSelection = this.allDrones.map(drone => ({
+    this.droneSelection = (await volateqApi.getAvailableDronesForAnalysis(this.analysis.id)).map(drone => ({
       value: drone.id.toString(),
       text: this.appendDroneNameAndModelName(drone)
     }));
-    this.updateFlightCampaigns();
+
+    await this.updateFlightCampaigns();
+
     this.availableProductPackages = await volateqApi.getOrderPPsMulitselectOptions(
       this.analysis.plant.id,
       this.analysis.flown_at,
       this.analysis.customer.id,
     );
+
     this.availableFlightTypes = (await volateqApi.getAllPlantStatus())
-                                  .filter(plant_status => plant_status.technology_id === this.analysis.plant.technology_id)
-                                  .map(plant_status => ({
-                                    id: plant_status.id.toString(),
-                                    label: plant_status.name
-                                  }));
+      .filter(plant_status => plant_status.technology_id === this.analysis.plant.technology_id)
+      .map(plant_status => ({
+        id: plant_status.id.toString(),
+        label: plant_status.name
+      }));
   }
-  @CatchError("flightCampaignModalLoading")
+  
+  @CatchError()
   onCreateFlightCampaignClick() {
-    this.currentFlightCampaign = {
-      id: "",
+    this.newFlightCampaign = {
       name: this.analysis.name + " " + this.$t("flight-campaign") + " " + (this.flightCampaignItems.length + 1).toString(),
-      analysis_id: this.analysis.id,
-      drone: this.allDrones.length == 1 ? this.allDrones[0] : {
-        id: "",
-        custom_name: "",
-        serial_number: "",
-        number_available_batteries: 0,
-        retired: false,
-        internal_identifier: "",
-        notes: "",
-        drone_model: {
-          id: "",
-          name: "",
-          name_abbrev: "",
-          vendor: "",
-          flight_time: 0,
-          recharge_time: 0,
-          battery_swap_time: 0,
-          supported: true,
-        }
-      },
-      start_date: this.analysis.flown_at,
-      original_start_date: "",
-      battery_hotswapping: true,
-      order_product_package_ids: this.analysis.order_product_packages.map(orderPP => orderPP.id),
-      force_add_flight_type_ids: [],
-      plant_status: [],
-      is_being_generated: true
+      analysisId: this.analysis.id,
+      startDate: this.analysis.flown_at,
+      batteryHotswapping: true,
+      orderProductPackageIds: this.analysis.order_product_packages.map(orderPP => orderPP.id),
+      forceAddFlightTypeIds: [],
     }
     this.selectedDroneId = this.analysis.drone.id;
+
     this.flightCampaignModalTitle = this.$t("create-flight-campaign").toString();
     this.flightCampaignModalOkTitle = this.$t("create").toString();
+
     this.appFlightCampaignModal.show();
   }
 
+  @CatchError("flightCampaignModalLoading")
   async onSubmitFlightCampaign() {
-    const selectedDrone = this.allDrones.filter(drone => drone.id.toString() == this.selectedDroneId);
-    if (selectedDrone.length != 1) {
-      return
-    }
     try {
+      if (!this.newFlightCampaign) {
+        return
+      }
+
+      if (!this.selectedDroneId) {
+        throw { error: "INVALID_OR_MISSING_DRONE_SELECTION", message: "Please select a drone"}
+      }
+
       await volateqApi.createFlightCampaign({
-        name: this.currentFlightCampaign.name,
-        analysis_id: this.currentFlightCampaign.analysis_id,
-        drone_id: selectedDrone[0].id.toString(),
-        start_date: this.currentFlightCampaign.start_date,
-        original_start_date: this.currentFlightCampaign.start_date,
-        battery_hotswapping: this.currentFlightCampaign.battery_hotswapping,
-        order_product_package_ids: this.currentFlightCampaign.order_product_package_ids,
-        force_add_flight_type_ids: this.currentFlightCampaign.force_add_flight_type_ids,
+        name: this.newFlightCampaign.name,
+        analysis_id: this.newFlightCampaign.analysisId,
+        drone_id: this.selectedDroneId,
+        start_date: this.newFlightCampaign.startDate,
+        original_start_date: this.newFlightCampaign.startDate,
+        battery_hotswapping: this.newFlightCampaign.batteryHotswapping,
+        order_product_package_ids: this.newFlightCampaign.orderProductPackageIds,
+        force_add_flight_type_ids: this.newFlightCampaign.forceAddFlightTypeIds,
       });
-      this.showSuccess(this.$t("now-creating-flight-campaign", { flight_campaign: this.currentFlightCampaign!.name }).toString());
+
+      this.showSuccess(this.$t("now-creating-flight-campaign", { flight_campaign: this.newFlightCampaign.name }).toString());
       this.appFlightCampaignModal.hide();
-      this.updateFlightCampaigns();
+
+      await this.updateFlightCampaigns();      
     } catch (e) {
       this.showError(e);
     }
   }
 
   async updateFlightCampaigns() {
-    this.flightCampaignItems = (await volateqApi.getFlightCampaignsOfAnalysis(this.analysis.id)).map((flight_campaign: FlightCampaignSchema) => ({
-      id: flight_campaign.id,
-      name: flight_campaign.name,
-      drone: flight_campaign.drone,
-      start_date: dateHelper.toDate(flight_campaign.start_date),
-      original_start_date: dateHelper.toDate(flight_campaign.original_start_date),
-      plant_status: flight_campaign.plant_status,
-      is_being_generated: flight_campaign.is_being_generated
-    })).sort((a, b) => {
-      const nameA = a.name.toLowerCase();
-      const nameB = b.name.toLowerCase();
-      const dateA = a.start_date;
-      const dateB = b.start_date;
-      // first sort by date
-      if (dateA < dateB) {
-        return -1;
-      }
-      if (dateA > dateB) {
-        return 1;
-      }
-      // then sort by name
-      if (nameA < nameB) {
-        return -1;
-      }
-      if (nameA > nameB) {
-        return 1;
-      }
-      return 0;
-    });
+    this.flightCampaignItems = sortBy(
+      (await volateqApi.getFlightCampaignsOfAnalysis(this.analysis.id)).map((flight_campaign: FlightCampaignSchema) => ({
+        id: flight_campaign.id,
+        name: flight_campaign.name,
+        drone: flight_campaign.drone,
+        start_date: dateHelper.toDate(flight_campaign.start_date),
+        original_start_date: dateHelper.toDate(flight_campaign.original_start_date),
+        plant_status: flight_campaign.plant_status,
+        is_being_generated: flight_campaign.is_being_generated
+      })),
+      e => e.name.toLowerCase(), 
+      'start_date'
+    );
   }
 
   onFlightCampaignSelected(flightCampaignItems: FlightCampaignItemSchema[]) {
@@ -378,9 +332,8 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
     return drone.custom_name + " (" + drone.drone_model.name_abbrev + ")"
   }
 
-  async onExportClick(refMeasureItem: any) {
-
-    // get export options, e.g. Litchi and Flighthub2
+  async onExportClick(item: any) {
+    // TODO: get export options, e.g. Litchi and Flighthub2
 
     // show modal with export options
     this.exportModal.show();
