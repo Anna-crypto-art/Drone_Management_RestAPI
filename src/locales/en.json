@@ -629,7 +629,8 @@
   "can-only-change-pp-drone-before-data-complete": "You can only edit the Product Packages or Drone while the analysis has a state earlier than \"Data complete\".",
   "can-only-change-pp-drone-before-data-complete-super-admin": "Only super admins can edit the Product Packages or Drone while the analysis has a state >= \"Data complete\".",
   "need-to-select-drone-to-set-complete": "You need to select a drone before you can set the state of this analysis to \"Data complete\".",
-  "previously-selected-drone-not-available": "The previously selected drone is currently not available for this client/plant. Check drone management settings.",
+  "previously-selected-drone-not-available": "The previously selected drone is currently not available for this customer/plant. Check drone management settings.",
+  "no-drone-available-for-customer-plant": "No drone available for this customer/plant.",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

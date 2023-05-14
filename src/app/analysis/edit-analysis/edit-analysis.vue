@@ -55,11 +55,16 @@
                       {{ $t("previously-selected-drone-not-available") }}
                     </b-alert>
                   </b-form-group>
+                  <b-form-group label-cols-sm="4" label-cols-lg="2" v-show="noDroneAvailable">
+                    <b-alert :show="noDroneAvailable" variant="info" class="edit-analysis-info">
+                      {{ $t("no-drone-available-for-customer-plant") }}
+                    </b-alert>
+                  </b-form-group>
                   <b-form-group label-cols-sm="4" label-cols-lg="2">
                     <template #label>
                       {{ $t('drone') }} <app-super-admin-marker v-if="isSuperAdmin && !changeProductPackagesAndDroneAllowed" />
                     </template>
-                    <b-form-select v-model="selectedDroneId" :options="droneOptions" :disabled="!(isSuperAdmin || changeProductPackagesAndDroneAllowed) || !selectedDroneIsCurrentlyAvailable"></b-form-select>
+                    <b-form-select v-model="selectedDroneId" :options="droneOptions" :disabled="!(isSuperAdmin || changeProductPackagesAndDroneAllowed) || !selectedDroneIsCurrentlyAvailable || noDroneAvailable"></b-form-select>
                   </b-form-group>
                   <b-form-group label-cols-sm="4" label-cols-lg="2" v-if="isSuperAdmin">
                     <template #label>
@@ -154,7 +159,7 @@ export default class AppEditAnalysis extends BaseAuthComponent {
   selectedDrone: DroneSchema | null = null;
   selectedDroneId: string | null = null;
   droneOptionsRaw: Array<any> = [];
-  droneOptions: Array<any> = [];
+  droneOptions: Array<any> | null = null;
 
   // tab index stuff currently only needed for direct link from button "upload data for analysis XYZ" to upload tab
   tabIndex = 0;
@@ -260,20 +265,16 @@ export default class AppEditAnalysis extends BaseAuthComponent {
     }
 
     this.selectedDrone = await volateqApi.getDroneOfAnalysis(this.analysis!.id);
-    if (this.selectedDrone) {
-      this.selectedDroneId = this.selectedDrone!.id;
+    if (this.selectedDrone?.id) {
+      this.selectedDroneId = this.selectedDrone?.id;
     }
     this.droneOptionsRaw = (await volateqApi.getAvailableDronesForAnalysis(this.analysis!.id)).map(drone => ({ value: drone.id, text: drone.custom_name + ' (' + drone.drone_model.name_abbrev + ')' }));
 
-    if (!this.selectedDroneIsCurrentlyAvailable) {
+    if (!this.selectedDroneIsCurrentlyAvailable && this.selectedDrone?.id) {
       this.droneOptions = [...this.droneOptionsRaw, {value: this.selectedDrone.id, text: this.selectedDrone.custom_name + ' (' + this.selectedDrone.drone_model.name_abbrev + ')'}]
     } else {
       this.droneOptions = this.droneOptionsRaw;
     }
-  }
-
-  get selectedDroneIsCurrentlyAvailable(): boolean {
-    return !!(this.droneOptionsRaw.find(drone => drone.value == this.selectedDrone?.id));
   }
 
   private watchAnalysisTask() {
@@ -317,6 +318,14 @@ export default class AppEditAnalysis extends BaseAuthComponent {
 
   get changeProductPackagesAndDroneAllowed(): boolean {
     return this.analysis!.current_state.state.id < ApiStates.DATA_COMPLETE;
+  }
+
+  get selectedDroneIsCurrentlyAvailable(): boolean {
+    return this.selectedDrone?.id == null || this.droneOptionsRaw.find(drone => drone.value == this.selectedDrone?.id);
+  }
+
+  get noDroneAvailable(): boolean {
+    return !!(this.droneOptions && this.droneOptions.length == 0);
   }
 }
 </script>
