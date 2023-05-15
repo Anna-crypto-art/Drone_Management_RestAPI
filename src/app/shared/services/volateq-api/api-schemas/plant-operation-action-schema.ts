@@ -1,5 +1,5 @@
 export interface PlantOperationActionSchema {
-  id: number;
+  id: string;
   timestamp: string;
   action_text: string;
 }

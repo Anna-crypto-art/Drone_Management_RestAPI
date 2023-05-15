@@ -1,27 +1,27 @@
 <template>
   <div v-show="flightCampaign">
-    <div v-for="(flightDay, index) in flightDays" :key="index">
+    <div v-for="(flightRoutesDay, index) in flightRoutesDays" :key="index">
       <h3 class="flight-campaign-route-table-header">
         {{ $t('day-with-number', {number: index+1}) }}
       </h3>
       <app-table-container>
         <app-table
-          :rows="flightDay"
+          :rows="flightRoutesDay.flightRoutesActions"
           :columns="flightRouteColumns"
           :loading="loading"
           :hoverActions="true"
         >
-          <template #cell(start_time)="row">
-            {{ row.item.start_time }}
+          <template #cell(startTime)="row">
+            {{ row.item.startTime }}
           </template>
           <template #cell(drone)="row">
             {{ appendDroneNameAndModelName(row.item.drone) }}
           </template>
-          <template #cell(plant_status)="row">
+          <template #cell(plantStatus)="row">
             <span>
-              {{ row.item.plant_status ? row.item.plant_status.name : '' }}
+              {{ row.item.plantStatus ? row.item.plantStatus.name : '' }}
             </span>
-            <app-explanation v-if="row.item.plant_status">{{ row.item.plant_status.description }}</app-explanation>
+            <app-explanation v-if="row.item.plantStatus">{{ row.item.plantStatus.description }}</app-explanation>
           </template>
           <template #cell(action)="row">
             {{ row.item.action ? row.item.action : '' }}
@@ -68,7 +68,11 @@ import { DroneSchema } from "@/app/shared/services/volateq-api/api-schemas/drone
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import { FlightCampaignItemSchema } from "@/app/shared/services/volateq-api/api-schemas/flight-campaign-schema";
-import { FlightRouteItemSchema } from "./types";
+import { FlightRoute, FlightRoutesActionDay, PlantAction } from "./types";
+import { sortBy } from "@/app/shared/services/helper/sort-helper";
+import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
+
+
 @Component({
   name: "app-flight-campaign-routes",
   components: {
@@ -81,14 +85,15 @@ import { FlightRouteItemSchema } from "./types";
 export default class AppFlightCampaignRoutes extends BaseAuthComponent {
   @Prop({ required: true }) analysis!: AnalysisSchema;
   @Prop({ default: null }) flightCampaign!: FlightCampaignItemSchema | null;
+  
   loading = false;
-  flightRouteItems: Array<FlightRouteItemSchema> = [];
-  flightDays: FlightRouteItemSchema[][] = [];
+  
+  flightRoutesDays: FlightRoutesActionDay[] = [];
 
   flightRouteColumns: AppTableColumns = [
-    { key: "start_time", label: this.$t("start-time").toString() },
-    { key: "plant_area", label: this.$t("plant-area").toString() },
-    { key: "plant_status", label: this.$t("plant-status").toString() },
+    { key: "startTime", label: this.$t("start-time").toString() },
+    { key: "plantArea", label: this.$t("plant-area").toString() },
+    { key: "plantStatus", label: this.$t("plant-status").toString() },
     { key: "action", label: this.$t("action").toString() },
     // { key: "drone", label: this.$t("drone").toString() }, // not needed yet as we only support 1 drone per flight campaign for now
     { key: "duration", label: this.$t("duration").toString() },
@@ -106,17 +111,12 @@ export default class AppFlightCampaignRoutes extends BaseAuthComponent {
   @CatchError()
   async onDownloadJsonClick(flightRouteItem: any) {
     if (this.flightCampaign) {
-      const flightRouteJsonContent = await volateqApi.downloadFlightRouteJson(flightRouteItem.id);
-      let download_file_name = this.flightCampaign.name + "_" + flightRouteItem.plant_area + "_" + flightRouteItem.start_time.toString() + "_" + flightRouteItem.plant_status.name + ".json";
-      download_file_name = download_file_name.replace(/ /g,"_");
+      const downloadUrl = await volateqApi.generateDownloadUrl(volateqApi.getFlightRouteJsonUrl(flightRouteItem.id));
+
+      console.log("downloadUrl: ")
+      console.log(downloadUrl)
       
-      const blob = new Blob([JSON.stringify(flightRouteJsonContent)], {type: 'text/json'});
-      const event = new MouseEvent("click", {"bubbles": true, "cancelable": false});
-      const a = document.createElement('a');
-      a.download = download_file_name;
-      a.href = window.URL.createObjectURL(blob);
-      a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
-      a.dispatchEvent(event);
+      AppDownloader.download(downloadUrl, 'blub.json')
     }
   }
 
@@ -145,68 +145,53 @@ export default class AppFlightCampaignRoutes extends BaseAuthComponent {
   @CatchError("loading")
   private async updateFlightRoutes() {
     if (!this.flightCampaign) {
-      this.flightRouteItems = [];
       return;
     }
 
-    let plantActions: Array<FlightRouteItemSchema> = (await volateqApi.getPlantActionsOfFlightCampaign(this.flightCampaign.id)).map(plant_action => ({
-          id: plant_action.id,
-          start_time: dateHelper.toDateTime(plant_action.timestamp, true),
-          drone: null,
-          plant_area: null,
-          plant_status: null,
-          duration: null,
-          action: plant_action.action_text
-    }));
+    const plantActions: PlantAction[] = (await volateqApi.getPlantActionsOfFlightCampaign(this.flightCampaign.id))
+      .map(action => ({
+        id: action.id,
+        startTime: dateHelper.toDateTime(action.timestamp, true),
+        action: action.action_text
+      }));
 
-    let flightRouteItems: Array<FlightRouteItemSchema> = (await volateqApi.getFlightRoutesOfFlightCampaign(this.flightCampaign.id)).map(flight_route => ({
-      id: flight_route.id,
-      start_time: dateHelper.toDateTime(flight_route.start_time, true),
-      drone: flight_route.drone,
-      plant_area: flight_route.plant_area,
-      plant_status: flight_route.plant_status,
-      duration: flight_route.duration,
-      action: 'Fly drone'
-    }));
-    flightRouteItems = [...plantActions, ...flightRouteItems];
-    this.flightRouteItems = flightRouteItems.sort((a, b) => {
-      const timeA = a.start_time!;
-      const timeB = b.start_time!;
-      if (timeA < timeB) {
-        return -1;
-      }
-      if (timeA > timeB) {
-        return 1;
-      }
-      return 0;
-    });
+    const flightRoutes: FlightRoute[] = (await volateqApi.getFlightRoutesOfFlightCampaign(this.flightCampaign.id))
+      .map(flight_route => ({
+        id: flight_route.id,
+        startTime: dateHelper.toDateTime(flight_route.start_time, true),
+        drone: flight_route.drone,
+        plantArea: flight_route.plant_area,
+        plantStatus: flight_route.plant_status,
+        duration: flight_route.duration,
+        action: this.$t('fly-drone-action').toString(),
+      }));
 
+    const flightRouteActions: PlantAction[] = sortBy([...plantActions, ...flightRoutes], e => e.startTime);
+
+    const flightRoutesActionDays: FlightRoutesActionDay[] = [];
+    
     // split into 1 table per day
-    let flightDays: FlightRouteItemSchema[][] = [];
-    let currentDayIdx = 0;
-    let currentDate = new Date(this.flightRouteItems[0].start_time!).getDay();
-    let currentFlightDay: FlightRouteItemSchema[] = [];
+    let yesterday: string | null = null;
+    for (const flightRouteAction of flightRouteActions) {
+      const today = flightRouteAction.startTime.substring(0, 10);
 
-    for (let i = 0; i < this.flightRouteItems.length; i++) {
-      let this_time = this.flightRouteItems[i].start_time!;
-      let time_diff = new Date(this_time).getDay() - currentDate;
-      if (time_diff && time_diff != 0) {
-        currentDayIdx = currentDayIdx + 1;
-        currentDate = new Date(this_time).getDay();
-        flightDays.push(currentFlightDay)
-        currentFlightDay = [];
-        currentFlightDay.push(this.flightRouteItems[i]);
-      } else {
-        currentFlightDay.push(this.flightRouteItems[i]);
+      if (!yesterday || yesterday !== today) {
+        flightRoutesActionDays.push({
+          date: today,
+          flightRoutesActions: [],
+        });
       }
-      if (i == this.flightRouteItems.length - 1) {
-        flightDays.push(currentFlightDay);
-      }
+
+      const lastFlightRoutesActionDay = flightRoutesActionDays[flightRoutesActionDays.length - 1];
+      lastFlightRoutesActionDay.flightRoutesActions.push(flightRouteAction);
+
+      yesterday = today
     }
-    this.flightDays = flightDays;
+
+    this.flightRoutesDays = flightRoutesActionDays;
   }
 
-  private appendDroneNameAndModelName(drone: DroneSchema) {
+  appendDroneNameAndModelName(drone: DroneSchema) {
     if (drone == undefined) {
       return ''
     }

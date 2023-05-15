@@ -14,11 +14,11 @@ export function sortAlphabetical<T>(arr: Array<T>, prop: string) {
   });
 }
 
-export function sortBy<T>(array: Array<T>, ...args: Array<string | ((e: T) => any)>) {
+export function sortBy<T>(array: Array<T>, ...args: Array<(e: T) => string | number>) {
   return array.sort((a, b) => {
     for (const arg of args) {
-      const valA = typeof arg === "string" ? a[arg] : arg(a);
-      const valB = typeof arg === "string" ? b[arg] : arg(b);
+      const valA = arg(a);
+      const valB = arg(b);
 
       if (valA < valB) {
         return -1;

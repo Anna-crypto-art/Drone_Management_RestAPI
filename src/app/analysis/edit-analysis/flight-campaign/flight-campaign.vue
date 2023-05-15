@@ -300,8 +300,8 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
         plant_status: flight_campaign.plant_status,
         is_being_generated: flight_campaign.is_being_generated
       })),
-      e => e.name.toLowerCase(), 
-      'start_date'
+      e => e.start_date,
+      e => e.name.toLowerCase(),
     );
   }
 

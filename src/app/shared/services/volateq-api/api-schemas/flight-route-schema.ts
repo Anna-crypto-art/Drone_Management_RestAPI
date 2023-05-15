@@ -2,7 +2,7 @@ import { DroneSchema } from "./drone-schemas";
 import { PlantStatusSchema } from "./plant-status-schema";
 
 export interface FlightRouteSchema {
-  id: number;
+  id: string;
   drone: DroneSchema;
   plant_status: PlantStatusSchema;
   start_time: string;
