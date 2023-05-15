@@ -767,6 +767,10 @@ export class VolateqAPI extends HttpClientBase {
     return `${apiBaseUrl}/auth/flight-route/${flightRouteId}/mission-json-file`;
   }
 
+  public getFlightRouteDjiWpmlUrl(flightRouteId: string): string {
+    return `${apiBaseUrl}/auth/flight-route/${flightRouteId}/dji-wpml-file`;
+  }
+
   public async createFlightCampaign(
     createFlightCampaignRequest: CreateFlightCampaignRequest,
   ): Promise<void> {

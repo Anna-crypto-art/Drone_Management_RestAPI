@@ -31,14 +31,19 @@
           </template>
 
           <template #hoverActions="row">
-            <app-button
-              v-show="row.item.drone"
-              @click="onDownloadJsonClick(row.item)"
-              variant="secondary"
-              size="sm"
-              :title="$t('download-json')"
-              icon="download"
-            />
+            <app-dropdown-button variant="secondary" size="sm">
+              <template #title>
+                <app-icon icon="download" />
+              </template>
+              <b-dropdown-item-button @click="onDownloadJsonClick(row.item)">
+                {{ $t('download-json') }}
+              </b-dropdown-item-button>
+              <b-dropdown-item-button @click="onDownloadWPMZClick(row.item)">
+                {{ $t('download-wpml-file') }}
+              </b-dropdown-item-button>
+            </app-dropdown-button>
+
+            
             <app-button
               v-show="isSuperAdmin"
               @click="onDeleteClick(row.item)"
@@ -60,6 +65,8 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import AppTable from "@/app/shared/components/app-table/app-table.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
+import AppIcon from "@/app/shared/components/app-icon/app-icon.vue";
+import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-dropdown-button.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { AppTableColumns } from "@/app/shared/components/app-table/types";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
@@ -79,7 +86,9 @@ import { AppDownloader } from "@/app/shared/services/app-downloader/app-download
     AppTableContainer,
     AppTable,
     AppButton,
-    AppExplanation
+    AppExplanation,
+    AppDropdownButton,
+    AppIcon,
   }
 })
 export default class AppFlightCampaignRoutes extends BaseAuthComponent {
@@ -109,14 +118,20 @@ export default class AppFlightCampaignRoutes extends BaseAuthComponent {
   }
 
   @CatchError()
-  async onDownloadJsonClick(flightRouteItem: any) {
+  async onDownloadJsonClick(flightRoute: FlightRoute) {
     if (this.flightCampaign) {
-      const downloadUrl = await volateqApi.generateDownloadUrl(volateqApi.getFlightRouteJsonUrl(flightRouteItem.id));
-
-      console.log("downloadUrl: ")
-      console.log(downloadUrl)
+      const downloadUrl = await volateqApi.generateDownloadUrl(volateqApi.getFlightRouteJsonUrl(flightRoute.id));
       
-      AppDownloader.download(downloadUrl, 'blub.json')
+      AppDownloader.download(downloadUrl)
+    }
+  }
+
+  @CatchError()
+  async onDownloadWPMZClick(flightRoute: FlightRoute) {
+    if (this.flightCampaign) {
+      const downloadUrl = await volateqApi.generateDownloadUrl(volateqApi.getFlightRouteDjiWpmlUrl(flightRoute.id));
+      
+      AppDownloader.download(downloadUrl)
     }
   }
 

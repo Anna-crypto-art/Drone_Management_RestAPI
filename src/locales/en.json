@@ -655,6 +655,7 @@
   "username": "User name",
   "previously-selected-drone-not-available": "The previously selected drone is currently not available for this client/plant. Check drone management settings.",
   "fly-drone-action": "Fly drone",
+  "download-wpml-file": "Download DJI WPML (KMZ) file",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",
