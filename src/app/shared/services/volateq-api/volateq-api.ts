@@ -610,10 +610,6 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/analysis/${analysisId}/drone-plant-coverage`);
   }
 
-  public async getDroneOfAnalysis(analysisId: string): Promise<DroneSchema> {
-    return this.get(`/auth/analysis/${analysisId}/drone`);
-  }
-
   public async getDocFiles(): Promise<DocFile[]> {
     return this.get(`/auth/doc/files`);
   }

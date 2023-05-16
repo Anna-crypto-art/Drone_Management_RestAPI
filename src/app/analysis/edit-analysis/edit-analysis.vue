@@ -50,8 +50,8 @@
                       :readonly="!(isSuperAdmin || changeProductPackagesAndDroneAllowed)"
                     />
                   </b-form-group>
-                  <b-form-group label-cols-sm="4" label-cols-lg="2" v-show="!selectedDroneIsCurrentlyAvailable">
-                    <b-alert :show="!selectedDroneIsCurrentlyAvailable && isSuperAdmin" variant="info" class="edit-analysis-info">
+                  <b-form-group label-cols-sm="4" label-cols-lg="2" v-show="isSelectedDroneUnavailable">
+                    <b-alert :show="isSelectedDroneUnavailable && isSuperAdmin" variant="info" class="edit-analysis-info">
                       {{ $t("previously-selected-drone-not-available") }}
                     </b-alert>
                   </b-form-group>
@@ -59,7 +59,7 @@
                     <template #label>
                       {{ $t('drone') }} <app-super-admin-marker v-if="isSuperAdmin && !changeProductPackagesAndDroneAllowed" />
                     </template>
-                    <b-form-select v-model="selectedDroneId" :options="droneOptions" :disabled="!(isSuperAdmin || changeProductPackagesAndDroneAllowed) || !selectedDroneIsCurrentlyAvailable"></b-form-select>
+                    <b-form-select v-model="selectedDroneId" :options="droneOptions" :disabled="!(isSuperAdmin || changeProductPackagesAndDroneAllowed) || isSelectedDroneUnavailable"></b-form-select>
                   </b-form-group>
                   <b-form-group label-cols-sm="4" label-cols-lg="2" v-if="isSuperAdmin">
                     <template #label>
@@ -78,7 +78,9 @@
         </b-tab>
         <b-tab v-if="isSuperAdmin" class="app-edit-analysis-flights-tab" lazy>
           <template #title>
-            <b-icon icon="calendar-range" /><span class="pad-left">{{ $t("flights") }}</span>
+            <b-icon icon="calendar-range" />
+            <span class="pad-left">{{ $t("flights") }}</span>
+            <app-super-admin-marker />
           </template>
           <app-analysis-flight-campaigns :analysis="analysis" />
         </b-tab>
@@ -267,21 +269,22 @@ export default class AppEditAnalysis extends BaseAuthComponent {
       AppContentEventService.showInfo(this.analysis!.id, this.$t("analysis-not-released_descr").toString());
     }
 
-    this.selectedDrone = await volateqApi.getDroneOfAnalysis(this.analysis!.id);
+    this.selectedDrone = this.analysis!.drone;
     if (this.selectedDrone) {
       this.selectedDroneId = this.selectedDrone!.id;
     }
-    this.droneOptionsRaw = (await volateqApi.getAvailableDronesForAnalysis(this.analysis!.id)).map(drone => ({ value: drone.id, text: drone.custom_name + ' (' + drone.drone_model.name_abbrev + ')' }));
+    this.droneOptionsRaw = (await volateqApi.getAvailableDronesForAnalysis(this.analysis!.id))
+      .map(drone => ({ value: drone.id, text: drone.custom_name + ' (' + drone.drone_model.name_abbrev + ')' }));
 
-    if (!this.selectedDroneIsCurrentlyAvailable) {
+    if (this.isSelectedDroneUnavailable) {
       this.droneOptions = [...this.droneOptionsRaw, {value: this.selectedDrone.id, text: this.selectedDrone.custom_name + ' (' + this.selectedDrone.drone_model.name_abbrev + ')'}]
     } else {
       this.droneOptions = this.droneOptionsRaw;
     }
   }
 
-  get selectedDroneIsCurrentlyAvailable(): boolean {
-    return !!(this.droneOptionsRaw.find(drone => drone.value == this.selectedDrone?.id));
+  get isSelectedDroneUnavailable(): boolean {
+    return !!this.selectedDrone && !this.droneOptionsRaw.find(drone => drone.value == this.selectedDrone!.id);
   }
 
   private watchAnalysisTask() {

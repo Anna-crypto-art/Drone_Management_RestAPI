@@ -2,7 +2,7 @@
   <div v-show="flightCampaign">
     <div v-for="(flightRoutesDay, index) in flightRoutesDays" :key="index">
       <h3 class="flight-campaign-route-table-header">
-        {{ $t('day-with-number', {number: index+1}) }}
+        {{ $t('day-with-number', {number: index+1}) }}, {{ getWeekDay(flightRoutesDay.date) }}
       </h3>
       <app-table-container>
         <app-table
@@ -38,7 +38,7 @@
               <b-dropdown-item-button @click="onDownloadJsonClick(row.item)">
                 {{ $t('download-json') }}
               </b-dropdown-item-button>
-              <b-dropdown-item-button @click="onDownloadWPMZClick(row.item)">
+              <b-dropdown-item-button @click="onDownloadWPMZClick(row.item)" :disabled="!isDJIWPMZDownloadAllowed(row.item)">
                 {{ $t('download-wpml-file') }}
               </b-dropdown-item-button>
             </app-dropdown-button>
@@ -60,7 +60,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref, Watch } from "vue-property-decorator";
+import { Component, Prop, Watch } from "vue-property-decorator";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import AppTable from "@/app/shared/components/app-table/app-table.vue";
@@ -211,6 +211,14 @@ export default class AppFlightCampaignRoutes extends BaseAuthComponent {
       return ''
     }
     return drone.custom_name + " (" + drone.drone_model.name_abbrev + ")"
+  }
+
+  getWeekday(date: string) {
+    return dateHelper.getWeekDay(date);
+  }
+
+  isDJIWPMZDownloadAllowed(flightRoute: FlightRoute) {
+    return flightRoute.drone?.drone_model.name_abbrev === "M3T";
   }
 }
 </script>

@@ -656,6 +656,13 @@
   "previously-selected-drone-not-available": "The previously selected drone is currently not available for this client/plant. Check drone management settings.",
   "fly-drone-action": "Fly drone",
   "download-wpml-file": "Download DJI WPML (KMZ) file",
+  "sunday": "Sunday",
+  "monday": "Monday",
+  "tuesday": "Tuesday",
+  "wednesday": "Wednesday",
+  "thursday": "Thursday",
+  "friday": "Friday",
+  "saturday": "Saturday",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

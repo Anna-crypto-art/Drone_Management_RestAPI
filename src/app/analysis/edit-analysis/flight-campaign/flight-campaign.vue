@@ -120,11 +120,6 @@
       :flightCampaign="selectedFlightCampaign"
     />
 
-    <!-- <app-flight-campaign-plant-operation-actions 
-      :analysis="analysis"
-      :flightCampaign="selectedFlightCampaign"
-    /> -->
-
     <app-modal-form
       id="export-modal"
       ref="exportModal"
@@ -166,7 +161,6 @@ import AppMultiselect from "@/app/shared/components/app-multiselect/app-multisel
 import AppFlightCampaignRoutes from "./flight-campaign-route.vue";
 import { DroneSchema } from "@/app/shared/services/volateq-api/api-schemas/drone-schemas";
 import dateHelper from "@/app/shared/services/helper/date-helper";
-import AppFlightCampaignPlantOperationActions from "./flight-campaign-plant-operation-actions.vue";
 import { NewFlightCampaign } from "./types";
 import { sortBy } from "@/app/shared/services/helper/sort-helper";
 @Component({
@@ -180,7 +174,6 @@ import { sortBy } from "@/app/shared/services/helper/sort-helper";
     AppSuperAdminMarker,
     AppMultiselect,
     AppFlightCampaignRoutes,
-    AppFlightCampaignPlantOperationActions
   }
 })
 export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
@@ -250,7 +243,7 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
       orderProductPackageIds: this.analysis.order_product_packages.map(orderPP => orderPP.id),
       forceAddFlightTypeIds: [],
     }
-    this.selectedDroneId = this.analysis.drone.id;
+    this.selectedDroneId = this.analysis.drone?.id;
 
     this.flightCampaignModalTitle = this.$t("create-flight-campaign").toString();
     this.flightCampaignModalOkTitle = this.$t("create").toString();

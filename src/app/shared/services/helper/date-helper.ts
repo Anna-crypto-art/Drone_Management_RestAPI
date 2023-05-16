@@ -1,3 +1,6 @@
+import { i18n } from "@/main";
+
+
 export default {
   getTimeDiff: function (date: string): [string, { time: number }] {
     const elapsed = Date.now() - Date.parse(date);
@@ -44,35 +47,45 @@ export default {
     );
   },
 
-  getDate(date: string | number | Date, ignore_timezone = false): Date {
-    let converted_date: Date | null = null;
+  sustractTimezoneOffset(d: Date): Date {
+    return new Date(d.getTime() - (d.getTimezoneOffset() * 60 * 1000));
+  },
+
+  getDate(date: string | number | Date, ignoreTimezone = false): Date {
+    let convertedDate: Date | null = null;
 
     if (typeof date === "string") {
-      converted_date = new Date(Date.parse(date));
+      convertedDate = new Date(Date.parse(date));
     } else if (typeof date === "number") {
-      converted_date =  new Date(date);
+      convertedDate =  new Date(date);
     } else {
-      converted_date = date;
+      convertedDate = date;
     }
 
-    if (ignore_timezone) {
-      return new Date(converted_date.getTime() - (converted_date.getTimezoneOffset() * 60 * 1000));
+    if (ignoreTimezone) {
+      return this.sustractTimezoneOffset(convertedDate);
     }
 
-    return converted_date;
+    return convertedDate;
   },
 
-  toDate(date: string | number | Date, ignore_timezone = false): string {
-    return this.getDate(date, ignore_timezone).toISOString().substring(0, 10);
+  toDate(date: string | number | Date, ignoreTimezone = false): string {
+    return this.getDate(date, ignoreTimezone).toISOString().substring(0, 10);
   },
-  toTime(date: string | number | Date, ignore_timezone = false): string {
-    return this.getDate(date, ignore_timezone).toISOString().substring(11, 16);
+  toTime(date: string | number | Date, ignoreTimezone = false): string {
+    return this.getDate(date, ignoreTimezone).toISOString().substring(11, 16);
   },
-  toDateTime(date: string | number | Date, ignore_timezone = false): string {
-    return this.toDate(date, ignore_timezone) + " " + this.toTime(date, ignore_timezone);
+  toDateTime(date: string | number | Date, ignoreTimezone = false): string {
+    return this.toDate(date, ignoreTimezone) + " " + this.toTime(date, ignoreTimezone);
   },
   now(): string {
-    const d = new Date();
-    return (new Date(d.getTime() - (d.getTimezoneOffset() * 60 * 1000))).toISOString();
-  }
+    return this.sustractTimezoneOffset(new Date()).toISOString();
+  },
+
+  getWeekDay(date: string | number | Date, ignoreTimezone = false): string {
+    const d = this.getDate(date, ignoreTimezone);
+    const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+    
+    return i18n.t(days[d.getDay()]).toString();
+  },
 };
