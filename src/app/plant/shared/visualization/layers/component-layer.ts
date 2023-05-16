@@ -103,6 +103,9 @@ export abstract class ComponentLayer extends LayerBase {
     }
 
     const pcs = this.getPcs(feature)!;
+    if (!pcs) {
+      return undefined;
+    }
 
     if (!featureInfosMeta.fieldgeoComponent) {
       featureInfosMeta.fieldgeoComponent = await volateqApi.getFieldgeometryComponent(

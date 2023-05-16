@@ -26,6 +26,9 @@
     >
       {{ $t("delete-selected-files") }}
     </app-button>
+    <span class="mar-left" v-show="selectedDonwloadFiles.length > 0">
+      {{ $t("selected-files") }}: {{ selectedDonwloadFiles.length }}
+    </span>
     <app-table-container>
       <app-table
         :rows="downloadFilesTableItems"
@@ -95,13 +98,13 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
   downloadButtonLoading = false;
 
   downloadFilesTableColumns: AppTableColumns = [
-    { key: "name", label: this.$t("name").toString() },
-    { key: "size", label: this.$t("size").toString() },
-    { key: "uploadedAt", label: this.$t("uploaded-at").toString() },
+    { key: "name", label: this.$t("name").toString(), sortable: true },
+    { key: "size", label: this.$t("size").toString(), sortable: true },
+    { key: "uploadedAt", label: this.$t("uploaded-at").toString(), sortable: true },
   ];
   downloadFilesTableItems: { name: string, size: string | null, uploadedAt: number | null }[] = [];
 
-  private selectedDonwloadFiles: { name: string }[] = [];
+  selectedDonwloadFiles: { name: string }[] = [];
 
   isFilesLoading = false;
 

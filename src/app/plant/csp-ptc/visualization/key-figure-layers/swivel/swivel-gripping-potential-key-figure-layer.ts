@@ -63,7 +63,8 @@ export class SwivelGrippingPotentialKeyFigureLayer extends ClassSwivelKeyFigureL
   protected mapResultToFeatureInfos(result: AnalysisResultCspPtcSwivelSchema): FeatureInfos | undefined {
     const featureInfos = super.mapResultToFeatureInfos(result);
 
-    if (result.gripping_risk_image_url && featureInfos) {
+    // Nobody understand this image, so show them to SUPER_ADMINs only
+    if (result.gripping_risk_image_url && featureInfos && this.vueComponent.isSuperAdmin) {
       featureInfos.images = [{ title: "Gripping risk image", url: result.gripping_risk_image_url }];
     }
 
