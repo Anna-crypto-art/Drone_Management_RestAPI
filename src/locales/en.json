@@ -665,6 +665,7 @@
   "thursday": "Thursday",
   "friday": "Friday",
   "saturday": "Saturday",
+  "current-analysis_expl": "The analysis this server is currently reserved for. A worker will run on this server that listens on the queue named after this analysis to run wizard and result import tasks. <br><br>To reserve a server for specific future automatic evaluations, you can...<br><b>1.</b> set CurrentAnalysis to the analysis name if the analysis already exists<br><b>2.</b> set CurrentAnalysis to CLIENT_PLANT of the analysis that will exist in the future<br><b>3.</b> set CurrentAnalysis to &lt;empty&gt; if any analysis can be run on this server in the future",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",
