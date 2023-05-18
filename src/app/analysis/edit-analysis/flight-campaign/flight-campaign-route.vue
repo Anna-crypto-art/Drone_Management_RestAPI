@@ -31,7 +31,7 @@
           </template>
 
           <template #hoverActions="row">
-            <app-dropdown-button variant="secondary" size="sm">
+            <app-dropdown-button variant="secondary" size="sm" v-show="row.item.drone">
               <template #title>
                 <app-icon icon="download" />
               </template>
