@@ -559,7 +559,7 @@
   "htf-temperature-both-motions": "HTF temperatures during W2E and E2W flights",
   "htf-temperature-avg": "Average HTF temperature",
   "hce-displacement": "HCE displacement",
-  "hce-displacement_expl": "RMS value of difference in HCE lateral deviation at respective collector end",
+  "hce-displacement_expl": "Difference in HCE lateral deviation change between both motion directions at respective collector end",
   "select-component-type": "Select component type",
   "drones": "Drones",
   "drone": "Drone",
