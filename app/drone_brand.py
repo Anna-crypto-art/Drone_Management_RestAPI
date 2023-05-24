@@ -1,0 +1,3 @@
+class DroneBrand():
+    name = ""
+    model = ""
