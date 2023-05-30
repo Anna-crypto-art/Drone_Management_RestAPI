@@ -48,7 +48,6 @@ export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer imple
       return undefined;
     }
 
-    const compareEntries: LegendEntry[] = [];
     if (this.compareAnalysisResult) {
       return this.compareClassKeyFigureMixin.getDiffLegend();
     }
@@ -60,8 +59,7 @@ export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer imple
           color: this.getColor(),
           name: this.vueComponent.$t(this.getLegendName()).toString() + 
             this.getLegendEntryCount(this.geoJSON!.features.length),
-        },
-        ...compareEntries
+        }
       ],
     };
   }

@@ -102,6 +102,7 @@ export enum LayerColor {
   black = "#000000",
   orange = "#ef7700",
   blue = "#0000ff",
+  white = "#ffffff",
 
   metallicBlue = "#c2cfff",
   romanticRain = "#8491D1",

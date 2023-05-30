@@ -12,6 +12,7 @@ export const keyFigureRainbowColors: Record<ApiKeyFigure, LayerColor> = {
   [ApiKeyFigure.IR_INTENSITY_ID]: LayerColor.RED_retroBerry,
   [ApiKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID]: LayerColor.red,
   [ApiKeyFigure.HCE_POSITION_ID]: LayerColor.BLUE_midnightDarkRoyalBlue,
+  [ApiKeyFigure.WHITE_GLASS_TUBE_ID]: LayerColor.white,
 
   // SCA
   [ApiKeyFigure.SCA_TRACKING_DEVIATION_ID]: LayerColor.BLUE_jeopardyBlue,
@@ -36,6 +37,7 @@ export const keyFigureRainbowColors: Record<ApiKeyFigure, LayerColor> = {
 
   // SWIVEL
   [ApiKeyFigure.SWIVEL_GRIPPING_POTENTIAL_CLASS_ID]: LayerColor.BLUE_liturgicalTemptation,
+  [ApiKeyFigure.ROTATION_JOINT_GEOMETRY_STATUS_ID]: LayerColor.BLUE_liturgicalTemptation,
 
   // TRACKER
   [ApiKeyFigure.TRACKER_SOILING_LEVEL_ID]: LayerColor.RED_retroBerry,

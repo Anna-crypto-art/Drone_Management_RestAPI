@@ -675,6 +675,9 @@
   "swivel-rotation-joint-angle-deviation_expl": "Deviation from average ball joint assembly angle",
   "swivel-rotation-joint-angle-gripping-potential-class": "Ball joint assembly gripping potential",
   "swivel-rotation-joint-angle-gripping-potential-class_expl": "swivel-rotation-joint-angle-gripping-potential-class_expl",
+  "swivel-rotation-joint-angle-gripping-potential-class-3": "High gripping potential",
+  "swivel-rotation-joint-angle-gripping-potential-class-2": "Moderate gripping potential",
+  "swivel-rotation-joint-angle-gripping-potential-class-1": "No gripping potential",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

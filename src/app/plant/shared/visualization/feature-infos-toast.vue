@@ -176,6 +176,9 @@ export default class AppFeatureInfosToast extends BaseComponent {
   .toaster-images {
     img {
       max-width: calc(500px - 1.5rem);
+      max-height: 500px;
+      display: block;
+      margin: 0 auto;
     }
     margin-bottom: 0.75rem;
   }

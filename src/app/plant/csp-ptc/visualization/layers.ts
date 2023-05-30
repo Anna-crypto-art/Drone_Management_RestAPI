@@ -21,6 +21,7 @@ import { GeoVisualCspPtcQuery } from "@/app/shared/services/volateq-api/api-requ
 import { SwivelComponentLayer } from "./component-layers/swivel-component-layer";
 import { SwivelGrippingPotentialKeyFigureLayer } from "./key-figure-layers/swivel/swivel-gripping-potential-key-figure-layer";
 import { MirrorComponentLayer } from "./component-layers/mirror-component-layer";
+import { SwivelRotationJointGrippingPotentialKeyFigureLayer } from "./key-figure-layers/swivel/swivel-rotation-joint-gripping-potential-key-figure-layer";
 
 export const COMPONENT_LAYERS: typeof ComponentLayer[] = [
   AbsorberComponentLayer,
@@ -55,6 +56,12 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
     layerType: BoolUndefinedHceKeyFigureLayer,
     keyFigureInfo: { keyName: "hot-glass-tube-ends", description: "hot-glass-tube-ends_expl", zIndex: 11 },
     query: { hot_glass_tube_ends: 1, undefined: 1 },
+  },
+  {
+    keyFigureId: ApiKeyFigure.WHITE_GLASS_TUBE_ID,
+    layerType: BoolUndefinedHceKeyFigureLayer,
+    keyFigureInfo: { keyName: "white-glass-tube", description: "white-glass-tube_expl", zIndex: 11 },
+    query: { white_glass_tube: 1, undefined: 1, },
   },
   {
     keyFigureId: ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID,
@@ -358,4 +365,29 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
       },
     ],
   },
+  {
+    keyFigureId: ApiKeyFigure.ROTATION_JOINT_GEOMETRY_STATUS_ID,
+    layerType: SwivelRotationJointGrippingPotentialKeyFigureLayer,
+    keyFigureInfo: { keyName: "swivel-rotation-joint-angle-gripping-potential-class", description: "swivel-rotation-joint-angle-gripping-potential-class_expl" },
+    subLayers: [
+      {
+        keyFigureInfo: { displayName: "swivel-rotation-joint-angle-gripping-potential-class-3", zIndex: 13 },
+        query: { rotation_joint_angle_gripping_potential_class: 3 },
+      },
+      {
+        keyFigureInfo: { displayName: "swivel-rotation-joint-angle-gripping-potential-class-2", zIndex: 12 },
+        query: { rotation_joint_angle_gripping_potential_class: 2 },
+      },
+      {
+        keyFigureInfo: { displayName: "swivel-rotation-joint-angle-gripping-potential-class-1", zIndex: 10 },
+        query: { rotation_joint_angle_gripping_potential_class: 1 },
+      },
+      {
+        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
+        query: { undefined: 1 },
+        color: LayerColor.grey,
+        invisibleAutoSelection: true,
+      },
+    ],
+  }
 ];
