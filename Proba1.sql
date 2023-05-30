@@ -1,6 +1,6 @@
-sudo - u postgres psql \ conninfo CREATE DATABASE task_2;
+CREATE DATABASE task_2;
 
-\ c task_2 CREATE TABLE drone_brand (
+CREATE TABLE drone_brand (
     brand_id SERIAL PRIMARY KEY,
     brand_name VARCHAR,
     owner_name VARCHAR NOT NULL
