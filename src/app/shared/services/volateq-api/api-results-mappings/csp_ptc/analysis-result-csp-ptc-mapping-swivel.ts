@@ -36,6 +36,42 @@ const analysisResultCspPtcMappingSwivel: AnalysisResultMappings<
     filterType: FilterFieldType.NUMERIC_EXTENDED,
     unit: "mm",
   },
+  {
+    getValue: r => r.rotation_joint_angle,
+    transName: "swivel-rotation-joint-angle",
+    transDescr: "swivel-rotation-joint-angle_expl",
+    keyFigureId: ApiKeyFigure.ROTATION_JOINT_GRIPPING_ID,
+    unit: "°",
+    filterType: FilterFieldType.NUMERIC_EXTENDED,
+    enableForRefMeasure: true,
+    getDiffValue: r => r.rotation_joint_angle__diff,
+  },
+  {
+    getValue: r => r.rotation_joint_angle_avg_subfield,
+    transName: "swivel-rotation-joint-angle-avg-subfield",
+    transDescr: "swivel-rotation-joint-angle-avg-subfield_expl",
+    keyFigureId: ApiKeyFigure.ROTATION_JOINT_GRIPPING_ID,
+    unit: "°",
+    filterType: FilterFieldType.NUMERIC_EXTENDED,
+  },
+  {
+    getValue: r => r.rotation_joint_angle_deviation,
+    transName: "swivel-rotation-joint-angle-deviation",
+    transDescr: "swivel-rotation-joint-angle-deviation_expl",
+    keyFigureId: ApiKeyFigure.ROTATION_JOINT_GRIPPING_ID,
+    unit: "°",
+    filterType: FilterFieldType.NUMERIC_EXTENDED,
+  },
+  {
+    getValue: r => r.rotation_joint_angle_gripping_potential_class,
+    transName: "swivel-rotation-joint-angle-gripping-potential-class",
+    transDescr: "swivel-rotation-joint-angle-gripping-potential-class_expl",
+    keyFigureId: ApiKeyFigure.ROTATION_JOINT_GRIPPING_ID,
+    filterType: FilterFieldType.NUMERIC_EXTENDED,
+    enableForDiagram: true,
+    getDiffValue: r => r.rotation_joint_angle_gripping_potential_class__diff,
+    enableForRefMeasure: true,
+  },
 ];
 
 export default analysisResultCspPtcMappingSwivel;

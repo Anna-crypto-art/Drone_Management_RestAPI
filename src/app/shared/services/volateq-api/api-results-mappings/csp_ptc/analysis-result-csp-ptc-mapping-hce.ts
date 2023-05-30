@@ -176,6 +176,13 @@ const analysisResultCspPtcMappingHce: AnalysisResultMappings<AnalysisResultCspPt
     keyFigureId: ApiKeyFigure.HCE_POSITION_ID,
     filterType: FilterFieldType.NUMERIC_EXTENDED,
   },
+  {
+    getValue: r => r.white_glass_tube,
+    transName: "hce-white-glass-tube",
+    transDescr: "hce-white-glass-tube_expl",
+    keyFigureId: ApiKeyFigure.WHITE_GLASS_TUBE_ID,
+    filterType: FilterFieldType.BOOLEAN,
+  },
 ];
 
 export default analysisResultCspPtcMappingHce;

@@ -24,6 +24,7 @@ export interface AnalysisResultCspPtcHceSchema extends AnalysisResultSchemaBase 
   hce_position_center_vertical_offset: number;
   hce_position_center_lateral_offset: number;
   hce_position_center_offset_class: number;
+  white_glass_tube: boolean;
 }
 
 export interface AnalysisResultCspPtcHceComparedSchema extends AnalysisResultCspPtcHceSchema {
@@ -36,4 +37,5 @@ export interface AnalysisResultCspPtcHceComparedSchema extends AnalysisResultCsp
   hot_glass_tube_ends__diff: number;
   glass_tube_temperature_class__diff: number;
   recommended_action_class__diff: number;
+  white_glass_tube__diff: number;
 }
