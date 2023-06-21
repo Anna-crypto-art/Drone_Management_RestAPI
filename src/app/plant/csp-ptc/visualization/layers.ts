@@ -371,6 +371,10 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
     keyFigureInfo: { keyName: "swivel-rotation-joint-angle-gripping-potential-class", description: "swivel-rotation-joint-angle-gripping-potential-class_expl" },
     subLayers: [
       {
+        keyFigureInfo: { displayName: "swivel-rotation-joint-angle-gripping-potential-class-4", zIndex: 14 },
+        query: { rotation_joint_angle_gripping_potential_class: 4 },
+      },
+      {
         keyFigureInfo: { displayName: "swivel-rotation-joint-angle-gripping-potential-class-3", zIndex: 13 },
         query: { rotation_joint_angle_gripping_potential_class: 3 },
       },
