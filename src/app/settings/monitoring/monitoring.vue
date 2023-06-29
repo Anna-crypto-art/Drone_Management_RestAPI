@@ -292,7 +292,7 @@ export default class AppSettingsMonitoring extends BaseAuthComponent {
     
     this.columns = [
       { key: "name", label: this.$t("name").toString() },
-      { key: "analysis_name", label: this.$t("current-analysis").toString() },
+      { key: "analysis_name", label: this.$t("current-analysis").toString(), labelExpl: this.$t("current-analysis_expl").toString() },
       { key: "notes", label: this.$t("notes").toString() },
       { key: "state", label: this.$t("state").toString() },
       { key: "instance_type", label: this.$t("instance-type").toString() },
