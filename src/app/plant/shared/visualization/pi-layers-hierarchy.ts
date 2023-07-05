@@ -117,19 +117,23 @@ export class PILayersHierarchy {
   public async reselectAllLayers(multiSelection: boolean) {
     const allChildLayers = this.getAllChildLayers();
 
-    const selectedChildLayerIds = allChildLayers.filter(childLayer => childLayer.getSelected())
-      .map(childLayer => childLayer.id);
+    const selectedKeyFigureIds = allChildLayers.filter(childLayer => childLayer.getSelected())
+    .map(childLayer => childLayer.keyFigureId);
         
     for (const childLayer of allChildLayers) {
       childLayer.setColorScheme(multiSelection ? KeyFigureColorScheme.RAINBOW : KeyFigureColorScheme.TRAFFIC_LIGHT);
-      childLayer.reloadLayer();
+
+      // continue here! Find a solution to not always reload
+      childLayer.reloadLayer(); 
       await childLayer.setSelected(false);
     }
 
     const reselectOneLayerOnly = !multiSelection;
     for (const childLayer of allChildLayers) {
-      // layers with "invisibleAutoSelection" gets reselected automatically.
-      if (selectedChildLayerIds.includes(childLayer.id) && !childLayer.invisibleAutoSelection)
+      
+      if (selectedKeyFigureIds.includes(childLayer.keyFigureId) &&
+        childLayer.analysisResult.id === this.selectedAnalysisResultId &&
+        !childLayer.invisibleAutoSelection) // layers with "invisibleAutoSelection" gets reselected automatically.
       {
         await childLayer.setSelected(true);
 
@@ -198,6 +202,38 @@ export class PILayersHierarchy {
     }
   }
 
+  public async selectLayers(layerNames: string[]) {
+    const layers = this.getAllChildLayers().filter(keyFigureLayer => 
+      keyFigureLayer.isVisible && layerNames.includes(keyFigureLayer.name) && !keyFigureLayer.getSelected())
+    for (const layer of layers) {
+
+      // continue here... select multiple layer if singleSelection is false!!
+      this.getParentComponentLayer()
+
+
+      layer.setSelected(true)
+    }
+  }
+
+  private getParentGroupLayer(childLayerId: string): GroupLayer | undefined {
+    function findParentGroupLayerRec(groupKpiLayers: GroupKPILayer[]): GroupLayer | undefined {
+      for (const parentLayer of groupKpiLayers) {
+        if (parentLayer.keyFigureLayers.find(l => l.id == childLayerId)) {
+          return parentLayer.groupLayer;
+        }
+
+        if (parentLayer.subGroupLayers) {
+          const groupLayer = findParentGroupLayerRec(parentLayer.subGroupLayers)
+          if (groupLayer) {
+            return groupLayer;
+          }
+        }
+      }
+    }
+
+    return findParentGroupLayerRec(this.parentComponentKpiLayers);
+  }
+
   private updateGroupedKPILayers() {
     const currentChildLayers = this.getAllChildLayers();
 
@@ -237,6 +273,8 @@ export class PILayersHierarchy {
           if (visible && this.compareAnylysisResultId) {
             visible = keyFigureLayer.hasKeyFigureForCompareAnalysisResult();
           }
+
+          console.log(`keyFigureLayer(${keyFigureLayer.id}).setVisible(${visible})`)
 
           keyFigureLayer.setVisible(visible);
 
@@ -370,9 +408,9 @@ export class PILayersHierarchy {
         childLayers: [],
         visible: false,
         singleSelection: false,
-        id: `group__
-          ${anaysisResult.id}__
-          ${keyFigureLayer.keyFigureInfo?.keyName || keyFigureLayer.keyFigureInfo?.templateName || ""}`,
+        id: `group__${anaysisResult.id}__${
+          keyFigureLayer.keyFigureInfo?.keyName || keyFigureLayer.keyFigureInfo?.templateName || ""
+        }`,
         description: keyFigureLayer.keyFigureInfo?.description && 
           this.vueComponent.$t(keyFigureLayer.keyFigureInfo.description).toString(),
       },

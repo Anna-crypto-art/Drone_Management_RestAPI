@@ -23,7 +23,7 @@ import { GeoJSON } from "@/app/shared/components/app-geovisualization/types/laye
 
 export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q extends GeoVisualQuery> extends LayerBase implements IOrthoImageMixin {
   protected abstract readonly analysisResultMapping: AnalysisResultMappings<T>;
-  protected readonly name: string;
+  public readonly name: string;
   protected readonly description?: string;
 
   public colorScheme = KeyFigureColorScheme.TRAFFIC_LIGHT;
@@ -270,9 +270,9 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
   }
 
   public get id() {
-    return `${this.analysisResult.id}__
-      ${this.keyFigureId}__
-      ${this.keyFigureInfo.displayName || this.keyFigureInfo.keyName || this.keyFigureInfo.templateName}`;
+    return `${this.analysisResult.id}__${this.keyFigureId}__${
+      this.keyFigureInfo.displayName || this.keyFigureInfo.keyName || this.keyFigureInfo.templateName
+    }`;
   }
 
   protected get keyFigure(): KeyFigureSchema {

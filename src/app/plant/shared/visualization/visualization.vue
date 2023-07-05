@@ -119,6 +119,7 @@ import CircleStyle from "ol/style/Circle";
 import { Point } from "ol/geom";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
+import { PlantRouteQuery } from "../types";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -351,6 +352,10 @@ export default class AppVisualization
   async loadQueryPi(): Promise<boolean> {
     let piSelected = false;
 
+    const plantRouteQuery: PlantRouteQuery = this.$route.query;
+
+
+
     let selectedPIs: (string | null)[] = Array.isArray(this.$route.query.pi!) ? 
       this.$route.query.pi! : 
       [this.$route.query.pi!];
@@ -553,7 +558,7 @@ export default class AppVisualization
     await this.piLayersHierarchy!.onLayerSelected();
 
     const selectedLayers = this.piLayersHierarchy!.getSelectedLayers();
-    this.routeQueryHelper.replaceRoute({ pi: selectedLayers.map(selectedLayer => selectedLayer.keyFigureId.toString() )});
+    this.routeQueryHelper.replaceRoute({ pi_layer_name: selectedLayers.map(selectedLayer => selectedLayer.name)});
     
     this.hideToast();
   }
