@@ -266,13 +266,12 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
     this.productPackageModalLoading = true;
     
     try {
-
       if (this.currentProductPackage.id === 0) {
         await volateqApi.createProductPackage({
           name: this.currentProductPackage.name,
           technology_id: this.currentProductPackage.technology_id,
           key_figures: this.selectedKeyFigureIds!.map(kf => Number(kf)),
-          plant_status: this.selectedPlantStatusIds!.map(ps => Number(ps)),
+          plant_status: this.selectedPlantStatusIds!.map(ps => ps),
         });
         this.showSuccess(this.$t("something-created-success", { something: this.currentProductPackage!.name }).toString());
       } else {
@@ -282,7 +281,7 @@ export default class AppSettingsProductPackages extends BaseAuthComponent {
             name: this.currentProductPackage.name,
             technology_id: this.currentProductPackage.technology_id,
             key_figures: this.selectedKeyFigureIds!.map(kf => Number(kf)),
-            plant_status: this.selectedPlantStatusIds!.map(ps => Number(ps)),
+            plant_status: this.selectedPlantStatusIds!.map(ps => ps),
           }
         );
         this.showSuccess(this.$t("something-edited-successfully", { something: this.currentProductPackage!.name }).toString());
