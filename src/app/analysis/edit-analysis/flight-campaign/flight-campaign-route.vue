@@ -41,6 +41,9 @@
               <b-dropdown-item-button @click="onDownloadWPMZClick(row.item)" :disabled="!isDJIWPMZDownloadAllowed(row.item)">
                 {{ $t('download-wpml-file') }}
               </b-dropdown-item-button>
+              <b-dropdown-item-button @click="onDownloadUnleashClick(row.item)">
+                {{ $t('download-unleash-route') }}
+              </b-dropdown-item-button>
             </app-dropdown-button>
 
             
@@ -130,6 +133,15 @@ export default class AppFlightCampaignRoutes extends BaseAuthComponent {
   async onDownloadWPMZClick(flightRoute: FlightRoute) {
     if (this.flightCampaign) {
       const downloadUrl = await volateqApi.generateDownloadUrl(volateqApi.getFlightRouteDjiWpmlUrl(flightRoute.id));
+      
+      AppDownloader.download(downloadUrl)
+    }
+  }
+
+  @CatchError()
+  async onDownloadUnleashClick(flightRoute: FlightRoute) {
+    if (this.flightCampaign) {
+      const downloadUrl = await volateqApi.generateDownloadUrl(volateqApi.getFlightRouteUnleashUrl(flightRoute.id));
       
       AppDownloader.download(downloadUrl)
     }
