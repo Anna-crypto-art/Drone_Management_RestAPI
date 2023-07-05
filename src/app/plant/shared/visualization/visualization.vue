@@ -353,7 +353,7 @@ export default class AppVisualization
     let piSelected = false;
 
     const plantRouteQuery: PlantRouteQuery = this.$route.query;
-
+    
 
 
     let selectedPIs: (string | null)[] = Array.isArray(this.$route.query.pi!) ? 
