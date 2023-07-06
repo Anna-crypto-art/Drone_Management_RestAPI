@@ -114,34 +114,34 @@ export class PILayersHierarchy {
     }
   }
 
-  public async reselectAllLayers(multiSelection: boolean) {
+  public async reselectAllLayers(reload = false) {
+    console.log("reselectAllLayers: reload="+reload)
+
     const allChildLayers = this.getAllChildLayers();
 
-    const selectedKeyFigureIds = allChildLayers.filter(childLayer => childLayer.getSelected())
-    .map(childLayer => childLayer.keyFigureId);
+    const selectedLayerNames = allChildLayers.filter(childLayer => childLayer.getSelected())
+      .map(childLayer => childLayer.name);
         
     for (const childLayer of allChildLayers) {
-      childLayer.setColorScheme(multiSelection ? KeyFigureColorScheme.RAINBOW : KeyFigureColorScheme.TRAFFIC_LIGHT);
+      childLayer.setColorScheme(this.multiSelection ? KeyFigureColorScheme.RAINBOW : KeyFigureColorScheme.TRAFFIC_LIGHT);
 
-      // continue here! Find a solution to not always reload
-      childLayer.reloadLayer(); 
+      if (reload) {
+        childLayer.reloadLayer(); 
+      }
+
+      if (childLayer.geoLayerObject?.reloadLayer) {
+        console.log("reselectAllLayers: reload layer: " + childLayer.id)
+      }
+
       await childLayer.setSelected(false);
     }
 
-    const reselectOneLayerOnly = !multiSelection;
-    for (const childLayer of allChildLayers) {
-      
-      if (selectedKeyFigureIds.includes(childLayer.keyFigureId) &&
-        childLayer.analysisResult.id === this.selectedAnalysisResultId &&
-        !childLayer.invisibleAutoSelection) // layers with "invisibleAutoSelection" gets reselected automatically.
-      {
-        await childLayer.setSelected(true);
-
-        if (reselectOneLayerOnly) {
-          break;
-        }
-      }
-    }
+    this.selectLayers(
+      allChildLayers.filter(l => selectedLayerNames.includes(l.name) &&
+        l.analysisResult.id === this.selectedAnalysisResultId &&
+        !l.invisibleAutoSelection // layers with "invisibleAutoSelection" gets reselected automatically.
+      )
+    )
   }
 
   public async rerenderSelectedLayers() {
@@ -202,16 +202,44 @@ export class PILayersHierarchy {
     }
   }
 
-  public async selectLayers(layerNames: string[]) {
-    const layers = this.getAllChildLayers().filter(keyFigureLayer => 
-      keyFigureLayer.isVisible && layerNames.includes(keyFigureLayer.name) && !keyFigureLayer.getSelected())
+  public async selectLayers(layersOrLayerNames: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>[] | string[]) {
+    if (layersOrLayerNames.length === 0) {
+      return;
+    }
+
+    console.log("selectLayers:")
+    console.log(layersOrLayerNames)
+
+    const layers: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>[] = typeof layersOrLayerNames[0] === "string" ? 
+      this.getAllChildLayers().filter(keyFigureLayer => 
+        keyFigureLayer.isVisible && (layersOrLayerNames as string[]).includes(keyFigureLayer.name) && !keyFigureLayer.getSelected())
+      :
+      layersOrLayerNames as KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>[];
+
+    let parentGroupLayer: GroupLayer | undefined = undefined
     for (const layer of layers) {
+      if (this.multiSelection) {
+        layer.setSelected(true);
+      } else {
+        // Only allow to select multiple layers when they are in the same group 
+        // with singleSelection === false
 
-      // continue here... select multiple layer if singleSelection is false!!
-      this.getParentComponentLayer()
+        const currentParentGroupLayer = this.getParentGroupLayer(layer.id);
 
+        if (parentGroupLayer === undefined || (
+          currentParentGroupLayer && currentParentGroupLayer.id === parentGroupLayer!.id &&
+          !parentGroupLayer!.singleSelection)
+        ) {
+          console.log("layer gets selected")
+          if (layer.geoLayerObject?.reloadLayer) {
+            console.log("reselectAllLayers: reload layer: " + layer.id)
+          }
 
-      layer.setSelected(true)
+          layer.setSelected(true);
+
+          parentGroupLayer = currentParentGroupLayer;
+        }
+      }
     }
   }
 
@@ -229,6 +257,8 @@ export class PILayersHierarchy {
           }
         }
       }
+
+      return undefined
     }
 
     return findParentGroupLayerRec(this.parentComponentKpiLayers);
@@ -273,8 +303,6 @@ export class PILayersHierarchy {
           if (visible && this.compareAnylysisResultId) {
             visible = keyFigureLayer.hasKeyFigureForCompareAnalysisResult();
           }
-
-          console.log(`keyFigureLayer(${keyFigureLayer.id}).setVisible(${visible})`)
 
           keyFigureLayer.setVisible(visible);
 

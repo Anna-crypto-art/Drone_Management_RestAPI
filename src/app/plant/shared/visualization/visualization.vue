@@ -226,12 +226,12 @@ export default class AppVisualization
     for (const analysis of this.analyses) {
       if (analysis.analysis_result) {
         analysisResultEventService.on(analysis.analysis_result.id, AnalysisResultEvent.MODIFIED, async () => {
-          await this.piLayersHierarchy!.reselectAllLayers(this.enableMultiSelection);
+          await this.piLayersHierarchy!.reselectAllLayers(true);
         });
       }
     }
 
-    this.routeQueryHelper.queryChanged(async () => { await this.loadQueryPi(); });
+    this.routeQueryHelper.queryChanged(async () => { await this.loadLayersFromUrlQuery(); });
   }
 
   async mounted() {
@@ -250,7 +250,9 @@ export default class AppVisualization
     this.refMeasureLayers!.addAndSelectAnalysis(this.firstAnalysis?.id);
     
     const multiAnalysesSelectedBefore = !!this.piLayersHierarchy!.getCompareAnalysisResultId();
-    this.piLayersHierarchy!.setCompareAnalysisResult(null);
+    if (multiAnalysesSelectedBefore) {
+      this.piLayersHierarchy!.setCompareAnalysisResult(null);
+    }
 
     if (multiAnalysesSelectedBefore) {
       // Recover subgroup multiselection, because compare view disabled multiselection on all levels.
@@ -271,7 +273,7 @@ export default class AppVisualization
 
     if (analysisSelectionChanged || multiAnalysesSelectedBefore) {
       if (!this.firstLoad) {
-        await this.piLayersHierarchy!.reselectAllLayers(this.enableMultiSelection);
+        await this.piLayersHierarchy!.reselectAllLayers(multiAnalysesSelectedBefore);
         await this.refMeasureLayers!.reselectAllLayers();
       }
     }
@@ -295,6 +297,8 @@ export default class AppVisualization
   protected async onMultiAnalysesSelected() {
     const selectionChanged = this.piLayersHierarchy!.getSelectedAnalysisResultId() !== this.firstAnalysisResult?.id ||
       this.piLayersHierarchy!.getCompareAnalysisResultId() !== this.compareAnalysisResult?.id;
+
+    const singleAnalysesSelectedBefore = !this.piLayersHierarchy!.getCompareAnalysisResultId()
     
     this.piLayersHierarchy!.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     this.piLayersHierarchy!.setCompareAnalysisResult(this.compareAnalysisResult || null);
@@ -313,7 +317,7 @@ export default class AppVisualization
 
       await this.piLayersHierarchy!.toggleShowUndefined(false, false);
 
-      await this.piLayersHierarchy!.reselectAllLayers(false);
+      await this.piLayersHierarchy!.reselectAllLayers(singleAnalysesSelectedBefore);
 
       await this.refMeasureLayers!.reselectAllLayers();
     }
@@ -346,42 +350,23 @@ export default class AppVisualization
     await this.piLayersHierarchy!.toggleShowUndefined(this.showCouldNotBeMeasured);
     this.piLayersHierarchy!.toggleMultiSelection(this.enableMultiSelection);
 
-    return await this.loadQueryPi();
+    return await this.loadLayersFromUrlQuery();
   }
 
-  async loadQueryPi(): Promise<boolean> {
-    let piSelected = false;
-
+  async loadLayersFromUrlQuery(): Promise<boolean> {
     const plantRouteQuery: PlantRouteQuery = this.$route.query;
-    
+    if (plantRouteQuery.layer) {
+      // Wait for analysis result to be loaded
+      await this.$nextTick(); 
+      await this.$nextTick();
 
+      const layerNames = typeof plantRouteQuery.layer === "string" ? [plantRouteQuery.layer] : plantRouteQuery.layer;
+      await this.piLayersHierarchy!.selectLayers(layerNames);
 
-    let selectedPIs: (string | null)[] = Array.isArray(this.$route.query.pi!) ? 
-      this.$route.query.pi! : 
-      [this.$route.query.pi!];
-    for (const selectedPI of selectedPIs) {
-      if (selectedPI) {
-        const keyFigureId: number = parseInt(selectedPI);
-        if (!Object.values(ApiKeyFigure).includes(keyFigureId)) {
-          this.showError({ error: "PI_NOT_FOUND", message: this.$t("pi-not-found").toString() });
-        } else {
-          // Wait for analysis result to be loaded
-          await this.$nextTick(); 
-          await this.$nextTick();
-
-          await this.piLayersHierarchy!.selectKeyFigureLayer(keyFigureId);
-
-          piSelected = true;
-        }
-
-        if (this.compareAnalysisResult !== null) {
-          // do not select multiple key figures in compare view
-          break;
-        }
-      }
+      return true;
     }
 
-    return piSelected;
+    return false;
   }
 
   get hasLayers(): boolean {
@@ -558,7 +543,7 @@ export default class AppVisualization
     await this.piLayersHierarchy!.onLayerSelected();
 
     const selectedLayers = this.piLayersHierarchy!.getSelectedLayers();
-    this.routeQueryHelper.replaceRoute({ pi_layer_name: selectedLayers.map(selectedLayer => selectedLayer.name)});
+    this.routeQueryHelper.replaceRoute({ layer: selectedLayers.map(selectedLayer => selectedLayer.name)});
     
     this.hideToast();
   }
@@ -568,7 +553,7 @@ export default class AppVisualization
     appLocalStorage.setItem(STORAGE_KEY_MULTISELECTION, this.enableMultiSelection);
 
     this.piLayersHierarchy!.toggleMultiSelection(this.enableMultiSelection);
-    await this.piLayersHierarchy!.reselectAllLayers(this.enableMultiSelection);
+    await this.piLayersHierarchy!.reselectAllLayers(true);
 
     // Group Layer "performance-indicators"
     (this.layers[0] as GroupLayer).singleSelection = !this.enableMultiSelection;

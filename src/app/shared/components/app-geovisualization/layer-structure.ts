@@ -51,8 +51,6 @@ export class LayerStructure extends SequentialEventEmitter {
       await this.unselectParentLayers();
     }
 
-    console.log(`selectLayer: selected=${selected} id=${this.layerLoader?.layerType.id}`)
-
     await this.layerLoader?.setVisible(selected);
 
     this.layerLoader?.layerType.onSelected && await this.layerLoader?.layerType.onSelected(selected);
