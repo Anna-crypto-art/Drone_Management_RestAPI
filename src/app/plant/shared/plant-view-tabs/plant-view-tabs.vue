@@ -54,6 +54,7 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
   // So we avoid keeping REST-API busy for no reason.
   loadTables = false;
   loadDiagrams = false; // same for diagrams
+  loadMap = false;
 
   notMapTabLoaded = false;
   zoomToHome = false;
@@ -93,9 +94,9 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
       // Special case of openlayers: 
       // Zoom to home does not work properly if canvas has no focus...
       // So we have to call it again...
-      if (this.notMapTabLoaded && this.selectedTab === PlantViewTabs.MAP) {
-        this.zoomToHome = true;
-      }
+      // if (!this.loadMap && this.selectedTab === PlantViewTabs.MAP) {
+      //   this.zoomToHome = true;
+      // }
       
       const nextView = PlantViewTabs[this.selectedTab].toString().toLowerCase() as any;
       await this.routeQueryHelper.pushRoute({ view: nextView });
@@ -121,14 +122,14 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
   }
 
   protected async onTabsLoaded() {
-    if (this.selectedTab !== this.queryTab) {
-      this.selectedTab = this.queryTab;
-    } else {
-      await this.onSelectedTabChanged();
-    }
+    if (this.selectedTab !== this.queryTab) { // selectedTab is Map but queryTab is not map (table or diagram...)
+      this.selectedTab = this.queryTab; // triggers "onSelectedTabChanged"
+    } else { // selectedTab is Map
+      this.rerenderOLCanvas();
+      // No need to call whazzup to avoid that onAnalysisSelected (in visualization.vue) gets fired twice...
+      this.loadMap = true;  
 
-    if (this.selectedTab !== PlantViewTabs.MAP) {
-      this.notMapTabLoaded = true;
+      await this.onSelectedTabChanged();
     }
   }
 
@@ -153,11 +154,8 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
       // triggers openlayers canvas element to rerender
       window.dispatchEvent(new UIEvent("resize"));
 
-      if (this.zoomToHome) {
+      if (!this.loadMap) {
         window.dispatchEvent(new CustomEvent("app-visualization:go-home"));
-
-        this.zoomToHome = false;
-        this.notMapTabLoaded = false;
       }
     }, timeout);
   }
@@ -167,22 +165,29 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
     return Object.values(PlantViewTabs).findIndex(tabName => tabName == queryTabName) || 0;
   }
 
+  private async callWhazzup() {
+    if (this.firstAnalysisResult) {
+      // wait for tables or map component to be loaded and
+      // fire last Analysis event to load data or rerender
+      await this.$nextTick();
+
+      console.log("call whazzup")
+
+      await analysisSelectEventService.whazzup(this.plant.id);
+    }
+  }
+
   private async loadTabContent() {
     if (this.hasResults) {
-      if (this.selectedTab === PlantViewTabs.TABLE) {
-        this.loadTables = true; 
-      } else if (this.selectedTab === PlantViewTabs.DIAGRAM) {
-        this.loadDiagrams = true; 
-      }
-
-      if ([PlantViewTabs.MAP, PlantViewTabs.TABLE, PlantViewTabs.DIAGRAM].includes(this.selectedTab)) {
-        // wait for tables or map component to be loaded and
-        // fire last Analysis event to load data or rerender
-        if (this.firstAnalysisResult) {
-          await this.$nextTick();
-
-          await analysisSelectEventService.whazzup(this.plant.id);
-        }
+      if (this.selectedTab === PlantViewTabs.TABLE && !this.loadTables) {
+        await this.callWhazzup();
+        this.loadTables = true;
+      } else if (this.selectedTab === PlantViewTabs.DIAGRAM && !this.loadDiagrams) {
+        await this.callWhazzup();
+        this.loadDiagrams = true;
+      } else if (this.selectedTab === PlantViewTabs.MAP && !this.loadMap) {
+        await this.callWhazzup();
+        this.loadMap = true;
       }
     }
   }

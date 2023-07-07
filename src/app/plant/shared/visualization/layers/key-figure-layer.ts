@@ -23,8 +23,9 @@ import { GeoJSON } from "@/app/shared/components/app-geovisualization/types/laye
 
 export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q extends GeoVisualQuery> extends LayerBase implements IOrthoImageMixin {
   protected abstract readonly analysisResultMapping: AnalysisResultMappings<T>;
-  public readonly name: string;
+  protected readonly name: string;
   protected readonly description?: string;
+  public readonly noTransName: string;
 
   public colorScheme = KeyFigureColorScheme.TRAFFIC_LIGHT;
   public enableCompare = false;
@@ -50,9 +51,10 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     super(vueComponent);
 
     this.visible = false;
-    this.name = (this.keyFigureInfo.templateName ||
-      (this.keyFigureInfo.displayName && this.vueComponent.$t(this.keyFigureInfo.displayName).toString()) ||
-      (this.keyFigureInfo.keyName && this.vueComponent.$t(this.keyFigureInfo.keyName).toString()))!;
+
+    this.noTransName = this.keyFigureInfo.displayName || this.keyFigureInfo.keyName || "";
+    this.name = this.keyFigureInfo.templateName || this.vueComponent.$t(this.noTransName).toString();
+
     this.description = this.keyFigureInfo.description;
     this.zIndex = this.keyFigureInfo.zIndex || 9; // 9 - to make sure PIs overlay components, always
 
@@ -82,11 +84,11 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
   }
 
   public getLegendId(): string {
-    return `${this.analysisResult.id}__${this.keyFigureId}__${this.keyFigureInfo.displayName || this.keyFigureInfo.keyName || this.keyFigureInfo.templateName || ""}`;
+    return `${this.analysisResult.id}__${this.keyFigureId}__${this.noTransName || this.keyFigureInfo.templateName || ""}`;
   }
 
   protected getLegendName(): string {
-    return this.vueComponent.$t((this.keyFigureInfo.displayName || this.keyFigureInfo.keyName)!).toString()
+    return this.vueComponent.$t(this.noTransName).toString()
   }
 
   protected async onSelected(selected: boolean): Promise<void> {
@@ -271,7 +273,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
 
   public get id() {
     return `${this.analysisResult.id}__${this.keyFigureId}__${
-      this.keyFigureInfo.displayName || this.keyFigureInfo.keyName || this.keyFigureInfo.templateName
+      this.noTransName || this.keyFigureInfo.templateName
     }`;
   }
 
@@ -404,7 +406,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     unit: string
   ): string {
     if (!currentClass) {
-      return this.vueComponent.$t(this.keyFigureInfo.displayName!).toString();
+      return this.vueComponent.$t(this.noTransName).toString();
     }
 
     let limitRange = "";

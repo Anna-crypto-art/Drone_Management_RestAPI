@@ -17,20 +17,14 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
   async created() {
     super.created();
 
+    console.log("AnalysisSelectionBaseComponent.created")
+    console.log(this)
+
     analysisSelectEventService.on(
       this.plant.id,
       AnalysisSelectionEvent.ANALYSIS_SELECTED,
       async (selectedAnalysisId: string | undefined) => {
-        if (this.analyses) {
-          this.selectedAnalysis = this.analyses
-            .find(analysis => analysis.id === selectedAnalysisId) || null;
-    
-          if (this.selectedAnalysis) {
-            this.selectedAnalyses = null;
-          }
-        }
-    
-        await this.onAnalysisSelected();
+        await this.fireAnalysisSelected(selectedAnalysisId);
       }
     );
 
@@ -38,20 +32,42 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
       this.plant.id,
       AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED,
       async (selectedAnalysesIds: string[] | undefined) => {
-        if (!selectedAnalysesIds) {
-          this.selectedAnalyses = null;
-        } else if (this.analyses) {
-          this.selectedAnalyses = this.analyses
-            .filter(analysis => selectedAnalysesIds.includes(analysis.id));
-    
-          if (this.selectedAnalyses.length > 1) {
-            this.selectedAnalysis = null;
-          }
-        }
-    
-        await this.onMultiAnalysesSelected();
+        await this.fireMultiAnalysisSelected(selectedAnalysesIds);
       }
     );
+  }
+
+  async mounted() {
+    // continue here...
+    analysisSelectEventService.getEventEmitter(this.plant.id)
+  }
+
+  private async fireAnalysisSelected(selectedAnalysisId: string | undefined) {
+    if (this.analyses) {
+      this.selectedAnalysis = this.analyses
+        .find(analysis => analysis.id === selectedAnalysisId) || null;
+
+      if (this.selectedAnalysis) {
+        this.selectedAnalyses = null;
+      }
+    }
+
+    await this.onAnalysisSelected();
+  }
+
+  private async fireMultiAnalysisSelected(selectedAnalysesIds: string[] | undefined) {
+    if (!selectedAnalysesIds) {
+      this.selectedAnalyses = null;
+    } else if (this.analyses) {
+      this.selectedAnalyses = this.analyses
+        .filter(analysis => selectedAnalysesIds.includes(analysis.id));
+
+      if (this.selectedAnalyses.length > 1) {
+        this.selectedAnalysis = null;
+      }
+    }
+
+    await this.onMultiAnalysesSelected();
   }
 
   protected async onAnalysisSelected() { /* override me, if you need to */ }

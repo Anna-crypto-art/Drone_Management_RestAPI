@@ -7,7 +7,7 @@ export abstract class AppEventServiceBase<E extends Event, T extends IEventEmitt
 
   protected abstract createEventEmitter(): T;
 
-  protected getEventEmitter(id: Event): T {
+  public getEventEmitter(id: Event): T {
     if (!(id in this.eventEmitters)) {
       this.eventEmitters[id] = this.createEventEmitter();
     }

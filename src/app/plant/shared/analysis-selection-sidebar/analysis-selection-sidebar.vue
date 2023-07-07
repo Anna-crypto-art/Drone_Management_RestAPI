@@ -118,14 +118,8 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
       });
     }
 
-    await this.selectAnalysis();
-
     analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL, async () => {
       this.analysesTable.clearSelected();
-    });
-
-    analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.SELECT_FIRST, async () => {
-      await this.selectAnalysis(true);
     });
 
     analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.SIDEBAR_ABSOLUTE, async (absolute) => {
@@ -137,8 +131,14 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
     });
   }
 
+  async mounted() {
+    await this.selectAnalysis();
+  }
+
   @CatchError("loading")
   async onAnalysisSelected(selectedAnalyses: { id: string }[]) {
+    console.log("selection sidebar: onAnalysisSelected")
+
     if (selectedAnalyses.length > 2) {
       const newSelected = selectedAnalyses
         .find(selected => !this.lastSelectedAnalyses.find(lastSelected => lastSelected.id === selected.id))

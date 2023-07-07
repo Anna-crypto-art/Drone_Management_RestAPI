@@ -243,6 +243,10 @@ export default class AppVisualization
 
   @CatchError("loading")
   protected async onAnalysisSelected() {
+    console.log("onAnalysisSelected.... resultId: ")
+    console.log(this.piLayersHierarchy!.getSelectedAnalysisResultId())
+    console.log(this.firstAnalysisResult?.id)
+
     const analysisSelectionChanged = 
       this.piLayersHierarchy!.getSelectedAnalysisResultId() !== this.firstAnalysisResult?.id;
 
@@ -252,9 +256,7 @@ export default class AppVisualization
     const multiAnalysesSelectedBefore = !!this.piLayersHierarchy!.getCompareAnalysisResultId();
     if (multiAnalysesSelectedBefore) {
       this.piLayersHierarchy!.setCompareAnalysisResult(null);
-    }
 
-    if (multiAnalysesSelectedBefore) {
       // Recover subgroup multiselection, because compare view disabled multiselection on all levels.
       this.piLayersHierarchy!.toggleMultiSelectionDeep(true);
 
@@ -361,6 +363,10 @@ export default class AppVisualization
       await this.$nextTick();
 
       const layerNames = typeof plantRouteQuery.layer === "string" ? [plantRouteQuery.layer] : plantRouteQuery.layer;
+
+      console.log("loadLayersFromUrlQuery:")
+      console.log(layerNames)
+
       await this.piLayersHierarchy!.selectLayers(layerNames);
 
       return true;
@@ -543,7 +549,7 @@ export default class AppVisualization
     await this.piLayersHierarchy!.onLayerSelected();
 
     const selectedLayers = this.piLayersHierarchy!.getSelectedLayers();
-    this.routeQueryHelper.replaceRoute({ layer: selectedLayers.map(selectedLayer => selectedLayer.name)});
+    this.routeQueryHelper.replaceRoute({ layer: selectedLayers.map(selectedLayer => selectedLayer.noTransName)});
     
     this.hideToast();
   }

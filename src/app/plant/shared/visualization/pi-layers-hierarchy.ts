@@ -120,7 +120,7 @@ export class PILayersHierarchy {
     const allChildLayers = this.getAllChildLayers();
 
     const selectedLayerNames = allChildLayers.filter(childLayer => childLayer.getSelected())
-      .map(childLayer => childLayer.name);
+      .map(childLayer => childLayer.noTransName);
         
     for (const childLayer of allChildLayers) {
       childLayer.setColorScheme(this.multiSelection ? KeyFigureColorScheme.RAINBOW : KeyFigureColorScheme.TRAFFIC_LIGHT);
@@ -137,7 +137,7 @@ export class PILayersHierarchy {
     }
 
     this.selectLayers(
-      allChildLayers.filter(l => selectedLayerNames.includes(l.name) &&
+      allChildLayers.filter(l => selectedLayerNames.includes(l.noTransName) &&
         l.analysisResult.id === this.selectedAnalysisResultId &&
         !l.invisibleAutoSelection // layers with "invisibleAutoSelection" gets reselected automatically.
       )
@@ -212,7 +212,7 @@ export class PILayersHierarchy {
 
     const layers: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>[] = typeof layersOrLayerNames[0] === "string" ? 
       this.getAllChildLayers().filter(keyFigureLayer => 
-        keyFigureLayer.isVisible && (layersOrLayerNames as string[]).includes(keyFigureLayer.name) && !keyFigureLayer.getSelected())
+        keyFigureLayer.isVisible && (layersOrLayerNames as string[]).includes(keyFigureLayer.noTransName) && !keyFigureLayer.getSelected())
       :
       layersOrLayerNames as KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>[];
 
