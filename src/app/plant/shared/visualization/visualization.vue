@@ -235,7 +235,7 @@ export default class AppVisualization
   }
 
   async mounted() {
-    await this.$nextTick();
+    await super.mounted()
 
     // wait for DOM before render OpenLayers
     this.isMounted = true;

@@ -14,18 +14,18 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
   private selectedAnalysis: AnalysisForViewSchema | null = null;
   private selectedAnalyses: AnalysisForViewSchema[] | null = null; // compare mode
 
-  async created() {
-    super.created();
+  private id: string | undefined = undefined
 
-    console.log("AnalysisSelectionBaseComponent.created")
-    console.log(this)
+  async mounted() {
+    this.id = Math.random().toString()
 
     analysisSelectEventService.on(
       this.plant.id,
       AnalysisSelectionEvent.ANALYSIS_SELECTED,
       async (selectedAnalysisId: string | undefined) => {
         await this.fireAnalysisSelected(selectedAnalysisId);
-      }
+      },
+      this.id
     );
 
     analysisSelectEventService.on(
@@ -33,13 +33,23 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
       AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED,
       async (selectedAnalysesIds: string[] | undefined) => {
         await this.fireMultiAnalysisSelected(selectedAnalysesIds);
-      }
+      },
+      this.id
     );
+
+    const eventEmitter = analysisSelectEventService.getEventEmitter(this.plant.id)
+    if (eventEmitter.lastEvent === AnalysisSelectionEvent.ANALYSIS_SELECTED) {
+      await this.fireAnalysisSelected(eventEmitter.lastArgs);
+    } else if (eventEmitter.lastEvent === AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED) {
+      await this.fireMultiAnalysisSelected(eventEmitter.lastArgs);
+    }
   }
 
-  async mounted() {
-    // continue here...
+  unmounted() {
     analysisSelectEventService.getEventEmitter(this.plant.id)
+      .removeListenerById(AnalysisSelectionEvent.ANALYSIS_SELECTED, this.id!);
+      analysisSelectEventService.getEventEmitter(this.plant.id)
+      .removeListenerById(AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED, this.id!);
   }
 
   private async fireAnalysisSelected(selectedAnalysisId: string | undefined) {
