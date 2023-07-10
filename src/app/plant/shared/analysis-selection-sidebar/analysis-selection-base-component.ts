@@ -16,7 +16,12 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
 
   private id: string | undefined = undefined
 
+  /**
+   * Every SFC subclass has to overide mounted and call super.mounted. 
+   * Otherwise the code will not be executed
+   */
   async mounted() {
+    // We need the id to unregister the AnalysisSelection event, again
     this.id = Math.random().toString()
 
     analysisSelectEventService.on(
@@ -39,9 +44,9 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
 
     const eventEmitter = analysisSelectEventService.getEventEmitter(this.plant.id)
     if (eventEmitter.lastEvent === AnalysisSelectionEvent.ANALYSIS_SELECTED) {
-      await this.fireAnalysisSelected(eventEmitter.lastArgs);
+      await this.fireAnalysisSelected(eventEmitter.lastArgs[0]);
     } else if (eventEmitter.lastEvent === AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED) {
-      await this.fireMultiAnalysisSelected(eventEmitter.lastArgs);
+      await this.fireMultiAnalysisSelected(eventEmitter.lastArgs[0]);
     }
   }
 

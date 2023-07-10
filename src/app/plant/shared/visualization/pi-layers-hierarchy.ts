@@ -115,8 +115,6 @@ export class PILayersHierarchy {
   }
 
   public async reselectAllLayers(reload = false) {
-    console.log("reselectAllLayers: reload="+reload)
-
     const allChildLayers = this.getAllChildLayers();
 
     const selectedLayerNames = allChildLayers.filter(childLayer => childLayer.getSelected())
@@ -129,11 +127,9 @@ export class PILayersHierarchy {
         childLayer.reloadLayer(); 
       }
 
-      if (childLayer.geoLayerObject?.reloadLayer) {
-        console.log("reselectAllLayers: reload layer: " + childLayer.id)
+      if (childLayer.getSelected()) {
+        await childLayer.setSelected(false);
       }
-
-      await childLayer.setSelected(false);
     }
 
     this.selectLayers(
@@ -207,9 +203,6 @@ export class PILayersHierarchy {
       return;
     }
 
-    console.log("selectLayers:")
-    console.log(layersOrLayerNames)
-
     const layers: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>[] = typeof layersOrLayerNames[0] === "string" ? 
       this.getAllChildLayers().filter(keyFigureLayer => 
         keyFigureLayer.isVisible && (layersOrLayerNames as string[]).includes(keyFigureLayer.noTransName) && !keyFigureLayer.getSelected())
@@ -230,11 +223,6 @@ export class PILayersHierarchy {
           currentParentGroupLayer && currentParentGroupLayer.id === parentGroupLayer!.id &&
           !parentGroupLayer!.singleSelection)
         ) {
-          console.log("layer gets selected")
-          if (layer.geoLayerObject?.reloadLayer) {
-            console.log("reselectAllLayers: reload layer: " + layer.id)
-          }
-
           layer.setSelected(true);
 
           parentGroupLayer = currentParentGroupLayer;

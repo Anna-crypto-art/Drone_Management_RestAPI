@@ -241,12 +241,12 @@ export default class AppVisualization
     this.isMounted = true;
   }
 
+  unmounted() {
+    super.unmounted();
+  }
+
   @CatchError("loading")
   protected async onAnalysisSelected() {
-    console.log("onAnalysisSelected.... resultId: ")
-    console.log(this.piLayersHierarchy!.getSelectedAnalysisResultId())
-    console.log(this.firstAnalysisResult?.id)
-
     const analysisSelectionChanged = 
       this.piLayersHierarchy!.getSelectedAnalysisResultId() !== this.firstAnalysisResult?.id;
 
@@ -363,9 +363,6 @@ export default class AppVisualization
       await this.$nextTick();
 
       const layerNames = typeof plantRouteQuery.layer === "string" ? [plantRouteQuery.layer] : plantRouteQuery.layer;
-
-      console.log("loadLayersFromUrlQuery:")
-      console.log(layerNames)
 
       await this.piLayersHierarchy!.selectLayers(layerNames);
 

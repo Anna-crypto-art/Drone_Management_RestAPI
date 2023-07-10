@@ -52,6 +52,14 @@ export default class AppPlantViewPv extends AnalysisSelectionBaseComponent {
 
     this.analyses = await volateqApi.getAnalysesForView(this.plant.id);
   }
+
+  async mounted() {
+    await super.mounted();
+  }
+
+  unmounted() {
+    super.unmounted();
+  }
 }
 </script>
 

@@ -7,17 +7,13 @@
         </template>
         <slot name="visual" />
       </b-tab>
-      <b-tab v-if="hasSelectAnalysisResults">
+      <b-tab v-if="hasSelectAnalysisResults" lazy>
         <template #title><b-icon icon="table" /> <span class="pad-left">{{ $t("table") }}</span></template>
-        <div v-if="loadTables">
-          <slot name="tables" />
-        </div>
+        <slot name="tables" />
       </b-tab>
-      <b-tab v-if="hasSelectAnalysisResults">
+      <b-tab v-if="hasSelectAnalysisResults" lazy>
         <template #title><b-icon icon="bar-chart-fill" /> <span class="pad-left">{{ $t("statistics") }}</span></template>
-        <div v-if="loadDiagrams">
-          <slot name="diagram" />
-        </div>
+        <slot name="diagram" />
       </b-tab>
       <b-tab v-if="isSuperAdmin && hasSelectAnalysisResults">
         <template #title><b-icon icon="shield-shaded" /><span class="pad-left">{{ $t("admin") }}</span></template>
@@ -97,6 +93,8 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
     // So we have to make sure that zoom home events gets called, always, 
     // as long as canvas has no focus for at least 1 sec....
     if (this.selectedTab === PlantViewTabs.MAP) {
+      this.rerenderOLCanvas();
+
       this.timeoutMapLoaded = setTimeout(() => {
         if (this.selectedTab === PlantViewTabs.MAP) {
           this.mapLoaded = true;

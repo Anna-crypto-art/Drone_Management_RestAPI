@@ -137,8 +137,6 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
 
   @CatchError("loading")
   async onAnalysisSelected(selectedAnalyses: { id: string }[]) {
-    console.log("selection sidebar: onAnalysisSelected")
-
     if (selectedAnalyses.length > 2) {
       const newSelected = selectedAnalyses
         .find(selected => !this.lastSelectedAnalyses.find(lastSelected => lastSelected.id === selected.id))
@@ -214,6 +212,17 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
 
   async onCompareModeChanged() {
     this.selectMode = this.compareMode ? "multi" : "single";
+
+    // Change the selectMode triggers the table to unselect all rows
+    // That raises onAnalysisSelected with an empty array...
+    // But we would like to keep the last first row selected
+    // So we wait for the raised event and then call selectAnalysis again...
+
+    await this.$nextTick();
+    await this.$nextTick();
+    await this.$nextTick();
+    
+    await this.selectAnalysis();
   }
 
   private async selectAnalysis(selectFirst = false): Promise<void> {
@@ -233,7 +242,9 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
           if (firstTableRowIndex >= 0 && secondTableRowIndex >= 0) {
             this.compareMode = true;
             await this.onCompareModeChanged();
+
             await this.$nextTick();
+
             this.analysesTable.selectRow(firstTableRowIndex);
 
             tableRowIndex = secondTableRowIndex;
@@ -250,6 +261,7 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
       }
 
       await this.$nextTick();
+
       this.analysesTable.selectRow(tableRowIndex);
     } else {
       await this.$nextTick();
