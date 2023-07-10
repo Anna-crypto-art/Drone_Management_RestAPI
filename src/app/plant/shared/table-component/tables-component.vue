@@ -78,8 +78,12 @@ export default class AppTablesComponent extends AnalysisSelectionBaseComponent {
   activeTabLabel = "";
   readonly activeTabComponents: TableResultMappingTabComponent[] = [];
 
-  async created() {
-    await super.created();
+  async mounted() {
+    await super.mounted();
+  }
+
+  unmounted() {
+    super.unmounted();
   }
 
   protected async onAnalysisSelected() {

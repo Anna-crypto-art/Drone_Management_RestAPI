@@ -14,44 +14,75 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
   private selectedAnalysis: AnalysisForViewSchema | null = null;
   private selectedAnalyses: AnalysisForViewSchema[] | null = null; // compare mode
 
-  async created() {
-    super.created();
+  private id: string | undefined = undefined
+
+  /**
+   * Every SFC subclass has to overide mounted and call super.mounted. 
+   * Otherwise the code will not be executed
+   */
+  async mounted() {
+    // We need the id to unregister the AnalysisSelection event, again
+    this.id = Math.random().toString()
 
     analysisSelectEventService.on(
       this.plant.id,
       AnalysisSelectionEvent.ANALYSIS_SELECTED,
       async (selectedAnalysisId: string | undefined) => {
-        if (this.analyses) {
-          this.selectedAnalysis = this.analyses
-            .find(analysis => analysis.id === selectedAnalysisId) || null;
-    
-          if (this.selectedAnalysis) {
-            this.selectedAnalyses = null;
-          }
-        }
-    
-        await this.onAnalysisSelected();
-      }
+        await this.fireAnalysisSelected(selectedAnalysisId);
+      },
+      this.id
     );
 
     analysisSelectEventService.on(
       this.plant.id,
       AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED,
       async (selectedAnalysesIds: string[] | undefined) => {
-        if (!selectedAnalysesIds) {
-          this.selectedAnalyses = null;
-        } else if (this.analyses) {
-          this.selectedAnalyses = this.analyses
-            .filter(analysis => selectedAnalysesIds.includes(analysis.id));
-    
-          if (this.selectedAnalyses.length > 1) {
-            this.selectedAnalysis = null;
-          }
-        }
-    
-        await this.onMultiAnalysesSelected();
-      }
+        await this.fireMultiAnalysisSelected(selectedAnalysesIds);
+      },
+      this.id
     );
+
+    const eventEmitter = analysisSelectEventService.getEventEmitter(this.plant.id)
+    if (eventEmitter.lastEvent === AnalysisSelectionEvent.ANALYSIS_SELECTED) {
+      await this.fireAnalysisSelected(eventEmitter.lastArgs[0]);
+    } else if (eventEmitter.lastEvent === AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED) {
+      await this.fireMultiAnalysisSelected(eventEmitter.lastArgs[0]);
+    }
+  }
+
+  unmounted() {
+    analysisSelectEventService.getEventEmitter(this.plant.id)
+      .removeListenerById(AnalysisSelectionEvent.ANALYSIS_SELECTED, this.id!);
+      analysisSelectEventService.getEventEmitter(this.plant.id)
+      .removeListenerById(AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED, this.id!);
+  }
+
+  private async fireAnalysisSelected(selectedAnalysisId: string | undefined) {
+    if (this.analyses) {
+      this.selectedAnalysis = this.analyses
+        .find(analysis => analysis.id === selectedAnalysisId) || null;
+
+      if (this.selectedAnalysis) {
+        this.selectedAnalyses = null;
+      }
+    }
+
+    await this.onAnalysisSelected();
+  }
+
+  private async fireMultiAnalysisSelected(selectedAnalysesIds: string[] | undefined) {
+    if (!selectedAnalysesIds) {
+      this.selectedAnalyses = null;
+    } else if (this.analyses) {
+      this.selectedAnalyses = this.analyses
+        .filter(analysis => selectedAnalysesIds.includes(analysis.id));
+
+      if (this.selectedAnalyses.length > 1) {
+        this.selectedAnalysis = null;
+      }
+    }
+
+    await this.onMultiAnalysesSelected();
   }
 
   protected async onAnalysisSelected() { /* override me, if you need to */ }

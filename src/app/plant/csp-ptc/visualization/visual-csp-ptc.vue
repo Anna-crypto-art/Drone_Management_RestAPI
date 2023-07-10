@@ -91,8 +91,12 @@ export default class AppVisualCspPtc extends AnalysisSelectionBaseComponent {
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
 
-  async created() {
-    await super.created();
+  async mounted() {
+    await super.mounted();
+  }
+
+  unmounted() {
+    super.unmounted();
   }
 
   getTransAlignmentOffsetClassLimit(componentType: "sce" | "sca" | "hce", classLimit: 1 | 2 | 3): string {

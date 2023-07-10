@@ -1,6 +1,6 @@
 <template>
   <div class="plant-view-diagram-csp-ptc">
-    <app-diagram-overview
+    <app-diagram-overview v-if="hasResultMappings"
       :plant="plant"
       :analyses="analyses" 
       :resultMappings="resultMappings"
@@ -44,8 +44,12 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
   numberBoxes: DiagramNumberBox[] | null = null;
   tableFilter: TableFilterRequest | null = null;
 
-  async created() {
-    await super.created();
+  async mounted() {
+    await super.mounted()
+  }
+
+  unmounted() {
+    super.unmounted()
   }
 
   async onAnalysisSelected() {
@@ -54,6 +58,10 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
 
   async onMultiAnalysesSelected() {
     this.updateMappings();
+  }
+
+  get hasResultMappings(): boolean {
+    return this.resultMappings.length > 0;
   }
 
   @CatchError()

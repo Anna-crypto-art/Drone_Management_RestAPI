@@ -28,7 +28,7 @@ export const GEO_JSON_OPTIONS = { dataProjection: "EPSG:4326", featureProjection
 export abstract class LayerBase {
   private _showPCS = false;
 
-  protected geoLayerObject?: GeoJSONLayer;
+  public geoLayerObject?: GeoJSONLayer;
 
   protected abstract readonly name: string;
   protected selected = false;

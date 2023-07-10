@@ -118,14 +118,8 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
       });
     }
 
-    await this.selectAnalysis();
-
     analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL, async () => {
       this.analysesTable.clearSelected();
-    });
-
-    analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.SELECT_FIRST, async () => {
-      await this.selectAnalysis(true);
     });
 
     analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.SIDEBAR_ABSOLUTE, async (absolute) => {
@@ -135,6 +129,10 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
     this.routeQueryHelper.queryChanged(async () => {
       await this.selectAnalysis();
     });
+  }
+
+  async mounted() {
+    await this.selectAnalysis();
   }
 
   @CatchError("loading")
@@ -214,6 +212,17 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
 
   async onCompareModeChanged() {
     this.selectMode = this.compareMode ? "multi" : "single";
+
+    // Change the selectMode triggers the table to unselect all rows
+    // That raises onAnalysisSelected with an empty array...
+    // But we would like to keep the last first row selected
+    // So we wait for the raised event and then call selectAnalysis again...
+
+    await this.$nextTick();
+    await this.$nextTick();
+    await this.$nextTick();
+    
+    await this.selectAnalysis();
   }
 
   private async selectAnalysis(selectFirst = false): Promise<void> {
@@ -233,7 +242,9 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
           if (firstTableRowIndex >= 0 && secondTableRowIndex >= 0) {
             this.compareMode = true;
             await this.onCompareModeChanged();
+
             await this.$nextTick();
+
             this.analysesTable.selectRow(firstTableRowIndex);
 
             tableRowIndex = secondTableRowIndex;
@@ -250,6 +261,7 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
       }
 
       await this.$nextTick();
+
       this.analysesTable.selectRow(tableRowIndex);
     } else {
       await this.$nextTick();
