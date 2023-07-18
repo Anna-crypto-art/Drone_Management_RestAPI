@@ -15,7 +15,7 @@
             {{ row.item.startTime }}
           </template>
           <template #cell(drone)="row">
-            {{ appendDroneNameAndModelName(row.item.drone) }}
+            {{ appendDroneNameAndSerialNumber(row.item.drone) }}
           </template>
           <template #cell(plantStatus)="row">
             <span>
@@ -218,11 +218,11 @@ export default class AppFlightCampaignRoutes extends BaseAuthComponent {
     this.flightRoutesDays = flightRoutesActionDays;
   }
 
-  appendDroneNameAndModelName(drone: DroneSchema) {
+  appendDroneNameAndSerialNumber(drone: DroneSchema) {
     if (drone == undefined) {
       return ''
     }
-    return drone.custom_name + " (" + drone.drone_model.name_abbrev + ")"
+    return this.$t("drone-with-sn", {droneName: drone.custom_name, droneSerialNumber: drone.serial_number}).toString();
   }
 
   getWeekday(date: string) {
