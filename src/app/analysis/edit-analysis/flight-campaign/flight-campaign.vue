@@ -325,11 +325,13 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
     return this.$t("drone-with-sn", {droneName: drone.custom_name, droneSerialNumber: drone.serial_number}).toString();
   }
 
-  async onExportClick(item: any) {
+  async onExportClick(flightCampaignItem: any) {
+    await volateqApi.exportFlightCampaignToUnleash(flightCampaignItem.id);
+    this.showSuccess(this.$t("flight-campaign-export-unleash-success").toString())
     // TODO: get export options, e.g. Litchi and Flighthub2
 
     // show modal with export options
-    this.exportModal.show();
+    // this.exportModal.show();
   }
 
   async onExport() {
