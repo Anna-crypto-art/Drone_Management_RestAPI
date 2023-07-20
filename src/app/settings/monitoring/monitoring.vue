@@ -384,8 +384,8 @@ export default class AppSettingsMonitoring extends BaseAuthComponent {
     this.runTaskSelection = [
       { value: null, text: "" },
       {
-        text: this.$t('validate-file-completeness').toString(),
-        value: ApiTasks.validate_plant_metadata,
+        text: this.$t('download-analysis-files').toString(),
+        value: ApiTasks.download_analysis_files,
       },
       {
         text: this.$t('run-qfly-wizard').toString(),
