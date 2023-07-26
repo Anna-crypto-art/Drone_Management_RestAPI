@@ -81,6 +81,8 @@ export default class AppTableComponentFilter extends BaseAuthComponent {
 
   loading = false;
 
+  id: string | null = null;
+
   piFilterFieldValues: FilterFieldValue[] = [];
   piFilterFields: FilterField[] = [];
   compFilterFieldValues: FilterFieldValue[] = [];
@@ -123,6 +125,27 @@ export default class AppTableComponentFilter extends BaseAuthComponent {
       
       await this.applyFilterAfterCompareViewChanged();
     });
+  }
+
+  mounted() {
+    this.id = Math.random().toString();
+
+    analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED, async () => {
+      this.compareView = true;
+
+      await this.applyFilterAfterCompareViewChanged();
+    }, this.id);
+    analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.ANALYSIS_SELECTED, async () => {
+      this.compareView = false;
+      
+      await this.applyFilterAfterCompareViewChanged();
+    }, this.id);
+  }
+
+  unmounted() {
+    analysisSelectEventService.getEventEmitter(this.plant.id).removeListenerById(AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED, this.id!);
+    analysisSelectEventService.getEventEmitter(this.plant.id).removeListenerById(AnalysisSelectionEvent.ANALYSIS_SELECTED, this.id!);
+    
   }
 
   onApplyFilter() {
