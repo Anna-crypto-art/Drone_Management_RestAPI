@@ -114,38 +114,40 @@ export default class AppTableComponentFilter extends BaseAuthComponent {
           .map(code => ({ value: code, text: code }));
       }
     }));
-
-    analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED, async () => {
-      this.compareView = true;
-
-      await this.applyFilterAfterCompareViewChanged();
-    });
-    analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.ANALYSIS_SELECTED, async () => {
-      this.compareView = false;
-      
-      await this.applyFilterAfterCompareViewChanged();
-    });
   }
 
-  mounted() {
+  async mounted() {
     this.id = Math.random().toString();
 
     analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED, async () => {
-      this.compareView = true;
-
-      await this.applyFilterAfterCompareViewChanged();
+      await this.compareViewChanged(true);
     }, this.id);
     analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.ANALYSIS_SELECTED, async () => {
-      this.compareView = false;
-      
-      await this.applyFilterAfterCompareViewChanged();
+      await this.compareViewChanged(false);
     }, this.id);
+
+    const eventEmitter = analysisSelectEventService.getEventEmitter(this.plant.id)
+    if (eventEmitter.lastEvent === AnalysisSelectionEvent.ANALYSIS_SELECTED) {
+      await this.compareViewChanged(false);
+    } else if (eventEmitter.lastEvent === AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED) {
+      await this.compareViewChanged(true);
+    }
   }
 
   unmounted() {
     analysisSelectEventService.getEventEmitter(this.plant.id).removeListenerById(AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED, this.id!);
     analysisSelectEventService.getEventEmitter(this.plant.id).removeListenerById(AnalysisSelectionEvent.ANALYSIS_SELECTED, this.id!);
-    
+  }
+
+  private async compareViewChanged(compareView: boolean) {
+    this.compareView = compareView
+
+    // Wait for compareView "@Watch"-Events to refresh filter
+    await this.$nextTick();
+    await this.$nextTick();
+    await this.$nextTick();
+
+    this.onApplyFilter();
   }
 
   onApplyFilter() {
@@ -157,15 +159,6 @@ export default class AppTableComponentFilter extends BaseAuthComponent {
     this.compFilterFieldValues = [];
 
     this.$emit("filter", this.getTableFilterRequest());
-  }
-
-  private async applyFilterAfterCompareViewChanged() {
-    // Wait for compareView "@Watch"-Events to refresh filter
-    await this.$nextTick();
-    await this.$nextTick();
-    await this.$nextTick();
-
-    this.onApplyFilter();
   }
 
   private getTableFilterRequest(): TableFilterRequest | undefined {
