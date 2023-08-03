@@ -1,7 +1,15 @@
-import app.drone;
-import app.drone_brand;
+from sqlalchemy import select
+from typing import List
+from flask_drone.app import db, app 
+from flask_drone.models.drone_brand import DroneBrand
 
-from app import flask_app
 
-if __name__ == "__main__":
-     flask_app.run()
+with app.app_context():
+    drones: List[DroneBrand] = db.session.query(DroneBrand).all()
+    print(drones)
+
+with app.app_context():
+    for drone in drones:
+          print(drone.owner_name)
+
+

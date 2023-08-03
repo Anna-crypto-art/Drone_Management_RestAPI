@@ -1,9 +1,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+# importing the Book and Base classes from a file database_setup.py
 from database_setup import DroneBrand, DroneFlight, Drone, Base
 
 engine = create_engine('sqlite:///drone-collection.db')
-
+# associate engine with the metadata of the Base class
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
