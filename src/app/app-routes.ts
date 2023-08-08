@@ -9,6 +9,7 @@ import docRoutes from "@/app/doc/doc-routes";
 import AppPageNotFound from "@/app/shared/components/page-not-found/page-not-found.vue";
 import AppHome from "@/app/home.vue";
 import store from "@/app/app-state";
+import noAuthRoutes from "@/app/no-auth/no-auth-routes";
 
 Vue.use(Router);
 
@@ -34,12 +35,13 @@ const router = new Router({
     ...settingsRoutes,
     ...plantRoutes,
     ...docRoutes,
+    ...noAuthRoutes,
   ],
 });
 
 // well... I admit this naming is confusing!
 // authRoutes are necessery for the authoriation. There are not auth protected!
-const nonAuthProtectRoutes = authRoutes.map(a => a.name);
+const nonAuthProtectRoutes = [...authRoutes.map(a => a.name), ...noAuthRoutes.map(a => a.name)];
 
 router.beforeEach((to, from, next) => {
   if (!store.getters.auth.isAuthenticated) {

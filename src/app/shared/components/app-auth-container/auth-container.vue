@@ -9,7 +9,7 @@
             alt="Volateq"
             class="logo-img"
           />
-          <div class="app-auth-box">
+          <div class="app-auth-box" :class="{ 'large': size === 'large' }">
             <div v-if="title" class="app-auth-box-title">
               <h1>{{ title }}</h1>
               <div v-if="subtitle" v-html="subtitle" class="app-auth-box-subtitle grayed"></div>
@@ -40,7 +40,8 @@
 import { AppAlert } from "@/app/shared/services/app-alert/app-alert";
 import Vue from "vue";
 import { Component, Prop } from "vue-property-decorator";
-import authContainerEventBus from "@/app/auth/shared/components/auth-container-event-bus";
+import { AuthContainerSize } from "@/app/shared/components/app-auth-container/types";
+import authContainerEventBus from "@/app/shared/components/app-auth-container/auth-container-event-bus";
 
 @Component({
   name: "app-auth-container",
@@ -49,6 +50,7 @@ export default class AppAuthContainer extends Vue {
   @Prop({ default: "" }) title!: string;
   @Prop({ default: "" }) subtitle!: string;
   @Prop({ default: "" }) infoAlert!: string;
+  @Prop({ default: "small" }) size!: AuthContainerSize;
 
   alert: AppAlert = { msg: "", variant: "success" };
   showAlert = false;
@@ -82,6 +84,10 @@ export default class AppAuthContainer extends Vue {
     position: relative;
     z-index: 1;
     width: 400px;
+
+    &.large {
+      width: 600px;
+    }
 
     &-title {
       margin-bottom: 2em;

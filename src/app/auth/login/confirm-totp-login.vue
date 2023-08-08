@@ -12,7 +12,7 @@
 <script lang="ts">
 import { Component } from "vue-property-decorator";
 
-import AppAuthContainer from "@/app/auth/shared/components/auth-container.vue";
+import AppAuthContainer from "@/app/shared/components/app-auth-container/auth-container.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppSecurityCode from "@/app/shared/components/app-security-code/app-security-code.vue";
 import { ConfirmLoginComponent } from "./confirm-login-component";
