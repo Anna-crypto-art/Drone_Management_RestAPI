@@ -1,5 +1,6 @@
 <template>
   <app-content :title="$t('documentation')">
+    <span v-html="$t('doc-explanation', {knowledgeHub: knowledgeHubURL})"></span>
     <div class="app-doc-files-table-toolbar" v-if="isSuperAdmin">
       <app-button variant="primary" @click="onCreateDocFileClick" :superAdminProtected="true">
         {{ $t("upload-new-doc-file") }}
@@ -107,11 +108,13 @@ import { AppTableColumns } from "../shared/components/app-table/types";
     AppTable,
   },
 })
+
 export default class AppDocFiles extends BaseAuthComponent {
   columns: AppTableColumns = [];
   rows: DocFileItem[] = [];
 
   loading = false;
+  knowledgeHubURL = "https://volateq.atlassian.net/wiki/spaces/VKB/overview";
 
   @Ref() appDocFileModal!: IAppModalForm;
   docFileModalLoading = false;
