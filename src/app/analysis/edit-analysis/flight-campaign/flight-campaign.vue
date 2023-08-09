@@ -20,7 +20,7 @@
           </span>
         </template>
         <template #cell(drone)="row">
-          {{ appendDroneNameAndModelName(row.item.drone) }}
+          {{ appendDroneNameAndSerialNumber(row.item.drone) }}
         </template>
         <template #cell(plant_status)="row">
           {{ row.item.plant_status.map(plant_status => plant_status.name).join(", ") }}
@@ -214,7 +214,7 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
   async created() {
     this.droneSelection = (await volateqApi.getAvailableDronesForAnalysis(this.analysis.id)).map(drone => ({
       value: drone.id.toString(),
-      text: this.appendDroneNameAndModelName(drone)
+      text: this.appendDroneNameAndSerialNumber(drone)
     }));
 
     await this.updateFlightCampaigns();
@@ -321,8 +321,8 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
     
     await this.updateFlightCampaigns();
   }
-  private appendDroneNameAndModelName(drone: DroneSchema) {
-    return drone.custom_name + " (" + drone.drone_model.name_abbrev + ")"
+  private appendDroneNameAndSerialNumber(drone: DroneSchema) {
+    return this.$t("drone-with-sn", {droneName: drone.custom_name, droneSerialNumber: drone.serial_number}).toString();
   }
 
   async onExportClick(item: any) {

@@ -279,10 +279,10 @@ export default class AppEditAnalysis extends BaseAuthComponent {
       this.selectedDroneId = this.selectedDrone!.id;
     }
     this.droneOptionsRaw = (await volateqApi.getAvailableDronesForAnalysis(this.analysis!.id))
-      .map(drone => ({ value: drone.id, text: drone.custom_name + ' (' + drone.drone_model.name_abbrev + ')' }));
+      .map(drone => ({ value: drone.id, text: this.$t("drone-with-sn", {droneName: drone.custom_name, droneSerialNumber: drone.serial_number}).toString() }));
 
     if (this.isSelectedDroneUnavailable) {
-      this.droneOptions = [...this.droneOptionsRaw, {value: this.selectedDrone.id, text: this.selectedDrone.custom_name + ' (' + this.selectedDrone.drone_model.name_abbrev + ')'}]
+      this.droneOptions = [...this.droneOptionsRaw, {value: this.selectedDrone.id, text: this.$t("drone-with-sn", {droneName: this.selectedDrone.custom_name, droneSerialNumber: this.selectedDrone.serial_number}).toString()}]
     } else {
       this.droneOptions = this.droneOptionsRaw;
     }

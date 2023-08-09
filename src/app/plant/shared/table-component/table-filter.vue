@@ -60,11 +60,9 @@ import { apiComponentNames } from "@/app/shared/services/volateq-api/api-compone
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { TableFilterRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { TableResultMappingComponent } from "./types";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
-import { analysisSelectEventService } from "../analysis-selection-sidebar/analysis-selection-service";
-import { AnalysisSelectionEvent } from "../analysis-selection-sidebar/types";
+import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
 
 @Component({
   name: "app-table-component-filter",
@@ -74,10 +72,15 @@ import { AnalysisSelectionEvent } from "../analysis-selection-sidebar/types";
     AppFilterFields,
   },
 })
-export default class AppTableComponentFilter extends BaseAuthComponent {
+export default class AppTableComponentFilter extends AnalysisSelectionBaseComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) analysisResult!: AnalysisResultDetailedSchema;
   @Prop({ required: true }) activeComponent!: TableResultMappingComponent;
+
+  // Base class AnalysisSelectionBaseComponent requires to have an "analyses" property. 
+  // But we don't have them. Fortunatly they are nullable and the events 
+  // ("onAnalysisSelected" and "onMultiAnalysesSelected") get fired anyway :)
+  analyses = null;
 
   loading = false;
 
@@ -112,17 +115,35 @@ export default class AppTableComponentFilter extends BaseAuthComponent {
           .map(code => ({ value: code, text: code }));
       }
     }));
+  }
 
-    analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED, async () => {
-      this.compareView = true;
+  async mounted() {
+    await super.mounted();
+  }
 
-      await this.applyFilterAfterCompareViewChanged();
-    });
-    analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.ANALYSIS_SELECTED, async () => {
-      this.compareView = false;
-      
-      await this.applyFilterAfterCompareViewChanged();
-    });
+  unmounted() {
+    super.unmounted();
+  }
+
+  protected async onAnalysisSelected() {
+    await this.compareViewChanged(false);
+  }
+
+  protected async onMultiAnalysesSelected() {
+    await this.compareViewChanged(true);
+  }
+
+  private async compareViewChanged(compareView: boolean) {
+    if (this.compareView != compareView) {
+      this.compareView = compareView
+  
+      // Wait for compareView "@Watch"-Events to refresh filter
+      await this.$nextTick();
+      await this.$nextTick();
+      await this.$nextTick();
+  
+      this.onApplyFilter();
+    }
   }
 
   onApplyFilter() {
@@ -134,15 +155,6 @@ export default class AppTableComponentFilter extends BaseAuthComponent {
     this.compFilterFieldValues = [];
 
     this.$emit("filter", this.getTableFilterRequest());
-  }
-
-  private async applyFilterAfterCompareViewChanged() {
-    // Wait for compareView "@Watch"-Events to refresh filter
-    await this.$nextTick();
-    await this.$nextTick();
-    await this.$nextTick();
-
-    this.onApplyFilter();
   }
 
   private getTableFilterRequest(): TableFilterRequest | undefined {

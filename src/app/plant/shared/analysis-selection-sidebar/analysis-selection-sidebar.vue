@@ -118,14 +118,8 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
       });
     }
 
-    await this.selectAnalysis();
-
     analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL, async () => {
       this.analysesTable.clearSelected();
-    });
-
-    analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.SELECT_FIRST, async () => {
-      await this.selectAnalysis(true);
     });
 
     analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.SIDEBAR_ABSOLUTE, async (absolute) => {
@@ -133,13 +127,20 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
     });
 
     this.routeQueryHelper.queryChanged(async () => {
-      await this.selectAnalysis();
+      await this.selectAnalysisByQueryRoute();
     });
+  }
+
+  async mounted() {
+    await this.selectAnalysisByQueryRoute();
   }
 
   @CatchError("loading")
   async onAnalysisSelected(selectedAnalyses: { id: string }[]) {
-    if (selectedAnalyses.length > 2) {
+    if (selectedAnalyses.length > 2) { 
+      // Too many analyses have been selected
+      // Unselect the last added analysis and ignore the evil user habit
+
       const newSelected = selectedAnalyses
         .find(selected => !this.lastSelectedAnalyses.find(lastSelected => lastSelected.id === selected.id))
       
@@ -150,15 +151,44 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
       return;
     }
 
-    const compareViewFinished = !this.compareMode && this.lastSelectedAnalyses.length === 2;
-    if (compareViewFinished && selectedAnalyses.length === 0) {
-      selectedAnalyses = [this.lastSelectedAnalyses[0]];
+    // Change the selectMode triggers the table to unselect all rows.. 
+    // and so we get an empty selection here... 
+    // At least this helps us to find out and handle the special cases:
+    // 1. Compare view has been finished
+    // 2. Compare view has been started
+
+    const compareViewFinished = !this.compareMode && 
+      (this.lastSelectedAnalyses.length === 2 || selectedAnalyses.length === 0);
+
+    const compareViewStarted = this.compareMode && selectedAnalyses.length === 0 &&
+      this.lastSelectedAnalyses.length < 2;
+
+    if (compareViewFinished || compareViewStarted) {
+      // 1. Compare view has been finished: Let's select the last first analysis again
+      //    to avoid to left the user with no selected analysis
+      // or 
+      // 2. Compare view has been started: Let's select the last selected analysis
+      //    so the user doesn't have to select the already selected analysis again...
+
+      const lastFirstSelectedAnalysis = this.lastSelectedAnalyses.length > 0 ?
+        this.lastSelectedAnalyses[0] : undefined;
+
+      if (lastFirstSelectedAnalysis) {
+        this.lastSelectedAnalyses = [lastFirstSelectedAnalysis];
+      }
+
+      await this.routeQueryHelper.replaceRoute({ result: lastFirstSelectedAnalysis?.id });
+      await this.selectAnalysisByQueryRoute();
+
+      return; // Bye. "this.selectAnalysisByQueryRoute()" reraises "onAnalysisSelected" again!
     }
 
     this.lastSelectedAnalyses = selectedAnalyses;
 
     if (this.compareMode) {
       if (selectedAnalyses.length > 0) {
+        // If the user selects an analysis without results,
+        // we need to unselect that analysis again and ignore the users bad habit...
         const selectedAnalysesWithoutResults = this.analyses.filter(analysis => 
           selectedAnalyses.find(selectedAnalysis => selectedAnalysis.id === analysis.id) && !analysis.analysis_result);
         
@@ -187,18 +217,9 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
       let selectedAnalysisId: string | undefined = undefined
       if (selectedAnalyses && selectedAnalyses.length > 0) {
         selectedAnalysisId = selectedAnalyses[0].id;
-      } else if (compareViewFinished) {
-        selectedAnalysisId = this.lastSelectedAnalyses[0].id;
       }
 
       await this.routeQueryHelper.replaceRoute({ result: selectedAnalysisId });
-
-      if (compareViewFinished) {
-        // Programmatically select the last newer analysis, if the compare view has been finished by the user
-        this.selectAnalysis();
-        // "selectAnalysis()" reraises onAnalysisSelected. Leave the function here to avoid double emitting.
-        return;
-      }
 
       await analysisSelectEventService.emit(
         this.plant.id,
@@ -216,12 +237,12 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
     this.selectMode = this.compareMode ? "multi" : "single";
   }
 
-  private async selectAnalysis(selectFirst = false): Promise<void> {
+  private async selectAnalysisByQueryRoute(): Promise<void> {
     if (this.analyses.length > 0) {
       let tableRowIndex = 0;
       const analysisId = this.$route.query.result;
 
-      if (analysisId && !selectFirst) {
+      if (analysisId) {
         if (typeof analysisId === "string") {
           tableRowIndex = this.analyses.findIndex(analysis => analysis.id === analysisId);
         } else if (Array.isArray(analysisId) && analysisId.length === 2) {
@@ -233,13 +254,15 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
           if (firstTableRowIndex >= 0 && secondTableRowIndex >= 0) {
             this.compareMode = true;
             await this.onCompareModeChanged();
-            await this.$nextTick();
+
+            await this.$nextTick(); // Wait for app-table component selectMode change
+
             this.analysesTable.selectRow(firstTableRowIndex);
 
             tableRowIndex = secondTableRowIndex;
           }
         }        
-      } else if (!analysisId && !selectFirst) {
+      } else {
         // Select an analysis with results raither then an analysis only with reference measurements
         for (let i = 0; i < this.analyses.length; i++) {
           if (this.analyses[i].analysis_result) {
@@ -250,6 +273,7 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
       }
 
       await this.$nextTick();
+
       this.analysesTable.selectRow(tableRowIndex);
     } else {
       await this.$nextTick();

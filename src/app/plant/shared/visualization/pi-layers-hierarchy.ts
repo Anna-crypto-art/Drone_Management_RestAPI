@@ -114,30 +114,30 @@ export class PILayersHierarchy {
     }
   }
 
-  public async reselectAllLayers(multiSelection: boolean) {
+  public async reselectAllLayers(reload = false) {
     const allChildLayers = this.getAllChildLayers();
 
-    const selectedChildLayerIds = allChildLayers.filter(childLayer => childLayer.getSelected())
-      .map(childLayer => childLayer.id);
+    const selectedLayerNames = allChildLayers.filter(childLayer => childLayer.getSelected())
+      .map(childLayer => childLayer.noTransName);
         
     for (const childLayer of allChildLayers) {
-      childLayer.setColorScheme(multiSelection ? KeyFigureColorScheme.RAINBOW : KeyFigureColorScheme.TRAFFIC_LIGHT);
-      childLayer.reloadLayer();
-      await childLayer.setSelected(false);
-    }
+      childLayer.setColorScheme(this.multiSelection ? KeyFigureColorScheme.RAINBOW : KeyFigureColorScheme.TRAFFIC_LIGHT);
 
-    const reselectOneLayerOnly = !multiSelection;
-    for (const childLayer of allChildLayers) {
-      // layers with "invisibleAutoSelection" gets reselected automatically.
-      if (selectedChildLayerIds.includes(childLayer.id) && !childLayer.invisibleAutoSelection)
-      {
-        await childLayer.setSelected(true);
+      if (reload) {
+        childLayer.reloadLayer(); 
+      }
 
-        if (reselectOneLayerOnly) {
-          break;
-        }
+      if (childLayer.getSelected()) {
+        await childLayer.setSelected(false);
       }
     }
+
+    this.selectLayers(
+      allChildLayers.filter(l => selectedLayerNames.includes(l.noTransName) &&
+        l.analysisResult.id === this.selectedAnalysisResultId &&
+        !l.invisibleAutoSelection // layers with "invisibleAutoSelection" gets reselected automatically.
+      )
+    )
   }
 
   public async rerenderSelectedLayers() {
@@ -196,6 +196,60 @@ export class PILayersHierarchy {
     if (keyFigureLayer && !keyFigureLayer.getSelected()) {
       await keyFigureLayer.setSelected(true);
     }
+  }
+
+  public async selectLayers(layersOrLayerNames: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>[] | string[]) {
+    if (layersOrLayerNames.length === 0) {
+      return;
+    }
+
+    const layers: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>[] = typeof layersOrLayerNames[0] === "string" ? 
+      this.getAllChildLayers().filter(keyFigureLayer => 
+        keyFigureLayer.isVisible && (layersOrLayerNames as string[]).includes(keyFigureLayer.noTransName) && !keyFigureLayer.getSelected())
+      :
+      layersOrLayerNames as KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>[];
+
+    let parentGroupLayer: GroupLayer | undefined = undefined
+    for (const layer of layers) {
+      if (this.multiSelection) {
+        layer.setSelected(true);
+      } else {
+        // Only allow to select multiple layers when they are in the same group 
+        // with singleSelection === false
+
+        const currentParentGroupLayer = this.getParentGroupLayer(layer.id);
+
+        if (parentGroupLayer === undefined || (
+          currentParentGroupLayer && currentParentGroupLayer.id === parentGroupLayer!.id &&
+          !parentGroupLayer!.singleSelection)
+        ) {
+          layer.setSelected(true);
+
+          parentGroupLayer = currentParentGroupLayer;
+        }
+      }
+    }
+  }
+
+  private getParentGroupLayer(childLayerId: string): GroupLayer | undefined {
+    function findParentGroupLayerRec(groupKpiLayers: GroupKPILayer[]): GroupLayer | undefined {
+      for (const parentLayer of groupKpiLayers) {
+        if (parentLayer.keyFigureLayers.find(l => l.id == childLayerId)) {
+          return parentLayer.groupLayer;
+        }
+
+        if (parentLayer.subGroupLayers) {
+          const groupLayer = findParentGroupLayerRec(parentLayer.subGroupLayers)
+          if (groupLayer) {
+            return groupLayer;
+          }
+        }
+      }
+
+      return undefined
+    }
+
+    return findParentGroupLayerRec(this.parentComponentKpiLayers);
   }
 
   private updateGroupedKPILayers() {
@@ -370,9 +424,9 @@ export class PILayersHierarchy {
         childLayers: [],
         visible: false,
         singleSelection: false,
-        id: `group__
-          ${anaysisResult.id}__
-          ${keyFigureLayer.keyFigureInfo?.keyName || keyFigureLayer.keyFigureInfo?.templateName || ""}`,
+        id: `group__${anaysisResult.id}__${
+          keyFigureLayer.keyFigureInfo?.keyName || keyFigureLayer.keyFigureInfo?.templateName || ""
+        }`,
         description: keyFigureLayer.keyFigureInfo?.description && 
           this.vueComponent.$t(keyFigureLayer.keyFigureInfo.description).toString(),
       },

@@ -7,17 +7,13 @@
         </template>
         <slot name="visual" />
       </b-tab>
-      <b-tab v-if="hasSelectAnalysisResults">
+      <b-tab v-if="hasSelectAnalysisResults" lazy>
         <template #title><b-icon icon="table" /> <span class="pad-left">{{ $t("table") }}</span></template>
-        <div v-if="loadTables">
-          <slot name="tables" />
-        </div>
+        <slot name="tables" />
       </b-tab>
-      <b-tab v-if="hasSelectAnalysisResults">
+      <b-tab v-if="hasSelectAnalysisResults" lazy>
         <template #title><b-icon icon="bar-chart-fill" /> <span class="pad-left">{{ $t("statistics") }}</span></template>
-        <div v-if="loadDiagrams">
-          <slot name="diagram" />
-        </div>
+        <slot name="diagram" />
       </b-tab>
       <b-tab v-if="isSuperAdmin && hasSelectAnalysisResults">
         <template #title><b-icon icon="shield-shaded" /><span class="pad-left">{{ $t("admin") }}</span></template>
@@ -46,14 +42,13 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
 
-  selectedTab = 0;
+  selectedTab = PlantViewTabs.MAP;
   tabsLoaded = 0;
   allTabsLoaded = false;
 
-  // Load table data if user switches to table view, only
-  // So we avoid keeping REST-API busy for no reason.
-  loadTables = false;
-  loadDiagrams = false; // same for diagrams
+  // Special case of openlayers...
+  mapLoaded = false;
+  timeoutMapLoaded: any | undefined = undefined;
 
   notMapTabLoaded = false;
   zoomToHome = false;
@@ -84,26 +79,41 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
     this.isMobileListener(this.isMobileQuery);
   }
 
+  async mounted() {
+    await super.mounted();
+  }
+
   @Watch("selectedTab") async onSelectedTabChanged() {
     if (!this.allTabsLoaded) {
       return;
     }
 
-    if (this.selectedTab !== this.queryTab) {
-      // Special case of openlayers: 
-      // Zoom to home does not work properly if canvas has no focus...
-      // So we have to call it again...
-      if (this.notMapTabLoaded && this.selectedTab === PlantViewTabs.MAP) {
-        this.zoomToHome = true;
-      }
-      
+    // Special case of openlayers: 
+    // Zoom to home does not work properly if canvas has no focus for about 1 sec
+    // So we have to make sure that zoom home events gets called, always, 
+    // as long as canvas has no focus for at least 1 sec....
+    if (this.selectedTab === PlantViewTabs.MAP) {
+      this.rerenderOLCanvas();
+
+      this.timeoutMapLoaded = setTimeout(() => {
+        if (this.selectedTab === PlantViewTabs.MAP) {
+          this.mapLoaded = true;
+        }
+        this.timeoutMapLoaded = undefined;
+      }, 1000);
+    } else if (this.timeoutMapLoaded !== undefined) {
+      clearTimeout(this.timeoutMapLoaded);
+      this.timeoutMapLoaded = undefined;
+    }
+    
+
+    if (this.selectedTab !== this.queryTab) { // Tab changed by user
+      // Push a new query route to the browser history
       const nextView = PlantViewTabs[this.selectedTab].toString().toLowerCase() as any;
       await this.routeQueryHelper.pushRoute({ view: nextView });
     }
 
     await this.updateLeftSidebarAbsolute();
-
-    await this.loadTabContent();
   }
 
   onTabsChanged() {
@@ -121,14 +131,10 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
   }
 
   protected async onTabsLoaded() {
-    if (this.selectedTab !== this.queryTab) {
-      this.selectedTab = this.queryTab;
-    } else {
+    if (this.selectedTab !== this.queryTab) { // selectedTab is Map but queryTab is not map (table or diagram...)
+      this.selectedTab = this.queryTab; // triggers "onSelectedTabChanged"
+    } else { // selectedTab is Map
       await this.onSelectedTabChanged();
-    }
-
-    if (this.selectedTab !== PlantViewTabs.MAP) {
-      this.notMapTabLoaded = true;
     }
   }
 
@@ -153,11 +159,8 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
       // triggers openlayers canvas element to rerender
       window.dispatchEvent(new UIEvent("resize"));
 
-      if (this.zoomToHome) {
+      if (!this.mapLoaded) {
         window.dispatchEvent(new CustomEvent("app-visualization:go-home"));
-
-        this.zoomToHome = false;
-        this.notMapTabLoaded = false;
       }
     }, timeout);
   }
@@ -167,27 +170,9 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
     return Object.values(PlantViewTabs).findIndex(tabName => tabName == queryTabName) || 0;
   }
 
-  private async loadTabContent() {
-    if (this.hasResults) {
-      if (this.selectedTab === PlantViewTabs.TABLE) {
-        this.loadTables = true; 
-      } else if (this.selectedTab === PlantViewTabs.DIAGRAM) {
-        this.loadDiagrams = true; 
-      }
-
-      if ([PlantViewTabs.MAP, PlantViewTabs.TABLE, PlantViewTabs.DIAGRAM].includes(this.selectedTab)) {
-        // wait for tables or map component to be loaded and
-        // fire last Analysis event to load data or rerender
-        if (this.firstAnalysisResult) {
-          await this.$nextTick();
-
-          await analysisSelectEventService.whazzup(this.plant.id);
-        }
-      }
-    }
-  }
-
   unmounted() {
+    super.unmounted();
+
     this.isMobileQuery.removeEventListener("change", this.isMobileListener);
   }
 

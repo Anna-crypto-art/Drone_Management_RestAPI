@@ -20,8 +20,8 @@ class AnalysisSelectionEventEmitter extends SequentialEventEmitter {
     return await super.emit(event, ...args);
   }
   
-  on(event: AnalysisSelectionEvent, func: EventCallbackFunction) {
-    super.on(event, func);
+  on(event: AnalysisSelectionEvent, func: EventCallbackFunction, id?: string) {
+    super.on(event, func, id);
   }
 
   async reemit() {
@@ -36,23 +36,12 @@ class AnalysisSelectionEventService extends AppEventServiceBase<AnalysisSelectio
     return new AnalysisSelectionEventEmitter();
   }
 
-  public on(plantId: string, event: AnalysisSelectionEvent, func: EventCallbackFunction): void {
-    super.on(plantId, event, func);
+  public on(plantId: string, event: AnalysisSelectionEvent, func: EventCallbackFunction, id?: string): void {
+    this.getEventEmitter(plantId).on(event, func, id)
   }
 
   public async emit(plantId: string, event: AnalysisSelectionEvent, ...args: any[]): Promise<boolean> {
     return await this.getEventEmitter(plantId).emit(event, ...args);
-  }
-
-  /**
-   * Do you know this kind of person, that joins a meeting too late and has no idea what is going on?
-   * So the person asks: "Whazzzzuuuup!?" 
-   * 
-   * Re-emits last emitted event for latecomers
-   * @param plantId 
-   */
-  public async whazzup(plantId: string) {
-    await this.getEventEmitter(plantId).reemit();
   }
 }
 

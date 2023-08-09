@@ -104,7 +104,7 @@
           <app-datepicker v-model="currentOrder.endDate" required />
         </b-form-group>
       </div>
-    </app-modal-form>    
+    </app-modal-form>
     <app-modal-form
       id="edit-order-pp-key-figures-disabled"
       ref="orderPPKFDisabledModal"
@@ -259,6 +259,11 @@ export default class AppSettingsOrders extends BaseAuthComponent {
       productPackages: [],
       plantId: this.selectedPlantId,
       customerId: this.selectedPlantId && this.selectedCustomerId,
+    }
+
+    this.updateCreateOrderCustomerOptions();
+    if (!this.selectedCustomerId && this.createOrderCustomerOptions.length === 1) {
+      this.currentOrder.customerId = this.createOrderCustomerOptions[0].value;
     }
 
     this.orderModalTitle = this.$t("create-order").toString();

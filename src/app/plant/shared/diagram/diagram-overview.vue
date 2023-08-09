@@ -76,8 +76,12 @@ export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
   loading = false;
   viewedNumberBox: DiagramNumberBox | null = null;
 
-  async created(): Promise<void> {
-    await super.created();
+  async mounted() {
+    await super.mounted();
+  }
+
+  unmounted() {
+    super.unmounted();
   }
 
   onShowHistoryButtonClick(numberBoxId: string) {
