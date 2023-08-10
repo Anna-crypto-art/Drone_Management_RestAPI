@@ -55,36 +55,31 @@ export default class AppVolaflyDownload extends BaseComponent {
 
 <style lang="scss">
 
-.app-auth-container {
-  .app-auth-box {
-    position: relative;
-    text-align: center;
+.app-volafly-download {
+  .buttons {
+    display: flex;
+    justify-content: center;
   }
-}
 
-.buttons {
-  display: flex;
-  justify-content: center;
-}
+  .app-button {
+    margin: 10px;
+  }
 
-.app-button {
-  margin: 10px;
-}
+  .guide {
+    text-align: left;
+    display: inline-flex;
+    flex-direction: column;
+    margin: auto;
+  }
 
-.guide {
-  text-align: left;
-  display: inline-flex;
-  flex-direction: column;
-  margin: auto;
-}
-
-.button-expl {
-  text-align: left;
-  color: grey;
-  font-size: 9pt;
-  width: 160px;
-  display: inline-flex;
-  margin: auto;  
+  .button-expl {
+    text-align: left;
+    color: grey;
+    font-size: 9pt;
+    width: 160px;
+    display: inline-flex;
+    margin: auto;  
+  }
 }
 </style>
 
