@@ -394,8 +394,13 @@ export class VolateqAPI extends HttpClientBase {
     return analysisResults;
   }
 
-  public importFieldgeometry(file: File, plantId: string, clearBefore: boolean): Promise<TaskSchema> {
-    return this.postForm(`/auth/fieldgeometry/${plantId}?clear_before=${clearBefore}`, { file });
+  public importFieldgeometry(
+    file: File, 
+    plantId: string, 
+    clearBefore: boolean,
+    onUploadProgress?: (progressEvent: ProgressEvent) => void,
+  ): Promise<TaskSchema> {
+    return this.postForm(`/auth/fieldgeometry/${plantId}?clear_before=${clearBefore}`, { file }, onUploadProgress);
   }
 
   public waitForTask(
