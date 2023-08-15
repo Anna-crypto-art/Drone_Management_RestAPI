@@ -31,11 +31,6 @@
       <b-alert :show="!hasStateCompleteVerified" variant="info">
         {{ $t("import-result-files-not-allowed_descr") }}
       </b-alert>
-      <b-alert :show="log" variant="info">
-        {{ "buttonDisabled is : "+this.buttonDisabled }}<br>
-        {{ "hasStateCompleteVerified is: "+this.hasStateCompleteVerified }}<br>
-        {{ "isAnalysisResultReleased is: "+this.isAnalysisResultReleased }}
-      </b-alert>
       <app-button type="submit" :loading="loading" :disabled="buttonDisabled">{{ $t("apply") }}</app-button>
     </b-form>
   </app-box>
@@ -119,10 +114,6 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
 
   get buttonDisabled(): boolean {
     return (!(this.hasStateCompleteVerified && !this.isAnalysisResultReleased)) || false;
-  }
-
-  get log(): boolean {
-    return true;
   }
 
   get hasStateCompleteVerified(): boolean {
