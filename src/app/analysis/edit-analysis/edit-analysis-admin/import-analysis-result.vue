@@ -28,10 +28,15 @@
       <b-form-group :label="$t('select-result-image-files-zip')">
         <app-simple-file-upload v-model="imageFilesZip" :uploadProgress="uploadProgress" accept=".zip" />
       </b-form-group>
-      <b-alert :show="!importResultsAllowed" variant="info">
+      <b-alert :show="!hasStateCompleteVerified" variant="info">
         {{ $t("import-result-files-not-allowed_descr") }}
       </b-alert>
-      <app-button type="submit" :loading="loading" :disabled="!importResultsAllowed" >{{ $t("apply") }}</app-button>
+      <b-alert :show="log" variant="info">
+        {{ "buttonDisabled is : "+this.buttonDisabled }}<br>
+        {{ "hasStateCompleteVerified is: "+this.hasStateCompleteVerified }}<br>
+        {{ "isAnalysisResultReleased is: "+this.isAnalysisResultReleased }}
+      </b-alert>
+      <app-button type="submit" :loading="loading" :disabled="buttonDisabled">{{ $t("apply") }}</app-button>
     </b-form>
   </app-box>
 </template>
@@ -112,12 +117,20 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
     }
   }
 
-  get importResultsAllowed(): boolean {
+  get buttonDisabled(): boolean {
+    return (!(this.hasStateCompleteVerified && !this.isAnalysisResultReleased)) || false;
+  }
+
+  get log(): boolean {
+    return true;
+  }
+
+  get hasStateCompleteVerified(): boolean {
     return this.analysis.current_state.state.id >= ApiStates.DATA_COMPLETE_VERIFIED;
   }
 
   get isAnalysisResultReleased(): boolean {
-    return this.analysis.analysis_result?.released || false
+    return this.analysis.analysis_result?.released || false;
   }
 
   private async setManageImportFiles() {

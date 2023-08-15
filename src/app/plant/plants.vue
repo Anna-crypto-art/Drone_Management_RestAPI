@@ -118,7 +118,7 @@
         </b-form-checkbox>
       </b-form-group>
       <b-form-group :label="$t('select-dt-json-file')">
-          <app-simple-file-upload v-model="file" :uploadProgress="uploadProgress" accept=".json" />
+        <app-simple-file-upload v-model="managePlantModel.file" :uploadProgress="uploadProgress" accept=".json" />
       </b-form-group>
     </app-modal-form>
 
@@ -223,8 +223,6 @@ export default class AppPlants extends BaseAuthComponent {
   @Ref() managePlantModal!: IAppModalForm;
   plantModalLoading = false;
 
-  file: File | null = null;
-
   columns: AppTableColumns | null = null;
   plants: PlantItem[] | null = null;
 
@@ -301,8 +299,8 @@ export default class AppPlants extends BaseAuthComponent {
       this.managePlantModel.plant!.id,
       this.managePlantModel.clearBefore,
       (progressEvent) => {
-              this.uploadProgress = { total: progressEvent.total, loaded: progressEvent.loaded };
-            }
+        this.uploadProgress = { total: progressEvent.total, loaded: progressEvent.loaded };
+      }
     );
 
     volateqApi.waitForTask(
