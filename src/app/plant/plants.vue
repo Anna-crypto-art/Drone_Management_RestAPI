@@ -66,34 +66,6 @@
       </app-table>
     </app-table-container>
 
-    <!-- <app-modal-form
-      id="manage-plant-modal"
-      ref="managePlantModal"
-      :title="$t('upload-dt')"
-      :subtitle="managePlantModel.plant && managePlantModel.plant.name || ''"
-      :ok-title="$t('apply')"
-      :modalLoading="plantModalLoading"
-      @submit="saveManagePlant"
-      :superAdminProtected="true"
-    >
-      <b-form-group v-if="managePlantModel.plant" v-show="managePlantModel.plant.fieldgeometry">
-        <a href="#" @click="onFileClick(managePlantModel.plant.fieldgeometry)">
-          {{ managePlantModel.plant.fieldgeometry && managePlantModel.plant.fieldgeometry.file_name }}
-        </a>
-      </b-form-group>
-      <b-form-group>
-        <b-alert :show="!removeDigitalTwinAllowed" variant="info">
-          {{ $t("remove-digital-twin-not-allowed_descr") }}
-        </b-alert>
-        <b-form-checkbox id="clear-before-checkbox" v-model="managePlantModel.clearBefore" :disabled="!removeDigitalTwinAllowed">
-          {{ $t("clear-before") }}
-        </b-form-checkbox>
-      </b-form-group>
-      <b-form-group :label="$t('select-dt-json-file')">
-        <b-form-file v-model="managePlantModel.file" required accept=".json"></b-form-file>
-      </b-form-group>
-    </app-modal-form> -->
-
     <app-modal-form
       id="manage-plant-modal"
       ref="managePlantModal"
