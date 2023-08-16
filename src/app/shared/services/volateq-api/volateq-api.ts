@@ -470,6 +470,10 @@ export class VolateqAPI extends HttpClientBase {
     return this.getUrl(`${apiBaseUrl}/auth/analysis/${analysisId}/files/download`, { filenames: filenames });
   }
 
+  public downloadVolaFlyAppUrl(sdk_version: string): Promise<{ url: string }> {
+    return this.get(`${apiBaseUrl}/volafly-download/${sdk_version}`)    
+  }
+
   public getAnalysisFiles(analysisId: string, filenames: string[]): Promise<AnalysisFileInfoSchema> {
     return this.post(`/auth/analysis/${analysisId}/files`, { file_names: filenames });
   }
@@ -939,6 +943,8 @@ export class VolateqAPI extends HttpClientBase {
       analysisResult.key_figures.splice(ir_intensity_index, 1);
     }
   }
+
+
 }
 
 const volateqApi = new VolateqAPI();
