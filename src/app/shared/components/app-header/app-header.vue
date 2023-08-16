@@ -51,12 +51,12 @@
 
           <b-dropdown-divider v-if="isSuperAdmin" />
 
-          <b-dropdown-form v-if="isSuperAdmin">
+          <b-dropdown-form v-if="isSuperAdmin || isHiddenSuperAdmin">
             <div class=""><small class="text-grey" v-if="!!selectedCustomer">{{ selectedCustomer.name }}</small></div>
             <app-button variant="secondary" cls="width-100pc" @click="onShowSwitchCustomerModal" :title="$t('switch-customer')"> {{ $t("switch") }}<app-super-admin-marker /></app-button>
           </b-dropdown-form>
 
-          <b-dropdown-divider v-if="isSuperAdmin" />
+          <b-dropdown-divider v-if="isSuperAdmin || isHiddenSuperAdmin" />
 
           <b-dropdown-item href="/settings/user-profile" class="link">
             {{ $t("user-profile") }} <span clas="pad-left-half"><app-icon icon="person-fill" /></span>
@@ -71,7 +71,7 @@
       </b-navbar-nav>
     </b-collapse>
 
-    <app-modal-form v-if="isSuperAdmin"
+    <app-modal-form v-if="isSuperAdmin || isHiddenSuperAdmin"
       id="switch-customer-modal"
       ref="switchCustomerModal"
       :title="$t('switch')"
@@ -88,6 +88,11 @@
       <b-form-group :label="$t('change-pi-view-availability')">
         <b-form-checkbox v-model="showAllKeyFigures">
           {{ $t('show-all-pis') }}
+        </b-form-checkbox>
+      </b-form-group>
+      <b-form-group :label="$t('hide-super-admin')">
+        <b-form-checkbox v-model="hideSuperAdmin">
+          {{ $t('hide-super-admin') }}
         </b-form-checkbox>
       </b-form-group>
     </app-modal-form>
@@ -107,6 +112,7 @@ import AppIcon from "@/app/shared/components/app-icon/app-icon.vue";
 import { IAppModalForm } from "../app-modal/types";
 import { sortAlphabetical } from "../../services/helper/sort-helper";
 import { environment } from "@/environment/environment";
+import { CustomerNameSchema } from "../../services/volateq-api/api-schemas/customer-schemas";
 
 @Component({
   name: "app-header",
@@ -127,6 +133,11 @@ export default class AppHeader extends BaseAuthComponent {
   selectedCustomerId: string | null = null;
 
   showAllKeyFigures = false;
+  hideSuperAdmin = false;
+
+  async created() {
+    this.hideSuperAdmin = this.isHiddenSuperAdmin;
+  }
 
   async logout(): Promise<void> {
     try {
@@ -180,6 +191,7 @@ export default class AppHeader extends BaseAuthComponent {
       }
 
       this.$store.direct.commit.auth.updateCustomer(selectedCustomer);
+      this.$store.direct.commit.auth.updateHidden(this.hideSuperAdmin);
 
       this.$router.go(0);
     } catch (e) {

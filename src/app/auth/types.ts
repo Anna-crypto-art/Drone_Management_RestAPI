@@ -5,4 +5,5 @@ export interface AuthState {
   token: string;
   role?: ApiRoles;
   customer?: CustomerNameSchema;
+  hiddenSuperAdmin?: boolean;
 }

@@ -19,7 +19,7 @@ const authStore = defineModule({
     isSuperAdmin(...args): boolean {
       const { state } = moduleGetterContext(args, authStore);
 
-      return state.role === ApiRoles.SUPER_ADMIN;
+      return state.role === ApiRoles.SUPER_ADMIN && !state.hiddenSuperAdmin;
     },
     isCustomerAdmin(...args): boolean {
       const { state } = moduleGetterContext(args, authStore);
@@ -35,7 +35,12 @@ const authStore = defineModule({
       const { state } = moduleGetterContext(args, authStore);
 
       return state.role === ApiRoles.ASSISTANT;
-    }
+    },
+    isHiddenSuperAdmin(...args): boolean {
+      const { state } = moduleGetterContext(args, authStore);
+
+      return state.hiddenSuperAdmin || false
+    },
   },
   mutations: {
     updateToken(state, newState: AuthState) {
@@ -48,7 +53,16 @@ const authStore = defineModule({
     updateCustomer(state, customer: CustomerNameSchema | undefined) {
       state.customer = customer;
 
-      appLocalStorage.setItem(key, state)
+      appLocalStorage.setItem(key, state);
+    },
+    updateHidden(state, isHidden: boolean) {
+      if (state.role !== ApiRoles.SUPER_ADMIN) {
+        return;
+      }
+
+      state.hiddenSuperAdmin = isHidden;
+
+      appLocalStorage.setItem(key, state);
     }
   },
   actions: {
@@ -61,7 +75,13 @@ const authStore = defineModule({
       const { commit } = moduleActionContext(context, authStore);
 
       commit.updateCustomer(payload);
+    },
+    updateHidden(context, payload: boolean) {
+      const { commit } = moduleActionContext(context, authStore);
+
+      commit.updateHidden(payload);
     }
+
   },
 });
 
