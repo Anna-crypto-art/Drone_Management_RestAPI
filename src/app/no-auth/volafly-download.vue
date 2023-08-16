@@ -56,6 +56,11 @@ export default class AppVolaflyDownload extends BaseComponent {
 <style lang="scss">
 
 .app-volafly-download {
+  .app-auth-box {
+    position: relative;
+    text-align: center;
+  }
+
   .buttons {
     display: flex;
     justify-content: center;
