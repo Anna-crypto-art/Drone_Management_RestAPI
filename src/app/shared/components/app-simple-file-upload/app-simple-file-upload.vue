@@ -2,10 +2,10 @@
   <div class="app-simple-file-upload">
     <b-form-file v-model="modelValue" :accept="accept"></b-form-file>
     <div v-if="uploadProgress && modelValue" class="mar-top">
-      {{ $t('uploading') }}
+      {{ isUploadComplete ? $t('upload-completed') : $t('uploading') }}
       <b-progress :max="uploadProgress.total">
         <b-progress-bar :value="uploadProgress.loaded" variant="success">
-          <span v-if="uploadProgress.loaded === uploadProgress.total">
+          <span v-if="isUploadComplete">
             {{ $t("upload-succes-filename", { filename: modelValue.name }) }}
           </span>
           <span v-if="uploadProgress.loaded < uploadProgress.total">
@@ -39,6 +39,11 @@ export default class AppSimpleFileUpload extends Vue {
   @Watch('modelValue') onModelValueChanged() {
     this.$emit('input', this.modelValue);
   }
+
+  get isUploadComplete(): boolean {
+    return this.uploadProgress && this.uploadProgress.loaded === this.uploadProgress.total || false;
+  }
+
 }
 
 </script>
