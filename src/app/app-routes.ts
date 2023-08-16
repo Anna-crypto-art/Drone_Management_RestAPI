@@ -55,7 +55,7 @@ router.beforeEach((to, from, next) => {
       return;
     }
 
-    if (to.meta?.role && !store.getters.auth.isSuperAdmin) {
+    if (to.meta?.role && !store.getters.auth.isSuperAdmin && !store.getters.auth.isHiddenSuperAdmin) {
       const roles: number[] = Array.isArray(to.meta.role) ? to.meta.role : [to.meta.role];
       if (!roles.includes(store.state.auth.role!)) {
         next({ name: "page-not-found" });

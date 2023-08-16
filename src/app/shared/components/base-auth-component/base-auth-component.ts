@@ -25,8 +25,12 @@ export abstract class BaseAuthComponent extends BaseComponent {
     return this.$store.getters["auth/isAssistant"];
   }
 
+  get isHiddenSuperAdmin(): boolean {
+    return this.$store.getters["auth/isHiddenSuperAdmin"];
+  }
+
   get selectedCustomer(): CustomerNameSchema | undefined {
-    if (this.isSuperAdmin) {
+    if (this.isSuperAdmin || this.isHiddenSuperAdmin) {
       return store.state.auth.customer;
     }
     
