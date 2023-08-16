@@ -111,11 +111,11 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
         continue;
       }
 
-      let recordValue: any = resultItem[entry.transName];
+      let recordValue: string | undefined | null = (resultItem[entry.transName] as any)?.toString();
       if (recordValue === undefined || recordValue === null) {
         recordValue = "";
       }
-      
+
       recordFeatureInfos.push(mappingHelper.toFeatureInfo(entry, recordValue, this.keyFigureId));
     }
 
