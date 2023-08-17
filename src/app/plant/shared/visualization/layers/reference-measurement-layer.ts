@@ -47,6 +47,10 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
     await this.vueComponent.onLayerSelected(selected, this.getLegend());
   }
 
+  public isOrthoImageAvailable(orthoImage: OrthoImage): boolean {
+    return this.orhtoImageMixin.isOrthoImageAvailable(orthoImage);
+  }
+
   protected get name(): string {
     const user = this.referenceMeasurement.user_created
     if (!user) {

@@ -119,7 +119,6 @@ export enum LayerColor {
 export interface OrthoImage {
    name: string,
    keyFigureId: ApiKeyFigure,
-   available: boolean,
    features?: Feature<Geometry>[]
 }
 

@@ -5,4 +5,5 @@ import { OrthoImage } from "../layers/types";
 export interface IOrthoImageMixin {
   orthoImages: OrthoImage[] | null;
   analysisResult: AnalysisResultDetailedSchema | null;
+  isOrthoImageAvailable(orthoImage: OrthoImage): boolean;
 }

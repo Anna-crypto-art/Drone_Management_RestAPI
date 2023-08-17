@@ -63,6 +63,10 @@ export abstract class ComponentLayer extends LayerBase {
     return this.color;
   }
 
+  public isOrthoImageAvailable(orthoImage: OrthoImage): boolean {
+    return this.orhtoImageMixin.isOrthoImageAvailable(orthoImage);
+  }
+
   protected getWidth(): number {
     return this.zoomWidth || this.width;
   }

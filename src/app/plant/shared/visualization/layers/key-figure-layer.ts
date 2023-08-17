@@ -79,6 +79,10 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     return super.getAddStyles(feature);
   }
 
+  public isOrthoImageAvailable(orthoImage: OrthoImage): boolean {
+    return this.orhtoImageMixin.isOrthoImageAvailable(orthoImage);
+  }
+
   protected getDescription(): string | undefined {
     return this.description && this.vueComponent.$t(this.description).toString();
   }
