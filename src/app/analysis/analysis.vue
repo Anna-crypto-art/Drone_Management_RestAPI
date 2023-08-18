@@ -228,7 +228,7 @@ export default class AppAnalysis extends BaseAuthComponent {
       analysisFilter.plant_id = this.selectedPlantId;
     }
     
-    this.analysisRows = (await volateqApi.getAllAnalysis(analysisFilter)).map((a: AnalysisSchema) => {
+    this.analysisRows = (await volateqApi.getAllAnalysis(analysisFilter)).map((a: AnalysisSchema) => {    
       const row = {
         id: a.id,
         name: a.name,
@@ -247,8 +247,12 @@ export default class AppAnalysis extends BaseAuthComponent {
         customer: a.customer.name,
         productPackages: a.order_product_packages,
       };
-
-      return row;
+      console.log(row.state)
+      // return row;
+      
+      if (row.state !== null) {
+        return row;
+      }
     });
   }
 
