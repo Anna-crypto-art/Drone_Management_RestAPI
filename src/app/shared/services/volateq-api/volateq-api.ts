@@ -44,6 +44,8 @@ import { FlightCampaignSchema } from "./api-schemas/flight-campaign-schema";
 import { CreateFlightCampaignRequest } from "./api-requests/flight-campaign-requests";
 import { FlightRouteSchema } from "./api-schemas/flight-route-schema";
 import { PlantOperationActionSchema } from "./api-schemas/plant-operation-action-schema";
+import { CustomComponentPropertySchema } from "./api-schemas/custom-component-property-schema";
+import { CustomComponentPropertyRequest } from "./api-requests/custom-component-property-request";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -928,6 +930,22 @@ export class VolateqAPI extends HttpClientBase {
 
   public async undoAnalysisResultValueChange(analysisResultChangeHistoryId: string): Promise<void> {
     await this.post(`/auth/analysis-result-change-history/${analysisResultChangeHistoryId}/undo`);
+  }
+
+  public async getCustomComponentProperties(plantId: string): Promise<CustomComponentPropertySchema[]> {
+    return await this.get(`/auth/plant/${plantId}/custom-component-properties`);
+  }
+
+  public async createCustomComponentProperty(plantId: string, ccpRequest: CustomComponentPropertyRequest) {
+    await this.post(`/auth/plant/${plantId}/custom-component-property`, ccpRequest);
+  }
+
+  public async updateCustomComponentProperty(plantId: string, ccpId: string, ccpRequest: CustomComponentPropertyRequest) {
+    await this.post(`/auth/plant/${plantId}/custom-component-property/${ccpId}`, ccpRequest);
+  }
+
+  public async deleteCustomComponentProperty(plantId: string, ccpId: string) {
+    await this.delete(`/auth/plant/${plantId}/custom-component-property/${ccpId}`)
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {

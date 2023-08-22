@@ -15,6 +15,10 @@
         <template #title><b-icon icon="bar-chart-fill" /> <span class="pad-left">{{ $t("statistics") }}</span></template>
         <slot name="diagram" />
       </b-tab>
+      <b-tab lazy>
+        <template #title><b-icon icon="gear-fill" /> <span class="pad-left">{{ $t("settings") }}</span></template>
+        <slot name="settings" />
+      </b-tab>
       <b-tab v-if="isSuperAdmin && hasSelectAnalysisResults">
         <template #title><b-icon icon="shield-shaded" /><span class="pad-left">{{ $t("admin") }}</span></template>
         <slot name="admin" />
@@ -119,12 +123,12 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
   onTabsChanged() {
     // onTabsChanged gets called, when a tab has been added or removed.
     // depending on the "v-if" conditions the number of the raised events variates...
-    // 3 times (because to conditions are identical) with analysis results
-    // 1 time without analysis results
+    // 4 times (because to conditions are identical) with analysis results
+    // 2 time without analysis results
 
     this.tabsLoaded++;
 
-    if ((this.tabsLoaded === 1 && !this.hasResults) || this.tabsLoaded === 3) {
+    if ((this.tabsLoaded === 2 && !this.hasResults) || this.tabsLoaded === 4) {
       this.allTabsLoaded = true;
       this.onTabsLoaded();
     }

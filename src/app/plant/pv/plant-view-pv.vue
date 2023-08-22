@@ -11,6 +11,9 @@
       <template #tables>
         <app-tables-pv :analyses="analyses" :plant="plant" />
       </template>
+      <template #settings>
+        <app-custom-component-properties :plant="plant" />
+      </template>
       <template #admin>
         <app-plant-admin-view-pv :selectedAnalysisResult="firstAnalysisResult" :plant="plant" />
       </template>
@@ -24,6 +27,7 @@ import AppPlantViewTabs from "@/app/plant/shared/plant-view-tabs/plant-view-tabs
 import AppVisualPv from "@/app/plant/pv/visualization/visual-pv.vue";
 import AppTablesPv from "@/app/plant/pv/tables/tables-pv.vue";
 import AppPlantAdminViewPv from "@/app/plant/pv/plant-admin-view-pv.vue";
+import AppCustomComponentProperties from "@/app/plant/shared/plant-settings/custom-component-properties.vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { Component, Prop } from "vue-property-decorator";
@@ -39,6 +43,7 @@ import { AnalysisSelectionBaseComponent } from "../shared/analysis-selection-sid
     AppVisualPv,
     AppTablesPv,
     AppPlantAdminViewPv,
+    AppCustomComponentProperties,
   },
 })
 export default class AppPlantViewPv extends AnalysisSelectionBaseComponent {

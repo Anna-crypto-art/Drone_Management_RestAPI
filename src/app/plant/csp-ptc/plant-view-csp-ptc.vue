@@ -14,6 +14,9 @@
       <template #diagram>
         <app-plant-diagram-view-csp-ptc :analyses="analyses" :plant="plant" />
       </template>
+      <template #settings>
+        <app-custom-component-properties :plant="plant" />
+      </template>
       <template #admin>
         <app-plant-admin-view-csp-ptc :selectedAnalysisResult="firstAnalysisResult" :plant="plant" />
       </template>
@@ -31,6 +34,7 @@ import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { Component, Prop } from "vue-property-decorator";
 import AppPlantDiagramViewCspPtc from "@/app/plant/csp-ptc/plant-diagram-view-csp-ptc.vue";
+import AppCustomComponentProperties from "@/app/plant/shared/plant-settings/custom-component-properties.vue";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { AnalysisSelectionBaseComponent } from "../shared/analysis-selection-sidebar/analysis-selection-base-component";
@@ -44,6 +48,7 @@ import { AnalysisSelectionBaseComponent } from "../shared/analysis-selection-sid
     AppAnalysisSelectionSidebar,
     AppPlantAdminViewCspPtc,
     AppPlantDiagramViewCspPtc,
+    AppCustomComponentProperties,
   },
 })
 export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {

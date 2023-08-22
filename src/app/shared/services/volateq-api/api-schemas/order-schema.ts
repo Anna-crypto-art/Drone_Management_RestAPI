@@ -1,6 +1,6 @@
-import { CustomerSchema } from "./customer-schemas";
+import { CustomerSchema, SimpleCustomerSchema } from "./customer-schemas";
 import { KeyFigureSchema } from "./key-figure-schema";
-import { PlantSchema } from "./plant-schema";
+import { PlantSchema, SimplePlantSchema } from "./plant-schema";
 import { ProductPackageSchema } from "./product-package";
 import { SimpleUserSchema } from "./user-schemas";
 
@@ -20,8 +20,8 @@ export interface OrderSchema {
   id: string;
   order_type: OrderType;
   name: string;
-  plant: PlantSchema;
-  customer: CustomerSchema;
+  plant: SimplePlantSchema;
+  customer: SimpleCustomerSchema;
   start_date: string;
   end_date: string;
   order_product_packages: OrderProductPackageSchema[];
