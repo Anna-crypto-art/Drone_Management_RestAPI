@@ -15,7 +15,9 @@
         <app-plant-diagram-view-csp-ptc :analyses="analyses" :plant="plant" />
       </template>
       <template #settings>
-        <app-custom-component-properties :plant="plant" />
+        <b-container>
+          <app-custom-component-properties :plant="plant" />
+        </b-container>
       </template>
       <template #admin>
         <app-plant-admin-view-csp-ptc :selectedAnalysisResult="firstAnalysisResult" :plant="plant" />

@@ -12,7 +12,9 @@
         <app-tables-pv :analyses="analyses" :plant="plant" />
       </template>
       <template #settings>
-        <app-custom-component-properties :plant="plant" />
+        <b-container>
+          <app-custom-component-properties :plant="plant" />
+        </b-container>
       </template>
       <template #admin>
         <app-plant-admin-view-pv :selectedAnalysisResult="firstAnalysisResult" :plant="plant" />

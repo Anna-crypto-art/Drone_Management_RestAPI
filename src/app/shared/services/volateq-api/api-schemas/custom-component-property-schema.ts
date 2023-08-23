@@ -20,10 +20,11 @@ export interface CustomComponentPropertySchema {
   data_type: CCPDataType;
   data_type_value_range: CCPDataTypeValueRange;
   created_at: string;
+  color?: string;
   updated_at?: string;
   description?: string;
   updated_by_user?: SimpleUserSchema;
-  created_by_user?: SimplePlantSchema;
+  created_by_user?: SimpleUserSchema;
 }
 
 export const ccpDataTypeNames: Record<CCPDataType, string> = {

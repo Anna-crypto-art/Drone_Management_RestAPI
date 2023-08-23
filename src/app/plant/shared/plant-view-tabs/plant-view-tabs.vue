@@ -123,12 +123,12 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
   onTabsChanged() {
     // onTabsChanged gets called, when a tab has been added or removed.
     // depending on the "v-if" conditions the number of the raised events variates...
-    // 4 times (because to conditions are identical) with analysis results
-    // 2 time without analysis results
+    // 3 times (because to conditions are identical) with analysis results
+    // 1 time without analysis results
 
     this.tabsLoaded++;
 
-    if ((this.tabsLoaded === 2 && !this.hasResults) || this.tabsLoaded === 4) {
+    if ((this.tabsLoaded === 1 && !this.hasResults) || this.tabsLoaded === 3) {
       this.allTabsLoaded = true;
       this.onTabsLoaded();
     }
