@@ -17,7 +17,7 @@
           <template #title>
             <b-icon icon="upload" /><span class="pad-left">{{ $t("upload") }}</span>
           </template>
-          <app-upload-analysis-files :analysis="analysis" :droneOptions="droneOptions" :selectedDrone="selectedDrone" />
+          <app-upload-analysis-files v-if="stateNotNull()" :analysis="analysis" :droneOptions="droneOptions" :selectedDrone="selectedDrone" />
         </b-tab>
         <b-tab class="app-edit-analysis-edit-tab">
           <template #title>
@@ -229,13 +229,14 @@ export default class AppEditAnalysis extends BaseAuthComponent {
   }
 
   private hasState(apiStates: ApiStates[]): boolean {
-    return this.analysis && this.analysis.current_state &&
+    if (this.stateNotNull()) {
+      return this.analysis && this.analysis.current_state &&
       apiStates.includes(this.analysis.current_state?.state?.id) || false;
+    }
+    return false;
   }
 
   private stateNotNull(): boolean {
-    console.log("hasState() is: "+ this.hasState().toString(apiStates));
-    console.log("this.analysis?.current_state is: "+this.analysis?.current_state)
     return this.analysis?.current_state != null;
   }
 
@@ -270,7 +271,6 @@ export default class AppEditAnalysis extends BaseAuthComponent {
     this.watchAnalysisTask();
 
     if (this.stateNotNull()) {
-      console.log("stateNotNull1 is: "+this.stateNotNull())
       if (this.isSuperAdmin && this.analysis.analysis_result && 
         this.analysis.analysis_result.released && this.analysis.current_state?.state?.id !== ApiStates.FINISHED
       ) {
@@ -341,12 +341,9 @@ export default class AppEditAnalysis extends BaseAuthComponent {
   }
 
   get changeProductPackagesAndDroneAllowed(): boolean {
-    console.log("stateNotNull2 is :"+this.stateNotNull().toString());
     if (this.stateNotNull()) {
-      console.log("changeProductPackagesAndDroneAllowed1 is: "+ (this.stateNotNull()).toString());
       return this.analysis!.current_state?.state?.id < ApiStates.DATA_COMPLETE;
     }
-    // console.log("changeProductPackagesAndDroneAllowed2 is: "+ (this.analysis!.current_state?.state?.id < ApiStates.DATA_COMPLETE));
     return false;
   }
 
