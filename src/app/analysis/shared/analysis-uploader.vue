@@ -148,11 +148,11 @@ export default class AppAnalysisUploader extends BaseAuthComponent {
   }
 
   get dataCompleteVerified(): boolean {
-    return !!(this.analysis && this.analysis.current_state.state.id >= ApiStates.DATA_COMPLETE_VERIFIED);
+    return !!(this.analysis && this.analysis.current_state!.state.id >= ApiStates.DATA_COMPLETE_VERIFIED);
   }
 
   get analysisIsEmpty(): boolean {
-    return !!(this.analysis && this.analysis.current_state.state.id == ApiStates.EMPTY);
+    return !!(this.analysis && this.analysis.current_state?.state.id == ApiStates.EMPTY);
   }
 
   get analysisHasAvailableDrones(): boolean {

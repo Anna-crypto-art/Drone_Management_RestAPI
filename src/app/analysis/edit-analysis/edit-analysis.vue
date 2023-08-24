@@ -17,7 +17,7 @@
           <template #title>
             <b-icon icon="upload" /><span class="pad-left">{{ $t("upload") }}</span>
           </template>
-          <app-upload-analysis-files v-if="stateNotNull()" :analysis="analysis" :droneOptions="droneOptions" :selectedDrone="selectedDrone" />
+          <app-upload-analysis-files v-if="isStateNotNull" :analysis="analysis" :droneOptions="droneOptions" :selectedDrone="selectedDrone" />
         </b-tab>
         <b-tab class="app-edit-analysis-edit-tab">
           <template #title>
@@ -193,10 +193,10 @@ export default class AppEditAnalysis extends BaseAuthComponent {
       {
         id: ApiStates.UPLOADING,
         name: this.hasState([ApiStates.UPLOAD_FAILED, ApiStates.DATA_INCOMPLETE]) ?
-          this.$t(this.analysis!.current_state?.state?.name).toString() : 
+          this.$t(this.analysis!.current_state?.state.name || "").toString() : 
           this.$t(apiStateNames[ApiStates.UPLOADING]).toString(),
         description: this.hasState([ApiStates.UPLOAD_FAILED, ApiStates.DATA_INCOMPLETE]) ?
-          this.$t(this.analysis!.current_state?.state?.name + "_descr").toString() : 
+          this.$t(this.analysis!.current_state?.state.name + "_descr").toString() : 
           this.$t(apiStateNames[ApiStates.UPLOADING] + "_descr").toString(),
         danger: this.hasState([ApiStates.UPLOAD_FAILED, ApiStates.DATA_INCOMPLETE]),
         active: this.hasState([ApiStates.UPLOADING, ApiStates.UPLOAD_FAILED, ApiStates.DATA_INCOMPLETE]),
@@ -229,15 +229,15 @@ export default class AppEditAnalysis extends BaseAuthComponent {
   }
 
   private hasState(apiStates: ApiStates[]): boolean {
-    if (this.stateNotNull()) {
+    if (this.isStateNotNull) {
       return this.analysis && this.analysis.current_state &&
-      apiStates.includes(this.analysis.current_state?.state?.id) || false;
+      apiStates.includes(this.analysis.current_state?.state.id) || false;
     }
     return false;
   }
 
-  private stateNotNull(): boolean {
-    return this.analysis?.current_state != null;
+  private get isStateNotNull(): boolean {
+    return this.analysis?.current_state != (null || undefined);
   }
 
   @CatchError()
@@ -270,13 +270,13 @@ export default class AppEditAnalysis extends BaseAuthComponent {
 
     this.watchAnalysisTask();
 
-    if (this.stateNotNull()) {
+    if (this.isStateNotNull) {
       if (this.isSuperAdmin && this.analysis.analysis_result && 
-        this.analysis.analysis_result.released && this.analysis.current_state?.state?.id !== ApiStates.FINISHED
+        this.analysis.analysis_result.released && this.analysis.current_state?.state.id !== ApiStates.FINISHED
       ) {
         AppContentEventService.showInfo(this.analysis!.id, this.$t("analysis-not-finished_descr").toString());
       }
-      if (this.isSuperAdmin && this.analysis.current_state?.state?.id === ApiStates.FINISHED && 
+      if (this.isSuperAdmin && this.analysis.current_state?.state.id === ApiStates.FINISHED && 
         (!this.analysis.analysis_result || !this.analysis.analysis_result.released)
       ) {
         AppContentEventService.showInfo(this.analysis!.id, this.$t("analysis-not-released_descr").toString());
@@ -341,8 +341,8 @@ export default class AppEditAnalysis extends BaseAuthComponent {
   }
 
   get changeProductPackagesAndDroneAllowed(): boolean {
-    if (this.stateNotNull()) {
-      return this.analysis!.current_state?.state?.id < ApiStates.DATA_COMPLETE;
+    if (this.isStateNotNull) {
+      return (this.analysis!.current_state?.state.id || "") < ApiStates.DATA_COMPLETE;
     }
     return false;
   }

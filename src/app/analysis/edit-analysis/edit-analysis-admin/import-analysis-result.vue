@@ -118,7 +118,7 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
   }
 
   get hasStateCompleteVerified(): boolean {
-    return this.analysis.current_state?.state?.id >= ApiStates.DATA_COMPLETE_VERIFIED;
+    return (this.analysis.current_state && this.analysis.current_state!.state.id >= ApiStates.DATA_COMPLETE_VERIFIED) || false;
   }
 
   get isAnalysisResultReleased(): boolean {
