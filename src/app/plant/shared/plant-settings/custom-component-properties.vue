@@ -68,7 +68,8 @@
           <b-form-textarea v-model="ccpModel.description" />
         </b-form-group>
         <b-form-group :label="$t('color')">
-          <b-form-input v-model="ccpModel.color" placeholder="#00000000" />
+          <b-form-input v-model="ccpModel.color" placeholder="#00000000"/>
+            <chrome-picker :value="colors" @input="updateColor"></chrome-picker>
         </b-form-group>
       </div>
     </app-modal-form>
@@ -97,7 +98,7 @@ import { CCPModel } from "./types";
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import { getUserName } from "@/app/shared/services/helper/user-helper";
 import { CustomComponentPropertyRequest } from '@/app/shared/services/volateq-api/api-requests/custom-component-property-request';
-
+import { Chrome } from 'vue-color';
 
 @Component({
   name: "app-custom-component-properties",
@@ -107,7 +108,8 @@ import { CustomComponentPropertyRequest } from '@/app/shared/services/volateq-ap
     AppTable,
     AppTableContainer,
     AppModalForm,
-  }
+    'chrome-picker': Chrome,  
+    }
 })
 export default class AppCustomComponentProperties extends BaseAuthComponent {
   @Prop({ required: true }) plant!: PlantSchema;
@@ -116,6 +118,8 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
 
   tableLoading = false;
   modalLoading = false;
+
+  colors = '#194d33';
 
   ccpRows: any[] = [];
   ccpColumns: AppTableColumns = [];
@@ -173,6 +177,10 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
         updated: !!ccp.updated_at,
       }
     });
+  }
+
+  get updateColor(): string {
+    return this.ccpModel!.color = Chrome.value.toString();
   }
 
   get ccpModalTitle(): string {

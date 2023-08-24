@@ -46,6 +46,7 @@
   },
   "devDependencies": {
     "@types/qrcode": "^1.5.0",
+    "@types/vue-color": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "4.0.1",
     "@typescript-eslint/parser": "4.0.1",
     "@vue/babel-preset-app": "4.5.14",
