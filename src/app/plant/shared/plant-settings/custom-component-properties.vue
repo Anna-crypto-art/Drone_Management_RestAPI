@@ -67,9 +67,11 @@
         <b-form-group :label="$t('description')">
           <b-form-textarea v-model="ccpModel.description" />
         </b-form-group>
-        <b-form-group :label="$t('color')">
-          <b-form-input v-model="ccpModel.color" placeholder="#00000000"/>
-            <chrome-picker :value="colors" @input="updateColor"></chrome-picker>
+        <b-form-group id="color" :label="$t('color')">
+          <b-form-input @focus="onFocus" v-model="ccpModel.color" placeholder="#194D33A8"/>
+          <div v-show="focused">
+            <chrome-picker ref="ColorPicker" v-model="colors" @input="updateColor" ></chrome-picker>
+          </div>
         </b-form-group>
       </div>
     </app-modal-form>
@@ -108,8 +110,8 @@ import { Chrome } from 'vue-color';
     AppTable,
     AppTableContainer,
     AppModalForm,
-    'chrome-picker': Chrome,  
-    }
+    'chrome-picker': Chrome,
+  }
 })
 export default class AppCustomComponentProperties extends BaseAuthComponent {
   @Prop({ required: true }) plant!: PlantSchema;
@@ -119,7 +121,11 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
   tableLoading = false;
   modalLoading = false;
 
-  colors = '#194d33';
+  colors = {
+  hex: '#194d33',
+  hex8: '#194D33A8'
+  };
+  focused = false;
 
   ccpRows: any[] = [];
   ccpColumns: AppTableColumns = [];
@@ -179,10 +185,6 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
     });
   }
 
-  get updateColor(): string {
-    return this.ccpModel!.color = Chrome.value.toString();
-  }
-
   get ccpModalTitle(): string {
     return this.ccpModel?.modalTitle || "";
   }
@@ -205,6 +207,25 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
 
     return "";
   }
+
+  @CatchError()
+  updateColor(): string {
+    // console.log(this.colors.hex8.toString())
+    this.ccpModel!.color = this.colors.hex8;
+    return this.colors.hex8.toString();
+  }
+
+  @CatchError()
+  onFocus (): boolean {
+    this.focused = true;
+    return this.focused;  
+  }
+
+  // @CatchError()
+  // onBlur (): boolean {
+  //   this.focused = false;
+  //   return this.focused;  
+  // }
 
   @CatchError()
   onAddCCPClick() {
