@@ -68,9 +68,16 @@
           <b-form-textarea v-model="ccpModel.description" />
         </b-form-group>
         <b-form-group id="color" :label="$t('color')">
-          <b-form-input @focus="onFocus" v-model="ccpModel.color" placeholder="#194D33A8"/>
-          <div v-show="focused">
+          <!-- <b-form-input @focus="onFocus" v-model="ccpModel.color" placeholder="#194D33A8"/>
+          <div class="input-group color-picker" ref="colorpicker" v-show="focused">
             <chrome-picker ref="ColorPicker" v-model="colors" @input="updateColor" ></chrome-picker>
+          </div> -->
+          <div class="input-group color-picker" ref="colorpicker">
+            <input type="text" class="form-control" v-model="ccpModel.color" @focus="showPicker()" @input="updateFromInput" />
+            <span class="input-group-addon color-picker-container">
+              <span class="current-color" :style="'background-color: ' + colorValue" @click="togglePicker()"></span>
+              <chrome-picker :value="colors" @input="updateFromPicker" v-if="displayPicker" />
+            </span>
           </div>
         </b-form-group>
       </div>
@@ -80,7 +87,7 @@
 
 <script lang="ts">
 import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component'
-import { Component, Prop, Ref } from "vue-property-decorator";
+import { Component, Prop, Ref, Vue } from "vue-property-decorator";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import AppTable from "@/app/shared/components/app-table/app-table.vue";
@@ -121,11 +128,13 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
   tableLoading = false;
   modalLoading = false;
 
-  colors = {
+  colors: any = {
   hex: '#194d33',
   hex8: '#194D33A8'
   };
-  focused = false;
+  // focused = false;
+  colorValue = '';
+  displayPicker = false;
 
   ccpRows: any[] = [];
   ccpColumns: AppTableColumns = [];
@@ -208,6 +217,62 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
     return "";
   }
 
+  setColor(color) {
+    this.updateColors(color);
+    this.colorValue = color;
+  }
+  updateColors(color) {
+    if(color.slice(0, 1) == '#') {
+      this.colors = {
+        hex: color
+      };
+    }
+    else if(color.slice(0, 4) == 'rgba') {
+      var rgba = color.replace(/^rgba?\(|\s+|\)$/g,'').split(','),
+        hex = '#' + ((1 << 24) + (parseInt(rgba[0]) << 16) + (parseInt(rgba[1]) << 8) + parseInt(rgba[2])).toString(16).slice(1);
+      this.colors = {
+        hex: hex,
+        a: rgba[3],
+      }
+    }
+  }
+
+  showPicker() {
+    document.addEventListener('click', this.documentClick);
+    this.displayPicker = true;
+  }
+
+  hidePicker() {
+    document.removeEventListener('click', this.documentClick);
+    this.displayPicker = false;
+  }
+
+  togglePicker() {
+    this.displayPicker ? this.hidePicker() : this.showPicker();
+  }
+
+  updateFromInput() {
+    this.updateColors(this.colorValue);
+  }
+
+  updateFromPicker(color) {
+    this.colors = color;
+    if(color.rgba.a == 1) {
+      this.colorValue = color.hex;
+    }
+    else {
+      this.colorValue = 'rgba(' + color.rgba.r + ', ' + color.rgba.g + ', ' + color.rgba.b + ', ' + color.rgba.a + ')';
+    }
+  }
+
+  documentClick(e): any {
+    var el = this.$refs.colorpicker,
+      target = e.target;
+    if(el !== target && !el.contains(target)) {
+      this.hidePicker()
+    }
+  }
+
   @CatchError()
   updateColor(): string {
     // console.log(this.colors.hex8.toString())
@@ -215,23 +280,36 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
     return this.colors.hex8.toString();
   }
 
-  @CatchError()
-  onFocus (): boolean {
-    this.focused = true;
-    return this.focused;  
-  }
+  // @CatchError()
+  // onFocus(): boolean {
+  //   this.focused = true;
+  //   return this.focused;  
+  // }
 
   // @CatchError()
-  // onBlur (): boolean {
+  // onBlur(): boolean {
   //   this.focused = false;
   //   return this.focused;  
   // }
 
+  createEmptyCCPModel(): CCPModel {
+    // this.focused = false;
+    return {
+      modalOkTitle: "",
+      modalTitle: "",
+      name: "",
+      id: null,
+      componentId: null,
+      dataType: null,
+    } 
+  }
+
+
   @CatchError()
   onAddCCPClick() {
-    this.ccpModel = this.initCCPModel;
-    this.ccpModel.modalTitle = this.$t("add-component-property").toString();
-    this.ccpModel.modalOkTitle = this.$t("create").toString();
+    this.ccpModel = this.createEmptyCCPModel();
+    this.ccpModel!.modalTitle = this.$t("add-component-property").toString();
+    this.ccpModel!.modalOkTitle = this.$t("create").toString();
 
     this.addOrUpdateCCPModal.show();
   }
@@ -249,7 +327,7 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
       description: row.description,
       color: row.color,
     }
-    
+    this.colors = row.color;
     this.addOrUpdateCCPModal.show();
   }
 
