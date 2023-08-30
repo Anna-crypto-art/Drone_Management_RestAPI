@@ -68,17 +68,12 @@
           <b-form-textarea v-model="ccpModel.description" />
         </b-form-group>
         <b-form-group id="color" :label="$t('color')">
-          <!-- <b-form-input @focus="onFocus" v-model="ccpModel.color" placeholder="#194D33A8"/>
-          <div class="input-group color-picker" ref="colorpicker" v-show="focused">
-            <chrome-picker ref="ColorPicker" v-model="colors" @input="updateColor" ></chrome-picker>
-          </div> -->
-          <div class="input-group color-picker" ref="colorpicker">
-            <input type="text" class="form-control" v-model="ccpModel.color" @focus="showPicker()" @input="updateFromInput" />
-            <span class="input-group-addon color-picker-container">
-              <span class="current-color" :style="'background-color: ' + colorValue" @click="togglePicker()"></span>
-              <chrome-picker :value="colors" @input="updateFromPicker" v-if="displayPicker" />
-            </span>
-          </div>
+          <div class="input-group-color-picker" ref="colorpicker">
+            <input type="text" class="form-control" v-model="ccpModel.color" @focus="showPicker" @input="updateFromInput" readonly/>
+              <div class="current-color">
+              <chrome-picker :value="colors" @input="updateFromPicker" v-if="displayPicker"/>
+              </div>
+            </div>
         </b-form-group>
       </div>
     </app-modal-form>
@@ -125,14 +120,12 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
 
   @Ref() addOrUpdateCCPModal!: IAppModalForm;
 
+  @Ref() colorpicker!: any
+
   tableLoading = false;
   modalLoading = false;
 
-  colors: any = {
-  hex: '#194d33',
-  hex8: '#194D33A8'
-  };
-  // focused = false;
+  colors: any = {hex: '#194d33', hex8: '#194D33A8'};
   colorValue = '';
   displayPicker = false;
 
@@ -213,27 +206,18 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
     } else if (this.ccpModel?.dataType === CCPDataType.VALUE_LIST) {
       return "A, B, OptionZ, 42"
     }
-
     return "";
   }
 
   setColor(color) {
     this.updateColors(color);
-    this.colorValue = color;
+    this.ccpModel!.color = color;
   }
   updateColors(color) {
     if(color.slice(0, 1) == '#') {
       this.colors = {
         hex: color
       };
-    }
-    else if(color.slice(0, 4) == 'rgba') {
-      var rgba = color.replace(/^rgba?\(|\s+|\)$/g,'').split(','),
-        hex = '#' + ((1 << 24) + (parseInt(rgba[0]) << 16) + (parseInt(rgba[1]) << 8) + parseInt(rgba[2])).toString(16).slice(1);
-      this.colors = {
-        hex: hex,
-        a: rgba[3],
-      }
     }
   }
 
@@ -247,53 +231,29 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
     this.displayPicker = false;
   }
 
-  togglePicker() {
-    this.displayPicker ? this.hidePicker() : this.showPicker();
-  }
-
   updateFromInput() {
-    this.updateColors(this.colorValue);
+    this.updateColors(this.ccpModel!.color);
   }
 
   updateFromPicker(color) {
     this.colors = color;
     if(color.rgba.a == 1) {
-      this.colorValue = color.hex;
+      this.ccpModel!.color = color.hex;
     }
     else {
-      this.colorValue = 'rgba(' + color.rgba.r + ', ' + color.rgba.g + ', ' + color.rgba.b + ', ' + color.rgba.a + ')';
+      this.ccpModel!.color = color.hex8;
     }
   }
 
-  documentClick(e): any {
-    var el = this.$refs.colorpicker,
+  documentClick(e) {
+    const el = this.$refs.colorpicker as HTMLElement,
       target = e.target;
-    if(el !== target && !el.contains(target)) {
+    if(el !== target && !el!.contains(target)) {
       this.hidePicker()
     }
   }
 
-  @CatchError()
-  updateColor(): string {
-    // console.log(this.colors.hex8.toString())
-    this.ccpModel!.color = this.colors.hex8;
-    return this.colors.hex8.toString();
-  }
-
-  // @CatchError()
-  // onFocus(): boolean {
-  //   this.focused = true;
-  //   return this.focused;  
-  // }
-
-  // @CatchError()
-  // onBlur(): boolean {
-  //   this.focused = false;
-  //   return this.focused;  
-  // }
-
   createEmptyCCPModel(): CCPModel {
-    // this.focused = false;
     return {
       modalOkTitle: "",
       modalTitle: "",
@@ -303,7 +263,6 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
       dataType: null,
     } 
   }
-
 
   @CatchError()
   onAddCCPClick() {
@@ -365,7 +324,7 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
       name: this.ccpModel!.name,
       data_type: this.ccpModel!.dataType!,
       data_type_value_range: this.ccpModel!.dataTypeValueRange || undefined,
-      description: this.ccpModel!.description,
+      description: this.ccpModel!.description || undefined,
       color: this.ccpModel!.color || undefined,
     };
   }
@@ -391,5 +350,9 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
 </script>
 
 <style lang="scss">
+
+.input-group-color-picker{
+    flex-direction: column;
+}
 
 </style>
