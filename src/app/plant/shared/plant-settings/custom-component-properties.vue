@@ -69,9 +69,9 @@
         </b-form-group>
         <b-form-group id="color" :label="$t('color')">
           <div class="input-group-color-picker" ref="colorpicker">
-            <input type="text" class="form-control" v-model="ccpModel.color" @focus="showPicker" @input="updateFromInput" readonly/>
+            <input type="text" class="form-control" v-model="ccpModel.color" @focus="onInputColorFocus" readonly/>
               <div class="current-color">
-              <chrome-picker :value="colors" @input="updateFromPicker" v-if="displayPicker"/>
+                <chrome-picker :value="colors" @input="onChromePickerChanged" v-if="displayPicker"/>
               </div>
             </div>
         </b-form-group>
@@ -82,7 +82,7 @@
 
 <script lang="ts">
 import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component'
-import { Component, Prop, Ref, Vue } from "vue-property-decorator";
+import { Component, Prop, Ref } from "vue-property-decorator";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import AppTable from "@/app/shared/components/app-table/app-table.vue";
@@ -103,6 +103,7 @@ import dateHelper from "@/app/shared/services/helper/date-helper";
 import { getUserName } from "@/app/shared/services/helper/user-helper";
 import { CustomComponentPropertyRequest } from '@/app/shared/services/volateq-api/api-requests/custom-component-property-request';
 import { Chrome } from 'vue-color';
+import { tinycolor } from 'tinycolor2';
 
 @Component({
   name: "app-custom-component-properties",
@@ -135,7 +136,7 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
   componentOptions: BvSelectOption[] | null = null;
   dataTypeOptions: BvSelectOption[] | null = null;
 
-  readonly initCCPModel: CCPModel = {
+  readonly CCPModel = {
     modalOkTitle: "",
     modalTitle: "",
     name: "",
@@ -161,8 +162,6 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
     }));
 
     this.dataTypeOptions = Object.keys(ccpDataTypeNames).map(k => ({ value: k, text: this.$t(ccpDataTypeNames[k]).toString() }));
-
-    this.ccpModel = this.initCCPModel;
 
     await this.updateCCPRows();
   }
@@ -209,33 +208,19 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
     return "";
   }
 
-  setColor(color) {
-    this.updateColors(color);
-    this.ccpModel!.color = color;
-  }
-  updateColors(color) {
-    if(color.slice(0, 1) == '#') {
-      this.colors = {
-        hex: color
-      };
-    }
-  }
-
-  showPicker() {
-    document.addEventListener('click', this.documentClick);
+  @CatchError()
+  onInputColorFocus() {
+    document.addEventListener('click', this.onDocumentClicked);
     this.displayPicker = true;
   }
 
   hidePicker() {
-    document.removeEventListener('click', this.documentClick);
+    document.removeEventListener('click', this.onDocumentClicked);
     this.displayPicker = false;
   }
 
-  updateFromInput() {
-    this.updateColors(this.ccpModel!.color);
-  }
-
-  updateFromPicker(color) {
+  @CatchError()
+  onChromePickerChanged(color: tinycolor) {
     this.colors = color;
     if(color.rgba.a == 1) {
       this.ccpModel!.color = color.hex;
@@ -245,10 +230,11 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
     }
   }
 
-  documentClick(e) {
+  @CatchError()
+  onDocumentClicked(e: Event) {
     const el = this.$refs.colorpicker as HTMLElement,
       target = e.target;
-    if(el !== target && !el!.contains(target)) {
+    if(el !== target && !el!.contains(target as HTMLElement)) {
       this.hidePicker()
     }
   }
@@ -350,9 +336,10 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
 </script>
 
 <style lang="scss">
-
-.input-group-color-picker{
+.app-custom-component-properties {
+  .input-group-color-picker{
     flex-direction: column;
+  }
 }
 
 </style>
