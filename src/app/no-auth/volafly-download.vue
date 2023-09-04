@@ -48,7 +48,7 @@ export default class AppVolaflyDownload extends BaseComponent {
   async downloadVolaFlyApp(sdkVersion: string) {
     const downloadUrl = await volateqApi.downloadVolaFlyAppUrl(sdkVersion)
 
-    AppDownloader.download(downloadUrl.url);
+    AppDownloader.download(downloadUrl.url, `volafly-${sdkVersion}-${downloadUrl.version}.apk`);
   }
 }
 </script>
