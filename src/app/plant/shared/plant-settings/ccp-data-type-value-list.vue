@@ -1,9 +1,19 @@
 <template>
   <div class="app-ccp-data-type-value-list">
-    <app-button variant="secondary" icon="plus" @click="onAddValueListItemClicked" />
-    <app-ccp-data-type-info v-for="(vl, i) in valueList" :key="i" :index="i" :value="vl" @input="onValueListChanged(i)">
-      <input type="text" v-model="vl.option" :placeholder="$t('option')" @change="onOptionChanged" />
+    <app-ccp-data-type-info
+      v-for="(vl, i) in valueList"
+      :key="i" 
+      :index="i" 
+      :value="vl" 
+      @input="onValueListChanged"
+      @delete="onDeleteValueListItem">
+      <b-form-group :label="$t('option')">
+        <b-form-input v-model="vl.option" :placeholder="$t('option')" @change="onOptionChanged" />
+      </b-form-group>
     </app-ccp-data-type-info>
+    <app-button variant="secondary" icon="plus" @click="onAddValueListItemClicked" cls="pull-right" size="sm">
+      {{ $t('add-value-list-item') }}
+    </app-button>
   </div>
 </template>
 <script lang="ts">
@@ -45,6 +55,10 @@ export default class AppCcpDatatTypeValueList extends Vue {
 
   onAddValueListItemClicked() {
     this.valueList.push({ option: "" });
+  }
+
+  onDeleteValueListItem(index: number) {
+    this.valueList.splice(index, 1);
   }
 }
 </script>
