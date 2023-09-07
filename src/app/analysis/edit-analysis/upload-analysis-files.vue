@@ -28,7 +28,7 @@ export default class AppUploadAnalysisFiles extends BaseAuthComponent {
   @Prop({ default: [] }) droneOptions!:  Array<any>;
 
   get uploadAllowed(): boolean {
-    return this.analysis && this.analysis.current_state.state.id < ApiStates.DATA_COMPLETE_VERIFIED || false;
+    return this.analysis && this.analysis.current_state!.state.id < ApiStates.DATA_COMPLETE_VERIFIED || false;
   }
 }
 </script>

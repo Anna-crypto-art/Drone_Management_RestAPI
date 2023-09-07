@@ -67,8 +67,13 @@
         <b-form-group :label="$t('description')">
           <b-form-textarea v-model="ccpModel.description" />
         </b-form-group>
-        <b-form-group :label="$t('color')">
-          <b-form-input v-model="ccpModel.color" placeholder="#00000000" />
+        <b-form-group id="color" :label="$t('color')">
+          <div class="input-group-color-picker" ref="colorpicker">
+            <input type="text" class="form-control" v-model="ccpModel.color" @focus="onInputColorFocus" readonly/>
+              <div class="current-color">
+                <chrome-picker :value="colors" @input="onChromePickerChanged" v-if="displayPicker"/>
+              </div>
+            </div>
         </b-form-group>
       </div>
     </app-modal-form>
@@ -97,7 +102,8 @@ import { CCPModel } from "./types";
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import { getUserName } from "@/app/shared/services/helper/user-helper";
 import { CustomComponentPropertyRequest } from '@/app/shared/services/volateq-api/api-requests/custom-component-property-request';
-
+import { Chrome } from 'vue-color';
+import { tinycolor } from 'tinycolor2';
 
 @Component({
   name: "app-custom-component-properties",
@@ -107,6 +113,7 @@ import { CustomComponentPropertyRequest } from '@/app/shared/services/volateq-ap
     AppTable,
     AppTableContainer,
     AppModalForm,
+    'chrome-picker': Chrome,
   }
 })
 export default class AppCustomComponentProperties extends BaseAuthComponent {
@@ -114,8 +121,14 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
 
   @Ref() addOrUpdateCCPModal!: IAppModalForm;
 
+  @Ref() colorpicker!: any
+
   tableLoading = false;
   modalLoading = false;
+
+  colors: any = {hex: '#194d33', hex8: '#194D33A8'};
+  colorValue = '';
+  displayPicker = false;
 
   ccpRows: any[] = [];
   ccpColumns: AppTableColumns = [];
@@ -123,7 +136,7 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
   componentOptions: BvSelectOption[] | null = null;
   dataTypeOptions: BvSelectOption[] | null = null;
 
-  readonly initCCPModel: CCPModel = {
+  readonly CCPModel = {
     modalOkTitle: "",
     modalTitle: "",
     name: "",
@@ -149,8 +162,6 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
     }));
 
     this.dataTypeOptions = Object.keys(ccpDataTypeNames).map(k => ({ value: k, text: this.$t(ccpDataTypeNames[k]).toString() }));
-
-    this.ccpModel = this.initCCPModel;
 
     await this.updateCCPRows();
   }
@@ -194,15 +205,56 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
     } else if (this.ccpModel?.dataType === CCPDataType.VALUE_LIST) {
       return "A, B, OptionZ, 42"
     }
-
     return "";
   }
 
   @CatchError()
+  onInputColorFocus() {
+    document.addEventListener('click', this.onDocumentClicked);
+    this.displayPicker = true;
+  }
+
+  hidePicker() {
+    document.removeEventListener('click', this.onDocumentClicked);
+    this.displayPicker = false;
+  }
+
+  @CatchError()
+  onChromePickerChanged(color: tinycolor) {
+    this.colors = color;
+    if(color.rgba.a == 1) {
+      this.ccpModel!.color = color.hex;
+    }
+    else {
+      this.ccpModel!.color = color.hex8;
+    }
+  }
+
+  @CatchError()
+  onDocumentClicked(e: Event) {
+    const el = this.$refs.colorpicker as HTMLElement,
+      target = e.target;
+    if(el !== target && !el!.contains(target as HTMLElement)) {
+      this.hidePicker()
+    }
+  }
+
+  createEmptyCCPModel(): CCPModel {
+    return {
+      modalOkTitle: "",
+      modalTitle: "",
+      name: "",
+      id: null,
+      componentId: null,
+      dataType: null,
+    } 
+  }
+
+  @CatchError()
   onAddCCPClick() {
-    this.ccpModel = this.initCCPModel;
-    this.ccpModel.modalTitle = this.$t("add-component-property").toString();
-    this.ccpModel.modalOkTitle = this.$t("create").toString();
+    this.ccpModel = this.createEmptyCCPModel();
+    this.ccpModel!.modalTitle = this.$t("add-component-property").toString();
+    this.ccpModel!.modalOkTitle = this.$t("create").toString();
 
     this.addOrUpdateCCPModal.show();
   }
@@ -220,7 +272,7 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
       description: row.description,
       color: row.color,
     }
-    
+    this.colors = row.color;
     this.addOrUpdateCCPModal.show();
   }
 
@@ -258,7 +310,7 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
       name: this.ccpModel!.name,
       data_type: this.ccpModel!.dataType!,
       data_type_value_range: this.ccpModel!.dataTypeValueRange || undefined,
-      description: this.ccpModel!.description,
+      description: this.ccpModel!.description || undefined,
       color: this.ccpModel!.color || undefined,
     };
   }
@@ -284,5 +336,10 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
 </script>
 
 <style lang="scss">
+.app-custom-component-properties {
+  .input-group-color-picker{
+    flex-direction: column;
+  }
+}
 
 </style>

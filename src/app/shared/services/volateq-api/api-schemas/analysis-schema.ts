@@ -30,7 +30,7 @@ export interface AnalysisKeyFigureSchema {
 }
 
 export interface AnalysisSchema extends SimpleAnalysisSchema {
-  current_state: AnalysisStateSchema;
+  current_state?: AnalysisStateSchema;
   plant: PlantSchema;
   customer: CustomerSchema;
   files?: AnalysisFilesSchema;

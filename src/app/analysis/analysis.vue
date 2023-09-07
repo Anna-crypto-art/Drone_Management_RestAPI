@@ -36,7 +36,7 @@
             </div>
           </template>
 
-          <template #cell(state)="row">
+          <template #cell(stateId)="row">
             <div v-if="row.item.state">
               {{ $t(row.item.state.state.name) }}
               <b-icon 
@@ -149,7 +149,9 @@ export default class AppAnalysis extends BaseAuthComponent {
           return dateHelper.toDate(flownAt);
         },
       },
-      { key: "state", label: this.$t("state").toString(), sortable: true },
+      { 
+        key: "stateId", label: this.$t("state").toString(), sortable: true,
+      },
       { key: "productPackages", label: this.$t("product-packages").toString() },
     ];
 
@@ -228,7 +230,7 @@ export default class AppAnalysis extends BaseAuthComponent {
       analysisFilter.plant_id = this.selectedPlantId;
     }
     
-    this.analysisRows = (await volateqApi.getAllAnalysis(analysisFilter)).map((a: AnalysisSchema) => {
+    this.analysisRows = (await volateqApi.getAllAnalysis(analysisFilter)).map((a: AnalysisSchema) => {    
       const row = {
         id: a.id,
         name: a.name,
@@ -241,13 +243,13 @@ export default class AppAnalysis extends BaseAuthComponent {
           "",
         analysisResult: a.analysis_result,
         state: a.current_state,
+        stateId: a.current_state?.state.id,
         files: a.files,
         plantId: a.plant.id,
         plant: a.plant.name,
         customer: a.customer.name,
         productPackages: a.order_product_packages,
-      };
-
+      };      
       return row;
     });
   }
