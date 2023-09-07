@@ -12,13 +12,33 @@ export enum CCPDataType {
 
 export type CCPDataTypeValueRange = string[] | [number, number]
 
+export interface DataTypeOptionInfo {
+  label?: string;
+  color?: string;
+  description?: string;
+}
+
+export type ValueListInfosSchema = Record<string, DataTypeOptionInfo>
+
+export interface NumberRangeInfoSchema {
+  number_range: [number, number];
+  info: DataTypeOptionInfo;
+}
+
+export type NumberRangeInfosSchema = Array<NumberRangeInfoSchema>;
+
+export interface DataTypeValueRangeSchema {
+  options: CCPDataTypeValueRange;
+  infos?: ValueListInfosSchema | NumberRangeInfosSchema;
+}
+
 export interface CustomComponentPropertySchema {
   id: string;
   plant: SimplePlantSchema;
   component: ComponentSchema;
   name: string;
   data_type: CCPDataType;
-  data_type_value_range: CCPDataTypeValueRange;
+  data_type_value_range: DataTypeValueRangeSchema;
   created_at: string;
   color?: string;
   updated_at?: string;
