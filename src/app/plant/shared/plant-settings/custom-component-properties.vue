@@ -50,31 +50,39 @@
       :title="ccpModalTitle"
       :okTitle="ccpModalOkTitle"
       :modalLoading="modalLoading"
+      size="lg"
       @submit="onAddOrUpdateCCPSubmit">
       <div v-if="ccpModel">
-        <b-form-group :label="$t('component')">
-          <b-form-select v-model="ccpModel.componentId" :options="componentOptions" />
-        </b-form-group>
-        <b-form-group :label="$t('name')">
-          <b-form-input v-model="ccpModel.name" />
-        </b-form-group>
-        <b-form-group :label="$t('data-type')">
-          <b-form-select v-model="ccpModel.dataType" :options="dataTypeOptions" />
-        </b-form-group>
-        <b-form-group v-show="isValueRangeRequired" :label="$t('data-type-value-range')">
-          <b-form-input v-model="ccpModel.dataTypeValueRange" :placeholder="valueRangePlaceholder" />
-        </b-form-group>
-        <b-form-group :label="$t('description')">
-          <b-form-textarea v-model="ccpModel.description" />
-        </b-form-group>
-        <b-form-group id="color" :label="$t('color')">
-          <div class="input-group-color-picker" ref="colorpicker">
-            <input type="text" class="form-control" v-model="ccpModel.color" @focus="onInputColorFocus" readonly/>
-              <div class="current-color">
-                <chrome-picker :value="colors" @input="onChromePickerChanged" v-if="displayPicker"/>
-              </div>
-            </div>
-        </b-form-group>
+        <b-row>
+          <b-col>
+            <b-form-group :label="$t('component')">
+              <b-form-select v-model="ccpModel.componentId" :options="componentOptions" />
+            </b-form-group>
+          </b-col>
+          <b-col>
+            <b-form-group :label="$t('name')">
+              <b-form-input v-model="ccpModel.name" />
+            </b-form-group>
+          </b-col>
+        </b-row>
+        <app-modal-form-info-area>
+          <b-form-group :label="$t('data-type')">
+            <b-form-select v-model="ccpModel.dataType" :options="dataTypeOptions" @change="onDataTypeChanged" />
+          </b-form-group>
+          <b-form-group v-show="isDataTypeValueList" :label="$t('data-type-value-list')">
+            <app-ccp-datat-type-value-list v-model="ccpModel.valueListInfos" />
+          </b-form-group>
+          <b-form-group :label="$t('color')" v-show="isSimpleDataType">
+            <app-colorpicker v-model="ccpModel.color" />
+          </b-form-group>
+        </app-modal-form-info-area>
+        <b-row>
+          <b-col>
+          <b-form-group :label="$t('description')">
+            <b-form-textarea v-model="ccpModel.description" />
+          </b-form-group>
+          </b-col>
+        </b-row>
       </div>
     </app-modal-form>
   </div>
@@ -88,10 +96,11 @@ import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import AppTable from "@/app/shared/components/app-table/app-table.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
+import AppModalFormInfoArea from "@/app/shared/components/app-modal/app-modal-form-info-area.vue";
 import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
 import volateqApi from '@/app/shared/services/volateq-api/volateq-api';
 import { AppTableColumns } from '@/app/shared/components/app-table/types';
-import { CCPDataType, ccpDataTypeNames, CCPDataTypeValueRange, CustomComponentPropertySchema } from '@/app/shared/services/volateq-api/api-schemas/custom-component-property-schema';
+import { CCPDataType, ccpDataTypeNames, CustomComponentPropertySchema } from '@/app/shared/services/volateq-api/api-schemas/custom-component-property-schema';
 import { CatchError } from '@/app/shared/services/helper/catch-helper';
 import { IAppModalForm } from '@/app/shared/components/app-modal/types';
 import { ApiComponent, apiTechnologyComponents } from '@/app/shared/services/volateq-api/api-components/api-components';
@@ -102,8 +111,8 @@ import { CCPModel } from "./types";
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import { getUserName } from "@/app/shared/services/helper/user-helper";
 import { CustomComponentPropertyRequest } from '@/app/shared/services/volateq-api/api-requests/custom-component-property-request';
-import { Chrome } from 'vue-color';
-import { tinycolor } from 'tinycolor2';
+import AppColorpicker from '@/app/shared/components/app-colorpicker/app-colorpicker.vue';
+import AppCcpDatatTypeValueList from './ccp-data-type-value-list.vue';
 
 @Component({
   name: "app-custom-component-properties",
@@ -113,7 +122,9 @@ import { tinycolor } from 'tinycolor2';
     AppTable,
     AppTableContainer,
     AppModalForm,
-    'chrome-picker': Chrome,
+    AppColorpicker,
+    AppModalFormInfoArea,
+    AppCcpDatatTypeValueList,
   }
 })
 export default class AppCustomComponentProperties extends BaseAuthComponent {
@@ -126,24 +137,12 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
   tableLoading = false;
   modalLoading = false;
 
-  colors: any = {hex: '#194d33', hex8: '#194D33A8'};
-  colorValue = '';
-  displayPicker = false;
-
   ccpRows: any[] = [];
   ccpColumns: AppTableColumns = [];
 
   componentOptions: BvSelectOption[] | null = null;
   dataTypeOptions: BvSelectOption[] | null = null;
 
-  readonly CCPModel = {
-    modalOkTitle: "",
-    modalTitle: "",
-    name: "",
-    id: null,
-    componentId: null,
-    dataType: null,
-  } 
   ccpModel: CCPModel | null = null;
 
   async created() {
@@ -194,49 +193,16 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
     return this.ccpModel?.modalOkTitle || "";
   }
 
-  get isValueRangeRequired(): boolean {
-    return this.ccpModel && this.ccpModel.dataType && 
-      [CCPDataType.NUMBER_RANGE, CCPDataType.VALUE_LIST].includes(this.ccpModel!.dataType!) || false;
+  get isDataTypeValueList(): boolean {
+    return this.ccpModel && this.ccpModel.dataType === CCPDataType.VALUE_LIST || false;
   }
 
-  get valueRangePlaceholder(): string {
-    if (this.ccpModel?.dataType === CCPDataType.NUMBER_RANGE) {
-      return "1 - 42"
-    } else if (this.ccpModel?.dataType === CCPDataType.VALUE_LIST) {
-      return "A, B, OptionZ, 42"
-    }
-    return "";
+  get isDataTypeNumberRange(): boolean {
+    return this.ccpModel && this.ccpModel.dataType === CCPDataType.NUMBER_RANGE || false;
   }
 
-  @CatchError()
-  onInputColorFocus() {
-    document.addEventListener('click', this.onDocumentClicked);
-    this.displayPicker = true;
-  }
-
-  hidePicker() {
-    document.removeEventListener('click', this.onDocumentClicked);
-    this.displayPicker = false;
-  }
-
-  @CatchError()
-  onChromePickerChanged(color: tinycolor) {
-    this.colors = color;
-    if(color.rgba.a == 1) {
-      this.ccpModel!.color = color.hex;
-    }
-    else {
-      this.ccpModel!.color = color.hex8;
-    }
-  }
-
-  @CatchError()
-  onDocumentClicked(e: Event) {
-    const el = this.$refs.colorpicker as HTMLElement,
-      target = e.target;
-    if(el !== target && !el!.contains(target as HTMLElement)) {
-      this.hidePicker()
-    }
+  get isSimpleDataType(): boolean {
+    return this.ccpModel && [CCPDataType.BOOLEAN, CCPDataType.NUMBER, CCPDataType.TEXT].includes(this.ccpModel.dataType!) || false;
   }
 
   createEmptyCCPModel(): CCPModel {
@@ -247,6 +213,8 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
       id: null,
       componentId: null,
       dataType: null,
+      valueListInfos: [],
+      numberRangeInfos: [],
     } 
   }
 
@@ -268,11 +236,10 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
       componentId: row.componentId,
       name: row.name,
       dataType: row.dataType,
-      dataTypeValueRange: row.dataTypeValueRange,
+      // dataTypeValueRange: row.dataTypeValueRange,
       description: row.description,
       color: row.color,
     }
-    this.colors = row.color;
     this.addOrUpdateCCPModal.show();
   }
 
@@ -304,18 +271,38 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
     await this.updateCCPRows();
   }
 
+  @CatchError()
+  onDataTypeChanged() {
+    switch (this.ccpModel!.dataType) {
+      case CCPDataType.BOOLEAN:
+      case CCPDataType.NUMBER:
+      case CCPDataType.TEXT:
+        break;
+
+      case CCPDataType.VALUE_LIST:
+        if (!this.ccpModel!.valueListInfos) {
+          this.ccpModel!.valueListInfos = [];
+        }
+        break;
+
+    }
+  }
+
   private convertCCPModelToRequest(): CustomComponentPropertyRequest {
     return {
       component_id: this.ccpModel!.componentId!,
       name: this.ccpModel!.name,
       data_type: this.ccpModel!.dataType!,
-      data_type_value_range: this.ccpModel!.dataTypeValueRange || undefined,
+      data_type_value_list: undefined, // this.ccpModel!.dataTypeValueRange || undefined,
+      data_type_numer_range: undefined,
       description: this.ccpModel!.description || undefined,
       color: this.ccpModel!.color || undefined,
     };
   }
 
-  private convertValueRangeToString(dataType: CCPDataType, valueRange: CCPDataTypeValueRange): string | null {
+  private convertValueRangeToString(dataType: CCPDataType, valueRange: any): string | null {
+    // continue here
+
     if (dataType === CCPDataType.NUMBER_RANGE) {
       if (!Array.isArray(valueRange) || valueRange.length !== 2) {
         throw { error: "INVALID_VALUE_RANGE", message: `The value range ${valueRange} is invalid for the data type ${dataType}` } as ApiException

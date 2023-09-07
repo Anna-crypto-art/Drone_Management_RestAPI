@@ -1,3 +1,4 @@
+import { NumberRangeInfoRequest, ValueListInfoRequest } from "@/app/shared/services/volateq-api/api-requests/custom-component-property-request";
 import { CCPDataType, CCPDataTypeValueRange } from "@/app/shared/services/volateq-api/api-schemas/custom-component-property-schema";
 
 export interface CCPModel {
@@ -7,7 +8,8 @@ export interface CCPModel {
   componentId: number | null;
   name: string;
   dataType: CCPDataType | null;
-  dataTypeValueRange?: CCPDataTypeValueRange;
+  valueListInfos?: ValueListInfoRequest[];
+  numberRangeInfos?: NumberRangeInfoRequest[];
   color?: string;
   description?: string;
 }
