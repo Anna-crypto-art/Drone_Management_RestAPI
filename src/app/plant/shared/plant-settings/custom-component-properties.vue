@@ -10,21 +10,29 @@
           :hoverActions="true">
 
           <template #cell(dataTypeValueRange)="row">
-            <ul v-if="row.item.dataType === 'VALUE_LIST'">
-              <li v-for="val in row.item.dataTypeValueRange.split(',')" :key="val">{{ val.trim() }}</li>
+            <ul v-if="row.item.dataTypeValueList" class="app-custom-component-properties-value-range">
+              <li v-for="(vl, i) in row.item.dataTypeValueList" :key="i">
+                <app-color-square v-if="vl.color" :color="vl.color" />
+                <i>{{ vl.option }}</i> &nbsp;
+                <span v-if="vl.label"> | <b>{{ vl.label }}</b></span> &nbsp;
+                <app-explanation v-if="vl.description">{{ vl.description }}</app-explanation> &nbsp;
+              </li>
             </ul>
-            <i v-if="row.item.dataType !== 'VALUE_LIST'">{{ row.item.dataTypeValueRange }}</i>
+            <ul v-if="row.item.dataTypeNumberRange" class="app-custom-component-properties-value-range">
+              <li v-for="(nr, i) in row.item.dataTypeNumberRange" :key="i">
+                <app-color-square v-if="nr.color" :color="nr.color" />
+                <i>{{ nr.number_from }} - {{ nr.number_to }}</i> &nbsp;
+                <span v-if="nr.label"> | <b>{{ nr.label }}</b></span> &nbsp;
+                <app-explanation v-if="nr.description">{{ nr.description }}</app-explanation> &nbsp;
+              </li>
+            </ul>
+            <app-color-square v-if="!row.item.dataTypeValueList && !row.item.dataTypeNumberRange" :color="row.item.color" />
           </template>
 
           <template #cell(description)="row">
             <small>
               {{ row.item.description }}
             </small>
-          </template>
-
-          <template #cell(color)="row">
-            <div v-if="row.item.color" :style="'background-color: ' + row.item.color + '; width: 20px; height: 20px;'">
-            </div>
           </template>
 
           <template #cell(user)="row">
@@ -69,8 +77,13 @@
           <b-form-group :label="$t('data-type')">
             <b-form-select v-model="ccpModel.dataType" :options="dataTypeOptions" @change="onDataTypeChanged" />
           </b-form-group>
-          <b-form-group v-show="isDataTypeValueList" :label="$t('data-type-value-list')">
+          <b-form-group v-show="isDataTypeValueList">
+            <label class="pad-top"><b>{{ $t('manage-options') }}</b></label>
             <app-ccp-datat-type-value-list v-model="ccpModel.valueListInfos" />
+          </b-form-group>
+          <b-form-group v-show="isDataTypeNumberRange">
+            <label class="pad-top"><b>{{ $t('manage-number-ranges') }}</b></label>
+            <app-ccp-data-type-number-range v-model="ccpModel.numberRangeInfos" />
           </b-form-group>
           <b-form-group :label="$t('color')" v-show="isSimpleDataType">
             <app-colorpicker v-model="ccpModel.color" />
@@ -100,7 +113,7 @@ import AppModalFormInfoArea from "@/app/shared/components/app-modal/app-modal-fo
 import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
 import volateqApi from '@/app/shared/services/volateq-api/volateq-api';
 import { AppTableColumns } from '@/app/shared/components/app-table/types';
-import { CCPDataType, ccpDataTypeNames, CustomComponentPropertySchema } from '@/app/shared/services/volateq-api/api-schemas/custom-component-property-schema';
+import { CCPDataType, ccpDataTypeNames, CustomComponentPropertySchema, DataTypeValueRangeSchema, NumberRangeInfosSchema } from '@/app/shared/services/volateq-api/api-schemas/custom-component-property-schema';
 import { CatchError } from '@/app/shared/services/helper/catch-helper';
 import { IAppModalForm } from '@/app/shared/components/app-modal/types';
 import { ApiComponent, apiTechnologyComponents } from '@/app/shared/services/volateq-api/api-components/api-components';
@@ -110,9 +123,12 @@ import { ApiException } from '@/app/shared/services/volateq-api/api-errors';
 import { CCPModel } from "./types";
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import { getUserName } from "@/app/shared/services/helper/user-helper";
-import { CustomComponentPropertyRequest } from '@/app/shared/services/volateq-api/api-requests/custom-component-property-request';
+import { CustomComponentPropertyRequest, DataTypeNumberRangeRequest, DataTypeValueListRequest, NumberRangeInfoRequest, ValueListInfoRequest } from '@/app/shared/services/volateq-api/api-requests/custom-component-property-request';
 import AppColorpicker from '@/app/shared/components/app-colorpicker/app-colorpicker.vue';
-import AppCcpDatatTypeValueList from './ccp-data-type-value-list.vue';
+import AppCcpDataTypeValueList from './ccp-data-type-value-list.vue';
+import AppExplanation from '@/app/shared/components/app-explanation/app-explanation.vue';
+import AppColorSquare from '@/app/shared/components/app-colorpicker/app-color-square.vue';
+import AppCcpDataTypeNumberRange from './ccp-data-type-number-range.vue';
 
 @Component({
   name: "app-custom-component-properties",
@@ -124,7 +140,10 @@ import AppCcpDatatTypeValueList from './ccp-data-type-value-list.vue';
     AppModalForm,
     AppColorpicker,
     AppModalFormInfoArea,
-    AppCcpDatatTypeValueList,
+    AppCcpDataTypeValueList,
+    AppExplanation,
+    AppColorSquare,
+    AppCcpDataTypeNumberRange,
   }
 })
 export default class AppCustomComponentProperties extends BaseAuthComponent {
@@ -151,7 +170,6 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
       { key: "name", label: this.$t("name").toString() },
       { key: "dataTypeName", label: this.$t("data-type").toString() },
       { key: "dataTypeValueRange", label: this.$t("data-type-value-range").toString() },
-      { key: "color", label: this.$t("color").toString() },
       { key: "description", label: this.$t("description").toString() },
       { key: "user", label: this.$t("user").toString() },
     ];
@@ -168,6 +186,11 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
   @CatchError("tableLoading")
   async updateCCPRows() {
     this.ccpRows = (await volateqApi.getCustomComponentProperties(this.plant.id)).map((ccp: CustomComponentPropertySchema) => {
+      const dataTypeValueList = ccp.data_type === CCPDataType.VALUE_LIST ? 
+        this.convertValueRangeToValueList(ccp.data_type_value_range) : undefined;
+      const dataTypeNumberRange = ccp.data_type === CCPDataType.NUMBER_RANGE ?
+        this.convertValueRangeToNumberRange(ccp.data_type_value_range) : undefined;
+
       return {
         id: ccp.id,
         componentId: ccp.component.id,
@@ -175,7 +198,8 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
         name: ccp.name,
         dataType: ccp.data_type,
         dataTypeName: this.$t(ccpDataTypeNames[ccp.data_type]).toString(),
-        dataTypeValueRange: this.convertValueRangeToString(ccp.data_type, ccp.data_type_value_range),
+        dataTypeValueList: dataTypeValueList,
+        dataTypeNumberRange: dataTypeNumberRange,
         description: ccp.description,
         user: getUserName(ccp.updated_by_user || ccp.created_by_user),
         color: ccp.color && "#" + ccp.color || "",
@@ -236,7 +260,8 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
       componentId: row.componentId,
       name: row.name,
       dataType: row.dataType,
-      // dataTypeValueRange: row.dataTypeValueRange,
+      valueListInfos: row.dataTypeValueList,
+      numberRangeInfos: row.dataTypeNumberRange,
       description: row.description,
       color: row.color,
     }
@@ -293,31 +318,90 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
       component_id: this.ccpModel!.componentId!,
       name: this.ccpModel!.name,
       data_type: this.ccpModel!.dataType!,
-      data_type_value_list: undefined, // this.ccpModel!.dataTypeValueRange || undefined,
-      data_type_numer_range: undefined,
+      data_type_value_list: this.convertAndValidateValueListsRequest(this.ccpModel!.dataType!, this.ccpModel!.valueListInfos),
+      data_type_numer_range: this.convertAndValidateNumberRangesRequest(this.ccpModel!.dataType!, this.ccpModel!.numberRangeInfos),
       description: this.ccpModel!.description || undefined,
       color: this.ccpModel!.color || undefined,
     };
   }
 
-  private convertValueRangeToString(dataType: CCPDataType, valueRange: any): string | null {
-    // continue here
-
-    if (dataType === CCPDataType.NUMBER_RANGE) {
-      if (!Array.isArray(valueRange) || valueRange.length !== 2) {
-        throw { error: "INVALID_VALUE_RANGE", message: `The value range ${valueRange} is invalid for the data type ${dataType}` } as ApiException
+  private convertAndValidateValueListsRequest(
+    ccpDataType: CCPDataType,
+    valueListsRequest: ValueListInfoRequest[] | undefined
+  ): DataTypeValueListRequest | undefined {
+    if (!valueListsRequest || valueListsRequest.length === 0) {
+      if (ccpDataType === CCPDataType.VALUE_LIST) {
+        throw { error: "OPTIONS_REQUIRED", message: "Please add options for data type \"Option\"" } as ApiException
       }
 
-      return `${valueRange[0]} - ${valueRange[1]}`;
-    } else if (dataType === CCPDataType.VALUE_LIST) {
-      if (!Array.isArray(valueRange) || valueRange.length === 0) {
-        throw { error: "INVALID_VALUE_RANGE", message: `The value range ${valueRange} is invalid for the data type ${dataType}` } as ApiException
-      }
-
-      return valueRange.join(", ");
+      return undefined;
     }
 
-    return null;
+    for (const option of valueListsRequest) {
+      if (option.option == undefined || option.option.trim() === "") {
+        throw { error: "OPTION_NAME_REQUIRED", message: "Please type a name for each option" } as ApiException;
+      }
+    }
+
+    return {
+      options: valueListsRequest.map(o => o.option),
+      infos: valueListsRequest,
+    };
+  }
+
+  private convertAndValidateNumberRangesRequest(
+    ccpDataType: CCPDataType,
+    numberRangesRequest: NumberRangeInfoRequest[] | undefined,
+  ): DataTypeNumberRangeRequest | undefined {
+    if (!numberRangesRequest || numberRangesRequest.length === 0) {
+      if (ccpDataType === CCPDataType.NUMBER_RANGE) {
+        throw { error: "NUMBER_RANGES_REQUIRED", message: "Please add number ranges for data type \"Number Range\"" } as ApiException
+      }
+
+      return undefined;
+    }
+
+    for (const nr of numberRangesRequest) {
+      if (nr.number_from !== 0 && !nr.number_from) {
+        throw { error: "NUMBER_FROM_REQUIRED", message: "Please type a number from value" } as ApiException
+      }
+      if (nr.number_to !== 0 && !nr.number_to) {
+        throw { error: "NUMBER_TO_REQUIRED", message: "Please type a number to value" } as ApiException
+      }
+    }
+
+    return {
+      number_from: numberRangesRequest[0].number_from,
+      number_to: numberRangesRequest[numberRangesRequest.length - 1].number_to,
+      infos: numberRangesRequest
+    };
+  }
+
+  private convertValueRangeToValueList(valueRange: DataTypeValueRangeSchema): ValueListInfoRequest[] {
+    const valueList: ValueListInfoRequest[] = [];
+    for (const option of valueRange.options) {
+      valueList.push({
+        option: option,
+        ...(valueRange.infos && option in valueRange.infos && valueRange.infos[option] || {}),
+      });
+    }
+
+    return valueList
+  }
+
+  private convertValueRangeToNumberRange(valueRange: DataTypeValueRangeSchema): NumberRangeInfoRequest[] {
+    let numberRanges: NumberRangeInfoRequest[];
+    if (valueRange.infos) {
+      numberRanges = (valueRange.infos as NumberRangeInfosSchema).map(info => ({ 
+        number_from: info.number_range[0],
+        number_to: info.number_range[1],
+        ...info.info,
+      }));
+    } else {
+      numberRanges = [{ number_from: valueRange.options[0] as number, number_to: valueRange.options[1] as number }];
+    }
+
+    return numberRanges;
   }
 }
 </script>
@@ -326,6 +410,9 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
 .app-custom-component-properties {
   .input-group-color-picker{
     flex-direction: column;
+  }
+  &-value-range {
+    list-style-type: none;
   }
 }
 

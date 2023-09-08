@@ -116,3 +116,14 @@ function complimentary(color) {
   const limit = 255;
   return [limit - r, limit - g, limit - b];
 }
+
+export function hex8ToRgba(hex8: string): string {
+  const [r, g, b, a] = [
+    parseInt(hex8.substring(1, 3), 16),
+    parseInt(hex8.substring(3, 5), 16),
+    parseInt(hex8.substring(5, 7), 16),
+    parseInt(hex8.substring(7, 9), 16) / 255,
+  ];
+
+  return `rgba(${r}, ${g}, ${b}, ${a})`
+}

@@ -15,8 +15,8 @@
     </b-col>
     <b-col class="app-ccp-data-type-info-col" cols="3">
       <b-form-group :label="$t('color')">
-        <app-colorpicker v-model="valueInfo.color" @change="onChange" style="width: 66%; padding-right: 15px; float: left" />
-        <app-button variant="outline-danger" icon="trash" @click="onDeleteClicked" size="sm" cls="pull-right" style="margin-right: 15px" />
+        <app-colorpicker v-model="valueInfo.color" @change="onChange" />
+        <app-button variant="outline-danger" icon="trash" @click="onDeleteClicked" size="sm" cls="del-btn pull-right" />
         <div class="clear"></div>
       </b-form-group>
     </b-col>
@@ -44,10 +44,14 @@ export default class AppCcpDataTypeInfo extends Vue {
 
   created() {
     this.valueInfo = this.value;
+
+    this.nullToUndefined();
   }
 
   @Watch("value") onValueChanged() {
     this.valueInfo = this.value;
+
+    this.nullToUndefined();
   }
 
   onChange() {
@@ -57,15 +61,31 @@ export default class AppCcpDataTypeInfo extends Vue {
   onDeleteClicked() {
     this.$emit("delete", this.index);
   }
+
+  private nullToUndefined() {
+    // API cannot handle "null" values. Only "undefined"... so we workaround here...
+    for (const k in this.valueInfo) {
+      if (this.valueInfo[k] === null) {
+        this.valueInfo[k] = undefined;
+      }
+    }
+  }
 }
 </script>
 <style lang="scss">
 .app-ccp-data-type-info {
   &-col {
     padding-right: 0 !important;
-  }
-  &-col.del-btn {
-    padding-top: 30px;
+
+    .del-btn {
+      margin-right: 15px;
+    }
+
+    .app-colorpicker {
+      width: 66%; 
+      padding-right: 15px;
+      float: left;
+    }
   }
 }
 </style>

@@ -7,12 +7,12 @@
       :value="vl" 
       @input="onValueListChanged"
       @delete="onDeleteValueListItem">
-      <b-form-group :label="$t('option')">
-        <b-form-input v-model="vl.option" :placeholder="$t('option')" @change="onOptionChanged" />
+      <b-form-group :label="$t('name')">
+        <b-form-input v-model="vl.option" :placeholder="$t('option-name')" @change="onOptionChanged" />
       </b-form-group>
     </app-ccp-data-type-info>
-    <app-button variant="secondary" icon="plus" @click="onAddValueListItemClicked" cls="pull-right" size="sm">
-      {{ $t('add-value-list-item') }}
+    <app-button variant="secondary" icon="plus" @click="onAddValueListItemClicked" size="sm">
+      {{ $t('add-option') }}
     </app-button>
   </div>
 </template>
@@ -30,7 +30,7 @@ import AppCcpDataTypeInfo from './ccp-data-type-info.vue';
     AppButton, 
   }
 })
-export default class AppCcpDatatTypeValueList extends Vue {
+export default class AppCcpDataTypeValueList extends Vue {
   @Prop({ required: true }) value!: ValueListInfoRequest[];
 
   valueList: ValueListInfoRequest[] = [];
