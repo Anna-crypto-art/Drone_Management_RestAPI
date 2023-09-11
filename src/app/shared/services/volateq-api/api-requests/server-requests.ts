@@ -3,7 +3,7 @@ import { ApiTasks } from "../api-tasks";
 
 export interface AnalysisQFlyServerActionRequest {
   action?: QFlyServerAction;
-  start_task?: ApiTasks.run_qfly_wizard | ApiTasks.validate_plant_metadata;
+  start_task?: ApiTasks.run_qfly_wizard | ApiTasks.download_analysis_files;
   tags?: ServerTag[];
 }
 
@@ -13,5 +13,5 @@ export interface QFlyServerUpdateRequest {
   analysis_name?: string;
   new_tags?: ServerTag[];
   action?: QFlyServerAction;
-  task?: ApiTasks.run_qfly_wizard | ApiTasks.validate_plant_metadata;
+  task?: ApiTasks.run_qfly_wizard | ApiTasks.download_analysis_files;
 }

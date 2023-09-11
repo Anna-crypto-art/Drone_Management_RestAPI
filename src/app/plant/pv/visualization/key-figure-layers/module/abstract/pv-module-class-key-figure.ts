@@ -5,10 +5,12 @@ import { ModuleKeyFigureLayer } from "./pv-module-key-figure";
 
 export abstract class ModuleClassKeyFigure extends ModuleKeyFigureLayer {
   public getStyle(feature: FeatureLike): Style {
+    const classColor = this.getClassColor(this.getQueryClassParam());
+
     const style = super.getStyle(feature);
-    
-    style.getFill().setColor(this.getClassColor(this.getQueryClassParam()));
-    
+    style.getFill().setColor(this.getColorWithAlpha(classColor, this.colorTransparency));
+    style.getStroke().setColor(classColor)
+
     return style
   }
 

@@ -73,8 +73,8 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
       this.taskSelectionDisabled = false;
 
       if (task.state === "SUCCESSFUL") {
-        if (task.name === ApiTasks.validate_plant_metadata) {
-          this.showSuccess(this.$t("uploaded-data-complete-success").toString());
+        if (task.name === ApiTasks.download_analysis_files) {
+          this.showSuccess(this.$t("download-analysis-files-success").toString());
         } else if (task.name === ApiTasks.run_qfly_wizard) {
           this.showSuccess(this.$t("evaluation-finished-success").toString());
         }
@@ -123,8 +123,8 @@ export default class AppRunQFlyForAnalysis extends BaseAuthComponent {
       this.runTaskSelection = [
         { value: null, text: "" },
         {
-          text: this.$t('validate-file-completeness').toString(),
-          value: ApiTasks.validate_plant_metadata,
+          text: this.$t('download-analysis-files').toString(),
+          value: ApiTasks.download_analysis_files,
         },
         {
           text: this.$t('run-qfly-wizard').toString(),

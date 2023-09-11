@@ -2,7 +2,7 @@ import { ApiErrors, ApiException } from "@/app/shared/services/volateq-api/api-e
 import { UserAuthMethod } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import Vue from "vue";
-import authContainerEventBus from "../shared/components/auth-container-event-bus";
+import authContainerEventBus from "../../shared/components/app-auth-container/auth-container-event-bus";
 
 export abstract class ConfirmLoginComponent extends Vue {
   protected abstract securityCode: string;

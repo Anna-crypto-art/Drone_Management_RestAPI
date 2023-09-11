@@ -21,11 +21,11 @@
 <script lang="ts">
 import { Component } from "vue-property-decorator";
 
-import AppAuthContainer from "@/app/auth/shared/components/auth-container.vue";
+import AppAuthContainer from "@/app/shared/components/app-auth-container/auth-container.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppSecurityCode from "@/app/shared/components/app-security-code/app-security-code.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import authContainerEventBus from "@/app/auth/shared/components/auth-container-event-bus";
+import authContainerEventBus from "@/app/shared/components/app-auth-container/auth-container-event-bus";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";
 import { ConfirmLoginComponent } from "./confirm-login-component";
 import { UserAuthMethod } from "@/app/shared/services/volateq-api/api-schemas/user-schemas";

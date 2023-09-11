@@ -90,7 +90,7 @@
         </b-form-checkbox>
       </b-form-group>
       <b-form-group :label="$t('select-dt-json-file')">
-        <b-form-file v-model="managePlantModel.file" required accept=".json"></b-form-file>
+        <app-simple-file-upload v-model="managePlantModel.file" :uploadProgress="uploadProgress" accept=".json" />
       </b-form-group>
     </app-modal-form>
 
@@ -173,6 +173,8 @@ import { CatchError } from "../shared/services/helper/catch-helper";
 import { PlantSchema } from "../shared/services/volateq-api/api-schemas/plant-schema";
 import { OrderProductPackageSchema, OrderSchema } from "../shared/services/volateq-api/api-schemas/order-schema";
 import { AppTableColumns } from "../shared/components/app-table/types";
+import AppSimpleFileUpload from "@/app/shared/components/app-simple-file-upload/app-simple-file-upload.vue";
+import { UploadProgress } from "@/app/shared/components/app-simple-file-upload/types";
 
 @Component({
   name: "app-plants",
@@ -186,6 +188,7 @@ import { AppTableColumns } from "../shared/components/app-table/types";
     AppOrderPpsView,
     AppTable,
     AppIcon,
+    AppSimpleFileUpload,
   },
 })
 export default class AppPlants extends BaseAuthComponent {
@@ -194,6 +197,8 @@ export default class AppPlants extends BaseAuthComponent {
 
   columns: AppTableColumns | null = null;
   plants: PlantItem[] | null = null;
+
+  uploadProgress: UploadProgress | null = null;
 
   tableLoading = false;
   managePlantModel: { plant: PlantItem | null; clearBefore: boolean; file: File | null } = {
@@ -264,7 +269,10 @@ export default class AppPlants extends BaseAuthComponent {
     const task = await volateqApi.importFieldgeometry(
       this.managePlantModel.file!,
       this.managePlantModel.plant!.id,
-      this.managePlantModel.clearBefore
+      this.managePlantModel.clearBefore,
+      (progressEvent) => {
+        this.uploadProgress = { total: progressEvent.total, loaded: progressEvent.loaded };
+      }
     );
 
     volateqApi.waitForTask(

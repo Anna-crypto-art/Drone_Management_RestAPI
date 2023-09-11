@@ -394,8 +394,13 @@ export class VolateqAPI extends HttpClientBase {
     return analysisResults;
   }
 
-  public importFieldgeometry(file: File, plantId: string, clearBefore: boolean): Promise<TaskSchema> {
-    return this.postForm(`/auth/fieldgeometry/${plantId}?clear_before=${clearBefore}`, { file });
+  public importFieldgeometry(
+    file: File, 
+    plantId: string, 
+    clearBefore: boolean,
+    onUploadProgress?: (progressEvent: ProgressEvent) => void,
+  ): Promise<TaskSchema> {
+    return this.postForm(`/auth/fieldgeometry/${plantId}?clear_before=${clearBefore}`, { file }, onUploadProgress);
   }
 
   public waitForTask(
@@ -468,6 +473,10 @@ export class VolateqAPI extends HttpClientBase {
 
   public downloadMultipleAnalysisFilesUrl(analysisId: string, filenames: string[] | "all") {
     return this.getUrl(`${apiBaseUrl}/auth/analysis/${analysisId}/files/download`, { filenames: filenames });
+  }
+
+  public downloadVolaFlyAppUrl(sdk_version: string): Promise<{ url: string, version: string }> {
+    return this.get(`${apiBaseUrl}/volafly-download/${sdk_version}`)    
   }
 
   public getAnalysisFiles(analysisId: string, filenames: string[]): Promise<AnalysisFileInfoSchema> {
@@ -943,6 +952,8 @@ export class VolateqAPI extends HttpClientBase {
       analysisResult.key_figures.splice(ir_intensity_index, 1);
     }
   }
+
+
 }
 
 const volateqApi = new VolateqAPI();

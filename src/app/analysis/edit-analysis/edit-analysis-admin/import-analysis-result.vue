@@ -28,10 +28,10 @@
       <b-form-group :label="$t('select-result-image-files-zip')">
         <app-simple-file-upload v-model="imageFilesZip" :uploadProgress="uploadProgress" accept=".zip" />
       </b-form-group>
-      <b-alert :show="!importResultsAllowed" variant="info">
+      <b-alert :show="!hasStateCompleteVerified" variant="info">
         {{ $t("import-result-files-not-allowed_descr") }}
       </b-alert>
-      <app-button type="submit" :loading="loading" :disabled="!importResultsAllowed" >{{ $t("apply") }}</app-button>
+      <app-button type="submit" :loading="loading" :disabled="applyButtonDisabled">{{ $t("apply") }}</app-button>
     </b-form>
   </app-box>
 </template>
@@ -54,6 +54,7 @@ import { QFlyServerState } from "@/app/shared/services/volateq-api/api-schemas/s
 import AppSimpleFileUpload from "@/app/shared/components/app-simple-file-upload/app-simple-file-upload.vue";
 import { UploadProgress } from "@/app/shared/components/app-simple-file-upload/types";
 import { ApiStates } from "@/app/shared/services/volateq-api/api-states";
+import { ApiErrors } from "@/app/shared/services/volateq-api/api-errors";
 
 @Component({
   name: "app-import-analysis-result",
@@ -112,12 +113,16 @@ export default class AppImportAnalysisResult extends BaseAuthComponent {
     }
   }
 
-  get importResultsAllowed(): boolean {
+  get applyButtonDisabled(): boolean {
+    return !this.hasStateCompleteVerified || this.isAnalysisResultReleased || (!this.jsonFile && !this.removeAllAnalysisResultFiles);
+  }
+
+  get hasStateCompleteVerified(): boolean {
     return this.analysis.current_state.state.id >= ApiStates.DATA_COMPLETE_VERIFIED;
   }
 
   get isAnalysisResultReleased(): boolean {
-    return this.analysis.analysis_result?.released || false
+    return this.analysis.analysis_result?.released || false;
   }
 
   private async setManageImportFiles() {

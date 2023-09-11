@@ -19,29 +19,24 @@ export class OrhtoImageMixin {
     private readonly layer: LayerBase & IOrthoImageMixin,
   ) {
     this.layer.orthoImages = [
-      { name: "RGB_ONLINE", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_ONLINE_ID, available: false },
-      { name: "RGB_ONLINE_NO_REFLEX", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_ONLINE_NO_REFLEX_ID, available: false },
-      { name: "RGB_OFFLINE", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_OFFLINE_ID, available: false },
-      { name: "IR", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_IR_ID, available: false },
-      { name: "SDX", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_SDX_ID, available: false },
-      { name: "TRACKER_IR", keyFigureId: ApiKeyFigure.TRACKER_ORTHO_IMAGES_IR_ID, available: false },
-      { name: "TRACKER_RGB", keyFigureId: ApiKeyFigure.TRACKER_ORTHO_IMAGES_RGB_ID, available: false },
+      { name: "RGB_ONLINE", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_ONLINE_ID },
+      { name: "RGB_ONLINE_NO_REFLEX", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_ONLINE_NO_REFLEX_ID },
+      { name: "RGB_OFFLINE", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_OFFLINE_ID },
+      { name: "IR", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_IR_ID },
+      { name: "SDX", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_SDX_ID },
+      { name: "TRACKER_IR", keyFigureId: ApiKeyFigure.TRACKER_ORTHO_IMAGES_IR_ID },
+      { name: "TRACKER_RGB", keyFigureId: ApiKeyFigure.TRACKER_ORTHO_IMAGES_RGB_ID },
     ];
-
-    this.setOrthoImageAvailable();
   }
 
-  private setOrthoImageAvailable() {
-    if (this.layer.orthoImages !== null && this.layer.analysisResult) {
-      for (const orthoImage of this.layer.orthoImages) {
-        orthoImage.available = !!this.layer.analysisResult.key_figures.find(keyFigure => keyFigure.id === orthoImage.keyFigureId);
-      }
-    }
+  public isOrthoImageAvailable(orthoImage: OrthoImage): boolean {
+    return this.layer.orthoImages !== null && !!this.layer.analysisResult 
+      && !!this.layer.analysisResult.key_figures.find(keyFigure => keyFigure.id === orthoImage.keyFigureId)
   }
 
   public addShowOrthoImageActions(featureInfos: FeatureInfos | undefined, componentId: ApiComponent) {
     if (featureInfos && this.layer.orthoImages) {
-      const actions: FeatureAction[] = this.layer.orthoImages.filter(orthoImage => orthoImage.available)
+      const actions: FeatureAction[] = this.layer.orthoImages.filter(orthoImage => this.isOrthoImageAvailable(orthoImage))
         .map(orthoImage => ({
           name: orthoImage.name,
           action: async () => { await this.loadOrthoImage(orthoImage, featureInfos, componentId); }

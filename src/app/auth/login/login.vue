@@ -27,8 +27,8 @@
 </template>
 
 <script lang="ts">
-import authContainerEventBus from "@/app/auth/shared/components/auth-container-event-bus";
-import AppAuthContainer from "@/app/auth/shared/components/auth-container.vue";
+import authContainerEventBus from "@/app/shared/components/app-auth-container/auth-container-event-bus";
+import AppAuthContainer from "@/app/shared/components/app-auth-container/auth-container.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { ApiException } from "@/app/shared/services/volateq-api/api-errors";

@@ -151,7 +151,11 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
   ): FeatureInfo {
     return {
       name: i18n.t(mappingEntry.transName).toString(),
-      value: value,
+      value: value +  (
+        mappingEntry.valueDescr && value && value !== "0"
+        ? " - " + i18n.t(mappingEntry.valueDescr + value).toString()
+        : ""
+      ),
       bold: currentKeyFigureId === mappingEntry.keyFigureId,
       descr: mappingEntry.transDescr,
       unit: value !== "" ? mappingEntry.unit : undefined,

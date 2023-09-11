@@ -18,6 +18,7 @@ export interface AnalysisResultMappingEntry<T extends AnalysisResultSchemaBase, 
   disableForTable?: boolean;
   superAdminOnly?: boolean;
   enableForRefMeasure?: boolean;
+  valueDescr?: string;
 }
 
 export type AnalysisResultMappings<T extends AnalysisResultSchemaBase, C = any> = AnalysisResultMappingEntry<T, C>[];
