@@ -53,7 +53,7 @@ import { AnalysisSelectionBaseComponent } from "../shared/analysis-selection-sid
     AppCustomComponentProperties,
   },
 })
-export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
+export default class AppPlantViewCspPtc extends BaseAuthComponent implements IAnalysisSelectionComponent {
   @Prop() plant!: PlantSchema;
 
   analyses: AnalysisForViewSchema[] | null = null;
@@ -71,6 +71,10 @@ export default class AppPlantViewCspPtc extends AnalysisSelectionBaseComponent {
 
   unmounted() {
     super.unmounted();
+  }
+
+  get firstAnalysisResult(): AnalysisResultDetailedSchema | null {
+    return this.analysisSelectionService?.firstAnalysisResult || null;
   }
 }
 </script>

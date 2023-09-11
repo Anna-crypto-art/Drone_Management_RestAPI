@@ -18,7 +18,6 @@ import { AnalysisResultMappings } from "@/app/shared/services/volateq-api/api-re
 import { allCspPtcMappings } from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping";
 import { TableColumnSelect, TableFilterRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
-import { AnalysisSelectionBaseComponent } from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-base-component";
 import AppDiagramOverview from "@/app/plant/shared/diagram/diagram-overview.vue";
 import { DiagramNumberBox, DiagramResultMappings } from "../shared/diagram/types";
 import { FilterFieldType } from "../shared/filter-fields/types";
@@ -26,6 +25,10 @@ import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures"
 import { LayerColor } from "../shared/visualization/layers/types";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { IAnalysisSelectionComponent } from "../shared/selection-sidebar/analysis-selection/types";
+import { AnalysisSelectionService } from "../shared/selection-sidebar/analysis-selection/analysis-selection-service";
+import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
     
 
 @Component({
@@ -35,9 +38,11 @@ import { CatchError } from "@/app/shared/services/helper/catch-helper";
     AppDiagramOverview,
   },
 })
-export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComponent {
+export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent implements IAnalysisSelectionComponent {
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
+
+  analysisSelectionService!: AnalysisSelectionService;
 
   resultMappings: DiagramResultMappings[] = [];
 
@@ -45,11 +50,11 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
   tableFilter: TableFilterRequest | null = null;
 
   async mounted() {
-    await super.mounted()
+    await AnalysisSelectionService.register(this);
   }
 
-  unmounted() {
-    super.unmounted()
+  async unmounted() {
+    this.analysisSelectionService.unregister();
   }
 
   async onAnalysisSelected() {
@@ -308,6 +313,14 @@ export default class AppPlantDiagramViewCspPtc extends AnalysisSelectionBaseComp
     }
 
     return numberBoxes;
+  }
+
+  get firstAnalysisResult(): AnalysisResultDetailedSchema | null {
+    return this.analysisSelectionService?.firstAnalysisResult || null;
+  }
+
+  get compareAnalysisResult(): AnalysisResultDetailedSchema | null {
+    return this.analysisSelectionService?.compareAnalysisResult || null;
   }
 
   get componentIdSelection(): ApiComponent[] {

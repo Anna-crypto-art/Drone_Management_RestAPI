@@ -30,7 +30,8 @@
 <script lang="ts">
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Component, Prop, Watch } from "vue-property-decorator";
-import { analysisSelectEventService } from "../analysis-selection-sidebar/analysis-selection-service";
+import { analysisSelectEventService } from "../analysis-selection-sidebar/analysis-selection-event-service";
+import { SelectionSidebarEvent, selectionSidebarEventService } from "@/app/plant/shared/selection-sidebar/selection-sidebar-event-serivce";
 import { RouteQueryHelper } from "../helper/route-query-helper";
 import { PlantViewTabs } from "./types";
 import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
@@ -183,9 +184,9 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
   async updateLeftSidebarAbsolute() {
     const leftSidebarAbsolute = this.isMobile || this.selectedTab === PlantViewTabs.MAP;
 
-    await analysisSelectEventService.emit(
+    await selectionSidebarEventService.emit(
       this.plant.id, 
-      AnalysisSelectionEvent.SIDEBAR_ABSOLUTE, 
+      SelectionSidebarEvent.SIDEBAR_ABSOLUTE,
       leftSidebarAbsolute
     );
   }
