@@ -81,11 +81,10 @@
             </b-col>
           </b-row>
         </b-tab>
-        <b-tab v-if="isSuperAdmin" class="app-edit-analysis-flights-tab" lazy>
+        <b-tab class="app-edit-analysis-flights-tab" lazy>
           <template #title>
             <b-icon icon="calendar-range" />
             <span class="pad-left">{{ $t("flights") }}</span>
-            <app-super-admin-marker />
           </template>
           <app-analysis-flight-campaigns :analysis="analysis" />
         </b-tab>

@@ -129,13 +129,13 @@
       @submit="onExport"
     >
       <b-form-group :label="$t('select-export-target')">
-        <b-form-select v-model="exportTargetId" :options="['Litchi', 'Flighthub 2']" required />
+        <b-form-select v-model="exportTargetId" :options="exportTargetOptions" required @change="onExportTargetChanged"/>
       </b-form-group>
       <b-form-group :label="$t('username')">
-        <b-form-input v-model="exportUsername" :placeholder="$t('username')" required />
+        <b-form-input v-model="exportUsername" :placeholder="$t('username')" required :disabled="!enableExportUserPasswordAuth" />
       </b-form-group>
       <b-form-group :label="$t('password')">
-        <b-form-input v-model="exportPassword" :placeholder="$t('password')" required />
+        <b-form-input v-model="exportPassword" :placeholder="$t('password')" required :disabled="!enableExportUserPasswordAuth" type="password" />
       </b-form-group>
     </app-modal-form>
   </div>
@@ -194,9 +194,12 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
 
   @Ref() exportModal!: IAppModalForm;
   exportModalLoading = false;
-  exportTargetId = null;
+  exportTargetOptions = ['Unleash', 'Litchi'];
+  exportTargetId = 'Unleash';
+  enableExportUserPasswordAuth = false;
   exportUsername = null;
   exportPassword = null;
+  flightCampaignSelectedForExport: FlightCampaignItemSchema | null = null;
 
   newFlightCampaign: NewFlightCampaign | null = null;
   
@@ -206,7 +209,6 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
     { key: "start_date", label: this.$t("start-date").toString() },
     { key: "drone", label: this.$t("drone").toString() },
     { key: "plant_status", label: this.$t("flight-types").toString() },
-    // { key: "measureNotes", label: this.$t("notes").toString() },
   ];
   selectedFlightCampaign: FlightCampaignItemSchema | null = null;
 
@@ -326,16 +328,35 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
   }
 
   async onExportClick(flightCampaignItem: any) {
-    await volateqApi.exportFlightCampaignToUnleash(flightCampaignItem.id);
-    this.showSuccess(this.$t("flight-campaign-export-unleash-success").toString())
-    // TODO: get export options, e.g. Litchi and Flighthub2
+    this.flightCampaignSelectedForExport = flightCampaignItem;
+    this.onExportTargetChanged();
+    this.exportModal.show();
+  }
 
-    // show modal with export options
-    // this.exportModal.show();
+  async onExportTargetChanged() {
+    this.exportUsername = null;
+    this.exportPassword = null;
+
+    if (this.exportTargetId == 'Litchi') {
+      this.enableExportUserPasswordAuth = true;
+    } else if (this.exportTargetId == 'Unleash') {
+      this.enableExportUserPasswordAuth = false;
+    }
   }
 
   async onExport() {
-    this.showError('Not yet implemented')
+    if (!this.flightCampaignSelectedForExport) {
+      this.showError('No flight campaign selected for export');
+      return
+    }
+
+    if (this.exportTargetId == 'Unleash') {
+      await volateqApi.exportFlightCampaignToUnleash(this.flightCampaignSelectedForExport.id);
+      this.showSuccess(this.$t("flight-campaign-export-unleash-success").toString());
+      this.exportModal.hide();
+    } else {
+      this.showError('Not yet implemented');
+    }
   }
 }
 </script>
