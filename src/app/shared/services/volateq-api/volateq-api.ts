@@ -780,6 +780,10 @@ export class VolateqAPI extends HttpClientBase {
     return `${apiBaseUrl}/auth/flight-route/${flightRouteId}/unleash-json-file`;
   }
 
+  public async exportFlightCampaignToUnleash(flightCampaignId: string): Promise<void> {
+    return this.post(`/auth/flight-campaign/${flightCampaignId}/export-to-unleash`);
+  }
+
   public async createFlightCampaign(
     createFlightCampaignRequest: CreateFlightCampaignRequest,
   ): Promise<void> {
