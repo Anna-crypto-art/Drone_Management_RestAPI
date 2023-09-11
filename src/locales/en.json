@@ -711,6 +711,7 @@
   "download-button_mavic3_expl": "Suitable for Mavic 3 Enterprise and Matrice 30 series",
   "doc-explanation": "This section contains confidential documents only. For further documentation and information about drone settings and technical requirements please visit our open <a href='{knowledgeHub}' target='_blank'>knowledge hub</a>.",
   "hide-super-admin": "Hide SUPER_ADMIN",
+  "flight-route-duration_expl": "This duration is a rough pre-calculation, more exact timings will be shown in your flight app.",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

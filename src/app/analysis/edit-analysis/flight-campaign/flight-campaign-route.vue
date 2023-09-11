@@ -108,7 +108,7 @@ export default class AppFlightCampaignRoutes extends BaseAuthComponent {
     { key: "plantStatus", label: this.$t("plant-status").toString() },
     { key: "action", label: this.$t("action").toString() },
     // { key: "drone", label: this.$t("drone").toString() }, // not needed yet as we only support 1 drone per flight campaign for now
-    { key: "duration", label: this.$t("duration").toString() },
+    { key: "duration", label: this.$t("duration").toString(), labelExpl: this.$t("flight-route-duration_expl").toString() },
   ];
 
   async created() {
