@@ -197,8 +197,8 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
   exportTargetOptions = ['Unleash', 'Litchi'];
   exportTargetId = 'Unleash';
   enableExportUserPasswordAuth = false;
-  exportUsername: string = '';
-  exportPassword: string = '';
+  exportUsername = '';
+  exportPassword = '';
   flightCampaignSelectedForExport: FlightCampaignItemSchema | null = null;
 
   newFlightCampaign: NewFlightCampaign | null = null;
