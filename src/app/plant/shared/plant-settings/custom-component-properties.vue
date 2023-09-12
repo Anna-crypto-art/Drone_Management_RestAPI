@@ -79,7 +79,7 @@
           </b-form-group>
           <b-form-group v-show="isDataTypeValueList">
             <label class="pad-top"><b>{{ $t('manage-options') }}</b></label>
-            <app-ccp-datat-type-value-list v-model="ccpModel.valueListInfos" />
+            <app-ccp-data-type-value-list v-model="ccpModel.valueListInfos" />
           </b-form-group>
           <b-form-group v-show="isDataTypeNumberRange">
             <label class="pad-top"><b>{{ $t('manage-number-ranges') }}</b></label>
