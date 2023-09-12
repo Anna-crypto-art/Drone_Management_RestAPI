@@ -47,7 +47,7 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
 
-  analysisSelectionService!: AnalysisSelectionService;
+  analysisSelectionService: AnalysisSelectionService | null = null;
 
   selectedTab = PlantViewTabs.MAP;
   tabsLoaded = 0;
@@ -178,7 +178,7 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
   }
 
   async unmounted() {
-    this.analysisSelectionService.unregister();
+    this.analysisSelectionService?.unregister();
 
     this.isMobileQuery.removeEventListener("change", this.isMobileListener);
   }

@@ -42,7 +42,7 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent impleme
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
 
-  analysisSelectionService!: AnalysisSelectionService;
+  analysisSelectionService: AnalysisSelectionService | null = null;
 
   resultMappings: DiagramResultMappings[] = [];
 
@@ -54,7 +54,7 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent impleme
   }
 
   async unmounted() {
-    this.analysisSelectionService.unregister();
+    this.analysisSelectionService?.unregister();
   }
 
   async onAnalysisSelected() {

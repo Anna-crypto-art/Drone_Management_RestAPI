@@ -94,14 +94,14 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
 
-  analysisSelectionService!: AnalysisSelectionService;
+  analysisSelectionService: AnalysisSelectionService | null = null;
 
   async mounted() {
     await AnalysisSelectionService.register(this);
   }
 
   async unmounted() {
-    this.analysisSelectionService.unregister();
+    this.analysisSelectionService?.unregister();
   }
 
   getTransAlignmentOffsetClassLimit(componentType: "sce" | "sca" | "hce", classLimit: 1 | 2 | 3): string {

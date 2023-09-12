@@ -153,7 +153,7 @@ export default class AppVisualization
   @Ref() openLayers!: IOpenLayersComponent;
   @Ref() appReferenceMeasurements!: IAppRefMeasure;
 
-  analysisSelectionService!: AnalysisSelectionService;
+  analysisSelectionService: AnalysisSelectionService | null = null;
 
   piLayersHierarchy: PILayersHierarchy | null = null;
   refMeasureLayers: RefMeasureLayers | null = null;
@@ -246,7 +246,7 @@ export default class AppVisualization
   }
 
   async unmounted() {
-    this.analysisSelectionService.unregister();
+    this.analysisSelectionService?.unregister();
   }
 
   get firstAnalysisResult(): AnalysisResultDetailedSchema | null {
@@ -267,6 +267,9 @@ export default class AppVisualization
 
   @CatchError("loading")
   async onAnalysisSelected() {
+    console.log("app-visualization: onAnalysisSelected")
+    console.log(this.firstAnalysisResult?.id)
+
     const analysisSelectionChanged = 
       this.piLayersHierarchy!.getSelectedAnalysisResultId() !== this.firstAnalysisResult?.id;
 

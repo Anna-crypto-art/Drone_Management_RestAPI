@@ -1,6 +1,6 @@
 <template>
   <div class="app-analysis-selection">
-    <div class="analysis-selection-settings" v-if="analyses.length > 1">
+    <div class="app-analysis-selection-settings" v-if="analyses.length > 1">
       <b-checkbox switch v-model="compareMode" @change="onCompareModeChanged">
         {{ $t("compare-mode") }}
         <app-explanation>{{ $t("compare-mode_descr") }}</app-explanation>
@@ -14,6 +14,7 @@
         :selectMode="selectMode"
         @rowSelected="onAnalysisSelected"
         :overlayLoading="loading"
+        :hideHeader="true"
       >
         <template #cell(name)="row">
           {{ row.item.date }} 

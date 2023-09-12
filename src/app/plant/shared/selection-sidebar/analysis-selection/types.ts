@@ -9,7 +9,7 @@ export enum AnalysisSelectionEvent {
 }
 
 export interface IAnalysisSelectionComponent {
-  analysisSelectionService: AnalysisSelectionService;
+  analysisSelectionService: AnalysisSelectionService | null;
   plant: PlantSchema;
   analyses: AnalysisForViewSchema[] | null;
   mounted(): Promise<void>;

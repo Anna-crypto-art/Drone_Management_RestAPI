@@ -73,7 +73,7 @@ export default class AppDiagramOverview extends BaseAuthComponent implements IAn
   @Prop() resultMappings!: DiagramResultMappings[];
   @Prop() componentSelection!: ApiComponent[];
   
-  analysisSelectionService!: AnalysisSelectionService;
+  analysisSelectionService: AnalysisSelectionService | null = null;
   
   numberBoxes: DiagramNumberBox[] | null = null;
 
@@ -85,7 +85,7 @@ export default class AppDiagramOverview extends BaseAuthComponent implements IAn
   }
 
   async unmounted() {
-    this.analysisSelectionService.unregister();
+    this.analysisSelectionService?.unregister();
   }
 
   onShowHistoryButtonClick(numberBoxId: string) {

@@ -5,7 +5,17 @@
         <h2 class="app-selection-sidebar-leftside-title" translate="no">
           {{ plant.name }}
         </h2>
-        <app-analysis-selection :plant="plant" :analyses="analyses" />
+        <b-tabs>
+          <b-tab>
+            <template #title><app-icon-analysis /> <span class="pad-left">{{ $t('analysis') }}</span></template>
+            <app-analysis-selection :plant="plant" :analyses="analyses" />
+          </b-tab>
+          <b-tab>
+            <template #title><app-icon icon="clipboard-data" /> <span class="pad-left">{{ $t('observations') }}</span></template>
+            <app-observation-selection :plant="plant" />
+          </b-tab>
+        </b-tabs>
+        
       </div>
     </app-sidebar>
   </div>
@@ -20,12 +30,18 @@ import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-sch
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { SelectionSidebarEvent, selectionSidebarEventService } from "./selection-sidebar-event-serivce";
 import AppAnalysisSelection from "./analysis-selection/analysis-selection.vue";
+import AppIcon from "@/app/shared/components/app-icon/app-icon.vue";
+import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
+import AppObservationSelection from "./observation-selection/observation-selection.vue";
 
 @Component({
   name: "app-selection-sidebar",
   components: {
     AppSidebar,
     AppAnalysisSelection,
+    AppIcon,
+    AppIconAnalysis,
+    AppObservationSelection,
   },
 })
 export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
@@ -74,7 +90,12 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
 
     &-title {
       margin-bottom: 1em;
+      margin-left: 10px;
     }
+  }
+
+  .tab-content {
+    padding-top: 1em;
   }
 }
 </style>

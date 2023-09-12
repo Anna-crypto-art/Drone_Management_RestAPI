@@ -61,7 +61,7 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent implements IAn
 
   analyses: AnalysisForViewSchema[] | null = null;
 
-  analysisSelectionService!: AnalysisSelectionService;
+  analysisSelectionService: AnalysisSelectionService | null = null;
 
   @CatchError()
   async created(): Promise<void> {
@@ -75,7 +75,7 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent implements IAn
   }
 
   async unmounted() {
-    this.analysisSelectionService.unregister
+    this.analysisSelectionService?.unregister
   }
 
   get firstAnalysisResult(): AnalysisResultDetailedSchema | null {

@@ -77,7 +77,7 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
   @Prop({ required: true }) componentResultMappings!: ComponentResultMappings[];
   @Prop({ required: true }) tableResultComponents!: TableResultComponent[];
 
-  analysisSelectionService!: AnalysisSelectionService;
+  analysisSelectionService: AnalysisSelectionService | null = null;
   
   csvExportLoading = false;
   tabIndex = 0;
@@ -89,7 +89,7 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
   }
 
   async unmounted() {
-    this.analysisSelectionService.unregister();
+    this.analysisSelectionService?.unregister();
   }
 
   get firstAnalysisResult(): AnalysisResultDetailedSchema | null {
@@ -101,11 +101,11 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
   }
 
   hasAnyAnalysisSelected(): boolean {
-    return this.analysisSelectionService.hasAnyAnalysisSelected();
+    return this.analysisSelectionService?.hasAnyAnalysisSelected() || false;
   }
 
   getKeyFigures(): KeyFigureSchema[] {
-    return this.analysisSelectionService.getKeyFigures();
+    return this.analysisSelectionService?.getKeyFigures() || [];
   }
 
   async onAnalysisSelected() {

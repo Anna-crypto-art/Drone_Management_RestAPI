@@ -50,14 +50,14 @@ export default class AppVisualPv extends BaseAuthComponent implements IAnalysisS
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
 
-  analysisSelectionService!: AnalysisSelectionService;
+  analysisSelectionService: AnalysisSelectionService | null = null;
 
   async mounted() {
     await AnalysisSelectionService.register(this);
   }
 
   async unmounted() {
-    this.analysisSelectionService.unregister();
+    this.analysisSelectionService?.unregister();
   }
 
   get firstAnalysisResult(): AnalysisResultDetailedSchema | null {
