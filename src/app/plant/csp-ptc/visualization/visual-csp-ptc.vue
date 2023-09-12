@@ -69,11 +69,14 @@ import AppVisualization from "@/app/plant/shared/visualization/visualization.vue
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Component, Prop } from "vue-property-decorator";
-import { AnalysisSelectionBaseComponent } from "../../shared/analysis-selection-sidebar/analysis-selection-base-component";
 import { COMPONENT_LAYERS, KEY_FIGURE_LAYERS } from "./layers";
 import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue"
 import AppButton from "@/app/shared/components/app-button/app-button.vue"
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { IAnalysisSelectionComponent } from "../../shared/selection-sidebar/analysis-selection/types";
+import { AnalysisSelectionService } from "../../shared/selection-sidebar/analysis-selection/analysis-selection-service";
+import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 
 @Component({
   name: "app-visual-csp-ptc",
@@ -84,19 +87,21 @@ import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-sch
     AppButton,
   },
 })
-export default class AppVisualCspPtc extends AnalysisSelectionBaseComponent {
+export default class AppVisualCspPtc extends BaseAuthComponent implements IAnalysisSelectionComponent {
   componentLayerTypes = COMPONENT_LAYERS;
   keyFigureLayers = KEY_FIGURE_LAYERS;
 
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
 
+  analysisSelectionService!: AnalysisSelectionService;
+
   async mounted() {
-    await super.mounted();
+    await AnalysisSelectionService.register(this);
   }
 
-  unmounted() {
-    super.unmounted();
+  async unmounted() {
+    this.analysisSelectionService.unregister();
   }
 
   getTransAlignmentOffsetClassLimit(componentType: "sce" | "sca" | "hce", classLimit: 1 | 2 | 3): string {
@@ -140,5 +145,12 @@ export default class AppVisualCspPtc extends AnalysisSelectionBaseComponent {
 
     throw new Error("class_limit not allowed");
   }
+
+  get firstAnalysisResult(): AnalysisResultDetailedSchema | null {
+    return this.analysisSelectionService?.firstAnalysisResult || null;
+  }
+
+  async onAnalysisSelected() { /* stay blubby */ }
+  async onMultiAnalysesSelected() { /* stay blubby */ }
 }
 </script>

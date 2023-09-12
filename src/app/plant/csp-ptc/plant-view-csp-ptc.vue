@@ -1,6 +1,6 @@
 <template>
   <div class="plant-view-csp-ptc" v-if="analyses">
-    <app-analysis-selection-sidebar
+    <app-selection-sidebar
       :plant="plant"
       :analyses="analyses"
     />
@@ -30,7 +30,7 @@
 import AppPlantAdminViewCspPtc from "@/app/plant/csp-ptc/plant-admin-view-csp-ptc.vue";
 import AppTablesCspPtc from "@/app/plant/csp-ptc/tables/tables-csp-ptc.vue";
 import AppVisualCspPtc from "@/app/plant/csp-ptc/visualization/visual-csp-ptc.vue";
-import AppAnalysisSelectionSidebar from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-sidebar.vue";
+import AppSelectionSidebar from "@/app/plant/shared/selection-sidebar/selection-sidebar.vue";
 import AppPlantViewTabs from "@/app/plant/shared/plant-view-tabs/plant-view-tabs.vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
@@ -39,7 +39,10 @@ import AppPlantDiagramViewCspPtc from "@/app/plant/csp-ptc/plant-diagram-view-cs
 import AppCustomComponentProperties from "@/app/plant/shared/plant-settings/custom-component-properties.vue";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
-import { AnalysisSelectionBaseComponent } from "../shared/analysis-selection-sidebar/analysis-selection-base-component";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { IAnalysisSelectionComponent } from "../shared/selection-sidebar/analysis-selection/types";
+import { AnalysisSelectionService } from "../shared/selection-sidebar/analysis-selection/analysis-selection-service";
+import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 
 @Component({
   name: "app-plant-view-csp-ptc",
@@ -47,7 +50,7 @@ import { AnalysisSelectionBaseComponent } from "../shared/analysis-selection-sid
     AppPlantViewTabs,
     AppVisualCspPtc,
     AppTablesCspPtc,
-    AppAnalysisSelectionSidebar,
+    AppSelectionSidebar,
     AppPlantAdminViewCspPtc,
     AppPlantDiagramViewCspPtc,
     AppCustomComponentProperties,
@@ -58,6 +61,8 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent implements IAn
 
   analyses: AnalysisForViewSchema[] | null = null;
 
+  analysisSelectionService!: AnalysisSelectionService;
+
   @CatchError()
   async created(): Promise<void> {
     await super.created();
@@ -66,16 +71,19 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent implements IAn
   }
 
   async mounted() {
-    await super.mounted();
+    await AnalysisSelectionService.register(this);
   }
 
-  unmounted() {
-    super.unmounted();
+  async unmounted() {
+    this.analysisSelectionService.unregister
   }
 
   get firstAnalysisResult(): AnalysisResultDetailedSchema | null {
     return this.analysisSelectionService?.firstAnalysisResult || null;
   }
+
+  async onAnalysisSelected() { /* stay blubby */ }
+  async onMultiAnalysesSelected() { /* stay blubby */ }
 }
 </script>
 

@@ -38,11 +38,9 @@
 
 <script lang="ts">
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
-import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Component, Prop } from "vue-property-decorator";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
-import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import AppDiagramNumberBox  from "@/app/plant/shared/diagram/diagram-number-box.vue";
 import { DiagramNumberBox, DiagramNumberBoxNum, DiagramResultMappings, GroupedAnalysisResult } from "./types";
@@ -54,6 +52,10 @@ import AppDiagramAreas from "@/app/plant/shared/diagram/diagram-areas.vue";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { RouteQueryHelper } from "../helper/route-query-helper";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { IAnalysisSelectionComponent } from "../selection-sidebar/analysis-selection/types";
+import { AnalysisSelectionService } from "../selection-sidebar/analysis-selection/analysis-selection-service";
+import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 
 @Component({
   name: "app-diagram-overview",
@@ -65,11 +67,13 @@ import { CatchError } from "@/app/shared/services/helper/catch-helper";
     AppDiagramAreas,
   },
 })
-export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
+export default class AppDiagramOverview extends BaseAuthComponent implements IAnalysisSelectionComponent {
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
   @Prop() resultMappings!: DiagramResultMappings[];
   @Prop() componentSelection!: ApiComponent[];
+  
+  analysisSelectionService!: AnalysisSelectionService;
   
   numberBoxes: DiagramNumberBox[] | null = null;
 
@@ -77,11 +81,11 @@ export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
   viewedNumberBox: DiagramNumberBox | null = null;
 
   async mounted() {
-    await super.mounted();
+    await AnalysisSelectionService.register(this);
   }
 
-  unmounted() {
-    super.unmounted();
+  async unmounted() {
+    this.analysisSelectionService.unregister();
   }
 
   onShowHistoryButtonClick(numberBoxId: string) {
@@ -139,13 +143,13 @@ export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
     }
   }
 
-  protected async onAnalysisSelected() {
+  async onAnalysisSelected() {
     if (this.firstAnalysisResult) {
       await this.updateNumberBoxes();
     }
   }
 
-  protected async onMultiAnalysesSelected() {
+  async onMultiAnalysesSelected() {
     if (this.firstAnalysisResult && this.compareAnalysisResult) {
       await this.updateNumberBoxes();
     }
@@ -215,6 +219,14 @@ export default class AppDiagramOverview extends AnalysisSelectionBaseComponent {
     numberBoxNum.diff = columnNameDiff ? 
       plusSymbol + MathHelper.roundTo(groupedResult[columnNameDiff] as number, numberBox.precision) : undefined
     numberBoxNum.diffVariant = variant;
+  }
+
+  get firstAnalysisResult(): AnalysisResultDetailedSchema | null {
+    return this.analysisSelectionService?.firstAnalysisResult || null;
+  }
+
+  get compareAnalysisResult(): AnalysisResultDetailedSchema | null {
+    return this.analysisSelectionService?.compareAnalysisResult || null;
   }
 }
 </script>

@@ -91,9 +91,7 @@ import { Geolocation } from "ol";
 import { Component, Prop, Ref } from "vue-property-decorator";
 import { ComponentLayer } from "./layers/component-layer";
 import { State } from "vuex-class";
-import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
-import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { RefMeasureLayers } from "./ref-measure-layers";
 import { layerEvents } from "./layer-events";
 import { OrthoImage } from "./layers/types";
@@ -120,6 +118,10 @@ import { Point } from "ol/geom";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { PlantRouteQuery } from "../types";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { IAnalysisSelectionComponent } from "../selection-sidebar/analysis-selection/types";
+import { AnalysisSelectionService } from "../selection-sidebar/analysis-selection/analysis-selection-service";
+import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -138,8 +140,8 @@ const STORAGE_KEY_SATELLITEVIEW = "storage-key-satelliteview";
   },
 })
 export default class AppVisualization
-  extends AnalysisSelectionBaseComponent
-  implements IPlantVisualization
+  extends BaseAuthComponent
+  implements IPlantVisualization, IAnalysisSelectionComponent
 {
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
@@ -150,6 +152,8 @@ export default class AppVisualization
 
   @Ref() openLayers!: IOpenLayersComponent;
   @Ref() appReferenceMeasurements!: IAppRefMeasure;
+
+  analysisSelectionService!: AnalysisSelectionService;
 
   piLayersHierarchy: PILayersHierarchy | null = null;
   refMeasureLayers: RefMeasureLayers | null = null;
@@ -235,18 +239,34 @@ export default class AppVisualization
   }
 
   async mounted() {
-    await super.mounted()
+    await AnalysisSelectionService.register(this);
 
     // wait for DOM before render OpenLayers
     this.isMounted = true;
   }
 
-  unmounted() {
-    super.unmounted();
+  async unmounted() {
+    this.analysisSelectionService.unregister();
+  }
+
+  get firstAnalysisResult(): AnalysisResultDetailedSchema | null {
+    return this.analysisSelectionService?.firstAnalysisResult || null;
+  }
+
+  get compareAnalysisResult(): AnalysisResultDetailedSchema | null {
+    return this.analysisSelectionService?.compareAnalysisResult || null;
+  }
+
+  get firstAnalysis(): AnalysisForViewSchema | null {
+    return this.analysisSelectionService?.firstAnalysis || null;
+  }
+
+  get analysisResults(): AnalysisResultDetailedSchema[] {
+    return this.analyses.map(analysis => analysis.analysis_result!).filter(analysisResult => !!analysisResult) || [];
   }
 
   @CatchError("loading")
-  protected async onAnalysisSelected() {
+  async onAnalysisSelected() {
     const analysisSelectionChanged = 
       this.piLayersHierarchy!.getSelectedAnalysisResultId() !== this.firstAnalysisResult?.id;
 
@@ -296,7 +316,7 @@ export default class AppVisualization
   }
 
   @CatchError("loading")
-  protected async onMultiAnalysesSelected() {
+  async onMultiAnalysesSelected() {
     const selectionChanged = this.piLayersHierarchy!.getSelectedAnalysisResultId() !== this.firstAnalysisResult?.id ||
       this.piLayersHierarchy!.getCompareAnalysisResultId() !== this.compareAnalysisResult?.id;
 

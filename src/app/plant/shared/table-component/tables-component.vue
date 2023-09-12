@@ -46,15 +46,19 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppSearchInput from "@/app/shared/components/app-search-input/app-search-input.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import { apiComponentNames } from "@/app/shared/services/volateq-api/api-components/api-components-name";
 import { ComponentResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
+import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { Component, Prop } from "vue-property-decorator";
-import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
+import { AnalysisSelectionService } from "../selection-sidebar/analysis-selection/analysis-selection-service";
+import { IAnalysisSelectionComponent } from "../selection-sidebar/analysis-selection/types";
 import { ITableComponent, TableResultComponent, TableResultMappingTabComponent } from "./types";
 
 @Component({
@@ -67,30 +71,48 @@ import { ITableComponent, TableResultComponent, TableResultMappingTabComponent }
     AppTableComponent,
   },
 })
-export default class AppTablesComponent extends AnalysisSelectionBaseComponent {
+export default class AppTablesComponent extends BaseAuthComponent implements IAnalysisSelectionComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) analyses!: AnalysisForViewSchema[];
   @Prop({ required: true }) componentResultMappings!: ComponentResultMappings[];
   @Prop({ required: true }) tableResultComponents!: TableResultComponent[];
 
+  analysisSelectionService!: AnalysisSelectionService;
+  
   csvExportLoading = false;
   tabIndex = 0;
   activeTabLabel = "";
   readonly activeTabComponents: TableResultMappingTabComponent[] = [];
 
   async mounted() {
-    await super.mounted();
+    await AnalysisSelectionService.register(this);
   }
 
-  unmounted() {
-    super.unmounted();
+  async unmounted() {
+    this.analysisSelectionService.unregister();
   }
 
-  protected async onAnalysisSelected() {
+  get firstAnalysisResult(): AnalysisResultDetailedSchema | null {
+    return this.analysisSelectionService?.firstAnalysisResult || null;
+  }
+
+  get compareAnalysisResult(): AnalysisResultDetailedSchema | null {
+    return this.analysisSelectionService?.compareAnalysisResult || null;
+  }
+
+  hasAnyAnalysisSelected(): boolean {
+    return this.analysisSelectionService.hasAnyAnalysisSelected();
+  }
+
+  getKeyFigures(): KeyFigureSchema[] {
+    return this.analysisSelectionService.getKeyFigures();
+  }
+
+  async onAnalysisSelected() {
     this.setActiveTabComponents();
   }
 
-  protected async onMultiAnalysesSelected() {
+  async onMultiAnalysesSelected() {
     this.setActiveTabComponents();
   }
 
@@ -183,6 +205,8 @@ export default class AppTablesComponent extends AnalysisSelectionBaseComponent {
   private getSelectedActiveComponent(): TableResultMappingTabComponent | undefined {
     return Object.values(this.activeTabComponents).find(comp => comp.tabIndex === this.tabIndex);
   }
+
+
 }
 </script>
 <style lang="scss">
