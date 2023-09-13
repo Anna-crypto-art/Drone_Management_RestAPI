@@ -1,5 +1,5 @@
 <template>
-  <b-modal class="app-modal-form" :id="id" :ok-title="okTitle" :size="size" no-close-on-backdrop>
+  <b-modal class="app-modal-form" :id="id" :ok-title="okTitle" :cancel-title="cancelTitle" :size="size" no-close-on-backdrop>
     <template v-slot:modal-title>
       <div class="app-modal-form-title">
         <slot name="modal-title">
@@ -20,7 +20,7 @@
       <slot></slot>
     </form>
     <template v-slot:modal-footer>
-      <b-button v-if="showCancelButton" variant="secondary" @click="$bvModal.hide(id)">{{ $t("cancel") }}</b-button>
+      <app-button v-if="showCancelButton" variant="secondary" @click="onCancel">{{ cancelTitle }}</app-button>
       <app-button @click="onSubmitButtonClick" :loading="modalLoading">{{ okTitle }}</app-button>
     </template>
   </b-modal>
@@ -45,6 +45,7 @@ export default class AppModalForm extends BaseAuthComponent implements IAppModal
   @Prop({ default: "" }) title!: string;
   @Prop() subtitle: string | undefined;
   @Prop({ required: true }) okTitle!: string;
+  @Prop({ default: "" }) cancelTitle!: string;
   @Prop({ default: false }) modalLoading!: boolean;
   @Prop({ default: false }) superAdminProtected!: boolean;
   @Prop({ default: true }) showCancelButton!: boolean
@@ -54,6 +55,12 @@ export default class AppModalForm extends BaseAuthComponent implements IAppModal
   showAlert = false;
   alertMsg = "";
   alertVariant = "default";
+
+  async created() {
+    if (!this.cancelTitle) {
+      this.cancelTitle = this.$t("cancel").toString();
+    }
+  }
 
   show() {
     this.$bvModal.show(this.id || "");
@@ -95,6 +102,12 @@ export default class AppModalForm extends BaseAuthComponent implements IAppModal
 
   onSubmitButtonClick(e: Event) {
     this.$emit("submit");
+  }
+
+  onCancel(e: Event) {
+    this.$emit("cancel");
+
+    this.hide();
   }
 
   hideAlert() {
