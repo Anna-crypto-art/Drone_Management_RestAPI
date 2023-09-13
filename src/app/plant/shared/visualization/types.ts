@@ -47,6 +47,9 @@ export interface IPlantVisualization {
     myRefMeasureEntry: RefMeasureEntry | null,
     myRefMeasureEntryKeyFigures: RefMeasureEntryKeyFigureSchema[] | null,
   ): void;
+  showObservModal(
+    fieldgeometryComponent: FieldgeometryComponentSchema
+  ): Promise<void>;
   refMeasuredPcsCodes: string[];
   setLoading(loading: boolean): void;
 }

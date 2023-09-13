@@ -499,7 +499,19 @@ export abstract class LayerBase {
               action: async () => {
                 this.vueComponent.showRefMeasureModal(featureInfosMeta.fieldgeoComponent!, myRefMeasureEntry, myRefMeasureEntryKeyFigures);
               }
-            }
+            },
+          ]
+        }, 
+        {
+          buttonVariant: "secondary",
+          name: this.vueComponent.$t("add-observation").toString(),
+          actions: [
+            {
+              name: this.vueComponent.$t("add-observation").toString(),
+              action: async () => {
+                await this.vueComponent.showObservModal(featureInfosMeta.fieldgeoComponent!);
+              }
+            },
           ]
         }
       ]

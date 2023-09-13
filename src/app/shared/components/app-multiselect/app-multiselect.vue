@@ -9,9 +9,14 @@
       :options="options"
       :value="innerValue" 
       @input="onInput"
-      :multiple="true"
+      :multiple="!singleSelect"
       :disabled="disabled"
-    />
+    >
+      <!-- Pass scoped slots through -->
+      <template v-for="(_, name) in $scopedSlots" :slot="name" slot-scope="slotData">
+        <slot :name="name" v-bind="slotData" />
+      </template>
+    </multiselect>
     <div v-show="readonly" class="app-multiselect-readonly"></div>
   </div>
 </template>
@@ -28,12 +33,13 @@ import { MultiselectOption } from "./types";
   }
 })
 export default class AppMultiselect extends Vue {
-  @Prop({ default: null }) value!: string[] | null;
+  @Prop({ default: null }) value!: string | string[] | null;
   @Prop({ default: [] }) options!: MultiselectOption[];
   @Prop({ default: false }) disabled!: boolean;
   @Prop({ default: false }) readonly!: boolean;
+  @Prop({ default: false }) singleSelect!: boolean;
 
-  innerValue: MultiselectOption[] | null = null;
+  innerValue: MultiselectOption | MultiselectOption[] | null = null;
 
   created() {
     this.onValueChanged();
@@ -49,11 +55,13 @@ export default class AppMultiselect extends Vue {
     this.onValueChanged();
   }
 
-  onInput(value: MultiselectOption[]) {
+  onInput(value: MultiselectOption | MultiselectOption[]) {
     this.innerValue = value;
 
     if (Array.isArray(this.innerValue)) {
       this.$emit("input", this.innerValue.map(val => val.id));
+    } else {
+      this.$emit("input", this.innerValue.id);
     }
   }
 }
