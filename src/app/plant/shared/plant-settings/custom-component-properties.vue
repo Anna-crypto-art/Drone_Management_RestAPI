@@ -131,6 +131,7 @@ import AppCcpDataTypeValueList from './ccp-data-type-value-list.vue';
 import AppExplanation from '@/app/shared/components/app-explanation/app-explanation.vue';
 import AppColorSquare from '@/app/shared/components/app-colorpicker/app-color-square.vue';
 import AppCcpDataTypeNumberRange from './ccp-data-type-number-range.vue';
+import { CcpService } from "@/app/plant/shared/plant-settings/ccp-service";
 
 @Component({
   name: "app-custom-component-properties",
@@ -168,6 +169,8 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
 
   ccpModel: CCPModel | null = null;
 
+  ccpService!: CcpService;
+
   async created() {
     this.ccpColumns = [
       { key: "component", label: this.$t("component").toString() },
@@ -184,12 +187,16 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
 
     this.dataTypeOptions = Object.keys(ccpDataTypeNames).map(k => ({ value: k, text: this.$t(ccpDataTypeNames[k]).toString() }));
 
+    this.ccpService = CcpService.get(this.plant.id);
+
     await this.updateCCPRows();
   }
 
   @CatchError("tableLoading")
   async updateCCPRows() {
-    this.ccpRows = (await volateqApi.getCustomComponentProperties(this.plant.id)).map((ccp: CustomComponentPropertySchema) => {
+    await this.ccpService.update();
+    
+    this.ccpRows = (await this.ccpService.getCcps()).map((ccp: CustomComponentPropertySchema) => {
       const dataTypeValueList = ccp.data_type === CCPDataType.VALUE_LIST ? 
         this.convertValueRangeToValueList(ccp.data_type_value_range) : undefined;
       const dataTypeNumberRange = ccp.data_type === CCPDataType.NUMBER_RANGE ?

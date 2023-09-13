@@ -42,6 +42,8 @@ import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppDatepicker from "@/app/shared/components/app-datepicker/app-datepicker.vue";
 import dateHelper from "@/app/shared/services/helper/date-helper";
+import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import { SummerizedObservations } from "@/app/shared/services/volateq-api/api-schemas/observation-schema";
 
 @Component({
   name: "app-observation-selection",
@@ -61,13 +63,14 @@ export default class AppObservationSelection extends BaseAuthComponent {
   observTableColumns: AppTableColumns = [
     { key: "name", label: this.$t("observations").toString() },
   ];
-  observTableItems: Record<string, unknown>[] = [];
+  observTableItems: Record<string, SummerizedObservations>[] = [];
 
   fromDate = "";
   toDate = "";
 
   loading = false;
 
+  @CatchError("loading")
   async created() {
     this.toDate = dateHelper.toDate(dateHelper.now());
     
@@ -75,7 +78,7 @@ export default class AppObservationSelection extends BaseAuthComponent {
     dFrom.setDate(dFrom.getDate() - 7);
     this.fromDate = dateHelper.toDate(dFrom);
 
-    // TODO: load observations
+    await this.updateSummerizedObservations();
   }
 
   @CatchError("loading")
@@ -86,6 +89,12 @@ export default class AppObservationSelection extends BaseAuthComponent {
   @CatchError("loading")
   async onObservSelected() {
     // TODO
+  }
+
+  private async updateSummerizedObservations() {
+    const summerizedDates = await volateqApi.getSummerizedOberservations(this.plant.id, { from: this.fromDate, to: this.toDate });
+
+    this.observTableItems = summerizedDates.observations.map(o => ({ name: o }));
   }
 }
 </script>

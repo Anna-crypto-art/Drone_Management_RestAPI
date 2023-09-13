@@ -74,6 +74,10 @@
       ref="appReferenceMeasurements"
       @referenceMeasurmentAdded="onReferenceMeasurmentAdded"
       @referenceMeasurmentRemoved="onReferenceMeasurmentRemoved" />
+    <app-observation-modal
+      ref="appObservModal"
+      :plant="plant"
+    />
   </div>
 </template>
 
@@ -122,6 +126,8 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import { IAnalysisSelectionComponent } from "../selection-sidebar/analysis-selection/types";
 import { AnalysisSelectionService } from "../selection-sidebar/analysis-selection/analysis-selection-service";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
+import AppObservationModal from "../observations/observation-modal.vue";
+import { IAppObservationModal } from "../observations/types";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -137,6 +143,7 @@ const STORAGE_KEY_SATELLITEVIEW = "storage-key-satelliteview";
     AppFeatureInfosToast,
     AppDropdownButton,
     AppSuperAdminMarker,
+    AppObservationModal,
   },
 })
 export default class AppVisualization
@@ -152,6 +159,7 @@ export default class AppVisualization
 
   @Ref() openLayers!: IOpenLayersComponent;
   @Ref() appReferenceMeasurements!: IAppRefMeasure;
+  @Ref() appObservModal!: IAppObservationModal;
 
   analysisSelectionService: AnalysisSelectionService | null = null;
 
@@ -826,6 +834,12 @@ export default class AppVisualization
       myRefMeasureEntry,
       myRefMeasureEntryKeyFigures,
     );
+
+    this.hideToast();
+  }
+
+  public async showObservModal(fieldgeometryComponent: FieldgeometryComponentSchema) {
+    await this.appObservModal.show(fieldgeometryComponent);
 
     this.hideToast();
   }

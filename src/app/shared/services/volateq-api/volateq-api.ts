@@ -46,6 +46,8 @@ import { FlightRouteSchema } from "./api-schemas/flight-route-schema";
 import { PlantOperationActionSchema } from "./api-schemas/plant-operation-action-schema";
 import { CustomComponentPropertySchema } from "./api-schemas/custom-component-property-schema";
 import { CustomComponentPropertyRequest } from "./api-requests/custom-component-property-request";
+import { SummerizedObservationRequest } from "./api-requests/observation-request";
+import { SummerizedDates } from "./api-schemas/observation-schema";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -950,6 +952,13 @@ export class VolateqAPI extends HttpClientBase {
 
   public async deleteCustomComponentProperty(plantId: string, ccpId: string) {
     await this.delete(`/auth/plant/${plantId}/custom-component-property/${ccpId}`)
+  }
+
+  public async getSummerizedOberservations(
+    plantId: string,
+    summerizedObservationRequest: SummerizedObservationRequest
+  ): Promise<SummerizedDates> {
+    return await this.get(`/auth/plant/${plantId}/summerized-observations`, summerizedObservationRequest);
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {
