@@ -741,6 +741,9 @@
   "observations": "Observations",
   "from": "From",
   "to": "To",
+  "add-observation": "Add observation",
+  "timestamp": "Timestamp",
+  "ticket-id": "Ticket ID",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

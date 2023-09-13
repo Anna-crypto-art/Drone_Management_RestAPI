@@ -209,7 +209,7 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
         dataTypeNumberRange: dataTypeNumberRange,
         description: ccp.description,
         user: getUserName(ccp.updated_by_user || ccp.created_by_user),
-        color: ccp.color && "#" + ccp.color || "",
+        color: ccp.color || "",
         changedAt: this.$t(...dateHelper.getTimeDiff(ccp.updated_at || ccp.created_at)).toString(),
         updated: !!ccp.updated_at,
       }

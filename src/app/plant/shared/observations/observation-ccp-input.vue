@@ -1,17 +1,20 @@
 <template>
   <div class="app-observation-ccp-input">
-    <b-form-group label-cols-sm="4">
+    <b-form-group label-cols="4" style="margin-bottom: 0.5em;">
       <template #label>
-        <app-color-square v-if="color" :color="color" :circle="true" style="margin-right: 1em;" />
-        <span>{{ ccp.name }}</span>
-        <app-explanation v-if="ccp.description">{{ ccp.description }}</app-explanation>
+        <div class="app-observation-ccp-input-label">
+          <span>{{ ccp.name }}</span>
+          <app-explanation v-if="ccp.description">{{ ccp.description }}</app-explanation>
+        </div>
       </template>
       <b-form-text v-if="isDataTypeText" 
         v-model="inputValue" 
       />
-      <b-form-select v-if="isDataTypeBoolean"
+      <b-form-checkbox v-if="isDataTypeBoolean"
         v-model="inputValue"
-        :options="[{ value: true, text: 'true' }, { value: false, text: 'false' }]" 
+        switch
+        size="lg"
+        style="margin-top: 3px;"
       />
       <b-form-input v-if="isDataTypeNumber"
         v-model="inputValue"
@@ -28,9 +31,10 @@
         v-model="inputValue"
         :options="getValueListOptions()"
         :singleSelect="true"
+        :allowEmpty="true"
       >
         <template #option="props">
-          <div class="pull-left">
+          <div class="pull-left" style="width: calc(100% - 50px)">
             <div>{{ props.option.label }}</div>
             <div v-if="props.option.description" class="mar-top-half grayed">
               <small>{{ props.option.description }}</small>
@@ -42,7 +46,6 @@
           <div class="clear"></div>
         </template>
       </app-multiselect>
-
     </b-form-group>
   </div>
 </template>
@@ -50,7 +53,7 @@
 <script lang="ts">
 import { Component, Prop, Ref, Watch } from "vue-property-decorator";
 import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
-import { CCPDataType, CustomComponentPropertySchema, NumberRangeInfosSchema, ValueListInfosSchema } from '@/app/shared/services/volateq-api/api-schemas/custom-component-property-schema';
+import { CCPDataType, CustomComponentPropertySchema, ValueListInfosSchema } from '@/app/shared/services/volateq-api/api-schemas/custom-component-property-schema';
 import { CcpDataTypeValueListOption } from "./types";
 import AppColorSquare from '@/app/shared/components/app-colorpicker/app-color-square.vue';
 import AppMultiselect from '@/app/shared/components/app-multiselect/app-multiselect.vue';
@@ -66,36 +69,39 @@ import AppExplanation from "@/app/shared/components/app-explanation/app-explanat
 })
 export default class AppObservationCcpInput extends BaseAuthComponent {
   @Prop({ default: true }) ccp!: CustomComponentPropertySchema;
+  @Prop() value!: string;
 
   color = "";
-  inputValue = "";
+  inputValue: string | number | boolean | null = null;
+
+  async created() {
+    this.inputValue = this.value;
+  }
 
   @Watch("inputValue") 
   onInputValueChanged() {
-    console.log("onInputValueChanged. inputValue:")
-    console.log(this.inputValue);
+    // Would be nice if we are able to visualize the color here somehow...
+    // if (this.inputValue) {
+    //   if (this.isDataTypeBoolean || this.isDataTypeNumber || this.isDataTypeText || !this.ccp.data_type_value_range.infos) {
+    //     this.color = this.ccp.color || "";
+    //   } else if (this.isDataTypeNumberRange) {
+    //     const infos = this.ccp.data_type_value_range.infos as NumberRangeInfosSchema;
+    //     const numValue: number = this.inputValue as number;
+    //     for (const info of infos) {
+    //       if (numValue >= info.number_range[0] && numValue <= info.number_range[1]) {
+    //         this.color = info.info.color || "";
+    //         break;
+    //       }
+    //     }
+    //   } else if (this.isDataTypeValueList) {
+    //     const infos = this.ccp.data_type_value_range.infos as ValueListInfosSchema;
+    //     this.color = infos[this.inputValue as string].color || "";
+    //   }
+    // } else {
+    //   this.color = "";
+    // }
 
-    if (this.inputValue) {
-      if (this.isDataTypeBoolean || this.isDataTypeNumber || this.isDataTypeText || !this.ccp.data_type_value_range.infos) {
-        this.color = "#" + this.ccp.color || "";
-      } else if (this.isDataTypeNumberRange) {
-        const infos = this.ccp.data_type_value_range.infos as NumberRangeInfosSchema;
-        const numValue = parseFloat(this.inputValue);
-        for (const info of infos) {
-          if (numValue >= info.number_range[0] && numValue <= info.number_range[1]) {
-            this.color = info.info.color || "";
-            break;
-          }
-        }
-      } else if (this.isDataTypeValueList) {
-        const infos = this.ccp.data_type_value_range.infos as ValueListInfosSchema;
-        this.color = infos[this.inputValue].color || "";
-      }
-    } else {
-      this.color = "";
-    }
-
-    console.log(this.color);
+    this.$emit("input", this.inputValue?.toString() || undefined);
   }
 
   get isDataTypeBoolean(): boolean {
@@ -130,13 +136,23 @@ export default class AppObservationCcpInput extends BaseAuthComponent {
     if (this.ccp.data_type_value_range.infos) {
       const infos = this.ccp.data_type_value_range.infos as ValueListInfosSchema;
 
-      return Object.keys(infos).map(k => ({ id: k, label: infos[k].label || k, ...infos[k] }));
+      return [
+        ...Object.keys(infos).map(k => ({ id: k, label: infos[k].label || k, ...infos[k] })), 
+      ]
     }
 
-    return (this.ccp.data_type_value_range.options as string[]).map(o => ({ id: o, label: o }));
+    return [
+      ...(this.ccp.data_type_value_range.options as string[]).map(o => ({ id: o, label: o })),
+    ]
   }
 }
 </script>
 
 <style lang="scss">
+.app-observation-ccp-input {
+  &-label {
+    border: 2px solid transparent;
+    border-radius: 100px;
+  }
+}
 </style>

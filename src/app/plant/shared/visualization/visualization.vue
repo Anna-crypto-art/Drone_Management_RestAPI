@@ -275,9 +275,6 @@ export default class AppVisualization
 
   @CatchError("loading")
   async onAnalysisSelected() {
-    console.log("app-visualization: onAnalysisSelected")
-    console.log(this.firstAnalysisResult?.id)
-
     const analysisSelectionChanged = 
       this.piLayersHierarchy!.getSelectedAnalysisResultId() !== this.firstAnalysisResult?.id;
 

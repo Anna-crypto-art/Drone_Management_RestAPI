@@ -21,7 +21,7 @@
     </form>
     <template v-slot:modal-footer>
       <b-button v-if="showCancelButton" variant="secondary" @click="$bvModal.hide(id)">{{ $t("cancel") }}</b-button>
-      <app-button @click="onSubmit" :loading="modalLoading">{{ okTitle }}</app-button>
+      <app-button @click="onSubmitButtonClick" :loading="modalLoading">{{ okTitle }}</app-button>
     </template>
   </b-modal>
 </template>
@@ -49,6 +49,7 @@ export default class AppModalForm extends BaseAuthComponent implements IAppModal
   @Prop({ default: false }) superAdminProtected!: boolean;
   @Prop({ default: true }) showCancelButton!: boolean
   @Prop({ default: undefined }) size!: "sm" | "lg" | "xl" | undefined;
+  @Prop({ default: false }) submitOnButtonClickOnly!: boolean;
 
   showAlert = false;
   alertMsg = "";
@@ -87,6 +88,12 @@ export default class AppModalForm extends BaseAuthComponent implements IAppModal
   }
 
   onSubmit(e: Event) {
+    if (!this.submitOnButtonClickOnly) {
+      this.$emit("submit");
+    }
+  }
+
+  onSubmitButtonClick(e: Event) {
     this.$emit("submit");
   }
 
@@ -103,7 +110,7 @@ export default class AppModalForm extends BaseAuthComponent implements IAppModal
 .app-modal-form {
   &-title {
     h2 {
-      font-size: 2em;
+      font-size: 1.5em;
       margin-bottom: 10px;
     }
 
