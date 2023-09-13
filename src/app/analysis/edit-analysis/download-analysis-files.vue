@@ -49,6 +49,7 @@
       ref="moveSelectedFilesModal"
       :modalLoading="moveSelectedFilesLoading"
       :okTitle="$t('move')"
+      :showCancelButton ="false"
       :title="$t('move-selected-files')"
       @submit="onMoveSelectedFiles"
       :superAdminProtected="true"

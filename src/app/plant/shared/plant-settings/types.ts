@@ -1,9 +1,10 @@
 import { NumberRangeInfoRequest, ValueListInfoRequest } from "@/app/shared/services/volateq-api/api-requests/custom-component-property-request";
-import { CCPDataType, CCPDataTypeValueRange } from "@/app/shared/services/volateq-api/api-schemas/custom-component-property-schema";
+import { CCPDataType } from "@/app/shared/services/volateq-api/api-schemas/custom-component-property-schema";
 
 export interface CCPModel {
   modalTitle: string;
   modalOkTitle: string;
+  modalCancelTitle: string;
   id: string | null;
   componentId: number | null;
   name: string;

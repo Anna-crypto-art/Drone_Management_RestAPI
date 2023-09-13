@@ -79,6 +79,8 @@
       :superAdminProtected="true"
       :modalLoading="switchCustomerLoading"
       :okTitle="$t('apply')"
+      :cancelTitle="$t('cancel')"
+      @cancel="onSwitchCustomerModalCancel"
       @submit="onCustomerSwitchSubmit"
     >
       <b-alert variant="info" :show="!selectedCustomerId"><span v-html="$t('info-no-customer-selected')"></span></b-alert>
@@ -113,6 +115,8 @@ import { IAppModalForm } from "../app-modal/types";
 import { sortAlphabetical } from "../../services/helper/sort-helper";
 import { environment } from "@/environment/environment";
 import { CustomerNameSchema } from "../../services/volateq-api/api-schemas/customer-schemas";
+import { CatchError } from '@/app/shared/services/helper/catch-helper';
+
 
 @Component({
   name: "app-header",
@@ -177,6 +181,11 @@ export default class AppHeader extends BaseAuthComponent {
     this.showAllKeyFigures = user.profile?.show_all_key_figures || false;
 
     this.switchCustomerModal.show();
+  }
+
+  @CatchError()
+  async onSwitchCustomerModalCancel() {
+    this.switchCustomerModal.hide();
   }
 
   async onCustomerSwitchSubmit() {

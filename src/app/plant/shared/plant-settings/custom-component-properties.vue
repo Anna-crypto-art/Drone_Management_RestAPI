@@ -57,9 +57,11 @@
       ref="addOrUpdateCCPModal"
       :title="ccpModalTitle"
       :okTitle="ccpModalOkTitle"
+      :cancelTitle="ccpModalCancelTitle"
       :modalLoading="modalLoading"
       size="lg"
-      @submit="onAddOrUpdateCCPSubmit">
+      @submit="onAddOrUpdateCCPSubmit"
+      @cancel="onAddOrUpdateCCPCancel">
       <div v-if="ccpModel">
         <b-row>
           <b-col>
@@ -156,6 +158,8 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
   tableLoading = false;
   modalLoading = false;
 
+  showCancelButton = true;
+
   ccpRows: any[] = [];
   ccpColumns: AppTableColumns = [];
 
@@ -217,6 +221,10 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
     return this.ccpModel?.modalOkTitle || "";
   }
 
+  get ccpModalCancelTitle(): string {
+    return this.ccpModel?.modalCancelTitle || "";
+  }
+
   get isDataTypeValueList(): boolean {
     return this.ccpModel && this.ccpModel.dataType === CCPDataType.VALUE_LIST || false;
   }
@@ -232,6 +240,7 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
   createEmptyCCPModel(): CCPModel {
     return {
       modalOkTitle: "",
+      modalCancelTitle: "",
       modalTitle: "",
       name: "",
       id: null,
@@ -247,6 +256,7 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
     this.ccpModel = this.createEmptyCCPModel();
     this.ccpModel!.modalTitle = this.$t("add-component-property").toString();
     this.ccpModel!.modalOkTitle = this.$t("create").toString();
+    this.ccpModel!.modalCancelTitle = this.$t("cancel").toString();
 
     this.addOrUpdateCCPModal.show();
   }
@@ -256,6 +266,7 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
     this.ccpModel = {
       modalTitle: this.$t("edit-component-property", { name: row.name }).toString(),
       modalOkTitle: this.$t("apply").toString(),
+      modalCancelTitle: this.$t("cancel").toString(),
       id: row.id,
       componentId: row.componentId,
       name: row.name,
@@ -293,6 +304,13 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
 
     this.addOrUpdateCCPModal.hide();
 
+    await this.updateCCPRows();
+  }
+
+  @CatchError()
+  async onAddOrUpdateCCPCancel() {
+    this.addOrUpdateCCPModal.hide();
+    console.log("Updateing Rows...")
     await this.updateCCPRows();
   }
 
