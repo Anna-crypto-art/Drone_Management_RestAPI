@@ -744,6 +744,7 @@
   "add-observation": "Add observation",
   "timestamp": "Timestamp",
   "ticket-id": "Ticket ID",
+  "observation-created-success": "Observation created successfully",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

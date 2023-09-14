@@ -48,6 +48,7 @@ import { CustomComponentPropertySchema } from "./api-schemas/custom-component-pr
 import { CustomComponentPropertyRequest } from "./api-requests/custom-component-property-request";
 import { SummerizedObservationRequest } from "./api-requests/observation-request";
 import { SummerizedDates } from "./api-schemas/observation-schema";
+import { ObservationRequest } from "./api-requests/observation-requests";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -959,6 +960,10 @@ export class VolateqAPI extends HttpClientBase {
     summerizedObservationRequest: SummerizedObservationRequest
   ): Promise<SummerizedDates> {
     return await this.get(`/auth/plant/${plantId}/summerized-observations`, summerizedObservationRequest);
+  }
+
+  public async createObservation(plantId: string, observation: ObservationRequest) {
+    await this.post(`/auth/plant/${plantId}/observation`, observation);
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {

@@ -20,14 +20,14 @@
       <slot></slot>
     </form>
     <template v-slot:modal-footer>
-      <app-button v-if="showCancelButton" variant="secondary" @click="onCancel">{{ cancelTitle }}</app-button>
+      <app-button v-if="showCancelButton" variant="secondary" @click="onCancel">{{ innerCancelTitle }}</app-button>
       <app-button @click="onSubmitButtonClick" :loading="modalLoading">{{ okTitle }}</app-button>
     </template>
   </b-modal>
 </template>
 
 <script lang="ts">
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Watch } from "vue-property-decorator";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { BaseAuthComponent } from "../base-auth-component/base-auth-component";
@@ -45,7 +45,7 @@ export default class AppModalForm extends BaseAuthComponent implements IAppModal
   @Prop({ default: "" }) title!: string;
   @Prop() subtitle: string | undefined;
   @Prop({ required: true }) okTitle!: string;
-  @Prop({ default: "" }) cancelTitle!: string;
+  @Prop({ default: "" }) cancelTitle!: string; 
   @Prop({ default: false }) modalLoading!: boolean;
   @Prop({ default: false }) superAdminProtected!: boolean;
   @Prop({ default: true }) showCancelButton!: boolean
@@ -56,10 +56,11 @@ export default class AppModalForm extends BaseAuthComponent implements IAppModal
   alertMsg = "";
   alertVariant = "default";
 
-  async created() {
-    if (!this.cancelTitle) {
-      this.cancelTitle = this.$t("cancel").toString();
-    }
+  innerCancelTitle = this.$t("cancel").toString();
+
+  @Watch("cancelTitle", { immediate: true })
+  onCancelTitleChanged() {
+    this.innerCancelTitle = this.cancelTitle;
   }
 
   show() {

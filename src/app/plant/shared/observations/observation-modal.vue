@@ -97,9 +97,18 @@ export default class AppObservationModal extends BaseAuthComponent implements IA
 
   @CatchError("loading")
   async onSubmitObserv() {
-    console.log("ccpValues:")
-    console.log(this.ccpValues)
-    // blub
+    await volateqApi.createObservation(this.plant.id, {
+      pcs: this.fieldgeometryComponent!.kks,
+      observed_at: this.observation!.observedAt,
+      ccp_values: this.ccpValues.filter(ccpVal => !!ccpVal.value)
+        .map(ccpVal => ({ ccp_id: ccpVal.ccp.id, value: ccpVal.value })),
+      notes: this.observation!.notes || undefined,
+      external_id: this.observation!.ticketId || undefined,
+    });
+
+    this.showSuccess(this.$t('observation-created-success').toString());
+
+    this.observModal.hide();
   }
 }
 </script>
