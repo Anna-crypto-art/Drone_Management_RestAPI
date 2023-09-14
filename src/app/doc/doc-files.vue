@@ -53,6 +53,7 @@
       :title="docFileModalTitle"
       :subtitle="docFileModalSubtitle"
       :ok-title="docFileModalOkTitle"
+      :cancel-title="$t('cancel')"
       :modalLoading="docFileModalLoading"
       :superAdminProtected="true"
       @submit="onSubmitDocFile"

@@ -52,6 +52,7 @@
       :title="flightCampaignModalTitle"
       :ok-title="flightCampaignModalOkTitle"
       :modalLoading="flightCampaignModalLoading"
+      :cancel-title="$t('cancel')"
       @submit="onSubmitFlightCampaign"
     >
       <div v-if="newFlightCampaign">
