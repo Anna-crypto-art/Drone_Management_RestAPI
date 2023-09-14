@@ -24,6 +24,10 @@ export class CcpService {
     return (await this.getCcps()).filter(c => c.component.id === componentId);
   }
 
+  getCcp(ccpId: string): CustomComponentPropertySchema | undefined {
+    return this._ccps?.find(ccp => ccp.id === ccpId);
+  }
+
   public static get(plantId: string): CcpService {
     if (!(plantId in CcpService.ccpServices)) {
       CcpService.ccpServices[plantId] = new CcpService(plantId);

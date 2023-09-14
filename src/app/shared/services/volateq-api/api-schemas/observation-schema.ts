@@ -5,8 +5,7 @@ export enum TimePeriod {
 }
 
 export interface SummerizedCCPs {
-  component_id: number;
-  name: string;
+  ccp_id: string;
   count: number;
 }
 
