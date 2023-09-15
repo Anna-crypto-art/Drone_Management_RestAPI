@@ -20,7 +20,6 @@ export interface SummerizedComponent {
   count: number;
 }
 
-
 export interface SummerizedObservations {
   date: string;
   d_from: string;

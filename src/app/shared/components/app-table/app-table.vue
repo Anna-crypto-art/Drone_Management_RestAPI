@@ -95,7 +95,6 @@ export default class AppTable extends Vue implements IAppSelectTable, IAppTable 
   @Prop({ default: null }) currentPage!: number | null;
   
   @Prop({ default: null }) selectMode!: 'single' | 'multi' | 'range' | null;
-  @Prop({ default: 0 }) maxRowSelectoin!: number;
   @Prop({ default: false }) selectAllColumns!: boolean;
 
   @Ref() appTable!: IAppSelectTable & IAppTable;

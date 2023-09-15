@@ -40,7 +40,7 @@ const router = new Router({
 });
 
 // well... I admit this naming is confusing!
-// authRoutes are necessery for the authoriation. There are not auth protected!
+// authRoutes are necessery for the authorization. There are not auth protected!
 const nonAuthProtectRoutes = [...authRoutes.map(a => a.name), ...noAuthRoutes.map(a => a.name)];
 
 router.beforeEach((to, from, next) => {

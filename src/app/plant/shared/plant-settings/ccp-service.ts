@@ -35,4 +35,8 @@ export class CcpService {
 
     return CcpService.ccpServices[plantId];
   }
+
+  public static get defaultColor(): string {
+    return "#cccccc";
+  }
 }

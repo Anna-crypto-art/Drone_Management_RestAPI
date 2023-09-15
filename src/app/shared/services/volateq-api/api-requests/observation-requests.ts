@@ -21,3 +21,13 @@ export interface ObservationRequest {
   notes?: string;
   external_id?: string;
 }
+
+export interface SummerizedObservationRequest {
+  from?: string;
+  to?: string;
+  period?: string;
+  page?: number;
+  limit?: number;
+}
+
+export type ObservFilterValue = string | number | boolean | [number, number] | undefined;

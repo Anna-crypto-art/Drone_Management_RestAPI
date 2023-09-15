@@ -134,7 +134,7 @@ export default class AppObservationSelection extends BaseAuthComponent {
     }
 
     if (!color) {
-      color = "#cccccc"; // default color
+      color = CcpService.defaultColor;
     }
 
     return color;

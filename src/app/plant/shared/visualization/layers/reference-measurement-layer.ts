@@ -67,7 +67,7 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
     return userName + (notes ? " - " + notes : "")
   }
 
-  protected async load(): Promise<GeoJSON<PropsFeature> | undefined> {
+  public async load(): Promise<GeoJSON<PropsFeature> | undefined> {
     try {
       return await volateqApi.getReferenceMeasurementValuesGeoVisual(this.referenceMeasurement.id);
     } catch (e) {

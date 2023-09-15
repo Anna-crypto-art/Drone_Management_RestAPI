@@ -18,3 +18,8 @@ export interface ObservationModel {
   notes?: string;
   ticketId?: string;
 }
+
+export interface DateRange {
+  from: string;
+  to: string;
+}

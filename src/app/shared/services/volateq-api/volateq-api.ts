@@ -46,7 +46,7 @@ import { FlightRouteSchema } from "./api-schemas/flight-route-schema";
 import { PlantOperationActionSchema } from "./api-schemas/plant-operation-action-schema";
 import { CustomComponentPropertySchema } from "./api-schemas/custom-component-property-schema";
 import { CustomComponentPropertyRequest } from "./api-requests/custom-component-property-request";
-import { SummerizedObservationRequest } from "./api-requests/observation-request";
+import { ObservFilterValue, SummerizedObservationRequest } from "./api-requests/observation-requests";
 import { SummerizedDates } from "./api-schemas/observation-schema";
 import { ObservationRequest } from "./api-requests/observation-requests";
 
@@ -964,6 +964,17 @@ export class VolateqAPI extends HttpClientBase {
 
   public async createObservation(plantId: string, observation: ObservationRequest) {
     await this.post(`/auth/plant/${plantId}/observation`, observation);
+  }
+
+  public async getObservationsGeoVisual(
+    plantId: string,
+    ccpId: string,
+    fromDate: string,
+    toDate: string,
+    filterValue: ObservFilterValue
+  ): Promise<any> {
+    return await this.get(`/auth/geo-visual/observations/${plantId}/ccp/${ccpId}/${fromDate}/${toDate}`, 
+      filterValue !== undefined ? { filter_value: filterValue } : undefined);
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {
