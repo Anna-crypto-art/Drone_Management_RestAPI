@@ -126,6 +126,7 @@
       ref="exportModal"
       :title="$t('export-to-third-party')"
       :ok-title="$t('export')"
+      :cancel-title="$t('cancel')"
       :modalLoading="exportModalLoading"
       @submit="onExport"
     >

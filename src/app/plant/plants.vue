@@ -132,6 +132,7 @@
       :title="$t('edit-plant')"
       :subtitle="editPlant && editPlant.name || ''"
       :okTitle="$t('apply')"
+      :cancel-title="$t('cancel')"
       :modalLoading="editPlantLoading"
       @submit="onSubmitEditPlant"
       :superAdminProtected="true"

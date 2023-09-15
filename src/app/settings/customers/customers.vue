@@ -35,6 +35,7 @@
       ref="appCustomerModal"
       :title="customerModalTitle"
       :ok-title="customerModalOkTitle"
+      :cancel-title="$t('cancel')"
       :modalLoading="customerModalLoading"
       @submit="onSubmitCustomer"
     >
