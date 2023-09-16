@@ -5,7 +5,7 @@ import { FeatureLike } from "ol/Feature";
 import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
 
 export class MirrorComponentLayer extends ComponentLayer {
-  protected readonly componentId = ApiComponent.CSP_PTC_MIRROR;
+  public readonly componentId = ApiComponent.CSP_PTC_MIRROR;
   protected readonly color = LayerColor.metallicBlue;
   protected readonly allowRefMeasures = true;
   protected readonly minZoomLevel = 19;

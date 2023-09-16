@@ -83,6 +83,7 @@
 
 <script lang="ts">
 import { PILayersHierarchy } from "@/app/plant/shared/visualization/pi-layers-hierarchy";
+import { ObservLayersHierarchy } from "@/app/plant/shared/visualization/observ-layers-hierarchy";
 import { FeatureInfos, FeatureInfosMeta, IPlantVisualization, KeyFigureTypeMap, Legend } from "@/app/plant/shared/visualization/types";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppGeovisualization from "@/app/shared/components/app-geovisualization/app-geovisualization.vue";
@@ -128,6 +129,9 @@ import { AnalysisSelectionService } from "../selection-sidebar/analysis-selectio
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import AppObservationModal from "../observations/observation-modal.vue";
 import { IAppObservationModal } from "../observations/types";
+import { CcpService } from "../plant-settings/ccp-service";
+import { IObservationSelectionComponent } from "@/app/plant/shared/selection-sidebar/observation-selection/types";
+import { ObservationSelectionService } from "../selection-sidebar/observation-selection/observation-selection-service";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -148,7 +152,7 @@ const STORAGE_KEY_SATELLITEVIEW = "storage-key-satelliteview";
 })
 export default class AppVisualization
   extends BaseAuthComponent
-  implements IPlantVisualization, IAnalysisSelectionComponent
+  implements IPlantVisualization, IAnalysisSelectionComponent, IObservationSelectionComponent
 {
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
@@ -165,11 +169,13 @@ export default class AppVisualization
 
   piLayersHierarchy: PILayersHierarchy | null = null;
   refMeasureLayers: RefMeasureLayers | null = null;
+  observLayersHierarchy: ObservLayersHierarchy | null = null;
 
   componentLayers: ComponentLayer[] = [];
   layers: LayerType[] = [];
   worldMapLayer!: OSMLayer;
   piHeadGroup: GroupLayer | null = null;
+  observHeadGroup: GroupLayer | null = null;
 
   // referenced by all component layers. Avoid referencation!
   refMeasuredPcsCodes: string[] = [];
@@ -207,8 +213,12 @@ export default class AppVisualization
   private accuracyFeature: Feature | undefined = undefined;
   private positionFeature: Feature | undefined = undefined;
 
+  observationSelectionService!: ObservationSelectionService;
+
   async created() {
     await super.created();
+
+    this.observationSelectionService = new ObservationSelectionService(this);
     
     window.addEventListener("app-visualization:go-to-me", async () => {
       if (!this.geolocation) {
@@ -248,12 +258,14 @@ export default class AppVisualization
 
   async mounted() {
     await AnalysisSelectionService.register(this);
+    this.observationSelectionService.register();
 
     // wait for DOM before render OpenLayers
     this.isMounted = true;
   }
 
   async unmounted() {
+    this.observationSelectionService.unregister();
     this.analysisSelectionService?.unregister();
   }
 
@@ -366,6 +378,19 @@ export default class AppVisualization
     this.piHeadGroup!.visible = !!this.firstAnalysisResult;
 
     this.hideToast();
+  }
+
+  @CatchError("loading")
+  async onObservationSelected() {
+    console.log("onObservationSelected")
+    console.log(this.observationSelectionService);
+
+    await this.observLayersHierarchy?.refreshLayers(
+      this.observationSelectionService.dateRange,
+      this.observationSelectionService.selectedCcps
+    )
+
+    this.observHeadGroup!.visible = this.observationSelectionService.hasSelectedObservations;
   }
 
   private async onFirstLoad(): Promise<boolean> {
@@ -638,6 +663,7 @@ export default class AppVisualization
       this.enableMultiSelection
     );
     this.refMeasureLayers = new RefMeasureLayers(this, this.analyses);
+    this.observLayersHierarchy = new ObservLayersHierarchy(this);
 
     this.worldMapLayer = {
       name: this.$t("world-map").toString(),
@@ -657,8 +683,18 @@ export default class AppVisualization
       visible: this.analysisResults.length > 0,
     },
 
+    this.observHeadGroup = {
+      name: this.$t("observations").toString(),
+      type: "group",
+      icon: "clipboard-data",
+      childLayers: this.observLayersHierarchy.groupLayers,
+      singleSelection: true,
+      visible: this.observationSelectionService.hasSelectedObservations,
+    }
+
     this.layers.push(
       this.piHeadGroup,
+      this.observHeadGroup,
       this.refMeasureLayers.groupLayer,
       {
         name: this.$t("components").toString(),

@@ -64,6 +64,8 @@ import { apiComponentNames } from "@/app/shared/services/volateq-api/api-compone
 import AppBadge from "@/app/shared/components/app-badge/app-badge.vue";
 import { CcpService } from "../../plant-settings/ccp-service";
 import { CCPDataType } from "@/app/shared/services/volateq-api/api-schemas/custom-component-property-schema";
+import { ObservationSelectionEvent, ObservRowItem } from "./types";
+import { observationSelectEventService } from "./observation-selection-event-service";
 
 @Component({
   name: "app-observation-selection",
@@ -84,7 +86,7 @@ export default class AppObservationSelection extends BaseAuthComponent {
   observTableColumns: AppTableColumns = [
     { key: "name", label: this.$t("observations").toString() },
   ];
-  observTableItems: Record<string, SummerizedObservations>[] = [];
+  observTableItems: ObservRowItem[] = [];
 
   fromDate = "";
   toDate = "";
@@ -112,8 +114,10 @@ export default class AppObservationSelection extends BaseAuthComponent {
   }
 
   @CatchError("loading")
-  async onObservSelected() {
-    // TODO
+  async onObservSelected(selectedItems: ObservRowItem[]) {
+    if (selectedItems.length > 0) {
+      await observationSelectEventService.emit(this.plant.id, ObservationSelectionEvent.SELECTED, selectedItems[0].name);
+    }
   }
 
   getComponentNames(summerizedObservations: SummerizedObservations): string {

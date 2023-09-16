@@ -5,7 +5,7 @@ import { FeatureLike } from "ol/Feature";
 import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
 
 export class AbsorberComponentLayer extends ComponentLayer {
-  protected readonly componentId = ApiComponent.CSP_PTC_ABSORBER;
+  public readonly componentId = ApiComponent.CSP_PTC_ABSORBER;
   protected readonly color = LayerColor.black;
   protected readonly allowRefMeasures = true;
   public readonly name = "absorber-tubes";

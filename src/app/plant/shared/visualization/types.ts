@@ -11,6 +11,9 @@ import { ReferenceMeasurementEntriesSchema, RefMeasureEntry, RefMeasureEntryKeyF
 import { FeatureLike } from "ol/Feature";
 import { KeyFigureLayer } from "./layers/key-figure-layer";
 import { LayerColor, KeyFigureInfo, SubKeyFigureInfo } from "./layers/types";
+import { CustomComponentPropertySchema } from "@/app/shared/services/volateq-api/api-schemas/custom-component-property-schema";
+import { ObservationCcpLayer } from "./layers/observation-ccp-layer";
+import { ComponentLayer } from "./layers/component-layer";
 
 export interface LegendEntry {
   color: string;
@@ -34,6 +37,19 @@ export interface GroupKPILayer {
   groupLayer: GroupLayer;
   subGroupLayers?: GroupKPILayer[];
   keyFigureLayers: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>[];
+}
+
+export interface ValueRangeGroupObservLayer {
+  ccp: CustomComponentPropertySchema;
+  groupLayer: GroupLayer;
+  childLayers: ObservationCcpLayer[];
+}
+
+export interface ComponentGroupObservLayer {
+  componentId: ApiComponent;
+  componentLayer: ComponentLayer;
+  groupLayer: GroupLayer;
+  childLayers: (ValueRangeGroupObservLayer | ObservationCcpLayer)[];
 }
 
 export interface IPlantVisualization {

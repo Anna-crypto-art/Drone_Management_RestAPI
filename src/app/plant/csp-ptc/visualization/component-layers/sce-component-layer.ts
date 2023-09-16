@@ -5,7 +5,7 @@ import { FeatureLike } from "ol/Feature";
 import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
 
 export class SceComponentLayer extends ComponentLayer {
-  protected readonly componentId = ApiComponent.CSP_PTC_SCE;
+  public readonly componentId = ApiComponent.CSP_PTC_SCE;
   protected readonly color = LayerColor.middleLightGrey;
   protected readonly allowRefMeasures = true;
   protected readonly minZoomLevel = 18;

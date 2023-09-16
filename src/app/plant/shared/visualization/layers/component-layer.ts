@@ -14,7 +14,7 @@ import { GeoJSON } from "@/app/shared/components/app-geovisualization/types/laye
 import { Extent } from "ol/extent";
 
 export abstract class ComponentLayer extends LayerBase {
-  protected abstract readonly componentId: ApiComponent;
+  public abstract readonly componentId: ApiComponent;
   protected abstract readonly color: LayerColor;
   
   protected readonly width: number = 1;

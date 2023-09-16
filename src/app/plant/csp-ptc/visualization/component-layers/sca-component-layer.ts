@@ -8,7 +8,7 @@ import { Feature } from "ol";
 import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
 
 export class ScaComponentLayer extends ComponentLayer {
-  protected readonly componentId = ApiComponent.CSP_PTC_SCA;
+  public readonly componentId = ApiComponent.CSP_PTC_SCA;
   protected readonly color = LayerColor.darkGrey;
   protected readonly allowRefMeasures = true;
 

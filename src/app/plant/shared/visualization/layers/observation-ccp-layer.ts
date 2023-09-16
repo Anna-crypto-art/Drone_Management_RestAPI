@@ -40,11 +40,14 @@ export class ObservationCcpLayer extends LayerBase {
 
   public async load(): Promise<GeoJSON<PropsFeature> | undefined> {
     try {
+      console.log("load");
+      console.log(this.filterValue);
+
       return await volateqApi.getObservationsGeoVisual(
         this.vueComponent.plant.id,
         this.ccp.id,
-        this.dateRange.from,
-        this.dateRange.to,
+        this.dateRange.from.substring(0, 10),
+        this.dateRange.to.substring(0, 10),
         this.filterValue
       );
     } catch (e) {
@@ -81,7 +84,7 @@ export class ObservationCcpLayer extends LayerBase {
   }
 
   private getDataTypeOptionInfo(): DataTypeOptionInfo | undefined {
-    if (this.filterValue !== undefined && this.ccp.data_type_value_range.infos) {
+    if (this.filterValue !== undefined && this.ccp.data_type_value_range?.infos) {
       if (this.ccp.data_type === CCPDataType.NUMBER_RANGE) {
         const infos = this.ccp.data_type_value_range.infos as NumberRangeInfosSchema;
         return infos.find(i => i.number_range[0] === (this.filterValue as [number, number])[0])?.info;

@@ -5,7 +5,7 @@ import { FeatureLike } from "ol/Feature";
 import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
 
 export class LoopComponentLayer extends ComponentLayer {
-  protected readonly componentId = ApiComponent.CSP_PTC_LOOP;
+  public readonly componentId = ApiComponent.CSP_PTC_LOOP;
   protected readonly color = LayerColor.darkGrey;
   public readonly name = "loop";
 
