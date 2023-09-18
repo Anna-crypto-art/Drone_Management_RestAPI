@@ -10,9 +10,12 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { ComponentLayer } from "./component-layer";
 import { Style } from "ol/style";
 import { CcpService } from "../../plant-settings/ccp-service";
+import { ObservationGeoJSON } from "./types";
 
 export class ObservationCcpLayer extends LayerBase {
   protected readonly dataTypeOptionInfo: DataTypeOptionInfo | undefined;
+
+  private geoJSON: ObservationGeoJSON | undefined = undefined; 
 
   constructor(
     vueComponent: BaseAuthComponent & IPlantVisualization,
@@ -24,6 +27,9 @@ export class ObservationCcpLayer extends LayerBase {
     super(vueComponent);
 
     this.dataTypeOptionInfo = this.getDataTypeOptionInfo();
+
+    this.zIndex = 50;
+    this.invisibleAutoSelection = false;
   }
 
   public get id(): string | undefined {
@@ -40,16 +46,15 @@ export class ObservationCcpLayer extends LayerBase {
 
   public async load(): Promise<GeoJSON<PropsFeature> | undefined> {
     try {
-      console.log("load");
-      console.log(this.filterValue);
-
-      return await volateqApi.getObservationsGeoVisual(
+      this.geoJSON = await volateqApi.getObservationsGeoVisual(
         this.vueComponent.plant.id,
         this.ccp.id,
-        this.dateRange.from.substring(0, 10),
-        this.dateRange.to.substring(0, 10),
+        this.dateRange.from,
+        this.dateRange.to,
         this.filterValue
       );
+
+      return this.geoJSON;
     } catch (e) {
       this.vueComponent.showError(e);
     }
@@ -73,7 +78,7 @@ export class ObservationCcpLayer extends LayerBase {
   protected getLegend(): Legend | undefined {
     return {
       id: this.id!,
-      entries: [{ name: this.name, color: this.color }],
+      entries: [{ name: this.name + " (" + (this.geoJSON?.features.length || 0) + ")", color: this.color }],
     };
   }
 
@@ -87,7 +92,7 @@ export class ObservationCcpLayer extends LayerBase {
     if (this.filterValue !== undefined && this.ccp.data_type_value_range?.infos) {
       if (this.ccp.data_type === CCPDataType.NUMBER_RANGE) {
         const infos = this.ccp.data_type_value_range.infos as NumberRangeInfosSchema;
-        return infos.find(i => i.number_range[0] === (this.filterValue as [number, number])[0])?.info;
+        return infos[this.filterValue as number]?.info;
       }
 
       if (this.ccp.data_type === CCPDataType.VALUE_LIST) {

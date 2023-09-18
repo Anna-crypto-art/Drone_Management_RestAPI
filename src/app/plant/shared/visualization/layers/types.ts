@@ -125,3 +125,5 @@ export interface OrthoImage {
 export type KeyFigureGeoJSON = GeoJSON<PropsFeature> & {
   custom: { components_total_count: number; mirrors_per_sce?: number };
 }
+
+export type ObservationGeoJSON = GeoJSON<PropsFeature>;

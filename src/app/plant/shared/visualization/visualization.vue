@@ -382,9 +382,6 @@ export default class AppVisualization
 
   @CatchError("loading")
   async onObservationSelected() {
-    console.log("onObservationSelected")
-    console.log(this.observationSelectionService);
-
     await this.observLayersHierarchy?.refreshLayers(
       this.observationSelectionService.dateRange,
       this.observationSelectionService.selectedCcps
@@ -571,7 +568,8 @@ export default class AppVisualization
         if (!existingLegend) {
           this.legends.push(legend);
         } else {
-          throw Error("Legend id " + legend.id + " already added");
+          console.error("Legend id " + legend.id + " already added")
+          // throw Error("Legend id " + legend.id + " already added");
         }
       } else {
         if (existingLegend) {

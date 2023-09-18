@@ -124,8 +124,12 @@ export class LayerStructure extends SequentialEventEmitter {
     return this.getLayerType()?.description;
   }
 
-  public addChildLayer(childLayer: LayerStructure): void {
-    this.childLayers.push(childLayer);
+  public addChildLayer(childLayer: LayerStructure, index: number | undefined = undefined): void {
+    if (index !== undefined) {
+      this.childLayers.splice(index, 0, childLayer);
+    } else {
+      this.childLayers.push(childLayer);
+    }
 
     childLayer.parentLayer = this;
   }

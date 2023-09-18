@@ -76,6 +76,10 @@ export default class AppGeovisualLayerSwitcher extends Vue {
   @State(state => state.sidebar["layer-switcher"]) sidebarOpen!: boolean;
 
   @Watch('layers', { deep: true }) onLayersChanged() {
+    console.log("layersChanged")
+
+    console.log(this.layers);
+    
     this.layerSetup(this.rootLayer, this.layers);
   }
 
@@ -94,13 +98,20 @@ export default class AppGeovisualLayerSwitcher extends Vue {
       this.$emit("loading", e);
     };
 
-    for (const layer of layers) {
+    // Triggers an endless loooooop! WHY!?
+    // const layerIds: string[] = layers.map(l => l.id as string);
+    // let rmIndex = -1
+    // while ((rmIndex = parentLayer.getChildLayers().findIndex(l => !layerIds.includes(l.id as string))) != -1) {
+    //   parentLayer.getChildLayers().splice(rmIndex);
+    // }
+
+    layers.forEach((layer, index) => {
       const layerId: string = layer.id || layer.name;
       
       switch (layer.type) {
         case "osm": {
           if (!parentLayer.hasChildLayer(layerId)) {
-            parentLayer.addChildLayer(new LayerStructure(new OSMLoader(layer, this.map, setLoadigState), layer.name));
+            parentLayer.addChildLayer(new LayerStructure(new OSMLoader(layer, this.map, setLoadigState), layer.name), index);
           }
 
           break;
@@ -109,7 +120,8 @@ export default class AppGeovisualLayerSwitcher extends Vue {
         case "geojson": {
           if (!parentLayer.hasChildLayer(layerId)) {
             parentLayer.addChildLayer(
-              new LayerStructure(new GeoJSONLoader(layer, this.map, setLoadigState), layer.name)
+              new LayerStructure(new GeoJSONLoader(layer, this.map, setLoadigState), layer.name),
+              index
             );
           }
 
@@ -120,7 +132,7 @@ export default class AppGeovisualLayerSwitcher extends Vue {
           let groupLayerStruct = parentLayer.getChildLayer(layerId);
           if (!groupLayerStruct) {
             groupLayerStruct = new LayerStructure(undefined, layer.name, layer);
-            parentLayer.addChildLayer(groupLayerStruct);
+            parentLayer.addChildLayer(groupLayerStruct, index);
           }
 
           this.layerSetup(groupLayerStruct, layer.childLayers);
@@ -131,15 +143,15 @@ export default class AppGeovisualLayerSwitcher extends Vue {
         case "custom": {
           if (!parentLayer.hasChildLayer(layerId)) {
             parentLayer.addChildLayer(
-              new LayerStructure(new CustomLoader(layer, this.map, setLoadigState), layer.name)
+              new LayerStructure(new CustomLoader(layer, this.map, setLoadigState), layer.name),
+              index
             );
           }
 
           break;
         }
       }
-      
-    }
+    });
   }
 
   handleZoom(direction: "out" | "in") {
