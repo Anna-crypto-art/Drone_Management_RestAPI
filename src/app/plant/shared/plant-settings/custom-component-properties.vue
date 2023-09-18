@@ -317,7 +317,6 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
   @CatchError()
   async onAddOrUpdateCCPCancel() {
     this.addOrUpdateCCPModal.hide();
-    console.log("Updateing Rows...")
     await this.updateCCPRows();
   }
 

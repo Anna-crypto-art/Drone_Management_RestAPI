@@ -57,16 +57,19 @@ export default class AppCcpDataTypeNumberRange extends Vue {
 
   onNumberFromChanged(numberRange: NumberRangeInfoRequest, index: number) {
     numberRange.number_from = parseInt(numberRange.number_from as unknown as string)
+    let isNotFirstNumberRange = index > 0;
+    let previousNumberRange = this.numberRanges[index - 1]; 
 
-    if (index > 0 && (
-      this.numberRanges[index - 1].number_to >= numberRange.number_from || 
-      numberRange.number_from - this.numberRanges[index - 1].number_to > 1)
+    if (isNotFirstNumberRange && (
+      previousNumberRange.number_to >= numberRange.number_from || 
+      numberRange.number_from - previousNumberRange.number_to > 1)
     ) {
-      this.numberRanges[index - 1].number_to = numberRange.number_from - 1;
+      previousNumberRange.number_to = numberRange.number_from - 1;
     }
 
     if (numberRange.number_from >= numberRange.number_to) {
       numberRange.number_from = numberRange.number_to - 1;
+      previousNumberRange.number_to = numberRange.number_from - 1;
     }
 
     this.updateNumberRange(numberRange, index);
@@ -74,16 +77,19 @@ export default class AppCcpDataTypeNumberRange extends Vue {
 
   onNumberToChanged(numberRange: NumberRangeInfoRequest, index: number) {
     numberRange.number_to = parseInt(numberRange.number_to as unknown as string)
+    let isLastNumberRange = index + 1 === this.numberRanges.length;
+    let nextNumberRange = this.numberRanges[index + 1];
 
-    if (index + 1 < this.numberRanges.length && (
-      this.numberRanges[index + 1].number_from <= numberRange.number_to ||
-      this.numberRanges[index + 1].number_from - numberRange.number_to > 1)
+    if (!isLastNumberRange && (
+      nextNumberRange.number_from <= numberRange.number_to ||
+      nextNumberRange.number_from - numberRange.number_to > 1)
     ) {
-      this.numberRanges[index + 1].number_from = numberRange.number_to + 1;
+      nextNumberRange.number_from = numberRange.number_to + 1;
     }
 
     if (numberRange.number_to <= numberRange.number_from) {
       numberRange.number_to = numberRange.number_from + 1;
+      nextNumberRange.number_from = numberRange.number_to + 1;
     }
 
     this.updateNumberRange(numberRange, index);
