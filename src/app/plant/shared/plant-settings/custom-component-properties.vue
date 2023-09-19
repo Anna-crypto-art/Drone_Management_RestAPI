@@ -334,6 +334,12 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
         }
         break;
 
+      case CCPDataType.NUMBER_RANGE:
+        if (!this.ccpModel!.numberRangeInfos) {
+          this.ccpModel!.numberRangeInfos = [];
+        }
+        break;
+
     }
   }
 
