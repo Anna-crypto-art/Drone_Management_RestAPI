@@ -317,7 +317,6 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
   @CatchError()
   async onAddOrUpdateCCPCancel() {
     this.addOrUpdateCCPModal.hide();
-    console.log("Updateing Rows...")
     await this.updateCCPRows();
   }
 
@@ -332,6 +331,12 @@ export default class AppCustomComponentProperties extends BaseAuthComponent {
       case CCPDataType.VALUE_LIST:
         if (!this.ccpModel!.valueListInfos) {
           this.ccpModel!.valueListInfos = [];
+        }
+        break;
+
+      case CCPDataType.NUMBER_RANGE:
+        if (!this.ccpModel!.numberRangeInfos) {
+          this.ccpModel!.numberRangeInfos = [];
         }
         break;
 
