@@ -1,5 +1,5 @@
 <template>
-  <b-modal class="app-modal-form" :id="id" :ok-title="okTitle" no-close-on-backdrop>
+  <b-modal class="app-modal-form" :id="id" :ok-title="okTitle" :cancel-title="cancelTitle" :size="size" no-close-on-backdrop>
     <template v-slot:modal-title>
       <div class="app-modal-form-title">
         <slot name="modal-title">
@@ -20,14 +20,14 @@
       <slot></slot>
     </form>
     <template v-slot:modal-footer>
-      <b-button v-if="showCancelButton" variant="secondary" @click="$bvModal.hide(id)">{{ $t("cancel") }}</b-button>
-      <app-button @click="onSubmit" :loading="modalLoading">{{ okTitle }}</app-button>
+      <app-button v-if="showCancelButton" variant="secondary" @click="onCancel">{{ innerCancelTitle }}</app-button>
+      <app-button @click="onSubmitButtonClick" :loading="modalLoading">{{ okTitle }}</app-button>
     </template>
   </b-modal>
 </template>
 
 <script lang="ts">
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Watch } from "vue-property-decorator";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { BaseAuthComponent } from "../base-auth-component/base-auth-component";
@@ -45,13 +45,23 @@ export default class AppModalForm extends BaseAuthComponent implements IAppModal
   @Prop({ default: "" }) title!: string;
   @Prop() subtitle: string | undefined;
   @Prop({ required: true }) okTitle!: string;
+  @Prop({ default: "" }) cancelTitle!: string; 
   @Prop({ default: false }) modalLoading!: boolean;
   @Prop({ default: false }) superAdminProtected!: boolean;
   @Prop({ default: true }) showCancelButton!: boolean
+  @Prop({ default: undefined }) size!: "sm" | "lg" | "xl" | undefined;
+  @Prop({ default: false }) submitOnButtonClickOnly!: boolean;
 
   showAlert = false;
   alertMsg = "";
   alertVariant = "default";
+
+  innerCancelTitle = this.$t("cancel").toString();
+
+  @Watch("cancelTitle", { immediate: true })
+  onCancelTitleChanged() {
+    this.innerCancelTitle = this.cancelTitle;
+  }
 
   show() {
     this.$bvModal.show(this.id || "");
@@ -86,7 +96,19 @@ export default class AppModalForm extends BaseAuthComponent implements IAppModal
   }
 
   onSubmit(e: Event) {
+    if (!this.submitOnButtonClickOnly) {
+      this.$emit("submit");
+    }
+  }
+
+  onSubmitButtonClick(e: Event) {
     this.$emit("submit");
+  }
+
+  onCancel(e: Event) {
+    this.$emit("cancel");
+
+    this.hide();
   }
 
   hideAlert() {
@@ -102,7 +124,7 @@ export default class AppModalForm extends BaseAuthComponent implements IAppModal
 .app-modal-form {
   &-title {
     h2 {
-      font-size: 2em;
+      font-size: 1.5em;
       margin-bottom: 10px;
     }
 

@@ -1,9 +1,19 @@
-export function complimentaryColor(hexColor: string): string {
+export function toRGB(hexColor: string): number[] {
   const rgb = [
     parseInt(hexColor.substring(1, 3), 16),
     parseInt(hexColor.substring(3, 5), 16),
     parseInt(hexColor.substring(5, 7), 16),
   ];
+
+  if (hexColor.length === 9) {
+    rgb.push(parseInt(hexColor.substring(7, 9), 16) / 255)
+  }
+
+  return rgb;
+}
+
+export function complimentaryColor(hexColor: string): string {
+  const rgb = toRGB(hexColor);
 
   const complementaryRgb = ryb2rgb(complimentary(rgb2ryb(rgb)));
 
@@ -115,4 +125,29 @@ function complimentary(color) {
   const r = color[0], g = color[1], b = color[2];
   const limit = 255;
   return [limit - r, limit - g, limit - b];
+}
+
+export function hex8ToRgba(hex8: string): string {
+  const [r, g, b, a] = toRGB(hex8);
+
+  return `rgba(${r}, ${g}, ${b}, ${a})`
+}
+
+export function calcBlackOrWhiteTextContrast(backgroundColor: string): "black" | "white" {
+  let rgb = toRGB(backgroundColor);
+  if (rgb.length === 4) {
+    rgb = mixAlphaIntoColor(rgb);
+  }
+
+  // stolen from https://stackoverflow.com/a/11868398
+  const yiq = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000;
+
+  return yiq >= 128 ? "black" : "white";
+}
+
+
+function mixAlphaIntoColor(rgba: number[]): number[] {
+  const a = rgba[3];
+
+  return rgba.slice(0, 3).map(c => Math.floor(c * a + 255 * (1 - a)));
 }

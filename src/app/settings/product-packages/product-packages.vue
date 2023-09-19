@@ -55,6 +55,7 @@
       ref="appProductPackageModal"
       :title="productPackageModalTitle"
       :ok-title="productPackageModalOkTitle"
+      :cancel-title="$t('cancel')"
       :modalLoading="productPackageModalLoading"
       @submit="onSubmitProductPackage"
     >

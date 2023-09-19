@@ -53,7 +53,7 @@ export abstract class LayerBase {
   constructor(public readonly vueComponent: BaseAuthComponent & IPlantVisualization) {}
 
   protected abstract getPcs(feature: FeatureLike): string | undefined;
-  protected abstract load(extent?: Extent): Promise<GeoJSON<PropsFeature> | undefined>;
+  public abstract load(extent?: Extent): Promise<GeoJSON<PropsFeature> | undefined>;
   public abstract get id(): string | undefined;
 
   /**
@@ -67,7 +67,7 @@ export abstract class LayerBase {
     return undefined;
   }
 
-  protected getStyle(feature: FeatureLike): Style {
+  public getStyle(feature: FeatureLike): Style {
     return new Style({
       text: this.showText(feature),
     });
@@ -499,7 +499,19 @@ export abstract class LayerBase {
               action: async () => {
                 this.vueComponent.showRefMeasureModal(featureInfosMeta.fieldgeoComponent!, myRefMeasureEntry, myRefMeasureEntryKeyFigures);
               }
-            }
+            },
+          ]
+        }, 
+        {
+          buttonVariant: "secondary",
+          name: this.vueComponent.$t("add-observation").toString(),
+          actions: [
+            {
+              name: this.vueComponent.$t("add-observation").toString(),
+              action: async () => {
+                await this.vueComponent.showObservModal(featureInfosMeta.fieldgeoComponent!);
+              }
+            },
           ]
         }
       ]

@@ -118,6 +118,7 @@
           ref="appQFlyServerModal"
           :title="qflyServerModalTitle"
           :ok-title="qflyServerModalOkTitle"
+          :cancel-title="$t('cancel')"
           :modalLoading="qflyServerModalLoading"
           @submit="onSubmitQFlyServer"
         >

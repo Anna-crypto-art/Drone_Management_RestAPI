@@ -5,7 +5,7 @@ import { FeatureLike } from "ol/Feature";
 import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
 
 export class SwivelComponentLayer extends ComponentLayer {
-  protected readonly componentId = ApiComponent.CSP_PTC_SWIVEL;
+  public readonly componentId = ApiComponent.CSP_PTC_SWIVEL;
   protected readonly color = LayerColor.darkGrey;
   protected readonly allowRefMeasures = true;
   public readonly name = "rotation-joints";

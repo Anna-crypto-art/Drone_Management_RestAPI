@@ -11,7 +11,7 @@
       :selectable="selectMode !== null"
       :select-mode="selectMode"
       @row-selected="onRowSelected"
-      :class="{ 'app-table-compact': compact }"
+      :class="{ 'app-table-compact': compact, 'app-table-hidden-header': hideHeader }"
 
       :per-page="perPage"
       :current-page="currentPage"
@@ -89,12 +89,12 @@ export default class AppTable extends Vue implements IAppSelectTable, IAppTable 
   @Prop({ default: false }) overlayLoading!: boolean | null;
   @Prop({ default: false }) hoverActions!: boolean;
   @Prop({ default: false }) compact!: boolean;
+  @Prop({ default: false }) hideHeader!: boolean;
 
   @Prop({ default: null }) perPage!: number | null;
   @Prop({ default: null }) currentPage!: number | null;
   
   @Prop({ default: null }) selectMode!: 'single' | 'multi' | 'range' | null;
-  @Prop({ default: 0 }) maxRowSelectoin!: number;
   @Prop({ default: false }) selectAllColumns!: boolean;
 
   @Ref() appTable!: IAppSelectTable & IAppTable;
@@ -259,6 +259,9 @@ export default class AppTable extends Vue implements IAppSelectTable, IAppTable 
   }
   .table.app-table-compact > tbody > tr > td {
     white-space: nowrap;
+  }
+  .table.app-table-hidden-header > thead {
+    display: none;
   }
 }
 </style>

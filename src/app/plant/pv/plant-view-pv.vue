@@ -1,6 +1,6 @@
 <template>
   <div class="plant-view-pv" v-if="analyses">
-    <app-analysis-selection-sidebar
+    <app-selection-sidebar
       :plant="plant"
       :analyses="analyses"
     />
@@ -11,6 +11,11 @@
       <template #tables>
         <app-tables-pv :analyses="analyses" :plant="plant" />
       </template>
+      <template #settings>
+        <b-container>
+          <app-custom-component-properties :plant="plant" />
+        </b-container>
+      </template>
       <template #admin>
         <app-plant-admin-view-pv :selectedAnalysisResult="firstAnalysisResult" :plant="plant" />
       </template>
@@ -19,30 +24,36 @@
 </template>
 
 <script lang="ts">
-import AppAnalysisSelectionSidebar from "@/app/plant/shared/analysis-selection-sidebar/analysis-selection-sidebar.vue";
+import AppSelectionSidebar from "@/app/plant/shared/selection-sidebar/selection-sidebar.vue";
 import AppPlantViewTabs from "@/app/plant/shared/plant-view-tabs/plant-view-tabs.vue";
 import AppVisualPv from "@/app/plant/pv/visualization/visual-pv.vue";
 import AppTablesPv from "@/app/plant/pv/tables/tables-pv.vue";
 import AppPlantAdminViewPv from "@/app/plant/pv/plant-admin-view-pv.vue";
+import AppCustomComponentProperties from "@/app/plant/shared/plant-settings/custom-component-properties.vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { Component, Prop } from "vue-property-decorator";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
-import { AnalysisSelectionBaseComponent } from "../shared/analysis-selection-sidebar/analysis-selection-base-component";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { IAnalysisSelectionComponent } from "../shared/selection-sidebar/analysis-selection/types";
+import { AnalysisSelectionService } from "../shared/selection-sidebar/analysis-selection/analysis-selection-service";
 
 @Component({
   name: "app-plant-view-pv",
   components: {
     AppPlantViewTabs,
-    AppAnalysisSelectionSidebar,
+    AppSelectionSidebar,
     AppVisualPv,
     AppTablesPv,
     AppPlantAdminViewPv,
+    AppCustomComponentProperties,
   },
 })
-export default class AppPlantViewPv extends AnalysisSelectionBaseComponent {
+export default class AppPlantViewPv extends BaseAuthComponent implements IAnalysisSelectionComponent {
   @Prop() plant!: PlantSchema;
+
+  analysisSelectionService: AnalysisSelectionService | null = null;
 
   analyses: AnalysisForViewSchema[] | null = null;
 
@@ -54,12 +65,15 @@ export default class AppPlantViewPv extends AnalysisSelectionBaseComponent {
   }
 
   async mounted() {
-    await super.mounted();
+    await AnalysisSelectionService.register(this);
   }
 
-  unmounted() {
-    super.unmounted();
+  async unmounted() {
+    this.analysisSelectionService?.unregister();
   }
+
+  async onAnalysisSelected() {/* stay blubby */}
+  async onMultiAnalysesSelected() {/* stay blubby */}
 }
 </script>
 

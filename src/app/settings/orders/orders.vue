@@ -58,6 +58,7 @@
       :title="orderModalTitle"
       :subtitle="orderModalSubTitle"
       :ok-title="orderModalOkTitle"
+      :cancel-title="$t('cancel')"
       :modalLoading="orderModalLoading"
       @submit="onSubmitOrder"
     >
@@ -110,6 +111,7 @@
       ref="orderPPKFDisabledModal"
       :title="$t('disable-key-figures-for-product-packages')"
       :ok-title="$t('apply')"
+      :cancel-title="$t('cancel')"
       @submit="onSubmitKeyFigureDisable"
     >
       <div v-if="disabledKeyFigures">

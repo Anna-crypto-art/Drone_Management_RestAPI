@@ -75,6 +75,7 @@
       :title="$t('invite-new-user')"
       :subtitle="$t('invite-new-user_descr')"
       :ok-title="$t('invite')"
+      :cancel-title="$t('cancel')"
       :modalLoading="inviteLoading"
       @submit="inviteUser"
     >
@@ -126,6 +127,7 @@
       id="edit-user-modal"
       ref="appEditUserModal"
       :ok-title="$t('apply')"
+      :cancel-title="$t('cancel')"
       :modalLoading="editUserLoading"
       @submit="updateUser"
     >

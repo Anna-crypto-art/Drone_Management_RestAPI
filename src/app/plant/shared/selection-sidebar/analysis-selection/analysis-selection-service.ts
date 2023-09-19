@@ -1,31 +1,25 @@
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { EventHelper } from "@/app/shared/services/helper/event-helper";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
-import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { analysisSelectEventService } from "./analysis-selection-service";
-import { AnalysisSelectionEvent } from "./types";
+import { analysisSelectEventService } from "./analysis-selection-event-service";
+import { AnalysisSelectionEvent, IAnalysisSelectionComponent } from "./types";
 
-export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
-  abstract plant: PlantSchema;
-  abstract analyses: AnalysisForViewSchema[] | null;
-
+export class AnalysisSelectionService {
   private selectedAnalysis: AnalysisForViewSchema | null = null;
   private selectedAnalyses: AnalysisForViewSchema[] | null = null; // compare mode
 
   private id: string | undefined = undefined
 
-  /**
-   * Every SFC subclass has to overide mounted and call super.mounted. 
-   * Otherwise the code will not be executed
-   */
-  async mounted() {
+  private constructor(
+    private readonly analysisSelectionComponent: IAnalysisSelectionComponent,
+  ) {}
+
+  private async init() {
     // We need the id to unregister the AnalysisSelection event, again
     this.id = Math.random().toString()
 
     analysisSelectEventService.on(
-      this.plant.id,
+      this.analysisSelectionComponent.plant.id,
       AnalysisSelectionEvent.ANALYSIS_SELECTED,
       async (selectedAnalysisId: string | undefined) => {
         await this.fireAnalysisSelected(selectedAnalysisId);
@@ -34,7 +28,7 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
     );
 
     analysisSelectEventService.on(
-      this.plant.id,
+      this.analysisSelectionComponent.plant.id,
       AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED,
       async (selectedAnalysesIds: string[] | undefined) => {
         await this.fireMultiAnalysisSelected(selectedAnalysesIds);
@@ -42,7 +36,7 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
       this.id
     );
 
-    const eventEmitter = analysisSelectEventService.getEventEmitter(this.plant.id)
+    const eventEmitter = analysisSelectEventService.getEventEmitter(this.analysisSelectionComponent.plant.id)
     if (eventEmitter.lastEvent === AnalysisSelectionEvent.ANALYSIS_SELECTED) {
       await this.fireAnalysisSelected(eventEmitter.lastArgs[0]);
     } else if (eventEmitter.lastEvent === AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED) {
@@ -50,16 +44,23 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
     }
   }
 
-  unmounted() {
-    analysisSelectEventService.getEventEmitter(this.plant.id)
+  public async unregister() {
+    analysisSelectEventService.getEventEmitter(this.analysisSelectionComponent.plant.id)
       .removeListenerById(AnalysisSelectionEvent.ANALYSIS_SELECTED, this.id!);
-      analysisSelectEventService.getEventEmitter(this.plant.id)
+      analysisSelectEventService.getEventEmitter(this.analysisSelectionComponent.plant.id)
       .removeListenerById(AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED, this.id!);
+  }
+  
+  public static async register(analysisSelectionComponent: IAnalysisSelectionComponent) {
+    const service = new AnalysisSelectionService(analysisSelectionComponent);
+    await service.init();
+
+    analysisSelectionComponent.analysisSelectionService = service;
   }
 
   private async fireAnalysisSelected(selectedAnalysisId: string | undefined) {
-    if (this.analyses) {
-      this.selectedAnalysis = this.analyses
+    if (this.analysisSelectionComponent.analyses) {
+      this.selectedAnalysis = this.analysisSelectionComponent.analyses
         .find(analysis => analysis.id === selectedAnalysisId) || null;
 
       if (this.selectedAnalysis) {
@@ -67,14 +68,14 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
       }
     }
 
-    await this.onAnalysisSelected();
+    await this.analysisSelectionComponent.onAnalysisSelected();
   }
 
   private async fireMultiAnalysisSelected(selectedAnalysesIds: string[] | undefined) {
     if (!selectedAnalysesIds) {
       this.selectedAnalyses = null;
-    } else if (this.analyses) {
-      this.selectedAnalyses = this.analyses
+    } else if (this.analysisSelectionComponent.analyses) {
+      this.selectedAnalyses = this.analysisSelectionComponent.analyses
         .filter(analysis => selectedAnalysesIds.includes(analysis.id));
 
       if (this.selectedAnalyses.length > 1) {
@@ -82,13 +83,10 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
       }
     }
 
-    await this.onMultiAnalysesSelected();
+    await this.analysisSelectionComponent.onMultiAnalysesSelected();
   }
 
-  protected async onAnalysisSelected() { /* override me, if you need to */ }
-  protected async onMultiAnalysesSelected() { /* override me, if you need to */ }
-
-  protected getKeyFigures(): KeyFigureSchema[] {
+  public getKeyFigures(): KeyFigureSchema[] {
     if (this.selectedAnalysis?.analysis_result) {
       return this.selectedAnalysis?.analysis_result.key_figures;
     }
@@ -102,24 +100,24 @@ export abstract class AnalysisSelectionBaseComponent extends BaseAuthComponent {
     return [];
   }
 
-  protected hasAnyAnalysisSelected(): boolean {
+  public hasAnyAnalysisSelected(): boolean {
     return this.selectedAnalysis !== null || this.selectedAnalyses !== null;
   }
 
-  protected get firstAnalysisResult(): AnalysisResultDetailedSchema | null {
+  public get firstAnalysisResult(): AnalysisResultDetailedSchema | null {
     return this.selectedAnalysis?.analysis_result || 
       (this.selectedAnalyses && this.selectedAnalyses[0].analysis_result) || null;
   }
 
-  protected get compareAnalysisResult(): AnalysisResultDetailedSchema | null {
+  public get compareAnalysisResult(): AnalysisResultDetailedSchema | null {
     return (this.selectedAnalyses && this.selectedAnalyses[1].analysis_result) || null;
   }
 
-  protected get firstAnalysis(): AnalysisForViewSchema | null {
+  public get firstAnalysis(): AnalysisForViewSchema | null {
     return this.selectedAnalysis || (this.selectedAnalyses && this.selectedAnalyses[0]) || null;
   }
 
-  protected get analysisResults(): AnalysisResultDetailedSchema[] {
-    return this.analyses?.map(analysis => analysis.analysis_result!).filter(analysisResult => !!analysisResult) || [];
+  public get analysisResults(): AnalysisResultDetailedSchema[] {
+    return this.analysisSelectionComponent.analyses?.map(analysis => analysis.analysis_result!).filter(analysisResult => !!analysisResult) || [];
   }
 }

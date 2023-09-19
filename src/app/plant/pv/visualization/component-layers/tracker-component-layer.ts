@@ -8,7 +8,7 @@ import { Feature } from "ol";
 import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
 
 export class TrackerComponentLayer extends ComponentLayer {
-  protected readonly componentId = ApiComponent.PV_TRACKER;
+  public readonly componentId = ApiComponent.PV_TRACKER;
   protected readonly color = LayerColor.darkGrey;
   protected readonly allowRefMeasures = true;
   

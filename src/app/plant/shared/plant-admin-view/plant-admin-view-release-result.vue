@@ -48,7 +48,7 @@ export default class AppPlantAdminViewReleaseResult extends BaseAuthComponent {
   @Watch('analysisResult') async analysisResultChanged() {
     if (this.analysisResult) {
       this.analysisResultReleased = this.analysisResult.released;
-      this.analysisState = (await volateqApi.getAnalysis(this.analysisResult.analysis_id)).current_state.state.id;
+      this.analysisState = (await volateqApi.getAnalysis(this.analysisResult.analysis_id)).current_state!.state.id;
     }
   }
 

@@ -49,6 +49,7 @@
       ref="moveSelectedFilesModal"
       :modalLoading="moveSelectedFilesLoading"
       :okTitle="$t('move')"
+      :cancel-title="$t('cancel')"
       :title="$t('move-selected-files')"
       @submit="onMoveSelectedFiles"
       :superAdminProtected="true"
@@ -244,7 +245,7 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
       return 0;
     });
 
-    if (this.analysis.current_state.state.id === ApiStates.UPLOADING) {        
+    if (this.analysis.current_state?.state?.id === ApiStates.UPLOADING) {        
       let uploadingUsers = await volateqApi.getUploadingUsers(this.analysis.id);
       if (uploadingUsers.length > 0) {
         const me = await volateqApi.getMe();

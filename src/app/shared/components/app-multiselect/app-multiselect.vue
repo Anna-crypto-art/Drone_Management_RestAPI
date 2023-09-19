@@ -9,9 +9,14 @@
       :options="options"
       :value="innerValue" 
       @input="onInput"
-      :multiple="true"
+      :multiple="!singleSelect"
       :disabled="disabled"
-    />
+    >
+      <!-- Pass scoped slots through -->
+      <template v-for="(_, name) in $scopedSlots" :slot="name" slot-scope="slotData">
+        <slot :name="name" v-bind="slotData" />
+      </template>
+    </multiselect>
     <div v-show="readonly" class="app-multiselect-readonly"></div>
   </div>
 </template>
@@ -28,20 +33,26 @@ import { MultiselectOption } from "./types";
   }
 })
 export default class AppMultiselect extends Vue {
-  @Prop({ default: null }) value!: string[] | null;
+  @Prop({ default: null }) value!: string | string[] | null;
   @Prop({ default: [] }) options!: MultiselectOption[];
   @Prop({ default: false }) disabled!: boolean;
   @Prop({ default: false }) readonly!: boolean;
+  @Prop({ default: false }) singleSelect!: boolean;
+  @Prop({ default: false }) allowEmpty!: boolean;
 
-  innerValue: MultiselectOption[] | null = null;
+  innerValue: MultiselectOption | MultiselectOption[] | null = null;
+
+  private readonly emptyOptionId = "-<empty option>-";
 
   created() {
     this.onValueChanged();
   }
 
   @Watch('value') onValueChanged() {
+    this.addEmptyOption();
+
     if (this.value) {
-      this.innerValue = this.options.filter(option => this.value!.includes(option.id))
+      this.innerValue = this.options.filter(option => this.value!.includes(option.id));
     }
   }
 
@@ -49,11 +60,46 @@ export default class AppMultiselect extends Vue {
     this.onValueChanged();
   }
 
-  onInput(value: MultiselectOption[]) {
+  onInput(value: MultiselectOption | MultiselectOption[]) {
     this.innerValue = value;
+
+    this.removeEmptyOption();
 
     if (Array.isArray(this.innerValue)) {
       this.$emit("input", this.innerValue.map(val => val.id));
+    } else {
+      this.$emit("input", this.innerValue?.id);
+    }
+  }
+
+  private addEmptyOption() {
+    if (!this.allowEmpty) {
+      return;
+    }
+
+    const emptyOption = this.options.find(o => o.id === this.emptyOptionId);
+    if (!emptyOption) {
+      this.options.unshift({
+        id: this.emptyOptionId,
+        label: " ",
+      })
+    }
+  }
+
+  private removeEmptyOption() {
+    if (!this.allowEmpty) {
+      return;
+    }
+
+    if (Array.isArray(this.innerValue)) {
+      const emptyOptionIndex = this.innerValue.findIndex(val => val.id === this.emptyOptionId);
+      if (emptyOptionIndex !== -1) {
+        this.innerValue.splice(emptyOptionIndex, 1);
+      }
+    } else {
+      if (this.innerValue?.id === this.emptyOptionId) {
+        this.innerValue = null;
+      }
     }
   }
 }

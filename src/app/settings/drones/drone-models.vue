@@ -55,6 +55,7 @@
       ref="appDroneModelModal"
       :title="droneModelModalTitle"
       :ok-title="droneModelModalOkTitle"
+      :cancel-title="$t('cancel')"
       :modalLoading="droneModelModalLoading"
       @submit="onSubmitDroneModel"
     >

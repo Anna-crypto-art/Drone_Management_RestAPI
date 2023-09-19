@@ -51,13 +51,13 @@ export default class AppSidebar extends Vue {
   background-color: $white;
   z-index: 10;
 
-  @supports (backdrop-filter: blur(5px)) {
-    backdrop-filter: blur(5px);
-    background: $white-70pc;
-  }
-  @supports not (backdrop-filter: blur(5px)) {
-    background: $white-70pc;
-  }
+  // @supports (backdrop-filter: blur(5px)) {
+  //   backdrop-filter: blur(5px);
+  //   background: $white-70pc;
+  // }
+  // @supports not (backdrop-filter: blur(5px)) {
+  //   background: $white-70pc;
+  // }
 
   .app-sidebar-container {
     position: relative;

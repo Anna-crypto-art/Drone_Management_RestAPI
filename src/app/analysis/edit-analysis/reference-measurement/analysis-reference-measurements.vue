@@ -40,6 +40,7 @@
       ref="moveModal"
       :title="$t('move-to-another-analysis')"
       :ok-title="$t('move')"
+      :cancel-title="$t('cancel')"
       :modalLoading="moveModalLoading"
       @submit="onMove"
     >

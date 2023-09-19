@@ -30,9 +30,12 @@
 import AppVisualization from "@/app/plant/shared/visualization/visualization.vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Component, Prop, Ref } from "vue-property-decorator";
-import { AnalysisSelectionBaseComponent } from "../../shared/analysis-selection-sidebar/analysis-selection-base-component";
 import { COMPONENT_LAYERS, KEY_FIGURE_LAYERS } from "./layers";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import { IAnalysisSelectionComponent } from "../../shared/selection-sidebar/analysis-selection/types";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { AnalysisSelectionService } from "../../shared/selection-sidebar/analysis-selection/analysis-selection-service";
+import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 
 @Component({
   name: "app-visual-pv",
@@ -40,19 +43,25 @@ import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-sch
     AppVisualization,
   },
 })
-export default class AppVisualPv extends AnalysisSelectionBaseComponent {
+export default class AppVisualPv extends BaseAuthComponent implements IAnalysisSelectionComponent {
   componentLayerTypes = COMPONENT_LAYERS;
   keyFigureLayers = KEY_FIGURE_LAYERS;
 
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
 
+  analysisSelectionService: AnalysisSelectionService | null = null;
+
   async mounted() {
-    await super.mounted();
+    await AnalysisSelectionService.register(this);
   }
 
-  unmounted() {
-    super.unmounted();
+  async unmounted() {
+    this.analysisSelectionService?.unregister();
+  }
+
+  get firstAnalysisResult(): AnalysisResultDetailedSchema | null {
+    return this.analysisSelectionService?.firstAnalysisResult || null;
   }
 
   getTransAlignmentOffsetClassLimit(componentType: "tracker", classLimit: 1 | 2 | 3): string {
@@ -90,5 +99,8 @@ export default class AppVisualPv extends AnalysisSelectionBaseComponent {
 
     throw new Error("class_limit not allowed");
   }
+
+  async onAnalysisSelected() { /* stay blubby */ }
+  async onMultiAnalysesSelected() { /* stay blubby */ }
 }
 </script>

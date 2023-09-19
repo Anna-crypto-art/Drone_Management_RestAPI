@@ -62,7 +62,9 @@ import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant
 import { TableFilterRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { TableResultMappingComponent } from "./types";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
-import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { IAnalysisSelectionComponent } from "../selection-sidebar/analysis-selection/types";
+import { AnalysisSelectionService } from "../selection-sidebar/analysis-selection/analysis-selection-service";
 
 @Component({
   name: "app-table-component-filter",
@@ -72,12 +74,14 @@ import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/an
     AppFilterFields,
   },
 })
-export default class AppTableComponentFilter extends AnalysisSelectionBaseComponent {
+export default class AppTableComponentFilter extends BaseAuthComponent implements IAnalysisSelectionComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) analysisResult!: AnalysisResultDetailedSchema;
   @Prop({ required: true }) activeComponent!: TableResultMappingComponent;
 
-  // Base class AnalysisSelectionBaseComponent requires to have an "analyses" property. 
+  analysisSelectionService: AnalysisSelectionService | null = null;
+
+  // Base class IAnalysisSelectionComponent requires to have an "analyses" property. 
   // But we don't have them. Fortunatly they are nullable and the events 
   // ("onAnalysisSelected" and "onMultiAnalysesSelected") get fired anyway :)
   analyses = null;
@@ -118,18 +122,18 @@ export default class AppTableComponentFilter extends AnalysisSelectionBaseCompon
   }
 
   async mounted() {
-    await super.mounted();
+    await AnalysisSelectionService.register(this);
   }
 
-  unmounted() {
-    super.unmounted();
+  async unmounted() {
+    this.analysisSelectionService?.unregister();
   }
 
-  protected async onAnalysisSelected() {
+  async onAnalysisSelected() {
     await this.compareViewChanged(false);
   }
 
-  protected async onMultiAnalysesSelected() {
+  async onMultiAnalysesSelected() {
     await this.compareViewChanged(true);
   }
 

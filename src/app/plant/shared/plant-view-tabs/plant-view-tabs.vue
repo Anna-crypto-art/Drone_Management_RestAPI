@@ -15,6 +15,10 @@
         <template #title><b-icon icon="bar-chart-fill" /> <span class="pad-left">{{ $t("statistics") }}</span></template>
         <slot name="diagram" />
       </b-tab>
+      <b-tab lazy>
+        <template #title><b-icon icon="gear-fill" /> <span class="pad-left">{{ $t("settings") }}</span></template>
+        <slot name="settings" />
+      </b-tab>
       <b-tab v-if="isSuperAdmin && hasSelectAnalysisResults">
         <template #title><b-icon icon="shield-shaded" /><span class="pad-left">{{ $t("admin") }}</span></template>
         <slot name="admin" />
@@ -26,21 +30,24 @@
 <script lang="ts">
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Component, Prop, Watch } from "vue-property-decorator";
-import { analysisSelectEventService } from "../analysis-selection-sidebar/analysis-selection-service";
+import { SelectionSidebarEvent, selectionSidebarEventService } from "@/app/plant/shared/selection-sidebar/selection-sidebar-event-serivce";
 import { RouteQueryHelper } from "../helper/route-query-helper";
 import { PlantViewTabs } from "./types";
-import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
-import { AnalysisSelectionEvent } from "../analysis-selection-sidebar/types";
 import { getMobileQuery } from "@/app/shared/services/helper/mobile-helper";
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { AnalysisSelectionService } from "../selection-sidebar/analysis-selection/analysis-selection-service";
+import { IAnalysisSelectionComponent } from "../selection-sidebar/analysis-selection/types";
 
 @Component({
   name: "app-plant-view-tabs"
 })
-export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
+export default class AppPlantViewTabs extends BaseAuthComponent implements IAnalysisSelectionComponent {
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
+
+  analysisSelectionService: AnalysisSelectionService | null = null;
 
   selectedTab = PlantViewTabs.MAP;
   tabsLoaded = 0;
@@ -80,7 +87,7 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
   }
 
   async mounted() {
-    await super.mounted();
+    await AnalysisSelectionService.register(this);
   }
 
   @Watch("selectedTab") async onSelectedTabChanged() {
@@ -138,11 +145,11 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
     }
   }
 
-  protected async onAnalysisSelected() {
+  async onAnalysisSelected() {
     this.rerenderOLCanvas();
   }
 
-  protected async onMultiAnalysesSelected() {
+  async onMultiAnalysesSelected() {
     this.rerenderOLCanvas();
   }
 
@@ -151,7 +158,7 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
   }
 
   get hasSelectAnalysisResults(): boolean {
-    return !!this.firstAnalysisResult;
+    return this.analysisSelectionService?.hasAnyAnalysisSelected() || false;
   }
 
   private rerenderOLCanvas(timeout = 0): void {
@@ -170,8 +177,8 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
     return Object.values(PlantViewTabs).findIndex(tabName => tabName == queryTabName) || 0;
   }
 
-  unmounted() {
-    super.unmounted();
+  async unmounted() {
+    this.analysisSelectionService?.unregister();
 
     this.isMobileQuery.removeEventListener("change", this.isMobileListener);
   }
@@ -179,9 +186,9 @@ export default class AppPlantViewTabs extends AnalysisSelectionBaseComponent {
   async updateLeftSidebarAbsolute() {
     const leftSidebarAbsolute = this.isMobile || this.selectedTab === PlantViewTabs.MAP;
 
-    await analysisSelectEventService.emit(
+    await selectionSidebarEventService.emit(
       this.plant.id, 
-      AnalysisSelectionEvent.SIDEBAR_ABSOLUTE, 
+      SelectionSidebarEvent.SIDEBAR_ABSOLUTE,
       leftSidebarAbsolute
     );
   }

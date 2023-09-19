@@ -5,7 +5,7 @@ import { FeatureLike } from "ol/Feature";
 import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
 
 export class ModuleComponentLayer extends ComponentLayer {
-  protected readonly componentId = ApiComponent.PV_MODULE;
+  public readonly componentId = ApiComponent.PV_MODULE;
   protected readonly color = LayerColor.darkGrey;
   protected readonly allowRefMeasures = true;
   protected readonly minZoomLevel = 19;

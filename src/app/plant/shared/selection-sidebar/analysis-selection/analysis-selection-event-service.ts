@@ -5,17 +5,13 @@ import { EventCallbackFunction } from "@/app/shared/services/app-event-service/t
 
 import { AnalysisSelectionEvent } from "./types";
 
-const invisibleAnalysisSelectionEvents = [AnalysisSelectionEvent.SIDEBAR_ABSOLUTE];
-
 class AnalysisSelectionEventEmitter extends SequentialEventEmitter {
   lastEvent: AnalysisSelectionEvent | null = null;
   lastArgs: any | null = null;
 
   async emit(event: AnalysisSelectionEvent, ...args: any[]): Promise<boolean> {
-    if (!invisibleAnalysisSelectionEvents.includes(event)) {
-      this.lastEvent = event;
-      this.lastArgs = args;
-    }
+    this.lastEvent = event;
+    this.lastArgs = args;
 
     return await super.emit(event, ...args);
   }

@@ -3,9 +3,12 @@ import { FieldgeometrySchema } from "./fieldgeometry-schema";
 import { OrderSchema } from "./order-schema";
 import { TechnologySchema } from "./technology-schema";
 
-export interface PlantSchema {
+export interface SimplePlantSchema {
   id: string;
   name: string;
+}
+
+export interface PlantSchema extends SimplePlantSchema {
   in_setup_phase: boolean;
   technology_id: number;
   technology: TechnologySchema;
@@ -17,3 +20,4 @@ export interface PlantSchema {
    */
   customers?: SimpleCustomerSchema[];
 }
+

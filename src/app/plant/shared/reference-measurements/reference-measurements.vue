@@ -6,6 +6,7 @@
       :title="title"
       :subtitle="fieldgeometryComponent && fieldgeometryComponent.kks || ''"
       :ok-title="$t('apply')"
+      :cancel-title="$t('cancel')"
       :modalLoading="loading"
       @submit="onAddRefMeasure"
     >
