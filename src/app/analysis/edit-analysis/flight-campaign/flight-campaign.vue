@@ -37,6 +37,11 @@
             {{ row.item.plant_status.map(plant_status => plant_status.name).join(", ") }}
           </span>
         </template>
+        <template #cell(user_created)="row">
+          <span :class="isGenerating(row.item) ? 'orange' : failedToGenerate(row.item) ? 'red' :''" :style="failedToGenerate(row.item) ? 'text-decoration: line-through;' : ''">
+            {{ row.item.user_created }}
+          </span>
+        </template>
         <template #hoverActions="row">
           <app-button
             v-show="isSuperAdmin && isGenerated(row.item)"
