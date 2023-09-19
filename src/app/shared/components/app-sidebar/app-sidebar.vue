@@ -6,14 +6,14 @@
       </div>
     </div>
 
-    <b-button
-      variant="secondary"
+    <b-button 
+      pill variant="secondary"
       size="sm"
       :class="'toggle-button opens-right ' + (open ? 'show-label' : '')"
       @click="onToggle()"
     >
       <app-icon-analysis :fill="open" />
-      <span class="toggle-button-text">&nbsp; {{ $t("analysis") }}</span>
+      <!-- <span class="toggle-button-text">&nbsp; {{ $t("analysis") }}</span> -->
     </b-button>
   </div>
 </template>
@@ -85,6 +85,12 @@ export default class AppSidebar extends Vue {
     .app-sidebar-container .app-sidebar-inner {
       left: 0;
     }
+
+    .toggle-button {
+      &.opens-right {
+        left: calc(100% - 21px);
+      }
+    }
   }
 
   .toggle-button {
@@ -103,17 +109,18 @@ export default class AppSidebar extends Vue {
   }
 
   &.opens-right {
-    left: calc(100% - 1px);
-    border-left-color: $white;
+    left: calc(100% - 5px);
+    transition: left 0.3s ease-in-out;
+    // border-left-color: $white;
 
-    .plant-view-csp-ptc:not(.mobile) & {
-      &:hover,
-      &.show-label {
-        .toggle-button-text {
-          padding-left: 0.5em;
-        }
-      }
-    }
+    // .plant-view-csp-ptc:not(.mobile) & {
+    //   &:hover,
+    //   &.show-label {
+    //     .toggle-button-text {
+    //       padding-left: 0.5em;
+    //     }
+    //   }
+    // }
   }
 
   &.opens-left {
