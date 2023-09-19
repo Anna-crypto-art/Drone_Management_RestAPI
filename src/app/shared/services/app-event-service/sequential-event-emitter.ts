@@ -3,8 +3,6 @@ import { Event, EventCallbackFunction, IEventEmitter, IdEventCallbackFunction } 
 export class SequentialEventEmitter implements IEventEmitter {
   private registeredEvents: Record<Event, IdEventCallbackFunction[]> = {};
 
-
-
   public on(event: Event, func: EventCallbackFunction, id?: string) {
     if (!this.registeredEvents[event]) {
       this.registeredEvents[event] = [];

@@ -110,40 +110,17 @@ export default class AppGeovisualLayerDisplay extends Vue {
 
   collapsed = false;
 
-  created() {
-    if (this.layer.hasSelectedChildLayer()) {
-      this.collapsed = true;
-    }
+  @Watch("layer") async onLayerChanged() {
+    await this.updateLayer();
+  }
 
-    this.selected = this.layer.selected;
+  async mounted() {
+    await this.updateLayer();
+  }
 
-    this.layer.on(LayerEvent.SET_SELECTED, async (selected: boolean) => {
-      this.selected = selected;
-      
-      // Special case: Selected programmatically, does not select layerType...
-      if (this.layer.selected !== selected) {
-        if (this.layer.layerLoader) {
-          this.layer.layerLoader.layerType.selected = selected;
-        }
-      }
-
-      if (this.selected) {
-        let layer = this.layer;
-        while (layer.parentLayer && !layer.collapsable) {
-          layer = layer.parentLayer;
-        }
-        if (layer && layer.parentLayer) {
-          await layer.emit(LayerEvent.COLLAPSE, true);
-        }
-      }
-    });
-    this.layer.on(LayerEvent.COLLAPSE, async (collapse: boolean) => {
-      if (!collapse && this.layer.hasSelectedChildLayer()) {
-        return;
-      }
-
-      this.collapsed = collapse;
-    });
+  unmounted() {
+    this.layer.removeListenerById(LayerEvent.SET_SELECTED, this.layer.displayEventId);
+    this.layer.removeListenerById(LayerEvent.COLLAPSE, this.layer.displayEventId);
   }
 
   async onChange(e: boolean) {
@@ -187,6 +164,47 @@ export default class AppGeovisualLayerDisplay extends Vue {
   onCollapse(layer: LayerStructure) {
     if (layer.collapsable) {
       this.collapsed = !this.collapsed;
+    }
+  }
+
+  private async updateLayer() {
+    if (this.layer.hasSelectedChildLayer()) {
+      this.collapsed = true;
+    }
+
+    this.selected = this.layer.selected;
+
+    this.layer.on(LayerEvent.SET_SELECTED, async (selected: boolean) => {
+      this.selected = selected;
+      
+      // Special case: Selected programmatically, does not select layerType...
+      if (this.layer.selected !== selected) {
+        if (this.layer.layerLoader) {
+          this.layer.layerLoader.layerType.selected = selected;
+        }
+      }
+
+      if (this.selected) {
+        let layer = this.layer;
+        while (layer.parentLayer && !layer.collapsable) {
+          layer = layer.parentLayer;
+        }
+        if (layer && layer.parentLayer) {
+          await layer.emit(LayerEvent.COLLAPSE, true);
+        }
+      }
+    }, this.layer.displayEventId);
+
+    this.layer.on(LayerEvent.COLLAPSE, async (collapse: boolean) => {
+      if (!collapse && this.layer.hasSelectedChildLayer()) {
+        return;
+      }
+
+      this.collapsed = collapse;
+    }, this.layer.displayEventId);
+
+    if (this.selected) {
+      await this.onChange(this.selected)
     }
   }
 }

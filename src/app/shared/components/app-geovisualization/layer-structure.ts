@@ -17,6 +17,9 @@ export class LayerStructure extends SequentialEventEmitter {
 
   public collapsed = false;
 
+  protected eventId: string;
+  public displayEventId: string;
+
   private selectWorkingQueue: number[] = [];
 
   constructor(
@@ -28,20 +31,24 @@ export class LayerStructure extends SequentialEventEmitter {
 
     this.childLayers = [];
 
+    this.eventId = this.id as string + "___" + Math.random();
+    this.displayEventId = this.eventId + "___layerDispayComponent"; 
+    
     this.initializeEvents();
   }
 
   private initializeEvents(): void {
-    this.layerLoader?.layerType.events?.on(LayerEvent.SET_SELECTED, async (selected: boolean) => {
+    this.getLayerType()?.events?.on(LayerEvent.SET_SELECTED, async (selected: boolean) => {
       await this.emit(LayerEvent.SET_SELECTED, selected);
-    });
+    }, this.eventId);
+
     this.on(LayerEvent.SET_SELECTED, async (selected: boolean) => {
       await this.selectLayer(selected);
-    });
+    }, this.eventId);
 
     this.getLayerType()?.events?.on(LayerEvent.COLLAPSE, async (collapse: boolean) => {
       await this.emit(LayerEvent.COLLAPSE, collapse);
-    });
+    }, this.eventId);
   }
 
   private async selectLayer(selected: boolean) {
@@ -49,6 +56,12 @@ export class LayerStructure extends SequentialEventEmitter {
 
     if (selected) {
       await this.unselectParentLayers();
+    }
+
+    if (selected) {
+      console.log("select layer!")
+      console.log(this.layerLoader?.layerType.id);
+      // console.trace(); 
     }
 
     await this.layerLoader?.setVisible(selected);
@@ -124,12 +137,8 @@ export class LayerStructure extends SequentialEventEmitter {
     return this.getLayerType()?.description;
   }
 
-  public addChildLayer(childLayer: LayerStructure, index: number | undefined = undefined): void {
-    if (index !== undefined) {
-      this.childLayers.splice(index, 0, childLayer);
-    } else {
-      this.childLayers.push(childLayer);
-    }
+  public addChildLayer(childLayer: LayerStructure): void {
+    this.childLayers.push(childLayer);
 
     childLayer.parentLayer = this;
   }
@@ -215,5 +224,13 @@ export class LayerStructure extends SequentialEventEmitter {
     }
     
     return false;
+  }
+
+  public unregisterEvents() {
+    this.getLayerType()?.events?.removeListenerById(LayerEvent.SET_SELECTED, this.eventId);
+    this.getLayerType()?.events?.removeListenerById(LayerEvent.COLLAPSE, this.eventId);
+    this.removeListenerById(LayerEvent.SET_SELECTED, this.eventId);
+    this.removeListenerById(LayerEvent.SET_SELECTED, this.displayEventId);
+    this.removeListenerById(LayerEvent.COLLAPSE, this.displayEventId);
   }
 }

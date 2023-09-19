@@ -51,8 +51,9 @@ import { LayerStructure } from "../layer-structure";
 import { CustomLoader } from "../loader/custom-loader";
 import { GeoJSONLoader } from "../loader/geojson-loader";
 import { OSMLoader } from "../loader/osm-loader";
+import { IAppLayerSWitcher } from "../types/components";
 import { LoadingEvent } from "../types/events";
-import { LayerType } from "../types/layers";
+import { LayerType, VectorGeoLayer } from "../types/layers";
 import AppGeovisualLayerDisplay from "./layer-display.vue";
 import AppGeovisualToggleLayer from "./toggle-layer.vue";
 
@@ -63,28 +64,21 @@ import AppGeovisualToggleLayer from "./toggle-layer.vue";
     AppGeovisualToggleLayer,
   },
 })
-export default class AppGeovisualLayerSwitcher extends Vue {
+export default class AppGeovisualLayerSwitcher extends Vue implements IAppLayerSWitcher {
   @Prop() map!: Map;
   @Prop() layers!: LayerType[];
   @Prop({ default: "" }) title = "";
 
-  readonly rootLayer = new LayerStructure();
+  rootLayer = new LayerStructure();
+  loadedLayers: Record<string, VectorGeoLayer> = {};
 
   public zoomDelta = 1;
   public animationDuration = 200;
 
   @State(state => state.sidebar["layer-switcher"]) sidebarOpen!: boolean;
 
-  @Watch('layers', { deep: true }) onLayersChanged() {
-    console.log("layersChanged")
-
-    console.log(this.layers);
-    
-    this.layerSetup(this.rootLayer, this.layers);
-  }
-
   mounted(): void {
-    this.layerSetup(this.rootLayer, this.layers);
+    this.updateLayers();
 
     this.map.getControls().forEach(control => {
       if (control instanceof Zoom) {
@@ -93,25 +87,56 @@ export default class AppGeovisualLayerSwitcher extends Vue {
     });
   }
 
-  private layerSetup(parentLayer: LayerStructure, layers: LayerType[]) {
+  updateLayers() {
+    this.keepAndUnregisterLoadedLayers();
+
+    this.rootLayer = new LayerStructure();
+
+    this.setupLayers(this.rootLayer, this.layers);
+  }
+
+  private keepAndUnregisterLoadedLayers() {
+    this.loadedLayers = {};
+
+    const getLoadedLayersAndUnregsiter = (parentLayer: LayerStructure) => {
+      for (const childLayer of parentLayer.getChildLayers()) {
+        if (childLayer.layerLoader instanceof GeoJSONLoader && childLayer.layerLoader.loaded) {
+          console.log("loaded layer! " + childLayer.id);
+
+          this.loadedLayers[childLayer.id as string] = childLayer.layerLoader.getLoadedLayer()! as VectorGeoLayer;
+        }
+
+        if (childLayer.hasChildrens) {
+          getLoadedLayersAndUnregsiter(childLayer);
+        }
+      }
+
+      parentLayer.unregisterEvents();
+    }
+
+    getLoadedLayersAndUnregsiter(this.rootLayer);
+  }
+
+  private getLoadedLayer(layerId: string): VectorGeoLayer | undefined {
+    if (layerId in this.loadedLayers) {
+      return this.loadedLayers[layerId];
+    }
+
+    return undefined;
+  }
+
+  private setupLayers(parentLayer: LayerStructure, layers: LayerType[]) {
     const setLoadigState = (e: LoadingEvent) => {
       this.$emit("loading", e);
     };
 
-    // Triggers an endless loooooop! WHY!?
-    // const layerIds: string[] = layers.map(l => l.id as string);
-    // let rmIndex = -1
-    // while ((rmIndex = parentLayer.getChildLayers().findIndex(l => !layerIds.includes(l.id as string))) != -1) {
-    //   parentLayer.getChildLayers().splice(rmIndex);
-    // }
-
-    layers.forEach((layer, index) => {
+    for (const layer of layers) {
       const layerId: string = layer.id || layer.name;
       
       switch (layer.type) {
         case "osm": {
           if (!parentLayer.hasChildLayer(layerId)) {
-            parentLayer.addChildLayer(new LayerStructure(new OSMLoader(layer, this.map, setLoadigState), layer.name), index);
+            parentLayer.addChildLayer(new LayerStructure(new OSMLoader(layer, this.map, setLoadigState), layer.name));
           }
 
           break;
@@ -120,8 +145,7 @@ export default class AppGeovisualLayerSwitcher extends Vue {
         case "geojson": {
           if (!parentLayer.hasChildLayer(layerId)) {
             parentLayer.addChildLayer(
-              new LayerStructure(new GeoJSONLoader(layer, this.map, setLoadigState), layer.name),
-              index
+              new LayerStructure(new GeoJSONLoader(layer, this.map, setLoadigState, this.getLoadedLayer(layerId)), layer.name)
             );
           }
 
@@ -132,10 +156,10 @@ export default class AppGeovisualLayerSwitcher extends Vue {
           let groupLayerStruct = parentLayer.getChildLayer(layerId);
           if (!groupLayerStruct) {
             groupLayerStruct = new LayerStructure(undefined, layer.name, layer);
-            parentLayer.addChildLayer(groupLayerStruct, index);
+            parentLayer.addChildLayer(groupLayerStruct);
           }
 
-          this.layerSetup(groupLayerStruct, layer.childLayers);
+          this.setupLayers(groupLayerStruct, layer.childLayers);
 
           break;
         }
@@ -144,14 +168,13 @@ export default class AppGeovisualLayerSwitcher extends Vue {
           if (!parentLayer.hasChildLayer(layerId)) {
             parentLayer.addChildLayer(
               new LayerStructure(new CustomLoader(layer, this.map, setLoadigState), layer.name),
-              index
             );
           }
 
           break;
         }
       }
-    });
+    }
   }
 
   handleZoom(direction: "out" | "in") {

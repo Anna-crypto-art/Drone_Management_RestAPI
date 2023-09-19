@@ -15,14 +15,18 @@ import * as ExtentFunctions from "ol/extent";
 import { i18n } from "@/main";
 import { waitFor } from "@/app/shared/services/helper/debounce-helper";
 
-export class GeoJSONLoader extends LayerLoader<
-  VectorLayer<VectorSource<Geometry>> | VectorImageLayer<VectorSource<Geometry>>
-> {
-  constructor(public readonly layerType: GeoJSONLayer, map: Map, loadingEvent: (e: LoadingEvent) => void) {
-    super(layerType, map, loadingEvent);
+
+export class GeoJSONLoader extends LayerLoader<VectorGeoLayer> {
+  constructor(
+    public readonly layerType: GeoJSONLayer,
+    map: Map,
+    loadingEvent: (e: LoadingEvent) => void,
+    loadedLayer: VectorGeoLayer | undefined = undefined,
+  ) {
+    super(layerType, map, loadingEvent, loadedLayer);
   }
 
-  async doLoad(): Promise<VectorLayer<VectorSource<Geometry>> | VectorImageLayer<VectorSource<Geometry>> | undefined> {
+  async doLoad(): Promise<VectorGeoLayer | undefined> {
     this.loadingCallback!({
       loading: true,
       state: i18n.t("fetching-data").toString(),

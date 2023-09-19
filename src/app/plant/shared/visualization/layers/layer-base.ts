@@ -359,6 +359,13 @@ export abstract class LayerBase {
     await this.events.emit(LayerEvent.SET_SELECTED, selected);
   }
 
+  public async selectSilent() {
+    this.selected = true;
+    if (this.geoLayerObject) {
+      this.geoLayerObject.selected = true;
+    }
+  }
+
   public getSelected(): boolean {
     return this.selected;
   }

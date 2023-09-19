@@ -79,7 +79,8 @@ export class PILayersHierarchy {
         if (groupKpiLayer.keyFigureLayers.length > 0) {
           const invsibleAutoSelectionLayer = groupKpiLayer.keyFigureLayers.find(l => l.invisibleAutoSelection);
           if (invsibleAutoSelectionLayer) {
-            const selectedLayers = groupKpiLayer.keyFigureLayers.filter(l => l.getSelected() && !l.invisibleAutoSelection);
+            const selectedLayers = groupKpiLayer.keyFigureLayers
+              .filter(l => l.getSelected() && !l.invisibleAutoSelection && l.analysisResult.id === invsibleAutoSelectionLayer.analysisResult.id);
             autoSelLayers.push({
               layer: invsibleAutoSelectionLayer,
               hasSelectedSiblings: selectedLayers.length > 0,
@@ -114,7 +115,7 @@ export class PILayersHierarchy {
     }
   }
 
-  public async reselectAllLayers(reload = false) {
+  public async reselectAllLayers(reload = false, slientSelection = false) {
     const allChildLayers = this.getAllChildLayers();
 
     const selectedLayerNames = allChildLayers.filter(childLayer => childLayer.getSelected())
@@ -136,7 +137,8 @@ export class PILayersHierarchy {
       allChildLayers.filter(l => selectedLayerNames.includes(l.noTransName) &&
         l.analysisResult.id === this.selectedAnalysisResultId &&
         !l.invisibleAutoSelection // layers with "invisibleAutoSelection" gets reselected automatically.
-      )
+      ),
+      slientSelection // Selects the layers silent, if true. Because "IOpenLayersComponent.updateLayers" will selected them later
     )
   }
 
@@ -147,7 +149,7 @@ export class PILayersHierarchy {
     }
   }
 
-  public async toggleShowUndefined(showUndefined: boolean, reselectLayer = true): Promise<void> {
+  public async toggleShowUndefined(showUndefined: boolean, reselectLayer = true, silentSelection = false): Promise<void> {
     this.showUndefined = showUndefined
 
     for (const childLayer of this.getAllChildLayers()) {
@@ -162,14 +164,14 @@ export class PILayersHierarchy {
 
         if (reselectLayer && childLayer.getSelected()) {
           await childLayer.setSelected(false);
-          await childLayer.setSelected(true);
+          silentSelection ? childLayer.selectSilent() : await childLayer.setSelected(true);
         }
       }
 
       if (reselectLayer) {
         for (const invAutoSelLayer of this.getInvisibleAutoSelectionLayers()) {
           if (showUndefined && invAutoSelLayer.hasSelectedSiblings && !invAutoSelLayer.layer.getSelected()) {
-            await invAutoSelLayer.layer.setSelected(true);
+            silentSelection ? invAutoSelLayer.layer.selectSilent() : await invAutoSelLayer.layer.setSelected(true);
           }
           if (!showUndefined && invAutoSelLayer.layer.getSelected()) {
             await invAutoSelLayer.layer.setSelected(false);
@@ -190,15 +192,14 @@ export class PILayersHierarchy {
     }
   }
 
-  public async selectKeyFigureLayer(keyFigureId: ApiKeyFigure) {
-    const keyFigureLayer = this.getAllChildLayers().find(keyFigureLayer => 
-      keyFigureLayer.isVisible && keyFigureLayer.keyFigureId === keyFigureId);
-    if (keyFigureLayer && !keyFigureLayer.getSelected()) {
-      await keyFigureLayer.setSelected(true);
-    }
-  }
+  public async selectLayers(
+    layersOrLayerNames: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>[] | string[],
+    silent = false,
+  ) {
+    console.log("selectLayers")
+    console.log(layersOrLayerNames);
+    console.log(silent);
 
-  public async selectLayers(layersOrLayerNames: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>[] | string[]) {
     if (layersOrLayerNames.length === 0) {
       return;
     }
@@ -212,7 +213,7 @@ export class PILayersHierarchy {
     let parentGroupLayer: GroupLayer | undefined = undefined
     for (const layer of layers) {
       if (this.multiSelection) {
-        layer.setSelected(true);
+        silent ? layer.selectSilent() : layer.setSelected(true);
       } else {
         // Only allow to select multiple layers when they are in the same group 
         // with singleSelection === false
@@ -223,7 +224,7 @@ export class PILayersHierarchy {
           currentParentGroupLayer && currentParentGroupLayer.id === parentGroupLayer!.id &&
           !parentGroupLayer!.singleSelection)
         ) {
-          layer.setSelected(true);
+          silent ? layer.selectSilent() : layer.setSelected(true);
 
           parentGroupLayer = currentParentGroupLayer;
         }
@@ -345,6 +346,8 @@ export class PILayersHierarchy {
   }
 
   public async onLayerSelected() {
+    console.log("onLayerSelected: " + this.raiseOnLayerSelected);
+    
     if (this.showUndefined && this.raiseOnLayerSelected) {
       this.raiseOnLayerSelected = false;
 
@@ -352,6 +355,11 @@ export class PILayersHierarchy {
         if (!invAutoSelLayer.hasSelectedSiblings && invAutoSelLayer.layer.getSelected()) {
           await invAutoSelLayer.layer.setSelected(false);
         } else if (invAutoSelLayer.hasSelectedSiblings && !invAutoSelLayer.layer.getSelected()) {
+          console.log("select invAutoSelLayer:")
+            console.log(invAutoSelLayer)
+
+          // trigges selected multiple times...
+
           await invAutoSelLayer.layer.setSelected(true);
         }
       }

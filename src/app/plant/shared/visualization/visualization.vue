@@ -292,6 +292,8 @@ export default class AppVisualization
 
     this.piLayersHierarchy!.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     this.refMeasureLayers!.addAndSelectAnalysis(this.firstAnalysis?.id);
+
+    
     
     const multiAnalysesSelectedBefore = !!this.piLayersHierarchy!.getCompareAnalysisResultId();
     if (multiAnalysesSelectedBefore) {
@@ -305,7 +307,7 @@ export default class AppVisualization
       this.piLayersHierarchy!.toggleMultiSelection(this.enableMultiSelection);
 
       this.doEnableShowCouldNotBeMeasured();
-      await this.piLayersHierarchy!.toggleShowUndefined(this.showCouldNotBeMeasured, false);
+      await this.piLayersHierarchy!.toggleShowUndefined(this.showCouldNotBeMeasured, false, true);
     }
 
     if (analysisSelectionChanged || multiAnalysesSelectedBefore || 
@@ -315,8 +317,8 @@ export default class AppVisualization
 
     if (analysisSelectionChanged || multiAnalysesSelectedBefore) {
       if (!this.firstLoad) {
-        await this.piLayersHierarchy!.reselectAllLayers(multiAnalysesSelectedBefore);
-        await this.refMeasureLayers!.reselectAllLayers();
+        await this.piLayersHierarchy!.reselectAllLayers(multiAnalysesSelectedBefore, true);
+        await this.refMeasureLayers!.reselectAllLayers(true);
       }
     }
 
@@ -331,6 +333,8 @@ export default class AppVisualization
     }
 
     this.piHeadGroup!.visible = !!this.firstAnalysisResult;
+
+    this.openLayers.updateLayers();
 
     this.hideToast();
   }
@@ -357,11 +361,11 @@ export default class AppVisualization
       this.piLayersHierarchy!.toggleMultiSelection(false);
       this.piLayersHierarchy!.toggleMultiSelectionDeep(false);
 
-      await this.piLayersHierarchy!.toggleShowUndefined(false, false);
+      await this.piLayersHierarchy!.toggleShowUndefined(false, false, true);
 
-      await this.piLayersHierarchy!.reselectAllLayers(singleAnalysesSelectedBefore);
+      await this.piLayersHierarchy!.reselectAllLayers(singleAnalysesSelectedBefore, true);
 
-      await this.refMeasureLayers!.reselectAllLayers();
+      await this.refMeasureLayers!.reselectAllLayers(true);
     }
     
     this.piLayersHierarchy!.updateVisibility();
@@ -377,6 +381,8 @@ export default class AppVisualization
 
     this.piHeadGroup!.visible = !!this.firstAnalysisResult;
 
+    this.openLayers.updateLayers();
+
     this.hideToast();
   }
 
@@ -388,6 +394,8 @@ export default class AppVisualization
     )
 
     this.observHeadGroup!.visible = this.observationSelectionService.hasSelectedObservations;
+
+    this.openLayers.updateLayers();
   }
 
   private async onFirstLoad(): Promise<boolean> {
