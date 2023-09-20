@@ -1,5 +1,16 @@
 <template>
   <div v-show="flightCampaign">
+    <div class="flight-campaign-print-headline mb-5">
+      <h2>
+        {{ flightCampaign.name }}
+      </h2>
+      <p>
+        {{ this.$t('date') + ": " + flightCampaign.start_date }}
+      </p>
+      <p>
+        {{ this.$t('drone') + ": " + appendDroneNameAndSerialNumber(flightCampaign.drone) }}
+      </p>
+    </div>
     <div v-for="(flightRoutesDay, index) in flightRoutesDays" :key="index">
       <h3 class="flight-campaign-route-table-header">
         {{ $t('day-with-number', {number: index+1}) }}, {{ getWeekDay(flightRoutesDay.date) }}
@@ -31,7 +42,7 @@
           </template>
 
           <template #hoverActions="row">
-            <app-dropdown-button variant="secondary" size="sm" v-show="row.item.drone">
+            <app-dropdown-button variant="secondary" size="sm" v-show="row.item.drone" class="d-none show-when-not-printing">
               <template #title>
                 <app-icon icon="download" />
               </template>
@@ -46,7 +57,6 @@
               </b-dropdown-item-button>
             </app-dropdown-button>
 
-            
             <app-button
               v-show="isSuperAdmin"
               @click="onDeleteClick(row.item)"
@@ -54,6 +64,7 @@
               size="sm"
               icon="trash"
               :title="$t('delete')"
+              class="d-none show-when-not-printing"
             />
           </template>
         </app-table>
@@ -239,4 +250,20 @@ export default class AppFlightCampaignRoutes extends BaseAuthComponent {
 .flight-campaign-route-table-header {
   margin-top: 20px !important;
 }
+
+// printing discards all CSS so we need to do some display stuff to
+// - hide the hover buttons
+// - show an intro/headline text
+// when printing.
+.show-when-not-printing:not(button) {
+  display: inline-flex !important;
+}
+button.show-when-not-printing {
+  display: inline-block !important;
+}
+.flight-campaign-print-headline {
+  margin-bottom: 40px;
+  display: none;
+}
+
 </style>
