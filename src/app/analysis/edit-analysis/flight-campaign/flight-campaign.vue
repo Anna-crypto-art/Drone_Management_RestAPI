@@ -138,10 +138,19 @@
       </div>
     </app-modal-form>
 
-    <app-flight-campaign-routes 
-      :analysis="analysis"
-      :flightCampaign="selectedFlightCampaign"
-    />
+    <div v-if="selectedFlightCampaign">
+      <app-button variant="primary" @click="printFlightCampaign" class="print-flight-campaign-btn">
+        {{ $t("print-flight-campaign") }}
+      </app-button>
+    </div>
+
+    <div v-if="selectedFlightCampaign">
+      <app-flight-campaign-routes 
+        id="flight-campaign-routes-area"
+        :analysis="analysis"
+        :flightCampaign="selectedFlightCampaign"
+      />
+    </div>
 
     <app-modal-form
       id="export-modal"
@@ -360,6 +369,7 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
     
     await this.updateFlightCampaigns();
   }
+
   private appendDroneNameAndSerialNumber(drone: DroneSchema) {
     return this.$t("drone-with-sn", {droneName: drone.custom_name, droneSerialNumber: drone.serial_number}).toString();
   }
@@ -407,8 +417,19 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
   private isGenerated(flightCampaign: FlightCampaignItemSchema): boolean {
     return flightCampaign.flight_campaign_state == FlightCampaignState.FINISHED_GENERATING;
   }
+
+  private printFlightCampaign() {
+    this.$htmlToPaper('flight-campaign-routes-area', {
+      "windowTitle": this.selectedFlightCampaign?.name + " - " + this.analysis.name + " - " + this.analysis.plant.name,
+    });
+  }
 }
 </script>
 
 <style lang="scss">
+.print-flight-campaign-btn {
+  margin-top: 20px;
+  margin-left: 20px;
+  float: right;
+}
 </style>

@@ -647,7 +647,7 @@
   "battery-hotswapping": "Battery hotswapping",
   "battery-hotswapping_expl": "If enabled, flight routes start times will be placed quickly after each other, no larger breaks are given for charging.",
   "auto-export-litchi": "Auto-export to Litchi",
-  "auto-export-litchi_expl": "If enabled, the flight routes will directly be exported to the Litchi account associated with this client/plant.",
+  "auto-export-litchi_expl": "If enabled, the flight routes will directly be exported to the Litchi account associated with this client/plant. Due to Litchi API limitations, this will add 1 minute per flight route to the time it takes to generate the flight campaign.",
   "flight-types": "Flight types",
   "flight-type-not-yet-available_expl": "Flight types will be available once the flight campaign was generated.",
   "force-add-flight-types": "Force additional flight types",
@@ -717,6 +717,7 @@
   "doc-explanation": "This section contains confidential documents only. For further documentation and information about drone settings and technical requirements please visit our open <a href='{knowledgeHub}' target='_blank'>knowledge hub</a>.",
   "hide-super-admin": "Hide SUPER_ADMIN",
   "flight-route-duration_expl": "This duration is a rough pre-calculation, more exact timings will be shown in your flight app.",
+  "print-flight-campaign": "Print flight campaign",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",
