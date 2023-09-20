@@ -37,9 +37,9 @@ export class SequentialEventEmitter implements IEventEmitter {
   }
 
   public removeListenerById(event: Event, id: string): IEventEmitter {
-    const funcIndex = this.registeredEvents[event].findIndex(f => f.id === id);
+    const funcIndex = this.registeredEvents[event]?.findIndex(f => f.id === id);
 
-    if (funcIndex != -1) {
+    if (funcIndex !== undefined && funcIndex != -1) {
       this.registeredEvents[event].splice(funcIndex, 1);
     }
 

@@ -101,13 +101,13 @@ export default class AppGeovisualLayerSwitcher extends Vue implements IAppLayerS
     const getLoadedLayersAndUnregsiter = (parentLayer: LayerStructure) => {
       for (const childLayer of parentLayer.getChildLayers()) {
         if (childLayer.layerLoader instanceof GeoJSONLoader && childLayer.layerLoader.loaded) {
-          console.log("loaded layer! " + childLayer.id);
-
           this.loadedLayers[childLayer.id as string] = childLayer.layerLoader.getLoadedLayer()! as VectorGeoLayer;
         }
 
         if (childLayer.hasChildrens) {
           getLoadedLayersAndUnregsiter(childLayer);
+        } else {
+          childLayer.unregisterEvents();
         }
       }
 

@@ -40,6 +40,10 @@ export class ObservationCcpLayer extends LayerBase {
     return this.dataTypeOptionInfo?.label || this.ccp.name;
   }
 
+  public get nameId(): string {
+    return this.ccp.id + "__" + this.name;
+  }
+
   protected getPcs(feature: FeatureLike): string | undefined {
     return feature.get("name");
   }
@@ -66,6 +70,7 @@ export class ObservationCcpLayer extends LayerBase {
     const style = this.componentLayer.getStyle(feature);
 
     style.getStroke()?.setColor(this.color);
+    style.getStroke()?.setWidth(5);
     style.getFill()?.setColor(this.color);
 
     return style;

@@ -192,14 +192,17 @@ export class PILayersHierarchy {
     }
   }
 
+  /**
+   * 
+   * @param layersOrLayerNames 
+   * @param silent silent selection sets "selected" to true but does not raise the LayerEvent.SET_SELECTED event.
+   * This is necessary for the case geo-visualiazion.updateLayers gets called afterwards. 
+   * Because geo-visualiazion.updateLayers recreates all layers and does select the layer then if true. 
+   */
   public async selectLayers(
     layersOrLayerNames: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>[] | string[],
-    silent = false,
+    silent = false, 
   ) {
-    console.log("selectLayers")
-    console.log(layersOrLayerNames);
-    console.log(silent);
-
     if (layersOrLayerNames.length === 0) {
       return;
     }
@@ -346,8 +349,6 @@ export class PILayersHierarchy {
   }
 
   public async onLayerSelected() {
-    console.log("onLayerSelected: " + this.raiseOnLayerSelected);
-    
     if (this.showUndefined && this.raiseOnLayerSelected) {
       this.raiseOnLayerSelected = false;
 
@@ -355,11 +356,6 @@ export class PILayersHierarchy {
         if (!invAutoSelLayer.hasSelectedSiblings && invAutoSelLayer.layer.getSelected()) {
           await invAutoSelLayer.layer.setSelected(false);
         } else if (invAutoSelLayer.hasSelectedSiblings && !invAutoSelLayer.layer.getSelected()) {
-          console.log("select invAutoSelLayer:")
-            console.log(invAutoSelLayer)
-
-          // trigges selected multiple times...
-
           await invAutoSelLayer.layer.setSelected(true);
         }
       }

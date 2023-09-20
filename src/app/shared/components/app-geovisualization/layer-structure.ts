@@ -52,16 +52,8 @@ export class LayerStructure extends SequentialEventEmitter {
   }
 
   private async selectLayer(selected: boolean) {
-    await this.queueUp();
-
     if (selected) {
       await this.unselectParentLayers();
-    }
-
-    if (selected) {
-      console.log("select layer!")
-      console.log(this.layerLoader?.layerType.id);
-      // console.trace(); 
     }
 
     await this.layerLoader?.setVisible(selected);
@@ -73,31 +65,6 @@ export class LayerStructure extends SequentialEventEmitter {
         await childLayer.setSelected(selected);
       }
     }
-
-    await this.next();    
-  }
-
-  private async queueUp() {
-    const ticketNumber = this.selectWorkingQueue.length > 0 ? this.selectWorkingQueue[0] + 1 : 0;
-    this.selectWorkingQueue.unshift(ticketNumber);
-
-    return await new Promise<void>((resolve) => {
-      if (this.selectWorkingQueue.length === 1) {
-        resolve();
-      }
-
-      this.on("enqueueNextSelect", (nextTicket) => {
-        if (nextTicket === undefined || nextTicket === ticketNumber) {
-          resolve();
-        }
-      });
-    })
-  }
-
-  private async next() {
-    this.selectWorkingQueue.pop();
-    await this.emit("enqueueNextSelect", 
-      this.selectWorkingQueue.length > 0 ? this.selectWorkingQueue[this.selectWorkingQueue.length - 1] : undefined);
   }
 
   private getLayerType(): BaseLayerType | undefined {

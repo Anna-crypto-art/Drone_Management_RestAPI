@@ -63,6 +63,9 @@ export default class AppGeovisualization extends Vue implements IOpenLayersCompo
     this.map?.setTarget(this.$el.firstChild as HTMLElement);
   }
 
+  /**
+   * Completely recreates LayersStructure hierarchy.
+   */
   updateLayers() {
     this.appLayerSwitcher.updateLayers()
   }

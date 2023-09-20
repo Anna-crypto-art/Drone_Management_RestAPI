@@ -31,9 +31,11 @@ export class ObservLayersHierarchy {
     for (const apiComponent in apiComponentNames) {
       const comp: ApiComponent = Number(apiComponent);
 
-      const componentGroupObservLayerIndex = this.layersHierarchy.findIndex(g => g.componentId === comp);
+      let selectedLayerNameIds: string[] = [];
+
+      const componentGroupObservLayerIndex = this.layersHierarchy.findIndex(g => g.componentId === comp);      
       if (componentGroupObservLayerIndex >= 0) {
-        await this.removeChildLayers(this.layersHierarchy[componentGroupObservLayerIndex]);
+        selectedLayerNameIds = await this.unselectAndRemoveChildLayers(this.layersHierarchy[componentGroupObservLayerIndex]);
 
         this.layersHierarchy.splice(componentGroupObservLayerIndex, 1);
         this.groupLayers.splice(componentGroupObservLayerIndex, 1);
@@ -41,7 +43,7 @@ export class ObservLayersHierarchy {
 
       const compCcps = ccps.filter(ccp => ccp.component.id === comp);
       if (compCcps.length > 0) {
-        const componentGroupObservLayer = {
+        const componentGroupObservLayer: ComponentGroupObservLayer = {
             componentId: comp,
             groupLayer: this.createGroupLayer(comp),
             childLayers: [],
@@ -55,7 +57,10 @@ export class ObservLayersHierarchy {
         for (const ccp of compCcps) {
           if (ccp.data_type === CCPDataType.NUMBER_RANGE || ccp.data_type === CCPDataType.VALUE_LIST) {
             const childLayer = this.createValueRangeGroupLayer(ccp, dateRange!);
+            componentGroupObservLayer.childLayers.push(childLayer)
             componentGroupObservLayer.groupLayer.childLayers.push(childLayer.groupLayer);
+
+            this.selectLayers(childLayer.childLayers, selectedLayerNameIds);
           } else {
             let filterValue: ObservFilterValue = undefined;
             if (ccp.data_type === CCPDataType.BOOLEAN) {
@@ -63,7 +68,10 @@ export class ObservLayersHierarchy {
             }
 
             const childLayer = this.createObservCcpLayer(ccp, dateRange!, filterValue);
+            componentGroupObservLayer.childLayers.push(childLayer)
             componentGroupObservLayer.groupLayer.childLayers.push(childLayer.toGeoLayer())
+
+            this.selectLayers([childLayer], selectedLayerNameIds);
           }
         }
       }
@@ -84,7 +92,10 @@ export class ObservLayersHierarchy {
     )
   }
 
-  private createValueRangeGroupLayer(ccp: CustomComponentPropertySchema, dateRange: DateRange): ValueRangeGroupObservLayer {
+  private createValueRangeGroupLayer(
+    ccp: CustomComponentPropertySchema,
+    dateRange: DateRange,
+  ): ValueRangeGroupObservLayer {
     const childLayers = this.createValueRangeLayers(ccp, dateRange);
 
     return {
@@ -126,32 +137,40 @@ export class ObservLayersHierarchy {
     };
   }
 
-  private async removeChildLayers(componentGroupObservLayer: ComponentGroupObservLayer) {
+  private async unselectAndRemoveChildLayers(componentGroupObservLayer: ComponentGroupObservLayer): Promise<string[]> {
+    const unselectedLayerNameIds: string[] = [];
+
     for (const childLayer of componentGroupObservLayer.childLayers) {
       if (childLayer instanceof ObservationCcpLayer) {
         if (childLayer.getSelected()) {
-          await childLayer.setSelected(false);
+          unselectedLayerNameIds.push(await this.unselectAndRemoveLayer(childLayer));
         }
-
-        // childLayer.setVisible(false);
       } else {
         for (const grandChildLayer of childLayer.childLayers) {
           if (grandChildLayer.getSelected()) {
-            await grandChildLayer.setSelected(false);
+            unselectedLayerNameIds.push(await this.unselectAndRemoveLayer(grandChildLayer));
           }
-
-          // grandChildLayer.setVisible(false);
         }
-
-        // childLayer.groupLayer.visible = false;
-        // childLayer.groupLayer.childLayers.length = 0;
-        // childLayer.childLayers.length = 0;
       }
     }
 
-    // componentGroupObservLayer.groupLayer.childLayers.length = 0;
-    // componentGroupObservLayer.childLayers.length = 0;
-    // componentGroupObservLayer.groupLayer.visible = false;
+    return unselectedLayerNameIds;
+  }
+
+  private async unselectAndRemoveLayer(layer: ObservationCcpLayer): Promise<string> {
+    layer.reloadLayer(); // removes the layer from operlayers map
+    await layer.setSelected(false);
+    return layer.nameId;
+  }
+
+  private selectLayers(layers: ObservationCcpLayer[], selectedLayerNameIds: string[]) {
+    if (selectedLayerNameIds.length > 0) {
+      for (const layer of layers) {
+        if (selectedLayerNameIds.includes(layer.nameId)) {
+          layer.selectSilent();
+        }
+      }
+    }
   }
 
   private getComponentLayerTypes(): (typeof ComponentLayer)[] {

@@ -292,8 +292,6 @@ export default class AppVisualization
 
     this.piLayersHierarchy!.addAndSelectAnalysisResult(this.firstAnalysisResult?.id);
     this.refMeasureLayers!.addAndSelectAnalysis(this.firstAnalysis?.id);
-
-    
     
     const multiAnalysesSelectedBefore = !!this.piLayersHierarchy!.getCompareAnalysisResultId();
     if (multiAnalysesSelectedBefore) {
@@ -422,7 +420,7 @@ export default class AppVisualization
 
       const layerNames = typeof plantRouteQuery.layer === "string" ? [plantRouteQuery.layer] : plantRouteQuery.layer;
 
-      await this.piLayersHierarchy!.selectLayers(layerNames);
+      await this.piLayersHierarchy!.selectLayers(layerNames, true);
 
       return true;
     }
@@ -577,7 +575,6 @@ export default class AppVisualization
           this.legends.push(legend);
         } else {
           console.error("Legend id " + legend.id + " already added")
-          // throw Error("Legend id " + legend.id + " already added");
         }
       } else {
         if (existingLegend) {

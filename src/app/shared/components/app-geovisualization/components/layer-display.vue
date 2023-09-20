@@ -111,6 +111,7 @@ export default class AppGeovisualLayerDisplay extends Vue {
   collapsed = false;
 
   @Watch("layer") async onLayerChanged() {
+    // Will be triggered by "layer-switcher.updateLayers"
     await this.updateLayer();
   }
 
