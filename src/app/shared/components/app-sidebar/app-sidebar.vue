@@ -7,13 +7,20 @@
     </div>
 
     <b-button 
-      pill variant="secondary"
+      :variant="variant"
       size="sm"
-      :class="'toggle-button opens-right ' + (open ? 'show-label' : '')"
+      :class="'toggle-button analysis'"
       @click="onToggle()"
     >
       <app-icon-analysis :fill="open" />
-      <!-- <span class="toggle-button-text">&nbsp; {{ $t("analysis") }}</span> -->
+    </b-button>
+    <b-button 
+      :variant="variant"
+      size="sm"
+      :class="'toggle-button observations'"
+      @click="onToggle()"
+    >
+      <b-icon-clipboard-data />
     </b-button>
   </div>
 </template>
@@ -22,18 +29,30 @@
 import Vue from "vue";
 import { Prop, Component } from "vue-property-decorator";
 import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
+import AppIconObservations from "@/app/shared/components/app-icon/app-icon-observations.vue";
+
 
 @Component({
   name: "app-sidebar",
   components: {
     AppIconAnalysis,
+    AppIconObservations,
   }
 })
 export default class AppSidebar extends Vue {
   @Prop({ default: true }) open!: boolean;
 
+  variant = "secondary"
+
   onToggle(): void {
     this.$emit("toggled");
+    
+    if (this.variant === "primary") {
+      this.variant = "secondary"
+    }
+    if (this.variant === "secondary") {
+      this.variant = "primary"
+    }
   }
 }
 </script>
@@ -45,6 +64,7 @@ export default class AppSidebar extends Vue {
 .app-sidebar {
   position: relative;
   box-sizing: border-box;
+  margin-left: 50px;
   width: 0;
   height: 100%;
   transition: width 0.3s ease-in-out;
@@ -62,7 +82,6 @@ export default class AppSidebar extends Vue {
   .app-sidebar-container {
     position: relative;
     top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
     overflow: hidden;
@@ -85,16 +104,15 @@ export default class AppSidebar extends Vue {
     .app-sidebar-container .app-sidebar-inner {
       left: 0;
     }
-
-    .toggle-button {
-      &.opens-right {
-        left: calc(100% - 21px);
-      }
-    }
   }
 
   .toggle-button {
-    top: 3.5em;
+    &.analysis {
+      top: 3.5em;
+    }
+    &.observations {
+      top: 6em;
+    }
   }
 }
 
@@ -104,23 +122,16 @@ export default class AppSidebar extends Vue {
   border: 1px solid $border-color-grey;
   white-space: nowrap;
 
-  &:active:hover {
-    color: $hover-blue !important;
+
+  // &:active:hover {
+  //   color: $hover-blue !important;
+  // }
+
+  &.analysis {
+    margin-left: -50px;    
   }
-
-  &.opens-right {
-    left: calc(100% - 5px);
-    transition: left 0.3s ease-in-out;
-    // border-left-color: $white;
-
-    // .plant-view-csp-ptc:not(.mobile) & {
-    //   &:hover,
-    //   &.show-label {
-    //     .toggle-button-text {
-    //       padding-left: 0.5em;
-    //     }
-    //   }
-    // }
+  &.observations {
+    margin-left: -50px;
   }
 
   &.opens-left {
