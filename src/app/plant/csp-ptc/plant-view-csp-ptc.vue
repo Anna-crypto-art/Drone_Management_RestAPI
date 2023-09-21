@@ -1,9 +1,7 @@
 <template>
   <div class="plant-view-csp-ptc" v-if="analyses">
-    <app-selection-sidebar
-      :plant="plant"
-      :analyses="analyses"
-    />
+    <!-- <app-selection-sidebar :plant="plant" :analyses="analyses" /> -->
+    <app-analysis-selection-sidebar :plant="plant" :analyses="analyses" />
     <app-plant-view-tabs :plant="plant" :analyses="analyses">
       <template #visual>
         <app-visual-csp-ptc :analyses="analyses" :plant="plant" />
@@ -43,6 +41,7 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import { IAnalysisSelectionComponent } from "../shared/selection-sidebar/analysis-selection/types";
 import { AnalysisSelectionService } from "../shared/selection-sidebar/analysis-selection/analysis-selection-service";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
+import AppAnalysisSelectionSidebar from "@/app/plant/shared/selection-sidebar/analysis-selection/analysis-selection.vue";
 
 @Component({
   name: "app-plant-view-csp-ptc",
@@ -50,7 +49,7 @@ import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/
     AppPlantViewTabs,
     AppVisualCspPtc,
     AppTablesCspPtc,
-    AppSelectionSidebar,
+    AppAnalysisSelectionSidebar,
     AppPlantAdminViewCspPtc,
     AppPlantDiagramViewCspPtc,
     AppCustomComponentProperties,

@@ -21,7 +21,7 @@
   </div>
 </template>
 
-<script lang="ts">
+// <script lang="ts">
 import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Component, Prop } from "vue-property-decorator";

@@ -1,47 +1,56 @@
 <template>
-  <div class="app-analysis-selection">
-    <div class="app-analysis-selection-settings" v-if="analyses.length > 1">
-      <b-checkbox switch v-model="compareMode" @change="onCompareModeChanged">
-        {{ $t("compare-mode") }}
-        <app-explanation>{{ $t("compare-mode_descr") }}</app-explanation>
-      </b-checkbox>
-    </div>
-    <app-table-container>
-      <app-table
-        ref="analysesTable"
-        :rows="analysesTableItems"
-        :columns="analysesTableColumns"
-        :selectMode="selectMode"
-        @rowSelected="onAnalysisSelected"
-        :overlayLoading="loading"
-        :hideHeader="true"
-      >
-        <template #cell(name)="row">
-          {{ row.item.date }} 
-          <app-icon v-if="!isPilot && !row.item.hasResults"
-            icon="cone-striped" 
-            class="mar-left-half orange" 
-            v-b-popover.hover.top="$t('no-pis-available-yet')"
-          />
-          <app-icon v-if="row.item.refMeasureCount > 0"
-            icon="clipboard-check"
-            class="mar-left-half blue"
-            v-b-popover.hover.top="$t('has-ref-measures', { count: row.item.refMeasureCount })"
-          />
-          <app-icon v-if="row.item.hasGoodies" 
-            icon="gift"
-            class="mar-left-half blue"
-            v-b-popover.hover.top="$t('has-additional-pis')"
-          />
-          <app-super-admin-marker v-if="row.item.analysisResultReleased === false" />
-          <br>
-          <small class="grayed">{{ row.item.name }}</small>
-          <div :class="{ 'mar-top': row.item.orderPPs && row.item.orderPPs.length > 0 }">
-            <app-order-pps-view :orderProductPackages="row.item.orderPPs" :lefted="true" />
+  <div class="app-analysis-selection-sidebar" :class="{ absolute: absolute }">
+    <app-sidebar :open="sidebarOpen" @toggled="onSidebarToggled">
+      <div class="app-selection-sidebar-leftside">
+        <h2 class="app-selection-sidebar-leftside-title" translate="no">
+          {{ plant.name }}
+        </h2>
+        <div class="app-analysis-selection">
+          <div class="app-analysis-selection-settings" v-if="analyses.length > 1">
+            <b-checkbox switch v-model="compareMode" @change="onCompareModeChanged">
+              {{ $t("compare-mode") }}
+              <app-explanation>{{ $t("compare-mode_descr") }}</app-explanation>
+            </b-checkbox>
           </div>
-        </template>
-      </app-table>
-    </app-table-container>
+          <app-table-container>
+            <app-table
+              ref="analysesTable"
+              :rows="analysesTableItems"
+              :columns="analysesTableColumns"
+              :selectMode="selectMode"
+              @rowSelected="onAnalysisSelected"
+              :overlayLoading="loading"
+              :hideHeader="true"
+            >
+              <template #cell(name)="row">
+                {{ row.item.date }} 
+                <app-icon v-if="!isPilot && !row.item.hasResults"
+                  icon="cone-striped" 
+                  class="mar-left-half orange" 
+                  v-b-popover.hover.top="$t('no-pis-available-yet')"
+                />
+                <app-icon v-if="row.item.refMeasureCount > 0"
+                  icon="clipboard-check"
+                  class="mar-left-half blue"
+                  v-b-popover.hover.top="$t('has-ref-measures', { count: row.item.refMeasureCount })"
+                />
+                <app-icon v-if="row.item.hasGoodies" 
+                  icon="gift"
+                  class="mar-left-half blue"
+                  v-b-popover.hover.top="$t('has-additional-pis')"
+                />
+                <app-super-admin-marker v-if="row.item.analysisResultReleased === false" />
+                <br>
+                <small class="grayed">{{ row.item.name }}</small>
+                <div :class="{ 'mar-top': row.item.orderPPs && row.item.orderPPs.length > 0 }">
+                  <app-order-pps-view :orderProductPackages="row.item.orderPPs" :lefted="true" />
+                </div>
+              </template>
+            </app-table>
+          </app-table-container>
+        </div>
+      </div>
+    </app-sidebar>
   </div>
 </template>
 
@@ -62,19 +71,59 @@ import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { AppTableColumns, IAppSelectTable } from "@/app/shared/components/app-table/types";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
+import { SelectionSidebarEvent, selectionSidebarEventService } from "../selection-sidebar-event-serivce";
+import { State } from "vuex-class";
+// import AppAnalysisSelection from "./analysis-selection/analysis-selection.vue";
+import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
+import AppObservationSelection from "../observation-selection/observation-selection.vue";
+import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
+
 
 @Component({
-  name: "app-analysis-selection",
+  name: "app-analysis-selection-sidebar",
   components: {
+    AppSidebar,
+    // AppAnalysisSelection,
+    AppIcon,
+    AppIconAnalysis,
+    AppObservationSelection,
     AppTableContainer,
     AppExplanation,
     AppOrderPpsView,
-    AppIcon,
     AppSuperAdminMarker,
     AppTable,
   },
 })
-export default class AppAnalysisSelection extends BaseAuthComponent {
+export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
+  @Prop() plant!: PlantSchema;
+  @Prop() analyses!: AnalysisForViewSchema[];
+  @State(state => state.sidebar["analysis"]) sidebarOpen!: boolean;
+
+  absolute = true;
+
+  async created() {
+    selectionSidebarEventService.on(this.plant.id, SelectionSidebarEvent.SIDEBAR_ABSOLUTE, async (absolute) => {
+      this.absolute = absolute;
+    });
+  }
+
+  onSidebarToggled(): void {
+    this.$store.direct.commit.sidebar.toggle({ name: "analysis" });
+  }
+}
+
+// @Component({
+//   name: "app-analysis-selection",
+//   components: {
+//     AppTableContainer,
+//     AppExplanation,
+//     AppOrderPpsView,
+//     AppIcon,
+//     AppSuperAdminMarker,
+//     AppTable,
+//   },
+// })
+export class AppAnalysisSelection extends BaseAuthComponent {
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
   @Ref() analysesTable!: IAppSelectTable;
@@ -289,4 +338,35 @@ export default class AppAnalysisSelection extends BaseAuthComponent {
   }
 }
 
+// Fix sidebar overlays toaster
+.b-popover {
+  z-index: 1101;
+}
+
+.app-selection-sidebar {
+  height: calc(100vh - #{$header-height});
+  display: flex;
+
+  &.absolute {
+    position: absolute;
+  }
+
+  &-leftside {
+    padding: 0.5em;
+    height: 100%;
+    width: 100%;
+    border-right: $border-color-grey 1px solid;
+    display: flex;
+    flex-flow: column;
+
+    &-title {
+      margin-bottom: 1em;
+      margin-left: 10px;
+    }
+  }
+
+  .tab-content {
+    padding-top: 1em;
+  }
+}
 </style>

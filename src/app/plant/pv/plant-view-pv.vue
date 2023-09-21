@@ -1,9 +1,8 @@
 <template>
   <div class="plant-view-pv" v-if="analyses">
-    <app-selection-sidebar
-      :plant="plant"
-      :analyses="analyses"
-    />
+    <app-selection-sidebar :plant="plant" :analyses="analyses" />
+    <!-- <app-analysis-selection :plant="plant" :analyses="analyses" /> -->
+    <!-- <app-analysis-selection-sidebar :plant="plant" :analyses="analyses" /> -->
     <app-plant-view-tabs :plant="plant" :analyses="analyses">
       <template #visual>
         <app-visual-pv :analyses="analyses" :plant="plant" />

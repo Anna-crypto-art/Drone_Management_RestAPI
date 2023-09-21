@@ -9,16 +9,18 @@
     <b-button 
       :variant="variant"
       size="sm"
+      tool="analysis"
       :class="'toggle-button analysis'"
       @click="onToggle()"
     >
-      <app-icon-analysis :fill="open" />
+      <app-icon-analysis />
     </b-button>
     <b-button 
       :variant="variant"
       size="sm"
+      tool="observations"
       :class="'toggle-button observations'"
-      @click="onToggle()"
+      @click="onToggle2()"
     >
       <b-icon-clipboard-data />
     </b-button>
@@ -30,6 +32,7 @@ import Vue from "vue";
 import { Prop, Component } from "vue-property-decorator";
 import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
 import AppIconObservations from "@/app/shared/components/app-icon/app-icon-observations.vue";
+import { waitFor } from "../../services/helper/debounce-helper";
 
 
 @Component({
@@ -46,12 +49,27 @@ export default class AppSidebar extends Vue {
 
   onToggle(): void {
     this.$emit("toggled");
-    
-    if (this.variant === "primary") {
-      this.variant = "secondary"
+
+    switch (this.variant) {
+      case "primary":
+        this.variant = "secondary";
+        break;
+      case "secondary":
+        this.variant = "primary";
+        break;
     }
-    if (this.variant === "secondary") {
-      this.variant = "primary"
+  }
+
+  onToggle2(): void {
+    this.$emit("toggled");
+    
+    switch (this.variant) {
+      case "primary":
+        this.variant = "secondary";
+        break;
+      case "secondary":
+        this.variant = "primary";
+        break;
     }
   }
 }
@@ -118,7 +136,7 @@ export default class AppSidebar extends Vue {
 
 .toggle-button {
   position: absolute;
-  color: $blue;
+  // color: $blue;
   border: 1px solid $border-color-grey;
   white-space: nowrap;
 
@@ -164,7 +182,7 @@ export default class AppSidebar extends Vue {
   }
 
   &:hover {
-    background-color: $background-grey;
+    // background-color: $background-grey;
 
     @extend .show-label;
   }
