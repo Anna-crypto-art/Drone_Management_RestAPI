@@ -63,3 +63,18 @@ export interface CustomLayer extends BaseLayerType {
 export type LayerType = GeoJSONLayer | OSMLayer | GroupLayer | CustomLayer;
 
 export type VectorGeoLayer = VectorLayer<VectorSource<Geometry>> | VectorImageLayer<VectorSource<Geometry>>;
+
+export interface IGeoLayer {
+  id: string;
+  name: string;
+  selected: boolean;
+  description: string | undefined;
+  onSelectedChanged: () => Promise<void> | void;
+  loadGeoJSON: () => GeoJSON<unknown> | undefined | Promise<GeoJSON<unknown> | undefined>;
+  getStyle: StyleFunction;
+  visible: boolean;
+  reloadLayerOnNextSelection: boolean;
+  autoZoom: boolean;
+  zIndex: number | undefined;
+  minZoom: number | undefined;
+}
