@@ -44,9 +44,9 @@ export const keyFigureRainbowColors: Record<ApiKeyFigure, LayerColor> = {
 
   // Not implemented
   [ApiKeyFigure.MODULE_BROKEN_GLASS_ID]: LayerColor.black,
-  [ApiKeyFigure.MODULE_SHORT_CIRCUIT_ID]: LayerColor.black,
+  [ApiKeyFigure.PID_ID]: LayerColor.black,
   [ApiKeyFigure.MODULE_OPEN_CIRCUIT_ID]: LayerColor.black,
-  [ApiKeyFigure.SUBSTRING_SHORT_CIRCUIT_ID]: LayerColor.black,
+  [ApiKeyFigure.MODULE_BYPASS_DIODE_ACTIVE_ID]: LayerColor.black,
   [ApiKeyFigure.SUBSTRING_OPEN_CIRCUIT_ID]: LayerColor.black,
   [ApiKeyFigure.CELL_BROKEN_ID]: LayerColor.black,
   [ApiKeyFigure.CELL_TRANSFER_RESISTANCE_ID]: LayerColor.black,

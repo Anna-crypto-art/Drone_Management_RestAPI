@@ -38,9 +38,9 @@ export interface GeoVisualPvQuery extends GeoVisualQuery {
   tracker_deviation_class?: 1 | 2 | 3;
   module_soiling_level?: 1 | 2 | 3;
   module_broken_glass_class?: 1 | 2 | 3;
-  module_short_circuit_class?: 1 | 2 | 3;
-  module_open_circuit_class?: 1 | 2 | 3;
-  module_substring_short_circuit_class?: 1 | 2 | 3;
+  module_pid?: 0 | 1;
+  module_open_circuit?: 0 | 1;
+  bypass_diode_active?: 0 | 1;
   module_cell_broken_class?: 1 | 2 | 3;
   module_cell_transfer_resistance_class?: 1 | 2 | 3;
 }

@@ -6,9 +6,9 @@ export interface AnalysisResultPvModuleSchema extends AnalysisResultSchemaBase {
     wind_speed: number;
     tracker_tracking_angle: number;
     broken_glass_class: number;
-    short_circuit_class: number;
-    open_circuit_class: number;
-    substring_short_circuit_class: number;
+    pid: boolean;
+    open_circuit: boolean;
+    bypass_diode_active: boolean;
     substring_open_circuit_class: number;
     cell_broken_class: number;
     cell_transfer_resistance_class: number;
@@ -22,9 +22,9 @@ export interface AnalysisResultPvModuleComparedSchema extends AnalysisResultPvMo
   wind_speed__diff: number;
   tracker_tracking_angle__diff: number;
   broken_glass_class__diff: number;
-  short_circuit_class__diff: number;
-  open_circuit_class__diff: number;
-  substring_short_circuit_class__diff: number;
+  pid__diff: number;
+  open_circuit__diff: number;
+  bypass_diode_active__diff: number;
   substring_open_circuit_class__diff: number;
   cell_broken_class__diff: number;
   cell_transfer_resistance_class__diff: number;
