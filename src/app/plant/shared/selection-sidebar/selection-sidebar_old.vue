@@ -1,21 +1,13 @@
 <template>
-  <div class="app-selection-sidebar" :class="{ absolute: absolute }">
+  <div class="app-analysis-selection-sidebar" :class="{ absolute: absolute }">
     <app-sidebar :open="sidebarOpen" @toggled="onSidebarToggled">
       <div class="app-selection-sidebar-leftside">
         <h2 class="app-selection-sidebar-leftside-title" translate="no">
           {{ plant.name }}
         </h2>
-        <b-tabs>
-          <b-tab>
-            <template #title><app-icon-analysis /> <span class="pad-left">{{ $t('analysis') }}</span></template>
-            <app-analysis-selection :plant="plant" :analyses="analyses" />
-          </b-tab>
-          <b-tab>
-            <template #title><app-icon icon="clipboard-data" /> <span class="pad-left">{{ $t('observations') }}</span></template>
-            <app-observation-selection :plant="plant" />
-          </b-tab>
-        </b-tabs>
-        
+        <div>
+          <app-analysis-selection-sidebar :plant="plant" :analyses="analyses" />
+        </div>       
       </div>
     </app-sidebar>
   </div>
@@ -35,7 +27,7 @@ import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.
 import AppObservationSelection from "./observation-selection/observation-selection.vue";
 
 @Component({
-  name: "app-selection-sidebar",
+  name: "app-analysis-selection-sidebar",
   components: {
     AppSidebar,
     AppAnalysisSelection,
@@ -72,7 +64,7 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
   z-index: 1101;
 }
 
-.app-selection-sidebar {
+.app-analysis-selection-sidebar {
   height: calc(100vh - #{$header-height});
   display: flex;
 

@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts">
-import AppSelectionSidebar from "@/app/plant/shared/selection-sidebar/selection-sidebar.vue";
+// import AppSelectionSidebar from "@/app/plant/shared/selection-sidebar/selection-sidebar_old.vue";
 import AppPlantViewTabs from "@/app/plant/shared/plant-view-tabs/plant-view-tabs.vue";
 import AppVisualPv from "@/app/plant/pv/visualization/visual-pv.vue";
 import AppTablesPv from "@/app/plant/pv/tables/tables-pv.vue";
@@ -42,7 +42,7 @@ import { AnalysisSelectionService } from "../shared/selection-sidebar/analysis-s
   name: "app-plant-view-pv",
   components: {
     AppPlantViewTabs,
-    AppSelectionSidebar,
+    // AppSelectionSidebar,
     AppVisualPv,
     AppTablesPv,
     AppPlantAdminViewPv,

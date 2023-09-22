@@ -1,12 +1,12 @@
 <template>
   <div class="app-analysis-selection-sidebar" :class="{ absolute: absolute }">
     <app-sidebar :open="sidebarOpen" @toggled="onSidebarToggled">
-      <div class="app-selection-sidebar-leftside">
-        <h2 class="app-selection-sidebar-leftside-title" translate="no">
+      <div class="app-analysis-selection-sidebar-leftside">
+        <h2 class="app-analysis-selection-sidebar-leftside-title" translate="no">
           {{ plant.name }}
         </h2>
-        <div class="app-analysis-selection">
-          <div class="app-analysis-selection-settings" v-if="analyses.length > 1">
+        <!-- <div class="app-analysis-selection"> -->
+          <div class="app-analysis-selection-sidebar-settings" v-if="analyses.length > 1">
             <b-checkbox switch v-model="compareMode" @change="onCompareModeChanged">
               {{ $t("compare-mode") }}
               <app-explanation>{{ $t("compare-mode_descr") }}</app-explanation>
@@ -48,7 +48,7 @@
               </template>
             </app-table>
           </app-table-container>
-        </div>
+        <!-- </div> -->
       </div>
     </app-sidebar>
   </div>
@@ -98,35 +98,11 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
   @State(state => state.sidebar["analysis"]) sidebarOpen!: boolean;
-
-  absolute = true;
-
-  async created() {
-    selectionSidebarEventService.on(this.plant.id, SelectionSidebarEvent.SIDEBAR_ABSOLUTE, async (absolute) => {
-      this.absolute = absolute;
-    });
-  }
+  @Ref() analysesTable!: IAppSelectTable;
 
   onSidebarToggled(): void {
     this.$store.direct.commit.sidebar.toggle({ name: "analysis" });
   }
-}
-
-// @Component({
-//   name: "app-analysis-selection",
-//   components: {
-//     AppTableContainer,
-//     AppExplanation,
-//     AppOrderPpsView,
-//     AppIcon,
-//     AppSuperAdminMarker,
-//     AppTable,
-//   },
-// })
-export class AppAnalysisSelection extends BaseAuthComponent {
-  @Prop() plant!: PlantSchema;
-  @Prop() analyses!: AnalysisForViewSchema[];
-  @Ref() analysesTable!: IAppSelectTable;
 
   analysesTableColumns: AppTableColumns = [
     { key: "name", label: this.$t("analysis").toString() },
@@ -141,7 +117,14 @@ export class AppAnalysisSelection extends BaseAuthComponent {
 
   private routeQueryHelper = new RouteQueryHelper(this);
 
+  absolute = true;
+
   async created() {
+    
+    selectionSidebarEventService.on(this.plant.id, SelectionSidebarEvent.SIDEBAR_ABSOLUTE, async (absolute) => {
+      this.absolute = absolute;
+    });
+      
     for (const analysis of this.analyses) {
       this.analysesTableItems.push({
         id: analysis.id,
@@ -324,29 +307,11 @@ export class AppAnalysisSelection extends BaseAuthComponent {
 @import "@/scss/_colors.scss";
 @import "@/scss/_variables.scss";
 
-.app-analysis-selection {
-  .app-table-container {
-    margin-top: 0;
-  }
-
-  &-settings {
-    margin-bottom: 15px;
-  }
-  
-  &-kpi-badge {
-    padding-right: 5px;
-  }
-}
-
-// Fix sidebar overlays toaster
-.b-popover {
-  z-index: 1101;
-}
-
-.app-selection-sidebar {
+.app-analysis-selection-sidebar {
+  margin-top: 0;
   height: calc(100vh - #{$header-height});
   display: flex;
-
+  
   &.absolute {
     position: absolute;
   }
@@ -360,13 +325,23 @@ export class AppAnalysisSelection extends BaseAuthComponent {
     flex-flow: column;
 
     &-title {
-      margin-bottom: 1em;
+      margin-bottom: 0.5em;
       margin-left: 10px;
     }
   }
 
-  .tab-content {
-    padding-top: 1em;
+  &-settings {
+    margin-bottom: -10px;
+  }
+    
+  &-kpi-badge {
+    padding-right: 5px;
   }
 }
+  
+// Fix sidebar overlays toaster
+.b-popover {
+  z-index: 1101;
+}
+
 </style>
