@@ -52,7 +52,7 @@
               <b-dropdown-item-button @click="onDownloadWPMZClick(row.item)" :disabled="!isDJIWPMZDownloadAllowed(row.item)">
                 {{ $t('download-wpml-file') }}
               </b-dropdown-item-button>
-              <b-dropdown-item-button @click="onDownloadUnleashClick(row.item)">
+              <b-dropdown-item-button @click="onDownloadUnleashClick(row.item)" v-if="isSuperAdmin">
                 {{ $t('download-unleash-route') }}
               </b-dropdown-item-button>
             </app-dropdown-button>
