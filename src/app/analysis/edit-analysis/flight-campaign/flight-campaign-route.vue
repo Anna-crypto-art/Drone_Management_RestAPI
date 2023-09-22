@@ -42,7 +42,7 @@
           </template>
 
           <template #hoverActions="row">
-            <app-dropdown-button variant="secondary" size="sm" v-show="row.item.drone" class="d-none show-when-not-printing">
+            <app-dropdown-button variant="secondary" size="sm" v-if="row.item.drone" class="d-none show-when-not-printing">
               <template #title>
                 <app-icon icon="download" />
               </template>
