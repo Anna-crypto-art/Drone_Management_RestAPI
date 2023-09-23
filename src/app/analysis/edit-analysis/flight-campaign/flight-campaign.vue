@@ -313,7 +313,7 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
         order_product_package_ids: this.newFlightCampaign.orderProductPackageIds,
         force_add_flight_type_ids: this.newFlightCampaign.forceAddFlightTypeIds,
         auto_export_litchi: this.newFlightCampaign.autoExportLitchi,
-        optimizeTorsionFlights: this.newFlightCampaign.optimizeTorsionFlights,
+        optimize_torsion_flights: this.newFlightCampaign.optimizeTorsionFlights,
       });
 
       this.showSuccess(this.$t("now-creating-flight-campaign", { flight_campaign: this.newFlightCampaign.name }).toString());
