@@ -135,6 +135,13 @@
             </b-form-checkbox>
           </b-col>
         </b-row>
+        <b-row>
+          <b-col>
+            <b-form-checkbox id="new-flight-campaign-optimize-torsion-flights" v-model="newFlightCampaign.optimizeTorsionFlights">
+              {{ $t("optimize-torsion-flights") }} <app-explanation>{{ $t("optimize-torsion-flights_expl") }}</app-explanation>
+            </b-form-checkbox>
+          </b-col>
+        </b-row>
       </div>
     </app-modal-form>
 
@@ -271,6 +278,7 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
       orderProductPackageIds: this.analysis.order_product_packages.map(orderPP => orderPP.id),
       forceAddFlightTypeIds: [],
       autoExportLitchi: false,
+      optimizeTorsionFlights: false,
     }
     this.selectedDroneId = this.analysis.drone?.id;
 
@@ -305,6 +313,7 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
         order_product_package_ids: this.newFlightCampaign.orderProductPackageIds,
         force_add_flight_type_ids: this.newFlightCampaign.forceAddFlightTypeIds,
         auto_export_litchi: this.newFlightCampaign.autoExportLitchi,
+        optimizeTorsionFlights: this.newFlightCampaign.optimizeTorsionFlights,
       });
 
       this.showSuccess(this.$t("now-creating-flight-campaign", { flight_campaign: this.newFlightCampaign.name }).toString());
