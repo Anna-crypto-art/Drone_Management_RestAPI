@@ -48,7 +48,7 @@ export const keyFigureRainbowColors: Record<ApiKeyFigure, LayerColor> = {
   [ApiKeyFigure.MODULE_OPEN_CIRCUIT_ID]: LayerColor.black,
   [ApiKeyFigure.MODULE_BYPASS_DIODE_ACTIVE_ID]: LayerColor.black,
   [ApiKeyFigure.SUBSTRING_OPEN_CIRCUIT_ID]: LayerColor.black,
-  [ApiKeyFigure.CELL_BROKEN_ID]: LayerColor.black,
+  [ApiKeyFigure.CELL_HOTSPOT_ID]: LayerColor.black,
   [ApiKeyFigure.CELL_TRANSFER_RESISTANCE_ID]: LayerColor.black,
   [ApiKeyFigure.TRACKING_DEVIATION_ID]: LayerColor.black,
   [ApiKeyFigure.MODULE_SOILING_LEVEL_ID]: LayerColor.black,
@@ -56,4 +56,6 @@ export const keyFigureRainbowColors: Record<ApiKeyFigure, LayerColor> = {
   [ApiKeyFigure.TRACKER_ORTHO_IMAGES_IR_ID]: LayerColor.black,
   [ApiKeyFigure.MODULE_ORTHO_IMAGES_RGB_ID]: LayerColor.black,
   [ApiKeyFigure.MODULE_ORTHO_IMAGES_IR_ID]: LayerColor.black,
+  [ApiKeyFigure.TRACKER_RAW_IMAGES_IR_ID]: LayerColor.black,
+  [ApiKeyFigure.SHADOWING_ID]: LayerColor.black,
 };

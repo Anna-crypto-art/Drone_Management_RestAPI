@@ -10,11 +10,12 @@ export interface AnalysisResultPvModuleSchema extends AnalysisResultSchemaBase {
     open_circuit: boolean;
     bypass_diode_active: boolean;
     substring_open_circuit_class: number;
-    cell_broken_class: number;
+    cell_hotspot: number;
     cell_transfer_resistance_class: number;
     soiling_level: number;
     ortho_image_rgb: string;
     ortho_image_ir: string;
+    shadowing: boolean;
 }
 
 export interface AnalysisResultPvModuleComparedSchema extends AnalysisResultPvModuleSchema {
@@ -26,7 +27,8 @@ export interface AnalysisResultPvModuleComparedSchema extends AnalysisResultPvMo
   open_circuit__diff: number;
   bypass_diode_active__diff: number;
   substring_open_circuit_class__diff: number;
-  cell_broken_class__diff: number;
+  cell_hotspot__diff: number;
   cell_transfer_resistance_class__diff: number;
   soiling_level__diff: number;
+  shadowing__diff: number;
 }

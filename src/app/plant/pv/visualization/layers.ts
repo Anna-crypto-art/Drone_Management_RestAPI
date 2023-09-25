@@ -14,6 +14,7 @@ import { ModuleBypassDiodeActiveKeyFigure } from "./key-figure-layers/module/mod
 import { TrackerSoilingKeyFigureLayer } from "./key-figure-layers/tracker/tracker-soiling-key-figure-layer";
 import { TrackingDeviationKeyFigureLayer } from "./key-figure-layers/tracker/tracking-deviation-key-figure-layer";
 import { ModuleComponentLayer } from "./component-layers/module-component-layer";
+import { ModuleShadowingKeyFigure } from "./key-figure-layers/module/module-shadowing-key-figure";
 
 export const COMPONENT_LAYERS: typeof ComponentLayer[] = [
   ModuleComponentLayer,
@@ -140,29 +141,10 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualPvQuery>[] = [
     query: { bypass_diode_active: 1, undefined: 1 },
   },
   {
-    keyFigureId: ApiKeyFigure.CELL_BROKEN_ID,
+    keyFigureId: ApiKeyFigure.CELL_HOTSPOT_ID,
     layerType: ModuleCellBrokenKeyFigure,
-    keyFigureInfo: { keyName: "pv-module-cell-broken" },
-    subLayers: [
-      {
-        keyFigureInfo: { displayName: "pv-module-cell-broken-class-3", zIndex: 13 },
-        query: { module_cell_broken_class: 3 },
-      },
-      {
-        keyFigureInfo: { displayName: "pv-module-cell-broken-class-2", zIndex: 12 },
-        query: { module_cell_broken_class: 2 },
-      },
-      {
-        keyFigureInfo: { displayName: "pv-module-cell-broken-class-1", zIndex: 10 },
-        query: { module_cell_broken_class: 1 },
-      },
-      {
-        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
-        query: { undefined: 1 },
-        color: LayerColor.grey,
-        invisibleAutoSelection: true,
-      },
-    ]
+    keyFigureInfo: { keyName: "pv-module-cell-hotspot" },
+    query: { module_cell_hotspot: 1, undefined: 1 },
   },
   {
     keyFigureId: ApiKeyFigure.CELL_TRANSFER_RESISTANCE_ID,
@@ -188,5 +170,11 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualPvQuery>[] = [
         invisibleAutoSelection: true,
       },
     ]
+  },
+  {
+    keyFigureId: ApiKeyFigure.SHADOWING_ID,
+    layerType: ModuleShadowingKeyFigure,
+    keyFigureInfo: { keyName: "pv-module-shadowing" },
+    query: { module_shadowing: 1, undefined: 1 },
   },
 ];

@@ -41,6 +41,7 @@ export interface GeoVisualPvQuery extends GeoVisualQuery {
   module_pid?: 0 | 1;
   module_open_circuit?: 0 | 1;
   bypass_diode_active?: 0 | 1;
-  module_cell_broken_class?: 1 | 2 | 3;
+  module_cell_hotspot?: 0 | 1;
   module_cell_transfer_resistance_class?: 1 | 2 | 3;
+  module_shadowing?: 0 | 1;
 }
