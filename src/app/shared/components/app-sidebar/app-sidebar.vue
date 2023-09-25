@@ -7,20 +7,20 @@
     </div>
 
     <b-button 
-      :variant="variant"
+      :variant="variantAnalysis"
       size="sm"
       tool="analysis"
       :class="'toggle-button analysis'"
-      @click="onToggle()"
+      @click="onToggle('analysis')"
     >
       <app-icon-analysis />
     </b-button>
     <b-button 
-      :variant="variant"
+      :variant="variantObservations"
       size="sm"
       tool="observations"
       :class="'toggle-button observations'"
-      @click="onToggle2()"
+      @click="onToggle('observations')"
     >
       <b-icon-clipboard-data />
     </b-button>
@@ -32,8 +32,8 @@ import Vue from "vue";
 import { Prop, Component } from "vue-property-decorator";
 import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
 import AppIconObservations from "@/app/shared/components/app-icon/app-icon-observations.vue";
-import { waitFor } from "../../services/helper/debounce-helper";
-
+import AppAnalysisSelectionSidebar from "@/app/plant/shared/selection-sidebar/analysis-selection/analysis-selection.vue";
+import AppObservationSelectionSidebar from "@/app/plant/shared/selection-sidebar/observation-selection/observation-selection.vue";
 
 @Component({
   name: "app-sidebar",
@@ -45,31 +45,35 @@ import { waitFor } from "../../services/helper/debounce-helper";
 export default class AppSidebar extends Vue {
   @Prop({ default: true }) open!: boolean;
 
-  variant = "secondary"
+  variantObservations = "secondary"
+  variantAnalysis = "primary"
 
-  onToggle(): void {
-    this.$emit("toggled");
+  onToggle(tool: string) {
 
-    switch (this.variant) {
-      case "primary":
-        this.variant = "secondary";
+    switch (tool) {
+      case "analysis":
+        this.$emit("toggled_analysis");
+        console.log("analysis sidebar state is: "+this.$store.direct.state.sidebar.analysis)
+        switch (this.variantAnalysis) {
+          case "primary":
+            this.variantAnalysis = "secondary";
+            break;
+          case "secondary":
+            this.variantAnalysis = "primary";
+            break;
+          }
         break;
-      case "secondary":
-        this.variant = "primary";
-        break;
-    }
-  }
-
-  onToggle2(): void {
-    this.$emit("toggled");
-    
-    switch (this.variant) {
-      case "primary":
-        this.variant = "secondary";
-        break;
-      case "secondary":
-        this.variant = "primary";
-        break;
+      case "observations":
+        this.$emit("toggled_observations");
+        console.log("observations sidebar state is: "+this.$store.direct.state.sidebar.observations)
+        switch (this.variantObservations) {
+          case "primary":
+            this.variantObservations = "secondary";
+            break;
+          case "secondary":
+            this.variantObservations = "primary";
+            break;
+          }
     }
   }
 }

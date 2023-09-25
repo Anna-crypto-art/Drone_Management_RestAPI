@@ -1,11 +1,10 @@
 <template>
   <div class="app-analysis-selection-sidebar" :class="{ absolute: absolute }">
-    <app-sidebar :open="sidebarOpen" @toggled="onSidebarToggled">
+    <app-sidebar :open="sidebarOpen" @toggled_analysis="onSidebarToggled">
       <div class="app-analysis-selection-sidebar-leftside">
         <h2 class="app-analysis-selection-sidebar-leftside-title" translate="no">
           {{ plant.name }}
         </h2>
-        <!-- <div class="app-analysis-selection"> -->
           <div class="app-analysis-selection-sidebar-settings" v-if="analyses.length > 1">
             <b-checkbox switch v-model="compareMode" @change="onCompareModeChanged">
               {{ $t("compare-mode") }}
@@ -43,12 +42,11 @@
                 <br>
                 <small class="grayed">{{ row.item.name }}</small>
                 <div :class="{ 'mar-top': row.item.orderPPs && row.item.orderPPs.length > 0 }">
-                  <app-order-pps-view :orderProductPackages="row.item.orderPPs" :lefted="true" />
-                </div>
-              </template>
-            </app-table>
-          </app-table-container>
-        <!-- </div> -->
+                <app-order-pps-view :orderProductPackages="row.item.orderPPs" :lefted="true" />
+              </div>
+            </template>
+          </app-table>
+        </app-table-container>
       </div>
     </app-sidebar>
   </div>
@@ -73,7 +71,6 @@ import { AppTableColumns, IAppSelectTable } from "@/app/shared/components/app-ta
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { SelectionSidebarEvent, selectionSidebarEventService } from "../selection-sidebar-event-serivce";
 import { State } from "vuex-class";
-// import AppAnalysisSelection from "./analysis-selection/analysis-selection.vue";
 import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
 import AppObservationSelection from "../observation-selection/observation-selection.vue";
 import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
@@ -83,7 +80,6 @@ import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
   name: "app-analysis-selection-sidebar",
   components: {
     AppSidebar,
-    // AppAnalysisSelection,
     AppIcon,
     AppIconAnalysis,
     AppObservationSelection,
@@ -101,6 +97,7 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
   @Ref() analysesTable!: IAppSelectTable;
 
   onSidebarToggled(): void {
+    console.log("toggle...")
     this.$store.direct.commit.sidebar.toggle({ name: "analysis" });
   }
 

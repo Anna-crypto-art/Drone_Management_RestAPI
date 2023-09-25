@@ -1,47 +1,56 @@
 <template>
-  <div class="app-observation-selection">
-    <div class="app-observation-selection-filter">
-      <b-form @submit.prevent="onSubmitFilter">
-        <b-form-group :label="$t('from')" label-cols-sm="4" label-cols-lg="2">
-          <app-datepicker v-model="fromDate" required /> 
-        </b-form-group>
-        <b-form-group :label="$t('to')" label-cols-sm="4" label-cols-lg="2">
-          <app-datepicker v-model="toDate" required /> 
-        </b-form-group>
-        <app-button type="submit" cls="width-100pc">{{ $t('apply') }}</app-button>
-      </b-form>
-    </div>
-    <app-table-container>
-      <app-table
-        ref="observTable"
-        :rows="observTableItems"
-        :columns="observTableColumns"
-        selectMode="single"
-        @rowSelected="onObservSelected"
-        :overlayLoading="loading"
-        :hideHeader="true"
-      >
-        <template #cell(name)="row">
-          {{ row.item.name.date }}
-          <app-icon 
-            icon="app-indicator"
-            class="mar-left-half"
-            v-b-popover.hover.top="getComponentNames(row.item.name)"
-          />
-          <app-icon 
-            icon="people-fill"
-            class="mar-left-half" 
-            v-b-popover.hover.top="row.item.name.user_names.join(', ')"
-          /><br>
-          <small class="grayed">{{ $t("count") }}: {{ row.item.name.count }}</small>
-          <div v-if="row.item.name.ccps.length > 0" class="mar-top">
-            <app-badge v-for="ccp in row.item.name.ccps" :key="ccp.ccp_id" :color="getCcpColor(ccp.ccp_id)">
-              {{ getCcpName(ccp.ccp_id) }}
-            </app-badge>
+  <div class="app-observation-selection-sidebar" :class="{ absolute: absolute }">
+    <app-sidebar @toggled_observations="onSidebarToggled">
+      <div class="app-observation-selection-sidebar-leftside">
+        <h2 class="app-observation-selection-sidebar-leftside-title" translate="no">
+          {{ plant.name }}
+        </h2>
+          <div class="app-observation-selection-sidebar">
+            <div class="app-observation-selection-filter">
+              <b-form @submit.prevent="onSubmitFilter">
+                <b-form-group :label="$t('from')" label-cols-sm="4" label-cols-lg="2">
+                  <app-datepicker v-model="fromDate" required /> 
+                </b-form-group>
+                <b-form-group :label="$t('to')" label-cols-sm="4" label-cols-lg="2">
+                  <app-datepicker v-model="toDate" required /> 
+                </b-form-group>
+                <app-button type="submit" cls="width-100pc">{{ $t('apply') }}</app-button>
+              </b-form>
+            </div>
+            <app-table-container>
+              <app-table
+                ref="observTable"
+                :rows="observTableItems"
+                :columns="observTableColumns"
+                selectMode="single"
+                @rowSelected="onObservSelected"
+                :overlayLoading="loading"
+                :hideHeader="true"
+              >
+                <template #cell(name)="row">
+                  {{ row.item.name.date }}
+                  <app-icon 
+                    icon="app-indicator"
+                    class="mar-left-half"
+                    v-b-popover.hover.top="getComponentNames(row.item.name)"
+                  />
+                  <app-icon 
+                    icon="people-fill"
+                    class="mar-left-half" 
+                    v-b-popover.hover.top="row.item.name.user_names.join(', ')"
+                  /><br>
+                  <small class="grayed">{{ $t("count") }}: {{ row.item.name.count }}</small>
+                  <div v-if="row.item.name.ccps.length > 0" class="mar-top">
+                    <app-badge v-for="ccp in row.item.name.ccps" :key="ccp.ccp_id" :color="getCcpColor(ccp.ccp_id)">
+                      {{ getCcpName(ccp.ccp_id) }}
+                    </app-badge>
+                  </div>
+                </template>
+              </app-table>
+            </app-table-container>
           </div>
-        </template>
-      </app-table>
-    </app-table-container>
+        </div>
+    </app-sidebar>
   </div>
 </template>
 
@@ -66,9 +75,11 @@ import { CcpService } from "../../plant-settings/ccp-service";
 import { CCPDataType } from "@/app/shared/services/volateq-api/api-schemas/custom-component-property-schema";
 import { ObservationSelectionEvent, ObservRowItem } from "./types";
 import { observationSelectEventService } from "./observation-selection-event-service";
+import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
+import { State } from "vuex-class";
 
 @Component({
-  name: "app-observation-selection",
+  name: "app-observation-selection-sidebar",
   components: {
     AppTableContainer,
     AppExplanation,
@@ -77,11 +88,13 @@ import { observationSelectEventService } from "./observation-selection-event-ser
     AppButton,
     AppDatepicker,
     AppBadge,
+    AppSidebar,
   },
 })
-export default class AppObservationSelection extends BaseAuthComponent {
+export default class AppObservationSelectionSidebar extends BaseAuthComponent {
   @Prop() plant!: PlantSchema;
   @Ref() observTable!: IAppSelectTable;
+  @State(state => state.sidebar["observations"]) sidebarOpen!: boolean;
 
   observTableColumns: AppTableColumns = [
     { key: "name", label: this.$t("observations").toString() },
@@ -93,10 +106,16 @@ export default class AppObservationSelection extends BaseAuthComponent {
 
   loading = false;
 
+  absolute = true;
+
   ccpService!: CcpService;
 
   @CatchError("loading")
   async created() {
+    observationSelectEventService.on(this.plant.id, ObservationSelectionEvent.SIDEBAR_ABSOLUTE, async (absolute) => {
+      this.absolute = absolute;
+    });
+
     this.toDate = dateHelper.toDate(dateHelper.now());
     
     const dFrom = new Date();
@@ -106,6 +125,10 @@ export default class AppObservationSelection extends BaseAuthComponent {
     this.ccpService = CcpService.get(this.plant.id);
 
     await this.updateSummerizedObservations();
+  }
+
+  onSidebarToggled(): void {
+    this.$store.direct.commit.sidebar.toggle({ name: "observations" });
   }
 
   @CatchError("loading")
@@ -162,14 +185,33 @@ export default class AppObservationSelection extends BaseAuthComponent {
 @import "@/scss/_colors.scss";
 @import "@/scss/_variables.scss";
 
-.app-observation-selection {
-  .app-table-container {
-    margin-top: 0;
+.app-observation-selection-sidebar {
+  margin-top: 0;
+  height: calc(100vh - #{$header-height});
+  display: flex;
+  
+  &.absolute {
+    position: absolute;
   }
 
-  &-filter {
-    margin-bottom: 15px;
+  &-leftside {
+    padding: 0.5em;
+    height: 100%;
+    width: 100%;
+    border-right: $border-color-grey 1px solid;
+    display: flex;
+    flex-flow: column;
+
+    &-title {
+      margin-bottom: 0.5em;
+      margin-left: 10px;
+    }
   }
+}
+  
+// Fix sidebar overlays toaster
+.b-popover {
+  z-index: 1101;
 }
 
 </style>
