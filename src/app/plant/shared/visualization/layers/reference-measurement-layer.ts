@@ -7,10 +7,10 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { FeatureLike } from "ol/Feature";
 import { Stroke, Style } from "ol/style";
 import { OrhtoImageMixin } from "../mixins/ortho-image-mixin";
-import { IOrthoImageMixin } from "../mixins/types";
+import { IOrthoImageMixin, OrthoImage } from "../mixins/types";
 import { FeatureInfos, FeatureInfosMeta, IPlantVisualization, Legend, PropsFeature } from "../types";
 import { LayerBase } from "./layer-base";
-import { LayerColor, OrthoImage } from "./types";
+import { LayerColor } from "./types";
 
 export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageMixin {
   protected zIndex = 20;

@@ -3,7 +3,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { LayerBase } from "./layer-base";
 import { FeatureLike } from "ol/Feature";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
-import { LayerColor, KeyFigureColorScheme, KeyFigureInfo, OrthoImage, KeyFigureGeoJSON } from "./types";
+import { LayerColor, KeyFigureColorScheme, KeyFigureInfo, KeyFigureGeoJSON } from "./types";
 import { FeatureInfo, FeatureInfos, FeatureProperties, IPlantVisualization, PropsFeature, FeatureActionsSummary, ComparedFeatureType, ComparedFeatures, FeatureInfosMeta } from "../types";
 import { AnalysisResultMappingEntry, AnalysisResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
@@ -13,7 +13,7 @@ import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/com
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { OrhtoImageMixin } from "../mixins/ortho-image-mixin";
-import { IOrthoImageMixin } from "../mixins/types";
+import { IOrthoImageMixin, OrthoImage } from "../mixins/types";
 import { analysisResultEventService } from "../../plant-admin-view/analysis-result-event-service";
 import { AnalysisResultEvent } from "../../plant-admin-view/types";
 import { FilterFieldType } from "../../filter-fields/types";

@@ -7,17 +7,17 @@ import * as ExtentFunctions from "ol/extent";
 import { Style } from "ol/style";
 import { layerEvents } from "../layer-events";
 import { GEO_JSON_OPTIONS, LayerBase } from "../layers/layer-base";
-import { OrthoImage } from "../layers/types";
 import { FeatureAction, FeatureInfos } from "../types";
-import { IOrthoImageMixin } from "./types";
+import { IOrthoImageMixin, OrthoImage } from "./types";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import { BaseImageMixin } from "./base-image-mixin";
 
-export class OrhtoImageMixin {
-  constructor(
-    private readonly layer: LayerBase & IOrthoImageMixin,
-  ) {
+export class OrhtoImageMixin extends BaseImageMixin<IOrthoImageMixin> {
+  constructor(layer: LayerBase & IOrthoImageMixin) {
+    super(layer);
+
     this.layer.orthoImages = [
       { name: "RGB_ONLINE", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_ONLINE_ID },
       { name: "RGB_ONLINE_NO_REFLEX", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_ONLINE_NO_REFLEX_ID },
@@ -27,11 +27,12 @@ export class OrhtoImageMixin {
       { name: "TRACKER_IR", keyFigureId: ApiKeyFigure.TRACKER_ORTHO_IMAGES_IR_ID },
       { name: "TRACKER_RGB", keyFigureId: ApiKeyFigure.TRACKER_ORTHO_IMAGES_RGB_ID },
     ];
+
+    this.images = this.layer.orthoImages;
   }
 
   public isOrthoImageAvailable(orthoImage: OrthoImage): boolean {
-    return this.layer.orthoImages !== null && !!this.layer.analysisResult 
-      && !!this.layer.analysisResult.key_figures.find(keyFigure => keyFigure.id === orthoImage.keyFigureId)
+    return this.isImageAvailable(orthoImage);
   }
 
   public addShowOrthoImageActions(featureInfos: FeatureInfos | undefined, componentId: ApiComponent) {
