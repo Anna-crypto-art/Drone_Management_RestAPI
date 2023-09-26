@@ -1,6 +1,6 @@
 <template>
   <div class="app-observation-selection-sidebar" :class="{ absolute: absolute }">
-    <app-sidebar @toggled_observations="onSidebarToggled">
+    <app-sidebar :open="sidebarOpen" @toggled_observations="onSidebarToggled">
       <div class="app-observation-selection-sidebar-leftside">
         <h2 class="app-observation-selection-sidebar-leftside-title" translate="no">
           {{ plant.name }}
@@ -128,6 +128,7 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
   }
 
   onSidebarToggled(): void {
+    console.log("toggle observations...")
     this.$store.direct.commit.sidebar.toggle({ name: "observations" });
   }
 

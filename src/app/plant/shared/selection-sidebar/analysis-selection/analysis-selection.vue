@@ -97,7 +97,7 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
   @Ref() analysesTable!: IAppSelectTable;
 
   onSidebarToggled(): void {
-    console.log("toggle...")
+    console.log("toggle analysis...")
     this.$store.direct.commit.sidebar.toggle({ name: "analysis" });
   }
 

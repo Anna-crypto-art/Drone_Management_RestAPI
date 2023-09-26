@@ -2,7 +2,7 @@
   <div class="plant-view-csp-ptc" v-if="analyses">
     <!-- <app-selection-sidebar :plant="plant" :analyses="analyses" /> -->
     <app-analysis-selection-sidebar :plant="plant" :analyses="analyses" />
-    <app-observation-selection-sidebar v-if="showSidebar" :plant="plant" />
+    <app-observation-selection-sidebar :plant="plant" />
     <app-plant-view-tabs :plant="plant" :analyses="analyses">
       <template #visual>
         <app-visual-csp-ptc :analyses="analyses" :plant="plant" />

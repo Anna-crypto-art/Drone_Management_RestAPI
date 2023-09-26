@@ -29,7 +29,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Prop, Component } from "vue-property-decorator";
+import { Prop, Component, Watch } from "vue-property-decorator";
 import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
 import AppIconObservations from "@/app/shared/components/app-icon/app-icon-observations.vue";
 import AppAnalysisSelectionSidebar from "@/app/plant/shared/selection-sidebar/analysis-selection/analysis-selection.vue";
@@ -45,35 +45,32 @@ import AppObservationSelectionSidebar from "@/app/plant/shared/selection-sidebar
 export default class AppSidebar extends Vue {
   @Prop({ default: true }) open!: boolean;
 
-  variantObservations = "secondary"
-  variantAnalysis = "primary"
+  variantAnalysis = this.setButtonVariant(this.$store.direct.state.sidebar.analysis)
+  variantObservations = this.setButtonVariant(this.$store.direct.state.sidebar.observations)
+
+  // setButton = this.setVariantObservations()
+
+  setButtonVariant(sidebar: boolean) {
+    if (sidebar) {
+      return "primary";
+    } else {
+      return "secondary";
+    }
+  }
 
   onToggle(tool: string) {
-
     switch (tool) {
       case "analysis":
         this.$emit("toggled_analysis");
         console.log("analysis sidebar state is: "+this.$store.direct.state.sidebar.analysis)
-        switch (this.variantAnalysis) {
-          case "primary":
-            this.variantAnalysis = "secondary";
-            break;
-          case "secondary":
-            this.variantAnalysis = "primary";
-            break;
-          }
+        this.variantAnalysis = this.setButtonVariant(this.$store.direct.state.sidebar.analysis)
         break;
       case "observations":
+        console.log(this.$store.direct.state.sidebar.observations)
         this.$emit("toggled_observations");
         console.log("observations sidebar state is: "+this.$store.direct.state.sidebar.observations)
-        switch (this.variantObservations) {
-          case "primary":
-            this.variantObservations = "secondary";
-            break;
-          case "secondary":
-            this.variantObservations = "primary";
-            break;
-          }
+        this.variantObservations = this.setButtonVariant(this.$store.direct.state.sidebar.observations)
+        console.log(this.$store.direct.state.sidebar.observations)
     }
   }
 }
