@@ -1,7 +1,4 @@
-import { ModuleClassKeyFigure } from "./abstract/pv-module-class-key-figure";
+import { ModuleKeyFigureLayer } from "./abstract/pv-module-key-figure";
 
-export class ModuleOpenCircuitKeyFigure extends ModuleClassKeyFigure {
-  protected getQueryClassParam(): number {
-    return this.query!.module_open_circuit_class!;
-  }
+export class ModuleOpenCircuitKeyFigure extends ModuleKeyFigureLayer {
 }

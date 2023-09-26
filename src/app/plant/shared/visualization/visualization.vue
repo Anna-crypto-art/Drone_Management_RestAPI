@@ -93,10 +93,8 @@ import { ComponentLayer } from "./layers/component-layer";
 import { State } from "vuex-class";
 import { AnalysisSelectionBaseComponent } from "../analysis-selection-sidebar/analysis-selection-base-component";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
-import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { RefMeasureLayers } from "./ref-measure-layers";
 import { layerEvents } from "./layer-events";
-import { OrthoImage } from "./layers/types";
 import { OrhtoImageMixin } from "./mixins/ortho-image-mixin";
 import AppReferenceMeasurements from "../reference-measurements/reference-measurements.vue";
 import { RouteQueryHelper } from "../helper/route-query-helper";
@@ -120,6 +118,7 @@ import { Point } from "ol/geom";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { PlantRouteQuery } from "../types";
+import { OrthoImage } from "./mixins/types";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
