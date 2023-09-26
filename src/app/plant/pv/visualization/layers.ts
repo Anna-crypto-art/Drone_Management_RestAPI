@@ -23,6 +23,30 @@ export const COMPONENT_LAYERS: typeof ComponentLayer[] = [
 
 export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualPvQuery>[] = [
   {
+    keyFigureId: ApiKeyFigure.PID_ID,
+    layerType: ModulePidKeyFigure,
+    keyFigureInfo: { keyName: "pv-module-pid", description: "pv-module-pid_expl" },
+    query: { module_pid: 1, undefined: 1 },
+  },
+  {
+    keyFigureId: ApiKeyFigure.MODULE_OPEN_CIRCUIT_ID,
+    layerType: ModuleOpenCircuitKeyFigure,
+    keyFigureInfo: { keyName: "pv-module-open-circuit" },
+    query: { module_open_circuit: 1, undefined: 1 },
+  },
+  {
+    keyFigureId: ApiKeyFigure.MODULE_BYPASS_DIODE_ACTIVE_ID,
+    layerType: ModuleBypassDiodeActiveKeyFigure,
+    keyFigureInfo: { keyName: "pv-module-bypass-diode-active" },
+    query: { bypass_diode_active: 1, undefined: 1 },
+  },
+  {
+    keyFigureId: ApiKeyFigure.CELL_HOTSPOT_ID,
+    layerType: ModuleCellBrokenKeyFigure,
+    keyFigureInfo: { keyName: "pv-module-cell-hotspot" },
+    query: { module_cell_hotspot: 1, undefined: 1 },
+  },
+  {
     keyFigureId: ApiKeyFigure.TRACKER_SOILING_LEVEL_ID,
     layerType: TrackerSoilingKeyFigureLayer,
     keyFigureInfo: { keyName: "pv-tracker-soiling-level", description: "pv-tracker-soiling-level_expl" },
@@ -121,30 +145,6 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualPvQuery>[] = [
         invisibleAutoSelection: true,
       },
     ]
-  },
-  {
-    keyFigureId: ApiKeyFigure.PID_ID,
-    layerType: ModulePidKeyFigure,
-    keyFigureInfo: { keyName: "pv-module-pid", description: "pv-module-pid_expl" },
-    query: { module_pid: 1, undefined: 1 },
-  },
-  {
-    keyFigureId: ApiKeyFigure.MODULE_OPEN_CIRCUIT_ID,
-    layerType: ModuleOpenCircuitKeyFigure,
-    keyFigureInfo: { keyName: "pv-module-open-circuit" },
-    query: { module_open_circuit: 1, undefined: 1 },
-  },
-  {
-    keyFigureId: ApiKeyFigure.MODULE_BYPASS_DIODE_ACTIVE_ID,
-    layerType: ModuleBypassDiodeActiveKeyFigure,
-    keyFigureInfo: { keyName: "pv-module-bypass-diode-active" },
-    query: { bypass_diode_active: 1, undefined: 1 },
-  },
-  {
-    keyFigureId: ApiKeyFigure.CELL_HOTSPOT_ID,
-    layerType: ModuleCellBrokenKeyFigure,
-    keyFigureInfo: { keyName: "pv-module-cell-hotspot" },
-    query: { module_cell_hotspot: 1, undefined: 1 },
   },
   {
     keyFigureId: ApiKeyFigure.CELL_TRANSFER_RESISTANCE_ID,

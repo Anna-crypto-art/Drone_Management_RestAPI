@@ -2,29 +2,17 @@ import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { Feature } from "ol";
 import { Geometry } from "ol/geom";
+import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 
-export interface IImageMixin {
+export interface IOrthoImageMixin {
   analysisResult: AnalysisResultDetailedSchema | null;
-}
-
-export interface IOrthoImageMixin extends IImageMixin {
   orthoImages: OrthoImage[] | null;
-  isOrthoImageAvailable(orthoImage: OrthoImage): boolean;
+  isOrthoImageAvailable(orthoImage: OrthoImage, componentId: ApiComponent): boolean;
 }
 
-export interface IActionImageMixin extends IImageMixin {
-  actionImages: ActionImage[] | null;
-}
-
-export interface MixinImage {
+export interface OrthoImage {
   keyFigureId: ApiKeyFigure;
-}
-
-export interface OrthoImage extends MixinImage {
   name: string;
   features?: Feature<Geometry>[];
-}
-
-export interface ActionImage extends MixinImage {
-  actionName: string;
+  componentId?: ApiComponent;
 }

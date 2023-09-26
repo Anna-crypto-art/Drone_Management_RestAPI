@@ -20,6 +20,7 @@ import { FilterFieldType } from "../../filter-fields/types";
 import { keyFigureRainbowColors } from "@/app/plant/shared/visualization/key-figure-colors";
 import { Stroke, Style } from "ol/style";
 import { GeoJSON } from "@/app/shared/components/app-geovisualization/types/layers";
+import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 
 export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q extends GeoVisualQuery> extends LayerBase implements IOrthoImageMixin {
   protected abstract readonly analysisResultMapping: AnalysisResultMappings<T>;
@@ -79,8 +80,8 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     return super.getAddStyles(feature);
   }
 
-  public isOrthoImageAvailable(orthoImage: OrthoImage): boolean {
-    return this.orhtoImageMixin.isOrthoImageAvailable(orthoImage);
+  public isOrthoImageAvailable(orthoImage: OrthoImage, componentId: ApiComponent): boolean {
+    return this.orhtoImageMixin.isOrthoImageAvailable(orthoImage, componentId);
   }
 
   protected getDescription(): string | undefined {
@@ -165,7 +166,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     return undefined;
   }
 
-  protected getPcs(feature: FeatureLike): string | undefined {
+  public getPcs(feature: FeatureLike): string | undefined {
     return this.getProperties(feature).name;
   }
 
@@ -281,7 +282,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     }`;
   }
 
-  protected get keyFigure(): KeyFigureSchema {
+  public get keyFigure(): KeyFigureSchema {
     return this.analysisResult.key_figures.find(keyFigure => keyFigure.id === this.keyFigureId)!;
   }
 

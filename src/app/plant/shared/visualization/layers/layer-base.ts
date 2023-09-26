@@ -52,7 +52,7 @@ export abstract class LayerBase {
 
   constructor(public readonly vueComponent: BaseAuthComponent & IPlantVisualization) {}
 
-  protected abstract getPcs(feature: FeatureLike): string | undefined;
+  public abstract getPcs(feature: FeatureLike): string | undefined;
   protected abstract load(extent?: Extent): Promise<GeoJSON<PropsFeature> | undefined>;
   public abstract get id(): string | undefined;
 

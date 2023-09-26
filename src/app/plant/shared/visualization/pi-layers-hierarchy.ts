@@ -327,7 +327,7 @@ export class PILayersHierarchy {
   public getAvailableOrthoImages(): OrthoImage[] {
     for (const layer of this.getAllChildLayers()) {
       if (layer.isVisible) {
-        const orthoImages = layer.orthoImages?.filter(orthoImage => layer.isOrthoImageAvailable(orthoImage));
+        const orthoImages = layer.orthoImages?.filter(orthoImage => layer.isOrthoImageAvailable(orthoImage, layer.keyFigure.component_id));
         if (orthoImages && orthoImages.length > 0) {
           return orthoImages;
         }

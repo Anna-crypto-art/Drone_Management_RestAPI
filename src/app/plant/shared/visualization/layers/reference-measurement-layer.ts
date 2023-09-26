@@ -11,6 +11,7 @@ import { IOrthoImageMixin, OrthoImage } from "../mixins/types";
 import { FeatureInfos, FeatureInfosMeta, IPlantVisualization, Legend, PropsFeature } from "../types";
 import { LayerBase } from "./layer-base";
 import { LayerColor } from "./types";
+import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 
 export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageMixin {
   protected zIndex = 20;
@@ -33,7 +34,7 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
     return this.analysis.analysis_result || null;
   }
 
-  protected getPcs(feature: FeatureLike): string | undefined {
+  public getPcs(feature: FeatureLike): string | undefined {
     return feature.get("name");
   }
 
@@ -47,8 +48,8 @@ export class ReferenceMeasurementLayer extends LayerBase implements IOrthoImageM
     await this.vueComponent.onLayerSelected(selected, this.getLegend());
   }
 
-  public isOrthoImageAvailable(orthoImage: OrthoImage): boolean {
-    return this.orhtoImageMixin.isOrthoImageAvailable(orthoImage);
+  public isOrthoImageAvailable(orthoImage: OrthoImage, componentId: ApiComponent): boolean {
+    return this.orhtoImageMixin.isOrthoImageAvailable(orthoImage, componentId);
   }
 
   protected get name(): string {

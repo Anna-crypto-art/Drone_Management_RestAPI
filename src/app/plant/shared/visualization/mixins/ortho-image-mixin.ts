@@ -12,12 +12,10 @@ import { IOrthoImageMixin, OrthoImage } from "./types";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { BaseImageMixin } from "./base-image-mixin";
+import { AnalysisResultPvTrackerSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-pv-tracker-schema";
 
-export class OrhtoImageMixin extends BaseImageMixin<IOrthoImageMixin> {
-  constructor(layer: LayerBase & IOrthoImageMixin) {
-    super(layer);
-
+export class OrhtoImageMixin {
+  constructor(protected readonly layer: LayerBase & IOrthoImageMixin) {
     this.layer.orthoImages = [
       { name: "RGB_ONLINE", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_ONLINE_ID },
       { name: "RGB_ONLINE_NO_REFLEX", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_RGB_ONLINE_NO_REFLEX_ID },
@@ -26,21 +24,28 @@ export class OrhtoImageMixin extends BaseImageMixin<IOrthoImageMixin> {
       { name: "SDX", keyFigureId: ApiKeyFigure.SCA_ORTHO_IMAGES_SDX_ID },
       { name: "TRACKER_IR", keyFigureId: ApiKeyFigure.TRACKER_ORTHO_IMAGES_IR_ID },
       { name: "TRACKER_RGB", keyFigureId: ApiKeyFigure.TRACKER_ORTHO_IMAGES_RGB_ID },
+      { name: "TRACKER_RAW_IR", keyFigureId: ApiKeyFigure.TRACKER_RAW_IMAGES_IR_ID },
     ];
-
-    this.images = this.layer.orthoImages;
   }
 
-  public isOrthoImageAvailable(orthoImage: OrthoImage): boolean {
-    return this.isImageAvailable(orthoImage);
+  public isOrthoImageAvailable(orthoImage: OrthoImage, componentId: ApiComponent): boolean {
+    return this.layer.orthoImages !== null && !!this.layer.analysisResult 
+      && !!this.layer.analysisResult.key_figures.find(keyFigure => keyFigure.id === orthoImage.keyFigureId)
+      && (!orthoImage.componentId || orthoImage.componentId === componentId)
   }
 
   public addShowOrthoImageActions(featureInfos: FeatureInfos | undefined, componentId: ApiComponent) {
     if (featureInfos && this.layer.orthoImages) {
-      const actions: FeatureAction[] = this.layer.orthoImages.filter(orthoImage => this.isOrthoImageAvailable(orthoImage))
+      const actions: FeatureAction[] = this.layer.orthoImages.filter(orthoImage => this.isOrthoImageAvailable(orthoImage, componentId))
         .map(orthoImage => ({
           name: orthoImage.name,
-          action: async () => { await this.loadOrthoImage(orthoImage, featureInfos, componentId); }
+          action: async () => { 
+            if (orthoImage.keyFigureId === ApiKeyFigure.TRACKER_RAW_IMAGES_IR_ID) {
+              await this.loadRawTrackerIRImage(orthoImage, componentId, featureInfos.title!);
+            } else {
+              await this.loadOrthoImage(orthoImage, featureInfos, componentId); 
+            }
+          }
         }));
       
       if (actions.length > 0) {
@@ -153,6 +158,49 @@ export class OrhtoImageMixin extends BaseImageMixin<IOrthoImageMixin> {
     } catch (e) {
       this.layer.vueComponent.showError(e);
     }
+  }
+
+  public async loadRawTrackerIRImage(
+    orthoImage: OrthoImage,
+    componentId: ApiComponent,
+    pcs: string,
+  ) {
+    const geoJSON = await volateqApi.getKeyFiguresGeoVisual(
+      this.layer.vueComponent.plant.id,
+      this.layer.analysisResult!.id,
+      orthoImage.keyFigureId,
+      (
+        componentId && pcs ? 
+        {
+          child_component_id: componentId,
+          child_pcs: pcs,
+        } :
+        undefined
+      )
+    );
+
+    const features: Feature<Geometry>[] = new GeoJSON(GEO_JSON_OPTIONS).readFeatures(geoJSON)
+    if (!features || features.length === 0) {
+      throw { error: "NOT_FOUND", message: "Raw IR image not found" };
+    }
+
+    const imageUrl = features[0].get("image");
+
+    const piToastInfo = this.layer.vueComponent.piToastInfo;
+    
+    // Property "featureInfos" of component AppFeatureInfosToast needs to be reassigned this way to recognize the change.
+    this.layer.vueComponent.piToastInfo = { groups: [] };
+    await this.layer.vueComponent.$nextTick();
+
+    if (!piToastInfo.images) {
+      piToastInfo.images = [];
+    }
+    piToastInfo.images.push({
+      title: orthoImage.name,
+      url: imageUrl,
+    });
+
+    this.layer.vueComponent.piToastInfo = piToastInfo;
   }
 
   public removeOrthoImageFeatures() {

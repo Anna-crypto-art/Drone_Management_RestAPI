@@ -54,9 +54,8 @@ const analysisResultPvMappingModule: AnalysisResultMappings<
   {
     keyFigureId: ApiKeyFigure.PID_ID,
     getValue: r => r.pid,
-    transName: "pv-module-short-circuit",
-    valueDescr: "pv-module-short-circuit-class-",
-    transDescr: "pv-module-short-circuit_expl",
+    transName: "pv-module-pid",
+    transDescr: "pv-module-pid_expl",
     filterType: FilterFieldType.BOOLEAN,
     getDiffValue: r => r.pid__diff,
     enableForRefMeasure: true,

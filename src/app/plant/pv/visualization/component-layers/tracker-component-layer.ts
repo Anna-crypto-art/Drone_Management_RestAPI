@@ -1,13 +1,13 @@
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
-import { ComponentLayer } from "../../../shared/visualization/layers/component-layer";
 import { Style, Stroke, Fill } from "ol/style";
 import { FeatureLike } from "ol/Feature";
 import { layerEvents } from "@/app/plant/shared/visualization/layer-events";
 import { Geometry } from "ol/geom";
 import { Feature } from "ol";
 import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
+import { PvComponentLayer } from "./abstract/pv-component-layer";
 
-export class TrackerComponentLayer extends ComponentLayer {
+export class TrackerComponentLayer extends PvComponentLayer {
   protected readonly componentId = ApiComponent.PV_TRACKER;
   protected readonly color = LayerColor.darkGrey;
   protected readonly allowRefMeasures = true;
@@ -22,6 +22,8 @@ export class TrackerComponentLayer extends ComponentLayer {
   public readonly autoZoom = true;
 
   protected created(): void {
+    super.created();
+
     layerEvents.onOrthoImageLoaded((features: Feature<Geometry>[]) => {
       const vectorGeoLayer = this.getVectorGeoLayer();
       vectorGeoLayer?.getSource()!.addFeatures(features);
