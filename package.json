@@ -1,6 +1,6 @@
 {
   "name": "volateq-web-app",
-  "version": "6.13.3",
+  "version": "6.14.0",
   "description": "VueJs Web Application powered by Volateq",
   "main": "main.js",
   "scripts": {
