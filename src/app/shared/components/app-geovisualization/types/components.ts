@@ -10,3 +10,7 @@ export interface IOpenLayersComponent {
 export interface IAppLayerSWitcher {
   updateLayers(): void;
 }
+
+export interface IAppGeoJsonLayerCheckbox {
+  setSelected(selected: boolean): Promise<void>;
+}

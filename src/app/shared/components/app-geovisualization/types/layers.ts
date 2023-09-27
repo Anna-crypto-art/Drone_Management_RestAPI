@@ -6,6 +6,7 @@ import { StyleFunction } from "ol/style/Style";
 import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/sequential-event-emitter";
 import { FeatureLike } from "ol/Feature";
 import { Coordinate } from "ol/coordinate";
+import { IAppGeoJsonLayerCheckbox } from "./components";
 
 export interface GeoJSON<T> {
   type: string;
@@ -77,4 +78,6 @@ export interface IGeoLayer {
   autoZoom: boolean;
   zIndex: number | undefined;
   minZoom: number | undefined;
+  loadedLayer: VectorGeoLayer | undefined;
+  appLayerCheckbox: IAppGeoJsonLayerCheckbox | undefined;
 }
