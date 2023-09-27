@@ -1,7 +1,4 @@
-import { ModuleClassKeyFigure } from "./abstract/pv-module-class-key-figure";
+import { ModuleKeyFigureLayer } from "./abstract/pv-module-key-figure";
 
-export class ModuleSubstringShortCircuitKeyFigure extends ModuleClassKeyFigure {
-  protected getQueryClassParam(): number {
-    return this.query!.module_substring_short_circuit_class!;
-  }
+export class ModuleBypassDiodeActiveKeyFigure extends ModuleKeyFigureLayer {
 }

@@ -8,12 +8,13 @@ import { ModuleBrokenGlassKeyFigure } from "./key-figure-layers/module/module-br
 import { ModuleCellBrokenKeyFigure } from "./key-figure-layers/module/module-cell-broken-key-figure";
 import { ModuleCellTransferResistanceKeyFigure } from "./key-figure-layers/module/module-cell-transfer-resistance-key-figure";
 import { ModuleOpenCircuitKeyFigure } from "./key-figure-layers/module/module-open-circuit-key-figure";
-import { ModuleShortCircuitKeyFigure } from "./key-figure-layers/module/module-short-circuit-key-figure";
+import { ModulePidKeyFigure } from "./key-figure-layers/module/module-pid-key-figure";
 import { ModuleSoilingKeyFigure } from "./key-figure-layers/module/module-soiling-key-figure";
-import { ModuleSubstringShortCircuitKeyFigure } from "./key-figure-layers/module/module-substring-short-circuit-key-figure";
+import { ModuleBypassDiodeActiveKeyFigure } from "./key-figure-layers/module/module-substring-short-circuit-key-figure";
 import { TrackerSoilingKeyFigureLayer } from "./key-figure-layers/tracker/tracker-soiling-key-figure-layer";
 import { TrackingDeviationKeyFigureLayer } from "./key-figure-layers/tracker/tracking-deviation-key-figure-layer";
 import { ModuleComponentLayer } from "./component-layers/module-component-layer";
+import { ModuleShadowingKeyFigure } from "./key-figure-layers/module/module-shadowing-key-figure";
 
 export const COMPONENT_LAYERS: typeof ComponentLayer[] = [
   ModuleComponentLayer,
@@ -21,6 +22,30 @@ export const COMPONENT_LAYERS: typeof ComponentLayer[] = [
 ];
 
 export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualPvQuery>[] = [
+  {
+    keyFigureId: ApiKeyFigure.PID_ID,
+    layerType: ModulePidKeyFigure,
+    keyFigureInfo: { keyName: "pv-module-pid", description: "pv-module-pid_expl" },
+    query: { module_pid: 1, undefined: 1 },
+  },
+  {
+    keyFigureId: ApiKeyFigure.MODULE_OPEN_CIRCUIT_ID,
+    layerType: ModuleOpenCircuitKeyFigure,
+    keyFigureInfo: { keyName: "pv-module-open-circuit" },
+    query: { module_open_circuit: 1, undefined: 1 },
+  },
+  {
+    keyFigureId: ApiKeyFigure.MODULE_BYPASS_DIODE_ACTIVE_ID,
+    layerType: ModuleBypassDiodeActiveKeyFigure,
+    keyFigureInfo: { keyName: "pv-module-bypass-diode-active" },
+    query: { bypass_diode_active: 1, undefined: 1 },
+  },
+  {
+    keyFigureId: ApiKeyFigure.CELL_HOTSPOT_ID,
+    layerType: ModuleCellBrokenKeyFigure,
+    keyFigureInfo: { keyName: "pv-module-cell-hotspot" },
+    query: { module_cell_hotspot: 1, undefined: 1 },
+  },
   {
     keyFigureId: ApiKeyFigure.TRACKER_SOILING_LEVEL_ID,
     layerType: TrackerSoilingKeyFigureLayer,
@@ -122,102 +147,6 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualPvQuery>[] = [
     ]
   },
   {
-    keyFigureId: ApiKeyFigure.MODULE_SHORT_CIRCUIT_ID,
-    layerType: ModuleShortCircuitKeyFigure,
-    keyFigureInfo: { keyName: "pv-module-short-circuit" },
-    subLayers: [
-      {
-        keyFigureInfo: { displayName: "pv-module-short-circuit-class-3", zIndex: 13 },
-        query: { module_short_circuit_class: 3 },
-      },
-      {
-        keyFigureInfo: { displayName: "pv-module-short-circuit-class-2", zIndex: 12 },
-        query: { module_short_circuit_class: 2 },
-      },
-      {
-        keyFigureInfo: { displayName: "pv-module-short-circuit-class-1", zIndex: 10 },
-        query: { module_short_circuit_class: 1 },
-      },
-      {
-        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
-        query: { undefined: 1 },
-        color: LayerColor.grey,
-        invisibleAutoSelection: true,
-      },
-    ]
-  },
-  {
-    keyFigureId: ApiKeyFigure.MODULE_OPEN_CIRCUIT_ID,
-    layerType: ModuleOpenCircuitKeyFigure,
-    keyFigureInfo: { keyName: "pv-module-open-circuit" },
-    subLayers: [
-      {
-        keyFigureInfo: { displayName: "pv-module-open-circuit-class-2", zIndex: 12 },
-        query: { module_open_circuit_class: 2 },
-      },
-      {
-        keyFigureInfo: { displayName: "pv-module-open-circuit-class-1", zIndex: 10 },
-        query: { module_open_circuit_class: 1 },
-      },
-      {
-        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
-        query: { undefined: 1 },
-        color: LayerColor.grey,
-        invisibleAutoSelection: true,
-      },
-    ]
-  },
-  {
-    keyFigureId: ApiKeyFigure.SUBSTRING_SHORT_CIRCUIT_ID,
-    layerType: ModuleSubstringShortCircuitKeyFigure,
-    keyFigureInfo: { keyName: "pv-module-substring-short-circuit" },
-    subLayers: [
-      {
-        keyFigureInfo: { displayName: "pv-module-substring-short-circuit-class-3", zIndex: 13 },
-        query: { module_substring_short_circuit_class: 3 },
-      },
-      {
-        keyFigureInfo: { displayName: "pv-module-substring-short-circuit-class-2", zIndex: 12 },
-        query: { module_substring_short_circuit_class: 2 },
-      },
-      {
-        keyFigureInfo: { displayName: "pv-module-substring-short-circuit-class-1", zIndex: 10 },
-        query: { module_substring_short_circuit_class: 1 },
-      },
-      {
-        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
-        query: { undefined: 1 },
-        color: LayerColor.grey,
-        invisibleAutoSelection: true,
-      },
-    ]
-  },
-  {
-    keyFigureId: ApiKeyFigure.CELL_BROKEN_ID,
-    layerType: ModuleCellBrokenKeyFigure,
-    keyFigureInfo: { keyName: "pv-module-cell-broken" },
-    subLayers: [
-      {
-        keyFigureInfo: { displayName: "pv-module-cell-broken-class-3", zIndex: 13 },
-        query: { module_cell_broken_class: 3 },
-      },
-      {
-        keyFigureInfo: { displayName: "pv-module-cell-broken-class-2", zIndex: 12 },
-        query: { module_cell_broken_class: 2 },
-      },
-      {
-        keyFigureInfo: { displayName: "pv-module-cell-broken-class-1", zIndex: 10 },
-        query: { module_cell_broken_class: 1 },
-      },
-      {
-        keyFigureInfo: { displayName: "not-measured", zIndex: 11 },
-        query: { undefined: 1 },
-        color: LayerColor.grey,
-        invisibleAutoSelection: true,
-      },
-    ]
-  },
-  {
     keyFigureId: ApiKeyFigure.CELL_TRANSFER_RESISTANCE_ID,
     layerType: ModuleCellTransferResistanceKeyFigure,
     keyFigureInfo: { keyName: "pv-module-cell-transfer-resistance" },
@@ -241,5 +170,11 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualPvQuery>[] = [
         invisibleAutoSelection: true,
       },
     ]
+  },
+  {
+    keyFigureId: ApiKeyFigure.SHADOWING_ID,
+    layerType: ModuleShadowingKeyFigure,
+    keyFigureInfo: { keyName: "pv-module-shadowing" },
+    query: { module_shadowing: 1, undefined: 1 },
   },
 ];

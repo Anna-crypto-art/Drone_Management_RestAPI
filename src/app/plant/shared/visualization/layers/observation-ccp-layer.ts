@@ -44,7 +44,7 @@ export class ObservationCcpLayer extends LayerBase {
     return this.ccp.id + "__" + this.name;
   }
 
-  protected getPcs(feature: FeatureLike): string | undefined {
+  public getPcs(feature: FeatureLike): string | undefined {
     return feature.get("name");
   }
 

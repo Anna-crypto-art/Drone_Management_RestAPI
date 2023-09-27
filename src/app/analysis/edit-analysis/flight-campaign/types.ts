@@ -29,4 +29,5 @@ export interface NewFlightCampaign {
   orderProductPackageIds: string[];
   forceAddFlightTypeIds: string[];
   autoExportLitchi: boolean;
+  optimizeTorsionFlights: boolean;
 }

@@ -99,7 +99,6 @@ import { State } from "vuex-class";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { RefMeasureLayers } from "./ref-measure-layers";
 import { layerEvents } from "./layer-events";
-import { OrthoImage } from "./layers/types";
 import { OrhtoImageMixin } from "./mixins/ortho-image-mixin";
 import AppReferenceMeasurements from "../reference-measurements/reference-measurements.vue";
 import { RouteQueryHelper } from "../helper/route-query-helper";
@@ -129,9 +128,9 @@ import { AnalysisSelectionService } from "../selection-sidebar/analysis-selectio
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import AppObservationModal from "../observations/observation-modal.vue";
 import { IAppObservationModal } from "../observations/types";
-import { CcpService } from "../plant-settings/ccp-service";
 import { IObservationSelectionComponent } from "@/app/plant/shared/selection-sidebar/observation-selection/types";
 import { ObservationSelectionService } from "../selection-sidebar/observation-selection/observation-selection-service";
+import { OrthoImage } from "./mixins/types";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
