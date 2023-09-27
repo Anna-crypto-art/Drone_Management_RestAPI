@@ -3,7 +3,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { LayerBase } from "./layer-base";
 import { FeatureLike } from "ol/Feature";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
-import { LayerColor, KeyFigureColorScheme, KeyFigureInfo, OrthoImage, KeyFigureGeoJSON } from "./types";
+import { LayerColor, KeyFigureColorScheme, KeyFigureInfo, KeyFigureGeoJSON } from "./types";
 import { FeatureInfo, FeatureInfos, FeatureProperties, IPlantVisualization, PropsFeature, FeatureActionsSummary, ComparedFeatureType, ComparedFeatures, FeatureInfosMeta } from "../types";
 import { AnalysisResultMappingEntry, AnalysisResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
@@ -13,13 +13,14 @@ import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/com
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { OrhtoImageMixin } from "../mixins/ortho-image-mixin";
-import { IOrthoImageMixin } from "../mixins/types";
+import { IOrthoImageMixin, OrthoImage } from "../mixins/types";
 import { analysisResultEventService } from "../../plant-admin-view/analysis-result-event-service";
 import { AnalysisResultEvent } from "../../plant-admin-view/types";
 import { FilterFieldType } from "../../filter-fields/types";
 import { keyFigureRainbowColors } from "@/app/plant/shared/visualization/key-figure-colors";
 import { Stroke, Style } from "ol/style";
 import { GeoJSON } from "@/app/shared/components/app-geovisualization/types/layers";
+import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 
 export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q extends GeoVisualQuery> extends LayerBase implements IOrthoImageMixin {
   protected abstract readonly analysisResultMapping: AnalysisResultMappings<T>;
@@ -79,8 +80,8 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     return super.getAddStyles(feature);
   }
 
-  public isOrthoImageAvailable(orthoImage: OrthoImage): boolean {
-    return this.orhtoImageMixin.isOrthoImageAvailable(orthoImage);
+  public isOrthoImageAvailable(orthoImage: OrthoImage, componentId: ApiComponent): boolean {
+    return this.orhtoImageMixin.isOrthoImageAvailable(orthoImage, componentId);
   }
 
   protected getDescription(): string | undefined {
@@ -165,7 +166,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     return undefined;
   }
 
-  protected getPcs(feature: FeatureLike): string | undefined {
+  public getPcs(feature: FeatureLike): string | undefined {
     return this.getProperties(feature).name;
   }
 
@@ -281,7 +282,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     }`;
   }
 
-  protected get keyFigure(): KeyFigureSchema {
+  public get keyFigure(): KeyFigureSchema {
     return this.analysisResult.key_figures.find(keyFigure => keyFigure.id === this.keyFigureId)!;
   }
 

@@ -1,10 +1,10 @@
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
-import { ComponentLayer } from "@/app/plant/shared/visualization/layers/component-layer";
 import { Style, Stroke, Fill } from "ol/style";
 import { FeatureLike } from "ol/Feature";
 import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
+import { PvComponentLayer } from "./abstract/pv-component-layer";
 
-export class ModuleComponentLayer extends ComponentLayer {
+export class ModuleComponentLayer extends PvComponentLayer {
   public readonly componentId = ApiComponent.PV_MODULE;
   protected readonly color = LayerColor.darkGrey;
   protected readonly allowRefMeasures = true;
