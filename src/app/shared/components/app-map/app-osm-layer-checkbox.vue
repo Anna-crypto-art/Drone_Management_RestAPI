@@ -1,6 +1,6 @@
 <template>
   <div class="app-osm-layer-checkbox">
-    <b-form-checkbox :checked="selected" @change="onChange">
+    <b-form-checkbox v-model="selected" @change="onChange">
       {{ $t("world-map") }}
     </b-form-checkbox>
   </div>
@@ -23,10 +23,20 @@ import TileSource from "ol/source/Tile";
 })
 export default class AppOsmLayerCheckbox extends BaseComponent {
   @Prop({ required: true }) map!: Map;
-  @Prop({ default: true }) selected!: boolean;
+  @Prop({ default: true }) value!: boolean;
   @Prop({ default: true }) satellite!: boolean;
 
   private osmLayer: TileLayer<TileSource> | undefined = undefined;
+  private selected = false;
+
+  async created() {
+    this.selected = this.value;
+  }
+
+  @Watch("value")
+  onValueChanged() {
+    this.selected = this.value;
+  }
 
   @CatchError()
   async mounted() {
@@ -39,6 +49,8 @@ export default class AppOsmLayerCheckbox extends BaseComponent {
 
   @CatchError()
   async onChange() {
+    this.$emit("input", this.selected);
+
     await this.loadOsmLayer();
   }
 

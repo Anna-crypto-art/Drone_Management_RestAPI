@@ -1,6 +1,6 @@
 <template>
   <div class="app-geo-json-layer-checkbox" v-show="geoLayer.visible">
-    <b-form-checkbox :checked="geoLayer.selected" @change="onChange">
+    <b-form-checkbox v-model="geoLayer.selected" @change="onChange">
       <slot :name="geoLayer.name">
         {{ geoLayer.name }}
         <app-explanation v-if="geoLayer.description"><span v-html="geoLayer.description"></span></app-explanation>
@@ -12,9 +12,9 @@
 <script lang="ts">
 import Map from "ol/Map";
 import { Component, Prop, Watch, Ref } from "vue-property-decorator";
-import { IGeoLayer, VectorGeoLayer } from "./types/layers";
+import { IGeoLayer, VectorGeoLayer } from "./types";
 import { CatchError } from "../../services/helper/catch-helper";
-import { LoadingEvent } from "./types/events";
+import { LoadingEvent } from "../app-geovisualization/types/events";
 import Feature from "ol/Feature";
 import GeoJSON from "ol/format/GeoJSON";
 import Geometry from "ol/geom/Geometry";
@@ -24,8 +24,9 @@ import { State } from "ol/render";
 import VectorSource from "ol/source/Vector";
 import { Style } from "ol/style";
 import * as ExtentFunctions from "ol/extent";
-import { IAppGeoJsonLayerCheckbox } from "./types/components";
+import { IAppGeoJsonLayerCheckbox } from "../app-geovisualization/types/components";
 import { BaseComponent } from "../base-component/base-component";
+import { EVENT_ZOOM_TO_HOME } from "./events";
 
 
 export const GEO_JSON_OPTIONS = { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" };
@@ -39,6 +40,8 @@ export const GEO_JSON_OPTIONS = { dataProjection: "EPSG:4326", featureProjection
 export default class AppGeoJsonLayerCheckbox extends BaseComponent implements IAppGeoJsonLayerCheckbox {
   @Prop({ required: true }) geoLayer!: IGeoLayer;
   @Prop({ required: true }) map!: Map;
+
+  private readonly zoomToHomeEvent = () => { this.zoomToHome() };
 
   @CatchError()
   async mounted() {
@@ -89,6 +92,10 @@ export default class AppGeoJsonLayerCheckbox extends BaseComponent implements IA
       this.geoLayer.loadedLayer.setVisible(false);
       this.map.removeLayer(this.geoLayer.loadedLayer);
       this.geoLayer.loadedLayer = undefined;
+
+      if (this.geoLayer.autoZoom) {
+        window.removeEventListener(EVENT_ZOOM_TO_HOME, this.zoomToHomeEvent);
+      }
     }
   }
 
@@ -126,7 +133,7 @@ export default class AppGeoJsonLayerCheckbox extends BaseComponent implements IA
         // A larger ratio avoids cut images during panning, but will cause a decrease in performance.
         // See https://openlayers.org/en/latest/apidoc/module-ol_layer_VectorImage-VectorImageLayer.html
         imageRatio: 1,
-        minZoom: this.geoLayer.minZoom,
+        minZoom: this.geoLayer.minZoomLevel,
       });
       
       vectorGeoLayer.setStyle(this.geoLayer.getStyle);
@@ -141,7 +148,7 @@ export default class AppGeoJsonLayerCheckbox extends BaseComponent implements IA
       if (this.geoLayer.autoZoom === true) {
         this.zoomToHome();
 
-        window.addEventListener("app-visualization:go-home", () => { this.zoomToHome() });
+        window.addEventListener(EVENT_ZOOM_TO_HOME, this.zoomToHomeEvent);
       }
 
       return vectorGeoLayer;

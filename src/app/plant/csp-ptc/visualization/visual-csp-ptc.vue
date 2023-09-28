@@ -1,5 +1,8 @@
 <template>
   <div class="visual-csp-ptc">
+    <app-map-view :plant="plant" />
+
+    <!--
     <app-visualization
       :plant="plant"
       :analyses="analyses"
@@ -61,6 +64,7 @@
         {{ getTransAlignmentOffsetClassLimit("hce", 1) }}
       </template>
     </app-visualization>
+    -->
   </div>
 </template>
 
@@ -77,6 +81,7 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import { IAnalysisSelectionComponent } from "../../shared/selection-sidebar/analysis-selection/types";
 import { AnalysisSelectionService } from "../../shared/selection-sidebar/analysis-selection/analysis-selection-service";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
+import AppMapView from "@/app/plant/shared/map-view/app-map-view.vue";
 
 @Component({
   name: "app-visual-csp-ptc",
@@ -85,6 +90,7 @@ import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/
     AppExplanation,
     AppModalForm,
     AppButton,
+    AppMapView,
   },
 })
 export default class AppVisualCspPtc extends BaseAuthComponent implements IAnalysisSelectionComponent {
