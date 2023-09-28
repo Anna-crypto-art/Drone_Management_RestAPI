@@ -1,5 +1,5 @@
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
-import { ComponentLayer } from "../../../shared/visualization/layers/component-layer";
+import { ComponentLayer } from "@/app/plant/shared/map-view/layers/component-layer";
 import { Style, Stroke } from "ol/style";
 import { FeatureLike } from "ol/Feature";
 import { layerEvents } from "@/app/plant/shared/visualization/layer-events";
@@ -12,10 +12,9 @@ export class ScaComponentLayer extends ComponentLayer {
   protected readonly color = LayerColor.darkGrey;
   protected readonly allowRefMeasures = true;
 
-  protected selected = true;
+  public selected = true;
   protected showPcsZoomLevel = 16.5;
-  protected zIndex = 3;
-  protected disabled = true;
+  public zIndex = 3;
 
   protected zoomWidths = {
     18: 2,
@@ -30,12 +29,11 @@ export class ScaComponentLayer extends ComponentLayer {
 
   protected created(): void {
     layerEvents.onOrthoImageLoaded((features: Feature<Geometry>[]) => {
-      const vectorGeoLayer = this.getVectorGeoLayer();
-      vectorGeoLayer?.getSource()!.addFeatures(features);
+      this.loadedLayer?.getSource()!.addFeatures(features);
     });
 
     layerEvents.onRemoveOrthoImages((features: Feature<Geometry>[]) => {
-      const layerSource = this.getVectorGeoLayer()?.getSource();
+      const layerSource = this.loadedLayer?.getSource();
       if (layerSource) {
         for (const feature of features) {
           layerSource.removeFeature(feature);

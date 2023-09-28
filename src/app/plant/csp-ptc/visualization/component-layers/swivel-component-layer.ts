@@ -1,5 +1,5 @@
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
-import { ComponentLayer } from "../../../shared/visualization/layers/component-layer";
+import { ComponentLayer } from "@/app/plant/shared/map-view/layers/component-layer";
 import { Style, Stroke, Circle, Fill } from "ol/style";
 import { FeatureLike } from "ol/Feature";
 import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
@@ -11,7 +11,7 @@ export class SwivelComponentLayer extends ComponentLayer {
   public readonly name = "rotation-joints";
 
   protected showPcsZoomLevel = 19;
-  protected zIndex = 5;
+  public zIndex = 5;
 
   protected zoomWidths = {
     17.5: 2,

@@ -27,10 +27,7 @@ import * as ExtentFunctions from "ol/extent";
 import { IAppGeoJsonLayerCheckbox } from "../app-geovisualization/types/components";
 import { BaseComponent } from "../base-component/base-component";
 import { EVENT_ZOOM_TO_HOME } from "./events";
-
-
-export const GEO_JSON_OPTIONS = { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" };
-
+import { GEO_JSON_OPTIONS } from "@/app/plant/shared/visualization/layers/layer-base";
 
 @Component({
   name: "app-geo-json-layer-checkbox",
@@ -136,7 +133,7 @@ export default class AppGeoJsonLayerCheckbox extends BaseComponent implements IA
         minZoom: this.geoLayer.minZoomLevel,
       });
       
-      vectorGeoLayer.setStyle(this.geoLayer.getStyle);
+      vectorGeoLayer.setStyle(this.geoLayer.style);
 
       if (this.geoLayer.zIndex) {
         vectorGeoLayer.setZIndex(this.geoLayer.zIndex);

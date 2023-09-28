@@ -3,7 +3,7 @@ import { AbsorberComponentLayer } from "./component-layers/absorber-component-la
 import { LoopComponentLayer } from "./component-layers/loop-component-layer";
 import { ScaComponentLayer } from "./component-layers/sca-component-layer";
 import { SceComponentLayer } from "./component-layers/sce-component-layer";
-import { ComponentLayer } from "../../shared/visualization/layers/component-layer";
+import { ComponentLayer } from "@/app/plant/shared/map-view/layers/component-layer";
 import { MissingMirrorKeyFigureLayer } from "./key-figure-layers/mirror/missing-mirror-key-figure-layer";
 import { ScaFrictionKeyFigureLayer } from "./key-figure-layers/sca/sca-friction-key-figure";
 import { ScaTrackingKeyFigureLayer } from "./key-figure-layers/sca/sca-tracking-key-figure-layer";

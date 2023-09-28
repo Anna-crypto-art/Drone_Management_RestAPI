@@ -1,8 +1,8 @@
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
-import { ComponentLayer } from "../../../shared/visualization/layers/component-layer";
 import { Style, Stroke } from "ol/style";
 import { FeatureLike } from "ol/Feature";
 import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
+import { ComponentLayer } from "@/app/plant/shared/map-view/layers/component-layer";
 
 export class AbsorberComponentLayer extends ComponentLayer {
   public readonly componentId = ApiComponent.CSP_PTC_ABSORBER;
@@ -10,10 +10,10 @@ export class AbsorberComponentLayer extends ComponentLayer {
   protected readonly allowRefMeasures = true;
   public readonly name = "absorber-tubes";
   protected readonly width = 3;
-  protected readonly minZoomLevel = 18;
+  public readonly minZoomLevel = 18;
 
   protected showPcsZoomLevel = 19.5;
-  protected zIndex = 5;
+  public zIndex = 5;
 
   protected zoomWidths = {
     18: 10,

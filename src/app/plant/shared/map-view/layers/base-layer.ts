@@ -3,23 +3,15 @@ import { Extent } from "ol/extent";
 import { Map } from "ol";
 import { Style, Stroke, Text, Fill } from "ol/style";
 import { asArray, asString } from "ol/color";
-import { FeatureInfoGroup, FeatureInfos, FeatureInfosMeta, IAppMapView, IPlantVisualization, Legend, PropsFeature } from "../types";
-import { GeoJSON, GeoJSONLayer, VectorGeoLayer } from "@/app/shared/components/app-geovisualization/types/layers";
+import { FeatureInfos, FeatureInfosMeta, IAppMapView, Legend, PropsFeature } from "../types";
 import GeoJSONFeatures from "ol/format/GeoJSON";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { Geolocation, Feature } from "ol";
-import CircleStyle from "ol/style/Circle";
-import { Point } from "ol/geom";
-import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/sequential-event-emitter";
-import { LayerEvent } from "@/app/shared/components/app-geovisualization/types/events";
-import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
-import { RefMeasureEntry, RefMeasureEntryKeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
-import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import dateHelper from "@/app/shared/services/helper/date-helper";
 import { transformExtent } from "ol/proj";
 import { debounce } from "@/app/shared/services/helper/debounce-helper";
 import { isOnMobileDevice } from "@/app/shared/services/helper/mobile-helper";
-import { GeoJSON, IAppGeoJsonLayerCheckbox, IGeoLayer, VectorGeoLayer } from "@/app/shared/components/app-map/types";
+import { IAppGeoJsonLayerCheckbox, IGeoLayer, VectorGeoLayer, GeoJSON } from "@/app/shared/components/app-map/types";
+import { GEO_JSON_OPTIONS } from "@/app/shared/components/app-map/constants";
+import { i18n } from "@/main";
 
 /**
  * Represents a geojson layer
@@ -31,16 +23,14 @@ export abstract class BaseLayer implements IGeoLayer {
   public selected = false;
   public readonly autoZoom: boolean = false;
   public visible = true;
-  public zIndex?: number;
+  public zIndex = 1;
   public readonly minZoomLevel: number | undefined = undefined;
   public description: string | undefined = undefined;
   public reloadLayerOnNextSelection = false;
   public loadedLayer: VectorGeoLayer | undefined;
   public appLayerCheckbox: IAppGeoJsonLayerCheckbox | undefined;
 
-
   protected showPcsZoomLevel = 15;
-
   
   protected zoomLoadedPcsCodes: Record<string, true> | undefined = undefined;
   protected loadedExtent: Extent | undefined = undefined;
@@ -115,7 +105,7 @@ export abstract class BaseLayer implements IGeoLayer {
   }
 
   protected onZoom(onZoomCallback: (zoomLevel: number | undefined) => void): void {
-    const map = this.appLayerCheckbox?.map.vueComponent.openLayers?.getMap();
+    const map = this.getMap();
     if (map) {
       const view = map.getView();
       view.on("change:resolution", (e) => {
@@ -156,6 +146,7 @@ export abstract class BaseLayer implements IGeoLayer {
         return geoJson;
       }
 
+      // continue here: make show info and show error ... global callable, use i18n for translations
       this.vueComponent.showInfo(
         this.vueComponent.$t(
           "zoom-in-to-see-features", 
@@ -170,7 +161,7 @@ export abstract class BaseLayer implements IGeoLayer {
   }
 
   protected async addLoadedFeatures(geoJson: GeoJSON<PropsFeature>) {
-    const source = this.getVectorGeoLayer()?.getSource();
+    const source = this.loadedLayer?.getSource();
     if (!source) {
       throw Error("Missing layer source for loading geo data within extent")
     }
@@ -309,10 +300,6 @@ export abstract class BaseLayer implements IGeoLayer {
     return undefined;
   }
 
-  public getDisabled(): boolean | undefined {
-    return this.disabled;
-  }
-
   public showPCS(show: boolean): void {
     this._showPCS = show;
   }
@@ -325,53 +312,17 @@ export abstract class BaseLayer implements IGeoLayer {
     this.reloadLayerOnNextSelection = true;
   }
 
-  public toGeoLayer(): GeoJSONLayer {
-    if (!this.geoLayerObject) {
-      this.geoLayerObject = {
-        type: "geojson",
-        name: this.getName(),
-        description: this.getDescription(),
-        selected: this.selected,
-        autoZoom: this.autoZoom,
-        geoJSONLoader: () => this.doLoad(),
-        geoJSONOptions: GEO_JSON_OPTIONS,
-        style: (feature: FeatureLike) => this.style(feature),
-        onSelected: async (selected: boolean) => await this.onSelected(selected),
-        visible: this.visible && !this.invisibleAutoSelection,
-        zIndex: this.zIndex,
-        layerType: "VectorImageLayer",
-        reloadLayer: this.refreshLayer,
-        id: this.id,
-        events: this.events,
-        minZoom: this.minZoomLevel,
-        disabled: this.disabled,
-      };
-    }
-
-    return this.geoLayerObject;
-  }
-
   public async setSelected(selected: boolean) {
-    await this.events.emit(LayerEvent.SET_SELECTED, selected);
+    await this.appLayerCheckbox?.setSelected(selected);
   }
 
   public async selectSilent() {
     this.selected = true;
-    if (this.geoLayerObject) {
-      this.geoLayerObject.selected = true;
-    }
-  }
-
-  public getSelected(): boolean {
-    return this.selected;
   }
 
   public setVisible(visible: boolean) {
     if (!this.invisibleAutoSelection) {
       this.visible = visible;
-      if (this.geoLayerObject) {
-        this.geoLayerObject.visible = this.visible;
-      }
     }
   }
 
@@ -391,7 +342,7 @@ export abstract class BaseLayer implements IGeoLayer {
   }
 
   private hasZoomLevelForPcs(): boolean {
-    return (this.vueComponent.openLayers!.getMap().getView().getZoom() || 0) >= this.showPcsZoomLevel;
+    return (this.getMap()?.getView().getZoom() || 0) >= this.showPcsZoomLevel;
   }
 
   protected getComplementColor(color: string): string {
@@ -401,10 +352,6 @@ export abstract class BaseLayer implements IGeoLayer {
   public getColorWithAlpha(color: string, alpha: number): string {
     const [r, g, b] = Array.from(asArray(color));
     return asString([r, g, b, alpha]);
-  }
-
-  public getVectorGeoLayer(): VectorGeoLayer | undefined {
-    return this.vueComponent.openLayers!.getMap().getAllLayers().find(layer => layer.getProperties()['id'] === this.id) as VectorGeoLayer;
   }
 
   public async rerender() {
@@ -417,7 +364,7 @@ export abstract class BaseLayer implements IGeoLayer {
   }
 
   public rerenderMap() {
-    this.getVectorGeoLayer()?.changed();
+    this.loadedLayer?.changed();
   }
 
   public async onClick(
@@ -425,99 +372,5 @@ export abstract class BaseLayer implements IGeoLayer {
     featureInfosMeta: FeatureInfosMeta,
   ): Promise<FeatureInfos | undefined> { 
     return undefined;
-  }
-
-  protected async getRefMeasureFeatureInfos(
-    featureInfosMeta: FeatureInfosMeta,
-    analysisId: string | null,
-  ): Promise<FeatureInfos | undefined> {
-    if (featureInfosMeta.refMeasureEntries) { // add ref measure action has been added, already
-      return undefined
-    }
-
-    const featureInfoGroups: FeatureInfoGroup[] = [];
-    const mappings = AnalysisResultMappingHelper.getMappingsByComponentId(featureInfosMeta.fieldgeoComponent!.component_id);
-
-    let myRefMeasureEntry: RefMeasureEntry | null = null;
-    let myRefMeasureEntryKeyFigures: RefMeasureEntryKeyFigureSchema[] | null = null;
-
-    if (analysisId && mappings && this.vueComponent.refMeasuredPcsCodes.includes(featureInfosMeta.fieldgeoComponent!.kks)) {
-      const mappingHelper = new AnalysisResultMappingHelper(mappings)
-      
-      const refMeasureEntries = await volateqApi.getReferenceMeasurementEntries(
-        analysisId, 
-        { pcs: featureInfosMeta.fieldgeoComponent!.kks }
-      );
-      featureInfosMeta.refMeasureEntries = refMeasureEntries;
-
-      for (const refMeasureEntry of refMeasureEntries.entries) {
-        const featureInfoGroup: FeatureInfoGroup = {
-          title: this.vueComponent.$t("reference-measurement-of", { user: refMeasureEntry.user.name }).toString(),
-          records: [
-            { 
-              name: this.vueComponent.$t("measure-timestamp").toString(), 
-              value: dateHelper.toDateTime(refMeasureEntry.measure_time),
-            }
-          ],
-        };
-
-        if (refMeasureEntry.notes) {
-          featureInfoGroup.records.push({
-            name: this.vueComponent.$t("notes").toString(),
-            value: refMeasureEntry.notes,
-          });
-        }
-
-        const rmMappingEntries = mappingHelper.getRefMeasureEntries(refMeasureEntry, refMeasureEntries.key_figures)
-        for (const rmMappingEntry of rmMappingEntries) {
-          featureInfoGroup.records.push(
-            mappingHelper.toFeatureInfo(
-              rmMappingEntry.entry,
-              rmMappingEntry.value.toString(),
-            )
-          );
-        }
-
-        featureInfoGroups.push(featureInfoGroup);
-
-        if (refMeasureEntry.editable) {
-          myRefMeasureEntry = refMeasureEntry;
-          myRefMeasureEntryKeyFigures = refMeasureEntries.key_figures;
-        }
-      }
-    }
-
-    const actionName = myRefMeasureEntry ? "edit-reference-measurement" : "add-reference-measurement";
-
-    return {
-      title: featureInfosMeta.fieldgeoComponent!.kks,
-      groups: featureInfoGroups,
-      actionsSummaries: [
-        { 
-          buttonVariant: "secondary",
-          name: this.vueComponent.$t(actionName).toString(),
-          actions: [
-            {
-              name: this.vueComponent.$t(actionName).toString(),
-              action: async () => {
-                this.vueComponent.showRefMeasureModal(featureInfosMeta.fieldgeoComponent!, myRefMeasureEntry, myRefMeasureEntryKeyFigures);
-              }
-            },
-          ]
-        }, 
-        {
-          buttonVariant: "secondary",
-          name: this.vueComponent.$t("add-observation").toString(),
-          actions: [
-            {
-              name: this.vueComponent.$t("add-observation").toString(),
-              action: async () => {
-                await this.vueComponent.showObservModal(featureInfosMeta.fieldgeoComponent!);
-              }
-            },
-          ]
-        }
-      ]
-    }
   }
 }

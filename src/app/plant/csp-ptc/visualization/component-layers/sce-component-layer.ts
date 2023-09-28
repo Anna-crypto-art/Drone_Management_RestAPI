@@ -1,5 +1,5 @@
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
-import { ComponentLayer } from "../../../shared/visualization/layers/component-layer";
+import { ComponentLayer } from "@/app/plant/shared/map-view/layers/component-layer";
 import { Style, Fill, Stroke } from "ol/style";
 import { FeatureLike } from "ol/Feature";
 import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
@@ -8,11 +8,11 @@ export class SceComponentLayer extends ComponentLayer {
   public readonly componentId = ApiComponent.CSP_PTC_SCE;
   protected readonly color = LayerColor.middleLightGrey;
   protected readonly allowRefMeasures = true;
-  protected readonly minZoomLevel = 18;
+  public readonly minZoomLevel = 18;
   public readonly name = "single-collector-elements";
 
   protected showPcsZoomLevel = 18;
-  protected zIndex = 4;
+  public zIndex = 4;
 
   public getStyle(feature: FeatureLike): Style {
     return new Style({
