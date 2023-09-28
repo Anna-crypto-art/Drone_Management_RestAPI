@@ -5,51 +5,52 @@
         <h2 class="app-observation-selection-sidebar-leftside-title" translate="no">
           {{ plant.name }}
         </h2>
-          <div class="app-observation-selection-sidebar">
-            <div class="app-observation-selection-filter">
-              <b-form @submit.prevent="onSubmitFilter">
-                <b-form-group :label="$t('from')" label-cols-sm="4" label-cols-lg="2">
-                  <app-datepicker v-model="fromDate" required /> 
-                </b-form-group>
-                <b-form-group :label="$t('to')" label-cols-sm="4" label-cols-lg="2">
-                  <app-datepicker v-model="toDate" required /> 
-                </b-form-group>
-                <app-button type="submit" cls="width-100pc">{{ $t('apply') }}</app-button>
-              </b-form>
-            </div>
-            <app-table-container>
-              <app-table
-                ref="observTable"
-                :rows="observTableItems"
-                :columns="observTableColumns"
-                selectMode="single"
-                @rowSelected="onObservSelected"
-                :overlayLoading="loading"
-                :hideHeader="true"
-              >
-                <template #cell(name)="row">
-                  {{ row.item.name.date }}
-                  <app-icon 
-                    icon="app-indicator"
-                    class="mar-left-half"
-                    v-b-popover.hover.top="getComponentNames(row.item.name)"
-                  />
-                  <app-icon 
-                    icon="people-fill"
-                    class="mar-left-half" 
-                    v-b-popover.hover.top="row.item.name.user_names.join(', ')"
-                  /><br>
-                  <small class="grayed">{{ $t("count") }}: {{ row.item.name.count }}</small>
-                  <div v-if="row.item.name.ccps.length > 0" class="mar-top">
-                    <app-badge v-for="ccp in row.item.name.ccps" :key="ccp.ccp_id" :color="getCcpColor(ccp.ccp_id)">
-                      {{ getCcpName(ccp.ccp_id) }}
-                    </app-badge>
-                  </div>
-                </template>
-              </app-table>
-            </app-table-container>
+        <div class="app-observation-selection-sidebar">
+          <div class="app-observation-selection-sidebar-filter">
+            <b-form @submit.prevent="onSubmitFilter">
+              <!-- <b-form-group :label="$t('from')" label-cols-sm="4" label-cols-lg="2">
+                <app-datepicker v-model="fromDate" required /> 
+              </b-form-group>
+              <b-form-group :label="$t('to')" label-cols-sm="4" label-cols-lg="2">
+                <app-datepicker v-model="toDate" required /> 
+              </b-form-group>
+              <app-button type="submit" cls="width-100pc">{{ $t('apply') }}</app-button> -->
+              <b-form-select :options="timeRangeOtions" @change="onTimeRangeChanged" />
+            </b-form>
           </div>
+          <app-table-container>
+            <app-table
+              ref="observTable"
+              :rows="observTableItems"
+              :columns="observTableColumns"
+              selectMode="single"
+              @rowSelected="onObservSelected"
+              :overlayLoading="loading"
+              :hideHeader="true"
+            >
+              <template #cell(name)="row">
+                {{ row.item.name.date }}
+                <app-icon 
+                  icon="app-indicator"
+                  class="mar-left-half"
+                  v-b-popover.hover.top="getComponentNames(row.item.name)"
+                />
+                <app-icon 
+                  icon="people-fill"
+                  class="mar-left-half" 
+                  v-b-popover.hover.top="row.item.name.user_names.join(', ')"
+                /><br>
+                <small class="grayed">{{ $t("count") }}: {{ row.item.name.count }}</small>
+                <div v-if="row.item.name.ccps.length > 0" class="mar-top">
+                  <app-badge v-for="ccp in row.item.name.ccps" :key="ccp.ccp_id" :color="getCcpColor(ccp.ccp_id)">
+                    {{ getCcpName(ccp.ccp_id) }}
+                  </app-badge>
+                </div>
+              </template>
+            </app-table>
+          </app-table-container>
         </div>
+      </div>
     </app-sidebar>
   </div>
 </template>
@@ -110,6 +111,30 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
 
   ccpService!: CcpService;
 
+  timeRangeOptions: { value: string | null; text: string}[] = [
+          { value: "past7Days", text: "Last 7 Days" },
+          { value: "past30Days", text: "Last 30 Days" },
+          { value: "past90Days", text: "Last 90 Days" },
+          { value: "pastYear", text: "Last Year" },
+        ];
+
+  // @CatchError("loading")
+  // async created() {
+  //   observationSelectEventService.on(this.plant.id, ObservationSelectionEvent.SIDEBAR_ABSOLUTE, async (absolute) => {
+  //     this.absolute = absolute;
+  //   });
+
+  //   this.toDate = dateHelper.toDate(dateHelper.now());
+    
+  //   const dFrom = new Date();
+  //   dFrom.setDate(dFrom.getDate() - 7);
+  //   this.fromDate = dateHelper.toDate(dFrom);
+
+  //   this.ccpService = CcpService.get(this.plant.id);
+
+  //   await this.updateSummerizedObservations();
+  // }
+
   @CatchError("loading")
   async created() {
     observationSelectEventService.on(this.plant.id, ObservationSelectionEvent.SIDEBAR_ABSOLUTE, async (absolute) => {
@@ -119,13 +144,33 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
     this.toDate = dateHelper.toDate(dateHelper.now());
     
     const dFrom = new Date();
-    dFrom.setDate(dFrom.getDate() - 7);
-    this.fromDate = dateHelper.toDate(dFrom);
+    // dFrom.setDate(dFrom.getDate() - 7);
+    // this.fromDate = dateHelper.toDate(dFrom);
 
     this.ccpService = CcpService.get(this.plant.id);
 
+    console.log(this.timeRangeOptions.values)
+    // switch (this.timeRangeOptions) {
+    //   case "past7Days":
+    //     dFrom.setDate(dFrom.getDate() - 7);
+    //     break;
+    //   case "past30Days":
+    //     dFrom.setDate(dFrom.getDate() - 30);
+    //     break;
+    //   case "past90Days":
+    //     dFrom.setDate(dFrom.getDate() - 90);
+    //     break;
+    //   case "pastYear":
+    //     dFrom.setDate(dFrom.getDate() - 365);
+    // };
+
+    this.fromDate = dateHelper.toDate(dFrom);
     await this.updateSummerizedObservations();
   }
+
+  // onTimeRangeChanged() {
+  //   test = this.timeRangeOptions.values
+  // }
 
   onSidebarToggled(): void {
     console.log("toggle observations...")
@@ -187,9 +232,10 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
 @import "@/scss/_variables.scss";
 
 .app-observation-selection-sidebar {
-  margin-top: 0;
+  // margin-top: 0;
   height: calc(100vh - #{$header-height});
-  display: flex;
+  // display: flex;
+  // height: 100%;
   
   &.absolute {
     position: absolute;
@@ -207,6 +253,14 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
       margin-bottom: 0.5em;
       margin-left: 10px;
     }
+  }
+
+  .app-table-container {
+    margin-top: 0;
+  }
+
+  &-filter {
+    margin-bottom: 15px;
   }
 }
   

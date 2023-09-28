@@ -72,7 +72,7 @@ import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { SelectionSidebarEvent, selectionSidebarEventService } from "../selection-sidebar-event-serivce";
 import { State } from "vuex-class";
 import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
-import AppObservationSelection from "../observation-selection/observation-selection.vue";
+import AppObservationSelection from "../observation-selection/observation-selection-sidebar.vue";
 import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
 
 

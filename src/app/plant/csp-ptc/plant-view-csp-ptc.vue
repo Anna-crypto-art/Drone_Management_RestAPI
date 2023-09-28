@@ -43,7 +43,7 @@ import { IAnalysisSelectionComponent } from "../shared/selection-sidebar/analysi
 import { AnalysisSelectionService } from "../shared/selection-sidebar/analysis-selection/analysis-selection-service";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import AppAnalysisSelectionSidebar from "@/app/plant/shared/selection-sidebar/analysis-selection/analysis-selection.vue";
-import AppObservationSelectionSidebar from "@/app/plant/shared/selection-sidebar/observation-selection/observation-selection.vue";
+import AppObservationSelectionSidebar from "@/app/plant/shared/selection-sidebar/observation-selection/observation-selection-sidebar.vue";
 import { State } from "vuex-class";
 
 
