@@ -12,6 +12,7 @@ import { Component, Prop } from "vue-property-decorator";
 import { CatchError } from "../../services/helper/catch-helper";
 import AppButton from "../app-button/app-button.vue";
 import { BaseComponent } from "../base-component/base-component";
+import { MapPopButtonsEvent, mapPopButtonsEventService } from "./map-pop-buttons-event-service";
 
 @Component({
   name: "app-map-pop-button",
@@ -22,11 +23,22 @@ import { BaseComponent } from "../base-component/base-component";
 export default class AppMapPopButton extends BaseComponent {
   @Prop({ required: true }) icon!: string;
 
+  id = Math.random().toString();
   popupVisible = false;
+
+  async created() {
+    mapPopButtonsEventService.on("AppMapPopButton", MapPopButtonsEvent.POPUP, (id: string) => {
+      if (id != this.id && this.popupVisible) {
+        this.popupVisible = false;
+      }
+    });
+  }
 
   @CatchError()
   showPopup() {
     this.popupVisible = !this.popupVisible;
+
+    mapPopButtonsEventService.emit("AppMapPopButton", MapPopButtonsEvent.POPUP, this.id);
   }
 }
 </script>
@@ -38,6 +50,10 @@ export default class AppMapPopButton extends BaseComponent {
   position: relative;
   overflow: visible;
 
+  .app-button {
+    box-shadow: 3px 3px 5px $dark-40pc;
+  }
+
   &-popup {
     width: 200px;
     position: absolute;
@@ -45,6 +61,7 @@ export default class AppMapPopButton extends BaseComponent {
     top: 0;
     padding: 1em;
     border: 1px solid $border-color-grey;
+    box-shadow: 3px 3px 5px $dark-40pc;
 
     @supports (backdrop-filter: blur(5px)) {
       backdrop-filter: blur(5px);

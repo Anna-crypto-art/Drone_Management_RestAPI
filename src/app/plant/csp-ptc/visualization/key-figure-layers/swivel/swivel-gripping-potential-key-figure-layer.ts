@@ -64,7 +64,7 @@ export class SwivelGrippingPotentialKeyFigureLayer extends ClassSwivelKeyFigureL
     const featureInfos = super.mapResultToFeatureInfos(result);
 
     // Nobody understand this image, so show them to SUPER_ADMINs only
-    if (result.gripping_risk_image_url && featureInfos && this.vueComponent.isSuperAdmin) {
+    if (result.gripping_risk_image_url && featureInfos && this.appLayerCheckbox?.isSuperAdmin) {
       featureInfos.images = [{ title: "Gripping risk image", url: result.gripping_risk_image_url }];
     }
 

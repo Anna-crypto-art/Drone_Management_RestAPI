@@ -49,8 +49,12 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent impleme
   numberBoxes: DiagramNumberBox[] | null = null;
   tableFilter: TableFilterRequest | null = null;
 
+  async created() {
+    this.analysisSelectionService = new AnalysisSelectionService(this);
+  }
+
   async mounted() {
-    await AnalysisSelectionService.register(this);
+    this.analysisSelectionService?.register();
   }
 
   async unmounted() {

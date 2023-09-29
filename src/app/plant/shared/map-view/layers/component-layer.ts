@@ -2,7 +2,7 @@ import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/a
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { FeatureLike } from "ol/Feature";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { FeatureInfos, FeatureInfosMeta, IAppMapView, PropsFeature } from "../types";
+import { FeatureInfos, FeatureInfosMeta, PropsFeature } from "../types";
 import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { ReferenceMeasurementEntriesSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
@@ -13,6 +13,8 @@ import { BaseLayer } from "./base-layer";
 import { IOrthoImageMixin, OrthoImage } from "../../visualization/mixins/types";
 import { LayerColor } from "../../visualization/layers/types";
 import { OrhtoImageMixin } from "../../visualization/mixins/ortho-image-mixin";
+import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import { i18n } from "@/main";
 
 export abstract class ComponentLayer extends BaseLayer /*implements IOrthoImageMixin*/ {
   public abstract readonly componentId: ApiComponent;
@@ -31,10 +33,8 @@ export abstract class ComponentLayer extends BaseLayer /*implements IOrthoImageM
   // private readonly orhtoImageMixin: OrhtoImageMixin;
   // public orthoImages: OrthoImage[] | null = null;
 
-  constructor(
-    vueComponent: BaseAuthComponent & IAppMapView,
-  ) {
-    super(vueComponent);
+  constructor(plant: PlantSchema) {
+    super(plant);
 
     // this.orhtoImageMixin = new OrhtoImageMixin(this);
 
@@ -42,16 +42,13 @@ export abstract class ComponentLayer extends BaseLayer /*implements IOrthoImageM
   }
 
   protected created(): void {/* override me */}
+
   public get id(): string {
-    return this.name;
+    return this.plant.id + "___" + this.name;
   }
 
   public getPcs(feature: FeatureLike): string | undefined {
     return feature.get("name");
-  }
-
-  protected getName(): string {
-    return this.vueComponent.$t(this.name).toString();
   }
 
   protected getColor(feature: FeatureLike): string {
@@ -74,7 +71,7 @@ export abstract class ComponentLayer extends BaseLayer /*implements IOrthoImageM
   public async load(extent: Extent): Promise<GeoJSON<PropsFeature> | undefined> {
     try {
       return await volateqApi.getComponentsGeoVisual(
-        this.vueComponent.plant.id,
+        this.plant.id,
         [this.componentId],
         extent ? {
           min_long: extent[0], 
@@ -84,7 +81,7 @@ export abstract class ComponentLayer extends BaseLayer /*implements IOrthoImageM
         } : undefined,
       );
     } catch (e) {
-      this.vueComponent.showError(e);
+      this.appLayerCheckbox?.showError(e);
     }
 
     return undefined;

@@ -38,6 +38,7 @@ export default class AppBox extends Vue {
   padding: 1em;
   background-color: $background-grey;
   margin-top: 30px;
+  border: 1px solid $border-color-grey;
 
   &-title {
     margin-bottom: 1em;

@@ -253,10 +253,12 @@ export default class AppVisualization
     }
 
     this.routeQueryHelper.queryChanged(async () => { await this.loadLayersFromUrlQuery(); });
+
+    this.analysisSelectionService = new AnalysisSelectionService(this);
   }
 
   async mounted() {
-    await AnalysisSelectionService.register(this);
+    this.analysisSelectionService?.register();
     this.observationSelectionService.register();
 
     // wait for DOM before render OpenLayers

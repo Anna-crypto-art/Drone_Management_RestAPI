@@ -2,7 +2,7 @@
   <div class="app-geo-json-layer-checkbox" v-show="geoLayer.visible">
     <b-form-checkbox v-model="geoLayer.selected" @change="onChange">
       <slot :name="geoLayer.name">
-        {{ geoLayer.name }}
+        {{ geoLayer.getDisplayName() }}
         <app-explanation v-if="geoLayer.description"><span v-html="geoLayer.description"></span></app-explanation>
       </slot>
     </b-form-checkbox>
@@ -15,7 +15,7 @@ import { Component, Prop, Watch, Ref } from "vue-property-decorator";
 import { IGeoLayer, VectorGeoLayer } from "./types";
 import { CatchError } from "../../services/helper/catch-helper";
 import { LoadingEvent } from "../app-geovisualization/types/events";
-import Feature from "ol/Feature";
+import Feature, { FeatureLike } from "ol/Feature";
 import GeoJSON from "ol/format/GeoJSON";
 import Geometry from "ol/geom/Geometry";
 import SimpleGeometry from "ol/geom/SimpleGeometry";
@@ -25,16 +25,18 @@ import VectorSource from "ol/source/Vector";
 import { Style } from "ol/style";
 import * as ExtentFunctions from "ol/extent";
 import { IAppGeoJsonLayerCheckbox } from "../app-geovisualization/types/components";
-import { BaseComponent } from "../base-component/base-component";
 import { EVENT_ZOOM_TO_HOME } from "./events";
 import { GEO_JSON_OPTIONS } from "@/app/plant/shared/visualization/layers/layer-base";
+import { BaseAuthComponent } from "../base-auth-component/base-auth-component";
+import AppExplanation from "../app-explanation/app-explanation.vue";
 
 @Component({
   name: "app-geo-json-layer-checkbox",
   components: {
+    AppExplanation,
   },
 })
-export default class AppGeoJsonLayerCheckbox extends BaseComponent implements IAppGeoJsonLayerCheckbox {
+export default class AppGeoJsonLayerCheckbox extends BaseAuthComponent implements IAppGeoJsonLayerCheckbox {
   @Prop({ required: true }) geoLayer!: IGeoLayer;
   @Prop({ required: true }) map!: Map;
 
@@ -74,9 +76,13 @@ export default class AppGeoJsonLayerCheckbox extends BaseComponent implements IA
     if (this.geoLayer.selected) {
       if (!this.geoLayer.loadedLayer) {
         this.geoLayer.loadedLayer = await this.loadVectorGeoLayer();
+        
+        if (this.geoLayer.autoZoom) {
+          this.zoomToHome();
+        }
       }
 
-      this.geoLayer.loadedLayer!.setVisible(true);
+      this.geoLayer.loadedLayer?.setVisible(true);
     } else {
       if (this.geoLayer.loadedLayer) {
         this.geoLayer.loadedLayer.setVisible(false);
@@ -98,24 +104,14 @@ export default class AppGeoJsonLayerCheckbox extends BaseComponent implements IA
 
   private async loadVectorGeoLayer(): Promise<VectorGeoLayer | undefined> {
     try {
-      this.loadingCallback!({
-        loading: true,
-        state: this.$t("fetching-data").toString(),
-      });
+      await this.geoLayer.setLoading(true, this.$t("fetching-data").toString());
 
       const features = await this.geoLayer.loadGeoJSON();
       if (features === undefined) {
         return undefined;
       }
 
-      this.loadingCallback!({
-        loading: true,
-        state: this.$t("drawing-features", { features: features.features.length }).toString()
-      });
-
-      // We have to wait for the $emit call of the loadingCallback with drawing features message. 
-      // Otherwise the loading state will not be updated
-      await this.$nextTick();
+      await this.geoLayer.setLoading(true, this.$t("drawing-features", { features: features.features.length }).toString());
 
       const source = new VectorSource({
         features: new GeoJSON().readFeatures(features, GEO_JSON_OPTIONS),
@@ -133,7 +129,7 @@ export default class AppGeoJsonLayerCheckbox extends BaseComponent implements IA
         minZoom: this.geoLayer.minZoomLevel,
       });
       
-      vectorGeoLayer.setStyle(this.geoLayer.style);
+      vectorGeoLayer.setStyle((feature: FeatureLike) => this.geoLayer.style(feature));
 
       if (this.geoLayer.zIndex) {
         vectorGeoLayer.setZIndex(this.geoLayer.zIndex);
@@ -143,14 +139,12 @@ export default class AppGeoJsonLayerCheckbox extends BaseComponent implements IA
 
       // Automatic zoom to features
       if (this.geoLayer.autoZoom === true) {
-        this.zoomToHome();
-
         window.addEventListener(EVENT_ZOOM_TO_HOME, this.zoomToHomeEvent);
       }
 
       return vectorGeoLayer;
     } finally {
-      this.loadingCallback({ loading: false });
+      await this.geoLayer.setLoading(false);
     } 
   }
 
@@ -187,10 +181,6 @@ export default class AppGeoJsonLayerCheckbox extends BaseComponent implements IA
 
       img.src = feature.get("image");
     }
-  }
-
-  private loadingCallback(e: LoadingEvent) {
-    this.$emit("loading", e);
   }
 
   private zoomToHome() {

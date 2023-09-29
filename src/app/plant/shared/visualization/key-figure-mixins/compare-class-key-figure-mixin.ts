@@ -2,6 +2,7 @@ import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
 import { ComparedFeatureType, FeatureProperties, Legend, LegendEntry } from "@/app/plant/shared/visualization/types";
 import { CspPtcKeyFigureLayer } from "../../../csp-ptc/visualization/key-figure-layers/csp-ptc-key-figure-layer";
 import { ICompareClassKeyFigureMixin } from "./types";
+import { i18n } from "@/main";
 
 export class CompareClassKeyFigureMixin<T extends ICompareClassKeyFigureMixin>  {
   public constructor(
@@ -29,18 +30,18 @@ export class CompareClassKeyFigureMixin<T extends ICompareClassKeyFigureMixin>  
         },
         {
           color: LayerColor.red,
-          name: this.layer.vueComponent.$t("of-which-are-new").toString() + 
+          name: i18n.t("of-which-are-new").toString() + 
             this.layer.getLegendEntryCount(comparedFeatures[ComparedFeatureType.NEW_WORSENED].length),
           indent: true,
         },
         {
           color: LayerColor.strongGreen,
-          name: this.layer.vueComponent.$t("improved").toString() +
+          name: i18n.t("improved").toString() +
             this.layer.getLegendEntryCount(comparedFeatures[ComparedFeatureType.GONE_IMPROVED].length),
         },
         ...(comparedFeatures[ComparedFeatureType.UNDEFINED].length > 0 ? [{
           color: LayerColor.grey,
-          name: this.layer.vueComponent.$t("not-measured").toString() + 
+          name: i18n.t("not-measured").toString() + 
           this.layer.getLegendEntryCount(comparedFeatures[ComparedFeatureType.UNDEFINED].length)
         }] : []),
       ],

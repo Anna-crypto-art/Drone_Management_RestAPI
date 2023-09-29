@@ -3,6 +3,7 @@ import { FeatureProperties, Legend, LegendEntry } from "@/app/plant/shared/visua
 import { FeatureLike } from "ol/Feature";
 import { Fill, Style } from "ol/style";
 import { MirrorKeyFigureLayer } from "./abstract/mirror-key-figure-layer";
+import { i18n } from "@/main";
 
 export class MissingMirrorKeyFigureLayer extends MirrorKeyFigureLayer {
   public enableCompare = true;
@@ -48,7 +49,7 @@ export class MissingMirrorKeyFigureLayer extends MirrorKeyFigureLayer {
     if (this.query?.undefined) {
       legend.entries.push({
         color: LayerColor.grey,
-        name: this.vueComponent.$t("not-measured").toString() + 
+        name: i18n.t("not-measured").toString() + 
           this.getLegendEntryCount(notMeasuredMirrorFeaturesCount),
       });
     }
@@ -70,12 +71,12 @@ export class MissingMirrorKeyFigureLayer extends MirrorKeyFigureLayer {
         },
         {
           color: LayerColor.red,
-          name: this.vueComponent.$t("of-which-are-new").toString() + this.getLegendEntryCount(newFeaturesCount),
+          name: i18n.t("of-which-are-new").toString() + this.getLegendEntryCount(newFeaturesCount),
           indent: true,
         },
         {
           color: LayerColor.strongGreen,
-          name: this.vueComponent.$t("fixed").toString() + this.getLegendEntryCount(fixedFeaturesCount),
+          name: i18n.t("fixed").toString() + this.getLegendEntryCount(fixedFeaturesCount),
         },
       ],
     };

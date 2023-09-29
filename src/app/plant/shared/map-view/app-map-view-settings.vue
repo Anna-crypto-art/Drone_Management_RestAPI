@@ -1,7 +1,7 @@
 <template>
   <div class="app-map-view-settings">
     <app-map-pop-button icon="gear-fill">
-      <h4 class="mar-bottom">{{ $t("map-settings") }}</h4>
+      <h5 class="mar-bottom"><b-icon icon="gear-fill" /><span class="pad-left">{{ $t("map-settings") }}</span></h5>
       <app-box class="no-mar-top mar-bottom">
         <b-form-checkbox v-model="satelliteView" switch @change="onSatelliteViewChanged">
           {{ $t("satellite-view") }}
@@ -62,5 +62,9 @@ export default class AppMapViewSettings extends BaseComponent {
 
 .app-map-view-settings {
   overflow: visible;
+
+  .box {
+    border: 1px solid $border-color-grey;
+  }
 }
 </style>

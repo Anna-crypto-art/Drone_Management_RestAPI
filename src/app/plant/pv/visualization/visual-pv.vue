@@ -52,8 +52,12 @@ export default class AppVisualPv extends BaseAuthComponent implements IAnalysisS
 
   analysisSelectionService: AnalysisSelectionService | null = null;
 
+  async created() {
+    this.analysisSelectionService = new AnalysisSelectionService(this);
+  }
+
   async mounted() {
-    await AnalysisSelectionService.register(this);
+    await this.analysisSelectionService?.register();
   }
 
   async unmounted() {

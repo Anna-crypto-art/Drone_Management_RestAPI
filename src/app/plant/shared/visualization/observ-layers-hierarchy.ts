@@ -176,7 +176,8 @@ export class ObservLayersHierarchy {
   private getComponentLayerTypes(): (typeof ComponentLayer)[] {
     switch (this.vueComponent.plant.technology_id) {
       case ApiTechnology.CSP_PTC:
-        return CSP_PTC_COMPONENT_LAYERS;
+        throw Error("Blub")
+        // return CSP_PTC_COMPONENT_LAYERS;
 
       case ApiTechnology.PV:
         return PV_COMPONENT_LAYERS;

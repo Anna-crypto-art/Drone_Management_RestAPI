@@ -1,6 +1,12 @@
 <template>
   <div class="visual-csp-ptc">
-    <app-map-view :plant="plant" />
+    <app-map-view 
+      :plant="plant"
+      :componentLayerTypes="componentLayerTypes" 
+      :analyses="analyses"
+      :keyFigureLayers="keyFigureLayers"
+    />
+    
 
     <!--
     <app-visualization
@@ -102,8 +108,12 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
 
   analysisSelectionService: AnalysisSelectionService | null = null;
 
+  async created() {
+    this.analysisSelectionService = new AnalysisSelectionService(this);
+  }
+
   async mounted() {
-    await AnalysisSelectionService.register(this);
+    await this.analysisSelectionService?.register();
   }
 
   async unmounted() {

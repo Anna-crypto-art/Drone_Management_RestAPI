@@ -1,5 +1,5 @@
-import { KeyFigureLayer } from "@/app/plant/shared/visualization/layers/key-figure-layer";
-import { FeatureProperties } from "@/app/plant/shared/visualization/types";
+import { KeyFigureLayer } from "@/app/plant/shared/map-view/layers/key-figure-layer";
+import { FeatureProperties } from "@/app/plant/shared/map-view/types";
 import { CompareClassKeyFigureMixin } from "./compare-class-key-figure-mixin";
 import { ICompareClassLimitsKeyFigureMixin } from "./types";
 

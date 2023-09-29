@@ -8,16 +8,16 @@ export class AnalysisSelectionService {
   private selectedAnalysis: AnalysisForViewSchema | null = null;
   private selectedAnalyses: AnalysisForViewSchema[] | null = null; // compare mode
 
-  private id: string | undefined = undefined
+  private readonly id: string;
 
-  private constructor(
+  constructor(
     private readonly analysisSelectionComponent: IAnalysisSelectionComponent,
-  ) {}
-
-  private async init() {
+  ) {
     // We need the id to unregister the AnalysisSelection event, again
     this.id = Math.random().toString()
+  }
 
+  public async register() {
     analysisSelectEventService.on(
       this.analysisSelectionComponent.plant.id,
       AnalysisSelectionEvent.ANALYSIS_SELECTED,
@@ -49,13 +49,6 @@ export class AnalysisSelectionService {
       .removeListenerById(AnalysisSelectionEvent.ANALYSIS_SELECTED, this.id!);
       analysisSelectEventService.getEventEmitter(this.analysisSelectionComponent.plant.id)
       .removeListenerById(AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED, this.id!);
-  }
-  
-  public static async register(analysisSelectionComponent: IAnalysisSelectionComponent) {
-    const service = new AnalysisSelectionService(analysisSelectionComponent);
-    await service.init();
-
-    analysisSelectionComponent.analysisSelectionService = service;
   }
 
   private async fireAnalysisSelected(selectedAnalysisId: string | undefined) {

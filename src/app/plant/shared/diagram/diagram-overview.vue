@@ -80,8 +80,12 @@ export default class AppDiagramOverview extends BaseAuthComponent implements IAn
   loading = false;
   viewedNumberBox: DiagramNumberBox | null = null;
 
+  async created() {
+    this.analysisSelectionService = new AnalysisSelectionService(this);
+  }
+
   async mounted() {
-    await AnalysisSelectionService.register(this);
+    await this.analysisSelectionService?.register();
   }
 
   async unmounted() {

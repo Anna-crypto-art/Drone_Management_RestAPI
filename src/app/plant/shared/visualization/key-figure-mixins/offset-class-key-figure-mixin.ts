@@ -5,6 +5,7 @@ import { FeatureLike } from "ol/Feature";
 import { CspPtcKeyFigureLayer } from "../../../csp-ptc/visualization/key-figure-layers/csp-ptc-key-figure-layer";
 import { CompareClassLimitsKeyFigureMixin } from "./compare-class-limits-key-figure-mixin";
 import { ICompareClassLimitsKeyFigureMixin } from "./types";
+import { i18n } from "@/main";
 
 export class OffsetClassKeyFigureMixin extends CompareClassLimitsKeyFigureMixin {
   public constructor(
@@ -22,7 +23,7 @@ export class OffsetClassKeyFigureMixin extends CompareClassLimitsKeyFigureMixin 
       return this.getDiffColor(featureProperties);
     }
  
-    const offset = featureProperties?.value;
+    const offset = featureProperties?.value as number;
     const complementary = offset !== undefined && offset !== null && offset < 0;
 
     return this.getOffsetColor(complementary);
@@ -37,8 +38,8 @@ export class OffsetClassKeyFigureMixin extends CompareClassLimitsKeyFigureMixin 
       return this.getDiffLegend();
     }
 
-    const negativeFeatureCount = this.layer.geoJSON!.features.filter(feature => feature.properties.value! < 0).length;
-    const positiveFeatureCount = this.layer.geoJSON!.features.filter(feature => feature.properties.value! >= 0).length;
+    const negativeFeatureCount = this.layer.geoJSON!.features.filter(feature => (feature.properties.value as number) < 0).length;
+    const positiveFeatureCount = this.layer.geoJSON!.features.filter(feature => (feature.properties.value as number) >= 0).length;
 
     const legendEntries: LegendEntry[] = [{
         color: this.getOffsetColor(),
@@ -88,30 +89,30 @@ export class OffsetClassKeyFigureMixin extends CompareClassLimitsKeyFigureMixin 
     const limitAt1 = this.layer.getClassLimits()[1] + unit;
 
     if (this.layer.query?.undefined === 1) {
-      return this.layer.vueComponent.$t("not-measured").toString() + this.layer.getLegendEntryCount();
+      return i18n.t("not-measured").toString() + this.layer.getLegendEntryCount();
     }
 
     if (this.layer.getQueryClass() === 1) {
-      return this.layer.vueComponent.$t("less-than", {limit: limitAt0}).toString() + ": " + this.layer.getLegendEntryCount();
+      return i18n.t("less-than", {limit: limitAt0}).toString() + ": " + this.layer.getLegendEntryCount();
     }
 
     if (this.layer.getQueryClass() === 2) {
       if (negativeOffset) {
-        return this.layer.vueComponent.$t("between-and", {limit1: "-" + limitAt1, limit2: "-" + limitAt0}).toString() +
+        return i18n.t("between-and", {limit1: "-" + limitAt1, limit2: "-" + limitAt0}).toString() +
           ": " + this.layer.getLegendEntryCount(featureCount);
       }
 
-      return this.layer.vueComponent.$t("between-and", {limit1: limitAt0, limit2: limitAt1}).toString() +
+      return i18n.t("between-and", {limit1: limitAt0, limit2: limitAt1}).toString() +
           ": " + this.layer.getLegendEntryCount(featureCount);
     }
     
     if (this.layer.getQueryClass() === 3) {
       if (negativeOffset) {
-        return this.layer.vueComponent.$t("less-than", {limit: "-" + limitAt1}).toString() + 
+        return i18n.t("less-than", {limit: "-" + limitAt1}).toString() + 
           ": " + this.layer.getLegendEntryCount(featureCount);
       }
 
-      return this.layer.vueComponent.$t("greater-than", {limit: limitAt1}).toString() +
+      return i18n.t("greater-than", {limit: limitAt1}).toString() +
          ": " + this.layer.getLegendEntryCount(featureCount);
     }
 
@@ -119,7 +120,7 @@ export class OffsetClassKeyFigureMixin extends CompareClassLimitsKeyFigureMixin 
   }
 
   public getDiffLegendName(): string {
-    return this.layer.vueComponent.$t("alignment-offset-class-" + this.layer.getQueryClass(), {
+    return i18n.t("alignment-offset-class-" + this.layer.getQueryClass(), {
       limit0: this.layer.getClassLimits()[0],
       limit1: this.layer.getClassLimits()[1],
     }).toString()

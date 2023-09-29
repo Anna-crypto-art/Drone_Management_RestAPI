@@ -47,9 +47,6 @@ export default class AppPlantView extends BaseAuthComponent {
       this.loading = loading;
       this.loadingStatus = loading && loadingStatus || "";
     });
-    plantViewEventService.on(this.plant.id, PlantViewEvent.UPDATE_LOADING_STATUS, (loadingStatus: string) => {
-      this.loadingStatus = loadingStatus;
-    });
   }
 
   get isCspPtc(): boolean {

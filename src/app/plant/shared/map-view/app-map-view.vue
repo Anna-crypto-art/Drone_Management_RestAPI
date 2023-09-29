@@ -1,10 +1,17 @@
 <template>
-  <div id="appMapView" class="app-map-view" v-if="map">
+  <div class="app-map-view" v-if="map">
     <app-map :map="map" />
     <app-map-controls :map="map" />
     <app-map-pop-buttons>
       <app-map-view-settings :plant="plant" :map="map" />
+      <app-map-view-components :componentLayerTypes="componentLayerTypes" :map="map" :plant="plant" />
     </app-map-pop-buttons>
+    <!--app-map-view-key-figure-layer-selection 
+      :analyses="analyses"
+      :keyFigureLayers="keyFigureLayers"
+      :map="map"
+      :plant="plant"
+    /-->
   </div>
 </template>
 
@@ -17,10 +24,12 @@ import { Component, Prop } from "vue-property-decorator";
 import AppMapPopButtons from "@/app/shared/components/app-map/app-map-pop-buttons.vue";
 import AppMapViewSettings from "./app-map-view-settings.vue";
 import { ComponentLayer } from "../visualization/layers/component-layer";
-import { plantViewEventService } from "../../plant-view-event-service";
-import { PlantViewEvent } from "../../types";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-
+import AppMapViewComponents from "./app-map-view-components.vue";
+import AppMapViewKeyFigureLayerSelection from "./app-map-view-layer-selection/app-map-view-key-figure-layer-selection.vue";
+import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import { KeyFigureTypeMap } from "./layers/types";
+import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 
 @Component({
   name: "app-map-view",
@@ -29,10 +38,14 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
     AppMapControls,
     AppMapPopButtons,
     AppMapViewSettings,
+    AppMapViewComponents,
+    AppMapViewKeyFigureLayerSelection,
   },
 })
 export default class AppMapView extends BaseAuthComponent {
   @Prop({ required: true }) plant!: PlantSchema;
+  @Prop({ required: true }) analyses!: AnalysisForViewSchema[];
+  @Prop({ required: true }) keyFigureLayers!: KeyFigureTypeMap<GeoVisualQuery>[];
   @Prop({ required: true }) componentLayerTypes!: typeof ComponentLayer[];
 
   map: Map | null = null;
@@ -45,10 +58,6 @@ export default class AppMapView extends BaseAuthComponent {
         zoom: 2,
       }),
     });
-  }
-
-  public async setLoading(loading: boolean) {
-    await plantViewEventService.emit(this.plant.id, PlantViewEvent.TOGGLE_LOADING, loading);
   }
 }
 </script>

@@ -2,11 +2,6 @@ import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { ReferenceMeasurementEntriesSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
 
-export interface IAppMapView {
-  plant: PlantSchema;
-  setLoading(loading: boolean): Promise<void>;
-}
-
 export interface FeatureProperties {
   name: string;
   value?: number | boolean | string | null;

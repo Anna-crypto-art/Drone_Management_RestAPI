@@ -84,8 +84,12 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
   activeTabLabel = "";
   readonly activeTabComponents: TableResultMappingTabComponent[] = [];
 
+  async created() {
+    this.analysisSelectionService = new AnalysisSelectionService(this);
+  }
+
   async mounted() {
-    await AnalysisSelectionService.register(this);
+    await this.analysisSelectionService?.register();
   }
 
   async unmounted() {

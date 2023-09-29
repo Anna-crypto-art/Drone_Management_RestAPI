@@ -32,5 +32,4 @@ export interface EditPlant {
 
 export enum PlantViewEvent {
   TOGGLE_LOADING = "TOGGLE_LOADING",
-  UPDATE_LOADING_STATUS = "UPDATE_LOADING_STATUS",
 }

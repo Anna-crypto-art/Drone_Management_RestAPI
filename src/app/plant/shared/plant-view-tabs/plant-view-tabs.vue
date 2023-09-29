@@ -84,10 +84,12 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
     this.isMobileQuery = getMobileQuery()
     this.isMobileQuery.addEventListener("change", this.isMobileListener);
     this.isMobileListener(this.isMobileQuery);
+
+    this.analysisSelectionService = new AnalysisSelectionService(this);
   }
 
   async mounted() {
-    await AnalysisSelectionService.register(this);
+    await this.analysisSelectionService?.register();
   }
 
   @Watch("selectedTab") async onSelectedTabChanged() {

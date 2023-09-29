@@ -3,6 +3,7 @@ import { FeatureProperties, Legend, LegendEntry } from "@/app/plant/shared/visua
 import { CompareClassKeyFigureMixin } from "@/app/plant/shared/visualization/key-figure-mixins/compare-class-key-figure-mixin";
 import { ICompareClassKeyFigureMixin } from "@/app/plant/shared/visualization/key-figure-mixins/types";
 import { ClassHceKeyFigureLayer } from "./abstract/class-hce-key-figure-layer";
+import { i18n } from "@/main";
 
 export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer implements ICompareClassKeyFigureMixin {
   private compareClassKeyFigureMixin!: CompareClassKeyFigureMixin<ICompareClassKeyFigureMixin>;
@@ -57,7 +58,7 @@ export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer imple
       entries: [
         {
           color: this.getColor(),
-          name: this.vueComponent.$t(this.getLegendName()).toString() + 
+          name: i18n.t(this.getLegendName()).toString() + 
             this.getLegendEntryCount(this.geoJSON!.features.length),
         }
       ],
@@ -66,11 +67,11 @@ export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer imple
 
   protected getLegendName(): string {
     if (
-      this.keyFigureInfo.displayName === "glass-tube-temperature-class-3" &&
+      this.options.displayName === "glass-tube-temperature-class-3" &&
       this.analysisResult.csp_ptc!.glass_tube_temperature_class_count === 3
     ) {
       // If we have 3 temperature classifications the third class is "Severe heat loss"
-      return this.vueComponent.$t("glass-tube-temperature-class-4").toString();
+      return i18n.t("glass-tube-temperature-class-4").toString();
     }
 
     return super.getLegendName();

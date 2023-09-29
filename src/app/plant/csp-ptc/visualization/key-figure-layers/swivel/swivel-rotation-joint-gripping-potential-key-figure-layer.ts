@@ -5,6 +5,7 @@ import { FeatureInfos, FeatureProperties, Legend, LegendEntry } from "@/app/plan
 import { KeyFigureColorScheme, LayerColor } from "@/app/plant/shared/visualization/layers/types";
 import { AnalysisResultCspPtcSwivelSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-swivel-schema";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
+import { i18n } from "@/main";
 
 export class SwivelRotationJointGrippingPotentialKeyFigureLayer extends SwivelKeyFigureLayer {
   private compareClassKeyFigureMixin!: CompareClassKeyFigureMixin<ICompareClassKeyFigureMixin>;
@@ -58,7 +59,7 @@ export class SwivelRotationJointGrippingPotentialKeyFigureLayer extends SwivelKe
 
     if (result.rotation_joint_angle_image_url && featureInfos) {
       featureInfos.images = [{ 
-        title: this.vueComponent.$t("swivel-rotation-joint-angle").toString(), 
+        title: i18n.t("swivel-rotation-joint-angle").toString(), 
         url: result.rotation_joint_angle_image_url
       }];
     }

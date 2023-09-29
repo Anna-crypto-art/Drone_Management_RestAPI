@@ -119,10 +119,12 @@ export default class AppTableComponentFilter extends BaseAuthComponent implement
           .map(code => ({ value: code, text: code }));
       }
     }));
+
+    this.analysisSelectionService = new AnalysisSelectionService(this);
   }
 
   async mounted() {
-    await AnalysisSelectionService.register(this);
+    await this.analysisSelectionService?.register();
   }
 
   async unmounted() {

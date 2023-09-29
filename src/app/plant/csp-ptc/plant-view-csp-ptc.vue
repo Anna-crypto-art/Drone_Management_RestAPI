@@ -67,11 +67,13 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent implements IAn
   async created(): Promise<void> {
     await super.created();
 
+    this.analysisSelectionService = new AnalysisSelectionService(this);
+
     this.analyses = await volateqApi.getAnalysesForView(this.plant.id);
   }
 
   async mounted() {
-    await AnalysisSelectionService.register(this);
+    await this.analysisSelectionService?.register();
   }
 
   async unmounted() {

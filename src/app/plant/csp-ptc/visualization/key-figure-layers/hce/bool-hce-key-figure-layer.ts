@@ -3,6 +3,7 @@ import { FeatureProperties, Legend, LegendEntry, PropsFeature } from "@/app/plan
 import { FeatureLike } from "ol/Feature";
 import { Stroke, Style } from "ol/style";
 import { HceKeyFigureLayer } from "./abstract/hce-key-figure-layer";
+import { i18n } from "@/main";
 
 export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
   public enableCompare = true;
@@ -53,12 +54,12 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
       compareEntries = [
         {
           color: LayerColor.red,
-          name: this.vueComponent.$t("of-which-are-new").toString() + this.getLegendEntryCount(newFeaturesCount),
+          name: i18n.t("of-which-are-new").toString() + this.getLegendEntryCount(newFeaturesCount),
           indent: true,
         },
         {
           color: LayerColor.strongGreen,
-          name: this.vueComponent.$t("fixed").toString() + this.getLegendEntryCount(fixedFeaturesCount),
+          name: i18n.t("fixed").toString() + this.getLegendEntryCount(fixedFeaturesCount),
         },
       ]
     }
@@ -77,7 +78,7 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
     if (this.query?.undefined && !this.compareAnalysisResult) {
       legend.entries.push({
         color: LayerColor.grey,
-        name: this.vueComponent.$t("not-measured").toString() + this.getLegendEntryCount(notMeasuredFeaturesCount),
+        name: i18n.t("not-measured").toString() + this.getLegendEntryCount(notMeasuredFeaturesCount),
       });
     }
 

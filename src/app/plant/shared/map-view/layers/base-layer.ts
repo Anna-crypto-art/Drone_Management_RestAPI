@@ -3,7 +3,7 @@ import { Extent } from "ol/extent";
 import { Map } from "ol";
 import { Style, Stroke, Text, Fill } from "ol/style";
 import { asArray, asString } from "ol/color";
-import { FeatureInfos, FeatureInfosMeta, IAppMapView, Legend, PropsFeature } from "../types";
+import { FeatureInfos, FeatureInfosMeta, Legend, PropsFeature } from "../types";
 import GeoJSONFeatures from "ol/format/GeoJSON";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { transformExtent } from "ol/proj";
@@ -12,6 +12,9 @@ import { isOnMobileDevice } from "@/app/shared/services/helper/mobile-helper";
 import { IAppGeoJsonLayerCheckbox, IGeoLayer, VectorGeoLayer, GeoJSON } from "@/app/shared/components/app-map/types";
 import { GEO_JSON_OPTIONS } from "@/app/shared/components/app-map/constants";
 import { i18n } from "@/main";
+import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import { plantViewEventService } from "@/app/plant/plant-view-event-service";
+import { PlantViewEvent } from "@/app/plant/types";
 
 /**
  * Represents a geojson layer
@@ -28,7 +31,7 @@ export abstract class BaseLayer implements IGeoLayer {
   public description: string | undefined = undefined;
   public reloadLayerOnNextSelection = false;
   public loadedLayer: VectorGeoLayer | undefined;
-  public appLayerCheckbox: IAppGeoJsonLayerCheckbox | undefined;
+  public appLayerCheckbox: IAppGeoJsonLayerCheckbox & BaseAuthComponent | undefined;
 
   protected showPcsZoomLevel = 15;
   
@@ -48,11 +51,15 @@ export abstract class BaseLayer implements IGeoLayer {
    */
   private initiallyLoadedBeforeSelected = false;
 
-  constructor(public readonly vueComponent: BaseAuthComponent & IAppMapView) {}
+  constructor(public readonly plant: PlantSchema) {}
 
   public abstract getPcs(feature: FeatureLike): string | undefined;
   public abstract load(extent?: Extent): Promise<GeoJSON<PropsFeature> | undefined>;
   public abstract get id(): string;
+
+  public getDisplayName(): string {
+    return i18n.t(this.name).toString();
+  }
 
   public style(feature: FeatureLike): Style | Style[] {
     const addStyles = this.getAddStyles(feature);
@@ -146,11 +153,10 @@ export abstract class BaseLayer implements IGeoLayer {
         return geoJson;
       }
 
-      // continue here: make show info and show error ... global callable, use i18n for translations
-      this.vueComponent.showInfo(
-        this.vueComponent.$t(
+      this.appLayerCheckbox?.showInfo(
+        i18n.t(
           "zoom-in-to-see-features", 
-          { features: this.vueComponent.$t(this.name).toString() },
+          { features: i18n.t(this.name).toString() },
         ).toString(),
       );
 
@@ -158,6 +164,10 @@ export abstract class BaseLayer implements IGeoLayer {
     }
 
     return this.load();
+  }
+
+  public async setLoading(loading: boolean, loadingStatus?: string) {
+    await plantViewEventService.emit(this.plant.id, PlantViewEvent.TOGGLE_LOADING, loading, loadingStatus);
   }
 
   protected async addLoadedFeatures(geoJson: GeoJSON<PropsFeature>) {
@@ -172,7 +182,7 @@ export abstract class BaseLayer implements IGeoLayer {
 
   protected async loadExtent(): Promise<GeoJSON<PropsFeature> | undefined> {
     try {
-      this.vueComponent.setLoading(true);
+      await this.setLoading(true);
 
       const map = this.getMap()!;
       const view = map.getView();
@@ -210,9 +220,9 @@ export abstract class BaseLayer implements IGeoLayer {
 
       return undefined;
     } catch (e) {
-      this.vueComponent.showError(e);
+      this.appLayerCheckbox?.showError(e);
     } finally {
-      this.vueComponent.setLoading(false);
+      await this.setLoading(false);
     }
   }
 
@@ -290,10 +300,6 @@ export abstract class BaseLayer implements IGeoLayer {
 
   protected getMap(): Map | undefined {
     return this.appLayerCheckbox?.map;
-  }
-
-  protected getName(): string {
-    return this.name;
   }
 
   protected getDescription(): string | undefined {

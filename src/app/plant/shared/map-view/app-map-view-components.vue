@@ -1,9 +1,11 @@
 <template>
   <div class="app-map-view-components">
     <app-map-pop-button icon="app-indicator">
-      <h4 class="mar-bottom">{{ $t("components") }}</h4>
-      
-      
+      <h5 class="mar-bottom"><b-icon icon="app-indicator" /><span class="pad-left">{{ $t("components") }}</span></h5>
+      <app-geo-json-layer-checkbox v-for="componentLayer in componentLayers" :key="componentLayer.id"
+        :geoLayer="componentLayer"
+        :map="map"
+      />
     </app-map-pop-button>
   </div>
 </template>
@@ -16,18 +18,31 @@ import { Map, View } from "ol";
 import { Component, Prop } from "vue-property-decorator";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { ComponentLayer } from "../visualization/layers/component-layer";
+import AppGeoJsonLayerCheckbox from "@/app/shared/components/app-map/app-geo-json-layer-checkbox.vue";
 
 
 @Component({
   name: "app-map-view-components",
   components: {
     AppMapPopButton,
+    AppGeoJsonLayerCheckbox,
   },
 })
 export default class AppMapViewComponents extends BaseComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) map!: Map;
   @Prop({ required: true }) componentLayerTypes!: typeof ComponentLayer[];
+
+  componentLayers: ComponentLayer[] = [];
+
+  created() {
+    this.setupComponentLayers();
+  }
+
+  private setupComponentLayers() {
+    this.componentLayers = this.componentLayerTypes
+      .map(componentType => new (componentType as any)(this.plant));
+  }
 
 }
 </script>

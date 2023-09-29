@@ -62,10 +62,12 @@ export default class AppPlantViewPv extends BaseAuthComponent implements IAnalys
     await super.created();
 
     this.analyses = await volateqApi.getAnalysesForView(this.plant.id);
+
+    this.analysisSelectionService = new AnalysisSelectionService(this);
   }
 
   async mounted() {
-    await AnalysisSelectionService.register(this);
+    await this.analysisSelectionService?.register();
   }
 
   async unmounted() {

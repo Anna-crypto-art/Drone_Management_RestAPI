@@ -199,12 +199,15 @@ export default class AppMapControls extends BaseComponent {
   right: 0;
   bottom: 0;
   padding-right: 0.5em;
-  padding-bottom: 2em; // leave space for openlayers (c)
+  padding-bottom: 2em; // leave space for openstreetmap (c)
 
-  button {
+  button.btn.btn-secondary {
     height: 35px;
     width: 35px;
     padding: 0;
+    color: $dark;
+    border-color: $white !important;
+    box-shadow: 3px 3px 5px $dark-40pc;
   }
 
   button:hover {
