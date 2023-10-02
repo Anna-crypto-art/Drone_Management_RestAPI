@@ -6,7 +6,7 @@
       </div>
     </div>
 
-    <b-button 
+    <!-- <b-button 
       :variant="variantAnalysis"
       size="sm"
       tool="analysis"
@@ -23,17 +23,15 @@
       @click="onToggle('observations')"
     >
       <b-icon-clipboard-data />
-    </b-button>
+    </b-button> -->
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import { Prop, Component, Watch } from "vue-property-decorator";
+import { Prop, Component } from "vue-property-decorator";
 import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
 import AppIconObservations from "@/app/shared/components/app-icon/app-icon-observations.vue";
-import AppAnalysisSelectionSidebar from "@/app/plant/shared/selection-sidebar/analysis-selection/analysis-selection.vue";
-import AppObservationSelectionSidebar from "@/app/plant/shared/selection-sidebar/observation-selection/observation-selection.vue";
 
 @Component({
   name: "app-sidebar",
@@ -43,36 +41,33 @@ import AppObservationSelectionSidebar from "@/app/plant/shared/selection-sidebar
   }
 })
 export default class AppSidebar extends Vue {
-  @Prop({ default: true }) open!: boolean;
+  @Prop({ default: false }) open!: boolean;
 
-  variantAnalysis = this.setButtonVariant(this.$store.direct.state.sidebar.analysis)
-  variantObservations = this.setButtonVariant(this.$store.direct.state.sidebar.observations)
+  // variantAnalysis = this.setButtonVariant(this.$store.direct.state.sidebar.analysis)
+  // variantObservations = this.setButtonVariant(this.$store.direct.state.sidebar.observations)
 
-  // setButton = this.setVariantObservations()
+  // // setButton = this.setVariantObservations()
 
-  setButtonVariant(sidebar: boolean) {
-    if (sidebar) {
-      return "primary";
-    } else {
-      return "secondary";
-    }
-  }
+  // setButtonVariant(sidebar: boolean) {
+  //   if (sidebar) {
+  //     return "primary";
+  //   } else {
+  //     return "secondary";
+  //   }
+  // }
 
-  onToggle(tool: string) {
-    switch (tool) {
-      case "analysis":
-        this.$emit("toggled_analysis");
-        console.log("analysis sidebar state is: "+this.$store.direct.state.sidebar.analysis)
-        this.variantAnalysis = this.setButtonVariant(this.$store.direct.state.sidebar.analysis)
-        break;
-      case "observations":
-        console.log(this.$store.direct.state.sidebar.observations)
-        this.$emit("toggled_observations");
-        console.log("observations sidebar state is: "+this.$store.direct.state.sidebar.observations)
-        this.variantObservations = this.setButtonVariant(this.$store.direct.state.sidebar.observations)
-        console.log(this.$store.direct.state.sidebar.observations)
-    }
-  }
+  // onToggle(tool: string) {
+  //   switch (tool) {
+  //     case "analysis":
+  //       this.$emit("toggled", "analysis");
+  //       console.log("analysis sidebar state is: "+this.$store.direct.state.sidebar.analysis)
+  //       break;
+  //     case "observations":
+  //       this.$emit("toggled", "observations");
+  //       this.variantObservations = this.setButtonVariant(this.$store.direct.state.sidebar.observations)
+  //       break;
+  //   }
+  // }
 }
 </script>
 
@@ -85,7 +80,8 @@ export default class AppSidebar extends Vue {
   box-sizing: border-box;
   margin-left: 50px;
   width: 0;
-  height: 100%;
+  height: calc(100% - 41.4px);
+  top: 41.4px;
   transition: width 0.3s ease-in-out;
   background-color: $white;
   z-index: 10;
@@ -124,68 +120,60 @@ export default class AppSidebar extends Vue {
       left: 0;
     }
   }
-
-  .toggle-button {
-    &.analysis {
-      top: 3.5em;
-    }
-    &.observations {
-      top: 6em;
-    }
-  }
 }
 
-.toggle-button {
-  position: absolute;
-  // color: $blue;
-  border: 1px solid $border-color-grey;
-  white-space: nowrap;
+// .toggle-button {
+  // position: absolute;
+  // // color: $blue;
+  // border: 1px solid $border-color-grey;
+  // white-space: nowrap;
 
+  // // &:active:hover {
+  // //   color: $hover-blue !important;
+  // // }
 
-  // &:active:hover {
-  //   color: $hover-blue !important;
+  // &.analysis {
+  //   margin-left: -50px;   
+  //   top: 0; 
+  // }
+  // &.observations {
+  //   margin-left: -50px;
+  //   top: 35px;
   // }
 
-  &.analysis {
-    margin-left: -50px;    
-  }
-  &.observations {
-    margin-left: -50px;
-  }
+  // &.opens-left {
+  //   right: calc(100% - 1px);
+  //   border-right-color: $white;
 
-  &.opens-left {
-    right: calc(100% - 1px);
-    border-right-color: $white;
+  //   .plant-view-csp-ptc:not(.mobile) & {
+  //     &:hover,
+  //     &.show-label {
+  //       .toggle-button-text {
+  //         padding-right: 0.5em;
+  //       }
+  //     }
+  //   }
+  // }
 
-    .plant-view-csp-ptc:not(.mobile) & {
-      &:hover,
-      &.show-label {
-        .toggle-button-text {
-          padding-right: 0.5em;
-        }
-      }
-    }
-  }
+//   &-text {
+//     transition: all 0.3s ease-in-out;
+//     max-width: 0;
+//     display: inline-block;
+//     overflow: hidden;
+//     vertical-align: text-bottom;
+//     line-height: 1.3em;
+//   }
 
-  &-text {
-    transition: all 0.3s ease-in-out;
-    max-width: 0;
-    display: inline-block;
-    overflow: hidden;
-    vertical-align: text-bottom;
-    line-height: 1.3em;
-  }
+//   .plant-view-csp-ptc:not(.mobile) &.show-label {
+//     .toggle-button-text {
+//       max-width: 150px;
+//     }
+//   }
 
-  .plant-view-csp-ptc:not(.mobile) &.show-label {
-    .toggle-button-text {
-      max-width: 150px;
-    }
-  }
+//   // &:hover {
+//   //   // background-color: $background-grey;
 
-  &:hover {
-    // background-color: $background-grey;
-
-    @extend .show-label;
-  }
-}
+//   //   @extend .show-label;
+//   // }
+// }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div class="app-observation-selection-sidebar" :class="{ absolute: absolute }">
-    <app-sidebar :open="sidebarOpen" @toggled_observations="onSidebarToggled">
+    <app-sidebar :open="sidebarOpen">
       <div class="app-observation-selection-sidebar-leftside">
         <h2 class="app-observation-selection-sidebar-leftside-title" translate="no">
           {{ plant.name }}
@@ -15,7 +15,7 @@
                 <app-datepicker v-model="toDate" required /> 
               </b-form-group>
               <app-button type="submit" cls="width-100pc">{{ $t('apply') }}</app-button> -->
-              <b-form-select :options="timeRangeOtions" @change="onTimeRangeChanged" />
+              <!-- <b-form-select :options="timeRangeOtions" @change="onTimeRangeChanged" /> -->
             </b-form>
           </div>
           <app-table-container>
@@ -149,7 +149,7 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
 
     this.ccpService = CcpService.get(this.plant.id);
 
-    console.log(this.timeRangeOptions.values)
+    // console.log(this.timeRangeOptions.values)
     // switch (this.timeRangeOptions) {
     //   case "past7Days":
     //     dFrom.setDate(dFrom.getDate() - 7);
@@ -172,9 +172,11 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
   //   test = this.timeRangeOptions.values
   // }
 
-  onSidebarToggled(): void {
-    console.log("toggle observations...")
-    this.$store.direct.commit.sidebar.toggle({ name: "observations" });
+  onSidebarToggled(sidebarType: string): void {
+    if (sidebarType === "observations") {
+      console.log("toggle observations...")
+      this.$store.direct.commit.sidebar.toggle({ name: "observations" });
+    }
   }
 
   @CatchError("loading")

@@ -1,10 +1,10 @@
 <template>
   <div class="app-analysis-selection-sidebar" :class="{ absolute: absolute }">
-    <app-sidebar :open="sidebarOpen" @toggled_analysis="onSidebarToggled">
+    <app-sidebar :open="sidebarOpen" @toggled="onSidebarToggled">
       <div class="app-analysis-selection-sidebar-leftside">
-        <h2 class="app-analysis-selection-sidebar-leftside-title" translate="no">
+        <h3 class="app-analysis-selection-sidebar-leftside-title" translate="no">
           {{ plant.name }}
-        </h2>
+        </h3>
           <div class="app-analysis-selection-sidebar-settings" v-if="analyses.length > 1">
             <b-checkbox switch v-model="compareMode" @change="onCompareModeChanged">
               {{ $t("compare-mode") }}
@@ -96,11 +96,12 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
   @State(state => state.sidebar["analysis"]) sidebarOpen!: boolean;
   @Ref() analysesTable!: IAppSelectTable;
 
-  onSidebarToggled(): void {
-    console.log("toggle analysis...")
-    this.$store.direct.commit.sidebar.toggle({ name: "analysis" });
+  onSidebarToggled(sidebarType: string): void {
+    if (sidebarType === "analysis") {
+      console.log("toggle analysis...")
+      this.$store.direct.commit.sidebar.toggle({ name: "analysis" });
+    }
   }
-
   analysesTableColumns: AppTableColumns = [
     { key: "name", label: this.$t("analysis").toString() },
   ];

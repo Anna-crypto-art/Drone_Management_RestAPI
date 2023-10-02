@@ -9,6 +9,7 @@ export type ISidebarModule = { [k in SidebarNames]: boolean };
 export interface ISidebarEvent {
   name: SidebarNames;
   state: boolean;
+  defaultOpen: boolean;
 }
 
 const SidebarModule = defineModule({
@@ -19,7 +20,10 @@ const SidebarModule = defineModule({
     },
     set(state, { name, state: sidebarState }: { name: SidebarNames; state: boolean }) {
       if (store.state.mobile.mobile) {
+        console.log(sidebars.indexOf(name))
         const otherName = sidebars[Math.abs(sidebars.indexOf(name) - 1)];
+        console.log({otherName})
+        console.log(sidebars.indexOf(name))
         state[otherName] = false;
         emit(otherName, false);
       }

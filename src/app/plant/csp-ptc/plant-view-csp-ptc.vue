@@ -3,6 +3,7 @@
     <!-- <app-selection-sidebar :plant="plant" :analyses="analyses" /> -->
     <app-analysis-selection-sidebar :plant="plant" :analyses="analyses" />
     <app-observation-selection-sidebar :plant="plant" />
+    <app-sidebar-button-menu :plant="plant" :analyses="analyses" />
     <app-plant-view-tabs :plant="plant" :analyses="analyses">
       <template #visual>
         <app-visual-csp-ptc :analyses="analyses" :plant="plant" />
@@ -42,9 +43,10 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import { IAnalysisSelectionComponent } from "../shared/selection-sidebar/analysis-selection/types";
 import { AnalysisSelectionService } from "../shared/selection-sidebar/analysis-selection/analysis-selection-service";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-import AppAnalysisSelectionSidebar from "@/app/plant/shared/selection-sidebar/analysis-selection/analysis-selection.vue";
+import AppAnalysisSelectionSidebar from "@/app/plant/shared/selection-sidebar/analysis-selection/analysis-selection-sidebar.vue";
 import AppObservationSelectionSidebar from "@/app/plant/shared/selection-sidebar/observation-selection/observation-selection-sidebar.vue";
 import { State } from "vuex-class";
+import AppSidebarButtonMenu from "@/app/shared/components/app-sidebar-button-menu/app-sidebar-button-menu.vue";
 
 
 @Component({
@@ -58,6 +60,7 @@ import { State } from "vuex-class";
     AppPlantDiagramViewCspPtc,
     AppCustomComponentProperties,
     AppObservationSelectionSidebar,
+    AppSidebarButtonMenu,
   },
 })
 export default class AppPlantViewCspPtc extends BaseAuthComponent implements IAnalysisSelectionComponent {
@@ -73,7 +76,7 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent implements IAn
   @CatchError()
   async created(): Promise<void> {
     await super.created();
-
+    // this.$store.direct.commit.sidebar.toggle({ name: "observations" });
     this.analyses = await volateqApi.getAnalysesForView(this.plant.id);
   }
 
