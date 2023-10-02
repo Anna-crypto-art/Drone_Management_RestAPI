@@ -4,6 +4,7 @@ import { Style } from "ol/style";
 import { HceKeyFigureLayer } from "./abstract/hce-key-figure-layer";
 import { OffsetClassKeyFigureMixin } from "@/app/plant/shared/visualization/key-figure-mixins/offset-class-key-figure-mixin";
 import { ICompareClassLimitsKeyFigureMixin } from "@/app/plant/shared/visualization/key-figure-mixins/types";
+import { i18n } from "@/main";
 
 abstract class HcePositionKeyFigureLayer extends HceKeyFigureLayer implements ICompareClassLimitsKeyFigureMixin {
   private offsetClassKeyFigureMixin!: OffsetClassKeyFigureMixin;
@@ -49,6 +50,14 @@ abstract class HcePositionKeyFigureLayer extends HceKeyFigureLayer implements IC
 
   public getDiffLegendName(): string {
     return this.offsetClassKeyFigureMixin.getDiffLegendName();
+  }
+
+  public getDisplayName(): string {
+    return this.getLimitsDisplayName(
+      this.getHcePositionOffsetClass(),
+      this.getClassLimits(),
+      "[mm]"
+    );
   }
 }
 

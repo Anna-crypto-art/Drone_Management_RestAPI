@@ -1,7 +1,7 @@
 <template>
   <div class="app-map-view-components">
     <app-map-pop-button icon="app-indicator">
-      <h5 class="mar-bottom"><b-icon icon="app-indicator" /><span class="pad-left">{{ $t("components") }}</span></h5>
+      <p class="mar-bottom-half grayed"><b-icon icon="app-indicator" /><span class="pad-left-half">{{ $t("components") }}</span></p>
       <app-geo-json-layer-checkbox v-for="componentLayer in componentLayers" :key="componentLayer.id"
         :geoLayer="componentLayer"
         :map="map"

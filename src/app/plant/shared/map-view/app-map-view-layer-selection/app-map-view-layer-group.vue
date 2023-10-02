@@ -1,10 +1,12 @@
 <template>
-  <div @click="onCollapse" class="app-map-view-layer-group">
-    <div class="app-map-view-layer-group-title">
-      <slot name="title" />
-      <small v-if="open" class="font-xs pad-left-half">
-        <app-icon :icon="collapsed ? 'chevron-up' : 'chevron-down'" :class="{ 'blue': open }" />
-      </small>
+  <div class="app-map-view-layer-group">
+    <div class="app-map-view-layer-group-title" @click="onCollapse">
+      <h5>
+        <slot name="title"><span class="app-map-view-layer-group-title-text">{{ title }}</span></slot>
+        <small class="font-xs pad-left-half">
+          <app-icon :icon="open ? 'chevron-up' : 'chevron-down'" class="blue" />
+        </small>
+      </h5>
     </div>
     <b-collapse v-model="open">
       <slot />
@@ -26,6 +28,7 @@ import AppIcon from "@/app/shared/components/app-icon/app-icon.vue";
 })
 export default class AppMapViewLayerGroup extends BaseComponent {  
   @Prop({ default: false }) value!: boolean;
+  @Prop({ default: "" }) title!: string;
 
   open!: boolean;
 
@@ -50,6 +53,10 @@ export default class AppMapViewLayerGroup extends BaseComponent {
 .app-map-view-layer-group {
   &-title {
     cursor: pointer;
+
+    &-text {
+      color: $blue;
+    }
   }
 }
 </style>

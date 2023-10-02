@@ -1,8 +1,8 @@
 <template>
   <div class="app-map-view-settings">
     <app-map-pop-button icon="gear-fill">
-      <h5 class="mar-bottom"><b-icon icon="gear-fill" /><span class="pad-left">{{ $t("map-settings") }}</span></h5>
-      <app-box class="no-mar-top mar-bottom">
+      <p class="mar-bottom-half grayed"><b-icon icon="gear-fill" /><span class="pad-left-half">{{ $t("map-settings") }}</span></p>
+      <app-box class="no-mar-top mar-bottom-half">
         <b-form-checkbox v-model="satelliteView" switch @change="onSatelliteViewChanged">
           {{ $t("satellite-view") }}
         </b-form-checkbox>

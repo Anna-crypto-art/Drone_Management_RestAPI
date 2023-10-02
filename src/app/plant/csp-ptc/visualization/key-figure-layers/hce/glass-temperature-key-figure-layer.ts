@@ -65,7 +65,7 @@ export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer imple
     };
   }
 
-  protected getLegendName(): string {
+  public getDisplayName(): string {
     if (
       this.options.displayName === "glass-tube-temperature-class-3" &&
       this.analysisResult.csp_ptc!.glass_tube_temperature_class_count === 3
@@ -74,7 +74,7 @@ export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer imple
       return i18n.t("glass-tube-temperature-class-4").toString();
     }
 
-    return super.getLegendName();
+    return super.getDisplayName();
   }
 
   public getDiffLegendName(): string {

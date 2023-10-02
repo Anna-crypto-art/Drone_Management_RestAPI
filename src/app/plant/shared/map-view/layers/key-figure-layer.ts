@@ -52,7 +52,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
 
     this.visible = false;
 
-    this.name = this.options.templateName || this.options.displayName || this.options.keyName || "";
+    this.name = this.options.displayName || this.options.keyName || "";
 
     this.description = this.options.description && i18n.t(this.options.description).toString();
     this.zIndex = this.options.zIndex || 9; // 9 - to make sure PIs overlay components, always
@@ -63,7 +63,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
   }
 
   public getDisplayName(): string {
-    return this.options.templateName || i18n.t(this.name).toString();
+    return i18n.t(this.name).toString();
   }
 
   protected created(): void {/* override me */}
@@ -502,5 +502,28 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     }
 
     return ComparedFeatureType.NO_CHANGE;
+  }
+
+  public getLimitsDisplayName(classLimit: number | undefined, offsetClassLimits: number[] | undefined, unit: string): string {
+    if (offsetClassLimits) {
+      if (classLimit === 1) {
+        return i18n.t("less-than-limit", { limit0: offsetClassLimits[0], unit }).toString();
+      }
+      if (classLimit === 2) {
+        return i18n.t("in-between-limits", {
+          limit1: offsetClassLimits[1],
+          limit0: offsetClassLimits[0],
+          unit,
+        }).toString();
+      }
+      if (classLimit === 3) {
+        return i18n.t("exceeds-limit", {
+          limit1: offsetClassLimits[1],
+          unit,
+        }).toString();
+      }
+    }
+
+    return "";
   }
 }

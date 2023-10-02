@@ -50,4 +50,12 @@ export abstract class OrientationKeyFigureLayer extends ScaKeyFigureLayer implem
   public getDiffLegendName(): string {
     return this.offsetClassKeyFigureMixin.getDiffLegendName();
   }
+
+  public getDisplayName(): string {
+    return this.getLimitsDisplayName(
+      this.getQueryClass(),
+      this.getClassLimits(),
+      "°"
+    );
+  }
 }

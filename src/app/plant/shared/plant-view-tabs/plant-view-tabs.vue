@@ -72,9 +72,7 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
   }
 
   @CatchError()
-  async created(): Promise<void> {
-    await super.created();
-
+  created() {
     this.setBrowserTitle(this.plant.name);
 
     this.routeQueryHelper.queryChanged(async () => {

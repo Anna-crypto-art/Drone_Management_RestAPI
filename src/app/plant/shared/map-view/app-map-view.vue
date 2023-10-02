@@ -6,12 +6,12 @@
       <app-map-view-settings :plant="plant" :map="map" />
       <app-map-view-components :componentLayerTypes="componentLayerTypes" :map="map" :plant="plant" />
     </app-map-pop-buttons>
-    <!--app-map-view-key-figure-layer-selection 
+    <app-map-view-key-figure-layer-selection 
       :analyses="analyses"
       :keyFigureLayers="keyFigureLayers"
       :map="map"
       :plant="plant"
-    /-->
+    />
   </div>
 </template>
 

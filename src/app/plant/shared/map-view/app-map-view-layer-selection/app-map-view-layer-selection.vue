@@ -1,6 +1,6 @@
 <template>
   <div class="app-map-view-layer-selection" v-show="visible">
-    <h4><slot name="title" /></h4>
+    <p class="grayed mar-bottom-half"><slot name="title" /></p>
     <slot />
   </div>
 </template>
@@ -30,6 +30,6 @@ export default class AppMapViewLayerSelection extends BaseComponent {
   left: 400px;
   top: 0;
   background-color: $white;
-  padding: 0.5em;
+  padding: 1em;
 }
 </style>

@@ -79,9 +79,7 @@ export default class AppAnalysisUploader extends BaseAuthComponent {
 
   private appContentEventId = "newAnalysis";
 
-  async created() {
-    await super.created();
-
+  created() {
     this.uploaderService = new AnalysisUploaderService(this.plantId || undefined, this.analysis?.id);
 
     this.dataComplete = this.analysis ? this.analysis.data_complete : false;

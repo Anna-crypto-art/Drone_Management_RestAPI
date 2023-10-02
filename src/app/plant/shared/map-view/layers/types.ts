@@ -69,10 +69,6 @@ export enum LayerColor {
 
 interface CommonKeyFigureLayerOptions {
   /**
-   * Define this name as a reference within template of visual(-csp-ptc/-pv) -> app-geovisualization
-   */
-  templateName?: string;
-  /**
    * will be translated (i18n)
    * If the displayed name differs from keyName define displayName. If undefined, keyName will be used
    */

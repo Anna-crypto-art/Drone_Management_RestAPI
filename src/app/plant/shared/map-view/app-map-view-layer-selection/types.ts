@@ -14,6 +14,7 @@ export interface GroupKeyFigureLayer {
 
 export interface ComponentGroupKeyFigureLayer {
   componentId: ApiComponent;
+  name: string;
   childLayers: (GroupKeyFigureLayer | KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>)[];
   visible: boolean;
   collapsed: boolean;

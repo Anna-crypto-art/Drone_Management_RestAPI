@@ -59,11 +59,9 @@ export default class AppPlantViewPv extends BaseAuthComponent implements IAnalys
 
   @CatchError()
   async created(): Promise<void> {
-    await super.created();
+    this.analysisSelectionService = new AnalysisSelectionService(this);
 
     this.analyses = await volateqApi.getAnalysesForView(this.plant.id);
-
-    this.analysisSelectionService = new AnalysisSelectionService(this);
   }
 
   async mounted() {

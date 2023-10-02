@@ -215,9 +215,8 @@ export default class AppVisualization
   observationSelectionService!: ObservationSelectionService;
 
   async created() {
-    await super.created();
-
     this.observationSelectionService = new ObservationSelectionService(this);
+    this.analysisSelectionService = new AnalysisSelectionService(this);
     
     window.addEventListener("app-visualization:go-to-me", async () => {
       if (!this.geolocation) {
@@ -253,8 +252,6 @@ export default class AppVisualization
     }
 
     this.routeQueryHelper.queryChanged(async () => { await this.loadLayersFromUrlQuery(); });
-
-    this.analysisSelectionService = new AnalysisSelectionService(this);
   }
 
   async mounted() {

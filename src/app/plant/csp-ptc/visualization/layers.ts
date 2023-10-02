@@ -75,7 +75,6 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
       },
       {
         layerOptions: {
-          templateName: "glassTubeTemperatureClass3",
           displayName: "glass-tube-temperature-class-3",
           zIndex: 13,
         },
@@ -90,7 +89,7 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
         query: { glass_tube_temperature_class: 1 },
       },
       {
-        layerOptions: { templateName: "glassTubeTemperatureNotMeasured", displayName: "not-measured", zIndex: 11 },
+        layerOptions: { displayName: "not-measured", zIndex: 11 },
         query: { undefined: 1 },
         color: LayerColor.grey,
         invisibleAutoSelection: true,
@@ -140,15 +139,15 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
     layerOptions: { keyName: "hce-position-support-offset-class", description: "hce-position-support-offset_expl" },
     subLayers: [
       {
-        layerOptions: { templateName: "hcePositionSupportOffsetClass3", displayName: "hce-position-support-offset-class-3", zIndex: 13 },
+        layerOptions: { displayName: "hce-position-support-offset-class-3", zIndex: 13 },
         query: { key_figure_class_name: "HcePositionSupportKeyFigure", hce_position_support_offset_class: 3 },
       },
       {
-        layerOptions: { templateName: "hcePositionSupportOffsetClass2", displayName: "hce-position-support-offset-class-2", zIndex: 12 },
+        layerOptions: { displayName: "hce-position-support-offset-class-2", zIndex: 12 },
         query: { key_figure_class_name: "HcePositionSupportKeyFigure", hce_position_support_offset_class: 2 },
       },
       {
-        layerOptions: { templateName: "hcePositionSupportOffsetClass1", displayName: "hce-position-support-offset-class-1", zIndex: 11 },
+        layerOptions: { displayName: "hce-position-support-offset-class-1", zIndex: 11 },
         query: { key_figure_class_name: "HcePositionSupportKeyFigure", hce_position_support_offset_class: 1 },
       },
       {
@@ -165,15 +164,15 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
     layerOptions: { keyName: "hce-position-center-offset-class", description: "hce-position-center-offset_expl" },
     subLayers: [
       {
-        layerOptions: { templateName: "hcePositionCenterOffsetClass3", displayName: "hce-position-center-offset-class-3", zIndex: 13 },
+        layerOptions: { displayName: "hce-position-center-offset-class-3", zIndex: 13 },
         query: { key_figure_class_name: "HcePositionCenterKeyFigure", hce_position_center_offset_class: 3 },
       },
       {
-        layerOptions: { templateName: "hcePositionCenterOffsetClass2", displayName: "hce-position-center-offset-class-2", zIndex: 12 },
+        layerOptions: { displayName: "hce-position-center-offset-class-2", zIndex: 12 },
         query: { key_figure_class_name: "HcePositionCenterKeyFigure", hce_position_center_offset_class: 2 },
       },
       {
-        layerOptions: { templateName: "hcePositionCenterOffsetClass1", displayName: "hce-position-center-offset-class-1", zIndex: 11 },
+        layerOptions: { displayName: "hce-position-center-offset-class-1", zIndex: 11 },
         query: { key_figure_class_name: "HcePositionCenterKeyFigure", hce_position_center_offset_class: 1 },
       },
       {
@@ -190,15 +189,15 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
     layerOptions: { keyName: "sce-alignment-offset", description: "sce-alignment-offset_expl" },
     subLayers: [
       {
-        layerOptions: { templateName: "sceOrientOffsetClass3", displayName: "sce-orient-offset-class-3", zIndex: 13 },
+        layerOptions: { displayName: "sce-orient-offset-class-3", zIndex: 13 },
         query: { orientation_offset_class: 3 },
       },
       {
-        layerOptions: { templateName: "sceOrientOffsetClass2", displayName: "sce-orient-offset-class-2", zIndex: 12 },
+        layerOptions: { displayName: "sce-orient-offset-class-2", zIndex: 12 },
         query: { orientation_offset_class: 2 },
       },
       {
-        layerOptions: { templateName: "sceOrientOffsetClass1", displayName: "sce-orient-offset-class-1", zIndex: 10 },
+        layerOptions: { displayName: "sce-orient-offset-class-1", zIndex: 10 },
         query: { orientation_offset_class: 1 },
       },
       {
@@ -240,15 +239,15 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
     layerOptions: { keyName: "tracking-offset", description: "tracking-offset_expl" },
     subLayers: [
       {
-        layerOptions: { templateName: "scaOrientOffsetClass3", displayName: "sca-orient-offset-class-3", zIndex: 13 },
+        layerOptions: { displayName: "sca-orient-offset-class-3", zIndex: 13 },
         query: { key_figure_class_name: "ScaTrackingKeyFigure", orientation_offset_class: 3 },
       },
       {
-        layerOptions: { templateName: "scaOrientOffsetClass2", displayName: "sca-orient-offset-class-2", zIndex: 12 },
+        layerOptions: { displayName: "sca-orient-offset-class-2", zIndex: 12 },
         query: { key_figure_class_name: "ScaTrackingKeyFigure", orientation_offset_class: 2 },
       },
       {
-        layerOptions: { templateName: "scaOrientOffsetClass1", displayName: "sca-orient-offset-class-1", zIndex: 10 },
+        layerOptions: { displayName: "sca-orient-offset-class-1", zIndex: 10 },
         query: { key_figure_class_name: "ScaTrackingKeyFigure", orientation_offset_class: 1 },
       },
       {
@@ -265,15 +264,15 @@ export const KEY_FIGURE_LAYERS: KeyFigureTypeMap<GeoVisualCspPtcQuery>[] = [
     layerOptions: { keyName: "average-tracking-offset", description: "average-tracking-offset_expl" },
     subLayers: [
       {
-        layerOptions: { templateName: "scaAvgOrientOffsetClass3", displayName: "sca-avg-orient-offset-class-3", zIndex: 13 },
+        layerOptions: { displayName: "sca-avg-orient-offset-class-3", zIndex: 13 },
         query: { key_figure_class_name: "ScaAverageTrackingKeyFigure", orientation_offset_class: 3 },
       },
       {
-        layerOptions: { templateName: "scaAvgOrientOffsetClass2", displayName: "sca-avg-orient-offset-class-2", zIndex: 12 },
+        layerOptions: { displayName: "sca-avg-orient-offset-class-2", zIndex: 12 },
         query: { key_figure_class_name: "ScaAverageTrackingKeyFigure", orientation_offset_class: 2 },
       },
       {
-        layerOptions: { templateName: "scaAvgOrientOffsetClass1", displayName: "sca-avg-orient-offset-class-1", zIndex: 10 },
+        layerOptions: { displayName: "sca-avg-orient-offset-class-1", zIndex: 10 },
         query: { key_figure_class_name: "ScaAverageTrackingKeyFigure", orientation_offset_class: 1 },
       },
       {

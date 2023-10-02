@@ -145,9 +145,7 @@ export default class AppDiagramHistory extends BaseAuthComponent {
     }
   }
 
-  async created(): Promise<void> {
-    await super.created();
-
+  created() {
     this.isMobile = isOnMobileDevice();
     this.charWidth = this.isMobile ? 300 : 800;
     this.charHeight = this.isMobile ? 150 : 400;

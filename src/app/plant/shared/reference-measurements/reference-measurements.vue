@@ -73,10 +73,6 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
 
   entryModel: RefMeasureEntryModel | null = null;
   filterFields: FilterField[] = [];
-
-  async created() {
-    super.created()
-  }
   
   get title(): string {
     return this.entry === null ? this.$t("add-reference-measurement").toString() : 

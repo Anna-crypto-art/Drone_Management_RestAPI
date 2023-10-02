@@ -1,20 +1,30 @@
 <template>
   <app-map-view-layer-selection :visible="visible">
     <template #title>
-      <b-icon icon="speedometer2" /><span class="pad-left">{{ $t("performance-indicators") }}</span>
+      <b-icon icon="speedometer2" /><span class="pad-left-half">{{ $t("performance-indicators") }}</span>
     </template>
     <div class="app-map-view-key-figure-layer-selection" v-show="visible">
       <app-map-view-layer-group v-for="compGroupLayer in compGroupLayers" :key="compGroupLayer.componentId"
         v-model="compGroupLayer.collapsed" 
         v-show="compGroupLayer.visible"
+        :title="compGroupLayer.name"
       >
-        <div v-for="(childLayer, index) in compGroupLayer.childLayers" :key="childLayer.id || index">
+        <div v-for="(childLayer, index) in compGroupLayer.childLayers"
+          :key="childLayer.id || index"
+          class="pad-left-half"
+          :class="{'pad-bottom': (index + 1) === compGroupLayer.childLayers.length }"
+          v-show="childLayer.visible"
+        >
           <div v-if="childLayer.childLayers" class="app-map-view-key-figure-layer-selection-group">
-            <h5>{{ $t(childLayer.layerOptions.displayName || childLayer.layerOptions.keyName) }}</h5>
-            <app-geo-json-layer-checkbox v-for="subChildLayer in childLayer.childLayers" :key="subChildLayer.id"
-              :geoLayer="subChildLayer"
-              :map="map"
-            />
+            <div class="pad-bottom-half font-md" :class="{ 'pad-top': index !== 0 }">
+              {{ $t(childLayer.layerOptions.displayName || childLayer.layerOptions.keyName) }}
+            </div>
+            <div class="pad-left-half">
+              <app-geo-json-layer-checkbox v-for="subChildLayer in childLayer.childLayers" :key="subChildLayer.id"
+                :geoLayer="subChildLayer"
+                :map="map"
+              />
+            </div>
           </div>
           <div v-if="!childLayer.childLayers" class="app-map-view-key-figure-layer-selection-single">
             <app-geo-json-layer-checkbox :geoLayer="childLayer" :map="map" />
@@ -83,6 +93,7 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
     this.visible = true;
 
     const selectedAnalysisId = this.analysisSelectionService?.firstAnalysis?.id;
+
     if (selectedAnalysisId && !(selectedAnalysisId in this.selectedAnalyses)) {
       this.selectedAnalyses[selectedAnalysisId] = this.analysisSelectionService!.firstAnalysis!;
       this.addLayersForAnalysis();
@@ -269,6 +280,7 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
         childLayers: [],
         visible: false,
         collapsed: false,
+        name: this.$t(apiComponentNames[apiComponent]).toString(),
       });
     }
   }
@@ -279,5 +291,11 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
 <style lang="scss">
 @import "@/scss/_colors.scss";
 @import "@/scss/_variables.scss";
+
+// .app-map-view-key-figure-layer-selection {
+//   &-group {
+//     padding-left: 09em;
+//   }
+// }
 
 </style>

@@ -62,6 +62,7 @@ export default class AppMapPopButton extends BaseComponent {
     padding: 1em;
     border: 1px solid $border-color-grey;
     box-shadow: 3px 3px 5px $dark-40pc;
+    background: $white;
 
     @supports (backdrop-filter: blur(5px)) {
       backdrop-filter: blur(5px);

@@ -143,9 +143,7 @@ export default class AppDiagramAreas extends BaseAuthComponent {
     }
   }
 
-  async created(): Promise<void> {
-    await super.created();
-
+  created() {
     this.selectedComponentId = this.componentSelection[0];
     this.selectedOrderByColumn = (this.numberBox.nums || [this.numberBox])[0].columnName
 

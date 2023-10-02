@@ -63,4 +63,12 @@ export class SceAlignmentKeyFigureLayer extends SceKeyFigureLayer implements ICo
   protected getColor(): string {
     return this.getClassColor(this.getQueryClass());
   }
+
+  public getDisplayName(): string {
+    return this.getLimitsDisplayName(
+      this.getQueryClass(),
+      this.getClassLimits(),
+      "°"
+    );
+  }
 }

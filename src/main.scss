@@ -86,6 +86,9 @@ form [type="submit"] {
 .font-xl {
   font-size: 2em;
 }
+.font-md {
+  font-size: 1.1em;
+}
 .font-xs {
   font-size: 0.7em;
 }
@@ -105,8 +108,14 @@ form [type="submit"] {
 .pad-right {
   padding-right: 1em;
 }
+.pad-bottom {
+  padding-bottom: 1em;
+}
 .pad-bottom-2x {
   padding-bottom: 2em;
+}
+.pad-bottom-half {
+  padding-bottom: 0.5em;
 }
 
 .mar-top {

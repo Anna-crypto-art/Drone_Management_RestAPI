@@ -64,9 +64,7 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent implements IAn
   analysisSelectionService: AnalysisSelectionService | null = null;
 
   @CatchError()
-  async created(): Promise<void> {
-    await super.created();
-
+  async created() {
     this.analysisSelectionService = new AnalysisSelectionService(this);
 
     this.analyses = await volateqApi.getAnalysesForView(this.plant.id);
@@ -77,7 +75,7 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent implements IAn
   }
 
   async unmounted() {
-    this.analysisSelectionService?.unregister
+    this.analysisSelectionService?.unregister();
   }
 
   get firstAnalysisResult(): AnalysisResultDetailedSchema | null {
