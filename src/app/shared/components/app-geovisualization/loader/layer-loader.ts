@@ -11,10 +11,16 @@ export default abstract class LayerLoader<T extends Layer<Source, LayerRenderer<
   constructor(
     public readonly layerType: BaseLayerType,
     protected readonly map: Map,
-    protected loadingCallback?: (e: LoadingEvent) => void
+    protected loadingCallback?: (e: LoadingEvent) => void,
+    loadedLayer: T | undefined = undefined
   ) {
+    this.loadedLayer = loadedLayer;
+    
     if (layerType.selected) {
-      this.load();
+      // this.load();
+      // if (!this.loadedLayer?.getVisible()) {
+      //   !this.loadedLayer?.setVisible(true);
+      // }
     }
   }
 
@@ -41,6 +47,10 @@ export default abstract class LayerLoader<T extends Layer<Source, LayerRenderer<
     return !!this.loadedLayer;
   }
 
+  public getLoadedLayer(): T | undefined {
+    return this.loadedLayer;
+  }
+
   public async setVisible(visible: boolean) {
     if (visible) {
       (await this.load())?.setVisible(true);
@@ -50,6 +60,8 @@ export default abstract class LayerLoader<T extends Layer<Source, LayerRenderer<
 
         if (this.layerType.reloadLayer) {
           this.map.removeLayer(this.loadedLayer!);
+
+          this.loadedLayer = undefined;
         }
       }
     }

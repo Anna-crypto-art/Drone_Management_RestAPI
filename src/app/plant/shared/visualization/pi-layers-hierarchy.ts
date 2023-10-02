@@ -2,7 +2,7 @@ import { GroupLayer, LayerType } from "@/app/shared/components/app-geovisualizat
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { KeyFigureLayer } from "./layers/key-figure-layer";
-import { KeyFigureColorScheme, KeyFigureInfo, OrthoImage } from "./layers/types";
+import { KeyFigureColorScheme, KeyFigureInfo } from "./layers/types";
 import { GroupKPILayer, InvisibleAutoSelectionLayer, KeyFigureTypeMap } from "./types";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
@@ -10,6 +10,7 @@ import { apiComponentNames } from "@/app/shared/services/volateq-api/api-compone
 import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/sequential-event-emitter";
 import { LayerEvent } from "@/app/shared/components/app-geovisualization/types/events";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
+import { OrthoImage } from "./mixins/types";
 
 /**
  * Component -> PIGroup -> PICheckbox
@@ -79,7 +80,8 @@ export class PILayersHierarchy {
         if (groupKpiLayer.keyFigureLayers.length > 0) {
           const invsibleAutoSelectionLayer = groupKpiLayer.keyFigureLayers.find(l => l.invisibleAutoSelection);
           if (invsibleAutoSelectionLayer) {
-            const selectedLayers = groupKpiLayer.keyFigureLayers.filter(l => l.getSelected() && !l.invisibleAutoSelection);
+            const selectedLayers = groupKpiLayer.keyFigureLayers
+              .filter(l => l.getSelected() && !l.invisibleAutoSelection && l.analysisResult.id === invsibleAutoSelectionLayer.analysisResult.id);
             autoSelLayers.push({
               layer: invsibleAutoSelectionLayer,
               hasSelectedSiblings: selectedLayers.length > 0,
@@ -114,7 +116,7 @@ export class PILayersHierarchy {
     }
   }
 
-  public async reselectAllLayers(reload = false) {
+  public async reselectAllLayers(reload = false, slientSelection = false) {
     const allChildLayers = this.getAllChildLayers();
 
     const selectedLayerNames = allChildLayers.filter(childLayer => childLayer.getSelected())
@@ -136,7 +138,8 @@ export class PILayersHierarchy {
       allChildLayers.filter(l => selectedLayerNames.includes(l.noTransName) &&
         l.analysisResult.id === this.selectedAnalysisResultId &&
         !l.invisibleAutoSelection // layers with "invisibleAutoSelection" gets reselected automatically.
-      )
+      ),
+      slientSelection // Selects the layers silent, if true. Because "IOpenLayersComponent.updateLayers" will selected them later
     )
   }
 
@@ -147,7 +150,7 @@ export class PILayersHierarchy {
     }
   }
 
-  public async toggleShowUndefined(showUndefined: boolean, reselectLayer = true): Promise<void> {
+  public async toggleShowUndefined(showUndefined: boolean, reselectLayer = true, silentSelection = false): Promise<void> {
     this.showUndefined = showUndefined
 
     for (const childLayer of this.getAllChildLayers()) {
@@ -162,14 +165,14 @@ export class PILayersHierarchy {
 
         if (reselectLayer && childLayer.getSelected()) {
           await childLayer.setSelected(false);
-          await childLayer.setSelected(true);
+          silentSelection ? childLayer.selectSilent() : await childLayer.setSelected(true);
         }
       }
 
       if (reselectLayer) {
         for (const invAutoSelLayer of this.getInvisibleAutoSelectionLayers()) {
           if (showUndefined && invAutoSelLayer.hasSelectedSiblings && !invAutoSelLayer.layer.getSelected()) {
-            await invAutoSelLayer.layer.setSelected(true);
+            silentSelection ? invAutoSelLayer.layer.selectSilent() : await invAutoSelLayer.layer.setSelected(true);
           }
           if (!showUndefined && invAutoSelLayer.layer.getSelected()) {
             await invAutoSelLayer.layer.setSelected(false);
@@ -190,15 +193,17 @@ export class PILayersHierarchy {
     }
   }
 
-  public async selectKeyFigureLayer(keyFigureId: ApiKeyFigure) {
-    const keyFigureLayer = this.getAllChildLayers().find(keyFigureLayer => 
-      keyFigureLayer.isVisible && keyFigureLayer.keyFigureId === keyFigureId);
-    if (keyFigureLayer && !keyFigureLayer.getSelected()) {
-      await keyFigureLayer.setSelected(true);
-    }
-  }
-
-  public async selectLayers(layersOrLayerNames: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>[] | string[]) {
+  /**
+   * 
+   * @param layersOrLayerNames 
+   * @param silent silent selection sets "selected" to true but does not raise the LayerEvent.SET_SELECTED event.
+   * This is necessary for the case geo-visualiazion.updateLayers gets called afterwards. 
+   * Because geo-visualiazion.updateLayers recreates all layers and does select the layer then if true. 
+   */
+  public async selectLayers(
+    layersOrLayerNames: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>[] | string[],
+    silent = false, 
+  ) {
     if (layersOrLayerNames.length === 0) {
       return;
     }
@@ -212,7 +217,7 @@ export class PILayersHierarchy {
     let parentGroupLayer: GroupLayer | undefined = undefined
     for (const layer of layers) {
       if (this.multiSelection) {
-        layer.setSelected(true);
+        silent ? layer.selectSilent() : layer.setSelected(true);
       } else {
         // Only allow to select multiple layers when they are in the same group 
         // with singleSelection === false
@@ -223,7 +228,7 @@ export class PILayersHierarchy {
           currentParentGroupLayer && currentParentGroupLayer.id === parentGroupLayer!.id &&
           !parentGroupLayer!.singleSelection)
         ) {
-          layer.setSelected(true);
+          silent ? layer.selectSilent() : layer.setSelected(true);
 
           parentGroupLayer = currentParentGroupLayer;
         }
@@ -326,7 +331,7 @@ export class PILayersHierarchy {
   public getAvailableOrthoImages(): OrthoImage[] {
     for (const layer of this.getAllChildLayers()) {
       if (layer.isVisible) {
-        const orthoImages = layer.orthoImages?.filter(orthoImage => layer.isOrthoImageAvailable(orthoImage));
+        const orthoImages = layer.orthoImages?.filter(orthoImage => layer.isOrthoImageAvailable(orthoImage, layer.keyFigure.component_id));
         if (orthoImages && orthoImages.length > 0) {
           return orthoImages;
         }

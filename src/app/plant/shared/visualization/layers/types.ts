@@ -1,7 +1,6 @@
 import { GeoJSON } from "@/app/shared/components/app-geovisualization/types/layers";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
-import { Feature } from "ol";
-import { Geometry } from "ol/geom";
+
 import { PropsFeature } from "../types";
 
 export interface KeyFigureInfo {
@@ -116,12 +115,8 @@ export enum LayerColor {
   volateqBlue = "#066be2",
 }
 
-export interface OrthoImage {
-   name: string,
-   keyFigureId: ApiKeyFigure,
-   features?: Feature<Geometry>[]
-}
-
 export type KeyFigureGeoJSON = GeoJSON<PropsFeature> & {
   custom: { components_total_count: number; mirrors_per_sce?: number };
 }
+
+export type ObservationGeoJSON = GeoJSON<PropsFeature>;

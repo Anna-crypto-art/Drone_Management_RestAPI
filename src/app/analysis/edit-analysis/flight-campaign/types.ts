@@ -28,4 +28,6 @@ export interface NewFlightCampaign {
   batteryHotswapping: boolean;
   orderProductPackageIds: string[];
   forceAddFlightTypeIds: string[];
+  autoExportLitchi: boolean;
+  optimizeTorsionFlights: boolean;
 }

@@ -52,7 +52,7 @@ export abstract class LayerBase {
 
   constructor(public readonly vueComponent: BaseAuthComponent & IPlantVisualization) {}
 
-  protected abstract getPcs(feature: FeatureLike): string | undefined;
+  public abstract getPcs(feature: FeatureLike): string | undefined;
   public abstract load(extent?: Extent): Promise<GeoJSON<PropsFeature> | undefined>;
   public abstract get id(): string | undefined;
 
@@ -357,6 +357,13 @@ export abstract class LayerBase {
 
   public async setSelected(selected: boolean) {
     await this.events.emit(LayerEvent.SET_SELECTED, selected);
+  }
+
+  public async selectSilent() {
+    this.selected = true;
+    if (this.geoLayerObject) {
+      this.geoLayerObject.selected = true;
+    }
   }
 
   public getSelected(): boolean {

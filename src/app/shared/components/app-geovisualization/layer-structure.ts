@@ -17,6 +17,9 @@ export class LayerStructure extends SequentialEventEmitter {
 
   public collapsed = false;
 
+  protected eventId: string;
+  public displayEventId: string;
+
   private selectWorkingQueue: number[] = [];
 
   constructor(
@@ -28,25 +31,27 @@ export class LayerStructure extends SequentialEventEmitter {
 
     this.childLayers = [];
 
+    this.eventId = this.id as string + "___" + Math.random();
+    this.displayEventId = this.eventId + "___layerDispayComponent"; 
+    
     this.initializeEvents();
   }
 
   private initializeEvents(): void {
-    this.layerLoader?.layerType.events?.on(LayerEvent.SET_SELECTED, async (selected: boolean) => {
+    this.getLayerType()?.events?.on(LayerEvent.SET_SELECTED, async (selected: boolean) => {
       await this.emit(LayerEvent.SET_SELECTED, selected);
-    });
+    }, this.eventId);
+
     this.on(LayerEvent.SET_SELECTED, async (selected: boolean) => {
       await this.selectLayer(selected);
-    });
+    }, this.eventId);
 
     this.getLayerType()?.events?.on(LayerEvent.COLLAPSE, async (collapse: boolean) => {
       await this.emit(LayerEvent.COLLAPSE, collapse);
-    });
+    }, this.eventId);
   }
 
   private async selectLayer(selected: boolean) {
-    await this.queueUp();
-
     if (selected) {
       await this.unselectParentLayers();
     }
@@ -60,31 +65,6 @@ export class LayerStructure extends SequentialEventEmitter {
         await childLayer.setSelected(selected);
       }
     }
-
-    await this.next();    
-  }
-
-  private async queueUp() {
-    const ticketNumber = this.selectWorkingQueue.length > 0 ? this.selectWorkingQueue[0] + 1 : 0;
-    this.selectWorkingQueue.unshift(ticketNumber);
-
-    return await new Promise<void>((resolve) => {
-      if (this.selectWorkingQueue.length === 1) {
-        resolve();
-      }
-
-      this.on("enqueueNextSelect", (nextTicket) => {
-        if (nextTicket === undefined || nextTicket === ticketNumber) {
-          resolve();
-        }
-      });
-    })
-  }
-
-  private async next() {
-    this.selectWorkingQueue.pop();
-    await this.emit("enqueueNextSelect", 
-      this.selectWorkingQueue.length > 0 ? this.selectWorkingQueue[this.selectWorkingQueue.length - 1] : undefined);
   }
 
   private getLayerType(): BaseLayerType | undefined {
@@ -211,5 +191,13 @@ export class LayerStructure extends SequentialEventEmitter {
     }
     
     return false;
+  }
+
+  public unregisterEvents() {
+    this.getLayerType()?.events?.removeListenerById(LayerEvent.SET_SELECTED, this.eventId);
+    this.getLayerType()?.events?.removeListenerById(LayerEvent.COLLAPSE, this.eventId);
+    this.removeListenerById(LayerEvent.SET_SELECTED, this.eventId);
+    this.removeListenerById(LayerEvent.SET_SELECTED, this.displayEventId);
+    this.removeListenerById(LayerEvent.COLLAPSE, this.displayEventId);
   }
 }

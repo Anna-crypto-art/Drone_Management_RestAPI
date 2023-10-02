@@ -51,8 +51,9 @@ import { LayerStructure } from "../layer-structure";
 import { CustomLoader } from "../loader/custom-loader";
 import { GeoJSONLoader } from "../loader/geojson-loader";
 import { OSMLoader } from "../loader/osm-loader";
+import { IAppLayerSWitcher } from "../types/components";
 import { LoadingEvent } from "../types/events";
-import { LayerType } from "../types/layers";
+import { LayerType, VectorGeoLayer } from "../types/layers";
 import AppGeovisualLayerDisplay from "./layer-display.vue";
 import AppGeovisualToggleLayer from "./toggle-layer.vue";
 
@@ -63,24 +64,21 @@ import AppGeovisualToggleLayer from "./toggle-layer.vue";
     AppGeovisualToggleLayer,
   },
 })
-export default class AppGeovisualLayerSwitcher extends Vue {
+export default class AppGeovisualLayerSwitcher extends Vue implements IAppLayerSWitcher {
   @Prop() map!: Map;
   @Prop() layers!: LayerType[];
   @Prop({ default: "" }) title = "";
 
-  readonly rootLayer = new LayerStructure();
+  rootLayer = new LayerStructure();
+  loadedLayers: Record<string, VectorGeoLayer> = {};
 
   public zoomDelta = 1;
   public animationDuration = 200;
 
   @State(state => state.sidebar["layer-switcher"]) sidebarOpen!: boolean;
 
-  @Watch('layers', { deep: true }) onLayersChanged() {
-    this.layerSetup(this.rootLayer, this.layers);
-  }
-
   mounted(): void {
-    this.layerSetup(this.rootLayer, this.layers);
+    this.updateLayers();
 
     this.map.getControls().forEach(control => {
       if (control instanceof Zoom) {
@@ -89,7 +87,45 @@ export default class AppGeovisualLayerSwitcher extends Vue {
     });
   }
 
-  private layerSetup(parentLayer: LayerStructure, layers: LayerType[]) {
+  updateLayers() {
+    this.keepAndUnregisterLoadedLayers();
+
+    this.rootLayer = new LayerStructure();
+
+    this.setupLayers(this.rootLayer, this.layers);
+  }
+
+  private keepAndUnregisterLoadedLayers() {
+    this.loadedLayers = {};
+
+    const getLoadedLayersAndUnregsiter = (parentLayer: LayerStructure) => {
+      for (const childLayer of parentLayer.getChildLayers()) {
+        if (childLayer.layerLoader instanceof GeoJSONLoader && childLayer.layerLoader.loaded) {
+          this.loadedLayers[childLayer.id as string] = childLayer.layerLoader.getLoadedLayer()! as VectorGeoLayer;
+        }
+
+        if (childLayer.hasChildrens) {
+          getLoadedLayersAndUnregsiter(childLayer);
+        } else {
+          childLayer.unregisterEvents();
+        }
+      }
+
+      parentLayer.unregisterEvents();
+    }
+
+    getLoadedLayersAndUnregsiter(this.rootLayer);
+  }
+
+  private getLoadedLayer(layerId: string): VectorGeoLayer | undefined {
+    if (layerId in this.loadedLayers) {
+      return this.loadedLayers[layerId];
+    }
+
+    return undefined;
+  }
+
+  private setupLayers(parentLayer: LayerStructure, layers: LayerType[]) {
     const setLoadigState = (e: LoadingEvent) => {
       this.$emit("loading", e);
     };
@@ -109,7 +145,7 @@ export default class AppGeovisualLayerSwitcher extends Vue {
         case "geojson": {
           if (!parentLayer.hasChildLayer(layerId)) {
             parentLayer.addChildLayer(
-              new LayerStructure(new GeoJSONLoader(layer, this.map, setLoadigState), layer.name)
+              new LayerStructure(new GeoJSONLoader(layer, this.map, setLoadigState, this.getLoadedLayer(layerId)), layer.name)
             );
           }
 
@@ -123,7 +159,7 @@ export default class AppGeovisualLayerSwitcher extends Vue {
             parentLayer.addChildLayer(groupLayerStruct);
           }
 
-          this.layerSetup(groupLayerStruct, layer.childLayers);
+          this.setupLayers(groupLayerStruct, layer.childLayers);
 
           break;
         }
@@ -131,14 +167,13 @@ export default class AppGeovisualLayerSwitcher extends Vue {
         case "custom": {
           if (!parentLayer.hasChildLayer(layerId)) {
             parentLayer.addChildLayer(
-              new LayerStructure(new CustomLoader(layer, this.map, setLoadigState), layer.name)
+              new LayerStructure(new CustomLoader(layer, this.map, setLoadigState), layer.name),
             );
           }
 
           break;
         }
       }
-      
     }
   }
 

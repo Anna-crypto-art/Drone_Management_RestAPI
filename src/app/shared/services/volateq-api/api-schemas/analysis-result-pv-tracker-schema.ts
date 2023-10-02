@@ -9,6 +9,7 @@ export interface AnalysisResultPvTrackerSchema extends AnalysisResultSchemaBase 
     ortho_image_ir: string;
     soiling_level: number;
     tracking_deviation: number;
+    raw_image_ir_url?: string;
 }
 
 export interface AnalysisResultPvTrackerComparedSchema extends AnalysisResultPvTrackerSchema {

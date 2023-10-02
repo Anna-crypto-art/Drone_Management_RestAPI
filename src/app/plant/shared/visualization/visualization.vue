@@ -99,7 +99,6 @@ import { State } from "vuex-class";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { RefMeasureLayers } from "./ref-measure-layers";
 import { layerEvents } from "./layer-events";
-import { OrthoImage } from "./layers/types";
 import { OrhtoImageMixin } from "./mixins/ortho-image-mixin";
 import AppReferenceMeasurements from "../reference-measurements/reference-measurements.vue";
 import { RouteQueryHelper } from "../helper/route-query-helper";
@@ -129,9 +128,9 @@ import { AnalysisSelectionService } from "../selection-sidebar/analysis-selectio
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import AppObservationModal from "../observations/observation-modal.vue";
 import { IAppObservationModal } from "../observations/types";
-import { CcpService } from "../plant-settings/ccp-service";
 import { IObservationSelectionComponent } from "@/app/plant/shared/selection-sidebar/observation-selection/types";
 import { ObservationSelectionService } from "../selection-sidebar/observation-selection/observation-selection-service";
+import { OrthoImage } from "./mixins/types";
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
 const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
@@ -305,7 +304,7 @@ export default class AppVisualization
       this.piLayersHierarchy!.toggleMultiSelection(this.enableMultiSelection);
 
       this.doEnableShowCouldNotBeMeasured();
-      await this.piLayersHierarchy!.toggleShowUndefined(this.showCouldNotBeMeasured, false);
+      await this.piLayersHierarchy!.toggleShowUndefined(this.showCouldNotBeMeasured, false, true);
     }
 
     if (analysisSelectionChanged || multiAnalysesSelectedBefore || 
@@ -315,8 +314,8 @@ export default class AppVisualization
 
     if (analysisSelectionChanged || multiAnalysesSelectedBefore) {
       if (!this.firstLoad) {
-        await this.piLayersHierarchy!.reselectAllLayers(multiAnalysesSelectedBefore);
-        await this.refMeasureLayers!.reselectAllLayers();
+        await this.piLayersHierarchy!.reselectAllLayers(multiAnalysesSelectedBefore, true);
+        await this.refMeasureLayers!.reselectAllLayers(true);
       }
     }
 
@@ -331,6 +330,8 @@ export default class AppVisualization
     }
 
     this.piHeadGroup!.visible = !!this.firstAnalysisResult;
+
+    this.openLayers.updateLayers();
 
     this.hideToast();
   }
@@ -357,11 +358,11 @@ export default class AppVisualization
       this.piLayersHierarchy!.toggleMultiSelection(false);
       this.piLayersHierarchy!.toggleMultiSelectionDeep(false);
 
-      await this.piLayersHierarchy!.toggleShowUndefined(false, false);
+      await this.piLayersHierarchy!.toggleShowUndefined(false, false, true);
 
-      await this.piLayersHierarchy!.reselectAllLayers(singleAnalysesSelectedBefore);
+      await this.piLayersHierarchy!.reselectAllLayers(singleAnalysesSelectedBefore, true);
 
-      await this.refMeasureLayers!.reselectAllLayers();
+      await this.refMeasureLayers!.reselectAllLayers(true);
     }
     
     this.piLayersHierarchy!.updateVisibility();
@@ -377,20 +378,21 @@ export default class AppVisualization
 
     this.piHeadGroup!.visible = !!this.firstAnalysisResult;
 
+    this.openLayers.updateLayers();
+
     this.hideToast();
   }
 
   @CatchError("loading")
   async onObservationSelected() {
-    console.log("onObservationSelected")
-    console.log(this.observationSelectionService);
-
     await this.observLayersHierarchy?.refreshLayers(
       this.observationSelectionService.dateRange,
       this.observationSelectionService.selectedCcps
     )
 
     this.observHeadGroup!.visible = this.observationSelectionService.hasSelectedObservations;
+
+    this.openLayers.updateLayers();
   }
 
   private async onFirstLoad(): Promise<boolean> {
@@ -417,7 +419,7 @@ export default class AppVisualization
 
       const layerNames = typeof plantRouteQuery.layer === "string" ? [plantRouteQuery.layer] : plantRouteQuery.layer;
 
-      await this.piLayersHierarchy!.selectLayers(layerNames);
+      await this.piLayersHierarchy!.selectLayers(layerNames, true);
 
       return true;
     }
@@ -571,7 +573,7 @@ export default class AppVisualization
         if (!existingLegend) {
           this.legends.push(legend);
         } else {
-          throw Error("Legend id " + legend.id + " already added");
+          console.error("Legend id " + legend.id + " already added")
         }
       } else {
         if (existingLegend) {

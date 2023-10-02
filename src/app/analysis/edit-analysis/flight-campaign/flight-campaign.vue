@@ -15,19 +15,36 @@
         :hoverActions="true"
       >
         <template #cell(name)="row">
-          <span :class="row.item.is_being_generated ? 'red' : ''">
+          <span :class="isGenerating(row.item) ? 'orange' : failedToGenerate(row.item) ? 'red' :''" :style="failedToGenerate(row.item) ? 'text-decoration: line-through;' : ''">
             {{ row.item.name }}
           </span>
         </template>
+        <template #cell(start_date)="row">
+          <span :class="isGenerating(row.item) ? 'orange' : failedToGenerate(row.item) ? 'red' :''" :style="failedToGenerate(row.item) ? 'text-decoration: line-through;' : ''">
+            {{ row.item.start_date }}
+          </span>
+        </template>
         <template #cell(drone)="row">
-          {{ appendDroneNameAndSerialNumber(row.item.drone) }}
+          <span :class="isGenerating(row.item) ? 'orange' : failedToGenerate(row.item) ? 'red' :''" :style="failedToGenerate(row.item) ? 'text-decoration: line-through;' : ''">
+            {{ appendDroneNameAndSerialNumber(row.item.drone) }}
+          </span>
         </template>
         <template #cell(plant_status)="row">
-          {{ row.item.plant_status.map(plant_status => plant_status.name).join(", ") }}
+          <span v-if="isGenerating(row.item)">
+            <app-explanation>{{ $t("flight-type-not-yet-available_expl") }}</app-explanation>
+          </span>
+          <span v-else :class="isGenerating(row.item) ? 'orange' : failedToGenerate(row.item) ? 'red' :''" :style="failedToGenerate(row.item) ? 'text-decoration: line-through;' : ''">
+            {{ row.item.plant_status.map(plant_status => plant_status.name).join(", ") }}
+          </span>
+        </template>
+        <template #cell(user_created)="row">
+          <span :class="isGenerating(row.item) ? 'orange' : failedToGenerate(row.item) ? 'red' :''" :style="failedToGenerate(row.item) ? 'text-decoration: line-through;' : ''">
+            {{ row.item.user_created }}
+          </span>
         </template>
         <template #hoverActions="row">
           <app-button
-            v-show="isSuperAdmin"
+            v-show="isSuperAdmin && isGenerated(row.item)"
             icon="arrow-right-circle-fill"
             @click="onExportClick(row.item)"
             variant="secondary"
@@ -35,7 +52,6 @@
             :title="$t('export-to-third-party')"
           />
           <app-button
-            v-show="isSuperAdmin"
             @click="onDeleteClick(row.item)"
             variant="outline-danger"
             size="sm"
@@ -109,7 +125,21 @@
         <b-row>
           <b-col>
             <b-form-checkbox id="new-flight-campaign-battery-hotswapping" v-model="newFlightCampaign.batteryHotswapping">
-              {{ $t("battery-hotswapping") }}
+              {{ $t("battery-hotswapping") }} <app-explanation>{{ $t("battery-hotswapping_expl") }}</app-explanation>
+            </b-form-checkbox>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col>
+            <b-form-checkbox id="new-flight-campaign-autoexport-litchi" v-model="newFlightCampaign.autoExportLitchi">
+              {{ $t("auto-export-litchi") }} <app-explanation>{{ $t("auto-export-litchi_expl") }}</app-explanation>
+            </b-form-checkbox>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col>
+            <b-form-checkbox id="new-flight-campaign-optimize-torsion-flights" v-model="newFlightCampaign.optimizeTorsionFlights">
+              {{ $t("optimize-torsion-flights") }} <app-explanation>{{ $t("optimize-torsion-flights_expl") }}</app-explanation>
             </b-form-checkbox>
           </b-col>
         </b-row>
@@ -155,7 +185,7 @@ import AppModalForm from "@/app/shared/components/app-modal/app-modal-form.vue";
 import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { AppTableColumns } from "@/app/shared/components/app-table/types";
-import { FlightCampaignItemSchema, FlightCampaignSchema } from "@/app/shared/services/volateq-api/api-schemas/flight-campaign-schema"
+import { FlightCampaignItemSchema, FlightCampaignSchema, FlightCampaignState } from "@/app/shared/services/volateq-api/api-schemas/flight-campaign-schema"
 import AppDatepicker from "@/app/shared/components/app-datepicker/app-datepicker.vue";
 import { MultiselectOption } from "@/app/shared/components/app-multiselect/types";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
@@ -165,6 +195,7 @@ import { DroneSchema } from "@/app/shared/services/volateq-api/api-schemas/drone
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import { NewFlightCampaign } from "./types";
 import { sortBy } from "@/app/shared/services/helper/sort-helper";
+import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 @Component({
   name: "app-analysis-flight-campaigns",
   components: {
@@ -176,6 +207,7 @@ import { sortBy } from "@/app/shared/services/helper/sort-helper";
     AppSuperAdminMarker,
     AppMultiselect,
     AppFlightCampaignRoutes,
+    AppExplanation
   }
 })
 export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
@@ -211,6 +243,7 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
     { key: "start_date", label: this.$t("start-date").toString() },
     { key: "drone", label: this.$t("drone").toString() },
     { key: "plant_status", label: this.$t("flight-types").toString() },
+    { key: "user_created", label: this.$t("created-by").toString() },
   ];
   selectedFlightCampaign: FlightCampaignItemSchema | null = null;
 
@@ -246,6 +279,8 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
       batteryHotswapping: true,
       orderProductPackageIds: this.analysis.order_product_packages.map(orderPP => orderPP.id),
       forceAddFlightTypeIds: [],
+      autoExportLitchi: false,
+      optimizeTorsionFlights: false,
     }
     this.selectedDroneId = this.analysis.drone?.id;
 
@@ -261,6 +296,10 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
       if (!this.newFlightCampaign) {
         return
       }
+      
+      if (!this.newFlightCampaign.name) {
+        throw { error: "INVALID_FLIGHT_CAMPAIGN_NAME", message: "Please enter a name for the flight campaign"}
+      }
 
       if (!this.selectedDroneId) {
         throw { error: "INVALID_OR_MISSING_DRONE_SELECTION", message: "Please select a drone"}
@@ -275,6 +314,8 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
         battery_hotswapping: this.newFlightCampaign.batteryHotswapping,
         order_product_package_ids: this.newFlightCampaign.orderProductPackageIds,
         force_add_flight_type_ids: this.newFlightCampaign.forceAddFlightTypeIds,
+        auto_export_litchi: this.newFlightCampaign.autoExportLitchi,
+        optimize_torsion_flights: this.newFlightCampaign.optimizeTorsionFlights,
       });
 
       this.showSuccess(this.$t("now-creating-flight-campaign", { flight_campaign: this.newFlightCampaign.name }).toString());
@@ -295,7 +336,9 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
         start_date: dateHelper.toDate(flight_campaign.start_date),
         original_start_date: dateHelper.toDate(flight_campaign.original_start_date),
         plant_status: flight_campaign.plant_status,
-        is_being_generated: flight_campaign.is_being_generated
+        flight_campaign_state: flight_campaign.flight_campaign_state,
+        user_created: flight_campaign.user_created ? 
+          (flight_campaign.user_created.first_name + " " + flight_campaign.user_created.last_name).trim() || flight_campaign.user_created.email : ""
       })),
       e => e.start_date,
       e => e.name.toLowerCase(),
@@ -304,8 +347,11 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
 
   onFlightCampaignSelected(flightCampaignItems: FlightCampaignItemSchema[]) {
     if (flightCampaignItems.length > 0) {
-      if (flightCampaignItems[0].is_being_generated) {
+      if (flightCampaignItems[0].flight_campaign_state == FlightCampaignState.GENERATING) {
         alert(this.$t('flight-campaign-being-generated'))
+        this.selectedFlightCampaign = null;
+      } else if (flightCampaignItems[0].flight_campaign_state == FlightCampaignState.FAILED_GENERATING) {
+        alert(this.$t('flight-campaign-generation-failed'))
         this.selectedFlightCampaign = null;
       } else {
         this.selectedFlightCampaign = flightCampaignItems[0];
@@ -359,6 +405,18 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
     } else {
       this.showError('Not yet implemented');
     }
+  }
+
+  private isGenerating(flightCampaign: FlightCampaignItemSchema): boolean {
+    return flightCampaign.flight_campaign_state == FlightCampaignState.GENERATING;
+  }
+
+  private failedToGenerate(flightCampaign: FlightCampaignItemSchema): boolean {
+    return flightCampaign.flight_campaign_state == FlightCampaignState.FAILED_GENERATING;
+  }
+
+  private isGenerated(flightCampaign: FlightCampaignItemSchema): boolean {
+    return flightCampaign.flight_campaign_state == FlightCampaignState.FINISHED_GENERATING;
   }
 }
 </script>

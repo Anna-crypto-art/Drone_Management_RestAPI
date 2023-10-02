@@ -7,4 +7,6 @@ export interface CreateFlightCampaignRequest {
   battery_hotswapping: boolean;
   order_product_package_ids: string[];
   force_add_flight_type_ids: string[];
+  auto_export_litchi: boolean;
+  optimize_torsion_flights: boolean;
 }

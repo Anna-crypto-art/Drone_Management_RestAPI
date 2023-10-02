@@ -3,6 +3,7 @@
     <div class="openlayers-map-content" />
 
     <app-geovisual-layer-switcher
+      ref="appLayerSwitcher"
       :layers="layers"
       :map="map"
       :title="title"
@@ -18,7 +19,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Component, Prop, Watch } from "vue-property-decorator";
+import { Component, Prop, Watch, Ref } from "vue-property-decorator";
 
 import Map from "ol/Map";
 import View from "ol/View";
@@ -28,7 +29,7 @@ import "ol/ol.css";
 
 import AppGeovisualLayerSwitcher from "./components/layer-switcher.vue";
 import { LayerType } from "./types/layers";
-import { IOpenLayersComponent } from "./types/components";
+import { IAppLayerSWitcher, IOpenLayersComponent } from "./types/components";
 import { LoadingEvent } from "./types/events";
 import { plantViewEventService } from "@/app/plant/plant-view-event-service";
 import { PlantViewEvent } from "@/app/plant/types";
@@ -47,6 +48,8 @@ export default class AppGeovisualization extends Vue implements IOpenLayersCompo
   @Prop({ default: "" }) title!: string;
   @Prop({ default: false }) loading!: boolean;
 
+  @Ref() appLayerSwitcher!: IAppLayerSWitcher;
+
   map: Map | null = null;
   
   layerLoading = false;
@@ -58,6 +61,13 @@ export default class AppGeovisualization extends Vue implements IOpenLayersCompo
 
   mounted(): void {
     this.map?.setTarget(this.$el.firstChild as HTMLElement);
+  }
+
+  /**
+   * Completely recreates LayersStructure hierarchy.
+   */
+  updateLayers() {
+    this.appLayerSwitcher.updateLayers()
   }
 
   async toggleLoading(e: LoadingEvent) {
