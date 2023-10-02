@@ -36,12 +36,16 @@ import store from "@/app/app-state";
   }
 })
 export default class AppSidebarButtonMenu extends Vue {
+  test = console.log("mobile: "+store.state.mobile.mobile);
+  test2 = console.log("state analysis sidebar:",this.$store.direct.state.sidebar.analysis);
+  test3 = console.log("state observation sidebar:",this.$store.direct.state.sidebar.observations);
+  sidebarClosed = this.$store.direct.commit.sidebar.set({ name: "observations", state: false });
+  test4 = console.log("state observation sidebar:",this.$store.direct.state.sidebar.observations);
 
   variantAnalysis = this.setButtonVariant(this.$store.direct.state.sidebar.analysis);
   variantObservations = this.setButtonVariant(this.$store.direct.state.sidebar.observations);
 
   setButtonVariant(sidebar: boolean) {
-    console.log(store.state.mobile.mobile)
     if (sidebar) {
       return "primary";
     } else {

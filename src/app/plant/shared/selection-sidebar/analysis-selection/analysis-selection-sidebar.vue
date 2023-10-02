@@ -1,9 +1,10 @@
 <template>
   <div class="app-analysis-selection-sidebar" :class="{ absolute: absolute }">
-    <app-sidebar :open="sidebarOpen" @toggled="onSidebarToggled">
+    <app-sidebar :open="sidebarOpen">
       <div class="app-analysis-selection-sidebar-leftside">
-        <h3 class="app-analysis-selection-sidebar-leftside-title" translate="no">
-          {{ plant.name }}
+        <h3 class="app-analysis-selection-sidebar-leftside-title">
+          {{ "Analyses" }}
+          <!-- {{ $t("Analyses") }} -->
         </h3>
           <div class="app-analysis-selection-sidebar-settings" v-if="analyses.length > 1">
             <b-checkbox switch v-model="compareMode" @change="onCompareModeChanged">

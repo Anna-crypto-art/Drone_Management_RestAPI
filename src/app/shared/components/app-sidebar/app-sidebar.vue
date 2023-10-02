@@ -41,7 +41,7 @@ import AppIconObservations from "@/app/shared/components/app-icon/app-icon-obser
   }
 })
 export default class AppSidebar extends Vue {
-  @Prop({ default: false }) open!: boolean;
+  @Prop({ default: true }) open!: boolean;
 
   // variantAnalysis = this.setButtonVariant(this.$store.direct.state.sidebar.analysis)
   // variantObservations = this.setButtonVariant(this.$store.direct.state.sidebar.observations)

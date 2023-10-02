@@ -1,10 +1,11 @@
 <template>
   <div class="app-observation-selection-sidebar" :class="{ absolute: absolute }">
-    <app-sidebar :open="sidebarOpen">
+    <app-sidebar :open="sidebarOpen" >
       <div class="app-observation-selection-sidebar-leftside">
-        <h2 class="app-observation-selection-sidebar-leftside-title" translate="no">
-          {{ plant.name }}
-        </h2>
+        <h3 class="app-observation-selection-sidebar-leftside-title">
+          {{ "Observations" }}
+          <!-- {{ $t("Observations") }} -->
+        </h3>
         <div class="app-observation-selection-sidebar">
           <div class="app-observation-selection-sidebar-filter">
             <b-form @submit.prevent="onSubmitFilter">
@@ -95,7 +96,11 @@ import { State } from "vuex-class";
 export default class AppObservationSelectionSidebar extends BaseAuthComponent {
   @Prop() plant!: PlantSchema;
   @Ref() observTable!: IAppSelectTable;
+  test4 = console.log("state observations sidebar:",this.$store.direct.state.sidebar.observations);
+  sidebarClosed = this.$store.direct.commit.sidebar.set({ name: "observations", state: false });
+  test5 = console.log(state => state.sidebar["observations"]);
   @State(state => state.sidebar["observations"]) sidebarOpen!: boolean;
+  
 
   observTableColumns: AppTableColumns = [
     { key: "name", label: this.$t("observations").toString() },
@@ -108,6 +113,8 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
   loading = false;
 
   absolute = true;
+
+  // test = console.log("sidebarOpen is: "+this.sidebarOpen);
 
   ccpService!: CcpService;
 
@@ -177,6 +184,10 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
       console.log("toggle observations...")
       this.$store.direct.commit.sidebar.toggle({ name: "observations" });
     }
+  }
+
+  async mounted() {
+    await this.$store.direct.commit.sidebar.set({ name: "observations", state: false });
   }
 
   @CatchError("loading")

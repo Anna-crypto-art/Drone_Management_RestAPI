@@ -1,9 +1,9 @@
 <template>
   <div class="plant-view-csp-ptc" v-if="analyses">
     <!-- <app-selection-sidebar :plant="plant" :analyses="analyses" /> -->
+    <app-sidebar-button-menu :plant="plant" :analyses="analyses" />
     <app-analysis-selection-sidebar :plant="plant" :analyses="analyses" />
     <app-observation-selection-sidebar :plant="plant" />
-    <app-sidebar-button-menu :plant="plant" :analyses="analyses" />
     <app-plant-view-tabs :plant="plant" :analyses="analyses">
       <template #visual>
         <app-visual-csp-ptc :analyses="analyses" :plant="plant" />
@@ -58,9 +58,9 @@ import AppSidebarButtonMenu from "@/app/shared/components/app-sidebar-button-men
     AppAnalysisSelectionSidebar,
     AppPlantAdminViewCspPtc,
     AppPlantDiagramViewCspPtc,
+    AppSidebarButtonMenu,
     AppCustomComponentProperties,
     AppObservationSelectionSidebar,
-    AppSidebarButtonMenu,
   },
 })
 export default class AppPlantViewCspPtc extends BaseAuthComponent implements IAnalysisSelectionComponent {
@@ -70,13 +70,9 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent implements IAn
 
   analysisSelectionService: AnalysisSelectionService | null = null;
 
-  showSidebar = false;
-
-
   @CatchError()
   async created(): Promise<void> {
     await super.created();
-    // this.$store.direct.commit.sidebar.toggle({ name: "observations" });
     this.analyses = await volateqApi.getAnalysesForView(this.plant.id);
   }
 
