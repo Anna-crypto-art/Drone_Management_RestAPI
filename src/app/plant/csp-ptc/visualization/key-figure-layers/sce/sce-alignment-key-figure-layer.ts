@@ -23,7 +23,7 @@ export class SceAlignmentKeyFigureLayer extends SceKeyFigureLayer implements ICo
     return style;
   }
 
-  protected getLegend(): Legend | undefined {
+  public getLegend(): Legend | undefined {
     return this.offsetClassKeyFigureMixin.getLegend();
   }
 

@@ -40,7 +40,7 @@ import { Component, Prop } from "vue-property-decorator";
 import { BaseComponent } from "@/app/shared/components/base-component/base-component";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Map } from "ol";
-import { KeyFigureLayerOptions, KeyFigureTypeMap } from "../layers/types";
+import { KeyFigureLayerOptions, KeyFigureTypeMap, LayerEvent } from "../layers/types";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 import { ComponentGroupKeyFigureLayer, GroupKeyFigureLayer } from "./types";
 import { IAnalysisSelectionComponent } from "../../selection-sidebar/analysis-selection/types";
@@ -53,6 +53,7 @@ import { apiComponentNames } from "@/app/shared/services/volateq-api/api-compone
 import AppMapViewLayerSelection from "./app-map-view-layer-selection.vue";
 import AppMapViewLayerGroup from "./app-map-view-layer-group.vue";
 import AppGeoJsonLayerCheckbox from "@/app/shared/components/app-map/app-geo-json-layer-checkbox.vue";
+import { LayersService } from "../layers/layers-service";
 
 @Component({
   name: "app-map-view-key-figure-layer-selection",
@@ -68,6 +69,7 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
   @Prop({ required: true }) analyses!: AnalysisForViewSchema[];
   @Prop({ required: true }) keyFigureLayers!: KeyFigureTypeMap<GeoVisualQuery>[];
   @Prop({ default: false }) multiSelection!: boolean;
+  @Prop({ default: false }) showUndefined!: boolean;
 
   visible = false;
   compGroupLayers: ComponentGroupKeyFigureLayer[] = [];
@@ -77,6 +79,14 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
 
   created() {
     this.analysisSelectionService = new AnalysisSelectionService(this);
+
+    LayersService.get(this.plant.id).on(
+      this.plant.id,
+      LayerEvent.ON_KEY_FIGURE_SELECTED,
+      async (layer: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>) => {
+        await this.selectInvAutoSelectLayer(layer);
+      }
+    );
 
     this.setupCompGroupLayers();
   }
@@ -118,6 +128,46 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
     await this.selectLayers(selectedLayerNames);
   }
 
+  private async selectInvAutoSelectLayer(layer: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>) {
+    if (this.showUndefined) {
+      const invAutoSelLayer = this.findInvAutoSelLayer(layer);
+      if (invAutoSelLayer) {
+        if (!invAutoSelLayer.hasSelectedSiblings && invAutoSelLayer.layer.selected) {
+          await invAutoSelLayer.layer.setSelected(false);
+        } else if (invAutoSelLayer.hasSelectedSiblings && !invAutoSelLayer.layer.selected) {
+          await invAutoSelLayer.layer.setSelected(true);
+        }
+      }
+    }
+  }
+
+  private findInvAutoSelLayer(
+    layer: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>
+  ): { layer: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>, hasSelectedSiblings: boolean } | undefined {
+    for (const groupLayer of this.compGroupLayers) {
+      if (groupLayer.visible) {
+        for (const childLayer of groupLayer.childLayers) {
+          if (!(childLayer instanceof KeyFigureLayer)) {
+            for (const subChildLayer of childLayer.childLayers) {
+              if (subChildLayer.id === layer.id) {
+                const autoSelLayer = childLayer.childLayers.find(l => l.invisibleAutoSelection);
+                if (autoSelLayer) {
+                  return { 
+                    layer: autoSelLayer,
+                    hasSelectedSiblings: !!childLayer.childLayers.find(l => !l.invisibleAutoSelection && l.selected),
+                  };
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return undefined;
+  } 
+  
+
   private addLayersForAnalysis() {
     const analysisResult = this.analysisSelectionService?.firstAnalysisResult;
     if (!analysisResult) {
@@ -142,6 +192,7 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
           );
 
           compGroupLayer.childLayers.push(keyFigureLayer);
+          LayersService.get(this.plant.id).addLayers(keyFigureLayer);
         } else {
           const groupKeyFigureLayer: GroupKeyFigureLayer = {
             keyFigureId: keyFigureTypeMap.keyFigureId,
@@ -171,6 +222,7 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
           }
 
           compGroupLayer.childLayers.push(groupKeyFigureLayer);
+          LayersService.get(this.plant.id).addLayers(groupKeyFigureLayer.childLayers);
         }
       }
     }

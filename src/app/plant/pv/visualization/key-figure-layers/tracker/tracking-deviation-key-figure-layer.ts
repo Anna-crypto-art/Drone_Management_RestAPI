@@ -40,7 +40,7 @@ export class TrackingDeviationKeyFigureLayer extends TrackerKeyFigureLayer {
     );
   }
 
-  protected getLegend(): Legend | undefined {
+  public getLegend(): Legend | undefined {
     return this.offsetClassKeyFigureMixin.getLegend();
   }
 

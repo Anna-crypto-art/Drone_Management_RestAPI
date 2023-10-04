@@ -14,11 +14,11 @@
 import AppMapPopButton from "@/app/shared/components/app-map/app-map-pop-button.vue";
 import { BaseComponent } from "@/app/shared/components/base-component/base-component";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { Map, View } from "ol";
+import { Map } from "ol";
 import { Component, Prop } from "vue-property-decorator";
-import { CatchError } from "@/app/shared/services/helper/catch-helper";
-import { ComponentLayer } from "../visualization/layers/component-layer";
+import { ComponentLayer } from "./layers/component-layer";
 import AppGeoJsonLayerCheckbox from "@/app/shared/components/app-map/app-geo-json-layer-checkbox.vue";
+import { LayersService } from "./layers/layers-service";
 
 
 @Component({
@@ -42,6 +42,8 @@ export default class AppMapViewComponents extends BaseComponent {
   private setupComponentLayers() {
     this.componentLayers = this.componentLayerTypes
       .map(componentType => new (componentType as any)(this.plant));
+
+    LayersService.get(this.plant.id).addLayers(this.componentLayers);
   }
 
 }

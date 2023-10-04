@@ -36,7 +36,7 @@ export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
     return LayerColor.black;
   }
 
-  protected getLegend(): Legend | undefined {
+  public getLegend(): Legend | undefined {
     if (!this.geoJSON) {
       return undefined;
     }

@@ -25,7 +25,7 @@ abstract class HcePositionKeyFigureLayer extends HceKeyFigureLayer implements IC
     return this.getHcePositionOffsetClass();
   }
 
-  protected getLegend(): Legend | undefined {
+  public getLegend(): Legend | undefined {
     return this.offsetClassKeyFigureMixin.getLegend();
   }
 

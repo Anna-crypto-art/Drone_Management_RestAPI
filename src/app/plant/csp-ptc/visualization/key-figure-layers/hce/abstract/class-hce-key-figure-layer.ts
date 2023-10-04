@@ -4,7 +4,7 @@ import { HceKeyFigureLayer } from "./hce-key-figure-layer";
 export abstract class ClassHceKeyFigureLayer extends HceKeyFigureLayer {
   protected abstract getQueryClass(): number | undefined;
   
-  protected getLegend(): Legend | undefined {
+  public getLegend(): Legend | undefined {
     if (!this.geoJSON) {
       return undefined;
     }

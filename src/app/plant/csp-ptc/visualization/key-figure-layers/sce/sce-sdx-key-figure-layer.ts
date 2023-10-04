@@ -2,7 +2,7 @@ import { Legend } from "@/app/plant/shared/visualization/types";
 import { SceKeyFigureLayer } from "./abstract/sce-key-figure-layer";
 
 export class SceSdxKeyFigureLayer extends SceKeyFigureLayer {
-  protected getLegend(): Legend | undefined {
+  public getLegend(): Legend | undefined {
     if (!this.geoJSON) {
       return undefined;
     }

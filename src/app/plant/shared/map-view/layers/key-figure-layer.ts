@@ -18,7 +18,7 @@ import { Style } from "ol/style";
 import { GeoJSON } from "@/app/shared/components/app-geovisualization/types/layers";
 import { BaseLayer } from "./base-layer";
 import { i18n } from "@/main";
-import { ComparedFeatureType, ComparedFeatures, KeyFigureColorScheme, KeyFigureGeoJSON, KeyFigureLayerOptions, LayerColor } from "./types";
+import { ComparedFeatureType, ComparedFeatures, KeyFigureColorScheme, KeyFigureGeoJSON, KeyFigureLayerOptions, LayerColor, LayerEvent } from "./types";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { FeatureActionsSummary, FeatureInfo, FeatureInfos, FeatureInfosMeta, FeatureProperties, PropsFeature } from "../types";
 
@@ -102,6 +102,14 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     await super.onSelectedChanged();
 
     // await this.vueComponent.onLayerSelected(selected, this.getLegend());
+  }
+
+  protected async emitOnSelected() {
+    if (this.invisibleAutoSelection) {
+      this.events.emit(LayerEvent.ON_INV_AUTO_SELECT_SELECTED, this);
+    } else {
+      await super.emitOnSelected();
+    }
   }
 
   protected mapResultToFeatureInfos(result: T): FeatureInfos | undefined {

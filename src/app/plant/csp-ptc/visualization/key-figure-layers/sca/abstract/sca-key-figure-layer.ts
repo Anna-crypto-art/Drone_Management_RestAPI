@@ -19,7 +19,7 @@ export abstract class ScaKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisRes
     });
   }
 
-  protected getLegend(): Legend | undefined {
+  public getLegend(): Legend | undefined {
     if (!this.geoJSON) {
       return undefined;
     }

@@ -23,7 +23,7 @@ export class SwivelGrippingPotentialKeyFigureLayer extends ClassSwivelKeyFigureL
     return this.query?.gripping_potential_class;
   }
 
-  protected getLegend(): Legend | undefined {
+  public getLegend(): Legend | undefined {
     if (!this.geoJSON) {
       return undefined;
     }

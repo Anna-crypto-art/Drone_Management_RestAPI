@@ -24,7 +24,7 @@ export class MissingMirrorKeyFigureLayer extends MirrorKeyFigureLayer {
     return super.getStyle(feature);
   }
 
-  protected getLegend(): Legend | undefined {
+  public getLegend(): Legend | undefined {
     if (!this.geoJSON) {
       return undefined;
     }

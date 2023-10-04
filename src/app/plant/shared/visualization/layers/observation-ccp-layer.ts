@@ -80,7 +80,7 @@ export class ObservationCcpLayer extends LayerBase {
     return this.dataTypeOptionInfo?.color || this.ccp.color || CcpService.defaultColor;
   }
 
-  protected getLegend(): Legend | undefined {
+  public getLegend(): Legend | undefined {
     return {
       id: this.id!,
       entries: [{ name: this.name + " (" + (this.geoJSON?.features.length || 0) + ")", color: this.color }],

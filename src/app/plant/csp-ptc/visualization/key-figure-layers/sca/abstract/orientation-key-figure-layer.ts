@@ -22,7 +22,7 @@ export abstract class OrientationKeyFigureLayer extends ScaKeyFigureLayer implem
     return style;
   }
 
-  protected getLegend(): Legend | undefined {
+  public getLegend(): Legend | undefined {
     return this.offsetClassKeyFigureMixin.getLegend();
   }
    

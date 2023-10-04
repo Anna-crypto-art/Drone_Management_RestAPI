@@ -12,6 +12,7 @@
       :map="map"
       :plant="plant"
     />
+    <app-map-view-legend :plant="plant" :analyses="analyses" />
   </div>
 </template>
 
@@ -30,6 +31,7 @@ import AppMapViewKeyFigureLayerSelection from "./app-map-view-layer-selection/ap
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { KeyFigureTypeMap } from "./layers/types";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
+import AppMapViewLegend from "./app-map-view-legend.vue";
 
 @Component({
   name: "app-map-view",
@@ -40,6 +42,7 @@ import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/g
     AppMapViewSettings,
     AppMapViewComponents,
     AppMapViewKeyFigureLayerSelection,
+    AppMapViewLegend,
   },
 })
 export default class AppMapView extends BaseAuthComponent {

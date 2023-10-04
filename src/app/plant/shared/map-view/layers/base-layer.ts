@@ -15,6 +15,8 @@ import { i18n } from "@/main";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { plantViewEventService } from "@/app/plant/plant-view-event-service";
 import { PlantViewEvent } from "@/app/plant/types";
+import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/sequential-event-emitter";
+import { LayerEvent } from "./types";
 
 /**
  * Represents a geojson layer
@@ -32,6 +34,8 @@ export abstract class BaseLayer implements IGeoLayer {
   public reloadLayerOnNextSelection = false;
   public loadedLayer: VectorGeoLayer | undefined;
   public appLayerCheckbox: IAppGeoJsonLayerCheckbox & BaseAuthComponent | undefined;
+
+  public readonly events = new SequentialEventEmitter();
 
   protected showPcsZoomLevel = 15;
   
@@ -80,7 +84,7 @@ export abstract class BaseLayer implements IGeoLayer {
     });
   }
 
-  protected getLegend(): Legend | undefined {
+  public getLegend(): Legend | undefined {
     return undefined;
   }
 
@@ -109,6 +113,12 @@ export abstract class BaseLayer implements IGeoLayer {
     }
 
     this.initiallyLoadedBeforeSelected = false;
+
+    await this.emitOnSelected();
+  }
+
+  protected async emitOnSelected() {
+    await this.events.emit(LayerEvent.ON_SELECTED, this);
   }
 
   protected onZoom(onZoomCallback: (zoomLevel: number | undefined) => void): void {

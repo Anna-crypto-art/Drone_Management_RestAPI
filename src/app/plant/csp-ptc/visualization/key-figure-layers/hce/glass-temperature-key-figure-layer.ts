@@ -44,7 +44,7 @@ export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer imple
     return super.getClassColor(classValue);
   }
 
-  protected getLegend(): Legend | undefined {
+  public getLegend(): Legend | undefined {
     if (!this.geoJSON) {
       return undefined;
     }

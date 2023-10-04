@@ -14,7 +14,7 @@ export abstract class ModuleClassKeyFigure extends ModuleKeyFigureLayer {
     return style
   }
 
-  protected getLegend(): Legend | undefined {
+  public getLegend(): Legend | undefined {
     const legend = super.getLegend();
 
     if (!legend) {

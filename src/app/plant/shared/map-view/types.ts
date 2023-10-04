@@ -29,8 +29,6 @@ export interface Legend {
   }
 }
 
-
-
 export interface FeatureImage {
   title: string;
   url: string;

@@ -26,7 +26,7 @@ export class SwivelRotationJointGrippingPotentialKeyFigureLayer extends SwivelKe
     return this.compareClassKeyFigureMixin.getDiffColor(featureProperties);
   }
 
-  protected getLegend(): Legend | undefined {
+  public getLegend(): Legend | undefined {
     if (!this.geoJSON) {
       return undefined;
     }

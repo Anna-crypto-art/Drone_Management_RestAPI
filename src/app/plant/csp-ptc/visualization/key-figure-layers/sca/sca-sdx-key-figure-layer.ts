@@ -30,7 +30,7 @@ export class ScaSdxKeyFigureLayer extends ScaKeyFigureLayer implements ICompareC
     return style;
   }
 
-  protected getLegend(): Legend | undefined {
+  public getLegend(): Legend | undefined {
     if (!this.geoJSON) {
       return undefined;
     }

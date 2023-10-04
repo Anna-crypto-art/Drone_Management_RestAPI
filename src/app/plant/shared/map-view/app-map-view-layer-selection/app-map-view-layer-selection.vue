@@ -31,5 +31,6 @@ export default class AppMapViewLayerSelection extends BaseComponent {
   top: 0;
   background-color: $white;
   padding: 1em;
+  overflow-y: auto;
 }
 </style>

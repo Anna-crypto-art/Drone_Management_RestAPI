@@ -28,7 +28,7 @@ export class MirrorKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisResultCsp
     });
   }
 
-  protected getLegend(): Legend | undefined {
+  public getLegend(): Legend | undefined {
     if (!this.geoJSON) {
       return undefined;
     }

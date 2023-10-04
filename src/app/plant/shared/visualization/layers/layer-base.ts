@@ -82,7 +82,7 @@ export abstract class LayerBase {
     return this.getStyle(feature);
   }
 
-  protected getLegend(): Legend | undefined {
+  public getLegend(): Legend | undefined {
     return undefined;
   }
 

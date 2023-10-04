@@ -8,7 +8,7 @@ export abstract class ClassSwivelKeyFigureLayer extends SwivelKeyFigureLayer {
     return this.getClassColor(this.getQueryClass());
   }
 
-  protected getLegend(): Legend | undefined {
+  public getLegend(): Legend | undefined {
     if (!this.geoJSON) {
       return undefined;
     }

@@ -25,7 +25,7 @@ export abstract class ModuleKeyFigureLayer extends PvKeyFigureLayer<AnalysisResu
     });
   }
 
-  protected getLegend(): Legend | undefined {
+  public getLegend(): Legend | undefined {
     if (!this.geoJSON) {
       return undefined;
     }

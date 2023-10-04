@@ -30,7 +30,7 @@ export class ScaFrictionKeyFigureLayer extends ScaKeyFigureLayer implements ICom
     return style;
   }
 
-  protected getLegend(): Legend | undefined {
+  public getLegend(): Legend | undefined {
     if (!this.geoJSON) {
       return undefined;
     }
