@@ -2,10 +2,10 @@
   <div class="app-analysis-selection-sidebar" :class="{ absolute: absolute }">
     <app-sidebar :open="sidebarOpen">
       <div class="app-analysis-selection-sidebar-leftside">
-        <h3 class="app-analysis-selection-sidebar-leftside-title">
+        <h4 class="app-analysis-selection-sidebar-leftside-title">
           {{ "Analyses" }}
           <!-- {{ $t("Analyses") }} -->
-        </h3>
+        </h4>
           <div class="app-analysis-selection-sidebar-settings" v-if="analyses.length > 1">
             <b-checkbox switch v-model="compareMode" @change="onCompareModeChanged">
               {{ $t("compare-mode") }}
@@ -99,7 +99,6 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
 
   onSidebarToggled(sidebarType: string): void {
     if (sidebarType === "analysis") {
-      console.log("toggle analysis...")
       this.$store.direct.commit.sidebar.toggle({ name: "analysis" });
     }
   }
@@ -136,6 +135,9 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
         hasGoodies: analysis.has_key_figures,
       });
     }
+
+    this.$store.direct.commit.sidebar.set({ name: "analysis", state: true });
+    await this.$nextTick();
 
     analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL, async () => {
       this.analysesTable.clearSelected();

@@ -1,6 +1,5 @@
 <template>
   <div class="plant-view-csp-ptc" v-if="analyses">
-    <!-- <app-selection-sidebar :plant="plant" :analyses="analyses" /> -->
     <app-sidebar-button-menu :plant="plant" :analyses="analyses" />
     <app-analysis-selection-sidebar :plant="plant" :analyses="analyses" />
     <app-observation-selection-sidebar :plant="plant" />

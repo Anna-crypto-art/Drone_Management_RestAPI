@@ -2,21 +2,20 @@
   <div class="app-observation-selection-sidebar" :class="{ absolute: absolute }">
     <app-sidebar :open="sidebarOpen" >
       <div class="app-observation-selection-sidebar-leftside">
-        <h3 class="app-observation-selection-sidebar-leftside-title">
+        <h4 class="app-observation-selection-sidebar-leftside-title">
           {{ "Observations" }}
           <!-- {{ $t("Observations") }} -->
-        </h3>
+        </h4>
         <div class="app-observation-selection-sidebar">
           <div class="app-observation-selection-sidebar-filter">
             <b-form @submit.prevent="onSubmitFilter">
-              <!-- <b-form-group :label="$t('from')" label-cols-sm="4" label-cols-lg="2">
-                <app-datepicker v-model="fromDate" required /> 
-              </b-form-group>
-              <b-form-group :label="$t('to')" label-cols-sm="4" label-cols-lg="2">
-                <app-datepicker v-model="toDate" required /> 
-              </b-form-group>
-              <app-button type="submit" cls="width-100pc">{{ $t('apply') }}</app-button> -->
-              <!-- <b-form-select :options="timeRangeOtions" @change="onTimeRangeChanged" /> -->
+              <b-form-select v-model="selected" @change="onTimeRangeChanged(selected)">
+                <b-form-select-option :value="null">select time range for Observations</b-form-select-option>
+                <b-form-select-option value="past7Days">Last 7 Days</b-form-select-option>
+                <b-form-select-option value="past30Days">Last 30 Days</b-form-select-option>
+                <b-form-select-option value="past90Days">Last 90 Days</b-form-select-option>
+                <b-form-select-option value="pastYear">Last Year</b-form-select-option>
+              </b-form-select>
             </b-form>
           </div>
           <app-table-container>
@@ -96,9 +95,6 @@ import { State } from "vuex-class";
 export default class AppObservationSelectionSidebar extends BaseAuthComponent {
   @Prop() plant!: PlantSchema;
   @Ref() observTable!: IAppSelectTable;
-  test4 = console.log("state observations sidebar:",this.$store.direct.state.sidebar.observations);
-  sidebarClosed = this.$store.direct.commit.sidebar.set({ name: "observations", state: false });
-  test5 = console.log(state => state.sidebar["observations"]);
   @State(state => state.sidebar["observations"]) sidebarOpen!: boolean;
   
 
@@ -114,33 +110,10 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
 
   absolute = true;
 
-  // test = console.log("sidebarOpen is: "+this.sidebarOpen);
-
   ccpService!: CcpService;
 
-  timeRangeOptions: { value: string | null; text: string}[] = [
-          { value: "past7Days", text: "Last 7 Days" },
-          { value: "past30Days", text: "Last 30 Days" },
-          { value: "past90Days", text: "Last 90 Days" },
-          { value: "pastYear", text: "Last Year" },
-        ];
-
-  // @CatchError("loading")
-  // async created() {
-  //   observationSelectEventService.on(this.plant.id, ObservationSelectionEvent.SIDEBAR_ABSOLUTE, async (absolute) => {
-  //     this.absolute = absolute;
-  //   });
-
-  //   this.toDate = dateHelper.toDate(dateHelper.now());
-    
-  //   const dFrom = new Date();
-  //   dFrom.setDate(dFrom.getDate() - 7);
-  //   this.fromDate = dateHelper.toDate(dFrom);
-
-  //   this.ccpService = CcpService.get(this.plant.id);
-
-  //   await this.updateSummerizedObservations();
-  // }
+  selected = "null";
+  selectedTimeRange = "";
 
   @CatchError("loading")
   async created() {
@@ -148,46 +121,47 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
       this.absolute = absolute;
     });
 
+    // vue does not react to the preset sidebar state for a reason, so we switch the state here for reactivity
+    this.$store.direct.commit.sidebar.set({ name: "observations", state: true });
+    await this.$nextTick();
+    this.$store.direct.commit.sidebar.set({ name: "observations", state: false });
+
     this.toDate = dateHelper.toDate(dateHelper.now());
     
-    const dFrom = new Date();
     // dFrom.setDate(dFrom.getDate() - 7);
     // this.fromDate = dateHelper.toDate(dFrom);
 
     this.ccpService = CcpService.get(this.plant.id);
+  }
 
-    // console.log(this.timeRangeOptions.values)
-    // switch (this.timeRangeOptions) {
-    //   case "past7Days":
-    //     dFrom.setDate(dFrom.getDate() - 7);
-    //     break;
-    //   case "past30Days":
-    //     dFrom.setDate(dFrom.getDate() - 30);
-    //     break;
-    //   case "past90Days":
-    //     dFrom.setDate(dFrom.getDate() - 90);
-    //     break;
-    //   case "pastYear":
-    //     dFrom.setDate(dFrom.getDate() - 365);
-    // };
+  async onTimeRangeChanged(selected: string) {
+    this.selectedTimeRange = selected;
+
+    const dFrom = new Date();
+
+    switch (this.selectedTimeRange) {
+      case "past7Days":
+        dFrom.setDate(dFrom.getDate() - 7);
+        break;
+      case "past30Days":
+        dFrom.setDate(dFrom.getDate() - 30);
+        break;
+      case "past90Days":
+        dFrom.setDate(dFrom.getDate() - 90);
+        break;
+      case "pastYear":
+        dFrom.setDate(dFrom.getDate() - 365);
+    }
 
     this.fromDate = dateHelper.toDate(dFrom);
+    console.log(this.fromDate)
     await this.updateSummerizedObservations();
   }
 
-  // onTimeRangeChanged() {
-  //   test = this.timeRangeOptions.values
-  // }
-
   onSidebarToggled(sidebarType: string): void {
     if (sidebarType === "observations") {
-      console.log("toggle observations...")
       this.$store.direct.commit.sidebar.toggle({ name: "observations" });
     }
-  }
-
-  async mounted() {
-    await this.$store.direct.commit.sidebar.set({ name: "observations", state: false });
   }
 
   @CatchError("loading")

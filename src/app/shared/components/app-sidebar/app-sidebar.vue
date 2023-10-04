@@ -1,35 +1,16 @@
 <template>
-  <div :class="'app-sidebar ' + (open ? 'open' : '')">
+  <div class="app-sidebar" :class="{open:open}">
     <div class="app-sidebar-container">
       <div class="app-sidebar-inner">
         <slot></slot>
       </div>
     </div>
-
-    <!-- <b-button 
-      :variant="variantAnalysis"
-      size="sm"
-      tool="analysis"
-      :class="'toggle-button analysis'"
-      @click="onToggle('analysis')"
-    >
-      <app-icon-analysis />
-    </b-button>
-    <b-button 
-      :variant="variantObservations"
-      size="sm"
-      tool="observations"
-      :class="'toggle-button observations'"
-      @click="onToggle('observations')"
-    >
-      <b-icon-clipboard-data />
-    </b-button> -->
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import { Prop, Component } from "vue-property-decorator";
+import { Prop, Component, Watch } from "vue-property-decorator";
 import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
 import AppIconObservations from "@/app/shared/components/app-icon/app-icon-observations.vue";
 
@@ -42,32 +23,6 @@ import AppIconObservations from "@/app/shared/components/app-icon/app-icon-obser
 })
 export default class AppSidebar extends Vue {
   @Prop({ default: true }) open!: boolean;
-
-  // variantAnalysis = this.setButtonVariant(this.$store.direct.state.sidebar.analysis)
-  // variantObservations = this.setButtonVariant(this.$store.direct.state.sidebar.observations)
-
-  // // setButton = this.setVariantObservations()
-
-  // setButtonVariant(sidebar: boolean) {
-  //   if (sidebar) {
-  //     return "primary";
-  //   } else {
-  //     return "secondary";
-  //   }
-  // }
-
-  // onToggle(tool: string) {
-  //   switch (tool) {
-  //     case "analysis":
-  //       this.$emit("toggled", "analysis");
-  //       console.log("analysis sidebar state is: "+this.$store.direct.state.sidebar.analysis)
-  //       break;
-  //     case "observations":
-  //       this.$emit("toggled", "observations");
-  //       this.variantObservations = this.setButtonVariant(this.$store.direct.state.sidebar.observations)
-  //       break;
-  //   }
-  // }
 }
 </script>
 
@@ -85,14 +40,6 @@ export default class AppSidebar extends Vue {
   transition: width 0.3s ease-in-out;
   background-color: $white;
   z-index: 10;
-
-  // @supports (backdrop-filter: blur(5px)) {
-  //   backdrop-filter: blur(5px);
-  //   background: $white-70pc;
-  // }
-  // @supports not (backdrop-filter: blur(5px)) {
-  //   background: $white-70pc;
-  // }
 
   .app-sidebar-container {
     position: relative;
@@ -122,58 +69,4 @@ export default class AppSidebar extends Vue {
   }
 }
 
-// .toggle-button {
-  // position: absolute;
-  // // color: $blue;
-  // border: 1px solid $border-color-grey;
-  // white-space: nowrap;
-
-  // // &:active:hover {
-  // //   color: $hover-blue !important;
-  // // }
-
-  // &.analysis {
-  //   margin-left: -50px;   
-  //   top: 0; 
-  // }
-  // &.observations {
-  //   margin-left: -50px;
-  //   top: 35px;
-  // }
-
-  // &.opens-left {
-  //   right: calc(100% - 1px);
-  //   border-right-color: $white;
-
-  //   .plant-view-csp-ptc:not(.mobile) & {
-  //     &:hover,
-  //     &.show-label {
-  //       .toggle-button-text {
-  //         padding-right: 0.5em;
-  //       }
-  //     }
-  //   }
-  // }
-
-//   &-text {
-//     transition: all 0.3s ease-in-out;
-//     max-width: 0;
-//     display: inline-block;
-//     overflow: hidden;
-//     vertical-align: text-bottom;
-//     line-height: 1.3em;
-//   }
-
-//   .plant-view-csp-ptc:not(.mobile) &.show-label {
-//     .toggle-button-text {
-//       max-width: 150px;
-//     }
-//   }
-
-//   // &:hover {
-//   //   // background-color: $background-grey;
-
-//   //   @extend .show-label;
-//   // }
-// }
 </style>

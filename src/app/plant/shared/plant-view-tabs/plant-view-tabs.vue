@@ -1,6 +1,9 @@
 <template>
   <div class="plant-view-tabs">
     <b-tabs v-model="selectedTab" align="center" @changed="onTabsChanged">
+      <div class="plant-name" translate="no">
+        {{ $t(plant.name) }}
+      </div>    
       <b-tab>
         <template #title>
           <b-icon icon="map" /> <span class="pad-left">{{ $t("map") }}</span>
@@ -207,6 +210,14 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
     .nav-item .nav-link:not(.active) span {
       display: none;
     }
+  }
+
+  .plant-name {
+    position: absolute;
+    z-index: 10;
+    top: 4px;
+    left: 10px;
+    font-size: 25px;
   }
 }
 </style>

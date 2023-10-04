@@ -12,17 +12,17 @@ export interface ISidebarEvent {
 }
 
 const SidebarModule = defineModule({
-  state: sidebars.reduce((acc, name) => ({ ...acc, [name]: true }), {}) as ISidebarModule,
+  state: sidebars.reduce((acc, name) => ({ ...acc, [name]: false }), {}) as ISidebarModule,
   mutations: {
     toggle(state, { name }: { name: SidebarNames }) {
       SidebarModule.mutations.set(state, { name, state: !state[name] });
     },
     set(state, { name, state: sidebarState }: { name: SidebarNames; state: boolean }) {
-      if (store.state.mobile.mobile) {
-        const otherName = sidebars[Math.abs(sidebars.indexOf(name) - 1)];
-        state[otherName] = false;
-        emit(otherName, false);
-      }
+      // if (store.state.mobile.mobile) {
+      //   const otherName = sidebars[Math.abs(sidebars.indexOf(name) - 1)];
+      //   state[otherName] = false;
+      //   emit(otherName, false);
+      // }
 
       state[name] = sidebarState;
       emit(name, sidebarState);
