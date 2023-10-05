@@ -1,7 +1,10 @@
 <template>
   <div class="app-map-pop-button">
     <app-button :variant="popupVisible ? 'primary' : 'secondary'" :icon="icon" @click="showPopup" />
-    <div class="app-map-pop-button-popup" v-show="popupVisible">
+    <div class="app-map-pop-button-popup"
+      v-show="popupVisible" 
+      :style="'width: ' + width + 'px; left: calc(-' + width + 'px - 0.5em);'"
+    >
       <slot />
     </div>
   </div>
@@ -22,6 +25,7 @@ import { MapPopButtonsEvent, mapPopButtonsEventService } from "./map-pop-buttons
 })
 export default class AppMapPopButton extends BaseComponent {
   @Prop({ required: true }) icon!: string;
+  @Prop({ default: 200 }) width!: number;
 
   id = Math.random().toString();
   popupVisible = false;
@@ -55,7 +59,6 @@ export default class AppMapPopButton extends BaseComponent {
   }
 
   &-popup {
-    width: 200px;
     position: absolute;
     left: calc(-200px - 0.5em);
     top: 0;

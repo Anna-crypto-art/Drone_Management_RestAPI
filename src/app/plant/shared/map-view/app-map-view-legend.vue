@@ -1,23 +1,18 @@
 <template>
   <div class="app-map-view-legend" :class="{ 'sidebar-open': sidebarOpen, 'selection-sidebar-open': selectionSidebarOpen }">
-    <div v-for="entry in legendEntries" :key="entry.color" class="app-map-view-legend-entry" :class="{ 'pad-left': entry.indent }">
+    <div v-for="(entry, index) in legendEntries" :key="index" class="app-map-view-legend-entry" :class="{ 'pad-left': entry.indent }">
       <div class="app-map-view-legend-entry-color" :style="`background: ${entry.color}`"></div>
       <div class="app-map-view-legend-entry-name" v-html="entry.name"></div>
     </div>
   </div>
 </template>
 <script lang="ts">
-import AppMapPopButton from "@/app/shared/components/app-map/app-map-pop-button.vue";
 import { BaseComponent } from "@/app/shared/components/base-component/base-component";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { Map } from "ol";
 import { Component, Prop } from "vue-property-decorator";
-import { ComponentLayer } from "./layers/component-layer";
-import AppGeoJsonLayerCheckbox from "@/app/shared/components/app-map/app-geo-json-layer-checkbox.vue";
 import { LayersService } from "./layers/layers-service";
 import { Legend, LegendEntry } from "./types";
 import { LayerEvent } from "./layers/types";
-import { BaseLayer } from "./layers/base-layer";
 import { KeyFigureLayer } from "./layers/key-figure-layer";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
@@ -55,7 +50,7 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
     );
     LayersService.get(this.plant.id).on(
       this.plant.id,
-      LayerEvent.ON_KEY_FIGURE_SELECTED,
+      LayerEvent.ON_INV_AUTO_SELECT_SELECTED,
       async (layer: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>) => {
         await this.onLayerSelected(layer);
       }
@@ -92,7 +87,8 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
     const legend = layer.getLegend();
 
     if (legend) {
-      let existingLegend = this.legends.find(l => l.id === legend.id || l.merge?.metaIds?.includes(legend.id));
+      const existingLegendIndex = this.legends.findIndex(l => l.id === legend.id || l.merge?.metaIds?.includes(legend.id));
+      const existingLegend = existingLegendIndex != -1 ? this.legends[existingLegendIndex] : undefined;
 
       if (layer.selected) {
         if (legend.merge) {
@@ -118,7 +114,7 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
         if (!existingLegend) {
           this.legends.push(legend);
         } else {
-          console.error("Legend id " + legend.id + " already added")
+          this.legends.splice(existingLegendIndex, 1, legend)
         }
       } else {
         if (existingLegend) {
@@ -137,7 +133,7 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
             
             existingLegend.entries[0].name = existingLegend.merge!.metaSum + " " + existingLegend.merge!.name;
           } else {
-            this.legends.splice(this.legends.findIndex(l => l.id === existingLegend!.id), 1);
+            this.legends.splice(existingLegendIndex, 1);
           }
         }
       }
@@ -150,16 +146,6 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
     
     // this.hideToast();
   }
-
-  async onAnalysisSelected() { 
-    console.log("onAnalysisSelected", this.analysisSelectionService!.firstAnalysis)
-
-    /* why do i exist? */
-  }
-
-  async onObservationSelected() { /* why do i exist? */}
-
-  async onMultiAnalysesSelected() { /* why do i exist? */}
 }
 </script>
 

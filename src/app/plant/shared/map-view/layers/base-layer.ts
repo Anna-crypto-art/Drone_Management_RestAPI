@@ -370,18 +370,20 @@ export abstract class BaseLayer implements IGeoLayer {
     return asString([r, g, b, alpha]);
   }
 
-  public async rerender() {
-    if (this.selected) {
-      await this.setSelected(false);
-    }
-    await this.setSelected(true);
-
-    this.rerenderMap();
-  }
-
-  public rerenderMap() {
+  public rerender() {
     this.loadedLayer?.changed();
+
+    // if (this.selected) {
+    //   await this.setSelected(false);
+    // }
+    // await this.setSelected(true);
+
+    // this.rerenderMap();
   }
+
+  // public rerenderMap() {
+  //   this.loadedLayer?.changed();
+  // }
 
   public async onClick(
     feature: FeatureLike,

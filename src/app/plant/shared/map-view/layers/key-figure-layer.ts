@@ -277,6 +277,12 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     return this.enableCompare;
   }
 
+  public setShowCouldNotBeMeasured(showCouldNotBeMeasured: boolean) {
+    if (this.query?.undefined !== undefined && !this.invisibleAutoSelection) {
+      this.query.undefined = showCouldNotBeMeasured ? 1 : 0;
+    }
+  }
+
   public hasKeyFigureForCompareAnalysisResult(): boolean {
     if (this.isCompareEnabled && this.compareAnalysisResult) {
       return !!(this.analysisResult.key_figures.find(keyFigure => keyFigure.id === this.keyFigureId) &&

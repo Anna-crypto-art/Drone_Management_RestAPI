@@ -53,7 +53,7 @@ import { AnalysisSelectionService } from "../shared/selection-sidebar/analysis-s
 export default class AppPlantViewPv extends BaseAuthComponent implements IAnalysisSelectionComponent {
   @Prop() plant!: PlantSchema;
 
-  analysisSelectionService: AnalysisSelectionService | null = null;
+  analysisSelectionService!: AnalysisSelectionService;
 
   analyses: AnalysisForViewSchema[] | null = null;
 
@@ -71,9 +71,6 @@ export default class AppPlantViewPv extends BaseAuthComponent implements IAnalys
   async unmounted() {
     this.analysisSelectionService?.unregister();
   }
-
-  async onAnalysisSelected() {/* stay blubby */}
-  async onMultiAnalysesSelected() {/* stay blubby */}
 }
 </script>
 

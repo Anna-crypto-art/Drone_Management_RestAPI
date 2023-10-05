@@ -73,7 +73,7 @@ export default class AppDiagramOverview extends BaseAuthComponent implements IAn
   @Prop() resultMappings!: DiagramResultMappings[];
   @Prop() componentSelection!: ApiComponent[];
   
-  analysisSelectionService: AnalysisSelectionService | null = null;
+  analysisSelectionService!: AnalysisSelectionService;
   
   numberBoxes: DiagramNumberBox[] | null = null;
 

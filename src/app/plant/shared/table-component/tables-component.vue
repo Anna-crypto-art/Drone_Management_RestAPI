@@ -77,7 +77,7 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
   @Prop({ required: true }) componentResultMappings!: ComponentResultMappings[];
   @Prop({ required: true }) tableResultComponents!: TableResultComponent[];
 
-  analysisSelectionService: AnalysisSelectionService | null = null;
+  analysisSelectionService!: AnalysisSelectionService;
   
   csvExportLoading = false;
   tabIndex = 0;

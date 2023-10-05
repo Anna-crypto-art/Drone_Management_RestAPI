@@ -1,7 +1,7 @@
 import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/sequential-event-emitter";
 import { BaseLayer } from "./base-layer";
 import { AppSeqEventService } from "@/app/shared/services/app-event-service/app-event-service";
-import { LayerEvent } from "./types";
+import { KeyFigureBaseLayer, LayerEvent, LayerSettings } from "./types";
 import { KeyFigureLayer } from "./key-figure-layer";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
@@ -16,6 +16,11 @@ export class LayersService extends AppSeqEventService<LayerEvent> {
 
     return this.layersServices[plantId];
   }
+
+  public readonly settings: LayerSettings = {
+    multiSelection: false,
+    showCouldNotBeMeasured: false,
+  };
 
   private constructor(private readonly plantId: string) {
     super();
@@ -35,11 +40,15 @@ export class LayersService extends AppSeqEventService<LayerEvent> {
         }
       });
 
-      l.events.on(LayerEvent.ON_INV_AUTO_SELECT_SELECTED, async (layer: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>) => {
+      l.events.on(LayerEvent.ON_INV_AUTO_SELECT_SELECTED, async (layer: KeyFigureBaseLayer) => {
         await this.emit(this.plantId, LayerEvent.ON_INV_AUTO_SELECT_SELECTED, layer);
       });
     }
 
     this.layers.push(...layers);
+  }
+
+  public get keyFigureLayers(): KeyFigureBaseLayer[] {
+    return this.layers.filter(l => l instanceof KeyFigureLayer) as KeyFigureBaseLayer[];
   }
 }

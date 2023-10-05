@@ -163,4 +163,12 @@ export enum LayerEvent {
   ON_SELECTED = "ON_SELECTED",
   ON_KEY_FIGURE_SELECTED = "ON_KEY_FIGURE_SELECTED",
   ON_INV_AUTO_SELECT_SELECTED = "ON_INV_AUTO_SELECT_SELECTED",
+  ON_SHOW_COULD_NOT_BE_MEASURED_CHANGED = "ON_SHOW_COULD_NOT_BE_MEASURED_CHANGED",
+}
+
+export type KeyFigureBaseLayer = KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>;
+
+export interface LayerSettings {
+  multiSelection: boolean;
+  showCouldNotBeMeasured: boolean;
 }

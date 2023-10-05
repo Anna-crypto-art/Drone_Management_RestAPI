@@ -14,6 +14,6 @@ export interface IAnalysisSelectionComponent {
   analyses: AnalysisForViewSchema[] | null;
   mounted(): Promise<void>;
   unmounted(): Promise<void>;
-  onAnalysisSelected(): Promise<void>;
-  onMultiAnalysesSelected(): Promise<void>;
+  onAnalysisSelected?(): Promise<void>;
+  onMultiAnalysesSelected?(): Promise<void>;
 }

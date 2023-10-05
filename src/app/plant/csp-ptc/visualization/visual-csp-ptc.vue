@@ -106,7 +106,7 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
 
-  analysisSelectionService: AnalysisSelectionService | null = null;
+  analysisSelectionService!: AnalysisSelectionService;
 
   async created() {
     this.analysisSelectionService = new AnalysisSelectionService(this);
@@ -165,8 +165,5 @@ export default class AppVisualCspPtc extends BaseAuthComponent implements IAnaly
   get firstAnalysisResult(): AnalysisResultDetailedSchema | null {
     return this.analysisSelectionService?.firstAnalysisResult || null;
   }
-
-  async onAnalysisSelected() { /* stay blubby */ }
-  async onMultiAnalysesSelected() { /* stay blubby */ }
 }
 </script>

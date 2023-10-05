@@ -79,7 +79,7 @@ export default class AppTableComponentFilter extends BaseAuthComponent implement
   @Prop({ required: true }) analysisResult!: AnalysisResultDetailedSchema;
   @Prop({ required: true }) activeComponent!: TableResultMappingComponent;
 
-  analysisSelectionService: AnalysisSelectionService | null = null;
+  analysisSelectionService!: AnalysisSelectionService;
 
   // Base class IAnalysisSelectionComponent requires to have an "analyses" property. 
   // But we don't have them. Fortunatly they are nullable and the events 

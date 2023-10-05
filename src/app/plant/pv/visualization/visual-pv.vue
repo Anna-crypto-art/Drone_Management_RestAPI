@@ -50,7 +50,7 @@ export default class AppVisualPv extends BaseAuthComponent implements IAnalysisS
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
 
-  analysisSelectionService: AnalysisSelectionService | null = null;
+  analysisSelectionService!: AnalysisSelectionService;
 
   async created() {
     this.analysisSelectionService = new AnalysisSelectionService(this);
@@ -103,8 +103,5 @@ export default class AppVisualPv extends BaseAuthComponent implements IAnalysisS
 
     throw new Error("class_limit not allowed");
   }
-
-  async onAnalysisSelected() { /* stay blubby */ }
-  async onMultiAnalysesSelected() { /* stay blubby */ }
 }
 </script>

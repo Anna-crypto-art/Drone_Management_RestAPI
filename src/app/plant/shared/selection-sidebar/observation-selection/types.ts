@@ -12,7 +12,7 @@ export interface IObservationSelectionComponent {
   plant: PlantSchema;
   mounted(): Promise<void>;
   unmounted(): Promise<void>;
-  onObservationSelected(): Promise<void>;
+  onObservationSelected?(): Promise<void>;
 }
 
 export interface ObservRowItem {

@@ -42,7 +42,7 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent impleme
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
 
-  analysisSelectionService: AnalysisSelectionService | null = null;
+  analysisSelectionService!: AnalysisSelectionService;
 
   resultMappings: DiagramResultMappings[] = [];
 

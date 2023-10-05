@@ -58,7 +58,7 @@ export class GlassTemperatureKeyFigureLayer extends ClassHceKeyFigureLayer imple
       entries: [
         {
           color: this.getColor(),
-          name: i18n.t(this.getLegendName()).toString() + 
+          name: this.getLegendName() + 
             this.getLegendEntryCount(this.geoJSON!.features.length),
         }
       ],

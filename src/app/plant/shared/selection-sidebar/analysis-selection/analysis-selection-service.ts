@@ -61,7 +61,7 @@ export class AnalysisSelectionService {
       }
     }
 
-    await this.analysisSelectionComponent.onAnalysisSelected();
+    this.analysisSelectionComponent.onAnalysisSelected && await this.analysisSelectionComponent.onAnalysisSelected();
   }
 
   private async fireMultiAnalysisSelected(selectedAnalysesIds: string[] | undefined) {
@@ -76,7 +76,7 @@ export class AnalysisSelectionService {
       }
     }
 
-    await this.analysisSelectionComponent.onMultiAnalysesSelected();
+    this.analysisSelectionComponent.onMultiAnalysesSelected && await this.analysisSelectionComponent.onMultiAnalysesSelected();
   }
 
   public getKeyFigures(): KeyFigureSchema[] {

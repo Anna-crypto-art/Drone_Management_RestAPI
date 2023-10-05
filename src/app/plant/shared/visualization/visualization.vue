@@ -164,7 +164,7 @@ export default class AppVisualization
   @Ref() appReferenceMeasurements!: IAppRefMeasure;
   @Ref() appObservModal!: IAppObservationModal;
 
-  analysisSelectionService: AnalysisSelectionService | null = null;
+  analysisSelectionService!: AnalysisSelectionService;
 
   piLayersHierarchy: PILayersHierarchy | null = null;
   refMeasureLayers: RefMeasureLayers | null = null;

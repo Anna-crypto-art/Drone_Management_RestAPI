@@ -1,9 +1,9 @@
 <template>
   <div class="app-map-view" v-if="map">
-    <app-map :map="map" />
+    <app-map :map="map" @click="onMapClick" />
     <app-map-controls :map="map" />
     <app-map-pop-buttons>
-      <app-map-view-settings :plant="plant" :map="map" />
+      <app-map-view-settings :plant="plant" :map="map" :analyses="analyses" />
       <app-map-view-components :componentLayerTypes="componentLayerTypes" :map="map" :plant="plant" />
     </app-map-pop-buttons>
     <app-map-view-key-figure-layer-selection 
@@ -13,6 +13,7 @@
       :plant="plant"
     />
     <app-map-view-legend :plant="plant" :analyses="analyses" />
+    <app-map-view-popup :plant="plant" :analyses="analyses" :mapFeature="clickedMapFeature" />
   </div>
 </template>
 
@@ -32,6 +33,9 @@ import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-sch
 import { KeyFigureTypeMap } from "./layers/types";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 import AppMapViewLegend from "./app-map-view-legend.vue";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
+import { FeatureLike } from "ol/Feature";
+import AppMapViewPopup from "./app-map-view-popup.vue";
 
 @Component({
   name: "app-map-view",
@@ -43,6 +47,7 @@ import AppMapViewLegend from "./app-map-view-legend.vue";
     AppMapViewComponents,
     AppMapViewKeyFigureLayerSelection,
     AppMapViewLegend,
+    AppMapViewPopup,
   },
 })
 export default class AppMapView extends BaseAuthComponent {
@@ -53,6 +58,8 @@ export default class AppMapView extends BaseAuthComponent {
 
   map: Map | null = null;
 
+  clickedMapFeature: FeatureLike | null = null;
+
   async created() {
     this.map = new Map({
       layers: [],
@@ -61,6 +68,16 @@ export default class AppMapView extends BaseAuthComponent {
         zoom: 2,
       }),
     });
+  }
+
+  @CatchError()
+  onMapClick(features: FeatureLike[]) {
+    // Multiselection is not supported
+    if (features.length > 1 || features.length === 0) {
+      return;
+    }
+
+    this.clickedMapFeature = features[0];
   }
 }
 </script>

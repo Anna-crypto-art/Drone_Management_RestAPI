@@ -32,7 +32,7 @@ export class ObservationSelectionService {
         this.dateRange = this.getDateRange();
         this.selectedCcps = await this.getSelectedCCPs();
 
-        await this.observSelectionComponent.onObservationSelected();
+        this.observSelectionComponent.onObservationSelected && await this.observSelectionComponent.onObservationSelected();
       },
       this.id,
     );
