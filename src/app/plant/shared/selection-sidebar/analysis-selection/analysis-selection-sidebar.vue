@@ -3,47 +3,46 @@
     <app-sidebar :open="sidebarOpen">
       <div class="app-analysis-selection-sidebar-leftside">
         <h4 class="app-analysis-selection-sidebar-leftside-title">
-          {{ "Analyses" }}
-          <!-- {{ $t("Analyses") }} -->
+          {{ $t("analyses") }}
         </h4>
-          <div class="app-analysis-selection-sidebar-settings" v-if="analyses.length > 1">
-            <b-checkbox switch v-model="compareMode" @change="onCompareModeChanged">
-              {{ $t("compare-mode") }}
-              <app-explanation>{{ $t("compare-mode_descr") }}</app-explanation>
-            </b-checkbox>
-          </div>
-          <app-table-container>
-            <app-table
-              ref="analysesTable"
-              :rows="analysesTableItems"
-              :columns="analysesTableColumns"
-              :selectMode="selectMode"
-              @rowSelected="onAnalysisSelected"
-              :overlayLoading="loading"
-              :hideHeader="true"
-            >
-              <template #cell(name)="row">
-                {{ row.item.date }} 
-                <app-icon v-if="!isPilot && !row.item.hasResults"
-                  icon="cone-striped" 
-                  class="mar-left-half orange" 
-                  v-b-popover.hover.top="$t('no-pis-available-yet')"
-                />
-                <app-icon v-if="row.item.refMeasureCount > 0"
-                  icon="clipboard-check"
-                  class="mar-left-half blue"
-                  v-b-popover.hover.top="$t('has-ref-measures', { count: row.item.refMeasureCount })"
-                />
-                <app-icon v-if="row.item.hasGoodies" 
-                  icon="gift"
-                  class="mar-left-half blue"
-                  v-b-popover.hover.top="$t('has-additional-pis')"
-                />
-                <app-super-admin-marker v-if="row.item.analysisResultReleased === false" />
-                <br>
-                <small class="grayed">{{ row.item.name }}</small>
-                <div :class="{ 'mar-top': row.item.orderPPs && row.item.orderPPs.length > 0 }">
-                <app-order-pps-view :orderProductPackages="row.item.orderPPs" :lefted="true" />
+        <div class="app-analysis-selection-sidebar-settings" v-if="analyses.length > 1">
+          <b-checkbox switch v-model="compareMode" @change="onCompareModeChanged">
+            {{ $t("compare-mode") }}
+            <app-explanation>{{ $t("compare-mode_descr") }}</app-explanation>
+          </b-checkbox>
+        </div>
+        <app-table-container>
+          <app-table
+            ref="analysesTable"
+            :rows="analysesTableItems"
+            :columns="analysesTableColumns"
+            :selectMode="selectMode"
+            @rowSelected="onAnalysisSelected"
+            :overlayLoading="loading"
+            :hideHeader="true"
+          >
+            <template #cell(name)="row">
+              {{ row.item.date }} 
+              <app-icon v-if="!isPilot && !row.item.hasResults"
+                icon="cone-striped" 
+                class="mar-left-half orange" 
+                v-b-popover.hover.top="$t('no-pis-available-yet')"
+              />
+              <app-icon v-if="row.item.refMeasureCount > 0"
+                icon="clipboard-check"
+                class="mar-left-half blue"
+                v-b-popover.hover.top="$t('has-ref-measures', { count: row.item.refMeasureCount })"
+              />
+              <app-icon v-if="row.item.hasGoodies" 
+                icon="gift"
+                class="mar-left-half blue"
+                v-b-popover.hover.top="$t('has-additional-pis')"
+              />
+              <app-super-admin-marker v-if="row.item.analysisResultReleased === false" />
+              <br>
+              <small class="grayed">{{ row.item.name }}</small>
+              <div :class="{ 'mar-top': row.item.orderPPs && row.item.orderPPs.length > 0 }">
+              <app-order-pps-view :orderProductPackages="row.item.orderPPs" :lefted="true" />
               </div>
             </template>
           </app-table>
@@ -94,16 +93,11 @@ import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
 export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
-  @State(state => state.sidebar["analysis"]) sidebarOpen!: boolean;
+  @State(state => state.sidebar["analyses"]) sidebarOpen!: boolean;
   @Ref() analysesTable!: IAppSelectTable;
 
-  onSidebarToggled(sidebarType: string): void {
-    if (sidebarType === "analysis") {
-      this.$store.direct.commit.sidebar.toggle({ name: "analysis" });
-    }
-  }
   analysesTableColumns: AppTableColumns = [
-    { key: "name", label: this.$t("analysis").toString() },
+    { key: "name", label: this.$t("analyses").toString() },
   ];
   analysesTableItems: Record<string, unknown>[] = [];
 
@@ -136,7 +130,7 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
       });
     }
 
-    this.$store.direct.commit.sidebar.set({ name: "analysis", state: true });
+    this.$store.direct.commit.sidebar.set({ name: "analyses", state: true });
     await this.$nextTick();
 
     analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL, async () => {
@@ -293,7 +287,7 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
       await this.$nextTick();
       await this.$nextTick();
 
-      this.$store.direct.commit.sidebar.set({ name: "analysis", state: false });
+      this.$store.direct.commit.sidebar.set({ name: "analyses", state: false });
     }
   }
 

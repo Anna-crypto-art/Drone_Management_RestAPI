@@ -1,8 +1,7 @@
-import store from "@/app/app-state";
 import { defineModule } from "direct-vuex";
 import Vue from "vue";
 
-const sidebars = ["analysis", "layer-switcher", "observations"] as const;
+export const sidebars = ["analyses", "layer-switcher", "observations"] as const;
 type SidebarNames = typeof sidebars[number];
 
 export type ISidebarModule = { [k in SidebarNames]: boolean };

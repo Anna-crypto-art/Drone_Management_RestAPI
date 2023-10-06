@@ -3,8 +3,7 @@
     <app-sidebar :open="sidebarOpen" >
       <div class="app-observation-selection-sidebar-leftside">
         <h4 class="app-observation-selection-sidebar-leftside-title">
-          {{ "Observations" }}
-          <!-- {{ $t("Observations") }} -->
+          {{ $t("observations") }}
         </h4>
         <div class="app-observation-selection-sidebar">
           <div class="app-observation-selection-sidebar-filter">
@@ -152,12 +151,6 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
 
     this.fromDate = dateHelper.toDate(dFrom);
       await this.updateSummerizedObservations();
-  }
-
-  onSidebarToggled(sidebarType: string): void {
-    if (sidebarType === "observations") {
-      this.$store.direct.commit.sidebar.toggle({ name: "observations" });
-    }
   }
 
   @CatchError("loading")

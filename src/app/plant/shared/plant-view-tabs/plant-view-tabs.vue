@@ -67,12 +67,11 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
 
   private isMobile!: boolean;
   private isMobileQuery!: MediaQueryList;
-  // private async isMobileListener<Evt extends { matches: boolean }>(e: Evt) {
-  //   this.isMobile = e.matches;
+  private async isMobileListener<Evt extends { matches: boolean }>(e: Evt) {
+    this.isMobile = e.matches;
 
-  //   this.$store.direct.commit.sidebar.setAll(!this.isMobile);
-  //   await this.updateLeftSidebarAbsolute();
-  // }
+    await this.updateLeftSidebarAbsolute();
+  }
 
   @CatchError()
   async created(): Promise<void> {
@@ -85,8 +84,8 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
     });
 
     this.isMobileQuery = getMobileQuery()
-    // this.isMobileQuery.addEventListener("change", this.isMobileListener);
-    // this.isMobileListener(this.isMobileQuery);
+    this.isMobileQuery.addEventListener("change", this.isMobileListener);
+    this.isMobileListener(this.isMobileQuery);
   }
 
   async mounted() {

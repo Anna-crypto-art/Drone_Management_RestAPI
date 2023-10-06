@@ -41,7 +41,7 @@ export default class AppSidebar extends Vue {
   background-color: $white;
   z-index: 10;
 
-  .app-sidebar-container {
+  &-sidebar-container {
     position: relative;
     top: 0;
     width: 100%;

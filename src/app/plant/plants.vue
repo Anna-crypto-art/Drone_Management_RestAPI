@@ -17,7 +17,7 @@
           <span v-if="!row.item.digitized">{{ row.item.name }}</span>
           <div>
             <small class="grayed">
-              {{ row.item.analysesCount }} {{ $t("analysis") }}
+              {{ row.item.analysesCount }} {{ $t("analyses") }}
             </small>
           </div>
         </template>
