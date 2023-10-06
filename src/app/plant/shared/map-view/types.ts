@@ -1,7 +1,3 @@
-import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
-import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { ReferenceMeasurementEntriesSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
-
 export interface FeatureProperties {
   name: string;
   value?: number | boolean | string | null;
@@ -34,23 +30,6 @@ export interface FeatureImage {
   url: string;
 }
 
-export interface FeatureInfoGroup {
-  title: string;
-  records: FeatureInfo[];
-}
-
-export interface FeatureInfos {
-  groups: FeatureInfoGroup[];
-  title?: string;
-  images?: FeatureImage[];
-  actionsSummaries?: FeatureActionsSummary[];
-}
-
-export interface FeatureInfosMeta {
-  fieldgeoComponent?: FieldgeometryComponentSchema;
-  refMeasureEntries?: ReferenceMeasurementEntriesSchema;
-}
-
 export interface FeatureInfo {
   name: string;
   value: string;
@@ -62,14 +41,7 @@ export interface FeatureInfo {
   _visible?: boolean;
 }
 
-export interface FeatureActionsSummary {
-  buttonVariant: string;
-  name: string;
-  actions: FeatureAction[];
-  superAdminOnly?: boolean;
-}
-
-export interface FeatureAction {
-  name: string;
-  action: () => Promise<void>;
+export interface FeatureInfos {
+  images?: FeatureImage[];
+  infos: FeatureInfo[];
 }

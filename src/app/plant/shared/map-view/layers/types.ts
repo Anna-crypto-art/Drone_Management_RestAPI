@@ -5,6 +5,9 @@ import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { PropsFeature } from "../types";
 import { KeyFigureLayer } from "./key-figure-layer";
+import { Feature } from "ol";
+import { Geometry } from "ol/geom";
+import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 
 /**
  * Inspired by https://htmlcolorcodes.com/color-picker/
@@ -171,4 +174,9 @@ export type KeyFigureBaseLayer = KeyFigureLayer<AnalysisResultSchemaBase, GeoVis
 export interface LayerSettings {
   multiSelection: boolean;
   showCouldNotBeMeasured: boolean;
+}
+
+export interface OrthoImage {
+  keyFigureId: ApiKeyFigure;
+  name: string;
 }

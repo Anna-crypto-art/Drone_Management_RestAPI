@@ -3,7 +3,7 @@ import { Extent } from "ol/extent";
 import { Map } from "ol";
 import { Style, Stroke, Text, Fill } from "ol/style";
 import { asArray, asString } from "ol/color";
-import { FeatureInfos, FeatureInfosMeta, Legend, PropsFeature } from "../types";
+import { FeatureInfos, Legend, PropsFeature } from "../types";
 import GeoJSONFeatures from "ol/format/GeoJSON";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { transformExtent } from "ol/proj";
@@ -385,10 +385,10 @@ export abstract class BaseLayer implements IGeoLayer {
   //   this.loadedLayer?.changed();
   // }
 
-  public async onClick(
-    feature: FeatureLike,
-    featureInfosMeta: FeatureInfosMeta,
-  ): Promise<FeatureInfos | undefined> { 
-    return undefined;
-  }
+  // public async onClick(
+  //   feature: FeatureLike,
+  //   featureInfosMeta: FeatureInfosMeta,
+  // ): Promise<FeatureInfos | undefined> { 
+  //   return undefined;
+  // }
 }

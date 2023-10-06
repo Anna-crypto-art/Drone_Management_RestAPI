@@ -6,7 +6,7 @@ import { AnalysisResultPvTrackerSchema } from "@/app/shared/services/volateq-api
 import analysisResultPvMappingTracker from "@/app/shared/services/volateq-api/api-results-mappings/pv/analysis-result-pv-mapping-tracker";
 
 export abstract class TrackerKeyFigureLayer extends PvKeyFigureLayer<AnalysisResultPvTrackerSchema> {
-  protected readonly analysisResultMapping = analysisResultPvMappingTracker;
+  public readonly analysisResultMapping = analysisResultPvMappingTracker;
 
   protected showPcsZoomLevel = 16;
 

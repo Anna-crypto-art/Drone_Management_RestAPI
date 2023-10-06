@@ -2,10 +2,9 @@ import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/a
 import { ComponentLayer } from "@/app/plant/shared/map-view/layers/component-layer";
 import { Style, Stroke } from "ol/style";
 import { FeatureLike } from "ol/Feature";
-import { layerEvents } from "@/app/plant/shared/visualization/layer-events";
 import { Geometry } from "ol/geom";
 import { Feature } from "ol";
-import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
+import { LayerColor } from "@/app/plant/shared/map-view/layers/types";
 
 export class ScaComponentLayer extends ComponentLayer {
   public readonly componentId = ApiComponent.CSP_PTC_SCA;
@@ -26,21 +25,6 @@ export class ScaComponentLayer extends ComponentLayer {
 
   public readonly name = "solar-collector-assembly";
   public readonly autoZoom = true;
-
-  protected created(): void {
-    layerEvents.onOrthoImageLoaded((features: Feature<Geometry>[]) => {
-      this.loadedLayer?.getSource()!.addFeatures(features);
-    });
-
-    layerEvents.onRemoveOrthoImages((features: Feature<Geometry>[]) => {
-      const layerSource = this.loadedLayer?.getSource();
-      if (layerSource) {
-        for (const feature of features) {
-          layerSource.removeFeature(feature);
-        }
-      }
-    });
-  }
 
   public getStyle(feature: FeatureLike): Style {
     return new Style({

@@ -50,7 +50,7 @@ export class ScaSdxKeyFigureLayer extends ScaKeyFigureLayer implements ICompareC
     };
   }
 
-  protected getMoreSpecificAnalysisResultParams(): TableRequest {
+  public getMoreSpecificAnalysisResultParams(): TableRequest {
     return { key_figure_image_url: ApiKeyFigure.SCA_ORTHO_IMAGES_SDX_ID };
   }
 

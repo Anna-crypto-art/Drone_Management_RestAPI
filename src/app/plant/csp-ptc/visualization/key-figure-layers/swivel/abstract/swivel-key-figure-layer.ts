@@ -7,7 +7,7 @@ import { Circle, Fill, Stroke, Style } from "ol/style";
 import { CspPtcKeyFigureLayer } from "../../csp-ptc-key-figure-layer";
 
 export class SwivelKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisResultCspPtcSwivelSchema> {
-  protected readonly analysisResultMapping = analysisResultCspPtcMappingSwivel;
+  public readonly analysisResultMapping = analysisResultCspPtcMappingSwivel;
 
   protected showPcsZoomLevel = 19;
 

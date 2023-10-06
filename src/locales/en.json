@@ -750,6 +750,7 @@
   "raw-ir-image": "Raw IR image",
   "show-raw-ir-image": "Show raw IR image",
   "map-settings": "Map settings",
+  "ortho": "ORTHO",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

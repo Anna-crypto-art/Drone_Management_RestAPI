@@ -6,7 +6,7 @@ import { Fill, Stroke, Style } from "ol/style";
 import { CspPtcKeyFigureLayer } from "../../csp-ptc-key-figure-layer";
 
 export class MirrorKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisResultCspPtcMirrorSchema> {
-  protected readonly analysisResultMapping = analysisResultCspPtcMappingMirror;
+  public readonly analysisResultMapping = analysisResultCspPtcMappingMirror;
 
   protected showPcsZoomLevel = 21;
   protected readonly strokeWidth = 3;

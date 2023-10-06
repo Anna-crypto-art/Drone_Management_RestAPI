@@ -6,7 +6,7 @@ import { Legend } from "@/app/plant/shared/visualization/types";
 import { CspPtcKeyFigureLayer } from "../../csp-ptc-key-figure-layer";
 
 export abstract class ScaKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisResultCspPtcScaSchema> {
-  protected readonly analysisResultMapping = analysisResultCspPtcMappingSca;
+  public readonly analysisResultMapping = analysisResultCspPtcMappingSca;
 
   protected showPcsZoomLevel = 16;
 

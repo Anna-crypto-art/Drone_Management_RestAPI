@@ -13,7 +13,7 @@
       :plant="plant"
     />
     <app-map-view-legend :plant="plant" :analyses="analyses" />
-    <app-map-view-popup :plant="plant" :analyses="analyses" :mapFeature="clickedMapFeature" />
+    <app-map-view-popup :plant="plant" :analyses="analyses" :mapFeature="clickedMapFeature" :map="map" />
   </div>
 </template>
 

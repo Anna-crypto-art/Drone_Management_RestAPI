@@ -6,7 +6,7 @@ import { Stroke, Style } from "ol/style";
 import { CspPtcKeyFigureLayer } from "../../csp-ptc-key-figure-layer";
 
 export abstract class HceKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisResultCspPtcHceSchema> {
-  protected readonly analysisResultMapping = analysisResultCspPtcMappingHce;
+  public readonly analysisResultMapping = analysisResultCspPtcMappingHce;
 
   protected readonly strokeWidth = 5;
   protected showPcsZoomLevel = 19;

@@ -1,4 +1,4 @@
-import { ComparedFeatureType, FeatureInfos, FeatureProperties, Legend } from "@/app/plant/shared/visualization/types";
+import { FeatureInfos, FeatureProperties, Legend } from "@/app/plant/shared/map-view/types";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { AnalysisResultCspPtcScaSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-sca-schema";
 import { FeatureLike } from "ol/Feature";
@@ -6,6 +6,7 @@ import { Style } from "ol/style";
 import { CompareClassLimitsKeyFigureMixin } from "@/app/plant/shared/visualization/key-figure-mixins/compare-class-limits-key-figure-mixin";
 import { ICompareClassLimitsKeyFigureMixin } from "@/app/plant/shared/visualization/key-figure-mixins/types";
 import { ScaKeyFigureLayer } from "./abstract/sca-key-figure-layer";
+import { ComparedFeatureType } from "@/app/plant/shared/map-view/layers/types";
 
 export class ScaFrictionKeyFigureLayer extends ScaKeyFigureLayer implements ICompareClassLimitsKeyFigureMixin {
   private compareClassLimitsKeyFigureMixin!: CompareClassLimitsKeyFigureMixin;
@@ -59,18 +60,14 @@ export class ScaFrictionKeyFigureLayer extends ScaKeyFigureLayer implements ICom
     )
   }
 
-  protected getMoreSpecificAnalysisResultParams(): TableRequest {
+  public getMoreSpecificAnalysisResultParams(): TableRequest {
     return { key_figure_image_url: this.keyFigureId };
   }
 
-  protected mapResultToFeatureInfos(result: AnalysisResultCspPtcScaSchema): FeatureInfos | undefined {
-    const featureInfos = super.mapResultToFeatureInfos(result);
-
+  public modifyFeatureInfos(featureInfos: FeatureInfos, result: AnalysisResultCspPtcScaSchema) {
     if (result.torsion_banana_image_url && featureInfos) {
       featureInfos.images = [{ title: "Torsion image", url: result.torsion_banana_image_url }];
     }
-
-    return featureInfos;
   }
 
   protected getColor(): string {

@@ -1,8 +1,8 @@
 import { CompareClassKeyFigureMixin } from "@/app/plant/shared/visualization/key-figure-mixins/compare-class-key-figure-mixin";
 import { SwivelKeyFigureLayer } from "./abstract/swivel-key-figure-layer";
 import { ICompareClassKeyFigureMixin } from "@/app/plant/shared/visualization/key-figure-mixins/types";
-import { FeatureInfos, FeatureProperties, Legend, LegendEntry } from "@/app/plant/shared/visualization/types";
-import { KeyFigureColorScheme, LayerColor } from "@/app/plant/shared/visualization/layers/types";
+import { FeatureInfos, FeatureProperties, Legend } from "@/app/plant/shared/map-view/types";
+import { KeyFigureColorScheme, LayerColor } from "@/app/plant/shared/map-view/layers/types";
 import { AnalysisResultCspPtcSwivelSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-swivel-schema";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { i18n } from "@/main";
@@ -50,21 +50,17 @@ export class SwivelRotationJointGrippingPotentialKeyFigureLayer extends SwivelKe
     return this.getLegendName();
   }
 
-  protected getMoreSpecificAnalysisResultParams(): TableRequest {
+  public getMoreSpecificAnalysisResultParams(): TableRequest {
     return { key_figure_image_url: this.keyFigureId };
   }
 
-  protected mapResultToFeatureInfos(result: AnalysisResultCspPtcSwivelSchema): FeatureInfos | undefined {
-    const featureInfos = super.mapResultToFeatureInfos(result);
-
+  public modifyFeatureInfos(featureInfos: FeatureInfos, result: AnalysisResultCspPtcSwivelSchema) {
     if (result.rotation_joint_angle_image_url && featureInfos) {
       featureInfos.images = [{ 
         title: i18n.t("swivel-rotation-joint-angle").toString(), 
         url: result.rotation_joint_angle_image_url
       }];
     }
-
-    return featureInfos;
   }
 
   protected getColor(): string {

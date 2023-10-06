@@ -1,4 +1,4 @@
-import { ComparedFeatureType, FeatureInfos, FeatureProperties, Legend } from "@/app/plant/shared/visualization/types";
+import { FeatureInfos, FeatureProperties, Legend } from "@/app/plant/shared/map-view/types";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { AnalysisResultCspPtcSwivelSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-swivel-schema";
 import { CompareClassLimitsKeyFigureMixin } from "@/app/plant/shared/visualization/key-figure-mixins/compare-class-limits-key-figure-mixin";
@@ -56,19 +56,14 @@ export class SwivelGrippingPotentialKeyFigureLayer extends ClassSwivelKeyFigureL
     )
   }
 
-  protected getMoreSpecificAnalysisResultParams(): TableRequest {
+  public getMoreSpecificAnalysisResultParams(): TableRequest {
     return { key_figure_image_url: this.keyFigureId };
   }
 
-  protected mapResultToFeatureInfos(result: AnalysisResultCspPtcSwivelSchema): FeatureInfos | undefined {
-    const featureInfos = super.mapResultToFeatureInfos(result);
-
-    // Nobody understand this image, so show them to SUPER_ADMINs only
+  public modifyFeatureInfos(featureInfos: FeatureInfos, result: AnalysisResultCspPtcSwivelSchema) {
     if (result.gripping_risk_image_url && featureInfos && this.appLayerCheckbox?.isSuperAdmin) {
       featureInfos.images = [{ title: "Gripping risk image", url: result.gripping_risk_image_url }];
     }
-
-    return featureInfos;
   }
 
   public getDiffLegendName(): string {

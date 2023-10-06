@@ -11,19 +11,13 @@
 
 <script lang="ts">
 import Map from "ol/Map";
-import { Component, Prop, Watch, Ref } from "vue-property-decorator";
+import { Component, Prop } from "vue-property-decorator";
 import { IGeoLayer, VectorGeoLayer } from "./types";
 import { CatchError } from "../../services/helper/catch-helper";
-import { LoadingEvent } from "../app-geovisualization/types/events";
-import Feature, { FeatureLike } from "ol/Feature";
+import { FeatureLike } from "ol/Feature";
 import GeoJSON from "ol/format/GeoJSON";
-import Geometry from "ol/geom/Geometry";
-import SimpleGeometry from "ol/geom/SimpleGeometry";
 import VectorImageLayer from "ol/layer/VectorImage";
-import { State } from "ol/render";
 import VectorSource from "ol/source/Vector";
-import { Style } from "ol/style";
-import * as ExtentFunctions from "ol/extent";
 import { IAppGeoJsonLayerCheckbox } from "../app-geovisualization/types/components";
 import { EVENT_ZOOM_TO_HOME } from "./events";
 import { GEO_JSON_OPTIONS } from "@/app/plant/shared/visualization/layers/layer-base";
@@ -116,9 +110,6 @@ export default class AppGeoJsonLayerCheckbox extends BaseAuthComponent implement
       const source = new VectorSource({
         features: new GeoJSON().readFeatures(features, GEO_JSON_OPTIONS),
       });
-      source.getFeatures().forEach(feature => {
-        this.setFeatureStyle(feature);
-      });
       
       const vectorGeoLayer = new VectorImageLayer({ // More performant, but less accurate, rendering than "VectorLayer"
         properties: { id: this.geoLayer.id },
@@ -146,41 +137,6 @@ export default class AppGeoJsonLayerCheckbox extends BaseAuthComponent implement
     } finally {
       await this.geoLayer.setLoading(false);
     } 
-  }
-
-  private setFeatureStyle(feature: Feature<Geometry>) {
-    if (feature.get("image")) {
-      const img = new Image();
-
-      img.onload = () => {
-        feature.setStyle(
-          new Style({
-            renderer: (pixelCoordinates, state: State): void => {
-              const ctx = state.context;
-              const geometry = state.geometry.clone() as SimpleGeometry;
-              geometry.setCoordinates(pixelCoordinates);
-              geometry.rotate(-state.rotation - (feature.get("rotation") || 0), [0, 0]);
-              const extent = geometry.getExtent();
-
-              const width = ExtentFunctions.getWidth(extent);
-              const height = ExtentFunctions.getHeight(extent);
-              const bottomLeft = ExtentFunctions.getBottomLeft(extent);
-              const bottom = bottomLeft[1];
-              const left = bottomLeft[0];
-
-              const drawRotation = (feature.get("rotation") ?? 0) + state.rotation;
-
-              ctx.save();
-              ctx.rotate(drawRotation);
-              ctx.drawImage(img, left, bottom, width, height);
-              ctx.restore();
-            },
-          })
-        );
-      };
-
-      img.src = feature.get("image");
-    }
   }
 
   private zoomToHome() {

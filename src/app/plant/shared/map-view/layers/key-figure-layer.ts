@@ -20,10 +20,10 @@ import { BaseLayer } from "./base-layer";
 import { i18n } from "@/main";
 import { ComparedFeatureType, ComparedFeatures, KeyFigureColorScheme, KeyFigureGeoJSON, KeyFigureLayerOptions, LayerColor, LayerEvent } from "./types";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { FeatureActionsSummary, FeatureInfo, FeatureInfos, FeatureInfosMeta, FeatureProperties, PropsFeature } from "../types";
+import { FeatureInfo, FeatureInfos, FeatureProperties, PropsFeature } from "../types";
 
 export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q extends GeoVisualQuery> extends BaseLayer /*implements IOrthoImageMixin*/ {
-  protected abstract readonly analysisResultMapping: AnalysisResultMappings<T>;
+  public abstract readonly analysisResultMapping: AnalysisResultMappings<T>;
   
   public readonly name: string;
 
@@ -112,35 +112,35 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     }
   }
 
-  protected mapResultToFeatureInfos(result: T): FeatureInfos | undefined {
-    const mappingHelper = new AnalysisResultMappingHelper(
-      this.analysisResultMapping,
-      this.analysisResult!,
-      this.appLayerCheckbox!.isSuperAdmin,
-    );
-    const resultItem = mappingHelper.getItem(result);
+  // protected mapResultToFeatureInfos(result: T): FeatureInfos | undefined {
+  //   const mappingHelper = new AnalysisResultMappingHelper(
+  //     this.analysisResultMapping,
+  //     this.analysisResult!,
+  //     this.appLayerCheckbox!.isSuperAdmin,
+  //   );
+  //   const resultItem = mappingHelper.getItem(result);
 
-    const recordFeatureInfos: FeatureInfo[] = [];
-    for (const entry of mappingHelper.getEntries()) {
-      if (entry.transName === "pcs") {
-        continue;
-      }
+  //   const recordFeatureInfos: FeatureInfo[] = [];
+  //   for (const entry of mappingHelper.getEntries()) {
+  //     if (entry.transName === "pcs") {
+  //       continue;
+  //     }
 
-      let recordValue: string | undefined | null = (resultItem[entry.transName] as any)?.toString();
-      if (recordValue === undefined || recordValue === null) {
-        recordValue = "";
-      }
+  //     let recordValue: string | undefined | null = (resultItem[entry.transName] as any)?.toString();
+  //     if (recordValue === undefined || recordValue === null) {
+  //       recordValue = "";
+  //     }
 
-      recordFeatureInfos.push(mappingHelper.toFeatureInfo(entry, recordValue, this.keyFigureId));
-    }
+  //     recordFeatureInfos.push(mappingHelper.toFeatureInfo(entry, recordValue, this.keyFigureId));
+  //   }
 
-    const featureInfos: FeatureInfos = {
-      title: result.fieldgeometry_component.kks,
-      groups: [{ title: i18n.t("performance-indicators").toString(), records: recordFeatureInfos }],
-    };
+  //   const featureInfos: FeatureInfos = {
+  //     title: result.fieldgeometry_component.kks,
+  //     groups: [{ title: i18n.t("performance-indicators").toString(), records: recordFeatureInfos }],
+  //   };
 
-    return featureInfos;
-  }
+  //   return featureInfos;
+  // }
 
   protected getMappingEntry(): AnalysisResultMappingEntry<T> | undefined {
     const mappingHelper = new AnalysisResultMappingHelper(this.analysisResultMapping, this.analysisResult!);
@@ -155,8 +155,12 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     return feature.getProperties() as FeatureProperties;
   }
 
-  protected getMoreSpecificAnalysisResultParams(): TableRequest {
+  public getMoreSpecificAnalysisResultParams(): TableRequest {
     return {};
+  }
+
+  public modifyFeatureInfos(featureInfos: FeatureInfos, result: T) {
+    return;
   }
 
   protected async getResultDetails(feature: FeatureLike): Promise<T | undefined> {
@@ -217,51 +221,51 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     return this.geoJSON;
   }
 
-  public async onClick(feature: FeatureLike, featureInfosMeta: FeatureInfosMeta): Promise<FeatureInfos | undefined> {
-    if (!this.isVisible || !this.selected) {
-      return undefined;
-    }
+  // public async onClick(feature: FeatureLike, featureInfosMeta: FeatureInfosMeta): Promise<FeatureInfos | undefined> {
+  //   if (!this.isVisible || !this.selected) {
+  //     return undefined;
+  //   }
 
-    if (featureInfosMeta.fieldgeoComponent && featureInfosMeta.fieldgeoComponent.component_id !== this.keyFigure.component.id) {
-      return undefined;
-    }
+  //   if (featureInfosMeta.fieldgeoComponent && featureInfosMeta.fieldgeoComponent.component_id !== this.keyFigure.component.id) {
+  //     return undefined;
+  //   }
 
-    const result = await this.getResultDetails(feature);
-    if (!result) {
-      return undefined;
-    }
+  //   const result = await this.getResultDetails(feature);
+  //   if (!result) {
+  //     return undefined;
+  //   }
 
-    if (!featureInfosMeta.fieldgeoComponent) {
-      featureInfosMeta.fieldgeoComponent = result.fieldgeometry_component;
+  //   if (!featureInfosMeta.fieldgeoComponent) {
+  //     featureInfosMeta.fieldgeoComponent = result.fieldgeometry_component;
 
-      if (featureInfosMeta.fieldgeoComponent.component_id !== this.keyFigure.component.id) {
-        return undefined;
-      }
-    }
+  //     if (featureInfosMeta.fieldgeoComponent.component_id !== this.keyFigure.component.id) {
+  //       return undefined;
+  //     }
+  //   }
 
-    const featureInfos = this.mapResultToFeatureInfos(result);
+  //   const featureInfos = this.mapResultToFeatureInfos(result);
 
-    // const refFeatureInfos = await this.getRefMeasureFeatureInfos(featureInfosMeta, this.analysisResult.analysis_id);
+  //   // const refFeatureInfos = await this.getRefMeasureFeatureInfos(featureInfosMeta, this.analysisResult.analysis_id);
 
-    // if (!featureInfos) {
-    //   featureInfos = refFeatureInfos
-    // } else if (refFeatureInfos) {
-    //   featureInfos.groups.push(...refFeatureInfos.groups);
-    //   if (!featureInfos.actionsSummaries) {
-    //     featureInfos.actionsSummaries = refFeatureInfos.actionsSummaries;
-    //   } else {
-    //     featureInfos.actionsSummaries.push(...refFeatureInfos.actionsSummaries!);
-    //   }
-    // }
+  //   // if (!featureInfos) {
+  //   //   featureInfos = refFeatureInfos
+  //   // } else if (refFeatureInfos) {
+  //   //   featureInfos.groups.push(...refFeatureInfos.groups);
+  //   //   if (!featureInfos.actionsSummaries) {
+  //   //     featureInfos.actionsSummaries = refFeatureInfos.actionsSummaries;
+  //   //   } else {
+  //   //     featureInfos.actionsSummaries.push(...refFeatureInfos.actionsSummaries!);
+  //   //   }
+  //   // }
 
-    // this.orhtoImageMixin.addShowOrthoImageActions(featureInfos, this.keyFigure.component_id);
+  //   // this.orhtoImageMixin.addShowOrthoImageActions(featureInfos, this.keyFigure.component_id);
 
-    // if (this.vueComponent.enableResultsModification) {
-    //   await this.addResultsModificationFeatureAction(featureInfos!);
-    // }
+  //   // if (this.vueComponent.enableResultsModification) {
+  //   //   await this.addResultsModificationFeatureAction(featureInfos!);
+  //   // }
 
-    return featureInfos;
-  }
+  //   return featureInfos;
+  // }
 
   public setColorScheme(colorScheme: KeyFigureColorScheme) {
     this.colorScheme = colorScheme;
@@ -313,43 +317,43 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
   //   this.orhtoImageMixin.removeOrthoImageFeatures();
   // }
   
-  private async addResultsModificationFeatureAction(featureInfos: FeatureInfos) {
-    if (!featureInfos.actionsSummaries) {
-      featureInfos.actionsSummaries = [];
-    }
+  // private async addResultsModificationFeatureAction(featureInfos: FeatureInfos) {
+  //   if (!featureInfos.actionsSummaries) {
+  //     featureInfos.actionsSummaries = [];
+  //   }
 
-    const actionsSummary: FeatureActionsSummary = {
-      superAdminOnly: true,
-      buttonVariant: "secondary",
-      name: i18n.t("modify").toString(),
-      actions: [
-        {
-          name: i18n.t("set-to-null").toString(),
-          action: async () => {
-            await this.modfiyFeatureResultAction(featureInfos, "null");
-          }
-        },
-      ],
-    }
+  //   const actionsSummary: FeatureActionsSummary = {
+  //     superAdminOnly: true,
+  //     buttonVariant: "secondary",
+  //     name: i18n.t("modify").toString(),
+  //     actions: [
+  //       {
+  //         name: i18n.t("set-to-null").toString(),
+  //         action: async () => {
+  //           await this.modfiyFeatureResultAction(featureInfos, "null");
+  //         }
+  //       },
+  //     ],
+  //   }
 
-    const entry = this.getMappingEntry();
-    if (entry?.filterType === FilterFieldType.BOOLEAN) {
-      actionsSummary.actions.push({
-        name: i18n.t("set-to-false").toString(),
-        action: async () => {
-          await this.modfiyFeatureResultAction(featureInfos, "false");
-        }
-      });
-      actionsSummary.actions.push({
-        name: i18n.t("set-to-true").toString(),
-        action: async () => {
-          await this.modfiyFeatureResultAction(featureInfos, "true");
-        }
-      });
-    }
+  //   const entry = this.getMappingEntry();
+  //   if (entry?.filterType === FilterFieldType.BOOLEAN) {
+  //     actionsSummary.actions.push({
+  //       name: i18n.t("set-to-false").toString(),
+  //       action: async () => {
+  //         await this.modfiyFeatureResultAction(featureInfos, "false");
+  //       }
+  //     });
+  //     actionsSummary.actions.push({
+  //       name: i18n.t("set-to-true").toString(),
+  //       action: async () => {
+  //         await this.modfiyFeatureResultAction(featureInfos, "true");
+  //       }
+  //     });
+  //   }
 
-    featureInfos.actionsSummaries.push(actionsSummary);
-  }
+  //   featureInfos.actionsSummaries.push(actionsSummary);
+  // }
 
   private async modfiyFeatureResultAction(featureInfos: FeatureInfos, newValue: "null" | "false" | "true") {
     if (!confirm(i18n.t("apply-are-you-sure").toString())) {
@@ -361,7 +365,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
 
     await volateqApi.setAnalysisResultValueToNullOrFalseOrTrue(this.analysisResult.id, {
       key_figure_id: this.keyFigureId,
-      kks: featureInfos.title!,
+      kks: "", //featureInfos.title!,
       property_name: entry ? mappingHelper.getPropertyName(entry) : undefined,
       new_value: newValue,
     });

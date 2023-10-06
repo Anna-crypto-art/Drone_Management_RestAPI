@@ -8,7 +8,7 @@ import analysisResultCspPtcMappingSce from "@/app/shared/services/volateq-api/ap
 import { AnalysisResultCspPtcSceSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-sce-schema";
 
 export abstract class SceKeyFigureLayer extends CspPtcKeyFigureLayer<AnalysisResultCspPtcSceSchema> {
-  protected readonly analysisResultMapping = analysisResultCspPtcMappingSce;
+  public readonly analysisResultMapping = analysisResultCspPtcMappingSce;
 
   protected showPcsZoomLevel = 18;
 

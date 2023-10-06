@@ -6,7 +6,7 @@ import { AnalysisResultPvModuleSchema } from "@/app/shared/services/volateq-api/
 import analysisResultPvMappingModule from "@/app/shared/services/volateq-api/api-results-mappings/pv/analysis-result-pv-mapping-module";
 
 export abstract class ModuleKeyFigureLayer extends PvKeyFigureLayer<AnalysisResultPvModuleSchema> {
-  protected readonly analysisResultMapping = analysisResultPvMappingModule;
+  public readonly analysisResultMapping = analysisResultPvMappingModule;
 
   protected showPcsZoomLevel = 21;
   protected readonly colorTransparency = 0.3;
