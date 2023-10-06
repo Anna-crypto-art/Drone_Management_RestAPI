@@ -127,9 +127,6 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
     this.$store.direct.commit.sidebar.set({ name: "observations", state: false });
 
     this.toDate = dateHelper.toDate(dateHelper.now());
-    
-    // dFrom.setDate(dFrom.getDate() - 7);
-    // this.fromDate = dateHelper.toDate(dFrom);
 
     this.ccpService = CcpService.get(this.plant.id);
   }
@@ -154,8 +151,7 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
     }
 
     this.fromDate = dateHelper.toDate(dFrom);
-    console.log(this.fromDate)
-    await this.updateSummerizedObservations();
+      await this.updateSummerizedObservations();
   }
 
   onSidebarToggled(sidebarType: string): void {
@@ -219,10 +215,7 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
 @import "@/scss/_variables.scss";
 
 .app-observation-selection-sidebar {
-  // margin-top: 0;
   height: calc(100vh - #{$header-height});
-  // display: flex;
-  // height: 100%;
   
   &.absolute {
     position: absolute;

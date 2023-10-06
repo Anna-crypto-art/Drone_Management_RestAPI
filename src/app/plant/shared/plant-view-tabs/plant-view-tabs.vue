@@ -1,8 +1,8 @@
 <template>
   <div class="plant-view-tabs">
     <b-tabs v-model="selectedTab" align="center" @changed="onTabsChanged">
-      <div class="plant-name" translate="no">
-        {{ $t(plant.name) }}
+      <div class="plant-name" align="center" translate="no">
+        {{ plant.name }}
       </div>    
       <b-tab>
         <template #title>
@@ -67,12 +67,12 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
 
   private isMobile!: boolean;
   private isMobileQuery!: MediaQueryList;
-  private async isMobileListener<Evt extends { matches: boolean }>(e: Evt) {
-    this.isMobile = e.matches;
+  // private async isMobileListener<Evt extends { matches: boolean }>(e: Evt) {
+  //   this.isMobile = e.matches;
 
-    this.$store.direct.commit.sidebar.setAll(!this.isMobile);
-    await this.updateLeftSidebarAbsolute();
-  }
+  //   this.$store.direct.commit.sidebar.setAll(!this.isMobile);
+  //   await this.updateLeftSidebarAbsolute();
+  // }
 
   @CatchError()
   async created(): Promise<void> {
@@ -85,8 +85,8 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
     });
 
     this.isMobileQuery = getMobileQuery()
-    this.isMobileQuery.addEventListener("change", this.isMobileListener);
-    this.isMobileListener(this.isMobileQuery);
+    // this.isMobileQuery.addEventListener("change", this.isMobileListener);
+    // this.isMobileListener(this.isMobileQuery);
   }
 
   async mounted() {
@@ -183,7 +183,7 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
   async unmounted() {
     this.analysisSelectionService?.unregister();
 
-    this.isMobileQuery.removeEventListener("change", this.isMobileListener);
+    // this.isMobileQuery.removeEventListener("change", this.isMobileListener);
   }
 
   async updateLeftSidebarAbsolute() {
@@ -213,11 +213,13 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
   }
 
   .plant-name {
+    width: 120px;
     position: absolute;
-    z-index: 10;
-    top: 4px;
-    left: 10px;
-    font-size: 25px;
+    z-index: 1030;
+    top: -25px;
+    left:65px;
+    color: white;
+    font-size: 15px;
   }
 }
 </style>

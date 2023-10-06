@@ -33,7 +33,7 @@ export default class AppSidebar extends Vue {
 .app-sidebar {
   position: relative;
   box-sizing: border-box;
-  margin-left: 50px;
+  margin-left: 40px;
   width: 0;
   height: calc(100% - 41.4px);
   top: 41.4px;

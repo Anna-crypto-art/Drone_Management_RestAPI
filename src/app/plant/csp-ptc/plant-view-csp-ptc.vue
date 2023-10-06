@@ -29,7 +29,6 @@
 import AppPlantAdminViewCspPtc from "@/app/plant/csp-ptc/plant-admin-view-csp-ptc.vue";
 import AppTablesCspPtc from "@/app/plant/csp-ptc/tables/tables-csp-ptc.vue";
 import AppVisualCspPtc from "@/app/plant/csp-ptc/visualization/visual-csp-ptc.vue";
-// import AppAnalysisSelectionSidebar from "@/app/plant/shared/selection-sidebar/selection-sidebar.vue";
 import AppPlantViewTabs from "@/app/plant/shared/plant-view-tabs/plant-view-tabs.vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";

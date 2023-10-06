@@ -1,23 +1,25 @@
 <template>
   <div class="app-sidebar-button-menu">
-    <b-button 
-      :variant="variantAnalysis"
-      size="sm"
-      tool="analysis"
-      :class="'toggle-button analysis'"
-      @click="onToggle('analysis')"
-    >
-      <app-icon-analysis />
-    </b-button>
-    <b-button 
-      :variant="variantObservations"
-      size="sm"
-      tool="observations"
-      :class="'toggle-button observations'"
-      @click="onToggle('observations')"
-    >
-      <b-icon-clipboard-data />
-    </b-button>
+    <b-button-group vertical>
+      <b-button 
+        :variant="variantAnalysis"
+        size="sm"
+        tool="analysis"
+        :class="'toggle-button analysis'"
+        @click="onToggle('analysis')"
+      >
+        <app-icon-analysis />
+      </b-button>
+      <b-button 
+        :variant="variantObservations"
+        size="sm"
+        tool="observations"
+        :class="'toggle-button observations'"
+        @click="onToggle('observations')"
+      >
+        <b-icon-clipboard-data />
+      </b-button>
+    </b-button-group>
   </div>
 </template>
 
@@ -64,40 +66,25 @@ export default class AppSidebarButtonMenu extends Vue {
 @import "@/scss/_variables.scss";
 
 .app-sidebar-button-menu {
-  width: 50px;
+  width: 41px;
+  position: absolute;
+  height: calc(100% - 41.4px);
+  top: 41.4px;
+  z-index: 100;
+  background-color: $white;
+  border: 1px solid $border-color-grey;
+  // margin-left: -1px;
 
   .toggle-button {
-    position: absolute;
-    border: 1px solid $border-color-grey;
-    white-space: nowrap;
-    z-index: 10;
+    width: 40px;
+    height: 40px;
+    margin-left: -1px;
 
-    &.analysis {
-      top: 41.2px;
-    }
-    &.observations {
-      top: 76.2px;
-    }
-
-    // &.opens-left {
-    //   right: calc(100% - 1px);
-    //   border-right-color: $white;
-
-    //   .plant-view-csp-ptc:not(.mobile) & {
-    //     &:hover,
-    //     &.show-label {
-    //       .toggle-button-text {
-    //         padding-right: 0.5em;
-    //       }
-    //     }
-    //   }
-    // }
-
-    // &:hover {
-    //   // background-color: $background-grey;
+    &:hover {
+      background-color: $background-grey;
 
     //   @extend .show-label;
-    // }
+    }
   }
 }
 </style>

@@ -45,12 +45,6 @@ button.layer-sidebar-toggle {
     }
   }
 
-  &:hover {
-    // background-color: $background-grey;
-
-    @extend .show-label;
-  }
-
   &-content {
     padding: 10px;
 

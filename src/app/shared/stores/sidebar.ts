@@ -18,11 +18,6 @@ const SidebarModule = defineModule({
       SidebarModule.mutations.set(state, { name, state: !state[name] });
     },
     set(state, { name, state: sidebarState }: { name: SidebarNames; state: boolean }) {
-      // if (store.state.mobile.mobile) {
-      //   const otherName = sidebars[Math.abs(sidebars.indexOf(name) - 1)];
-      //   state[otherName] = false;
-      //   emit(otherName, false);
-      // }
 
       state[name] = sidebarState;
       emit(name, sidebarState);

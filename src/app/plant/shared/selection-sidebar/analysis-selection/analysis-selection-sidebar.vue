@@ -309,9 +309,7 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
 @import "@/scss/_variables.scss";
 
 .app-analysis-selection-sidebar {
-  margin-top: 0;
   height: calc(100vh - #{$header-height});
-  display: flex;
   
   &.absolute {
     position: absolute;
