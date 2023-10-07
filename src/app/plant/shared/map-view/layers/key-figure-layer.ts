@@ -31,9 +31,6 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
   public enableCompare = false;
   public compareAnalysisResult: AnalysisResultDetailedSchema | null = null;
 
-  // protected readonly orhtoImageMixin: OrhtoImageMixin;
-  // public orthoImages: OrthoImage[] | null = null;
-
   // protected readonly refMeasureFeatureStrokeWidth: number = 3;
   // protected readonly refMeasureFeatureStrokeWidthAddOnZoom: number = 6;
 
@@ -56,8 +53,6 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
 
     this.description = this.options.description && i18n.t(this.options.description).toString();
     this.zIndex = this.options.zIndex || 9; // 9 - to make sure PIs overlay components, always
-
-    // this.orhtoImageMixin = new OrhtoImageMixin(this);
 
     this.created();
   }
@@ -82,10 +77,6 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     return super.getAddStyles(feature);
   }
 
-  // public isOrthoImageAvailable(orthoImage: OrthoImage, componentId: ApiComponent): boolean {
-  //   return this.orhtoImageMixin.isOrthoImageAvailable(orthoImage, componentId);
-  // }
-
   public get id(): string {
     return `${this.analysisResult.id}__${this.keyFigureId}__${this.name}`;
   }
@@ -98,12 +89,6 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     return this.getDisplayName();
   }
 
-  public async onSelectedChanged(): Promise<void> {
-    await super.onSelectedChanged();
-
-    // await this.vueComponent.onLayerSelected(selected, this.getLegend());
-  }
-
   protected async emitOnSelected() {
     if (this.invisibleAutoSelection) {
       this.events.emit(LayerEvent.ON_INV_AUTO_SELECT_SELECTED, this);
@@ -111,36 +96,6 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
       await super.emitOnSelected();
     }
   }
-
-  // protected mapResultToFeatureInfos(result: T): FeatureInfos | undefined {
-  //   const mappingHelper = new AnalysisResultMappingHelper(
-  //     this.analysisResultMapping,
-  //     this.analysisResult!,
-  //     this.appLayerCheckbox!.isSuperAdmin,
-  //   );
-  //   const resultItem = mappingHelper.getItem(result);
-
-  //   const recordFeatureInfos: FeatureInfo[] = [];
-  //   for (const entry of mappingHelper.getEntries()) {
-  //     if (entry.transName === "pcs") {
-  //       continue;
-  //     }
-
-  //     let recordValue: string | undefined | null = (resultItem[entry.transName] as any)?.toString();
-  //     if (recordValue === undefined || recordValue === null) {
-  //       recordValue = "";
-  //     }
-
-  //     recordFeatureInfos.push(mappingHelper.toFeatureInfo(entry, recordValue, this.keyFigureId));
-  //   }
-
-  //   const featureInfos: FeatureInfos = {
-  //     title: result.fieldgeometry_component.kks,
-  //     groups: [{ title: i18n.t("performance-indicators").toString(), records: recordFeatureInfos }],
-  //   };
-
-  //   return featureInfos;
-  // }
 
   protected getMappingEntry(): AnalysisResultMappingEntry<T> | undefined {
     const mappingHelper = new AnalysisResultMappingHelper(this.analysisResultMapping, this.analysisResult!);
@@ -221,52 +176,6 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     return this.geoJSON;
   }
 
-  // public async onClick(feature: FeatureLike, featureInfosMeta: FeatureInfosMeta): Promise<FeatureInfos | undefined> {
-  //   if (!this.isVisible || !this.selected) {
-  //     return undefined;
-  //   }
-
-  //   if (featureInfosMeta.fieldgeoComponent && featureInfosMeta.fieldgeoComponent.component_id !== this.keyFigure.component.id) {
-  //     return undefined;
-  //   }
-
-  //   const result = await this.getResultDetails(feature);
-  //   if (!result) {
-  //     return undefined;
-  //   }
-
-  //   if (!featureInfosMeta.fieldgeoComponent) {
-  //     featureInfosMeta.fieldgeoComponent = result.fieldgeometry_component;
-
-  //     if (featureInfosMeta.fieldgeoComponent.component_id !== this.keyFigure.component.id) {
-  //       return undefined;
-  //     }
-  //   }
-
-  //   const featureInfos = this.mapResultToFeatureInfos(result);
-
-  //   // const refFeatureInfos = await this.getRefMeasureFeatureInfos(featureInfosMeta, this.analysisResult.analysis_id);
-
-  //   // if (!featureInfos) {
-  //   //   featureInfos = refFeatureInfos
-  //   // } else if (refFeatureInfos) {
-  //   //   featureInfos.groups.push(...refFeatureInfos.groups);
-  //   //   if (!featureInfos.actionsSummaries) {
-  //   //     featureInfos.actionsSummaries = refFeatureInfos.actionsSummaries;
-  //   //   } else {
-  //   //     featureInfos.actionsSummaries.push(...refFeatureInfos.actionsSummaries!);
-  //   //   }
-  //   // }
-
-  //   // this.orhtoImageMixin.addShowOrthoImageActions(featureInfos, this.keyFigure.component_id);
-
-  //   // if (this.vueComponent.enableResultsModification) {
-  //   //   await this.addResultsModificationFeatureAction(featureInfos!);
-  //   // }
-
-  //   return featureInfos;
-  // }
-
   public setColorScheme(colorScheme: KeyFigureColorScheme) {
     this.colorScheme = colorScheme;
   }
@@ -312,10 +221,6 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
 
     return ` (<b>${percentage.toString()}%</b> - <small>${featureCount}</small>)`;
   }
-
-  // public removeOrthoImageFeatures() {
-  //   this.orhtoImageMixin.removeOrthoImageFeatures();
-  // }
   
   // private async addResultsModificationFeatureAction(featureInfos: FeatureInfos) {
   //   if (!featureInfos.actionsSummaries) {

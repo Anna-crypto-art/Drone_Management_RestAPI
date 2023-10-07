@@ -1,13 +1,13 @@
 <template>
   <div class="app-map-view-popup" v-show="visible">
     <div class="app-map-view-popup-close-button" @click="onClose">x</div>
-    <div class="app-map-view-popup-title">
-      <h3>
+    <div class="app-map-view-popup-title mar-bottom">
+      <h3 class="no-mar-bottom">
         <div>{{ pcs }}</div>
         <div v-if="componentName"><small class="grayed">{{ componentName }}</small></div>
       </h3>
     </div>
-    <div class="app-map-view-popup-actions">
+    <div class="app-map-view-popup-actions mar-bottom">
       <b-dropdown v-if="orthoImages" variant="secondary">
         <template #button-content>
           <b-icon-image-fill /><span class="pad-left-half">{{ $t("ortho") }}</span>
@@ -22,15 +22,30 @@
     </div>
     <div class="app-map-view-popup-body">
       <app-loading v-show="loading" />
-      <div class="app-map-view-popup-body-feature-infos" v-if="piFeatureInfos">
-        <h4>{{ $t("performance-indicators") }}</h4>
-        
-        <app-box>
-          <div v-for="(piFeatureInfo, index) in piFeatureInfos.infos" :key="index">
-            <div><small class="grayed">{{ piFeatureInfo.name }}</small></div>
-            <div>{{ piFeatureInfo.value }}</div>
-            <hr v-if="index + 1 < piFeatureInfos.infos.length" />
+      <div v-if="piFeatureInfos.length > 0">
+        <h4 class="no-mar-top mar-bottom-half">{{ $t("performance-indicators") }}</h4>
+        <app-box class="app-map-view-popup-body-feature-infos no-mar-top no-mar-bottom">
+          <div v-for="(piFeatureInfo, index) in piFeatureInfos" :key="index">
+            <div v-show="piFeatureInfo._visible" v-if="piFeatureInfo.value">
+              <div class="app-map-view-popup-body-feature-infos-name">
+                <small class="grayed">
+                  <b>{{ piFeatureInfo.name }}</b>
+                  <app-super-admin-marker v-if="piFeatureInfo.superAdminOnly" />
+                  <app-explanation v-if="piFeatureInfo.descr"><span v-html="$t(piFeatureInfo.descr)"></span></app-explanation>
+                </small>
+              </div>
+              <div class="app-map-view-popup-body-feature-infos-value" :class="{ bold: piFeatureInfo.bold }">
+                {{ piFeatureInfo.value }}
+                <span v-if="piFeatureInfo.unit">
+                  {{ piFeatureInfo.unit }}
+                </span>
+              </div>
+              <hr class="mar-bottom-half mar-top-half" />
+            </div>
           </div>
+          <a href="#" @click.prevent="onShowMorePiFeaturesClick" v-if="hasHiddenFeatures">
+            {{ hiddenFeaturesVisible ? $t("hide") : $t("show-more") }}
+          </a>
         </app-box>
       </div>
     </div>
@@ -65,6 +80,8 @@ import { AnalysisResultMappingHelper } from '@/app/shared/services/volateq-api/a
 import { AnalysisResultSchemaBase } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base';
 import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
 import { FeatureInfo, FeatureInfos } from './types';
+import { BaseLayer } from './layers/base-layer';
+import AppBox from '@/app/shared/components/app-box/app-box.vue';
 
 @Component({
   name: "app-map-view-popup",
@@ -74,6 +91,7 @@ import { FeatureInfo, FeatureInfos } from './types';
     AppButton,
     AppSuperAdminMarker,
     AppLoading,
+    AppBox,
   }
 })
 export default class AppMapViewPopup extends BaseAuthComponent implements IAnalysisSelectionComponent {
@@ -92,8 +110,11 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   pcs = "";
   componentId: ApiComponent | null = null;
   orthoImages: OrthoImage[] | null = null;
+  
   imgTitle = "";
   imgUrl = "";
+  piFeatureInfos: FeatureInfo[] = [];
+  hiddenFeaturesVisible = false;
 
   created() {
     this.analysisSelectionService = new AnalysisSelectionService(this);
@@ -131,7 +152,13 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
 
   @CatchError("loading")
   async updatePopup() {
+    this.resetPopupValues();
+
     const pcs: string = this.mapFeature!.getProperties().name;
+    if (!pcs) {
+      return;
+    }
+
     this.pcs = pcs;
 
     if (this.analysisSelectionService.firstAnalysisResult) {
@@ -146,17 +173,22 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     const clickedLayers = this.layersService.layers.filter(l => l.selected && 
       l.loadedLayer?.getSource()?.getFeatures().find(f => f.getProperties().name === pcs));
 
-    const keyFigureLayer: KeyFigureBaseLayer | undefined = clickedLayers.find(l => l instanceof KeyFigureLayer) as KeyFigureBaseLayer;
-    if (keyFigureLayer) {
-      this.componentId = keyFigureLayer.keyFigure.component_id;
+    this.setComponentId(clickedLayers);
 
-      
+    const clickedKeyFigureLayers = clickedLayers.filter(l => l instanceof KeyFigureLayer) as KeyFigureBaseLayer[];
+    if (clickedKeyFigureLayers.length > 0) {
+      const details = await this.getAnalysisResultSchemaDetails(pcs, clickedKeyFigureLayers);
+      if (details) {
+        const featureInfos = this.mapDetailsToFeatureInfos(details, clickedKeyFigureLayers);
 
-      // continue here
-    } else {
-      const componentLayer: ComponentLayer | undefined = clickedLayers.find(l => l instanceof ComponentLayer) as ComponentLayer;
-      if (componentLayer) {
-        this.componentId = componentLayer.componentId;
+        // Currently image gets overwritten for the edge case, that multiple images should be displayed.
+        // TODO: Implement an Image slider for this edge case...
+        if (featureInfos.images && featureInfos.images.length > 0) {
+          this.imgTitle = featureInfos.images[0].title;
+          this.imgUrl = featureInfos.images[0].url;
+        }
+
+        this.piFeatureInfos = featureInfos.infos;        
       }
     }
   }
@@ -187,7 +219,43 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     }
   }
 
-  private async getResultDetails(
+  get hasHiddenFeatures(): boolean {
+    return !!this.piFeatureInfos.find(f => f.hidden);
+  }
+
+  @CatchError()
+  onShowMorePiFeaturesClick() {
+    for (const piFeatureInfo of this.piFeatureInfos) {
+      if (piFeatureInfo.hidden) {
+        piFeatureInfo._visible = !piFeatureInfo._visible;
+      }
+    }
+    this.hiddenFeaturesVisible = !this.hiddenFeaturesVisible;
+  }
+
+  private resetPopupValues() {
+    this.imgTitle = "";
+    this.imgUrl = "",
+    this.orthoImages = null;
+    this.pcs = "";
+    this.componentId = null;
+    this.piFeatureInfos = [];
+    this.hiddenFeaturesVisible = false;
+  }
+
+  private setComponentId(clickedLayers: BaseLayer[]) {
+    const keyFigureLayer: KeyFigureBaseLayer | undefined = clickedLayers.find(l => l instanceof KeyFigureLayer) as KeyFigureBaseLayer;
+    if (keyFigureLayer) {
+      this.componentId = keyFigureLayer.keyFigure.component_id;
+    } else {
+      const componentLayer: ComponentLayer | undefined = clickedLayers.find(l => l instanceof ComponentLayer) as ComponentLayer;
+      if (componentLayer) {
+        this.componentId = componentLayer.componentId;
+      }
+    }
+  }
+
+  private async getAnalysisResultSchemaDetails(
     pcs: string,
     keyFigureLayers: KeyFigureBaseLayer[],
   ): Promise<AnalysisResultSchemaBase | undefined> {
@@ -201,7 +269,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     }
 
     const results = await volateqApi.getSpecificAnalysisResult(
-      this.analysisSelectionService.firstAnalysis!.id, 
+      this.analysisSelectionService.firstAnalysisResult!.id, 
       keyFigureLayers[0].keyFigure.component_id, 
       {
         search_text: pcs,
@@ -218,7 +286,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     return undefined;
   }
 
-  private mapResultToFeatureInfos(result: AnalysisResultSchemaBase, keyFigureLayers: KeyFigureBaseLayer[]): FeatureInfos | undefined {
+  private mapDetailsToFeatureInfos(result: AnalysisResultSchemaBase, keyFigureLayers: KeyFigureBaseLayer[]): FeatureInfos {
     const mappingHelper = new AnalysisResultMappingHelper(
       keyFigureLayers[0].analysisResultMapping,
       this.analysisSelectionService.firstAnalysisResult!,
@@ -237,13 +305,19 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
         recordValue = "";
       }
 
-      recordFeatureInfos.push(mappingHelper.toFeatureInfo(entry, recordValue, keyFigureLayers[0].keyFigureId));
+      const featureInfo = mappingHelper.toFeatureInfo(entry, recordValue, keyFigureLayers[0].keyFigureId);
+      featureInfo._visible = !featureInfo.hidden;
+
+      recordFeatureInfos.push(featureInfo);
     }
 
-    const featureInfos: FeatureInfos = {
-      title: result.fieldgeometry_component.kks,
-      groups: [{ title: i18n.t("performance-indicators").toString(), records: recordFeatureInfos }],
+    const featureInfos = {
+      infos: recordFeatureInfos,
     };
+
+    for (const keyFigureLayer of keyFigureLayers) {
+      keyFigureLayer.modifyFeatureInfos(featureInfos, result);
+    }
 
     return featureInfos;
   }
@@ -294,7 +368,19 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
 
   &-body {
     position: relative;
-    min-height: 150px;
+    min-height: 50px;
+
+    &-feature-infos {
+      max-height: 500px;
+      overflow-y: auto;
+
+      &-name {
+        line-height: 1;
+      }
+      &-value.bold {
+        font-weight: bold;
+      }
+    }
   }
 }
 

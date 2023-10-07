@@ -2,7 +2,7 @@ import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/a
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { FeatureLike } from "ol/Feature";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { FeatureInfos, FeatureInfosMeta, PropsFeature } from "../types";
+import { FeatureInfos, PropsFeature } from "../types";
 import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { ReferenceMeasurementEntriesSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
@@ -30,13 +30,8 @@ export abstract class ComponentLayer extends BaseLayer /*implements IOrthoImageM
 
   // protected analysis: AnalysisForViewSchema | null = null;
 
-  // private readonly orhtoImageMixin: OrhtoImageMixin;
-  // public orthoImages: OrthoImage[] | null = null;
-
   constructor(plant: PlantSchema) {
     super(plant);
-
-    // this.orhtoImageMixin = new OrhtoImageMixin(this);
 
     this.created();
   }
@@ -60,10 +55,6 @@ export abstract class ComponentLayer extends BaseLayer /*implements IOrthoImageM
     return this.color;
   }
 
-  // public isOrthoImageAvailable(orthoImage: OrthoImage, componentId: ApiComponent): boolean {
-  //   return this.orhtoImageMixin.isOrthoImageAvailable(orthoImage, componentId);
-  // }
-
   protected getWidth(): number {
     return this.zoomWidth || this.width;
   }
@@ -86,47 +77,4 @@ export abstract class ComponentLayer extends BaseLayer /*implements IOrthoImageM
 
     return undefined;
   }
-
-  // public setSelectedAnalysis(analysis: AnalysisForViewSchema | null) {
-  //   this.analysis = analysis;
-  // }
-
-  // public get analysisResult(): AnalysisResultDetailedSchema | null {
-  //   return this.analysis?.analysis_result || null;
-  // }
-
-  // public async onClick(
-  //   feature: FeatureLike,
-  //   featureInfosMeta: FeatureInfosMeta,
-  // ): Promise<FeatureInfos | undefined> { 
-  //   if (!this.allowRefMeasures || !this.isVisible || !this.selected) {
-  //     return undefined;
-  //   }
-
-  //   const pcs = this.getPcs(feature)!;
-  //   if (!pcs) {
-  //     return undefined;
-  //   }
-
-  //   if (!featureInfosMeta.fieldgeoComponent) {
-  //     featureInfosMeta.fieldgeoComponent = await volateqApi.getFieldgeometryComponent(
-  //       this.vueComponent.plant.fieldgeometry!.id,
-  //       pcs,
-  //     )
-  //   }
-
-  //   if (featureInfosMeta.fieldgeoComponent!.component_id !== this.componentId) {
-  //     return undefined;
-  //   }
-
-  //   if (!this.analysis) {
-  //     return undefined;
-  //   }
-
-  //   const featureInfos: FeatureInfos = { groups: [] }; // await this.getRefMeasureFeatureInfos(featureInfosMeta, this.analysis.id);
-    
-  //   // this.orhtoImageMixin.addShowOrthoImageActions(featureInfos, this.componentId);
-
-  //   return featureInfos;
-  // }
 }

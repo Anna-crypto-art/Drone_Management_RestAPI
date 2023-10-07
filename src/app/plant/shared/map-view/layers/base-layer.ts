@@ -372,23 +372,5 @@ export abstract class BaseLayer implements IGeoLayer {
 
   public rerender() {
     this.loadedLayer?.changed();
-
-    // if (this.selected) {
-    //   await this.setSelected(false);
-    // }
-    // await this.setSelected(true);
-
-    // this.rerenderMap();
   }
-
-  // public rerenderMap() {
-  //   this.loadedLayer?.changed();
-  // }
-
-  // public async onClick(
-  //   feature: FeatureLike,
-  //   featureInfosMeta: FeatureInfosMeta,
-  // ): Promise<FeatureInfos | undefined> { 
-  //   return undefined;
-  // }
 }
