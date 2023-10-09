@@ -45,3 +45,5 @@ export interface FeatureInfos {
   images?: FeatureImage[];
   infos: FeatureInfo[];
 }
+
+export type ResultModMode = "null" | "false" | "true";
