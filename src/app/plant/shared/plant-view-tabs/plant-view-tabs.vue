@@ -182,7 +182,7 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
   async unmounted() {
     this.analysisSelectionService?.unregister();
 
-    // this.isMobileQuery.removeEventListener("change", this.isMobileListener);
+    this.isMobileQuery.removeEventListener("change", this.isMobileListener);
   }
 
   async updateLeftSidebarAbsolute() {
