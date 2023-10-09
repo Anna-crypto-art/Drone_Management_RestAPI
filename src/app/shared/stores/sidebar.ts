@@ -1,8 +1,8 @@
 import { defineModule } from "direct-vuex";
 import Vue from "vue";
 
-export const sidebars = ["analyses", "layer-switcher", "observations"] as const;
-type SidebarNames = typeof sidebars[number];
+export const sidebars = ["analyses", "observations"] as const;
+export type SidebarNames = typeof sidebars[number];
 
 export type ISidebarModule = { [k in SidebarNames]: boolean };
 export interface ISidebarEvent {

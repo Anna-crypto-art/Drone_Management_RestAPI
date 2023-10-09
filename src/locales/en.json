@@ -747,6 +747,11 @@
   "count": "Count",
   "raw-ir-image": "Raw IR image",
   "show-raw-ir-image": "Show raw IR image",
+  "please-select-time-range": "- please select time range -",
+  "last-7-days": "Last 7 Days",
+  "last-30-days": "Last 30 Days",
+  "last-90-days": "Last 90 Days",
+  "last-year": "Last Year",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

@@ -5,7 +5,7 @@
         :variant="variantAnalyses"
         size="sm"
         tool="analyses"
-        :class="'toggle-button analyses'"
+        class="toggle-button"
         @click="onToggle('analyses')"
       >
         <app-icon-analysis />
@@ -14,10 +14,10 @@
         :variant="variantObservations"
         size="sm"
         tool="observations"
-        :class="'toggle-button observations'"
+        class="toggle-button"
         @click="onToggle('observations')"
       >
-        <b-icon-clipboard-data />
+        <app-icon-observations />
       </b-button>
     </b-button-group>
   </div>
@@ -29,7 +29,7 @@ import { Component } from "vue-property-decorator";
 import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
 import AppIconObservations from "@/app/shared/components/app-icon/app-icon-observations.vue";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
-import { sidebars } from "@/app/shared/stores/sidebar";
+import { SidebarNames } from "@/app/shared/stores/sidebar";
 
 @Component({
   name: "app-sidebar-button-menu",
@@ -43,10 +43,8 @@ export default class AppSidebarButtonMenu extends Vue {
   get variantAnalyses(): string { return this.$store.direct.state.sidebar.analyses ? "primary" : "secondary"; }
   get variantObservations(): string { return this.$store.direct.state.sidebar.observations ? "primary" : "secondary"; }
 
-  tool: string = typeof sidebars;
-
   @CatchError()
-  onToggle(tool: string) {
+  onToggle(tool: SidebarNames) {
     switch (tool) {
       case "analyses":
         this.$store.direct.commit.sidebar.toggle({ name: "analyses" });

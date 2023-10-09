@@ -131,7 +131,6 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
     }
 
     this.$store.direct.commit.sidebar.set({ name: "analyses", state: true });
-    await this.$nextTick();
 
     analysisSelectEventService.on(this.plant.id, AnalysisSelectionEvent.UNSELECT_ALL, async () => {
       this.analysesTable.clearSelected();
@@ -330,11 +329,6 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
   &-kpi-badge {
     padding-right: 5px;
   }
-}
-  
-// Fix sidebar overlays toaster
-.b-popover {
-  z-index: 1101;
 }
 
 </style>

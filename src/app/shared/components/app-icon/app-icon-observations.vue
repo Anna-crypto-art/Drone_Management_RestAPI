@@ -1,6 +1,6 @@
 <template>
   <b-iconstack :class="cls">
-    <b-icon stacked icon="clipboard-data" scale="1.5" shift-h="-1"/>
+    <b-icon icon="clipboard-data" scale="0.8" shift-v="2" shift-h="-3" />
   </b-iconstack>
 </template>
 <script lang="ts">

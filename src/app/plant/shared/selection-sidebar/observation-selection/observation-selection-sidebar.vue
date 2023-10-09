@@ -8,12 +8,7 @@
         <div class="app-observation-selection-sidebar">
           <div class="app-observation-selection-sidebar-filter">
             <b-form @submit.prevent="onSubmitFilter">
-              <b-form-select v-model="selected" @change="onTimeRangeChanged(selected)">
-                <b-form-select-option :value="null">select time range for Observations</b-form-select-option>
-                <b-form-select-option value="past7Days">Last 7 Days</b-form-select-option>
-                <b-form-select-option value="past30Days">Last 30 Days</b-form-select-option>
-                <b-form-select-option value="past90Days">Last 90 Days</b-form-select-option>
-                <b-form-select-option value="pastYear">Last Year</b-form-select-option>
+              <b-form-select v-model="selectedTimeRange" :options="timeRangeOptions" @change="onTimeRangeChanged()">
               </b-form-select>
             </b-form>
           </div>
@@ -111,8 +106,14 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
 
   ccpService!: CcpService;
 
-  selected = "null";
-  selectedTimeRange = "";
+  timeRangeOptions: { value: number, text: string }[] = [
+    { value: 7, text: this.$t("last-7-days").toString() },
+    { value: 30, text: this.$t("last-30-days").toString() },
+    { value: 90, text: this.$t("last-90-days").toString() },
+    { value: 365, text: this.$t("last-year").toString() },
+  ];
+
+  selectedTimeRange = 7;
 
   @CatchError("loading")
   async created() {
@@ -130,27 +131,12 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
     this.ccpService = CcpService.get(this.plant.id);
   }
 
-  async onTimeRangeChanged(selected: string) {
-    this.selectedTimeRange = selected;
-
+  @CatchError("loading")
+  async onTimeRangeChanged() {
     const dFrom = new Date();
-
-    switch (this.selectedTimeRange) {
-      case "past7Days":
-        dFrom.setDate(dFrom.getDate() - 7);
-        break;
-      case "past30Days":
-        dFrom.setDate(dFrom.getDate() - 30);
-        break;
-      case "past90Days":
-        dFrom.setDate(dFrom.getDate() - 90);
-        break;
-      case "pastYear":
-        dFrom.setDate(dFrom.getDate() - 365);
-    }
-
+    dFrom.setDate(dFrom.getDate() - this.selectedTimeRange);
     this.fromDate = dateHelper.toDate(dFrom);
-      await this.updateSummerizedObservations();
+    await this.updateSummerizedObservations();
   }
 
   @CatchError("loading")
@@ -235,11 +221,6 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
   &-filter {
     margin-bottom: 15px;
   }
-}
-  
-// Fix sidebar overlays toaster
-.b-popover {
-  z-index: 1101;
 }
 
 </style>

@@ -20,7 +20,7 @@ export default class AppGeovisualToggleLayer extends Vue {
   @State(state => state.sidebar["layer-switcher"]) open!: boolean;
 
   toggle() {
-    this.$store.direct.commit.sidebar.toggle({ name: "layer-switcher" });
+    // this.$store.direct.commit.sidebar.toggle({ name: "layer-switcher" });
   }
 }
 </script>
