@@ -8,14 +8,14 @@
       </h3>
     </div>
     <div class="app-map-view-popup-actions mar-bottom">
-      <b-dropdown v-if="orthoImages" variant="secondary">
-        <template #button-content>
+      <app-dropdown-button v-if="orthoImages" variant="secondary" :loading="orthoLoading">
+        <template #title>
           <b-icon-image-fill /><span class="pad-left-half">{{ $t("ortho") }}</span>
         </template>
         <b-dropdown-item v-for="orthoImage in orthoImages" :key="orthoImage.keyFigureId" @click="onOrthoImageClick(orthoImage)">
           {{ orthoImage.name }}
         </b-dropdown-item>
-      </b-dropdown>
+      </app-dropdown-button>
     </div>
     <div class="app-map-view-popup-image mar-bottom" v-if="imgUrl">
       <img :title="imgTitle" :src="imgUrl" />
@@ -40,7 +40,7 @@
                   {{ piFeatureInfo.unit }}
                 </span>
               </div>
-              <hr class="mar-bottom-half mar-top-half" />
+              <hr class="mar-bottom-half mar-top-half" v-show="hasHiddenFeatures || index + 1 < piFeatureInfos.length" />
             </div>
           </div>
           <a href="#" @click.prevent="onShowMorePiFeaturesClick" v-if="hasHiddenFeatures">
@@ -102,6 +102,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
 
   visible = false;
   loading = false;
+  orthoLoading = false;
 
   analysisSelectionService!: AnalysisSelectionService;
   layersService!: LayersService;
@@ -197,7 +198,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     return this.componentId && this.$t(apiComponentNames[this.componentId]).toString() || ""; 
   }
 
-  @CatchError("loading")
+  @CatchError("orthoLoading")
   async onOrthoImageClick(orthoImage: OrthoImage) {
     if (orthoImage.keyFigureId === ApiKeyFigure.TRACKER_RAW_IMAGES_IR_ID) {
       const features = await this.orthoImagesLayer.getImageFeatures(

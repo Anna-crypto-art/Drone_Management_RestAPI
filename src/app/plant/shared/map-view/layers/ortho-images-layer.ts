@@ -14,8 +14,13 @@ import { GEO_JSON_OPTIONS } from "@/app/shared/components/app-map/constants";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import VectorSource from "ol/source/Vector";
 import VectorImageLayer from "ol/layer/VectorImage";
+import { AppSeqEventService } from "@/app/shared/services/app-event-service/app-event-service";
 
-export class OrthoImagesLayer {
+export enum OrthoImageEvent {
+  ON_ORTHO_IMAGE_CHANGED = "ON_ORTHO_IMAGE_CHANGED",
+}
+
+export class OrthoImagesLayer extends AppSeqEventService<OrthoImageEvent> {
   private static readonly orthoImagesLayers: Record<string, OrthoImagesLayer> = {};
 
   public static get(plant: PlantSchema, map: Map): OrthoImagesLayer {
@@ -42,7 +47,9 @@ export class OrthoImagesLayer {
   private constructor(
     private readonly plant: PlantSchema,
     private readonly map: Map,
-  ) {}
+  ) {
+    super();
+  }
 
   public getAvailableOrthoImages(analysisResult: AnalysisResultDetailedSchema): OrthoImage[] {
     return this.orthoImages.filter(o => analysisResult.key_figures.find(kf => kf.id === o.keyFigureId));
@@ -91,10 +98,19 @@ export class OrthoImagesLayer {
       this.loadedLayer = this.loadLayer();
     }
     this.loadedLayer.getSource()?.addFeatures(features);
+
+    await this.emit(this.plant.id, OrthoImageEvent.ON_ORTHO_IMAGE_CHANGED);
   }
 
-  public removeAllImages() {
+  public async removeAllImages() {
     this.loadedLayer?.getSource()?.clear();
+
+    await this.emit(this.plant.id, OrthoImageEvent.ON_ORTHO_IMAGE_CHANGED);
+  }
+
+  public hasLoadedImages(): boolean {
+    const loadedFeatures = this.loadedLayer?.getSource()?.getFeatures();
+    return loadedFeatures && loadedFeatures.length > 0 || false;
   }
 
   private loadLayer(): VectorImageLayer<VectorSource> {

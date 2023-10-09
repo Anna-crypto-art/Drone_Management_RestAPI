@@ -54,7 +54,7 @@ export default class AppMapPopButton extends BaseComponent {
   position: relative;
   overflow: visible;
 
-  .app-button {
+  & > .app-button {
     box-shadow: 3px 3px 5px $dark-40pc;
   }
 

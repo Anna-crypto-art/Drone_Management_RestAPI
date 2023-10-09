@@ -9,12 +9,35 @@
         <b-form-checkbox v-model="showCouldNotBeMeasured" switch @change="onShowCouldNotBeMeasuredChanged" :disabled="isShowCouldNotBeMeasuredDisabled">
           {{ $t("show-could-not-be-measured") }}
         </b-form-checkbox>
+        <b-form-checkbox v-model="showPCS" switch @change="onShowPcsChanged">
+          {{ $t("pcs") }}
+        </b-form-checkbox>
         <b-form-checkbox v-model="satelliteView" switch @change="onSatelliteViewChanged">
           {{ $t("satellite-view") }}
         </b-form-checkbox>
       </div>
       <hr>
       <app-osm-layer-checkbox :map="map" :satellite="satelliteView" v-model="osmSelected" />
+      <div v-if="orthoImages.length > 0">
+        <hr>
+        <app-dropdown-button variant="primary" :loading="orthoLoading" size="sm">
+          <template #title>
+            <b-icon-image-fill /><span class="pad-left-half">{{ $t("load-all-ortho-images") }}</span>
+          </template>
+          <b-dropdown-item v-for="orthoImage in orthoImages" :key="orthoImage.keyFigureId" @click="onShowAllOrthoClick(orthoImage)">
+            {{ orthoImage.name }}
+          </b-dropdown-item>
+        </app-dropdown-button>
+        <app-button v-show="hasLoadedOrthoImages"
+          cls="mar-top-half"
+          variant="secondary"
+          size="sm"
+          @click="onClearOrthoImagesClick"
+          :loading="clearOrthoLoading"
+        >
+          {{ $t('clear-ortho-images') }}
+        </app-button>
+      </div>
     </app-map-pop-button>
   </div>
 </template>
@@ -30,11 +53,15 @@ import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { appLocalStorage } from "@/app/shared/services/app-storage/app-storage";
 import { LayersService } from "./layers/layers-service";
-import { KeyFigureColorScheme, LayerEvent } from "./layers/types";
+import { KeyFigureColorScheme, LayerEvent, OrthoImage } from "./layers/types";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import { IAnalysisSelectionComponent } from "../selection-sidebar/analysis-selection/types";
 import { AnalysisSelectionService } from "../selection-sidebar/analysis-selection/analysis-selection-service";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-dropdown-button.vue";
+import { OrthoImageEvent, OrthoImagesLayer } from "./layers/ortho-images-layer";
+import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
+import AppButton from "@/app/shared/components/app-button/app-button.vue";
 
 
 const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
@@ -49,6 +76,8 @@ const STORAGE_KEY_SATELLITEVIEW = "storage-key-satelliteview";
     AppOsmLayerCheckbox,
     AppBox,
     AppExplanation,
+    AppDropdownButton,
+    AppButton,
   },
 })
 export default class AppMapViewSettings extends BaseComponent implements IAnalysisSelectionComponent {
@@ -60,29 +89,37 @@ export default class AppMapViewSettings extends BaseComponent implements IAnalys
   showCouldNotBeMeasured = false;
   osmSelected = true;
   satelliteView = true;
+  showPCS = false;
 
   multiSelectionDisabled = false;
   isShowCouldNotBeMeasuredDisabled = false;
 
+  hasLoadedOrthoImages = false;
+  orthoLoading = false;
+  clearOrthoLoading = false;
+
   layersService!: LayersService
-  analysisSelectionService!: AnalysisSelectionService;
+  analysisSelectionService: AnalysisSelectionService | null = null;
+  orthoImagesLayer: OrthoImagesLayer | null = null;
 
   async created() {
     this.analysisSelectionService = new AnalysisSelectionService(this);
-
     this.layersService = LayersService.get(this.plant.id);
-    
-    this.setLayerSettings();
+    this.orthoImagesLayer = OrthoImagesLayer.get(this.plant, this.map);
 
-    this.satelliteView = appLocalStorage.getItem(STORAGE_KEY_SATELLITEVIEW);
+    this.orthoImagesLayer.on(this.plant.id, OrthoImageEvent.ON_ORTHO_IMAGE_CHANGED, () => {
+      this.hasLoadedOrthoImages = this.orthoImagesLayer!.hasLoadedImages();
+    })
+    
+    this.setLayerSettings();    
   }
 
   async mounted() {
-    await this.analysisSelectionService.register();
+    await this.analysisSelectionService!.register();
   }
 
   async unmounted() {
-    this.analysisSelectionService.unregister();
+    this.analysisSelectionService!.unregister();
   }
 
   @CatchError()
@@ -123,6 +160,36 @@ export default class AppMapViewSettings extends BaseComponent implements IAnalys
     await this.layersService.emit(this.plant.id, LayerEvent.ON_SHOW_COULD_NOT_BE_MEASURED_CHANGED);
   }
 
+  @CatchError()
+  onShowPcsChanged() {
+    const loadedLayers = this.layersService.layers.filter(l => l.loadedLayer);
+    for (const loadedLayer of loadedLayers) {
+      loadedLayer.showPCS(this.showPCS);
+      loadedLayer.rerender();
+    }
+  }
+
+  get orthoImages(): OrthoImage[] {
+    return this.analysisSelectionService?.firstAnalysisResult && 
+      this.orthoImagesLayer?.getAvailableOrthoImages(this.analysisSelectionService?.firstAnalysisResult)
+        .filter(o => o.keyFigureId !== ApiKeyFigure.TRACKER_RAW_IMAGES_IR_ID) || // Special case: Load all raw pv tracker images is not allowed
+      [];
+  }
+
+  @CatchError("orthoLoading")
+  async onShowAllOrthoClick(orthoImage: OrthoImage) {
+    if (!confirm(this.$t('load-all-ortho-images-sure').toString())) {
+      return;
+    }
+
+    await this.orthoImagesLayer!.loadImages(orthoImage, this.analysisSelectionService!.firstAnalysisResult!);
+  }
+
+  @CatchError("clearOrthoLoading")
+  onClearOrthoImagesClick() {
+    this.orthoImagesLayer!.removeAllImages();
+  }
+
   async onMultiAnalysesSelected() {
     this.isShowCouldNotBeMeasuredDisabled = true;
     this.multiSelectionDisabled = true;
@@ -142,9 +209,12 @@ export default class AppMapViewSettings extends BaseComponent implements IAnalys
     this.multiSelection = 
       this.layersService.settings.multiSelection = 
       appLocalStorage.getItem(STORAGE_KEY_MULTISELECTION) || false;
+    
     this.showCouldNotBeMeasured = 
       this.layersService.settings.showCouldNotBeMeasured =
       appLocalStorage.getItem(STORAGE_KEY_SHOWUNDEFINED) || false;
+
+    this.satelliteView = appLocalStorage.getItem(STORAGE_KEY_SATELLITEVIEW);
   }
 }
 </script>
@@ -155,9 +225,5 @@ export default class AppMapViewSettings extends BaseComponent implements IAnalys
 
 .app-map-view-settings {
   overflow: visible;
-
-  .box {
-    border: 1px solid $border-color-grey;
-  }
 }
 </style>
