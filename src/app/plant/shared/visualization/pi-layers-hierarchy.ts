@@ -2,7 +2,7 @@ import { GroupLayer, LayerType } from "@/app/shared/components/app-geovisualizat
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { KeyFigureLayer } from "./layers/key-figure-layer";
-import { KeyFigureColorScheme, KeyFigureInfo, OrthoImage } from "./layers/types";
+import { KeyFigureColorScheme, KeyFigureInfo } from "./layers/types";
 import { GroupKPILayer, InvisibleAutoSelectionLayer, KeyFigureTypeMap } from "./types";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
@@ -10,6 +10,7 @@ import { apiComponentNames } from "@/app/shared/services/volateq-api/api-compone
 import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/sequential-event-emitter";
 import { LayerEvent } from "@/app/shared/components/app-geovisualization/types/events";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
+import { OrthoImage } from "./mixins/types";
 
 /**
  * Component -> PIGroup -> PICheckbox
@@ -326,7 +327,7 @@ export class PILayersHierarchy {
   public getAvailableOrthoImages(): OrthoImage[] {
     for (const layer of this.getAllChildLayers()) {
       if (layer.isVisible) {
-        const orthoImages = layer.orthoImages?.filter(orthoImage => layer.isOrthoImageAvailable(orthoImage));
+        const orthoImages = layer.orthoImages?.filter(orthoImage => layer.isOrthoImageAvailable(orthoImage, layer.keyFigure.component_id));
         if (orthoImages && orthoImages.length > 0) {
           return orthoImages;
         }

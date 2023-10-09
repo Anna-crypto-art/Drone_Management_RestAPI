@@ -49,6 +49,7 @@ export interface IPlantVisualization {
   ): void;
   refMeasuredPcsCodes: string[];
   setLoading(loading: boolean): void;
+  piToastInfo: FeatureInfos;
 }
 
 export interface FeatureProperties {

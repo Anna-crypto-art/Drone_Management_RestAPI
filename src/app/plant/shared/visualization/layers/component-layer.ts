@@ -5,15 +5,16 @@ import { FeatureLike } from "ol/Feature";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { FeatureInfos, FeatureInfosMeta, IPlantVisualization, PropsFeature } from "../types";
 import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
-import { LayerColor, OrthoImage } from "./types";
+import { LayerColor } from "./types";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { ReferenceMeasurementEntriesSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
 import { OrhtoImageMixin } from "../mixins/ortho-image-mixin";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { GeoJSON } from "@/app/shared/components/app-geovisualization/types/layers";
 import { Extent } from "ol/extent";
+import { IOrthoImageMixin, OrthoImage } from "../mixins/types";
 
-export abstract class ComponentLayer extends LayerBase {
+export abstract class ComponentLayer extends LayerBase implements IOrthoImageMixin {
   protected abstract readonly componentId: ApiComponent;
   protected abstract readonly color: LayerColor;
   
@@ -27,9 +28,8 @@ export abstract class ComponentLayer extends LayerBase {
 
   protected analysis: AnalysisForViewSchema | null = null;
 
-  public orthoImages: OrthoImage[] | null = null;
-
   private readonly orhtoImageMixin: OrhtoImageMixin;
+  public orthoImages: OrthoImage[] | null = null;
 
   constructor(
     vueComponent: BaseAuthComponent & IPlantVisualization,
@@ -46,7 +46,7 @@ export abstract class ComponentLayer extends LayerBase {
     return this.name;
   }
 
-  protected getPcs(feature: FeatureLike): string | undefined {
+  public getPcs(feature: FeatureLike): string | undefined {
     return feature.get("name");
   }
 
@@ -63,8 +63,8 @@ export abstract class ComponentLayer extends LayerBase {
     return this.color;
   }
 
-  public isOrthoImageAvailable(orthoImage: OrthoImage): boolean {
-    return this.orhtoImageMixin.isOrthoImageAvailable(orthoImage);
+  public isOrthoImageAvailable(orthoImage: OrthoImage, componentId: ApiComponent): boolean {
+    return this.orhtoImageMixin.isOrthoImageAvailable(orthoImage, componentId);
   }
 
   protected getWidth(): number {
