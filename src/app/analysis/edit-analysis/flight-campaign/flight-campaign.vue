@@ -1,6 +1,6 @@
-<template>
+<template class="app-analysis-flight-campaigns">
   <div>
-    <div class="app-flight-campaign-table-toolbar">
+    <div class="app-analysis-flight-campaigns-table-toolbar">
       <app-button variant="primary" @click="onCreateFlightCampaignClick">
         {{ $t("create-flight-campaign") }}
       </app-button>
@@ -139,11 +139,12 @@
     </app-modal-form>
 
     <div v-if="selectedFlightCampaign">
-      <app-button variant="primary" @click="printFlightCampaign" class="print-flight-campaign-btn">
+      <app-button variant="primary" @click="onPrintFlightCampaignClick" class="app-analysis-flight-campaigns-print-flight-campaign-btn pull-right" icon="file-earmark-pdf">
         {{ $t("print-flight-campaign") }}
       </app-button>
     </div>
 
+    <!-- the CSS ID flight-campaign-routes-area is used for PDF printing all HTML within that area -->
     <div v-if="selectedFlightCampaign">
       <app-flight-campaign-routes 
         id="flight-campaign-routes-area"
@@ -418,7 +419,8 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
     return flightCampaign.flight_campaign_state == FlightCampaignState.FINISHED_GENERATING;
   }
 
-  private printFlightCampaign() {
+  @CatchError()
+  onPrintFlightCampaignClick() {
     this.$htmlToPaper('flight-campaign-routes-area', {
       "windowTitle": this.selectedFlightCampaign?.name + " - " + this.analysis.name + " - " + this.analysis.plant.name,
     });
@@ -427,9 +429,11 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
 </script>
 
 <style lang="scss">
-.print-flight-campaign-btn {
-  margin-top: 20px;
-  margin-left: 20px;
-  float: right;
+.app-analysis-flight-campaigns {
+  &-print-flight-campaign-btn {
+    margin-top: 20px;
+    margin-left: 20px;
+    float: right;
+  }
 }
 </style>

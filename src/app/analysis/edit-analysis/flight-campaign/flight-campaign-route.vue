@@ -1,6 +1,6 @@
-<template>
+<template class="app-flight-campaign-routes">
   <div v-show="flightCampaign">
-    <div class="flight-campaign-print-headline mb-5">
+    <div class="app-flight-campaign-routes-print-headline mb-5">
       <h2>
         {{ flightCampaign.name }}
       </h2>
@@ -12,7 +12,7 @@
       </p>
     </div>
     <div v-for="(flightRoutesDay, index) in flightRoutesDays" :key="index">
-      <h3 class="flight-campaign-route-table-header">
+      <h3 class="app-flight-campaign-routes-table-header">
         {{ $t('day-with-number', {number: index+1}) }}, {{ getWeekDay(flightRoutesDay.date) }}
       </h3>
       <app-table-container>
@@ -42,7 +42,7 @@
           </template>
 
           <template #hoverActions="row">
-            <app-dropdown-button variant="secondary" size="sm" v-if="row.item.drone" class="d-none show-when-not-printing">
+            <app-dropdown-button variant="secondary" size="sm" v-if="row.item.drone" class="d-none app-flight-campaign-routes-show-when-not-printing">
               <template #title>
                 <app-icon icon="download" />
               </template>
@@ -64,7 +64,7 @@
               size="sm"
               icon="trash"
               :title="$t('delete')"
-              class="d-none show-when-not-printing"
+              class="d-none app-flight-campaign-routes-show-when-not-printing"
             />
           </template>
         </app-table>
@@ -247,23 +247,26 @@ export default class AppFlightCampaignRoutes extends BaseAuthComponent {
 </script>
 
 <style lang="scss">
-.flight-campaign-route-table-header {
-  margin-top: 20px !important;
+.app-flight-campaign-routes {
+  &-table-header {
+    margin-top: 20px !important;
+  }
+  &-print-headline {
+    margin-bottom: 40px;
+    display: none;
+  }
 }
 
 // printing discards all CSS so we need to do some display stuff to
 // - hide the hover buttons
-// - show an intro/headline text
+// - show an intro/headline text (done above for &-print-headline)
 // when printing.
-.show-when-not-printing:not(button) {
+// These two CSS selectors don't work within SCSS scoping so I put them outside.
+.app-flight-campaign-routes-show-when-not-printing:not(button) {
   display: inline-flex !important;
 }
-button.show-when-not-printing {
+button.app-flight-campaign-routes-show-when-not-printing {
   display: inline-block !important;
-}
-.flight-campaign-print-headline {
-  margin-bottom: 40px;
-  display: none;
 }
 
 </style>
