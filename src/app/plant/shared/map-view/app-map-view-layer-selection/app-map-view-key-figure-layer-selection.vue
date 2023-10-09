@@ -39,7 +39,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Watch } from "vue-property-decorator";
 import { BaseComponent } from "@/app/shared/components/base-component/base-component";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Map } from "ol";
@@ -75,6 +75,7 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
   @Prop({ required: true }) analyses!: AnalysisForViewSchema[];
   @Prop({ required: true }) keyFigureLayers!: KeyFigureTypeMap<GeoVisualQuery>[];
 
+  get isSidebarOpen(): boolean { return this.$store.direct.state.sidebar.analyses}
   visible = false;
   compGroupLayers: ComponentGroupKeyFigureLayer[] = [];
   
@@ -146,8 +147,9 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
     return true;
   }
 
-  private async handleAnalysesSelection() {
-    this.visible = !!this.analysisSelectionService.firstAnalysisResult;
+  @Watch('isSidebarOpen')
+  private async handleAnalysesSelection() {    
+    this.visible = !!this.analysisSelectionService.firstAnalysisResult && this.isSidebarOpen;
 
     const selectedAnalysisId = this.analysisSelectionService?.firstAnalysis?.id;
     if (selectedAnalysisId && !(selectedAnalysisId in this.selectedAnalyses)) {
