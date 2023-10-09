@@ -76,7 +76,7 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
   }
 
   get sidebarOpen(): boolean {
-    return this.$store.direct.state.sidebar.analysis; //|| this.$store.direct.state.sidebar.observations;
+    return this.$store.direct.state.sidebar.analyses || this.$store.direct.state.sidebar.observations;
   }
 
   get selectionSidebarOpen(): boolean {

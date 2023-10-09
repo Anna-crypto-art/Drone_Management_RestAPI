@@ -20,14 +20,30 @@ export default class AppGeovisualToggleLayer extends Vue {
   @State(state => state.sidebar["layer-switcher"]) open!: boolean;
 
   toggle() {
-    this.$store.direct.commit.sidebar.toggle({ name: "layer-switcher" });
+    // this.$store.direct.commit.sidebar.toggle({ name: "layer-switcher" });
   }
 }
 </script>
 
 <style lang="scss">
+@import "@/scss/_colors.scss";
+
 button.layer-sidebar-toggle {
   top: 0.5em;
+
+  &.opens-left {
+    right: calc(100% - 1px);
+    border-right-color: $white;
+
+    .plant-view-csp-ptc:not(.mobile) & {
+      &:hover,
+      &.show-label {
+        .toggle-button-text {
+          padding-right: 0.5em;
+        }
+      }
+    }
+  }
 
   &-content {
     padding: 10px;

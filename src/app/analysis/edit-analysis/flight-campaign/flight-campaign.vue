@@ -1,6 +1,6 @@
-<template>
+<template class="app-analysis-flight-campaigns">
   <div>
-    <div class="app-flight-campaign-table-toolbar">
+    <div class="app-analysis-flight-campaigns-table-toolbar">
       <app-button variant="primary" @click="onCreateFlightCampaignClick">
         {{ $t("create-flight-campaign") }}
       </app-button>
@@ -146,10 +146,20 @@
       </div>
     </app-modal-form>
 
-    <app-flight-campaign-routes 
-      :analysis="analysis"
-      :flightCampaign="selectedFlightCampaign"
-    />
+    <div v-if="selectedFlightCampaign">
+      <app-button variant="primary" @click="onPrintFlightCampaignClick" class="app-analysis-flight-campaigns-print-flight-campaign-btn pull-right" icon="file-earmark-pdf">
+        {{ $t("print-flight-campaign") }}
+      </app-button>
+    </div>
+
+    <!-- the CSS ID flight-campaign-routes-area is used for PDF printing all HTML within that area -->
+    <div v-if="selectedFlightCampaign">
+      <app-flight-campaign-routes 
+        id="flight-campaign-routes-area"
+        :analysis="analysis"
+        :flightCampaign="selectedFlightCampaign"
+      />
+    </div>
 
     <app-modal-form
       id="export-modal"
@@ -371,6 +381,7 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
     
     await this.updateFlightCampaigns();
   }
+
   private appendDroneNameAndSerialNumber(drone: DroneSchema) {
     return this.$t("drone-with-sn", {droneName: drone.custom_name, droneSerialNumber: drone.serial_number}).toString();
   }
@@ -418,8 +429,22 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
   private isGenerated(flightCampaign: FlightCampaignItemSchema): boolean {
     return flightCampaign.flight_campaign_state == FlightCampaignState.FINISHED_GENERATING;
   }
+
+  @CatchError()
+  onPrintFlightCampaignClick() {
+    this.$htmlToPaper('flight-campaign-routes-area', {
+      "windowTitle": this.selectedFlightCampaign?.name + " - " + this.analysis.name + " - " + this.analysis.plant.name,
+    });
+  }
 }
 </script>
 
 <style lang="scss">
+.app-analysis-flight-campaigns {
+  &-print-flight-campaign-btn {
+    margin-top: 20px;
+    margin-left: 20px;
+    float: right;
+  }
+}
 </style>

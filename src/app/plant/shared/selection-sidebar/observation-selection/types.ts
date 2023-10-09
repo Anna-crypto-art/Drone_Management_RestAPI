@@ -5,6 +5,7 @@ import { SummerizedObservations } from "@/app/shared/services/volateq-api/api-sc
 
 export enum ObservationSelectionEvent {
   SELECTED = "observation_selected",
+  SIDEBAR_ABSOLUTE = "sidebar_absolute",
 }
 
 export interface IObservationSelectionComponent {

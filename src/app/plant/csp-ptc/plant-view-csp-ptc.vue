@@ -1,9 +1,8 @@
 <template>
   <div class="plant-view-csp-ptc" v-if="analyses">
-    <app-selection-sidebar
-      :plant="plant"
-      :analyses="analyses"
-    />
+    <app-sidebar-button-menu :plant="plant" :analyses="analyses" />
+    <app-analysis-selection-sidebar :plant="plant" :analyses="analyses" />
+    <app-observation-selection-sidebar :plant="plant" />
     <app-plant-view-tabs :plant="plant" :analyses="analyses">
       <template #visual>
         <app-visual-csp-ptc :analyses="analyses" :plant="plant" />
@@ -30,7 +29,6 @@
 import AppPlantAdminViewCspPtc from "@/app/plant/csp-ptc/plant-admin-view-csp-ptc.vue";
 import AppTablesCspPtc from "@/app/plant/csp-ptc/tables/tables-csp-ptc.vue";
 import AppVisualCspPtc from "@/app/plant/csp-ptc/visualization/visual-csp-ptc.vue";
-import AppSelectionSidebar from "@/app/plant/shared/selection-sidebar/selection-sidebar.vue";
 import AppPlantViewTabs from "@/app/plant/shared/plant-view-tabs/plant-view-tabs.vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
@@ -43,6 +41,10 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import { IAnalysisSelectionComponent } from "../shared/selection-sidebar/analysis-selection/types";
 import { AnalysisSelectionService } from "../shared/selection-sidebar/analysis-selection/analysis-selection-service";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
+import AppAnalysisSelectionSidebar from "@/app/plant/shared/selection-sidebar/analysis-selection/analysis-selection-sidebar.vue";
+import AppObservationSelectionSidebar from "@/app/plant/shared/selection-sidebar/observation-selection/observation-selection-sidebar.vue";
+import AppSidebarButtonMenu from "@/app/plant/shared/app-sidebar-button-menu/app-sidebar-button-menu.vue";
+
 
 @Component({
   name: "app-plant-view-csp-ptc",
@@ -50,10 +52,12 @@ import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/
     AppPlantViewTabs,
     AppVisualCspPtc,
     AppTablesCspPtc,
-    AppSelectionSidebar,
+    AppAnalysisSelectionSidebar,
     AppPlantAdminViewCspPtc,
     AppPlantDiagramViewCspPtc,
+    AppSidebarButtonMenu,
     AppCustomComponentProperties,
+    AppObservationSelectionSidebar,
   },
 })
 export default class AppPlantViewCspPtc extends BaseAuthComponent implements IAnalysisSelectionComponent {
@@ -61,7 +65,7 @@ export default class AppPlantViewCspPtc extends BaseAuthComponent implements IAn
 
   analyses: AnalysisForViewSchema[] | null = null;
 
-  analysisSelectionService!: AnalysisSelectionService;
+  analysisSelectionService: AnalysisSelectionService | null = null;
 
   @CatchError()
   async created() {

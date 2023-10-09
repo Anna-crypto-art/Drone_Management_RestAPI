@@ -1,6 +1,9 @@
 <template>
   <div class="plant-view-tabs">
     <b-tabs v-model="selectedTab" align="center" @changed="onTabsChanged">
+      <div class="plant-name" align="center" translate="no">
+        {{ plant.name }}
+      </div>    
       <b-tab>
         <template #title>
           <b-icon icon="map" /> <span class="pad-left">{{ $t("map") }}</span>
@@ -67,7 +70,6 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
   private async isMobileListener<Evt extends { matches: boolean }>(e: Evt) {
     this.isMobile = e.matches;
 
-    this.$store.direct.commit.sidebar.setAll(!this.isMobile);
     await this.updateLeftSidebarAbsolute();
   }
 
@@ -207,6 +209,16 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
     .nav-item .nav-link:not(.active) span {
       display: none;
     }
+  }
+
+  .plant-name {
+    width: 120px;
+    position: absolute;
+    z-index: 1030;
+    top: -25px;
+    left:65px;
+    color: white;
+    font-size: 15px;
   }
 }
 </style>

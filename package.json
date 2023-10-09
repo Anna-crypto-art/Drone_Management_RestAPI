@@ -1,6 +1,6 @@
 {
   "name": "volateq-web-app",
-  "version": "6.14.0",
+  "version": "6.15.0",
   "description": "VueJs Web Application powered by Volateq",
   "main": "main.js",
   "scripts": {
@@ -43,7 +43,8 @@
     "vue-property-decorator": "9.0.0",
     "vue-router": "3.3.4",
     "vuex": "3.5.1",
-    "vuex-class": "^0.3.2"
+    "vuex-class": "^0.3.2",
+    "vue-html-to-paper": "1.4.5"
   },
   "devDependencies": {
     "@types/qrcode": "^1.5.0",

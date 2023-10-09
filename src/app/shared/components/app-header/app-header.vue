@@ -28,7 +28,7 @@
         </b-nav-item>
 
         <b-nav-item v-if="!isAssistant" class="link" href="/analyses" :active="isActiveRoute(['/analyses', '/analysis/new'])">
-          <span class="nav-item-text">{{ $t("analysis") }}</span>
+          <span class="nav-item-text">{{ $t("analyses") }}</span>
         </b-nav-item>
 
         <b-nav-item class="link" href="/doc/files" :active="isActiveRoute(['/doc/files'])">
