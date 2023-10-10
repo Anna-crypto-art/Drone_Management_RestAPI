@@ -1,54 +1,52 @@
 <template>
-  <div class="app-analysis-selection-sidebar" :class="{ absolute: absolute }">
-    <app-sidebar :open="sidebarOpen">
-      <div class="app-analysis-selection-sidebar-leftside">
-        <h4 class="app-analysis-selection-sidebar-leftside-title">
-          {{ $t("analyses") }}
-        </h4>
-        <div class="app-analysis-selection-sidebar-settings" v-if="analyses.length > 1">
-          <b-checkbox switch v-model="compareMode" @change="onCompareModeChanged">
-            {{ $t("compare-mode") }}
-            <app-explanation>{{ $t("compare-mode_descr") }}</app-explanation>
-          </b-checkbox>
-        </div>
-        <app-table-container>
-          <app-table
-            ref="analysesTable"
-            :rows="analysesTableItems"
-            :columns="analysesTableColumns"
-            :selectMode="selectMode"
-            @rowSelected="onAnalysisSelected"
-            :overlayLoading="loading"
-            :hideHeader="true"
-          >
-            <template #cell(name)="row">
-              {{ row.item.date }} 
-              <app-icon v-if="!isPilot && !row.item.hasResults"
-                icon="cone-striped" 
-                class="mar-left-half orange" 
-                v-b-popover.hover.top="$t('no-pis-available-yet')"
-              />
-              <app-icon v-if="row.item.refMeasureCount > 0"
-                icon="clipboard-check"
-                class="mar-left-half blue"
-                v-b-popover.hover.top="$t('has-ref-measures', { count: row.item.refMeasureCount })"
-              />
-              <app-icon v-if="row.item.hasGoodies" 
-                icon="gift"
-                class="mar-left-half blue"
-                v-b-popover.hover.top="$t('has-additional-pis')"
-              />
-              <app-super-admin-marker v-if="row.item.analysisResultReleased === false" />
-              <br>
-              <small class="grayed">{{ row.item.name }}</small>
-              <div :class="{ 'mar-top': row.item.orderPPs && row.item.orderPPs.length > 0 }">
-              <app-order-pps-view :orderProductPackages="row.item.orderPPs" :lefted="true" />
-              </div>
-            </template>
-          </app-table>
-        </app-table-container>
-      </div>
-    </app-sidebar>
+  <div class="app-analysis-selection-sidebar" :class="{ open: sidebarOpen }">
+    <h4 class="app-analysis-selection-sidebar-title">
+      {{ $t("analyses") }}
+    </h4>
+    <div class="app-analysis-selection-sidebar-settings" v-if="analyses.length > 1">
+      <b-checkbox switch v-model="compareMode" @change="onCompareModeChanged">
+        {{ $t("compare-mode") }}
+        <app-explanation>{{ $t("compare-mode_descr") }}</app-explanation>
+      </b-checkbox>
+    </div>
+    <div class="app-analysis-selection-sidebar-table">
+      <app-table-container>
+        <app-table
+          ref="analysesTable"
+          :rows="analysesTableItems"
+          :columns="analysesTableColumns"
+          :selectMode="selectMode"
+          @rowSelected="onAnalysisSelected"
+          :overlayLoading="loading"
+          :hideHeader="true"
+        >
+          <template #cell(name)="row">
+            {{ row.item.date }} 
+            <app-icon v-if="!isPilot && !row.item.hasResults"
+              icon="cone-striped" 
+              class="mar-left-half orange" 
+              v-b-popover.hover.top="$t('no-pis-available-yet')"
+            />
+            <app-icon v-if="row.item.refMeasureCount > 0"
+              icon="clipboard-check"
+              class="mar-left-half blue"
+              v-b-popover.hover.top="$t('has-ref-measures', { count: row.item.refMeasureCount })"
+            />
+            <app-icon v-if="row.item.hasGoodies" 
+              icon="gift"
+              class="mar-left-half blue"
+              v-b-popover.hover.top="$t('has-additional-pis')"
+            />
+            <app-super-admin-marker v-if="row.item.analysisResultReleased === false" />
+            <br>
+            <small class="grayed">{{ row.item.name }}</small>
+            <div :class="{ 'mar-top': row.item.orderPPs && row.item.orderPPs.length > 0 }">
+            <app-order-pps-view :orderProductPackages="row.item.orderPPs" :lefted="true" />
+            </div>
+          </template>
+        </app-table>
+      </app-table-container>
+    </div>
   </div>
 </template>
 
@@ -72,17 +70,13 @@ import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { SelectionSidebarEvent, selectionSidebarEventService } from "../selection-sidebar-event-serivce";
 import { State } from "vuex-class";
 import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
-import AppObservationSelection from "../observation-selection/observation-selection-sidebar.vue";
-import AppSidebar from "@/app/shared/components/app-sidebar/app-sidebar.vue";
 
 
 @Component({
   name: "app-analysis-selection-sidebar",
   components: {
-    AppSidebar,
     AppIcon,
     AppIconAnalysis,
-    AppObservationSelection,
     AppTableContainer,
     AppExplanation,
     AppOrderPpsView,
@@ -302,24 +296,36 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
 @import "@/scss/_variables.scss";
 
 .app-analysis-selection-sidebar {
-  height: calc(100vh - #{$header-height});
-  
-  &.absolute {
-    position: absolute;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  display: none;
+
+  &.open {
+    display: block;
   }
+  &-table {
+    overflow-y: auto;
+  }
+  // display: flex;
+  
+  // &.absolute {
+  //   position: absolute;
+  // }
 
-  &-leftside {
-    padding: 0.5em;
-    height: 100%;
-    width: 100%;
-    border-right: $border-color-grey 1px solid;
-    display: flex;
-    flex-flow: column;
+  // &-leftside {
+  //   padding: 0.5em;
+  //   height: 100%;
+  //   width: 100%;
+  //   border-right: $border-color-grey 1px solid;
+  //   // display: flex;
+  //   // flex-flow: column;
 
-    &-title {
-      margin-bottom: 0.5em;
-      margin-left: 10px;
-    }
+  //   
+  // }
+  &-title {
+    margin-bottom: 0.5em;
+    margin-left: 10px;
   }
 
   &-settings {

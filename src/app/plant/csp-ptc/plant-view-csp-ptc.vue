@@ -1,8 +1,7 @@
 <template>
   <div class="plant-view-csp-ptc" v-if="analyses">
     <app-sidebar-button-menu :plant="plant" :analyses="analyses" />
-    <app-analysis-selection-sidebar :plant="plant" :analyses="analyses" />
-    <app-observation-selection-sidebar :plant="plant" />
+    <app-sidebar :open="isSidebarOpen" :plant="plant" :analyses="analyses" />
     <app-plant-view-tabs :plant="plant" :analyses="analyses">
       <template #visual>
         <app-visual-csp-ptc :analyses="analyses" :plant="plant" />
@@ -41,9 +40,8 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import { IAnalysisSelectionComponent } from "../shared/selection-sidebar/analysis-selection/types";
 import { AnalysisSelectionService } from "../shared/selection-sidebar/analysis-selection/analysis-selection-service";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-import AppAnalysisSelectionSidebar from "@/app/plant/shared/selection-sidebar/analysis-selection/analysis-selection-sidebar.vue";
-import AppObservationSelectionSidebar from "@/app/plant/shared/selection-sidebar/observation-selection/observation-selection-sidebar.vue";
 import AppSidebarButtonMenu from "@/app/plant/shared/app-sidebar-button-menu/app-sidebar-button-menu.vue";
+import AppSidebar from "@/app/plant/shared/app-sidebar/app-sidebar.vue";
 
 
 @Component({
@@ -52,12 +50,11 @@ import AppSidebarButtonMenu from "@/app/plant/shared/app-sidebar-button-menu/app
     AppPlantViewTabs,
     AppVisualCspPtc,
     AppTablesCspPtc,
-    AppAnalysisSelectionSidebar,
     AppPlantAdminViewCspPtc,
     AppPlantDiagramViewCspPtc,
     AppSidebarButtonMenu,
     AppCustomComponentProperties,
-    AppObservationSelectionSidebar,
+    AppSidebar,
   },
 })
 export default class AppPlantViewCspPtc extends BaseAuthComponent implements IAnalysisSelectionComponent {
