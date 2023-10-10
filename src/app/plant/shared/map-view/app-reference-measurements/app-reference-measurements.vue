@@ -4,7 +4,7 @@
       id="reference-measurement-modal"
       ref="refMeasureModal"
       :title="title"
-      :subtitle="fieldgeometryComponent && fieldgeometryComponent.kks || ''"
+      :subtitle="pcs || ''"
       :ok-title="$t('apply')"
       :cancel-title="$t('cancel')"
       :modalLoading="loading"
@@ -45,10 +45,11 @@ import { CatchError } from '@/app/shared/services/helper/catch-helper';
 import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
 import { RefMeasureEntry, RefMeasureEntryKeyFigureSchema } from '@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema';
 import AppFilterFields from '@/app/plant/shared/filter-fields/filter-fields.vue';
-import { FilterField, FilterFieldType } from '../filter-fields/types';
+import { FilterField, FilterFieldType } from '../../filter-fields/types';
 import { FieldgeometryComponentSchema } from '@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema';
 import { AnalysisResultMappingHelper } from '@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper';
 import dateHelper from '@/app/shared/services/helper/date-helper';
+import { ApiComponent } from '@/app/shared/services/volateq-api/api-components/api-components';
 
 @Component({
   name: "app-reference-measurements",
@@ -64,7 +65,8 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
   @Ref() refMeasureModal!: IAppModalForm;
   
   analysisId: string | null = null;
-  fieldgeometryComponent: FieldgeometryComponentSchema | null = null;
+  pcs: string | null = null;
+  componentId: ApiComponent | null = null;
   entry: RefMeasureEntry | null = null;
   keyFigures: RefMeasureEntryKeyFigureSchema[] | null = null;
 
@@ -85,7 +87,7 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
 
     await volateqApi.addReferenceMeasurement(this.analysisId!, {
       measure_time: this.entryModel!.measureTime,
-      pcs: this.fieldgeometryComponent!.kks,
+      pcs: this.pcs!,
       notes: this.entryModel!.notes || undefined,
       key_figure_ids: this.entryModel!.values
         .map(v => mappingHelper.getEntries().find(e => e.transName === v.filterField!.key)!.keyFigureId!),
@@ -96,8 +98,6 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
     });
 
     this.showSuccess(this.$t("ref-measures-created-success").toString());
-
-    this.$emit("referenceMeasurmentAdded", this.fieldgeometryComponent);
 
     this.refMeasureModal.hide();
   }
@@ -112,19 +112,19 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
 
     this.showSuccess(this.$t("ref-measures-removed-success").toString());
 
-    this.$emit("referenceMeasurmentRemoved", this.fieldgeometryComponent);
-
     this.refMeasureModal.hide();
   }
 
   show(
     analysisId: string,
-    fieldgeometryComponent: FieldgeometryComponentSchema,
+    pcs: string,
+    componentId: ApiComponent,
     entry: RefMeasureEntry | null,
     keyFigures: RefMeasureEntryKeyFigureSchema[] | null,
   ) {
     this.analysisId = analysisId;
-    this.fieldgeometryComponent = fieldgeometryComponent;
+    this.pcs = pcs;
+    this.componentId = componentId;
     this.entry = entry;
     this.keyFigures = keyFigures;
 
@@ -167,7 +167,7 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
   }
 
   private getMappingHelper(): AnalysisResultMappingHelper<any> {
-    const mappings = AnalysisResultMappingHelper.getMappingsByComponentId(this.fieldgeometryComponent!.component_id);
+    const mappings = AnalysisResultMappingHelper.getMappingsByComponentId(this.componentId!);
     const mappingHelper = new AnalysisResultMappingHelper(mappings!);
 
     return mappingHelper;

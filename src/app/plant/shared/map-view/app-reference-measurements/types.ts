@@ -1,11 +1,12 @@
-import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
 import { RefMeasureEntry, RefMeasureEntryKeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
-import { FilterFieldValue } from "../filter-fields/types";
+import { FilterFieldValue } from "../../filter-fields/types";
+import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 
 export interface IAppRefMeasure {
   show(
     analysisId: string,
-    fieldgeometryComponent: FieldgeometryComponentSchema,
+    pcs: string,
+    componentId: ApiComponent,
     entry: RefMeasureEntry | null,
     keyFigures: RefMeasureEntryKeyFigureSchema[] | null,
   ): void;

@@ -9,7 +9,7 @@ import { LayerColor } from "@/app/plant/shared/map-view/layers/types";
 export class TrackerComponentLayer extends PvComponentLayer {
   public readonly componentId = ApiComponent.PV_TRACKER;
   protected readonly color = LayerColor.darkGrey;
-  protected readonly allowRefMeasures = true;
+  public readonly allowRefMeasures = true;
   
   protected showPcsZoomLevel = 18.5;
   protected zIndex = 3;

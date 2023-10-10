@@ -30,7 +30,7 @@
             <app-icon v-if="row.item.refMeasureCount > 0"
               icon="clipboard-check"
               class="mar-left-half blue"
-              v-b-popover.hover.top="$t('has-ref-measures', { count: row.item.refMeasureCount })"
+              v-b-popover.hover.top="$t('has-ref-measures')"
             />
             <app-icon v-if="row.item.hasGoodies" 
               icon="gift"

@@ -7,7 +7,7 @@ import { PvComponentLayer } from "./abstract/pv-component-layer";
 export class ModuleComponentLayer extends PvComponentLayer {
   public readonly componentId = ApiComponent.PV_MODULE;
   protected readonly color = LayerColor.darkGrey;
-  protected readonly allowRefMeasures = true;
+  public readonly allowRefMeasures = true;
   protected readonly minZoomLevel = 19;
   
   protected showPcsZoomLevel = 21.5;

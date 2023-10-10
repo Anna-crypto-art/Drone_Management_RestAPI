@@ -8,21 +8,17 @@ import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/k
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
-// import { OrhtoImageMixin } from "../mixins/ortho-image-mixin";
-// import { IOrthoImageMixin, OrthoImage } from "../mixins/types";
-import { analysisResultEventService } from "../../plant-admin-view/analysis-result-event-service";
-import { AnalysisResultEvent } from "../../plant-admin-view/types";
-import { FilterFieldType } from "../../filter-fields/types";
 import { keyFigureRainbowColors } from "./key-figure-colors";
-import { Style } from "ol/style";
+import { Stroke, Style } from "ol/style";
 import { GeoJSON } from "@/app/shared/components/app-geovisualization/types/layers";
 import { BaseLayer } from "./base-layer";
 import { i18n } from "@/main";
 import { ComparedFeatureType, ComparedFeatures, KeyFigureColorScheme, KeyFigureGeoJSON, KeyFigureLayerOptions, LayerColor, LayerEvent } from "./types";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { FeatureInfo, FeatureInfos, FeatureProperties, PropsFeature } from "../types";
+import { FeatureInfos, FeatureProperties, PropsFeature } from "../types";
+import { RefMeasureLayersService } from "./ref-measure-layers-service";
 
-export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q extends GeoVisualQuery> extends BaseLayer /*implements IOrthoImageMixin*/ {
+export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q extends GeoVisualQuery> extends BaseLayer {
   public abstract readonly analysisResultMapping: AnalysisResultMappings<T>;
   
   public readonly name: string;
@@ -31,8 +27,8 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
   public enableCompare = false;
   public compareAnalysisResult: AnalysisResultDetailedSchema | null = null;
 
-  // protected readonly refMeasureFeatureStrokeWidth: number = 3;
-  // protected readonly refMeasureFeatureStrokeWidthAddOnZoom: number = 6;
+  protected readonly refMeasureFeatureStrokeWidth: number = 3;
+  protected readonly refMeasureFeatureStrokeWidthAddOnZoom: number = 6;
 
   public geoJSON?: KeyFigureGeoJSON;
 
@@ -64,15 +60,15 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
   protected created(): void {/* override me */}
 
   protected getAddStyles(feature: FeatureLike): Style[] | undefined {
-    // const pcs = this.getPcs(feature);
-    // if (pcs && this.vueComponent.refMeasuredPcsCodes.includes(pcs)) {
-    //   return [new Style({
-    //     stroke: new Stroke({
-    //       width: this.zoomWidth ? this.zoomWidth + this.refMeasureFeatureStrokeWidthAddOnZoom : this.refMeasureFeatureStrokeWidth,
-    //       color: LayerColor.volateqBlue,
-    //     }),
-    //   })];
-    // }
+    const pcs = this.getPcs(feature);
+    if (pcs && RefMeasureLayersService.get(this.plant, this.appLayerCheckbox!.map).hasPCS(pcs)) {
+      return [new Style({
+        stroke: new Stroke({
+          width: this.zoomWidth ? this.zoomWidth + this.refMeasureFeatureStrokeWidthAddOnZoom : this.refMeasureFeatureStrokeWidth,
+          color: LayerColor.volateqBlue,
+        }),
+      })];
+    }
 
     return super.getAddStyles(feature);
   }

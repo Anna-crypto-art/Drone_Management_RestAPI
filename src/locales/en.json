@@ -459,7 +459,7 @@
   "table": "Table",
   "statistics": "Statistics",
   "admin": "Admin",
-  "has-ref-measures": "{count} reference measurement(s)",
+  "has-ref-measures": "Has reference measurement(s)",
   "browse": "Browse...",
   "goto-analysis": "Go to analysis {analysis}",
   "error-occured-retrying": "An Error occurred. Trying to resume...",
@@ -757,6 +757,7 @@
   "last-30-days": "Last 30 Days",
   "last-90-days": "Last 90 Days",
   "last-year": "Last Year",
+  "ref-measure": "Ref. measure.",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

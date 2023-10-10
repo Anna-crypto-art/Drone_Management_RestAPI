@@ -21,6 +21,8 @@ import { AnalysisSelectionService } from "../selection-sidebar/analysis-selectio
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { IObservationSelectionComponent } from "../selection-sidebar/observation-selection/types";
 import { ObservationSelectionService } from "../selection-sidebar/observation-selection/observation-selection-service";
+import { RefMeasureLayerEvent, RefMeasureLayersService } from "./layers/ref-measure-layers-service";
+import { Map } from "ol";
 
 
 @Component({
@@ -31,15 +33,18 @@ import { ObservationSelectionService } from "../selection-sidebar/observation-se
 export default class AppMapViewLegend extends BaseComponent implements IAnalysisSelectionComponent, IObservationSelectionComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) analyses!: AnalysisForViewSchema[];
+  @Prop({ required: true }) map!: Map;
   
   analysisSelectionService: AnalysisSelectionService | null = null;
   observationSelectionService!: ObservationSelectionService;
+  refMeasureLayersService!: RefMeasureLayersService;
 
   legends: Legend[] = [];
 
   created() {
     this.analysisSelectionService = new AnalysisSelectionService(this);
     this.observationSelectionService = new ObservationSelectionService(this);
+    this.refMeasureLayersService = RefMeasureLayersService.get(this.plant, this.map);
 
     LayersService.get(this.plant.id).on(
       this.plant.id,
@@ -55,6 +60,18 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
         await this.onLayerSelected(layer);
       }
     );
+
+    this.refMeasureLayersService.on(this.plant.id, RefMeasureLayerEvent.ON_REF_MEASURE_LAYERS_CHANGED, () => {
+      const li = this.legends.findIndex(l => l.id === this.refMeasureLayersService.refMeasurLegendId);
+      if (li !== -1) {
+        this.legends.splice(li, 1);
+      }
+
+      const refMeasureLegend = this.refMeasureLayersService.getLegend();
+      if (refMeasureLegend) {
+        this.legends.push(refMeasureLegend);
+      }
+    });
   }
 
   async mounted() {
@@ -87,64 +104,21 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
     const legend = layer.getLegend();
 
     if (legend) {
-      const existingLegendIndex = this.legends.findIndex(l => l.id === legend.id || l.merge?.metaIds?.includes(legend.id));
+      const existingLegendIndex = this.legends.findIndex(l => l.id === legend.id);
       const existingLegend = existingLegendIndex != -1 ? this.legends[existingLegendIndex] : undefined;
 
       if (layer.selected) {
-        if (legend.merge) {
-          // Merge multiple Legends that have "merge" property and the same color.
-          // Currently used by ReferenceMeasurementLayer, only
-
-          legend.merge.metaSum = legend.merge.count;
-          legend.merge.metaIds = [];
-
-          const mergeLegend = this.legends.find(l => l.merge && l.entries[0].color === legend.entries[0].color);
-          if (mergeLegend) {
-            legend.merge.metaSum += mergeLegend.merge!.metaSum || mergeLegend.merge!.count;
-            legend.merge.metaIds.push(mergeLegend.id);
-            
-            const mergeLegendIndex = this.legends.findIndex(l => l.id === mergeLegend.id);
-
-            this.legends.splice(mergeLegendIndex, 1);
-          }
-
-          legend.entries[0].name = legend.merge.metaSum + " " + legend.merge.name;
-        }
-
-        if (!existingLegend) {
-          this.legends.push(legend);
-        } else {
+        if (existingLegend) {
           this.legends.splice(existingLegendIndex, 1, legend)
+        } else {
+          this.legends.push(legend);
         }
       } else {
         if (existingLegend) {
-          if (legend.merge && existingLegend.merge!.metaSum! > legend.merge.count) {
-            // The ("legend.merge")-code mutated to a complex thing.... 
-            // I feel sorry for the developer, who is trying to understand...
-
-            existingLegend.merge!.metaSum! -= legend.merge.count;
-
-            const metaIdIndex = existingLegend.merge!.metaIds!.findIndex(id => id === legend.id);
-            if (metaIdIndex != -1) {
-              existingLegend.merge!.metaIds!.splice(metaIdIndex, 1);
-            } else {
-              existingLegend.id = existingLegend.merge!.metaIds![0];
-            }
-            
-            existingLegend.entries[0].name = existingLegend.merge!.metaSum + " " + existingLegend.merge!.name;
-          } else {
-            this.legends.splice(existingLegendIndex, 1);
-          }
+          this.legends.splice(existingLegendIndex, 1);
         }
       }
     }
-
-    // await this.piLayersHierarchy!.onLayerSelected();
-
-    // const selectedLayers = this.piLayersHierarchy!.getSelectedLayers();
-    // this.routeQueryHelper.replaceRoute({ layer: selectedLayers.map(selectedLayer => selectedLayer.noTransName)});
-    
-    // this.hideToast();
   }
 }
 </script>

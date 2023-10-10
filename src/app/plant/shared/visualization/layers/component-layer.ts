@@ -21,7 +21,7 @@ export abstract class ComponentLayer extends LayerBase implements IOrthoImageMix
   protected readonly width: number = 1;
   protected readonly refMeasureColor = LayerColor.volateqBlue;
 
-  protected readonly allowRefMeasures: boolean = false;
+  public readonly allowRefMeasures: boolean = false;
   protected onAddRefMeasureCallback: (
       (fieldgeoComponent: FieldgeometryComponentSchema, refMeasureEntries: ReferenceMeasurementEntriesSchema | null) => void
     ) | undefined = undefined;
