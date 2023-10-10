@@ -68,13 +68,11 @@ export default class AppSidebarButtonMenu extends Vue {
 @import "@/scss/_variables.scss";
 
 .app-sidebar-button-menu {
-  width: 41px;
-  position: absolute;
-  height: calc(100% - 41.4px);
-  top: 41.4px;
-  z-index: 100;
+  width: $button-menu-width;
+  height: 100%;
   background-color: $white;
   border: 1px solid $border-color-grey;
+  z-index: 10;
 
   .toggle-button {
     width: 40px;

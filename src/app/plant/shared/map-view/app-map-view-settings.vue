@@ -15,6 +15,9 @@
         <b-form-checkbox v-model="satelliteView" switch @change="onSatelliteViewChanged">
           {{ $t("satellite-view") }}
         </b-form-checkbox>
+        <b-form-checkbox v-if="isSuperAdmin" v-model="enableResultsModification" switch @change="onEnableResultModChanged">
+          {{ $t("enable-results-modification") }} <app-super-admin-marker />
+        </b-form-checkbox>
       </div>
       <hr>
       <app-osm-layer-checkbox :map="map" :satellite="satelliteView" v-model="osmSelected" />
@@ -45,9 +48,8 @@
 <script lang="ts">
 import AppOsmLayerCheckbox from "@/app/shared/components/app-map/app-osm-layer-checkbox.vue";
 import AppMapPopButton from "@/app/shared/components/app-map/app-map-pop-button.vue";
-import { BaseComponent } from "@/app/shared/components/base-component/base-component";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { Map, View } from "ol";
+import { Map } from "ol";
 import { Component, Prop } from "vue-property-decorator";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
@@ -62,12 +64,9 @@ import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-d
 import { OrthoImageEvent, OrthoImagesLayer } from "./layers/ortho-images-layer";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
-
-
-const STORAGE_KEY_MULTISELECTION = "storage-key-multiselection";
-const STORAGE_KEY_SHOWUNDEFINED = "storage-key-showundefined";
-const STORAGE_KEY_SATELLITEVIEW = "storage-key-satelliteview";
-
+import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
+import { STORAGE_KEY_MULTISELECTION, STORAGE_KEY_SHOWUNDEFINED, STORAGE_KEY_SATELLITEVIEW, STORAGE_KEY_ENABLERESULTMOD } from "./storage-keys";
+import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 
 @Component({
   name: "app-map-view-settings",
@@ -78,9 +77,10 @@ const STORAGE_KEY_SATELLITEVIEW = "storage-key-satelliteview";
     AppExplanation,
     AppDropdownButton,
     AppButton,
+    AppSuperAdminMarker,
   },
 })
-export default class AppMapViewSettings extends BaseComponent implements IAnalysisSelectionComponent {
+export default class AppMapViewSettings extends BaseAuthComponent implements IAnalysisSelectionComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) analyses!: AnalysisForViewSchema[];
   @Prop({ required: true }) map!: Map;
@@ -90,6 +90,7 @@ export default class AppMapViewSettings extends BaseComponent implements IAnalys
   osmSelected = true;
   satelliteView = true;
   showPCS = false;
+  enableResultsModification = false;
 
   multiSelectionDisabled = false;
   isShowCouldNotBeMeasuredDisabled = false;
@@ -169,6 +170,11 @@ export default class AppMapViewSettings extends BaseComponent implements IAnalys
     }
   }
 
+  @CatchError()
+  onEnableResultModChanged() {
+    appLocalStorage.setItem(STORAGE_KEY_ENABLERESULTMOD, this.enableResultsModification);
+  }
+
   get orthoImages(): OrthoImage[] {
     return this.analysisSelectionService?.firstAnalysisResult && 
       this.orthoImagesLayer?.getAvailableOrthoImages(this.analysisSelectionService?.firstAnalysisResult)
@@ -214,7 +220,11 @@ export default class AppMapViewSettings extends BaseComponent implements IAnalys
       this.layersService.settings.showCouldNotBeMeasured =
       appLocalStorage.getItem(STORAGE_KEY_SHOWUNDEFINED) || false;
 
-    this.satelliteView = appLocalStorage.getItem(STORAGE_KEY_SATELLITEVIEW);
+    this.satelliteView = appLocalStorage.getItem(STORAGE_KEY_SATELLITEVIEW) || true;
+
+    if (this.isSuperAdmin) {
+      this.enableResultsModification = appLocalStorage.getItem(STORAGE_KEY_ENABLERESULTMOD) || false;
+    }
   }
 }
 </script>

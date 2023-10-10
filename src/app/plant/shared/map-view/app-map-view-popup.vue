@@ -8,12 +8,20 @@
       </h3>
     </div>
     <div class="app-map-view-popup-actions mar-bottom">
-      <app-dropdown-button v-if="orthoImages" variant="secondary" :loading="orthoLoading">
+      <app-dropdown-button v-if="orthoImages.length > 0" size="sm" variant="secondary" :loading="orthoLoading">
         <template #title>
           <b-icon-image-fill /><span class="pad-left-half">{{ $t("ortho") }}</span>
         </template>
         <b-dropdown-item v-for="orthoImage in orthoImages" :key="orthoImage.keyFigureId" @click="onOrthoImageClick(orthoImage)">
           {{ orthoImage.name }}
+        </b-dropdown-item>
+      </app-dropdown-button>
+      <app-dropdown-button v-if="resultModEnabled" size="sm" variant="secondary" :loading="resultModLoading">
+        <template #title>
+          {{ $t("modify") }} <app-super-admin-marker />
+        </template>
+        <b-dropdown-item v-for="resultModMode in resultModModes" :key="resultModMode" @click="onModifyResultClick(resultModMode)">
+          {{ $t("set-to-" + resultModMode) }}
         </b-dropdown-item>
       </app-dropdown-button>
     </div>
@@ -79,9 +87,14 @@ import { TableRequest } from '@/app/shared/services/volateq-api/api-requests/com
 import { AnalysisResultMappingHelper } from '@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper';
 import { AnalysisResultSchemaBase } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base';
 import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
-import { FeatureInfo, FeatureInfos } from './types';
+import { FeatureInfo, FeatureInfos, ResultModMode } from './types';
 import { BaseLayer } from './layers/base-layer';
 import AppBox from '@/app/shared/components/app-box/app-box.vue';
+import { appLocalStorage } from '@/app/shared/services/app-storage/app-storage';
+import { STORAGE_KEY_ENABLERESULTMOD } from './storage-keys';
+import { FilterFieldType } from '../filter-fields/types';
+import { analysisResultEventService } from '../plant-admin-view/analysis-result-event-service';
+import { AnalysisResultEvent } from '../plant-admin-view/types';
 
 @Component({
   name: "app-map-view-popup",
@@ -103,6 +116,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   visible = false;
   loading = false;
   orthoLoading = false;
+  resultModLoading = false;
 
   analysisSelectionService!: AnalysisSelectionService;
   layersService!: LayersService;
@@ -110,12 +124,17 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
 
   pcs = "";
   componentId: ApiComponent | null = null;
-  orthoImages: OrthoImage[] | null = null;
+  orthoImages: OrthoImage[] = [];
   
   imgTitle = "";
   imgUrl = "";
   piFeatureInfos: FeatureInfo[] = [];
   hiddenFeaturesVisible = false;
+
+  resultModEnabled = false;
+  resultModModes: ResultModMode[] = [];
+
+  currentSelectedLayers: BaseLayer[] = [];
 
   created() {
     this.analysisSelectionService = new AnalysisSelectionService(this);
@@ -155,6 +174,8 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   async updatePopup() {
     this.resetPopupValues();
 
+    console.log("this.resultModEnabled: ", this.resultModEnabled)
+
     const pcs: string = this.mapFeature!.getProperties().name;
     if (!pcs) {
       return;
@@ -163,35 +184,15 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     this.pcs = pcs;
 
     if (this.analysisSelectionService.firstAnalysisResult) {
-      const orthoImages = this.orthoImagesLayer.getAvailableOrthoImages(this.analysisSelectionService.firstAnalysisResult);
-      if (orthoImages.length > 0) {
-        this.orthoImages = orthoImages;
-      } else {
-        this.orthoImages = null;
-      }
+      this.orthoImages = this.orthoImagesLayer.getAvailableOrthoImages(this.analysisSelectionService.firstAnalysisResult);
     }
 
-    const clickedLayers = this.layersService.layers.filter(l => l.selected && 
-      l.loadedLayer?.getSource()?.getFeatures().find(f => f.getProperties().name === pcs));
+    this.currentSelectedLayers = this.layersService.layers.filter(l => l.selected);
 
-    this.setComponentId(clickedLayers);
-
-    const clickedKeyFigureLayers = clickedLayers.filter(l => l instanceof KeyFigureLayer) as KeyFigureBaseLayer[];
-    if (clickedKeyFigureLayers.length > 0) {
-      const details = await this.getAnalysisResultSchemaDetails(pcs, clickedKeyFigureLayers);
-      if (details) {
-        const featureInfos = this.mapDetailsToFeatureInfos(details, clickedKeyFigureLayers);
-
-        // Currently image gets overwritten for the edge case, that multiple images should be displayed.
-        // TODO: Implement an Image slider for this edge case...
-        if (featureInfos.images && featureInfos.images.length > 0) {
-          this.imgTitle = featureInfos.images[0].title;
-          this.imgUrl = featureInfos.images[0].url;
-        }
-
-        this.piFeatureInfos = featureInfos.infos;        
-      }
-    }
+    this.setComponentId();
+    this.setResultModModes();
+    await this.setPiFeatureInfos();
+    
   }
 
   get componentName(): string {
@@ -234,33 +235,82 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     this.hiddenFeaturesVisible = !this.hiddenFeaturesVisible;
   }
 
+  @CatchError("resultModLoading")
+  async onModifyResultClick(mode: ResultModMode) {
+    if (!confirm(this.$t("apply-are-you-sure").toString())) {
+      return;
+    }
+
+    const keyFigureLayer: KeyFigureBaseLayer = this.selectedKeyFigureLayers[0];
+
+    const mappingHelper = new AnalysisResultMappingHelper(
+      keyFigureLayer.analysisResultMapping,
+      keyFigureLayer.analysisResult,
+    );
+    const entry = keyFigureLayer.getMappingEntry();
+
+    await volateqApi.setAnalysisResultValueToNullOrFalseOrTrue(keyFigureLayer.analysisResult.id, {
+      key_figure_id: keyFigureLayer.keyFigureId,
+      kks: this.pcs!,
+      property_name: entry ? mappingHelper.getPropertyName(entry) : undefined,
+      new_value: mode,
+    });
+    
+    keyFigureLayer.reloadLayer();
+    await keyFigureLayer.setSelected(false);
+    await keyFigureLayer.setSelected(true);
+
+    this.visible = false;
+
+    analysisResultEventService.emit(keyFigureLayer.analysisResult.id, AnalysisResultEvent.MODIFIED);
+  }
+
   private resetPopupValues() {
     this.imgTitle = "";
     this.imgUrl = "",
-    this.orthoImages = null;
+    this.orthoImages = [];
     this.pcs = "";
     this.componentId = null;
     this.piFeatureInfos = [];
     this.hiddenFeaturesVisible = false;
+    this.resultModEnabled = appLocalStorage.getItem(STORAGE_KEY_ENABLERESULTMOD) || false;
+    this.currentSelectedLayers = [];
   }
 
-  private setComponentId(clickedLayers: BaseLayer[]) {
-    const keyFigureLayer: KeyFigureBaseLayer | undefined = clickedLayers.find(l => l instanceof KeyFigureLayer) as KeyFigureBaseLayer;
+  private setComponentId() {
+    const keyFigureLayer: KeyFigureBaseLayer | undefined = this.currentSelectedLayers.find(l => l instanceof KeyFigureLayer) as KeyFigureBaseLayer;
     if (keyFigureLayer) {
       this.componentId = keyFigureLayer.keyFigure.component_id;
     } else {
-      const componentLayer: ComponentLayer | undefined = clickedLayers.find(l => l instanceof ComponentLayer) as ComponentLayer;
+      const componentLayer: ComponentLayer | undefined = this.currentSelectedLayers.find(l => l instanceof ComponentLayer) as ComponentLayer;
       if (componentLayer) {
         this.componentId = componentLayer.componentId;
       }
     }
   }
 
-  private async getAnalysisResultSchemaDetails(
-    pcs: string,
-    keyFigureLayers: KeyFigureBaseLayer[],
-  ): Promise<AnalysisResultSchemaBase | undefined> {
+  private async setPiFeatureInfos() {
+    const keyFigureLayers = this.selectedKeyFigureLayers;
+    if (keyFigureLayers.length > 0) {
+      const details = await this.getAnalysisResultSchemaDetails();
+      if (details) {
+        const featureInfos = this.mapDetailsToFeatureInfos(details);
+
+        // Currently image gets overwritten for the edge case, that multiple images should be displayed.
+        // TODO: Implement an Image slider for this edge case...
+        if (featureInfos.images && featureInfos.images.length > 0) {
+          this.imgTitle = featureInfos.images[0].title;
+          this.imgUrl = featureInfos.images[0].url;
+        }
+
+        this.piFeatureInfos = featureInfos.infos;        
+      }
+    }
+  }
+
+  private async getAnalysisResultSchemaDetails(): Promise<AnalysisResultSchemaBase | undefined> {
     let specAnalysisResultParams: TableRequest = {};
+    const keyFigureLayers = this.selectedKeyFigureLayers;
 
     for (const keyFigureLayer of keyFigureLayers) {
       specAnalysisResultParams = {
@@ -271,9 +321,9 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
 
     const results = await volateqApi.getSpecificAnalysisResult(
       this.analysisSelectionService.firstAnalysisResult!.id, 
-      keyFigureLayers[0].keyFigure.component_id, 
+      this.componentId!, 
       {
-        search_text: pcs,
+        search_text: this.pcs,
         limit: 1,
         search_mode: "equals",
         ...specAnalysisResultParams,
@@ -287,7 +337,9 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     return undefined;
   }
 
-  private mapDetailsToFeatureInfos(result: AnalysisResultSchemaBase, keyFigureLayers: KeyFigureBaseLayer[]): FeatureInfos {
+  private mapDetailsToFeatureInfos(result: AnalysisResultSchemaBase): FeatureInfos {
+    const keyFigureLayers = this.selectedKeyFigureLayers;
+
     const mappingHelper = new AnalysisResultMappingHelper(
       keyFigureLayers[0].analysisResultMapping,
       this.analysisSelectionService.firstAnalysisResult!,
@@ -321,6 +373,27 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     }
 
     return featureInfos;
+  }
+
+  private setResultModModes() {
+    const keyFigureLayers = this.selectedKeyFigureLayers;
+
+    if (keyFigureLayers.length !== 1) {
+      this.resultModEnabled = false;
+      this.resultModModes = [];
+
+      return;
+    }
+
+    if (keyFigureLayers[0].getMappingEntry()?.filterType === FilterFieldType.BOOLEAN) {
+      this.resultModModes = ["null", "false", "true"];
+    } else {
+      this.resultModModes = ["null"];
+    }
+  }
+
+  private get selectedKeyFigureLayers(): KeyFigureBaseLayer[] {
+    return this.currentSelectedLayers.filter(l => l instanceof KeyFigureLayer) as KeyFigureBaseLayer[];
   }
 }
 </script>
@@ -364,6 +437,12 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
       max-height: 500px;
       display: block;
       margin: 0 auto;
+    }
+  }
+
+  &-actions {
+    .b-dropdown {
+      margin-right: 0.5em;
     }
   }
 

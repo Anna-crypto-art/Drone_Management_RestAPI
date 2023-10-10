@@ -97,7 +97,7 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     }
   }
 
-  protected getMappingEntry(): AnalysisResultMappingEntry<T> | undefined {
+  public getMappingEntry(): AnalysisResultMappingEntry<T> | undefined {
     const mappingHelper = new AnalysisResultMappingHelper(this.analysisResultMapping, this.analysisResult!);
     return mappingHelper.getEntries().find(entry => entry.transName === this.options.keyName);
   }
@@ -220,67 +220,6 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     }
 
     return ` (<b>${percentage.toString()}%</b> - <small>${featureCount}</small>)`;
-  }
-  
-  // private async addResultsModificationFeatureAction(featureInfos: FeatureInfos) {
-  //   if (!featureInfos.actionsSummaries) {
-  //     featureInfos.actionsSummaries = [];
-  //   }
-
-  //   const actionsSummary: FeatureActionsSummary = {
-  //     superAdminOnly: true,
-  //     buttonVariant: "secondary",
-  //     name: i18n.t("modify").toString(),
-  //     actions: [
-  //       {
-  //         name: i18n.t("set-to-null").toString(),
-  //         action: async () => {
-  //           await this.modfiyFeatureResultAction(featureInfos, "null");
-  //         }
-  //       },
-  //     ],
-  //   }
-
-  //   const entry = this.getMappingEntry();
-  //   if (entry?.filterType === FilterFieldType.BOOLEAN) {
-  //     actionsSummary.actions.push({
-  //       name: i18n.t("set-to-false").toString(),
-  //       action: async () => {
-  //         await this.modfiyFeatureResultAction(featureInfos, "false");
-  //       }
-  //     });
-  //     actionsSummary.actions.push({
-  //       name: i18n.t("set-to-true").toString(),
-  //       action: async () => {
-  //         await this.modfiyFeatureResultAction(featureInfos, "true");
-  //       }
-  //     });
-  //   }
-
-  //   featureInfos.actionsSummaries.push(actionsSummary);
-  // }
-
-  private async modfiyFeatureResultAction(featureInfos: FeatureInfos, newValue: "null" | "false" | "true") {
-    if (!confirm(i18n.t("apply-are-you-sure").toString())) {
-      return;
-    }
-
-    const mappingHelper = new AnalysisResultMappingHelper(this.analysisResultMapping, this.analysisResult);
-    const entry = this.getMappingEntry();
-
-    await volateqApi.setAnalysisResultValueToNullOrFalseOrTrue(this.analysisResult.id, {
-      key_figure_id: this.keyFigureId,
-      kks: "", //featureInfos.title!,
-      property_name: entry ? mappingHelper.getPropertyName(entry) : undefined,
-      new_value: newValue,
-    });
-
-    await this.setSelected(false);
-    await this.setSelected(true);
-
-    // this.vueComponent.hideToast();
-
-    analysisResultEventService.emit(this.analysisResult.id, AnalysisResultEvent.MODIFIED);
   }
 
   protected get color(): string {
