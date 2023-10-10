@@ -1,10 +1,8 @@
 <template>
-  <Transition>
-    <div class="app-map-view-layer-selection" v-if="visible">
+    <div class="app-map-view-layer-selection" :class="{ 'sidebar-open': sidebarOpen}">
         <p class="grayed mar-bottom-half"><slot name="title" /></p>
         <slot />    
     </div>
-  </Transition>
 </template>
 
 <script lang="ts">
@@ -18,6 +16,10 @@ import { BaseComponent } from "@/app/shared/components/base-component/base-compo
 export default class AppMapViewLayerSelection extends BaseComponent {
   @Prop({ default: false }) visible!: boolean;
 
+  get sidebarOpen(): boolean {
+    return this.$store.direct.state.sidebar.analyses;
+  }
+
 }
 </script>
 
@@ -25,22 +27,19 @@ export default class AppMapViewLayerSelection extends BaseComponent {
 @import "@/scss/_colors.scss";
 @import "@/scss/_variables.scss";
 
-.v-leave-from {
-  width: 300px;
-  left: calc($sidebar-width + 40px);
-  transition: left 0.3s;
-  transition: width 0.3s;
-}
-
 .app-map-view-layer-selection {
   position: absolute;
   height: 100%;
-  width: 0px;
-  left: 0px;
-  
+  width: 300px;
+  left: calc($sidebar-width * -1);  
+  transition: all 1.5s ease-in-out;
   top: 0;
   background-color: $white;
   padding: 1em;
   overflow-y: auto;
+
+  &.sidebar-open {
+    left: calc($sidebar-width + 40px);
+  }
 }
 </style>
