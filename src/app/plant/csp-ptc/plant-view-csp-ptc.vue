@@ -1,7 +1,7 @@
 <template>
   <div class="plant-view-csp-ptc" v-if="analyses">
     <app-sidebar-button-menu :plant="plant" :analyses="analyses" />
-    <app-sidebar :open="isSidebarOpen" :plant="plant" :analyses="analyses" />
+    <app-sidebar :plant="plant" :analyses="analyses" />
     <app-plant-view-tabs :plant="plant" :analyses="analyses">
       <template #visual>
         <app-visual-csp-ptc :analyses="analyses" :plant="plant" />

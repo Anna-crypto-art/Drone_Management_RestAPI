@@ -1,8 +1,8 @@
 <template>
   <div class="app-observation-selection-sidebar" :class="{ open: sidebarOpen }">
-    <h4 class="app-observation-selection-sidebar-leftside-title">
-      {{ $t("observations") }}
-    </h4>
+    <div class="grayed title">
+      <app-icon-observations /><span class="title">{{ $t("observations") }}</span>
+    </div>
     <div class="app-observation-selection-sidebar-filter">
       <b-form @submit.prevent="onSubmitFilter">
         <b-form-select v-model="selectedTimeRange" :options="timeRangeOptions" @change="onTimeRangeChanged()">
@@ -65,11 +65,13 @@ import { CCPDataType } from "@/app/shared/services/volateq-api/api-schemas/custo
 import { ObservationSelectionEvent, ObservRowItem } from "./types";
 import { observationSelectEventService } from "./observation-selection-event-service";
 import { State } from "vuex-class";
+import AppIconObservations from "@/app/shared/components/app-icon/app-icon-observations.vue";
 
 @Component({
   name: "app-observation-selection-sidebar",
   components: {
     AppTableContainer,
+    AppIconObservations,
     AppExplanation,
     AppIcon,
     AppTable,
@@ -195,6 +197,10 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
     display: block;
   }
 
+  &-filter {
+    margin: 8px;
+  }
+
   // display: flex;
   
   // &.absolute {
@@ -212,9 +218,13 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
 
   // }
 
-  &-title {
-    margin-bottom: 0.5em;
-    margin-left: 10px;
+  .title {
+    margin: 10px;
+    
+    .app-icon-observations {
+      // margin-right: 5px;
+      font-size: 120%;
+    }
   }
 
   .app-table-container {

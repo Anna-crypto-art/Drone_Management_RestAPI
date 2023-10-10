@@ -78,6 +78,7 @@ export default class AppSidebarButtonMenu extends Vue {
     width: 40px;
     height: 40px;
     margin-left: -1px;
+    border-right: 1px solid $border-color-grey;
 
     &:hover {
       background-color: $background-grey;

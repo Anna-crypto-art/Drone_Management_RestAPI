@@ -1,8 +1,8 @@
 <template>
   <div class="app-analysis-selection-sidebar" :class="{ open: sidebarOpen }">
-    <h4 class="app-analysis-selection-sidebar-title">
-      {{ $t("analyses") }}
-    </h4>
+    <div class="grayed title">
+      <app-icon-analysis /><span class="title">{{ $t("analyses") }}</span>
+    </div>
     <div class="app-analysis-selection-sidebar-settings" v-if="analyses.length > 1">
       <b-checkbox switch v-model="compareMode" @change="onCompareModeChanged">
         {{ $t("compare-mode") }}
@@ -300,36 +300,32 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
   width: 100%;
   position: absolute;
   display: none;
+  z-index: 9;
+  border-right: 1px solid $border-color-grey;
+  transition: all 0.3s ease-in-out;  
 
   &.open {
     display: block;
   }
   &-table {
     overflow-y: auto;
+
+    .app-table-container {
+      margin-top: 10px;
+      overflow-y: auto;
+
+      .app-table {
+        overflow-y: auto;
+      }
+    }
   }
-  // display: flex;
   
-  // &.absolute {
-  //   position: absolute;
-  // }
-
-  // &-leftside {
-  //   padding: 0.5em;
-  //   height: 100%;
-  //   width: 100%;
-  //   border-right: $border-color-grey 1px solid;
-  //   // display: flex;
-  //   // flex-flow: column;
-
-  //   
-  // }
-  &-title {
-    margin-bottom: 0.5em;
-    margin-left: 10px;
+  &-settings {
+    margin-left: 8px;
   }
 
-  &-settings {
-    margin-bottom: -10px;
+  .title {
+    margin: 10px;
   }
     
   &-kpi-badge {
