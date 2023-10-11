@@ -1,6 +1,6 @@
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { GeoVisualPvQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
-import { ComponentLayer } from "../../shared/visualization/layers/component-layer";
+import { ComponentLayer } from "../../shared/map-view/layers/component-layer";
 import { LayerColor } from "../../shared/visualization/layers/types";
 import { KeyFigureTypeMap } from "../../shared/visualization/types";
 import { TrackerComponentLayer } from "./component-layers/tracker-component-layer";

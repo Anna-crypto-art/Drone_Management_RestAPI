@@ -12,7 +12,7 @@ export class TrackerComponentLayer extends PvComponentLayer {
   public readonly allowRefMeasures = true;
   
   protected showPcsZoomLevel = 18.5;
-  protected zIndex = 3;
+  public zIndex = 3;
   protected disabled = true;
   protected width = 1;
 

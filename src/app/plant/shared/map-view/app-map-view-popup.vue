@@ -16,6 +16,7 @@
           {{ orthoImage.name }}
         </b-dropdown-item>
       </app-dropdown-button>
+      <app-button v-if="hasObservAction" size="sm" variant="secondary" icon="clipboard-data" @click="onObservClick" >{{ $t("observ") }}</app-button>
       <app-button v-if="hasRefMeasureAction" size="sm" variant="secondary" icon="clipboard-check" @click="onRefMeasureClick" >{{ $t("ref-measure") }}</app-button>
       <app-dropdown-button v-if="resultModEnabled" size="sm" variant="secondary" :loading="resultModLoading">
         <template #title>
@@ -79,6 +80,7 @@
       </div>
     </div>
     <app-reference-measurements ref="appReferenceMeasurements" :map="map" :plant="plant" />
+    <app-observation-modal ref="appObservModal" :plant="plant" />
   </div>
 </template>
 
@@ -122,6 +124,10 @@ import { IAppRefMeasure } from './app-reference-measurements/types';
 import { RefMeasureEntry, RefMeasureEntryKeyFigureSchema } from '@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema';
 import { RefMeasureLayersService } from './layers/ref-measure-layers-service';
 import dateHelper from '@/app/shared/services/helper/date-helper';
+import AppObservationModal from '../observations/observation-modal.vue';
+import { IAppObservationModal } from '../observations/types';
+import { FieldgeometryComponentSchema } from '@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema';
+import { CcpService } from '../plant-settings/ccp-service';
 
 @Component({
   name: "app-map-view-popup",
@@ -133,6 +139,7 @@ import dateHelper from '@/app/shared/services/helper/date-helper';
     AppLoading,
     AppBox,
     AppReferenceMeasurements,
+    AppObservationModal,
   }
 })
 export default class AppMapViewPopup extends BaseAuthComponent implements IAnalysisSelectionComponent {
@@ -142,6 +149,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   @Prop({ default: null }) mapFeature!: FeatureLike | null;
 
   @Ref() appReferenceMeasurements!: IAppRefMeasure;
+  @Ref() appObservModal!: IAppObservationModal;
 
   visible = false;
   loading = false;
@@ -152,8 +160,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   layersService!: LayersService;
   orthoImagesLayer!: OrthoImagesLayer;
 
-  pcs = "";
-  componentId: ApiComponent | null = null;
+  fieldgeometryComponent: FieldgeometryComponentSchema | null = null;
   orthoImages: OrthoImage[] = [];
   
   imgTitle = "";
@@ -166,15 +173,19 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   myRefMeasureEntry: RefMeasureEntry | null = null;
   myRefMeasureEntryKeyFigures: RefMeasureEntryKeyFigureSchema[] | null = null;
 
+  hasObservAction = false;
+
   resultModEnabled = false;
   resultModModes: ResultModMode[] = [];
 
   currentSelectedLayers: BaseLayer[] = [];
 
-  created() {
+  async created() {
     this.analysisSelectionService = new AnalysisSelectionService(this);
     this.layersService = LayersService.get(this.plant.id);
     this.orthoImagesLayer = OrthoImagesLayer.get(this.plant, this.map);
+
+    this.hasObservAction = (await CcpService.get(this.plant.id).getCcps()).length > 0;
   }
 
   @Watch("mapFeature")
@@ -214,7 +225,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
       return;
     }
 
-    this.pcs = pcs;
+    await this.setFielgeoComp(pcs);
 
     if (this.analysisSelectionService.firstAnalysisResult) {
       this.orthoImages = this.orthoImagesLayer.getAvailableOrthoImages(this.analysisSelectionService.firstAnalysisResult);
@@ -222,13 +233,20 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
 
     this.currentSelectedLayers = this.layersService.layers.filter(l => l.selected);
 
-    await this.setComponentId();
     this.setResultModModes();
     await this.setPiFeatureInfos();
     await this.setRefMeasureFeatureInfos();
 
     this.hasRefMeasureAction = this.selectedKeyFigureLayers.length > 0 || 
       !!(this.currentSelectedLayers as ComponentLayer[]).find(l => l.allowRefMeasures);
+  }
+
+  get pcs(): string {
+    return this.fieldgeometryComponent?.kks || "";
+  }
+
+  get componentId(): ApiComponent | null {
+    return this.fieldgeometryComponent?.component_id || null;
   }
 
   get componentName(): string {
@@ -302,6 +320,13 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   }
 
   @CatchError()
+  onObservClick() {
+    this.appObservModal.show(this.fieldgeometryComponent!);
+
+    this.visible = false;
+  }
+
+  @CatchError()
   onRefMeasureClick() {
     this.appReferenceMeasurements.show(
       this.analysisSelectionService.firstAnalysis!.id,
@@ -326,8 +351,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     this.imgTitle = "";
     this.imgUrl = "",
     this.orthoImages = [];
-    this.pcs = "";
-    this.componentId = null;
+    this.fieldgeometryComponent = null;
     this.piFeatureInfos = [];
     this.hiddenFeaturesVisible = false;
     this.resultModEnabled = appLocalStorage.getItem(STORAGE_KEY_ENABLERESULTMOD) || false;
@@ -338,12 +362,11 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     this.myRefMeasureEntryKeyFigures = null;
   }
 
-  private async setComponentId() {
-    const fieldgeometryComp = await volateqApi.getFieldgeometryComponent(
+  private async setFielgeoComp(pcs: string) {
+    this.fieldgeometryComponent = await volateqApi.getFieldgeometryComponent(
       this.plant.fieldgeometry!.id,
-      this.pcs,
+      pcs,
     );
-    this.componentId = fieldgeometryComp.component_id;
   }
 
   private async setPiFeatureInfos() {

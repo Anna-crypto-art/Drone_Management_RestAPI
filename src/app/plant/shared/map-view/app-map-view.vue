@@ -12,6 +12,10 @@
       :map="map"
       :plant="plant"
     />
+    <app-map-view-observ-layer-selection 
+      :map="map"
+      :plant="plant"
+    />
     <app-map-view-legend :plant="plant" :analyses="analyses" :map="map" />
     <app-map-view-popup :plant="plant" :analyses="analyses" :mapFeature="clickedMapFeature" :map="map" />
   </div>
@@ -29,6 +33,7 @@ import { ComponentLayer } from "../visualization/layers/component-layer";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppMapViewComponents from "./app-map-view-components.vue";
 import AppMapViewKeyFigureLayerSelection from "./app-map-view-layer-selection/app-map-view-key-figure-layer-selection.vue";
+import AppMapViewObservLayerSelection from "./app-map-view-layer-selection/app-map-view-observ-layer-selection.vue";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { KeyFigureTypeMap } from "./layers/types";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
@@ -40,7 +45,6 @@ import { IAnalysisSelectionComponent } from "../selection-sidebar/analysis-selec
 import { AnalysisSelectionService } from "../selection-sidebar/analysis-selection/analysis-selection-service";
 import { LayersService } from "./layers/layers-service";
 import { RefMeasureLayersService } from "./layers/ref-measure-layers-service";
-import { waitFor } from "@/app/shared/services/helper/debounce-helper";
 
 @Component({
   name: "app-map-view",
@@ -53,6 +57,7 @@ import { waitFor } from "@/app/shared/services/helper/debounce-helper";
     AppMapViewKeyFigureLayerSelection,
     AppMapViewLegend,
     AppMapViewPopup,
+    AppMapViewObservLayerSelection,
   },
 })
 export default class AppMapView extends BaseAuthComponent implements IAnalysisSelectionComponent {
