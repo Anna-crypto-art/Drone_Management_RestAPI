@@ -13,6 +13,7 @@ import { LayerColor } from "./types";
 import { AppSeqEventService } from "@/app/shared/services/app-event-service/app-event-service";
 import { Legend } from "../types";
 import { i18n } from "@/main";
+import { LayersService } from "./layers-service";
 
 export enum RefMeasureLayerEvent {
   ON_REF_MEASURE_LAYERS_CHANGED = "ON_REF_MEASURE_LAYERS_CHANGED",
@@ -84,6 +85,19 @@ export class RefMeasureLayersService extends AppSeqEventService<RefMeasureLayerE
     }
 
     await this.emit(this.plant.id, RefMeasureLayerEvent.ON_REF_MEASURE_LAYERS_CHANGED);
+  }
+
+  public async reload() {
+    if (this.currentAnalysis && this.currentAnalysis.id in this.analysesRefMeasureLayers) {
+      const loadedLayer = this.analysesRefMeasureLayers[this.currentAnalysis.id];
+      loadedLayer.setVisible(false);
+      this.map.removeLayer(loadedLayer);
+      delete this.analysesRefMeasureLayers[this.currentAnalysis.id];
+
+      await this.loadLayersForAnalysis(this.currentAnalysis);
+
+      LayersService.get(this.plant.id).rerenderLoadedLayers();
+    }
   }
 
   private async loadLayer(analysis: AnalysisForViewSchema): Promise<VectorGeoLayer> {

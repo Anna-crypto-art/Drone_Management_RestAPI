@@ -78,7 +78,7 @@
         </app-box>
       </div>
     </div>
-    <app-reference-measurements ref="appReferenceMeasurements" />
+    <app-reference-measurements ref="appReferenceMeasurements" :map="map" :plant="plant" />
   </div>
 </template>
 
@@ -209,8 +209,6 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   async updatePopup() {
     this.resetPopupValues();
 
-    console.log("this.resultModEnabled: ", this.resultModEnabled)
-
     const pcs: string = this.mapFeature!.getProperties().name;
     if (!pcs) {
       return;
@@ -222,10 +220,9 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
       this.orthoImages = this.orthoImagesLayer.getAvailableOrthoImages(this.analysisSelectionService.firstAnalysisResult);
     }
 
-    // BUG: Not working for ref measure layers...
     this.currentSelectedLayers = this.layersService.layers.filter(l => l.selected);
 
-    this.setComponentId();
+    await this.setComponentId();
     this.setResultModModes();
     await this.setPiFeatureInfos();
     await this.setRefMeasureFeatureInfos();
@@ -313,6 +310,16 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
       this.myRefMeasureEntry,
       this.myRefMeasureEntryKeyFigures
     );
+
+    this.visible = false;
+  }
+
+  async onAnalysisSelected() {
+    this.visible = false;
+  }
+
+  async onMultiAnalysesSelected() {
+    this.visible = false;
   }
 
   private resetPopupValues() {
@@ -331,16 +338,12 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     this.myRefMeasureEntryKeyFigures = null;
   }
 
-  private setComponentId() {
-    const keyFigureLayer: KeyFigureBaseLayer | undefined = this.currentSelectedLayers.find(l => l instanceof KeyFigureLayer) as KeyFigureBaseLayer;
-    if (keyFigureLayer) {
-      this.componentId = keyFigureLayer.keyFigure.component_id;
-    } else {
-      const componentLayer: ComponentLayer | undefined = this.currentSelectedLayers.find(l => l instanceof ComponentLayer) as ComponentLayer;
-      if (componentLayer) {
-        this.componentId = componentLayer.componentId;
-      }
-    }
+  private async setComponentId() {
+    const fieldgeometryComp = await volateqApi.getFieldgeometryComponent(
+      this.plant.fieldgeometry!.id,
+      this.pcs,
+    );
+    this.componentId = fieldgeometryComp.component_id;
   }
 
   private async setPiFeatureInfos() {

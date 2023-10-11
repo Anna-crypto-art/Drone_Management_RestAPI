@@ -107,9 +107,7 @@ export default class AppMapView extends BaseAuthComponent implements IAnalysisSe
     // Load ref measure layers for analysis takes a while because it loads geoJSON.
     // So we avoid "blocking the thread" this way....
     this.refMeasureLayersService.loadLayersForAnalysis(this.analysisSelectionService.firstAnalysis || undefined).then(() => {
-      this.layersService.layers.filter(l => l.loadedLayer).forEach(l => l.rerender());
-
-      // console.log("hello there?")
+      this.layersService.rerenderLoadedLayers();
     });
   }
 }

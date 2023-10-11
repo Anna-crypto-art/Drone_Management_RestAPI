@@ -35,7 +35,7 @@
 <script lang="ts">
 import { IAppModalForm } from '@/app/shared/components/app-modal/types';
 import volateqApi from '@/app/shared/services/volateq-api/volateq-api';
-import { Component, Ref } from "vue-property-decorator";
+import { Component, Prop, Ref } from "vue-property-decorator";
 import { IAppRefMeasure, RefMeasureEntryModel } from './types';
 import AppButton from '@/app/shared/components/app-button/app-button.vue';
 import AppModalForm from '@/app/shared/components/app-modal/app-modal-form.vue';
@@ -50,6 +50,9 @@ import { FieldgeometryComponentSchema } from '@/app/shared/services/volateq-api/
 import { AnalysisResultMappingHelper } from '@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper';
 import dateHelper from '@/app/shared/services/helper/date-helper';
 import { ApiComponent } from '@/app/shared/services/volateq-api/api-components/api-components';
+import { Map } from 'ol';
+import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
+import { RefMeasureLayersService } from '../layers/ref-measure-layers-service';
 
 @Component({
   name: "app-reference-measurements",
@@ -62,7 +65,11 @@ import { ApiComponent } from '@/app/shared/services/volateq-api/api-components/a
   },
 })
 export default class AppReferenceMeasurements extends BaseAuthComponent implements IAppRefMeasure {
+  @Prop({ required: true }) plant!: PlantSchema;
+  @Prop({ required: true }) map!: Map;
   @Ref() refMeasureModal!: IAppModalForm;
+
+  refMeasureLayersService!: RefMeasureLayersService;
   
   analysisId: string | null = null;
   pcs: string | null = null;
@@ -75,6 +82,10 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
 
   entryModel: RefMeasureEntryModel | null = null;
   filterFields: FilterField[] = [];
+
+  created() {
+    this.refMeasureLayersService = RefMeasureLayersService.get(this.plant, this.map);
+  }
   
   get title(): string {
     return this.entry === null ? this.$t("add-reference-measurement").toString() : 
@@ -97,6 +108,8 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
         .map(v => v.value!.toString()),
     });
 
+    await this.refMeasureLayersService.reload();
+
     this.showSuccess(this.$t("ref-measures-created-success").toString());
 
     this.refMeasureModal.hide();
@@ -109,6 +122,8 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
     }
 
     await volateqApi.deleteReferenceMeasurementEntry(this.entry!.entry_id);
+
+    await this.refMeasureLayersService.reload();
 
     this.showSuccess(this.$t("ref-measures-removed-success").toString());
 

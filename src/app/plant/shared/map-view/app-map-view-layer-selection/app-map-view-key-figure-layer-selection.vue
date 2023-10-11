@@ -388,10 +388,9 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
     }
 
     const analysisResult = this.analysisSelectionService?.firstAnalysisResult;
-    if (analysisResult) {
-      const visible = layer.analysisResult.id === analysisResult.id && (!layer.compareAnalysisResult || layer.hasKeyFigureForCompareAnalysisResult());
-      layer.setVisible(visible);
-    }
+    const visible = analysisResult && layer.analysisResult.id === analysisResult.id &&
+      (!layer.compareAnalysisResult || layer.hasKeyFigureForCompareAnalysisResult()) || false;
+    layer.setVisible(visible);
 
     if (layer.selected) {
       if (!layer.isVisible) {
