@@ -191,32 +191,19 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
   height: 100%;
   width: 100%;
   position: absolute;
-  display: none;
+  border-right: 1px solid $border-color-grey;
+  margin-left: calc($sidebar-width * -1);
+  transition: all 0.3s ease-in-out;
 
   &.open {
+    margin-left: 0;
     display: block;
+    // z-index: 9;
   }
 
   &-filter {
     margin: 8px;
   }
-
-  // display: flex;
-  
-  // &.absolute {
-  //   position: absolute;
-  // }
-
-  // &-leftside {
-  //   padding: 0.5em;
-  //   height: 100%;
-  //   width: 100%;
-  //   border-right: $border-color-grey 1px solid;
-  //   display: block;
-  //   // display: flex;
-  //   // flex-flow: column;
-
-  // }
 
   .title {
     margin: 10px;

@@ -1,6 +1,7 @@
 <template>
     <div class="app-map-view-layer-selection" :class="{ 'sidebar-open': sidebarOpen}">
-        <p class="grayed mar-bottom-half"><slot name="title" /></p>
+      <div class="grayed app-map-view-popup-close-button" @click="onClose">x</div>
+      <p class="grayed mar-bottom-half"><slot name="title" /></p>
         <slot />    
     </div>
 </template>
@@ -8,6 +9,7 @@
 <script lang="ts">
 import { Component, Prop } from "vue-property-decorator";
 import { BaseComponent } from "@/app/shared/components/base-component/base-component";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
 
 @Component({
   name: "app-map-view-layer-selection",
@@ -17,9 +19,13 @@ export default class AppMapViewLayerSelection extends BaseComponent {
   @Prop({ default: false }) visible!: boolean;
 
   get sidebarOpen(): boolean {
-    return this.$store.direct.state.sidebar.analyses;
+    return this.visible;
   }
 
+  @CatchError()
+  onClose() {
+    this.visible = false;
+  }
 }
 </script>
 
@@ -30,17 +36,13 @@ export default class AppMapViewLayerSelection extends BaseComponent {
 .app-map-view-layer-selection {
   position: absolute;
   height: 100%;
-  width: 300px;
+  width: 250px;
   left: calc($sidebar-width * -2);  
-  transition: all 0.5s ease-in-out;
+  transition: all 0.4s ease-in;
   top: 0;
   background-color: $white;
   padding: 1em;
   overflow-y: auto;
-
-  .mar-bottom-half {  
-    z-index: 8;
-  }
 
   &.sidebar-open {
     left: 0px;
