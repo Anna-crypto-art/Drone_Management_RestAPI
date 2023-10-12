@@ -21,8 +21,8 @@ export class AnalysisSelectionService {
     analysisSelectEventService.on(
       this.analysisSelectionComponent.plant.id,
       AnalysisSelectionEvent.ANALYSIS_SELECTED,
-      async (selectedAnalysisId: string | undefined) => {
-        await this.fireAnalysisSelected(selectedAnalysisId);
+      async (selectedAnalysisId: string | undefined, selectedByQueryRoute?: boolean) => {
+        await this.fireAnalysisSelected(selectedAnalysisId, selectedByQueryRoute);
       },
       this.id
     );
@@ -30,8 +30,8 @@ export class AnalysisSelectionService {
     analysisSelectEventService.on(
       this.analysisSelectionComponent.plant.id,
       AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED,
-      async (selectedAnalysesIds: string[] | undefined) => {
-        await this.fireMultiAnalysisSelected(selectedAnalysesIds);
+      async (selectedAnalysesIds: string[] | undefined, selectedByQueryRoute?: boolean) => {
+        await this.fireMultiAnalysisSelected(selectedAnalysesIds, selectedByQueryRoute);
       },
       this.id
     );
@@ -51,7 +51,7 @@ export class AnalysisSelectionService {
       .removeListenerById(AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED, this.id!);
   }
 
-  private async fireAnalysisSelected(selectedAnalysisId: string | undefined) {
+  private async fireAnalysisSelected(selectedAnalysisId: string | undefined, selectedByQueryRoute?: boolean) {
     if (this.analysisSelectionComponent.analyses) {
       this.selectedAnalysis = this.analysisSelectionComponent.analyses
         .find(analysis => analysis.id === selectedAnalysisId) || null;
@@ -61,10 +61,10 @@ export class AnalysisSelectionService {
       }
     }
 
-    this.analysisSelectionComponent.onAnalysisSelected && await this.analysisSelectionComponent.onAnalysisSelected();
+    this.analysisSelectionComponent.onAnalysisSelected && await this.analysisSelectionComponent.onAnalysisSelected(selectedByQueryRoute);
   }
 
-  private async fireMultiAnalysisSelected(selectedAnalysesIds: string[] | undefined) {
+  private async fireMultiAnalysisSelected(selectedAnalysesIds: string[] | undefined, selectedByQueryRoute?: boolean) {
     if (!selectedAnalysesIds) {
       this.selectedAnalyses = null;
     } else if (this.analysisSelectionComponent.analyses) {
@@ -76,7 +76,7 @@ export class AnalysisSelectionService {
       }
     }
 
-    this.analysisSelectionComponent.onMultiAnalysesSelected && await this.analysisSelectionComponent.onMultiAnalysesSelected();
+    this.analysisSelectionComponent.onMultiAnalysesSelected && await this.analysisSelectionComponent.onMultiAnalysesSelected(selectedByQueryRoute);
   }
 
   public getKeyFigures(): KeyFigureSchema[] {

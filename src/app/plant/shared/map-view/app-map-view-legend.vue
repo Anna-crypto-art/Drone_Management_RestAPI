@@ -23,6 +23,7 @@ import { IObservationSelectionComponent } from "../selection-sidebar/observation
 import { ObservationSelectionService } from "../selection-sidebar/observation-selection/observation-selection-service";
 import { RefMeasureLayerEvent, RefMeasureLayersService } from "./layers/ref-measure-layers-service";
 import { Map } from "ol";
+import { RouteQueryHelper } from "../helper/route-query-helper";
 
 
 @Component({
@@ -38,6 +39,9 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
   analysisSelectionService: AnalysisSelectionService | null = null;
   observationSelectionService!: ObservationSelectionService;
   refMeasureLayersService!: RefMeasureLayersService;
+  layersService!: LayersService;
+
+  routeQueryHelper = new RouteQueryHelper(this);
 
   legends: Legend[] = [];
 
@@ -45,15 +49,20 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
     this.analysisSelectionService = new AnalysisSelectionService(this);
     this.observationSelectionService = new ObservationSelectionService(this);
     this.refMeasureLayersService = RefMeasureLayersService.get(this.plant, this.map);
-
-    LayersService.get(this.plant.id).on(
+    
+    this.layersService = LayersService.get(this.plant.id);
+    this.layersService.on(
       this.plant.id,
       LayerEvent.ON_KEY_FIGURE_SELECTED,
       async (layer: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>) => {
         await this.onLayerSelected(layer);
+
+        await this.routeQueryHelper.replaceRoute({
+          layer: this.layersService.keyFigureLayers.filter(l => l.selected).map(l => l.name),
+        });
       }
     );
-    LayersService.get(this.plant.id).on(
+    this.layersService.on(
       this.plant.id,
       LayerEvent.ON_INV_AUTO_SELECT_SELECTED,
       async (layer: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>) => {

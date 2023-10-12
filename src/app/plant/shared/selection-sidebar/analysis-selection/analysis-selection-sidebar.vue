@@ -105,8 +105,9 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
 
   absolute = true;
 
-  async created() {
-    
+  selectedByQueryRoute = false;
+
+  created() {
     selectionSidebarEventService.on(this.plant.id, SelectionSidebarEvent.SIDEBAR_ABSOLUTE, async (absolute) => {
       this.absolute = absolute;
     });
@@ -189,6 +190,8 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
 
     this.lastSelectedAnalyses = selectedAnalyses;
 
+    // await this.$nextTick(); // Make loading animation working
+
     if (this.compareMode) {
       if (selectedAnalyses.length > 0) {
         // If the user selects an analysis without results,
@@ -214,8 +217,11 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
         await analysisSelectEventService.emit(
           this.plant.id,
           AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED,
-          selectedAnalysisIds
+          selectedAnalysisIds,
+          this.selectedByQueryRoute,
         );
+
+        this.selectedByQueryRoute = false;
       }
     } else {
       let selectedAnalysisId: string | undefined = undefined
@@ -228,8 +234,11 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
       await analysisSelectEventService.emit(
         this.plant.id,
         AnalysisSelectionEvent.ANALYSIS_SELECTED,
-        selectedAnalysisId
+        selectedAnalysisId,
+        this.selectedByQueryRoute
       );
+
+      this.selectedByQueryRoute = false;
     }
   }
 
@@ -273,6 +282,8 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
       }
 
       await this.$nextTick();
+      
+      this.selectedByQueryRoute = true;
 
       this.analysesTable.selectRow(tableRowIndex);
     } else {

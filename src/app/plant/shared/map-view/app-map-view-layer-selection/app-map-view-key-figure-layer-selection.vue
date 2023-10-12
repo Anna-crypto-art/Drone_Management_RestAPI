@@ -59,6 +59,9 @@ import { LayersService } from "../layers/layers-service";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { LayerColor } from "../../visualization/layers/types";
+import { PlantRouteQuery } from "../../types";
+import { RouteQueryHelper } from "../../helper/route-query-helper";
+import { waitFor } from "@/app/shared/services/helper/debounce-helper";
 
 @Component({
   name: "app-map-view-key-figure-layer-selection",
@@ -81,12 +84,14 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
   analysisSelectionService!: AnalysisSelectionService;
   layersService!: LayersService;
 
+  private routeQueryHelper = new RouteQueryHelper(this);
+
   private selectedAnalyses: Record<string, AnalysisForViewSchema> = {};
 
   created() {
     this.analysisSelectionService = new AnalysisSelectionService(this);
+    
     this.layersService = LayersService.get(this.plant.id);
-
     this.layersService.on(
       this.plant.id,
       LayerEvent.ON_KEY_FIGURE_SELECTED,
@@ -98,7 +103,6 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
         }
       }
     );
-
     this.layersService.on(
       this.plant.id,
       LayerEvent.ON_SHOW_COULD_NOT_BE_MEASURED_CHANGED,
@@ -106,6 +110,8 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
         await this.handleCouldNotBeMeasuredChanged();
       }
     )
+
+    this.routeQueryHelper.queryChanged(async () => { await this.loadLayersFromUrlQuery(); });
 
     this.setupCompGroupLayers();
   }
@@ -118,12 +124,14 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
     await this.analysisSelectionService?.unregister();
   }
 
-  async onAnalysisSelected() {
-    await this.handleAnalysesSelection();
+  async onAnalysisSelected(selectedByQueryRoute?: boolean) {
+    console.log("AppMapViewKeyFigureLayerSelection: onAnalysisSelected")
+
+    await this.handleAnalysesSelection(selectedByQueryRoute);
   }
 
-  async onMultiAnalysesSelected() {
-    await this.handleAnalysesSelection();
+  async onMultiAnalysesSelected(selectedByQueryRoute?: boolean) {
+    await this.handleAnalysesSelection(selectedByQueryRoute);
   }
 
   isFirstVisibleGroup(compGroupLayer: ComponentGroupKeyFigureLayer, index: number) {
@@ -146,7 +154,7 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
     return true;
   }
 
-  private async handleAnalysesSelection() {
+  private async handleAnalysesSelection(selectedByQueryRoute?: boolean) {
     this.visible = !!this.analysisSelectionService.firstAnalysisResult;
 
     const selectedAnalysisId = this.analysisSelectionService?.firstAnalysis?.id;
@@ -157,6 +165,22 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
 
     const selectedLayerNames = await this.updateLayers();
     await this.selectLayers(selectedLayerNames);
+
+    if (selectedByQueryRoute) {
+      await this.loadLayersFromUrlQuery();
+    }
+  }
+
+  private async loadLayersFromUrlQuery(): Promise<boolean> {
+    const plantRouteQuery: PlantRouteQuery = this.$route.query;
+    if (plantRouteQuery.layer) {
+      const layerNames = typeof plantRouteQuery.layer === "string" ? [plantRouteQuery.layer] : plantRouteQuery.layer;
+      await this.selectLayers(layerNames);
+
+      return true;
+    }
+
+    return false;
   }
 
   private async selectInvAutoSelectLayer(layer: KeyFigureBaseLayer) {

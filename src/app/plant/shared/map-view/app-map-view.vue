@@ -108,12 +108,8 @@ export default class AppMapView extends BaseAuthComponent implements IAnalysisSe
   }
 
   async onAnalysisSelected() {
-    // using "await" leads to blocking open layers code execution (somehow!?) -> zoomToHome does not work!
-    // Load ref measure layers for analysis takes a while because it loads geoJSON.
-    // So we avoid "blocking the thread" this way....
-    this.refMeasureLayersService.loadLayersForAnalysis(this.analysisSelectionService.firstAnalysis || undefined).then(() => {
-      this.layersService.rerenderLoadedLayers();
-    });
+    await this.refMeasureLayersService.loadLayersForAnalysis(this.analysisSelectionService.firstAnalysis || undefined);
+    this.layersService.rerenderLoadedLayers();
   }
 }
 </script>

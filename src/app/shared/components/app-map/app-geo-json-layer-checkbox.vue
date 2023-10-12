@@ -23,6 +23,7 @@ import { EVENT_ZOOM_TO_HOME } from "./events";
 import { GEO_JSON_OPTIONS } from "@/app/plant/shared/visualization/layers/layer-base";
 import { BaseAuthComponent } from "../base-auth-component/base-auth-component";
 import AppExplanation from "../app-explanation/app-explanation.vue";
+import { waitFor } from "../../services/helper/debounce-helper";
 
 @Component({
   name: "app-geo-json-layer-checkbox",
@@ -30,7 +31,7 @@ import AppExplanation from "../app-explanation/app-explanation.vue";
     AppExplanation,
   },
 })
-export default class AppGeoJsonLayerCheckbox extends BaseAuthComponent implements IAppGeoJsonLayerCheckbox {
+export default class selectedByQueryRoute extends BaseAuthComponent implements IAppGeoJsonLayerCheckbox {
   @Prop({ required: true }) geoLayer!: IGeoLayer;
   @Prop({ required: true }) map!: Map;
 
@@ -39,6 +40,8 @@ export default class AppGeoJsonLayerCheckbox extends BaseAuthComponent implement
   @CatchError()
   async mounted() {
     this.geoLayer.appLayerCheckbox = this;
+
+    console.log("selectedByQueryRoute mounted: ", this.geoLayer.id);
 
     await this.loadGeoLayer();
   }
@@ -72,7 +75,8 @@ export default class AppGeoJsonLayerCheckbox extends BaseAuthComponent implement
         this.geoLayer.loadedLayer = await this.loadVectorGeoLayer();
         
         if (this.geoLayer.autoZoom) {
-          this.zoomToHome();
+          const waitForRendered = () => this.map.isRendered() ? this.zoomToHome() : setTimeout(() => waitForRendered(), 50);
+          waitForRendered();
         }
       }
 
