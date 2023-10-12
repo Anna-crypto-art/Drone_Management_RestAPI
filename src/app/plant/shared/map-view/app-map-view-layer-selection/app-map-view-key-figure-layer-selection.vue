@@ -39,7 +39,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Watch } from "vue-property-decorator";
 import { BaseComponent } from "@/app/shared/components/base-component/base-component";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Map } from "ol";
@@ -78,6 +78,7 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
   @Prop({ required: true }) analyses!: AnalysisForViewSchema[];
   @Prop({ required: true }) keyFigureLayers!: KeyFigureTypeMap<GeoVisualQuery>[];
 
+  get isSidebarOpen(): boolean { return this.$store.direct.state.sidebar.analyses}
   visible = false;
   compGroupLayers: ComponentGroupKeyFigureLayer[] = [];
   
@@ -124,6 +125,11 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
     await this.analysisSelectionService?.unregister();
   }
 
+  @Watch('isSidebarOpen')
+  onVisibilityChanged() {
+    this.visible = !!this.analysisSelectionService.firstAnalysisResult && this.isSidebarOpen;
+  }
+
   async onAnalysisSelected(selectedByQueryRoute?: boolean) {
     console.log("AppMapViewKeyFigureLayerSelection: onAnalysisSelected")
 
@@ -154,8 +160,8 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
     return true;
   }
 
-  private async handleAnalysesSelection(selectedByQueryRoute?: boolean) {
-    this.visible = !!this.analysisSelectionService.firstAnalysisResult;
+  private async handleAnalysesSelection(selectedByQueryRoute?: boolean) {    
+    this.onVisibilityChanged();
 
     const selectedAnalysisId = this.analysisSelectionService?.firstAnalysis?.id;
     if (selectedAnalysisId && !(selectedAnalysisId in this.selectedAnalyses)) {
@@ -495,5 +501,10 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
 <style lang="scss">
 @import "@/scss/_colors.scss";
 @import "@/scss/_variables.scss";
+
+// .app-map-view-key-figure-layer-selection {
+//   height: 100%;
+//   overflow-y: auto;
+// }
 
 </style>

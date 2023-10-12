@@ -58,7 +58,7 @@
           </a>
         </app-box>
       </div>
-      <div v-if="refMeasureFeatureInfos.length > 0">
+      <div v-if="refMeasureFeatureInfos.length > 0" :class="{ 'mar-top': piFeatureInfos.length > 0 }">
         <h4 class="no-mar-top mar-bottom-half">{{ $t("reference-measurements") }}</h4>
         <app-box class="app-map-view-popup-body-feature-infos no-mar-top no-mar-bottom">
           <div v-for="(rmFeatureInfo, index) in refMeasureFeatureInfos" :key="index">
@@ -74,7 +74,7 @@
                 {{ rmFeatureInfo.unit }}
               </span>
             </div>
-            <hr class="mar-bottom-half mar-top-half" v-show="index + 1 < rmFeatureInfo.length" />
+            <hr class="mar-bottom-half mar-top-half" v-show="index + 1 < refMeasureFeatureInfos.length" />
           </div>
         </app-box>
       </div>

@@ -5,7 +5,7 @@
         :variant="variantAnalyses"
         size="sm"
         tool="analyses"
-        class="toggle-button"
+        class="sidebar-button"
         @click="onToggle('analyses')"
       >
         <app-icon-analysis />
@@ -14,12 +14,20 @@
         :variant="variantObservations"
         size="sm"
         tool="observations"
-        class="toggle-button"
+        class="sidebar-button"
         @click="onToggle('observations')"
       >
         <app-icon-observations />
       </b-button>
     </b-button-group>
+    <b-button 
+        variant="secondary"
+        size="sm"
+        class="toggle-button"
+        @click="onToggleAll()"
+      >
+        <b-icon :icon="open ? 'hevron-compact-left' : 'hevron-compact-right'"></b-icon>
+      </b-button>
   </div>
 </template>
 
@@ -30,6 +38,7 @@ import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.
 import AppIconObservations from "@/app/shared/components/app-icon/app-icon-observations.vue";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { SidebarNames } from "@/app/shared/stores/sidebar";
+import { State } from "vuex-class";
 
 @Component({
   name: "app-sidebar-button-menu",
@@ -39,9 +48,13 @@ import { SidebarNames } from "@/app/shared/stores/sidebar";
   }
 })
 export default class AppSidebarButtonMenu extends Vue {
+  @State(state => state.sidebar["analyses"]) openA!: boolean;
+  @State(state => state.sidebar["observations"]) openO!: boolean;
 
   get variantAnalyses(): string { return this.$store.direct.state.sidebar.analyses ? "primary" : "secondary"; }
   get variantObservations(): string { return this.$store.direct.state.sidebar.observations ? "primary" : "secondary"; }
+
+  get open(): boolean { return (this.openA || this.openO) }
 
   @CatchError()
   onToggle(tool: SidebarNames) {
@@ -59,6 +72,12 @@ export default class AppSidebarButtonMenu extends Vue {
         }
         break;
     }
+    console.log(this.open)
+  }
+
+  @CatchError()
+  onToggleAll() {
+    this.$store.direct.commit.sidebar.toggle({ name: "analyses" });
   }
 }
 </script>
@@ -74,14 +93,21 @@ export default class AppSidebarButtonMenu extends Vue {
   border: 1px solid $border-color-grey;
   z-index: 10;
 
-  .toggle-button {
+  .sidebar-button {
     width: 40px;
     height: 40px;
     margin-left: -1px;
+    border-right: 1px solid $border-color-grey;
 
     &:hover {
       background-color: $background-grey;
     }
+  }
+
+  .toggle-button {
+    position: relative;
+    width: 30px;
+    height: 40px;
   }
 }
 </style>

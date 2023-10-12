@@ -1,8 +1,8 @@
 <template>
   <div class="app-observation-selection-sidebar" :class="{ open: sidebarOpen }">
-    <h4 class="app-observation-selection-sidebar-leftside-title">
-      {{ $t("observations") }}
-    </h4>
+    <div class="grayed title">
+      <app-icon-observations /><span class="title">{{ $t("observations") }}</span>
+    </div>
     <div class="app-observation-selection-sidebar-filter">
       <b-form @submit.prevent="onSubmitFilter">
         <b-form-select v-model="selectedTimeRange" :options="timeRangeOptions" @change="onTimeRangeChanged()">
@@ -65,11 +65,13 @@ import { CCPDataType } from "@/app/shared/services/volateq-api/api-schemas/custo
 import { ObservationSelectionEvent, ObservRowItem } from "./types";
 import { observationSelectEventService } from "./observation-selection-event-service";
 import { State } from "vuex-class";
+import AppIconObservations from "@/app/shared/components/app-icon/app-icon-observations.vue";
 
 @Component({
   name: "app-observation-selection-sidebar",
   components: {
     AppTableContainer,
+    AppIconObservations,
     AppExplanation,
     AppIcon,
     AppTable,
@@ -189,32 +191,27 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
   height: 100%;
   width: 100%;
   position: absolute;
-  display: none;
+  border-right: 1px solid $border-color-grey;
+  margin-left: calc($sidebar-width * -1);
+  transition: all 0.3s ease-in-out;
 
   &.open {
+    margin-left: 0;
     display: block;
+    // z-index: 9;
   }
 
-  // display: flex;
-  
-  // &.absolute {
-  //   position: absolute;
-  // }
+  &-filter {
+    margin: 8px;
+  }
 
-  // &-leftside {
-  //   padding: 0.5em;
-  //   height: 100%;
-  //   width: 100%;
-  //   border-right: $border-color-grey 1px solid;
-  //   display: block;
-  //   // display: flex;
-  //   // flex-flow: column;
-
-  // }
-
-  &-title {
-    margin-bottom: 0.5em;
-    margin-left: 10px;
+  .title {
+    margin: 10px;
+    
+    .app-icon-observations {
+      // margin-right: 5px;
+      font-size: 120%;
+    }
   }
 
   .app-table-container {

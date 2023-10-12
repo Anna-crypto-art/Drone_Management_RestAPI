@@ -127,5 +127,6 @@ export default class AppMapView extends BaseAuthComponent implements IAnalysisSe
   position: relative;
   height: calc(100vh - $header-height - $tab-height);
   width: 100%;
+  overflow: hidden;
 }
 </style>
