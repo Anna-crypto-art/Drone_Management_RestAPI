@@ -475,10 +475,12 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
 @import "@/scss/_colors.scss";
 @import "@/scss/_variables.scss";
 
-// .app-map-view-key-figure-layer-selection {
+.app-map-view-key-figure-layer-selection {
+  height: 100%;
+  overflow-y: auto;
 //   &-group {
 //     padding-left: 09em;
 //   }
-// }
+}
 
 </style>
