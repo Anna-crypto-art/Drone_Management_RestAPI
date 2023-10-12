@@ -21,12 +21,13 @@
       </b-button>
     </b-button-group>
     <b-button 
-        variant="secondary"
-        size="sm"
-        class="toggle-button"
-        @click="onToggleAll()"
+      variant="primary"
+      size="sm"
+      class="toggle-button"
+      :class="{openAnalyses:openAnalyses, openObservations:openObservations}"
+      @click="onToggleAll()"
       >
-        <b-icon :icon="open ? 'hevron-compact-left' : 'hevron-compact-right'"></b-icon>
+        <b-icon :icon="open ? 'chevron-compact-left' : 'chevron-compact-right'"></b-icon>
       </b-button>
   </div>
 </template>
@@ -48,13 +49,13 @@ import { State } from "vuex-class";
   }
 })
 export default class AppSidebarButtonMenu extends Vue {
-  @State(state => state.sidebar["analyses"]) openA!: boolean;
-  @State(state => state.sidebar["observations"]) openO!: boolean;
+  @State(state => state.sidebar["analyses"]) openAnalyses!: boolean;
+  @State(state => state.sidebar["observations"]) openObservations!: boolean;
 
   get variantAnalyses(): string { return this.$store.direct.state.sidebar.analyses ? "primary" : "secondary"; }
   get variantObservations(): string { return this.$store.direct.state.sidebar.observations ? "primary" : "secondary"; }
 
-  get open(): boolean { return (this.openA || this.openO) }
+  get open(): boolean { return (this.openAnalyses || this.openObservations) }
 
   @CatchError()
   onToggle(tool: SidebarNames) {
@@ -105,9 +106,21 @@ export default class AppSidebarButtonMenu extends Vue {
   }
 
   .toggle-button {
-    position: relative;
+    position: absolute;
+    margin-top: 200px;
     width: 30px;
     height: 40px;
+    border: 1px solid $border-color-grey;
+    left: $button-menu-width;
+    transition: all 0.3s ease-in-out;
+
+    &.openAnalyses {
+      left: calc($button-menu-width + $layer-selection-width + $sidebar-width);
+    }
+
+    &.openObservations {
+      left: calc($button-menu-width + $sidebar-width);
+    }
   }
 }
 </style>

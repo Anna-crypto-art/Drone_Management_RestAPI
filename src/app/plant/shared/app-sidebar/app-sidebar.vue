@@ -45,15 +45,17 @@ export default class AppSidebar extends Vue {
 .app-sidebar {
   position: relative;
   box-sizing: border-box;
-  margin-left: calc($sidebar-width * -1);
+  left: calc($sidebar-width * -1);
   width: $sidebar-width;
   height: 100%;
   transition: all 0.3s ease-in-out;
   background-color: $white;
   overflow: hidden;
+  flex-shrink: 0;
+  // flex-wrap: nowrap;
 
   &.open {
-    margin-left: 0;
+    left: 0;
   }
 }
 

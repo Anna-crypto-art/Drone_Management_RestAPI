@@ -192,11 +192,11 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
   width: 100%;
   position: absolute;
   border-right: 1px solid $border-color-grey;
-  margin-left: calc($sidebar-width * -1);
+  left: calc($sidebar-width * -1);
   transition: all 0.3s ease-in-out;
 
   &.open {
-    margin-left: 0;
+    left: 0;
     display: block;
     // z-index: 9;
   }

@@ -36,13 +36,12 @@ export default class AppMapViewLayerSelection extends BaseComponent {
 .app-map-view-layer-selection {
   position: absolute;
   height: 100%;
-  width: 250px;
+  width: $layer-selection-width;
   left: calc($sidebar-width * -2);  
-  transition: all 0.4s ease-in;
+  transition: all 0.3s ease-in;
   top: 0;
   background-color: $white;
   padding: 1em;
-  // overflow-y: auto;
 
   &.sidebar-open {
     left: 0px;
