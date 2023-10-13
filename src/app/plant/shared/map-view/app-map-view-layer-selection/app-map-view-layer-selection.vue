@@ -38,13 +38,17 @@ export default class AppMapViewLayerSelection extends BaseComponent {
   height: 100%;
   width: $layer-selection-width;
   left: calc($sidebar-width * -2);  
-  transition: all 0.3s ease-in;
+  transition: all 0.4s ease-in;
   top: 0;
   background-color: $white;
   padding: 1em;
 
   &.sidebar-open {
     left: 0px;
+  }
+
+  @media screen {
+    
   }
 }
 </style>

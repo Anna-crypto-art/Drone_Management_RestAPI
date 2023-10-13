@@ -1,7 +1,7 @@
 <template>
   <div class="app-observation-selection-sidebar" :class="{ open: sidebarOpen }">
     <div class="grayed title">
-      <app-icon-observations /><span class="title">{{ $t("observations") }}</span>
+      <b-icon icon="clipboard-data" /><span class="title">{{ $t("observations") }}</span>
     </div>
     <div class="app-observation-selection-sidebar-filter">
       <b-form @submit.prevent="onSubmitFilter">

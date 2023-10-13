@@ -17,14 +17,14 @@
         class="sidebar-button"
         @click="onToggle('observations')"
       >
-        <app-icon-observations />
+        <b-icon icon="clipboard-data" scale="1.1" shift-h="-2" />
       </b-button>
     </b-button-group>
     <b-button 
-      variant="primary"
+      variant="secondary"
       size="sm"
       class="toggle-button"
-      :class="{openAnalyses:openAnalyses, openObservations:openObservations}"
+      :class="{ openAnalyses:openAnalyses, openObservations:openObservations, invisible:invisible }"
       @click="onToggleAll()"
       >
         <b-icon :icon="open ? 'chevron-compact-left' : 'chevron-compact-right'"></b-icon>
@@ -34,7 +34,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Component } from "vue-property-decorator";
+import { Component, Watch } from "vue-property-decorator";
 import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
 import AppIconObservations from "@/app/shared/components/app-icon/app-icon-observations.vue";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
@@ -57,6 +57,16 @@ export default class AppSidebarButtonMenu extends Vue {
 
   get open(): boolean { return (this.openAnalyses || this.openObservations) }
 
+  invisible = false;
+
+  @Watch('open')
+  onOpenChanged() {
+    this.invisible = true;
+    setTimeout(() => {
+      this.invisible = false;
+    }, 500);
+  }
+  
   @CatchError()
   onToggle(tool: SidebarNames) {
     switch (tool) {
@@ -98,7 +108,8 @@ export default class AppSidebarButtonMenu extends Vue {
     width: 40px;
     height: 40px;
     margin-left: -1px;
-    border-right: 1px solid $border-color-grey;
+    border-right: 1px solid $border-color-grey !important;
+    border-color: transparent;
 
     &:hover {
       background-color: $background-grey;
@@ -107,19 +118,32 @@ export default class AppSidebarButtonMenu extends Vue {
 
   .toggle-button {
     position: absolute;
-    margin-top: 200px;
-    width: 30px;
+    top: 50%;
+    width: 15px;
     height: 40px;
     border: 1px solid $border-color-grey;
     left: $button-menu-width;
-    transition: all 0.3s ease-in-out;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    opacity: 1;
+    transition: opacity 1s;
+
+    &.invisible {
+      opacity: 0;
+      transition: opacity 5s;
+    }
 
     &.openAnalyses {
       left: calc($button-menu-width + $layer-selection-width + $sidebar-width);
+      // transition: opacity 5s ease-in-out;
+      transition-delay: 0.4s;
     }
 
     &.openObservations {
       left: calc($button-menu-width + $sidebar-width);
+      // transition: opacity 5s ease-in-out;
+      transition-delay: 0.3s;
     }
   }
 }
