@@ -2,8 +2,9 @@
   <div class="app-geo-json-layer-checkbox" v-show="geoLayer.visible">
     <b-form-checkbox v-model="geoLayer.selected" @change="onChange">
       <slot :name="geoLayer.name">
-        {{ geoLayer.getDisplayName() }}
-        <app-explanation v-if="geoLayer.description"><span v-html="geoLayer.description"></span></app-explanation>
+        <app-expl-wrap :expl="geoLayer.description" :placement="descrPlacement">
+          {{ geoLayer.getDisplayName() }}
+        </app-expl-wrap>
       </slot>
     </b-form-checkbox>
   </div>
@@ -23,25 +24,25 @@ import { EVENT_ZOOM_TO_HOME } from "./events";
 import { GEO_JSON_OPTIONS } from "@/app/plant/shared/visualization/layers/layer-base";
 import { BaseAuthComponent } from "../base-auth-component/base-auth-component";
 import AppExplanation from "../app-explanation/app-explanation.vue";
-import { waitFor } from "../../services/helper/debounce-helper";
+import AppExplWrap from "@/app/shared/components/app-explanation/app-expl-wrap.vue";
 
 @Component({
   name: "app-geo-json-layer-checkbox",
   components: {
     AppExplanation,
+    AppExplWrap,
   },
 })
 export default class selectedByQueryRoute extends BaseAuthComponent implements IAppGeoJsonLayerCheckbox {
   @Prop({ required: true }) geoLayer!: IGeoLayer;
   @Prop({ required: true }) map!: Map;
+  @Prop({ default: "top" }) descrPlacement!: string;
 
   private readonly zoomToHomeEvent = () => { this.zoomToHome() };
 
   @CatchError()
   async mounted() {
     this.geoLayer.appLayerCheckbox = this;
-
-    console.log("selectedByQueryRoute mounted: ", this.geoLayer.id);
 
     await this.loadGeoLayer();
   }

@@ -119,8 +119,8 @@ import { STORAGE_KEY_ENABLERESULTMOD } from './storage-keys';
 import { FilterFieldType } from '../filter-fields/types';
 import { analysisResultEventService } from '../plant-admin-view/analysis-result-event-service';
 import { AnalysisResultEvent } from '../plant-admin-view/types';
-import AppReferenceMeasurements from './app-reference-measurements/app-reference-measurements.vue';
-import { IAppRefMeasure } from './app-reference-measurements/types';
+import AppReferenceMeasurements from './reference-measurements/reference-measurements.vue';
+import { IAppRefMeasure } from './reference-measurements/types';
 import { RefMeasureEntry, RefMeasureEntryKeyFigureSchema } from '@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema';
 import { RefMeasureLayersService } from './layers/ref-measure-layers-service';
 import dateHelper from '@/app/shared/services/helper/date-helper';
@@ -534,6 +534,8 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   width: 500px;
   padding: 1em;
   box-shadow: 3px 3px 5px $dark-40pc;
+  max-height: calc(100% - 1em);
+  overflow-y: auto;
 
   @supports (backdrop-filter: blur(5px)) {
     backdrop-filter: blur(5px);
@@ -575,8 +577,8 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     min-height: 50px;
 
     &-feature-infos {
-      max-height: 500px;
-      overflow-y: auto;
+      // max-height: 500px;
+      // overflow-y: auto;
 
       &-name {
         line-height: 1;

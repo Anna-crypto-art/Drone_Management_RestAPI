@@ -21,13 +21,13 @@
       </b-button>
     </b-button-group>
     <b-button 
-        variant="secondary"
-        size="sm"
-        class="toggle-button"
-        @click="onToggleAll()"
-      >
-        <b-icon :icon="open ? 'hevron-compact-left' : 'hevron-compact-right'"></b-icon>
-      </b-button>
+      variant="secondary"
+      size="sm"
+      class="toggle-button"
+      @click="onToggleAll()"
+    >
+      <b-icon :icon="open ? 'hevron-compact-left' : 'hevron-compact-right'"></b-icon>
+    </b-button>
   </div>
 </template>
 

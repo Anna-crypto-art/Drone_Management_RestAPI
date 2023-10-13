@@ -11,12 +11,14 @@
       :keyFigureLayers="keyFigureLayers"
       :map="map"
       :plant="plant"
+      @openChanged="onLayerSelectionOpenChanged"
     />
     <app-map-view-observ-layer-selection 
       :map="map"
       :plant="plant"
+      @openChanged="onLayerSelectionOpenChanged"
     />
-    <app-map-view-legend :plant="plant" :analyses="analyses" :map="map" />
+    <app-map-view-legend :plant="plant" :analyses="analyses" :map="map" :layerSelectionOpen="layerSelectionOpen" />
     <app-map-view-popup :plant="plant" :analyses="analyses" :mapFeature="clickedMapFeature" :map="map" />
   </div>
 </template>
@@ -26,21 +28,21 @@ import AppMapControls from "@/app/shared/components/app-map/app-map-controls.vue
 import AppMap from "@/app/shared/components/app-map/app-map.vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Map, View } from "ol";
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Watch } from "vue-property-decorator";
 import AppMapPopButtons from "@/app/shared/components/app-map/app-map-pop-buttons.vue";
-import AppMapViewSettings from "./app-map-view-settings.vue";
-import { ComponentLayer } from "../visualization/layers/component-layer";
+import AppMapViewSettings from "./map-view-settings.vue";
+import { ComponentLayer } from "./layers/component-layer";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import AppMapViewComponents from "./app-map-view-components.vue";
-import AppMapViewKeyFigureLayerSelection from "./app-map-view-layer-selection/app-map-view-key-figure-layer-selection.vue";
-import AppMapViewObservLayerSelection from "./app-map-view-layer-selection/app-map-view-observ-layer-selection.vue";
+import AppMapViewComponents from "./map-view-components.vue";
+import AppMapViewKeyFigureLayerSelection from "./map-view-layer-selection/map-view-key-figure-layer-selection.vue";
+import AppMapViewObservLayerSelection from "./map-view-layer-selection/map-view-observ-layer-selection.vue";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { KeyFigureTypeMap } from "./layers/types";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
-import AppMapViewLegend from "./app-map-view-legend.vue";
+import AppMapViewLegend from "./map-view-legend.vue";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { FeatureLike } from "ol/Feature";
-import AppMapViewPopup from "./app-map-view-popup.vue";
+import AppMapViewPopup from "./map-view-popup.vue";
 import { IAnalysisSelectionComponent } from "../selection-sidebar/analysis-selection/types";
 import { AnalysisSelectionService } from "../selection-sidebar/analysis-selection/analysis-selection-service";
 import { LayersService } from "./layers/layers-service";
@@ -73,6 +75,8 @@ export default class AppMapView extends BaseAuthComponent implements IAnalysisSe
   map: Map | null = null;
 
   clickedMapFeature: FeatureLike | null = null;
+
+  layerSelectionOpen = false;
 
   async created() {
     this.analysisSelectionService = new AnalysisSelectionService(this);
@@ -107,9 +111,23 @@ export default class AppMapView extends BaseAuthComponent implements IAnalysisSe
     this.clickedMapFeature = features[0];
   }
 
+  @CatchError()
+  onLayerSelectionOpenChanged(open: boolean) {
+    this.layerSelectionOpen = open;
+  }
+
   async onAnalysisSelected() {
     await this.refMeasureLayersService.loadLayersForAnalysis(this.analysisSelectionService.firstAnalysis || undefined);
     this.layersService.rerenderLoadedLayers();
+  }
+
+  get sidebarOpen(): boolean {
+    return this.$store.direct.state.sidebar.analyses || this.$store.direct.state.sidebar.observations;
+  }
+
+  @Watch("sidebarOpen")
+  rerenderMap() {
+    setTimeout(() => window.dispatchEvent(new UIEvent("resize")), 400);
   }
 }
 </script>

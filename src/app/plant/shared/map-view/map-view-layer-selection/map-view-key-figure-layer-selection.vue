@@ -1,5 +1,5 @@
 <template>
-  <app-map-view-layer-selection :visible="visible">
+  <app-map-view-layer-selection :value="visible" @input="onVisibilityChanged">
     <template #title>
       <b-icon icon="speedometer2" /><span class="pad-left-half">{{ $t("performance-indicators") }}</span>
     </template>
@@ -11,26 +11,26 @@
       >
         <div v-for="(childLayer, index) in compGroupLayer.childLayers"
           :key="childLayer.id || index"
-          class="pad-left-half"
+          
           :class="{'pad-bottom': isLastVisibleGroup(compGroupLayer, index) }"
           v-show="childLayer.visible"
         >
           <div v-if="childLayer.childLayers" class="app-map-view-key-figure-layer-selection-group">
             <div class="pad-bottom-half font-md" :class="{ 'pad-top': !isFirstVisibleGroup(compGroupLayer, index) }">
-              {{ $t(childLayer.layerOptions.displayName || childLayer.layerOptions.keyName) }}
-              <app-explanation v-if="childLayer.layerOptions.description">
-                <span v-html="$t(childLayer.layerOptions.description)"></span>
-              </app-explanation>
+              <app-expl-wrap :expl="childLayer.layerOptions.description && $t(childLayer.layerOptions.description)" placement="right">
+                {{ $t(childLayer.layerOptions.displayName || childLayer.layerOptions.keyName) }}  
+              </app-expl-wrap>
             </div>
             <div class="pad-left-half">
               <app-geo-json-layer-checkbox v-for="subChildLayer in childLayer.childLayers" :key="subChildLayer.id"
                 :geoLayer="subChildLayer"
                 :map="map"
+                descrPlacement="right"
               />
             </div>
           </div>
           <div v-if="!childLayer.childLayers" class="app-map-view-key-figure-layer-selection-single">
-            <app-geo-json-layer-checkbox :geoLayer="childLayer" :map="map" />
+            <app-geo-json-layer-checkbox :geoLayer="childLayer" :map="map" descrPlacement="right" />
           </div>
         </div>
       </app-map-view-layer-group>
@@ -52,8 +52,8 @@ import { AnalysisSelectionService } from "../../selection-sidebar/analysis-selec
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { KeyFigureLayer } from "../layers/key-figure-layer";
 import { apiComponentNames } from "@/app/shared/services/volateq-api/api-components/api-components-name";
-import AppMapViewLayerSelection from "./app-map-view-layer-selection.vue";
-import AppMapViewLayerGroup from "./app-map-view-layer-group.vue";
+import AppMapViewLayerSelection from "./map-view-layer-selection.vue";
+import AppMapViewLayerGroup from "./map-view-layer-group.vue";
 import AppGeoJsonLayerCheckbox from "@/app/shared/components/app-map/app-geo-json-layer-checkbox.vue";
 import { LayersService } from "../layers/layers-service";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
@@ -61,7 +61,8 @@ import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/
 import { LayerColor } from "../../visualization/layers/types";
 import { PlantRouteQuery } from "../../types";
 import { RouteQueryHelper } from "../../helper/route-query-helper";
-import { waitFor } from "@/app/shared/services/helper/debounce-helper";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
+import AppExplWrap from "@/app/shared/components/app-explanation/app-expl-wrap.vue";
 
 @Component({
   name: "app-map-view-key-figure-layer-selection",
@@ -70,6 +71,7 @@ import { waitFor } from "@/app/shared/services/helper/debounce-helper";
     AppMapViewLayerGroup,
     AppGeoJsonLayerCheckbox,
     AppExplanation,
+    AppExplWrap,
   },
 })
 export default class AppMapViewKeyFigureLayerSelection extends BaseComponent implements IAnalysisSelectionComponent {
@@ -78,7 +80,6 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
   @Prop({ required: true }) analyses!: AnalysisForViewSchema[];
   @Prop({ required: true }) keyFigureLayers!: KeyFigureTypeMap<GeoVisualQuery>[];
 
-  get isSidebarOpen(): boolean { return this.$store.direct.state.sidebar.analyses}
   visible = false;
   compGroupLayers: ComponentGroupKeyFigureLayer[] = [];
   
@@ -125,14 +126,24 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
     await this.analysisSelectionService?.unregister();
   }
 
+  get isSidebarOpen(): boolean { return this.$store.direct.state.sidebar.analyses; }
+
   @Watch('isSidebarOpen')
-  onVisibilityChanged() {
-    this.visible = !!this.analysisSelectionService.firstAnalysisResult && this.isSidebarOpen;
+  onSidebarOpenChanged() {
+    const visible = !!this.analysisSelectionService.firstAnalysisResult && this.isSidebarOpen;
+
+    if (visible !== this.visible) {
+      this.onVisibilityChanged(visible);
+    }
+  }
+
+  @CatchError()
+  onVisibilityChanged(visible: boolean) {
+    this.visible = visible;
+    this.$emit("openChanged", this.visible);
   }
 
   async onAnalysisSelected(selectedByQueryRoute?: boolean) {
-    console.log("AppMapViewKeyFigureLayerSelection: onAnalysisSelected")
-
     await this.handleAnalysesSelection(selectedByQueryRoute);
   }
 
@@ -161,7 +172,7 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
   }
 
   private async handleAnalysesSelection(selectedByQueryRoute?: boolean) {    
-    this.onVisibilityChanged();
+    this.onSidebarOpenChanged();
 
     const selectedAnalysisId = this.analysisSelectionService?.firstAnalysis?.id;
     if (selectedAnalysisId && !(selectedAnalysisId in this.selectedAnalyses)) {
@@ -206,8 +217,6 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
     if (this.layersService.settings.multiSelection) {
       return;
     }
-
-    console.log("Selected layer: ", layer.id)
 
     const layerGroup = this.findLayerGroup(layer);
     const selectedLayers = this.layersService.keyFigureLayers.filter(l => l.selected);

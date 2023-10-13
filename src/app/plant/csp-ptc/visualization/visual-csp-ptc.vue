@@ -87,7 +87,7 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import { IAnalysisSelectionComponent } from "../../shared/selection-sidebar/analysis-selection/types";
 import { AnalysisSelectionService } from "../../shared/selection-sidebar/analysis-selection/analysis-selection-service";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-import AppMapView from "@/app/plant/shared/map-view/app-map-view.vue";
+import AppMapView from "@/app/plant/shared/map-view/map-view.vue";
 
 @Component({
   name: "app-visual-csp-ptc",

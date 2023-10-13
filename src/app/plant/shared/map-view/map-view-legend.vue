@@ -1,8 +1,13 @@
 <template>
-  <div class="app-map-view-legend" :class="{ 'sidebar-open': sidebarOpen, 'selection-sidebar-open': selectionSidebarOpen }">
-    <div v-for="(entry, index) in legendEntries" :key="index" class="app-map-view-legend-entry" :class="{ 'pad-left': entry.indent }">
-      <div class="app-map-view-legend-entry-color" :style="`background: ${entry.color}`"></div>
-      <div class="app-map-view-legend-entry-name" v-html="entry.name"></div>
+  <div class="app-map-view-legend" :class="{ 'selection-sidebar-open': layerSelectionOpen }" v-show="visible">
+    <div class="app-map-view-legend-container" :class="{ 'selection-sidebar-open': layerSelectionOpen }">
+      <div class="grayed mar-bottom-half">
+        <small><b>{{ selectedAnalysisName }}</b></small>
+      </div>
+      <div v-for="(entry, index) in analysislegendEntries" :key="index" class="app-map-view-legend-container-entry" :class="{ 'pad-left': entry.indent }">
+        <div class="app-map-view-legend-container-entry-color" :style="`background: ${entry.color}`"></div>
+        <div class="app-map-view-legend-container-entry-name" v-html="entry.name"></div>
+      </div>
     </div>
   </div>
 </template>
@@ -35,6 +40,7 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) analyses!: AnalysisForViewSchema[];
   @Prop({ required: true }) map!: Map;
+  @Prop({ required: true }) layerSelectionOpen!: boolean;
   
   analysisSelectionService: AnalysisSelectionService | null = null;
   observationSelectionService!: ObservationSelectionService;
@@ -43,7 +49,8 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
 
   routeQueryHelper = new RouteQueryHelper(this);
 
-  legends: Legend[] = [];
+  analysisLegends: Legend[] = [];
+  obersvationLegends: Legend[] = [];
 
   created() {
     this.analysisSelectionService = new AnalysisSelectionService(this);
@@ -71,14 +78,14 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
     );
 
     this.refMeasureLayersService.on(this.plant.id, RefMeasureLayerEvent.ON_REF_MEASURE_LAYERS_CHANGED, () => {
-      const li = this.legends.findIndex(l => l.id === this.refMeasureLayersService.refMeasurLegendId);
+      const li = this.analysisLegends.findIndex(l => l.id === this.refMeasureLayersService.refMeasurLegendId);
       if (li !== -1) {
-        this.legends.splice(li, 1);
+        this.analysisLegends.splice(li, 1);
       }
 
       const refMeasureLegend = this.refMeasureLayersService.getLegend();
       if (refMeasureLegend) {
-        this.legends.push(refMeasureLegend);
+        this.analysisLegends.push(refMeasureLegend);
       }
     });
   }
@@ -91,40 +98,40 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
     this.analysisSelectionService!.unregister();
   }
 
-  get legendEntries(): LegendEntry[] {
+  get visible(): boolean {
+    return this.analysislegendEntries.length > 0;
+  }
+
+  get analysislegendEntries(): LegendEntry[] {
     const legendEntries: LegendEntry[] = [];
     
-    for (const legend of this.legends) {
+    for (const legend of this.analysisLegends) {
       legendEntries.push(...legend.entries);
     }
 
     return legendEntries;
   }
 
-  get sidebarOpen(): boolean {
-    return this.$store.direct.state.sidebar.analyses || this.$store.direct.state.sidebar.observations;
-  }
-
-  get selectionSidebarOpen(): boolean {
-    return !!(this.analysisSelectionService?.firstAnalysisResult || this.observationSelectionService.hasSelectedObservations);
+  get selectedAnalysisName(): string {
+    return this.analysisSelectionService?.firstAnalysis?.name || "";
   }
 
   async onLayerSelected(layer: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>) {
     const legend = layer.getLegend();
 
     if (legend) {
-      const existingLegendIndex = this.legends.findIndex(l => l.id === legend.id);
-      const existingLegend = existingLegendIndex != -1 ? this.legends[existingLegendIndex] : undefined;
+      const existingLegendIndex = this.analysisLegends.findIndex(l => l.id === legend.id);
+      const existingLegend = existingLegendIndex != -1 ? this.analysisLegends[existingLegendIndex] : undefined;
 
       if (layer.selected) {
         if (existingLegend) {
-          this.legends.splice(existingLegendIndex, 1, legend)
+          this.analysisLegends.splice(existingLegendIndex, 1, legend)
         } else {
-          this.legends.push(legend);
+          this.analysisLegends.push(legend);
         }
       } else {
         if (existingLegend) {
-          this.legends.splice(existingLegendIndex, 1);
+          this.analysisLegends.splice(existingLegendIndex, 1);
         }
       }
     }
@@ -137,46 +144,46 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
 @import "@/scss/_variables.scss";
 
 .app-map-view-legend {
-  @supports (backdrop-filter: blur(5px)) {
-    backdrop-filter: blur(5px);
-    background: rgba(255, 255, 255, 0.7);
-  }
-  @supports not (backdrop-filter: blur(5px)) {
-    background: rgba(255, 255, 255, 0.8);
-  }
-
   transition: left 0.3s ease-in-out;
   position: absolute;
   bottom: 0.5em;
   left: 0.5em;
   width: auto;
   height: auto;
-  padding: 10px 15px 0px 15px;
 
-  &.sidebar-open {
-    left: calc($sidebar-width + 0.5em);
-
-    &.selection-sidebar-open {
-      left: calc($sidebar-width + 300px + 0.5em);
-    }
+  &.selection-sidebar-open {
+    left: calc($layer-selection-width + 0.5em);
   }
 
-  &-entry {
-    display: flex;
-    height: 25px;
-    margin-bottom: 10px;
-
-    &-color {
-      width: 15px;
-      height: 15px;
-      margin-right: 10px;
-      margin-top: 5px;
-      flex-shrink: 0;
+  &-container {
+    @supports (backdrop-filter: blur(5px)) {
+      backdrop-filter: blur(5px);
+      background: rgba(255, 255, 255, 0.7);
     }
-    &-name {
-      width: auto;
-      word-break: break-all;
-      overflow: hidden;
+    @supports not (backdrop-filter: blur(5px)) {
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    padding: 10px 15px 5px 15px;
+    box-shadow: 3px 3px 5px $dark-40pc;
+
+    &-entry {
+      display: flex;
+      height: 25px;
+      margin-bottom: 10px;
+
+      &-color {
+        width: 15px;
+        height: 15px;
+        margin-right: 10px;
+        margin-top: 5px;
+        flex-shrink: 0;
+      }
+      &-name {
+        width: auto;
+        word-break: break-all;
+        overflow: hidden;
+      }
     }
   }
 }

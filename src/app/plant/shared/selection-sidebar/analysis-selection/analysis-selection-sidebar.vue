@@ -5,8 +5,9 @@
     </div>
     <div class="app-analysis-selection-sidebar-settings" v-if="analyses.length > 1">
       <b-checkbox switch v-model="compareMode" @change="onCompareModeChanged">
-        {{ $t("compare-mode") }}
-        <app-explanation>{{ $t("compare-mode_descr") }}</app-explanation>
+        <app-expl-wrap :expl="$t('compare-mode_descr')" placement="right">
+          {{ $t("compare-mode") }}
+        </app-expl-wrap>
       </b-checkbox>
     </div>
     <div class="app-analysis-selection-sidebar-table">
@@ -70,6 +71,7 @@ import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { SelectionSidebarEvent, selectionSidebarEventService } from "../selection-sidebar-event-serivce";
 import { State } from "vuex-class";
 import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
+import AppExplWrap from "@/app/shared/components/app-explanation/app-expl-wrap.vue";
 
 
 @Component({
@@ -82,6 +84,7 @@ import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.
     AppOrderPpsView,
     AppSuperAdminMarker,
     AppTable,
+    AppExplWrap,
   },
 })
 export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {

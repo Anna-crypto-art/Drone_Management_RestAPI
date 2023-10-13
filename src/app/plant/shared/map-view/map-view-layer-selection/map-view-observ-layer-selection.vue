@@ -1,5 +1,5 @@
 <template>
-  <app-map-view-layer-selection :visible="visible">
+  <app-map-view-layer-selection :value="visible" @input="onVisibilityChanged">
     <template #title>
       blub
       <!-- <b-icon icon="speedometer2" /><span class="pad-left-half">{{ $t("performance-indicators") }}</span> -->
@@ -40,14 +40,14 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Watch } from "vue-property-decorator";
 import { BaseComponent } from "@/app/shared/components/base-component/base-component";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Map } from "ol";
 import { ComponentGroupKeyFigureLayer, ComponentGroupObservationLayer, ValueRangeGroupObservLayer } from "./types";
 import { apiComponentNames } from "@/app/shared/services/volateq-api/api-components/api-components-name";
-import AppMapViewLayerSelection from "./app-map-view-layer-selection.vue";
-import AppMapViewLayerGroup from "./app-map-view-layer-group.vue";
+import AppMapViewLayerSelection from "./map-view-layer-selection.vue";
+import AppMapViewLayerGroup from "./map-view-layer-group.vue";
 import AppGeoJsonLayerCheckbox from "@/app/shared/components/app-map/app-geo-json-layer-checkbox.vue";
 import { LayersService } from "../layers/layers-service";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
@@ -62,6 +62,7 @@ import { CCPDataType, CustomComponentPropertySchema, NumberRangeInfosSchema } fr
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 import { ObservFilterValue } from "@/app/shared/services/volateq-api/api-requests/observation-requests";
 import { ObservationCcpLayer } from "../layers/observation-ccp-layer";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
 
 @Component({
   name: "app-map-view-observ-layer-selection",
@@ -119,7 +120,26 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
     return true;
   }
 
+  get isSidebarOpen(): boolean { return this.$store.direct.state.sidebar.observations; }
+
+  @Watch('isSidebarOpen')
+  onSidebarOpenChanged() {
+    const visible = !!this.observationSelectionService.hasSelectedObservations && this.isSidebarOpen;
+
+    if (visible !== this.visible) {
+      this.onVisibilityChanged(visible);
+    }
+  }
+
+  @CatchError()
+  onVisibilityChanged(visible: boolean) {
+    this.visible = visible;
+    this.$emit("openChanged", this.visible);
+  }
+
   async onObservationSelected() {
+    this.onSidebarOpenChanged();
+
     await this.refreshLayers(
       this.observationSelectionService.dateRange,
       this.observationSelectionService.selectedCcps
