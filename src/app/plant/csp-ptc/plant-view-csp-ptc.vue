@@ -40,8 +40,8 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import { IAnalysisSelectionComponent } from "../shared/selection-sidebar/analysis-selection/types";
 import { AnalysisSelectionService } from "../shared/selection-sidebar/analysis-selection/analysis-selection-service";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-import AppSidebarButtonMenu from "@/app/plant/shared/app-sidebar-button-menu/app-sidebar-button-menu.vue";
-import AppSidebar from "@/app/plant/shared/app-sidebar/app-sidebar.vue";
+import AppSidebarButtonMenu from "@/app/plant/shared/sidebar-button-menu/sidebar-button-menu.vue";
+import AppSidebar from "@/app/plant/shared/sidebar/sidebar.vue";
 
 
 @Component({

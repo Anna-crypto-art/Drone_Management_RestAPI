@@ -70,10 +70,10 @@
     </div>
 
     <app-feature-infos-toast toastId="piInfoToast" :featureInfos="piToastInfo" />
-    <app-reference-measurements
+    <!-- <app-reference-measurements
       ref="appReferenceMeasurements"
       @referenceMeasurmentAdded="onReferenceMeasurmentAdded"
-      @referenceMeasurmentRemoved="onReferenceMeasurmentRemoved" />
+      @referenceMeasurmentRemoved="onReferenceMeasurmentRemoved" /> -->
     <app-observation-modal
       ref="appObservModal"
       :plant="plant"
@@ -100,12 +100,12 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { RefMeasureLayers } from "./ref-measure-layers";
 import { layerEvents } from "./layer-events";
 import { OrhtoImageMixin } from "./mixins/ortho-image-mixin";
-import AppReferenceMeasurements from "../reference-measurements/reference-measurements.vue";
+// import AppReferenceMeasurements from "../reference-measurements/reference-measurements.vue";
 import { RouteQueryHelper } from "../helper/route-query-helper";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/sequential-event-emitter";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
-import { IAppRefMeasure } from "../reference-measurements/types";
+// import { IAppRefMeasure } from "../reference-measurements/types";
 import AppFeatureInfosToast from "./feature-infos-toast.vue";
 import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-dropdown-button.vue";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
@@ -142,7 +142,7 @@ const STORAGE_KEY_SATELLITEVIEW = "storage-key-satelliteview";
     AppGeovisualization,
     AppExplanation,
     AppButton,
-    AppReferenceMeasurements,
+    // AppReferenceMeasurements,
     AppFeatureInfosToast,
     AppDropdownButton,
     AppSuperAdminMarker,
@@ -161,7 +161,7 @@ export default class AppVisualization
   @State(state => state.sidebar["analysis"]) sidebarOpen!: boolean;
 
   @Ref() openLayers!: IOpenLayersComponent;
-  @Ref() appReferenceMeasurements!: IAppRefMeasure;
+  // @Ref() appReferenceMeasurements!: IAppRefMeasure;
   @Ref() appObservModal!: IAppObservationModal;
 
   analysisSelectionService!: AnalysisSelectionService;
@@ -862,12 +862,12 @@ export default class AppVisualization
     myRefMeasureEntry: RefMeasureEntry | null,
     myRefMeasureEntryKeyFigures: RefMeasureEntryKeyFigureSchema[] | null,
   ) {
-    this.appReferenceMeasurements.show(
-      this.firstAnalysis!.id,
-      fieldgeometryComponent,
-      myRefMeasureEntry,
-      myRefMeasureEntryKeyFigures,
-    );
+    // this.appReferenceMeasurements.show(
+    //   this.firstAnalysis!.id,
+    //   fieldgeometryComponent,
+    //   myRefMeasureEntry,
+    //   myRefMeasureEntryKeyFigures,
+    // );
 
     this.hideToast();
   }

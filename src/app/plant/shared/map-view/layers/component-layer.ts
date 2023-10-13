@@ -1,34 +1,22 @@
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { FeatureLike } from "ol/Feature";
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
-import { FeatureInfos, PropsFeature } from "../types";
-import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
-import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
-import { ReferenceMeasurementEntriesSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
-import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
+import { PropsFeature } from "../types";
 import { GeoJSON } from "@/app/shared/components/app-geovisualization/types/layers";
 import { Extent } from "ol/extent";
 import { BaseLayer } from "./base-layer";
-import { IOrthoImageMixin, OrthoImage } from "../../visualization/mixins/types";
 import { LayerColor } from "../../visualization/layers/types";
-import { OrhtoImageMixin } from "../../visualization/mixins/ortho-image-mixin";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { i18n } from "@/main";
+import { RefMeasureLayersService } from "./ref-measure-layers-service";
 
-export abstract class ComponentLayer extends BaseLayer /*implements IOrthoImageMixin*/ {
+export abstract class ComponentLayer extends BaseLayer {
   public abstract readonly componentId: ApiComponent;
   protected abstract readonly color: LayerColor;
   
   protected readonly width: number = 1;
-  // protected readonly refMeasureColor = LayerColor.volateqBlue;
 
-  // protected readonly allowRefMeasures: boolean = false;
-  // protected onAddRefMeasureCallback: (
-  //     (fieldgeoComponent: FieldgeometryComponentSchema, refMeasureEntries: ReferenceMeasurementEntriesSchema | null) => void
-  //   ) | undefined = undefined;
-
-  // protected analysis: AnalysisForViewSchema | null = null;
+  protected readonly refMeasureColor = LayerColor.volateqBlue;
+  public readonly allowRefMeasures: boolean = false;
 
   constructor(plant: PlantSchema) {
     super(plant);
@@ -47,10 +35,10 @@ export abstract class ComponentLayer extends BaseLayer /*implements IOrthoImageM
   }
 
   protected getColor(feature: FeatureLike): string {
-    // const pcs = this.getPcs(feature);
-    // if (pcs && this.allowRefMeasures && this.vueComponent.refMeasuredPcsCodes.includes(pcs)) {
-    //   return this.refMeasureColor;
-    // }
+    const pcs = this.getPcs(feature);
+    if (this.allowRefMeasures && pcs && RefMeasureLayersService.get(this.plant, this.appLayerCheckbox!.map).hasPCS(pcs)) {
+      return this.refMeasureColor;
+    }
 
     return this.color;
   }

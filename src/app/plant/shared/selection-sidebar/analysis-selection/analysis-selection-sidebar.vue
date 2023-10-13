@@ -5,8 +5,9 @@
     </div>
     <div class="app-analysis-selection-sidebar-settings" v-if="analyses.length > 1">
       <b-checkbox switch v-model="compareMode" @change="onCompareModeChanged">
-        {{ $t("compare-mode") }}
-        <app-explanation>{{ $t("compare-mode_descr") }}</app-explanation>
+        <app-expl-wrap :expl="$t('compare-mode_descr')" placement="right">
+          {{ $t("compare-mode") }}
+        </app-expl-wrap>
       </b-checkbox>
     </div>
     <div class="app-analysis-selection-sidebar-table">
@@ -30,7 +31,7 @@
             <app-icon v-if="row.item.refMeasureCount > 0"
               icon="clipboard-check"
               class="mar-left-half blue"
-              v-b-popover.hover.top="$t('has-ref-measures', { count: row.item.refMeasureCount })"
+              v-b-popover.hover.top="$t('has-ref-measures')"
             />
             <app-icon v-if="row.item.hasGoodies" 
               icon="gift"
@@ -70,6 +71,7 @@ import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { SelectionSidebarEvent, selectionSidebarEventService } from "../selection-sidebar-event-serivce";
 import { State } from "vuex-class";
 import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
+import AppExplWrap from "@/app/shared/components/app-explanation/app-expl-wrap.vue";
 
 
 @Component({
@@ -82,6 +84,7 @@ import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.
     AppOrderPpsView,
     AppSuperAdminMarker,
     AppTable,
+    AppExplWrap,
   },
 })
 export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
@@ -105,8 +108,9 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
 
   absolute = true;
 
-  async created() {
-    
+  selectedByQueryRoute = false;
+
+  created() {
     selectionSidebarEventService.on(this.plant.id, SelectionSidebarEvent.SIDEBAR_ABSOLUTE, async (absolute) => {
       this.absolute = absolute;
     });
@@ -189,6 +193,8 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
 
     this.lastSelectedAnalyses = selectedAnalyses;
 
+    // await this.$nextTick(); // Make loading animation working
+
     if (this.compareMode) {
       if (selectedAnalyses.length > 0) {
         // If the user selects an analysis without results,
@@ -214,8 +220,11 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
         await analysisSelectEventService.emit(
           this.plant.id,
           AnalysisSelectionEvent.MULTI_ANALYSES_SELECTED,
-          selectedAnalysisIds
+          selectedAnalysisIds,
+          this.selectedByQueryRoute,
         );
+
+        this.selectedByQueryRoute = false;
       }
     } else {
       let selectedAnalysisId: string | undefined = undefined
@@ -228,8 +237,11 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
       await analysisSelectEventService.emit(
         this.plant.id,
         AnalysisSelectionEvent.ANALYSIS_SELECTED,
-        selectedAnalysisId
+        selectedAnalysisId,
+        this.selectedByQueryRoute
       );
+
+      this.selectedByQueryRoute = false;
     }
   }
 
@@ -273,6 +285,8 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
       }
 
       await this.$nextTick();
+      
+      this.selectedByQueryRoute = true;
 
       this.analysesTable.selectRow(tableRowIndex);
     } else {

@@ -7,7 +7,7 @@ import { ComponentLayer } from "@/app/plant/shared/map-view/layers/component-lay
 export class AbsorberComponentLayer extends ComponentLayer {
   public readonly componentId = ApiComponent.CSP_PTC_ABSORBER;
   protected readonly color = LayerColor.black;
-  protected readonly allowRefMeasures = true;
+  public readonly allowRefMeasures = true;
   public readonly name = "absorber-tubes";
   protected readonly width = 3;
   public readonly minZoomLevel = 18;

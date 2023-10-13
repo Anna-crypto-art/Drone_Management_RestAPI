@@ -180,7 +180,8 @@ export class ObservLayersHierarchy {
         // return CSP_PTC_COMPONENT_LAYERS;
 
       case ApiTechnology.PV:
-        return PV_COMPONENT_LAYERS;
+        // return PV_COMPONENT_LAYERS;
+        throw Error("Blub")
     }
 
     throw Error("Unsupported technology id for getting component layer types")

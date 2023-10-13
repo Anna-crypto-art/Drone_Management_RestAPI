@@ -4,7 +4,7 @@
       id="reference-measurement-modal"
       ref="refMeasureModal"
       :title="title"
-      :subtitle="fieldgeometryComponent && fieldgeometryComponent.kks || ''"
+      :subtitle="pcs || ''"
       :ok-title="$t('apply')"
       :cancel-title="$t('cancel')"
       :modalLoading="loading"
@@ -35,7 +35,7 @@
 <script lang="ts">
 import { IAppModalForm } from '@/app/shared/components/app-modal/types';
 import volateqApi from '@/app/shared/services/volateq-api/volateq-api';
-import { Component, Ref } from "vue-property-decorator";
+import { Component, Prop, Ref } from "vue-property-decorator";
 import { IAppRefMeasure, RefMeasureEntryModel } from './types';
 import AppButton from '@/app/shared/components/app-button/app-button.vue';
 import AppModalForm from '@/app/shared/components/app-modal/app-modal-form.vue';
@@ -45,10 +45,14 @@ import { CatchError } from '@/app/shared/services/helper/catch-helper';
 import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
 import { RefMeasureEntry, RefMeasureEntryKeyFigureSchema } from '@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema';
 import AppFilterFields from '@/app/plant/shared/filter-fields/filter-fields.vue';
-import { FilterField, FilterFieldType } from '../filter-fields/types';
+import { FilterField, FilterFieldType } from '../../filter-fields/types';
 import { FieldgeometryComponentSchema } from '@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema';
 import { AnalysisResultMappingHelper } from '@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper';
 import dateHelper from '@/app/shared/services/helper/date-helper';
+import { ApiComponent } from '@/app/shared/services/volateq-api/api-components/api-components';
+import { Map } from 'ol';
+import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
+import { RefMeasureLayersService } from '../layers/ref-measure-layers-service';
 
 @Component({
   name: "app-reference-measurements",
@@ -61,10 +65,15 @@ import dateHelper from '@/app/shared/services/helper/date-helper';
   },
 })
 export default class AppReferenceMeasurements extends BaseAuthComponent implements IAppRefMeasure {
+  @Prop({ required: true }) plant!: PlantSchema;
+  @Prop({ required: true }) map!: Map;
   @Ref() refMeasureModal!: IAppModalForm;
+
+  refMeasureLayersService!: RefMeasureLayersService;
   
   analysisId: string | null = null;
-  fieldgeometryComponent: FieldgeometryComponentSchema | null = null;
+  pcs: string | null = null;
+  componentId: ApiComponent | null = null;
   entry: RefMeasureEntry | null = null;
   keyFigures: RefMeasureEntryKeyFigureSchema[] | null = null;
 
@@ -73,6 +82,10 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
 
   entryModel: RefMeasureEntryModel | null = null;
   filterFields: FilterField[] = [];
+
+  created() {
+    this.refMeasureLayersService = RefMeasureLayersService.get(this.plant, this.map);
+  }
   
   get title(): string {
     return this.entry === null ? this.$t("add-reference-measurement").toString() : 
@@ -85,7 +98,7 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
 
     await volateqApi.addReferenceMeasurement(this.analysisId!, {
       measure_time: this.entryModel!.measureTime,
-      pcs: this.fieldgeometryComponent!.kks,
+      pcs: this.pcs!,
       notes: this.entryModel!.notes || undefined,
       key_figure_ids: this.entryModel!.values
         .map(v => mappingHelper.getEntries().find(e => e.transName === v.filterField!.key)!.keyFigureId!),
@@ -95,9 +108,9 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
         .map(v => v.value!.toString()),
     });
 
-    this.showSuccess(this.$t("ref-measures-created-success").toString());
+    await this.refMeasureLayersService.reload();
 
-    this.$emit("referenceMeasurmentAdded", this.fieldgeometryComponent);
+    this.showSuccess(this.$t("ref-measures-created-success").toString());
 
     this.refMeasureModal.hide();
   }
@@ -110,21 +123,23 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
 
     await volateqApi.deleteReferenceMeasurementEntry(this.entry!.entry_id);
 
-    this.showSuccess(this.$t("ref-measures-removed-success").toString());
+    await this.refMeasureLayersService.reload();
 
-    this.$emit("referenceMeasurmentRemoved", this.fieldgeometryComponent);
+    this.showSuccess(this.$t("ref-measures-removed-success").toString());
 
     this.refMeasureModal.hide();
   }
 
   show(
     analysisId: string,
-    fieldgeometryComponent: FieldgeometryComponentSchema,
+    pcs: string,
+    componentId: ApiComponent,
     entry: RefMeasureEntry | null,
     keyFigures: RefMeasureEntryKeyFigureSchema[] | null,
   ) {
     this.analysisId = analysisId;
-    this.fieldgeometryComponent = fieldgeometryComponent;
+    this.pcs = pcs;
+    this.componentId = componentId;
     this.entry = entry;
     this.keyFigures = keyFigures;
 
@@ -167,7 +182,7 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
   }
 
   private getMappingHelper(): AnalysisResultMappingHelper<any> {
-    const mappings = AnalysisResultMappingHelper.getMappingsByComponentId(this.fieldgeometryComponent!.component_id);
+    const mappings = AnalysisResultMappingHelper.getMappingsByComponentId(this.componentId!);
     const mappingHelper = new AnalysisResultMappingHelper(mappings!);
 
     return mappingHelper;

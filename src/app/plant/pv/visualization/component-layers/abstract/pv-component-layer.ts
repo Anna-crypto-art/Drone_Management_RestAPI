@@ -1,3 +1,3 @@
-import { ComponentLayer } from "@/app/plant/shared/visualization/layers/component-layer";
+import { ComponentLayer } from "@/app/plant/shared/map-view/layers/component-layer";
 
 export abstract class PvComponentLayer extends ComponentLayer {}

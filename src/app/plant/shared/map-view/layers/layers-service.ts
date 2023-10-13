@@ -51,4 +51,8 @@ export class LayersService extends AppSeqEventService<LayerEvent> {
   public get keyFigureLayers(): KeyFigureBaseLayer[] {
     return this.layers.filter(l => l instanceof KeyFigureLayer) as KeyFigureBaseLayer[];
   }
+
+  public rerenderLoadedLayers() {
+    this.layers.filter(l => l.loadedLayer).forEach(l => l.rerender());
+  }
 }

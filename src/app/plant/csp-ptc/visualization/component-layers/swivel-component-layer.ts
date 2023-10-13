@@ -7,7 +7,7 @@ import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
 export class SwivelComponentLayer extends ComponentLayer {
   public readonly componentId = ApiComponent.CSP_PTC_SWIVEL;
   protected readonly color = LayerColor.darkGrey;
-  protected readonly allowRefMeasures = true;
+  public readonly allowRefMeasures = true;
   public readonly name = "rotation-joints";
 
   protected showPcsZoomLevel = 19;

@@ -7,7 +7,7 @@ import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
 export class MirrorComponentLayer extends ComponentLayer {
   public readonly componentId = ApiComponent.CSP_PTC_MIRROR;
   protected readonly color = LayerColor.metallicBlue;
-  protected readonly allowRefMeasures = true;
+  public readonly allowRefMeasures = true;
   public readonly minZoomLevel = 19;
   public readonly name = "mirrors";
 

@@ -4,7 +4,9 @@
       <p class="mar-bottom-half grayed"><b-icon icon="gear-fill" /><span class="pad-left-half">{{ $t("map-settings") }}</span></p>
       <div class="no-mar-top mar-bottom-half">
         <b-form-checkbox v-model="multiSelection" switch @change="onMultiSelectionChanged" :disabled="multiSelectionDisabled">
-          {{ $t("multi-selection") }} <app-explanation>{{ $t("multi-selection-overlapping_expl") }}</app-explanation>
+          <app-expl-wrap :expl="$t('multi-selection-overlapping_expl')">
+            {{ $t("multi-selection") }}
+          </app-expl-wrap>
         </b-form-checkbox>
         <b-form-checkbox v-model="showCouldNotBeMeasured" switch @change="onShowCouldNotBeMeasuredChanged" :disabled="isShowCouldNotBeMeasuredDisabled">
           {{ $t("show-could-not-be-measured") }}
@@ -67,6 +69,7 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { STORAGE_KEY_MULTISELECTION, STORAGE_KEY_SHOWUNDEFINED, STORAGE_KEY_SATELLITEVIEW, STORAGE_KEY_ENABLERESULTMOD } from "./storage-keys";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
+import AppExplWrap from "@/app/shared/components/app-explanation/app-expl-wrap.vue";
 
 @Component({
   name: "app-map-view-settings",
@@ -78,6 +81,7 @@ import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/
     AppDropdownButton,
     AppButton,
     AppSuperAdminMarker,
+    AppExplWrap
   },
 })
 export default class AppMapViewSettings extends BaseAuthComponent implements IAnalysisSelectionComponent {
@@ -220,7 +224,7 @@ export default class AppMapViewSettings extends BaseAuthComponent implements IAn
       this.layersService.settings.showCouldNotBeMeasured =
       appLocalStorage.getItem(STORAGE_KEY_SHOWUNDEFINED) || false;
 
-    this.satelliteView = appLocalStorage.getItem(STORAGE_KEY_SATELLITEVIEW) || true;
+    this.satelliteView = !!appLocalStorage.getItem(STORAGE_KEY_SATELLITEVIEW);
 
     if (this.isSuperAdmin) {
       this.enableResultsModification = appLocalStorage.getItem(STORAGE_KEY_ENABLERESULTMOD) || false;

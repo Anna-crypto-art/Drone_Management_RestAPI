@@ -7,7 +7,7 @@ import { LayerColor } from "@/app/plant/shared/visualization/layers/types";
 export class SceComponentLayer extends ComponentLayer {
   public readonly componentId = ApiComponent.CSP_PTC_SCE;
   protected readonly color = LayerColor.middleLightGrey;
-  protected readonly allowRefMeasures = true;
+  public readonly allowRefMeasures = true;
   public readonly minZoomLevel = 18;
   public readonly name = "single-collector-elements";
 

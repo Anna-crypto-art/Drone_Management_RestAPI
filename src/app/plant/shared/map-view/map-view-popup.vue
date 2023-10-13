@@ -16,6 +16,8 @@
           {{ orthoImage.name }}
         </b-dropdown-item>
       </app-dropdown-button>
+      <app-button v-if="hasObservAction" size="sm" variant="secondary" icon="clipboard-data" @click="onObservClick" >{{ $t("observ") }}</app-button>
+      <app-button v-if="hasRefMeasureAction" size="sm" variant="secondary" icon="clipboard-check" @click="onRefMeasureClick" >{{ $t("ref-measure") }}</app-button>
       <app-dropdown-button v-if="resultModEnabled" size="sm" variant="secondary" :loading="resultModLoading">
         <template #title>
           {{ $t("modify") }} <app-super-admin-marker />
@@ -56,13 +58,35 @@
           </a>
         </app-box>
       </div>
+      <div v-if="refMeasureFeatureInfos.length > 0" :class="{ 'mar-top': piFeatureInfos.length > 0 }">
+        <h4 class="no-mar-top mar-bottom-half">{{ $t("reference-measurements") }}</h4>
+        <app-box class="app-map-view-popup-body-feature-infos no-mar-top no-mar-bottom">
+          <div v-for="(rmFeatureInfo, index) in refMeasureFeatureInfos" :key="index">
+            <div class="app-map-view-popup-body-feature-infos-name">
+              <small class="grayed">
+                <b>{{ rmFeatureInfo.name }}</b>
+                <app-explanation v-if="rmFeatureInfo.descr"><span v-html="$t(rmFeatureInfo.descr)"></span></app-explanation>
+              </small>
+            </div>
+            <div class="app-map-view-popup-body-feature-infos-value" :class="{ bold: rmFeatureInfo.bold }">
+              {{ rmFeatureInfo.value }}
+              <span v-if="rmFeatureInfo.unit">
+                {{ rmFeatureInfo.unit }}
+              </span>
+            </div>
+            <hr class="mar-bottom-half mar-top-half" v-show="index + 1 < refMeasureFeatureInfos.length" />
+          </div>
+        </app-box>
+      </div>
     </div>
+    <app-reference-measurements ref="appReferenceMeasurements" :map="map" :plant="plant" />
+    <app-observation-modal ref="appObservModal" :plant="plant" />
   </div>
 </template>
 
 <script lang="ts">
 import { CatchError } from '@/app/shared/services/helper/catch-helper';
-import { Component, Prop, Watch } from "vue-property-decorator";
+import { Component, Prop, Ref, Watch } from "vue-property-decorator";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-dropdown-button.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
@@ -95,6 +119,15 @@ import { STORAGE_KEY_ENABLERESULTMOD } from './storage-keys';
 import { FilterFieldType } from '../filter-fields/types';
 import { analysisResultEventService } from '../plant-admin-view/analysis-result-event-service';
 import { AnalysisResultEvent } from '../plant-admin-view/types';
+import AppReferenceMeasurements from './reference-measurements/reference-measurements.vue';
+import { IAppRefMeasure } from './reference-measurements/types';
+import { RefMeasureEntry, RefMeasureEntryKeyFigureSchema } from '@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema';
+import { RefMeasureLayersService } from './layers/ref-measure-layers-service';
+import dateHelper from '@/app/shared/services/helper/date-helper';
+import AppObservationModal from '../observations/observation-modal.vue';
+import { IAppObservationModal } from '../observations/types';
+import { FieldgeometryComponentSchema } from '@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema';
+import { CcpService } from '../plant-settings/ccp-service';
 
 @Component({
   name: "app-map-view-popup",
@@ -105,6 +138,8 @@ import { AnalysisResultEvent } from '../plant-admin-view/types';
     AppSuperAdminMarker,
     AppLoading,
     AppBox,
+    AppReferenceMeasurements,
+    AppObservationModal,
   }
 })
 export default class AppMapViewPopup extends BaseAuthComponent implements IAnalysisSelectionComponent {
@@ -112,6 +147,9 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   @Prop({ required: true }) analyses!: AnalysisForViewSchema[];
   @Prop({ required: true }) map!: Map;
   @Prop({ default: null }) mapFeature!: FeatureLike | null;
+
+  @Ref() appReferenceMeasurements!: IAppRefMeasure;
+  @Ref() appObservModal!: IAppObservationModal;
 
   visible = false;
   loading = false;
@@ -122,8 +160,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   layersService!: LayersService;
   orthoImagesLayer!: OrthoImagesLayer;
 
-  pcs = "";
-  componentId: ApiComponent | null = null;
+  fieldgeometryComponent: FieldgeometryComponentSchema | null = null;
   orthoImages: OrthoImage[] = [];
   
   imgTitle = "";
@@ -131,15 +168,24 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   piFeatureInfos: FeatureInfo[] = [];
   hiddenFeaturesVisible = false;
 
+  hasRefMeasureAction = false;
+  refMeasureFeatureInfos: FeatureInfo[] = [];
+  myRefMeasureEntry: RefMeasureEntry | null = null;
+  myRefMeasureEntryKeyFigures: RefMeasureEntryKeyFigureSchema[] | null = null;
+
+  hasObservAction = false;
+
   resultModEnabled = false;
   resultModModes: ResultModMode[] = [];
 
   currentSelectedLayers: BaseLayer[] = [];
 
-  created() {
+  async created() {
     this.analysisSelectionService = new AnalysisSelectionService(this);
     this.layersService = LayersService.get(this.plant.id);
     this.orthoImagesLayer = OrthoImagesLayer.get(this.plant, this.map);
+
+    this.hasObservAction = (await CcpService.get(this.plant.id).getCcps()).length > 0;
   }
 
   @Watch("mapFeature")
@@ -174,14 +220,12 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   async updatePopup() {
     this.resetPopupValues();
 
-    console.log("this.resultModEnabled: ", this.resultModEnabled)
-
     const pcs: string = this.mapFeature!.getProperties().name;
     if (!pcs) {
       return;
     }
 
-    this.pcs = pcs;
+    await this.setFielgeoComp(pcs);
 
     if (this.analysisSelectionService.firstAnalysisResult) {
       this.orthoImages = this.orthoImagesLayer.getAvailableOrthoImages(this.analysisSelectionService.firstAnalysisResult);
@@ -189,10 +233,20 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
 
     this.currentSelectedLayers = this.layersService.layers.filter(l => l.selected);
 
-    this.setComponentId();
     this.setResultModModes();
     await this.setPiFeatureInfos();
-    
+    await this.setRefMeasureFeatureInfos();
+
+    this.hasRefMeasureAction = this.selectedKeyFigureLayers.length > 0 || 
+      !!(this.currentSelectedLayers as ComponentLayer[]).find(l => l.allowRefMeasures);
+  }
+
+  get pcs(): string {
+    return this.fieldgeometryComponent?.kks || "";
+  }
+
+  get componentId(): ApiComponent | null {
+    return this.fieldgeometryComponent?.component_id || null;
   }
 
   get componentName(): string {
@@ -265,28 +319,54 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     analysisResultEventService.emit(keyFigureLayer.analysisResult.id, AnalysisResultEvent.MODIFIED);
   }
 
+  @CatchError()
+  onObservClick() {
+    this.appObservModal.show(this.fieldgeometryComponent!);
+
+    this.visible = false;
+  }
+
+  @CatchError()
+  onRefMeasureClick() {
+    this.appReferenceMeasurements.show(
+      this.analysisSelectionService.firstAnalysis!.id,
+      this.pcs,
+      this.componentId!,
+      this.myRefMeasureEntry,
+      this.myRefMeasureEntryKeyFigures
+    );
+
+    this.visible = false;
+  }
+
+  async onAnalysisSelected() {
+    this.visible = false;
+  }
+
+  async onMultiAnalysesSelected() {
+    this.visible = false;
+  }
+
   private resetPopupValues() {
     this.imgTitle = "";
     this.imgUrl = "",
     this.orthoImages = [];
-    this.pcs = "";
-    this.componentId = null;
+    this.fieldgeometryComponent = null;
     this.piFeatureInfos = [];
     this.hiddenFeaturesVisible = false;
     this.resultModEnabled = appLocalStorage.getItem(STORAGE_KEY_ENABLERESULTMOD) || false;
     this.currentSelectedLayers = [];
+    this.hasRefMeasureAction = false;
+    this.refMeasureFeatureInfos = [];
+    this.myRefMeasureEntry = null;
+    this.myRefMeasureEntryKeyFigures = null;
   }
 
-  private setComponentId() {
-    const keyFigureLayer: KeyFigureBaseLayer | undefined = this.currentSelectedLayers.find(l => l instanceof KeyFigureLayer) as KeyFigureBaseLayer;
-    if (keyFigureLayer) {
-      this.componentId = keyFigureLayer.keyFigure.component_id;
-    } else {
-      const componentLayer: ComponentLayer | undefined = this.currentSelectedLayers.find(l => l instanceof ComponentLayer) as ComponentLayer;
-      if (componentLayer) {
-        this.componentId = componentLayer.componentId;
-      }
-    }
+  private async setFielgeoComp(pcs: string) {
+    this.fieldgeometryComponent = await volateqApi.getFieldgeometryComponent(
+      this.plant.fieldgeometry!.id,
+      pcs,
+    );
   }
 
   private async setPiFeatureInfos() {
@@ -395,6 +475,50 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   private get selectedKeyFigureLayers(): KeyFigureBaseLayer[] {
     return this.currentSelectedLayers.filter(l => l instanceof KeyFigureLayer) as KeyFigureBaseLayer[];
   }
+
+  private async setRefMeasureFeatureInfos() {
+    const mappings = AnalysisResultMappingHelper.getMappingsByComponentId(this.componentId!);
+
+    const refMeasureLayersService = RefMeasureLayersService.get(this.plant, this.map);
+
+    if (mappings && refMeasureLayersService.hasPCS(this.pcs) && this.analysisSelectionService.firstAnalysis) {
+      const mappingHelper = new AnalysisResultMappingHelper(mappings)
+      
+      const refMeasureEntries = await volateqApi.getReferenceMeasurementEntries(
+        this.analysisSelectionService.firstAnalysis.id, 
+        { pcs: this.pcs }
+      );
+
+      for (const refMeasureEntry of refMeasureEntries.entries) {
+        this.refMeasureFeatureInfos.push({
+          name: this.$t("measure-timestamp").toString(), 
+          value: dateHelper.toDateTime(refMeasureEntry.measure_time),
+        });
+
+        if (refMeasureEntry.notes) {
+          this.refMeasureFeatureInfos.push({
+            name: this.$t("notes").toString(),
+            value: refMeasureEntry.notes,
+          });
+        }
+
+        const rmMappingEntries = mappingHelper.getRefMeasureEntries(refMeasureEntry, refMeasureEntries.key_figures)
+        for (const rmMappingEntry of rmMappingEntries) {
+          this.refMeasureFeatureInfos.push(
+            mappingHelper.toFeatureInfo(
+              rmMappingEntry.entry,
+              rmMappingEntry.value.toString(),
+            )
+          );
+        }
+
+        if (refMeasureEntry.editable) {
+          this.myRefMeasureEntry = refMeasureEntry;
+          this.myRefMeasureEntryKeyFigures = refMeasureEntries.key_figures;
+        }
+      }
+    }
+  }
 }
 </script>
 
@@ -410,6 +534,8 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   width: 500px;
   padding: 1em;
   box-shadow: 3px 3px 5px $dark-40pc;
+  max-height: calc(100% - 1em);
+  overflow-y: auto;
 
   @supports (backdrop-filter: blur(5px)) {
     backdrop-filter: blur(5px);
@@ -441,7 +567,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   }
 
   &-actions {
-    .b-dropdown {
+    .b-dropdown, .app-button {
       margin-right: 0.5em;
     }
   }
@@ -451,8 +577,8 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     min-height: 50px;
 
     &-feature-infos {
-      max-height: 500px;
-      overflow-y: auto;
+      // max-height: 500px;
+      // overflow-y: auto;
 
       &-name {
         line-height: 1;

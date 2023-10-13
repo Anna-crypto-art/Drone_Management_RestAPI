@@ -9,7 +9,7 @@ import { LayerColor } from "@/app/plant/shared/map-view/layers/types";
 export class ScaComponentLayer extends ComponentLayer {
   public readonly componentId = ApiComponent.CSP_PTC_SCA;
   protected readonly color = LayerColor.darkGrey;
-  protected readonly allowRefMeasures = true;
+  public readonly allowRefMeasures = true;
 
   public selected = true;
   protected showPcsZoomLevel = 16.5;

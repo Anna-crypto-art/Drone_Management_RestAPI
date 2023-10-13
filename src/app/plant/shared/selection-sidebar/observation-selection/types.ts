@@ -9,7 +9,7 @@ export enum ObservationSelectionEvent {
 }
 
 export interface IObservationSelectionComponent {
-  observationSelectionService: ObservationSelectionService;
+  observationSelectionService: ObservationSelectionService | null;
   plant: PlantSchema;
   mounted(): Promise<void>;
   unmounted(): Promise<void>;
