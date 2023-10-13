@@ -1,10 +1,19 @@
 <template>
   <div class="app-map-view-legend" :class="{ 'selection-sidebar-open': layerSelectionOpen }" v-show="visible">
-    <div class="app-map-view-legend-container" :class="{ 'selection-sidebar-open': layerSelectionOpen }">
+    <div class="app-map-view-legend-container" v-show="selectedAnalysisName">
       <div class="grayed mar-bottom-half">
         <small><b>{{ selectedAnalysisName }}</b></small>
       </div>
       <div v-for="(entry, index) in analysislegendEntries" :key="index" class="app-map-view-legend-container-entry" :class="{ 'pad-left': entry.indent }">
+        <div class="app-map-view-legend-container-entry-color" :style="`background: ${entry.color}`"></div>
+        <div class="app-map-view-legend-container-entry-name" v-html="entry.name"></div>
+      </div>
+    </div>
+    <div class="app-map-view-legend-container" :class="{ 'mar-top-half': !!selectedAnalysisName }" v-show="selectedObservName">
+      <div class="grayed mar-bottom-half">
+        <small><b>{{ selectedObservName }}</b></small>
+      </div>
+      <div v-for="(entry, index) in observationslegendEntries" :key="index" class="app-map-view-legend-container-entry" :class="{ 'pad-left': entry.indent }">
         <div class="app-map-view-legend-container-entry-color" :style="`background: ${entry.color}`"></div>
         <div class="app-map-view-legend-container-entry-name" v-html="entry.name"></div>
       </div>
@@ -17,10 +26,7 @@ import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant
 import { Component, Prop } from "vue-property-decorator";
 import { LayersService } from "./layers/layers-service";
 import { Legend, LegendEntry } from "./types";
-import { LayerEvent } from "./layers/types";
-import { KeyFigureLayer } from "./layers/key-figure-layer";
-import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
-import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
+import { KeyFigureBaseLayer, LayerEvent } from "./layers/types";
 import { IAnalysisSelectionComponent } from "../selection-sidebar/analysis-selection/types";
 import { AnalysisSelectionService } from "../selection-sidebar/analysis-selection/analysis-selection-service";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
@@ -29,6 +35,8 @@ import { ObservationSelectionService } from "../selection-sidebar/observation-se
 import { RefMeasureLayerEvent, RefMeasureLayersService } from "./layers/ref-measure-layers-service";
 import { Map } from "ol";
 import { RouteQueryHelper } from "../helper/route-query-helper";
+import { ObservationCcpLayer } from "./layers/observation-ccp-layer";
+import { BaseLayer } from "./layers/base-layer";
 
 
 @Component({
@@ -43,7 +51,7 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
   @Prop({ required: true }) layerSelectionOpen!: boolean;
   
   analysisSelectionService: AnalysisSelectionService | null = null;
-  observationSelectionService!: ObservationSelectionService;
+  observationSelectionService: ObservationSelectionService | null = null;
   refMeasureLayersService!: RefMeasureLayersService;
   layersService!: LayersService;
 
@@ -61,8 +69,8 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
     this.layersService.on(
       this.plant.id,
       LayerEvent.ON_KEY_FIGURE_SELECTED,
-      async (layer: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>) => {
-        await this.onLayerSelected(layer);
+      async (layer: KeyFigureBaseLayer) => {
+        this.onKeyFigureLayerSelected(layer);
 
         await this.routeQueryHelper.replaceRoute({
           layer: this.layersService.keyFigureLayers.filter(l => l.selected).map(l => l.name),
@@ -72,10 +80,20 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
     this.layersService.on(
       this.plant.id,
       LayerEvent.ON_INV_AUTO_SELECT_SELECTED,
-      async (layer: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>) => {
-        await this.onLayerSelected(layer);
+      async (layer: KeyFigureBaseLayer) => {
+        this.onKeyFigureLayerSelected(layer);
       }
     );
+    this.layersService.on(
+      this.plant.id,
+      LayerEvent.ON_OBSERV_SELECTED,
+      async (layer: ObservationCcpLayer) => {
+        console.log(LayerEvent.ON_OBSERV_SELECTED, layer);
+
+        this.onObservLayerSelected(layer);
+      }
+    )
+
 
     this.refMeasureLayersService.on(this.plant.id, RefMeasureLayerEvent.ON_REF_MEASURE_LAYERS_CHANGED, () => {
       const li = this.analysisLegends.findIndex(l => l.id === this.refMeasureLayersService.refMeasurLegendId);
@@ -112,26 +130,50 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
     return legendEntries;
   }
 
+  get observationslegendEntries(): LegendEntry[] {
+    const legendEntries: LegendEntry[] = [];
+    
+    for (const legend of this.obersvationLegends) {
+      legendEntries.push(...legend.entries);
+    }
+
+    return legendEntries;
+  }
+
   get selectedAnalysisName(): string {
     return this.analysisSelectionService?.firstAnalysis?.name || "";
   }
 
-  async onLayerSelected(layer: KeyFigureLayer<AnalysisResultSchemaBase, GeoVisualQuery>) {
+  get selectedObservName(): string {
+    return this.observationSelectionService?.hasSelectedObservations &&
+      this.$t("observations").toString() + " " + this.observationSelectionService!.date ||
+      "";
+  }
+
+  onKeyFigureLayerSelected(layer: KeyFigureBaseLayer) {
+    this.onLayerSelected(layer, this.analysisLegends);
+  }
+
+  onObservLayerSelected(layer: ObservationCcpLayer) {
+    this.onLayerSelected(layer, this.obersvationLegends);
+  }
+
+  private onLayerSelected(layer: BaseLayer, legends: Legend[]) {
     const legend = layer.getLegend();
 
     if (legend) {
-      const existingLegendIndex = this.analysisLegends.findIndex(l => l.id === legend.id);
-      const existingLegend = existingLegendIndex != -1 ? this.analysisLegends[existingLegendIndex] : undefined;
+      const existingLegendIndex = legends.findIndex(l => l.id === legend.id);
+      const existingLegend = existingLegendIndex != -1 ? legends[existingLegendIndex] : undefined;
 
       if (layer.selected) {
         if (existingLegend) {
-          this.analysisLegends.splice(existingLegendIndex, 1, legend)
+          legends.splice(existingLegendIndex, 1, legend)
         } else {
-          this.analysisLegends.push(legend);
+          legends.push(legend);
         }
       } else {
         if (existingLegend) {
-          this.analysisLegends.splice(existingLegendIndex, 1);
+          legends.splice(existingLegendIndex, 1);
         }
       }
     }

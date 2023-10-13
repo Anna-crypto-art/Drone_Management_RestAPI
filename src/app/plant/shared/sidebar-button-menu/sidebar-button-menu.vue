@@ -72,7 +72,6 @@ export default class AppSidebarButtonMenu extends Vue {
         }
         break;
     }
-    console.log(this.open)
   }
 
   @CatchError()

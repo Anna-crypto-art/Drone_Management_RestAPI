@@ -190,8 +190,6 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
 
   @Watch("mapFeature")
   async onMapFeatureChanged() {
-    console.log("onMapFeatureChanged: ", this.mapFeature);
-
     if (this.mapFeature === null) {
       this.visible = false;
 

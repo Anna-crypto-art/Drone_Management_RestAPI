@@ -36,7 +36,9 @@ export abstract class ComponentLayer extends BaseLayer {
 
   protected getColor(feature: FeatureLike): string {
     const pcs = this.getPcs(feature);
-    if (this.allowRefMeasures && pcs && RefMeasureLayersService.get(this.plant, this.appLayerCheckbox!.map).hasPCS(pcs)) {
+    if (this.allowRefMeasures && pcs && this.appLayerCheckbox && 
+      RefMeasureLayersService.get(this.plant, this.appLayerCheckbox.map).hasPCS(pcs)) 
+    {
       return this.refMeasureColor;
     }
 

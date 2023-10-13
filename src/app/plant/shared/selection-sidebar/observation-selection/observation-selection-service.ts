@@ -8,11 +8,10 @@ import { CustomComponentPropertySchema } from "@/app/shared/services/volateq-api
 export class ObservationSelectionService {
   private readonly id: string;
 
-  private summerizedObservations: SummerizedObservations | undefined = undefined;
+  private summerizedObservations: SummerizedObservations | null = null;
 
   public readonly ccpService: CcpService;
 
-  public dateRange: DateRange | undefined = undefined;
   public selectedCcps: CustomComponentPropertySchema[] = [];
 
   constructor(
@@ -27,9 +26,8 @@ export class ObservationSelectionService {
       this.observSelectionComponent.plant.id,
       ObservationSelectionEvent.SELECTED,
       async (summerizedObservations: SummerizedObservations | undefined) => {
-        this.summerizedObservations = summerizedObservations;
+        this.summerizedObservations = summerizedObservations || null;
 
-        this.dateRange = this.getDateRange();
         this.selectedCcps = await this.getSelectedCCPs();
 
         this.observSelectionComponent.onObservationSelected && await this.observSelectionComponent.onObservationSelected();
@@ -48,9 +46,13 @@ export class ObservationSelectionService {
     return this.dateRange !== undefined;
   }
 
-  private getDateRange(): DateRange | undefined {
+  public get dateRange(): DateRange | null {
     return this.summerizedObservations && 
       { from: this.summerizedObservations.d_from, to: this.summerizedObservations.d_to };
+  }
+
+  public get date(): string | null {
+    return this.summerizedObservations?.date || null;
   }
 
   private async getSelectedCCPs(): Promise<CustomComponentPropertySchema[]> {

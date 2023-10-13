@@ -5,6 +5,7 @@ import { KeyFigureBaseLayer, LayerEvent, LayerSettings } from "./types";
 import { KeyFigureLayer } from "./key-figure-layer";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
+import { ObservationCcpLayer } from "./observation-ccp-layer";
 
 export class LayersService extends AppSeqEventService<LayerEvent> {
   private static readonly layersServices: Record<string, LayersService> = {};
@@ -38,6 +39,10 @@ export class LayersService extends AppSeqEventService<LayerEvent> {
         if (l instanceof KeyFigureLayer) {
           await this.emit(this.plantId, LayerEvent.ON_KEY_FIGURE_SELECTED, layer);
         }
+
+        if (l instanceof ObservationCcpLayer) {
+          await this.emit(this.plantId, LayerEvent.ON_OBSERV_SELECTED, layer);
+        }
       });
 
       l.events.on(LayerEvent.ON_INV_AUTO_SELECT_SELECTED, async (layer: KeyFigureBaseLayer) => {
@@ -54,5 +59,12 @@ export class LayersService extends AppSeqEventService<LayerEvent> {
 
   public rerenderLoadedLayers() {
     this.layers.filter(l => l.loadedLayer).forEach(l => l.rerender());
+  }
+
+  public removeLayer(layerId: string) {
+    const layerIndex = this.layers.findIndex(l => l.id === layerId);
+    if (layerIndex >= 0) {
+      this.layers.splice(layerIndex, 1);
+    }
   }
 }

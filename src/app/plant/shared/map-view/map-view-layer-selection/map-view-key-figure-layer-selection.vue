@@ -223,15 +223,11 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
     for (const selectedLayer of selectedLayers) {
       if (selectedLayer.id !== layer.id) {
         if ((layerGroup as ComponentGroupKeyFigureLayer).componentId) {
-          console.log("unselect layer: ", selectedLayer.id)
-
           await selectedLayer.setSelected(false);
 
         } else {
           const sibling = (layerGroup as GroupKeyFigureLayer).childLayers.find(l => l.id === selectedLayer.id);
           if (!sibling) {
-            console.log("unselect layer: ", selectedLayer.id)
-
             await selectedLayer.setSelected(false);
           }
         }

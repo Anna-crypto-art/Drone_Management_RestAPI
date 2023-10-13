@@ -29,6 +29,7 @@ export type ComponentGroupKeyFigureLayer = ComponentGroupBaseLayer<GroupKeyFigur
 export interface ValueRangeGroupObservLayer {
   ccp: CustomComponentPropertySchema;
   childLayers: ObservationCcpLayer[];
+  visible: boolean;
 }
 
 export interface ComponentGroupObservationLayer extends ComponentGroupBaseLayer<ValueRangeGroupObservLayer | ObservationCcpLayer> {

@@ -1,8 +1,7 @@
 <template>
   <app-map-view-layer-selection :value="visible" @input="onVisibilityChanged">
     <template #title>
-      blub
-      <!-- <b-icon icon="speedometer2" /><span class="pad-left-half">{{ $t("performance-indicators") }}</span> -->
+      <b-icon icon="clipboard-data" /><span class="pad-left-half">{{ $t("observations") }}</span>
     </template>
     <div class="app-map-view-observ-layer-selection">
       <app-map-view-layer-group v-for="compGroupLayer in compGroupLayers" :key="compGroupLayer.componentId"
@@ -12,26 +11,25 @@
       >
         <div v-for="(childLayer, index) in compGroupLayer.childLayers"
           :key="childLayer.id || index"
-          class="pad-left-half"
           :class="{'pad-bottom': isLastVisibleGroup(compGroupLayer, index) }"
           v-show="childLayer.visible"
         >
           <div v-if="childLayer.childLayers" class="app-map-view-observation-layer-selection-group">
             <div class="pad-bottom-half font-md" :class="{ 'pad-top': !isFirstVisibleGroup(compGroupLayer, index) }">
-              {{ $t(childLayer.ccp.name) }}
-              <app-explanation v-if="childLayer.ccp.description">
-                <span v-html="childLayer.ccp.description"></span>
-              </app-explanation>
+              <app-expl-wrap :expl="childLayer.ccp.description" placement="right">
+                {{ $t(childLayer.ccp.name) }}
+              </app-expl-wrap>
             </div>
             <div class="pad-left-half">
               <app-geo-json-layer-checkbox v-for="subChildLayer in childLayer.childLayers" :key="subChildLayer.id"
                 :geoLayer="subChildLayer"
                 :map="map"
+                descrPlacement="right"
               />
             </div>
           </div>
           <div v-if="!childLayer.childLayers" class="app-map-view-observation-layer-selection-single">
-            <app-geo-json-layer-checkbox :geoLayer="childLayer" :map="map" />
+            <app-geo-json-layer-checkbox :geoLayer="childLayer" :map="map" descrPlacement="right" />
           </div>
         </div>
       </app-map-view-layer-group>
@@ -63,6 +61,7 @@ import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/a
 import { ObservFilterValue } from "@/app/shared/services/volateq-api/api-requests/observation-requests";
 import { ObservationCcpLayer } from "../layers/observation-ccp-layer";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
+import AppExplWrap from "@/app/shared/components/app-explanation/app-expl-wrap.vue";
 
 @Component({
   name: "app-map-view-observ-layer-selection",
@@ -71,6 +70,7 @@ import { CatchError } from "@/app/shared/services/helper/catch-helper";
     AppMapViewLayerGroup,
     AppGeoJsonLayerCheckbox,
     AppExplanation,
+    AppExplWrap,
   },
 })
 export default class AppMapViewObservLayerSelection extends BaseComponent implements IObservationSelectionComponent {
@@ -89,7 +89,7 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
     this.observationSelectionService = new ObservationSelectionService(this);
     this.layersService = LayersService.get(this.plant.id);
 
-    this.setupCompGroupLayers();
+    this.componentLayers = this.getComponentLayerTypes().map(t => new (t as any)(this.plant));
   }
 
   async mounted() {
@@ -148,21 +148,6 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
     this.visible = this.observationSelectionService.hasSelectedObservations;
   }
 
-  private setupCompGroupLayers() {
-    this.componentLayers = this.getComponentLayerTypes().map(t => new (t as any)(this.plant));
-
-    for (const apiComponent in apiComponentNames) {
-      this.compGroupLayers.push({
-        componentId: Number(apiComponent),
-        childLayers: [],
-        visible: false,
-        collapsed: false,
-        name: this.$t(apiComponentNames[apiComponent]).toString(),
-        componentLayer: this.componentLayers.find(cl => cl.componentId === Number(apiComponent))!,
-      });
-    }
-  }
-
   private getComponentLayerTypes(): (typeof ComponentLayer)[] {
     switch (this.plant.technology_id) {
       case ApiTechnology.CSP_PTC:
@@ -176,7 +161,7 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
   }
 
   public async refreshLayers(
-    dateRange: DateRange | undefined, 
+    dateRange: DateRange | null, 
     ccps: CustomComponentPropertySchema[],
   ) {
     for (const apiComponent in apiComponentNames) {
@@ -198,7 +183,7 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
             childLayers: [],
             componentLayer: this.componentLayers.find(c => c.componentId === comp)!,
             collapsed: false,
-            visible: false,
+            visible: true,
           };
 
         this.compGroupLayers.push(componentGroupObservLayer);
@@ -217,7 +202,7 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
             }
 
             const childLayer = this.createObservCcpLayer(ccp, dateRange!, filterValue);
-            componentGroupObservLayer.childLayers.push(childLayer)
+            componentGroupObservLayer.childLayers.unshift(childLayer);
 
             this.selectLayers([childLayer], selectedLayerNameIds);
           }
@@ -231,13 +216,17 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
     dateRange: DateRange,
     observFilterValue?: ObservFilterValue,
   ): ObservationCcpLayer {
-    return new ObservationCcpLayer(
+    const layer = new ObservationCcpLayer(
       this.plant,
       ccp,
       this.componentLayers.find(cl => cl.componentId === ccp.component.id)!,
       dateRange,
       observFilterValue,
-    )
+    );
+
+    this.layersService.addLayers(layer);
+
+    return layer;
   }
 
   private createValueRangeGroupLayer(
@@ -247,6 +236,7 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
     return {
       ccp,
       childLayers: this.createValueRangeLayers(ccp, dateRange),
+      visible: true,
     };
   }
 
@@ -286,6 +276,9 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
   private async unselectAndRemoveLayer(layer: ObservationCcpLayer): Promise<string> {
     layer.reloadLayer(); // removes the layer from operlayers map
     await layer.setSelected(false);
+    
+    this.layersService.removeLayer(layer.id);
+    
     return layer.nameId;
   }
 
