@@ -241,6 +241,8 @@ export default class AppFlightCampaignRoutes extends BaseAuthComponent {
   }
 
   isDJIWPMZDownloadAllowed(flightRoute: FlightRoute) {
+    // KMZ files only supported by our API for M300 RTK, M30, M30T, M3E, M3T, M3M
+    // full implementation currently only for M3T!
     return flightRoute.drone?.drone_model.name_abbrev === "M3T";
   }
 }
