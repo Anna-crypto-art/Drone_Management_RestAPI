@@ -50,9 +50,8 @@ export default class AppSidebar extends Vue {
   height: 100%;
   transition: all 0.3s ease-in-out;
   background-color: $white;
-  overflow: hidden;
+  // overflow: hidden;
   flex-shrink: 0;
-  // flex-wrap: nowrap;
 
   &.open {
     margin-left: 0;

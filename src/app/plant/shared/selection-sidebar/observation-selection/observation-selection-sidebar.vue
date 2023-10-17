@@ -123,6 +123,8 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
     this.toDate = dateHelper.toDate(dateHelper.now());
 
     this.ccpService = CcpService.get(this.plant.id);
+
+    this.onTimeRangeChanged();
   }
 
   @CatchError("loading")
@@ -140,7 +142,8 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
 
   @CatchError("loading")
   async onObservSelected(selectedItems: ObservRowItem[]) {
-    if (selectedItems.length > 0) {
+    console.log(this.sidebarOpen)
+    if (selectedItems.length > 0 && this.sidebarOpen) {
       await observationSelectEventService.emit(this.plant.id, ObservationSelectionEvent.SELECTED, selectedItems[0].name);
     }
   }
@@ -192,13 +195,14 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
   width: 100%;
   position: absolute;
   border-right: 1px solid $border-color-grey;
-  left: calc($sidebar-width * -1);
+  left: calc($sidebar-width * -1 - $button-menu-width);
   transition: all 0.3s ease-in-out;
 
   &.open {
     left: 0;
     display: block;
-    // z-index: 9;
+    z-index: 9;
+    box-shadow: 3px 3px 5px $dark-40pc;
   }
 
   &-filter {

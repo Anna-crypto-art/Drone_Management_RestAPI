@@ -321,6 +321,7 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
     left: 0;
     display: block;
     z-index: 9;
+    box-shadow: 3px 3px 5px $dark-40pc;
   }
   &-table {
     height: 100%;

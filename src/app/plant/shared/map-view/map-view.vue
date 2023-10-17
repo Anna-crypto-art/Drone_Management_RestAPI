@@ -114,6 +114,7 @@ export default class AppMapView extends BaseAuthComponent implements IAnalysisSe
   @CatchError()
   onLayerSelectionOpenChanged(open: boolean) {
     this.layerSelectionOpen = open;
+    
   }
 
   async onAnalysisSelected() {
@@ -146,5 +147,10 @@ export default class AppMapView extends BaseAuthComponent implements IAnalysisSe
   height: calc(100vh - $header-height - $tab-height);
   width: 100%;
   overflow: hidden;
+
+  @media(max-width: 1000px) {
+      z-index: 100;
+      overflow: visible;
+    }
 }
 </style>
