@@ -116,9 +116,9 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
     });
 
     // vue does not react to the preset sidebar state for a reason, so we switch the state here for reactivity
-    this.$store.direct.commit.sidebar.set({ name: "observations", state: true });
-    await this.$nextTick();
-    this.$store.direct.commit.sidebar.set({ name: "observations", state: false });
+    // this.$store.direct.commit.sidebar.set({ name: "observations", state: true });
+    // await this.$nextTick();
+    // this.$store.direct.commit.sidebar.set({ name: "observations", state: false });
 
     this.toDate = dateHelper.toDate(dateHelper.now());
 

@@ -43,7 +43,7 @@ export class ObservationSelectionService {
   }
 
   public get hasSelectedObservations(): boolean {
-    return this.dateRange !== undefined;
+    return !!this.summerizedObservations;
   }
 
   public get dateRange(): DateRange | null {
