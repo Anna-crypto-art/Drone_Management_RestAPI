@@ -165,13 +165,13 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
     // 1. Compare view has been finished
     // 2. Compare view has been started
 
-    const compareViewFinished = !this.compareMode && 
+    const compareViewFinishedOrNoSelection = !this.compareMode && 
       (this.lastSelectedAnalyses.length === 2 || selectedAnalyses.length === 0);
 
     const compareViewStarted = this.compareMode && selectedAnalyses.length === 0 &&
       this.lastSelectedAnalyses.length < 2;
 
-    if (compareViewFinished || compareViewStarted) {
+    if (compareViewFinishedOrNoSelection || compareViewStarted) {
       // 1. Compare view has been finished: Let's select the last first analysis again
       //    to avoid to left the user with no selected analysis
       // or 
@@ -324,11 +324,11 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
     box-shadow: 3px 3px 5px $dark-40pc;
   }
   &-table {
-    height: 100%;
+    height: calc(100% - 78px); // Such a nice magic number
 
     .app-table-container {
-      margin-top: 10px;
-      height: calc(100% - 65px);
+      height: 100%;
+      margin-top: 10px;  
       overflow-y: auto;
     }
   }

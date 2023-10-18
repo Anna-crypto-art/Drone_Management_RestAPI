@@ -1,5 +1,5 @@
 <template>
-  <app-map-view-layer-selection :value="visible" @input="onVisibilityChanged">
+  <app-map-view-layer-selection :value="selectionSidebarOpen" @input="onSelectionSidebarOpenChanged">
     <template #title>
       <b-icon icon="speedometer2" /><span class="pad-left-half">{{ $t("performance-indicators") }}</span>
     </template>
@@ -63,6 +63,7 @@ import { PlantRouteQuery } from "../../types";
 import { RouteQueryHelper } from "../../helper/route-query-helper";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import AppExplWrap from "@/app/shared/components/app-explanation/app-expl-wrap.vue";
+import { State } from "vuex-class";
 
 @Component({
   name: "app-map-view-key-figure-layer-selection",
@@ -79,6 +80,7 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
   @Prop({ required: true }) map!: Map;
   @Prop({ required: true }) analyses!: AnalysisForViewSchema[];
   @Prop({ required: true }) keyFigureLayers!: KeyFigureTypeMap<GeoVisualQuery>[];
+  @State(state => state.sidebar["analysesSelection"]) selectionSidebarOpen!: boolean;
 
   visible = false;
   compGroupLayers: ComponentGroupKeyFigureLayer[] = [];
@@ -130,17 +132,13 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
 
   @Watch('isSidebarOpen')
   onSidebarOpenChanged() {
-    const visible = !!this.analysisSelectionService.firstAnalysisResult && this.isSidebarOpen;
+    const isOpen = !!this.analysisSelectionService.firstAnalysisResult && this.isSidebarOpen;
 
-    if (visible !== this.visible) {
-      this.onVisibilityChanged(visible);
-    }
+    this.$store.direct.commit.sidebar.set({ name: "analysesSelection", state: isOpen });
   }
 
-  @CatchError()
-  onVisibilityChanged(visible: boolean) {
-    this.visible = visible;
-    this.$emit("openChanged", this.visible);
+  onSelectionSidebarOpenChanged(open: boolean) {
+    this.$store.direct.commit.sidebar.set({ name: "analysesSelection", state: open });
   }
 
   async onAnalysisSelected(selectedByQueryRoute?: boolean) {

@@ -1,7 +1,7 @@
 <template>
   <div class="app-observation-selection-sidebar" :class="{ open: sidebarOpen }">
     <div class="grayed title">
-      <b-icon icon="clipboard-data" /><span class="title">{{ $t("observations") }}</span>
+      <b-icon icon="clipboard-data" /><span class="title">{{ $t("observations-selection") }}</span>
     </div>
     <div class="app-observation-selection-sidebar-filter">
       <b-form @submit.prevent="onSubmitFilter">
@@ -66,6 +66,7 @@ import { ObservationSelectionEvent, ObservRowItem } from "./types";
 import { observationSelectEventService } from "./observation-selection-event-service";
 import { State } from "vuex-class";
 import AppIconObservations from "@/app/shared/components/app-icon/app-icon-observations.vue";
+import { ObservationSelectionService } from "./observation-selection-service";
 
 @Component({
   name: "app-observation-selection-sidebar",
@@ -85,6 +86,7 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
   @Ref() observTable!: IAppSelectTable;
   @State(state => state.sidebar["observations"]) sidebarOpen!: boolean;
   
+  observationSelectionService: ObservationSelectionService | null = null;
 
   observTableColumns: AppTableColumns = [
     { key: "name", label: this.$t("observations").toString() },
@@ -111,6 +113,8 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
 
   @CatchError("loading")
   async created() {
+    this.observationSelectionService = new ObservationSelectionService(this);
+
     observationSelectEventService.on(this.plant.id, ObservationSelectionEvent.SIDEBAR_ABSOLUTE, async (absolute) => {
       this.absolute = absolute;
     });
@@ -125,6 +129,14 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
     this.ccpService = CcpService.get(this.plant.id);
 
     this.onTimeRangeChanged();
+  }
+
+  async mounted() {
+    this.observationSelectionService?.register();
+  }
+
+  async unmounted() {
+    this.observationSelectionService?.unregister();
   }
 
   @CatchError("loading")
@@ -142,9 +154,17 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
 
   @CatchError("loading")
   async onObservSelected(selectedItems: ObservRowItem[]) {
-    console.log(this.sidebarOpen)
     if (selectedItems.length > 0 && this.sidebarOpen) {
       await observationSelectEventService.emit(this.plant.id, ObservationSelectionEvent.SELECTED, selectedItems[0].name);
+    } else if (selectedItems.length === 0) {
+      if (this.observationSelectionService?.hasSelectedObservations) {
+        const lastObservSelectedIndex = this.observTableItems
+          .findIndex(o => o.name.date === this.observationSelectionService?.date);
+        
+        if (lastObservSelectedIndex >= 0) {
+          this.observTable.selectRow(lastObservSelectedIndex);
+        }
+      }
     }
   }
 

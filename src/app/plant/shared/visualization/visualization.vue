@@ -384,10 +384,10 @@ export default class AppVisualization
 
   @CatchError("loading")
   async onObservationSelected() {
-    await this.observLayersHierarchy?.refreshLayers(
-      this.observationSelectionService.dateRange,
-      this.observationSelectionService.selectedCcps
-    )
+    // await this.observLayersHierarchy?.refreshLayers(
+    //   this.observationSelectionService.dateRange,
+    //   this.observationSelectionService.selectedCcps
+    // )
 
     this.observHeadGroup!.visible = this.observationSelectionService.hasSelectedObservations;
 

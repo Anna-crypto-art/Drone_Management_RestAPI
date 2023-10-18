@@ -1,7 +1,7 @@
 <template>
-  <app-map-view-layer-selection :value="visible" @input="onVisibilityChanged">
+  <app-map-view-layer-selection :value="selectionSidebarOpen" @input="onSelectionSidebarOpenChanged">
     <template #title>
-      <b-icon icon="clipboard-data" /><span class="pad-left-half">{{ $t("observations") }}</span>
+      <span v-html="$t('observations-of', { date: selectedDate })" />
     </template>
     <div class="app-map-view-observ-layer-selection">
       <app-map-view-layer-group v-for="compGroupLayer in compGroupLayers" :key="compGroupLayer.componentId"
@@ -62,6 +62,7 @@ import { ObservFilterValue } from "@/app/shared/services/volateq-api/api-request
 import { ObservationCcpLayer } from "../layers/observation-ccp-layer";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import AppExplWrap from "@/app/shared/components/app-explanation/app-expl-wrap.vue";
+import { State } from "vuex-class";
 
 @Component({
   name: "app-map-view-observ-layer-selection",
@@ -76,11 +77,11 @@ import AppExplWrap from "@/app/shared/components/app-explanation/app-expl-wrap.v
 export default class AppMapViewObservLayerSelection extends BaseComponent implements IObservationSelectionComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) map!: Map;
+  @State(state => state.sidebar["observationsSelection"]) selectionSidebarOpen!: boolean;
 
-  visible = false;
   compGroupLayers: ComponentGroupObservationLayer[] = [];
   
-  observationSelectionService!: ObservationSelectionService;
+  observationSelectionService: ObservationSelectionService | null = null;
   layersService!: LayersService;
 
   componentLayers!: ComponentLayer[];
@@ -93,11 +94,11 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
   }
 
   async mounted() {
-    this.observationSelectionService.register();
+    this.observationSelectionService?.register();
   }
 
   async unmounted() {
-    this.observationSelectionService.unregister();
+    this.observationSelectionService?.unregister();
   }
 
   isFirstVisibleGroup(compGroupLayer: ComponentGroupKeyFigureLayer, index: number) {
@@ -122,30 +123,33 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
 
   get isSidebarOpen(): boolean { return this.$store.direct.state.sidebar.observations; }
 
-  @Watch('isSidebarOpen')
-  onSidebarOpenChanged() {
-    const visible = !!this.observationSelectionService.hasSelectedObservations && this.isSidebarOpen;
-
-    if (visible !== this.visible) {
-      this.onVisibilityChanged(visible);
-    }
+  get selectedDate(): string {
+    return this.observationSelectionService?.date || "";
   }
 
-  @CatchError()
-  onVisibilityChanged(visible: boolean) {
-    this.visible = visible;
-    this.$emit("openChanged", this.visible);
+  @Watch('isSidebarOpen')
+  onSidebarOpenChanged() {
+    const isOpen = !!this.observationSelectionService?.hasSelectedObservations && this.isSidebarOpen;
+
+    this.$store.direct.commit.sidebar.set({ name: "observationsSelection", state: isOpen });
+  }
+
+  onSelectionSidebarOpenChanged(open: boolean) {
+    this.$store.direct.commit.sidebar.set({ name: "observationsSelection", state: open });
   }
 
   async onObservationSelected() {
     this.onSidebarOpenChanged();
 
     await this.refreshLayers(
-      this.observationSelectionService.dateRange,
-      this.observationSelectionService.selectedCcps
+      this.observationSelectionService!.dateRange,
+      this.observationSelectionService!.selectedCcps
     );
 
-    this.visible = this.observationSelectionService.hasSelectedObservations;
+    this.$store.direct.commit.sidebar.set({ 
+      name: "observationsSelection", 
+      state: this.observationSelectionService!.hasSelectedObservations
+    });
   }
 
   private getComponentLayerTypes(): (typeof ComponentLayer)[] {

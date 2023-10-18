@@ -11,14 +11,12 @@
       :keyFigureLayers="keyFigureLayers"
       :map="map"
       :plant="plant"
-      @openChanged="onLayerSelectionOpenChanged"
     />
     <app-map-view-observ-layer-selection 
       :map="map"
       :plant="plant"
-      @openChanged="onLayerSelectionOpenChanged"
     />
-    <app-map-view-legend :plant="plant" :analyses="analyses" :map="map" :layerSelectionOpen="layerSelectionOpen" />
+    <app-map-view-legend :plant="plant" :analyses="analyses" :map="map" />
     <app-map-view-popup :plant="plant" :analyses="analyses" :mapFeature="clickedMapFeature" :map="map" />
   </div>
 </template>
@@ -76,8 +74,6 @@ export default class AppMapView extends BaseAuthComponent implements IAnalysisSe
 
   clickedMapFeature: FeatureLike | null = null;
 
-  layerSelectionOpen = false;
-
   async created() {
     this.analysisSelectionService = new AnalysisSelectionService(this);
     this.layersService = LayersService.get(this.plant.id);
@@ -109,12 +105,6 @@ export default class AppMapView extends BaseAuthComponent implements IAnalysisSe
     }
 
     this.clickedMapFeature = features[0];
-  }
-
-  @CatchError()
-  onLayerSelectionOpenChanged(open: boolean) {
-    this.layerSelectionOpen = open;
-    
   }
 
   async onAnalysisSelected() {

@@ -24,17 +24,17 @@
       variant="secondary"
       size="sm"
       class="toggle-button"
-      :class="{ openAnalyses:openAnalyses, openObservations:openObservations, invisible:invisible }"
+      :class="{ open: sidebarOpen, selectionOpen: selectionSidebarOpen, invisible: invisible }"
       @click="onToggleAll()"
     >
-      <b-icon :icon="open ? 'chevron-compact-left' : 'chevron-compact-right'"></b-icon>
+      <b-icon :icon="sidebarOpen ? 'chevron-compact-left' : 'chevron-compact-right'"></b-icon>
     </b-button>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import { Component } from "vue-property-decorator";
+import { Component, Watch } from "vue-property-decorator";
 import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
 import AppIconObservations from "@/app/shared/components/app-icon/app-icon-observations.vue";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
@@ -51,24 +51,25 @@ import { State } from "vuex-class";
 export default class AppSidebarButtonMenu extends Vue {
   @State(state => state.sidebar["analyses"]) openAnalyses!: boolean;
   @State(state => state.sidebar["observations"]) openObservations!: boolean;
+  @State(state => state.sidebar["analysesSelection"]) openAnalysesSelection!: boolean;
+  @State(state => state.sidebar["observationsSelection"]) openObservationsSelection!: boolean;
 
   get variantAnalyses(): string { return this.$store.direct.state.sidebar.analyses ? "primary" : "secondary"; }
   get variantObservations(): string { return this.$store.direct.state.sidebar.observations ? "primary" : "secondary"; }
 
-  get open(): boolean { return (this.openAnalyses || this.openObservations) }
+  get sidebarOpen(): boolean { return (this.openAnalyses || this.openObservations); }
+  get selectionSidebarOpen(): boolean { return this.openAnalysesSelection || this.openObservationsSelection; }
+
   invisible = false;
 
-  // @Watch('open')
-  onOpenChanged() {
-    this.invisible = true;
-    setTimeout(() => {
-      this.invisible = false;
-    }, 500);
+  @Watch("selectionSidebarOpen")
+  onSelectionSidebarOpenChanged() {
+    this.fadeInOutToggleButton();
   }
 
   @CatchError()
   onToggle(tool: SidebarNames) {
-    this.onOpenChanged();
+    this.fadeInOutToggleButton();
     switch (tool) {
       case "analyses":
         this.$store.direct.commit.sidebar.toggle({ name: "analyses" });
@@ -87,22 +88,26 @@ export default class AppSidebarButtonMenu extends Vue {
 
   @CatchError()
   onToggleAll() {
-    this.onOpenChanged();
-    switch (this.open) {
-      case true:
-        if (this.openAnalyses) {
-          this.$store.direct.commit.sidebar.toggle({ name: "analyses" });
-        }
-        if (this.openObservations) {
-          this.$store.direct.commit.sidebar.toggle({ name: "observations" });
-        }
-        break;
-      case false: {
-        if (!this.openAnalyses && !this.openObservations) {
-          this.$store.direct.commit.sidebar.toggle({ name: "analyses" });
-        }
+    this.fadeInOutToggleButton();
+
+    if (this.sidebarOpen) {
+      if (this.openAnalyses) {
+        this.$store.direct.commit.sidebar.toggle({ name: "analyses" });
       }
+      if (this.openObservations) {
+        this.$store.direct.commit.sidebar.toggle({ name: "observations" });
+      }
+    } else {
+      const lastActiveSidebarName = this.$store.direct.state.sidebar.lastActiveSidebarName || "analyses";
+      this.$store.direct.commit.sidebar.toggle({ name: lastActiveSidebarName });
     }
+  }
+
+  private fadeInOutToggleButton() {
+    this.invisible = true;
+    setTimeout(() => {
+      this.invisible = false;
+    }, 500);
   }
 }
 </script>
@@ -156,13 +161,11 @@ export default class AppSidebarButtonMenu extends Vue {
       opacity: 0;
       transition: opacity 1s ease-in-out;
     }
-    &.openAnalyses {
-      left: calc($button-menu-width + $layer-selection-width + $sidebar-width);
-
-    }
-    &.openObservations {
+    &.open {
       left: calc($button-menu-width + $sidebar-width);
-
+    }
+    &.selectionOpen {
+      left: calc($button-menu-width + $layer-selection-width + $sidebar-width);
     }
   }
 }

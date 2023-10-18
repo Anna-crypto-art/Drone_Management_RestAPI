@@ -48,7 +48,6 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) analyses!: AnalysisForViewSchema[];
   @Prop({ required: true }) map!: Map;
-  @Prop({ required: true }) layerSelectionOpen!: boolean;
   
   analysisSelectionService: AnalysisSelectionService | null = null;
   observationSelectionService: ObservationSelectionService | null = null;
@@ -114,6 +113,10 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
 
   async unmounted() {
     this.analysisSelectionService!.unregister();
+  }
+
+  get layerSelectionOpen(): boolean {
+    return this.$store.direct.state.sidebar.analysesSelection || this.$store.direct.state.sidebar.observationsSelection;
   }
 
   get visible(): boolean {
