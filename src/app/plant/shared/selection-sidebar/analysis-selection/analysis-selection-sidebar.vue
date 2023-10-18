@@ -313,14 +313,15 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
   height: 100%;
   width: 100%;
   position: absolute;
-  margin-left: calc($sidebar-width * -1);
+  left: calc($sidebar-width * -1);
   border-right: 1px solid $border-color-grey;
   transition: all 0.3s ease-in-out;
 
   &.open {
-    margin-left: 0;
+    left: 0;
     display: block;
     z-index: 9;
+    box-shadow: 3px 3px 5px $dark-40pc;
   }
   &-table {
     height: 100%;

@@ -1,7 +1,7 @@
 <template>
   <div class="app-observation-selection-sidebar" :class="{ open: sidebarOpen }">
     <div class="grayed title">
-      <app-icon-observations /><span class="title">{{ $t("observations") }}</span>
+      <b-icon icon="clipboard-data" /><span class="title">{{ $t("observations") }}</span>
     </div>
     <div class="app-observation-selection-sidebar-filter">
       <b-form @submit.prevent="onSubmitFilter">
@@ -123,6 +123,8 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
     this.toDate = dateHelper.toDate(dateHelper.now());
 
     this.ccpService = CcpService.get(this.plant.id);
+
+    this.onTimeRangeChanged();
   }
 
   @CatchError("loading")
@@ -140,7 +142,8 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
 
   @CatchError("loading")
   async onObservSelected(selectedItems: ObservRowItem[]) {
-    if (selectedItems.length > 0) {
+    console.log(this.sidebarOpen)
+    if (selectedItems.length > 0 && this.sidebarOpen) {
       await observationSelectEventService.emit(this.plant.id, ObservationSelectionEvent.SELECTED, selectedItems[0].name);
     }
   }
@@ -192,13 +195,14 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
   width: 100%;
   position: absolute;
   border-right: 1px solid $border-color-grey;
-  margin-left: calc($sidebar-width * -1);
+  left: calc($sidebar-width * -1 - $button-menu-width);
   transition: all 0.3s ease-in-out;
 
   &.open {
-    margin-left: 0;
+    left: 0;
     display: block;
-    // z-index: 9;
+    z-index: 9;
+    box-shadow: 3px 3px 5px $dark-40pc;
   }
 
   &-filter {

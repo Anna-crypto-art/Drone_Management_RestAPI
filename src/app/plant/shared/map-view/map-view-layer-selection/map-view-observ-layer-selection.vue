@@ -298,4 +298,11 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
 @import "@/scss/_colors.scss";
 @import "@/scss/_variables.scss";
 
+.app-map-view-observ-layer-selection {
+    @media(max-width: 1000px) {
+      left: -250px;
+      height: calc(100vh - $header-height - $tab-height)
+    }
+}
+
 </style>

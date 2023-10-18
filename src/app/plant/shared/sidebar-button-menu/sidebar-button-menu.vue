@@ -1,5 +1,5 @@
 <template>
-  <div class="app-sidebar-button-menu">
+  <div class="app-sidebar-button-menu" :class="{ openAnalyses:openAnalyses, openObservations:openObservations }">
     <b-button-group vertical>
       <b-button 
         :variant="variantAnalyses"
@@ -17,16 +17,17 @@
         class="sidebar-button"
         @click="onToggle('observations')"
       >
-        <app-icon-observations />
+        <b-icon icon="clipboard-data" scale="1.1" shift-h="-2" />
       </b-button>
     </b-button-group>
     <b-button 
       variant="secondary"
       size="sm"
       class="toggle-button"
+      :class="{ openAnalyses:openAnalyses, openObservations:openObservations, invisible:invisible }"
       @click="onToggleAll()"
     >
-      <b-icon :icon="open ? 'hevron-compact-left' : 'hevron-compact-right'"></b-icon>
+      <b-icon :icon="open ? 'chevron-compact-left' : 'chevron-compact-right'"></b-icon>
     </b-button>
   </div>
 </template>
@@ -48,26 +49,36 @@ import { State } from "vuex-class";
   }
 })
 export default class AppSidebarButtonMenu extends Vue {
-  @State(state => state.sidebar["analyses"]) openA!: boolean;
-  @State(state => state.sidebar["observations"]) openO!: boolean;
+  @State(state => state.sidebar["analyses"]) openAnalyses!: boolean;
+  @State(state => state.sidebar["observations"]) openObservations!: boolean;
 
   get variantAnalyses(): string { return this.$store.direct.state.sidebar.analyses ? "primary" : "secondary"; }
   get variantObservations(): string { return this.$store.direct.state.sidebar.observations ? "primary" : "secondary"; }
 
-  get open(): boolean { return (this.openA || this.openO) }
+  get open(): boolean { return (this.openAnalyses || this.openObservations) }
+  invisible = false;
+
+  // @Watch('open')
+  onOpenChanged() {
+    this.invisible = true;
+    setTimeout(() => {
+      this.invisible = false;
+    }, 500);
+  }
 
   @CatchError()
   onToggle(tool: SidebarNames) {
+    this.onOpenChanged();
     switch (tool) {
       case "analyses":
         this.$store.direct.commit.sidebar.toggle({ name: "analyses" });
-        if (this.$store.direct.state.sidebar.observations) {
+        if (this.openObservations) {
           this.$store.direct.commit.sidebar.toggle({ name: "observations" });
         }
         break;
       case "observations":
         this.$store.direct.commit.sidebar.toggle({ name: "observations" });
-        if (this.$store.direct.state.sidebar.analyses) {
+        if (this.openAnalyses) {
           this.$store.direct.commit.sidebar.toggle({ name: "analyses" });
         }
         break;
@@ -76,7 +87,22 @@ export default class AppSidebarButtonMenu extends Vue {
 
   @CatchError()
   onToggleAll() {
-    this.$store.direct.commit.sidebar.toggle({ name: "analyses" });
+    this.onOpenChanged();
+    switch (this.open) {
+      case true:
+        if (this.openAnalyses) {
+          this.$store.direct.commit.sidebar.toggle({ name: "analyses" });
+        }
+        if (this.openObservations) {
+          this.$store.direct.commit.sidebar.toggle({ name: "observations" });
+        }
+        break;
+      case false: {
+        if (!this.openAnalyses && !this.openObservations) {
+          this.$store.direct.commit.sidebar.toggle({ name: "analyses" });
+        }
+      }
+    }
   }
 }
 </script>
@@ -91,12 +117,22 @@ export default class AppSidebarButtonMenu extends Vue {
   background-color: $white;
   border: 1px solid $border-color-grey;
   z-index: 10;
+  box-shadow: 3px 3px 5px $dark-40pc;
+
+  &.openObservations {
+    box-shadow: none;
+  }
+
+  &.openAnalyses {
+    box-shadow: none;
+  }
 
   .sidebar-button {
     width: 40px;
     height: 40px;
     margin-left: -1px;
-    border-right: 1px solid $border-color-grey;
+    border-right: 1px solid $border-color-grey !important;
+    border-color: transparent;
 
     &:hover {
       background-color: $background-grey;
@@ -104,9 +140,30 @@ export default class AppSidebarButtonMenu extends Vue {
   }
 
   .toggle-button {
-    position: relative;
-    width: 30px;
+    position: absolute;
+    top: 50%;
+    width: 15px;
     height: 40px;
+    border: 1px solid $border-color-grey;
+    left: $button-menu-width;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    opacity: 1;
+    transition: opacity 1s ease-in-out;
+
+    &.invisible {
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+    }
+    &.openAnalyses {
+      left: calc($button-menu-width + $layer-selection-width + $sidebar-width);
+
+    }
+    &.openObservations {
+      left: calc($button-menu-width + $sidebar-width);
+
+    }
   }
 }
 </style>

@@ -3,7 +3,7 @@
     <template #title>
       <b-icon icon="speedometer2" /><span class="pad-left-half">{{ $t("performance-indicators") }}</span>
     </template>
-    <div class="app-map-view-key-figure-layer-selection" v-show="visible">
+    <div class="app-map-view-key-figure-layer-selection">
       <app-map-view-layer-group v-for="compGroupLayer in compGroupLayers" :key="compGroupLayer.componentId"
         v-model="compGroupLayer.collapsed" 
         v-show="compGroupLayer.visible"
