@@ -222,7 +222,7 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
     left: 0;
     display: block;
     z-index: 9;
-    box-shadow: 3px 3px 5px $dark-40pc;
+    // box-shadow: 3px 3px 5px $dark-40pc;
   }
 
   &-filter {

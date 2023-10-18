@@ -65,7 +65,8 @@ export default class AppMapViewLayerSelection extends BaseComponent {
   &.sidebar-open {
     @media(max-width: 1000px) {
       left: calc($sidebar-width * -1);
-      height: calc(100vh - $header-height - $tab-height)
+      height: calc(100vh - $header-height); // - $tab-height);
+      top: calc($tab-height * -1);
     }
   }  
 }

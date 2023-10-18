@@ -1,5 +1,5 @@
 <template>
-  <div class="app-sidebar" :class="{open:open}">
+  <div class="app-sidebar" :class="{ open: open, 'selection-open': selectionOpen }">
     <app-analysis-selection-sidebar :plant="plant" :analyses="analyses" />
     <app-observation-selection-sidebar :plant="plant" />
   </div>
@@ -29,11 +29,12 @@ export default class AppSidebar extends Vue {
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
 
-  @State(state => state.sidebar["observations"]) observSidebarOpen!: boolean;
-  @State(state => state.sidebar["analyses"]) analysesSidebarOpen!: boolean;
-
   get open(): boolean {
-    return this.observSidebarOpen || this.analysesSidebarOpen;
+    return this.$store.direct.state.sidebar.analyses || this.$store.direct.state.sidebar.observations;
+  }
+
+  get selectionOpen(): boolean {
+    return this.$store.direct.state.sidebar.analysesSelection || this.$store.direct.state.sidebar.observationsSelection;
   }
 }
 </script>
@@ -50,11 +51,15 @@ export default class AppSidebar extends Vue {
   height: 100%;
   transition: all 0.3s ease-in-out;
   background-color: $white;
-  // overflow: hidden;
   flex-shrink: 0;
 
   &.open {
     margin-left: 0;
+    box-shadow: 3px 3px 5px $dark-40pc;
+    z-index: 1; // overlays map
+  }
+  &.open.selection-open {
+    box-shadow: none;
   }
 }
 
