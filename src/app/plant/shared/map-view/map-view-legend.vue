@@ -1,15 +1,24 @@
 <template>
   <div class="app-map-view-legend" :class="{ 'selection-sidebar-open': layerSelectionOpen }" v-show="visible">
-    <div class="app-map-view-legend-container" v-show="selectedAnalysisName">
+    <div v-show="selectedAnalysisName"
+      class="app-map-view-legend-container"
+      :class="{ 'inactive': !isAnalysisLegendsActive }"
+    >
       <div class="grayed mar-bottom-half">
         <small><b>{{ selectedAnalysisName }}</b></small>
       </div>
-      <div v-for="(entry, index) in analysislegendEntries" :key="index" class="app-map-view-legend-container-entry" :class="{ 'pad-left': entry.indent }">
+      <div v-for="(entry, index) in analysislegendEntries" :key="index"
+        class="app-map-view-legend-container-entry" 
+        :class="{ 'pad-left': entry.indent }"
+      >
         <div class="app-map-view-legend-container-entry-color" :style="`background: ${entry.color}`"></div>
         <div class="app-map-view-legend-container-entry-name" v-html="entry.name"></div>
       </div>
     </div>
-    <div class="app-map-view-legend-container" :class="{ 'mar-top-half': !!selectedAnalysisName }" v-show="selectedObservName">
+    <div class="app-map-view-legend-container"
+      :class="{ 'mar-top-half': !!selectedAnalysisName, 'inactive': !isObservationsLegendsActive }"
+      v-show="selectedObservName"
+    >
       <div class="grayed mar-bottom-half">
         <small><b>{{ selectedObservName }}</b></small>
       </div>
@@ -23,7 +32,7 @@
 <script lang="ts">
 import { BaseComponent } from "@/app/shared/components/base-component/base-component";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Watch } from "vue-property-decorator";
 import { LayersService } from "./layers/layers-service";
 import { Legend, LegendEntry } from "./types";
 import { KeyFigureBaseLayer, LayerEvent } from "./layers/types";
@@ -58,6 +67,9 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
 
   analysisLegends: Legend[] = [];
   obersvationLegends: Legend[] = [];
+
+  isAnalysisLegendsActive = true;
+  isObservationsLegendsActive = true;
 
   created() {
     this.analysisSelectionService = new AnalysisSelectionService(this);
@@ -109,10 +121,12 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
 
   async mounted() {
     await this.analysisSelectionService!.register();
+    this.observationSelectionService!.register();
   }
 
   async unmounted() {
     this.analysisSelectionService!.unregister();
+    this.observationSelectionService!.unregister();
   }
 
   get layerSelectionOpen(): boolean {
@@ -148,9 +162,26 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
   }
 
   get selectedObservName(): string {
-    return this.observationSelectionService?.hasSelectedObservations &&
-      this.$t("observations").toString() + " " + this.observationSelectionService!.date ||
+    return this.obersvationLegends.length > 0 && this.observationSelectionService?.hasSelectedObservations &&
+      this.$t("observations").toString() + " " + this.observationSelectionService.date ||
       "";
+  }
+
+  get isAnalysesSidebarOpen(): boolean {
+    return this.$store.direct.state.sidebar.analyses;
+  }
+  get isObservationsSidebarOpen(): boolean {
+    return this.$store.direct.state.sidebar.observations;
+  }
+
+  @Watch("isAnalysesSidebarOpen")
+  onAnalysesSidebarOpenChanged() {
+    this.sidebarOpenChanged();
+  }
+
+  @Watch("isObservationsSidebarOpen") 
+  onObservationsSidebarOpenChanged() {
+    this.sidebarOpenChanged();
   }
 
   onKeyFigureLayerSelected(layer: KeyFigureBaseLayer) {
@@ -159,6 +190,13 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
 
   onObservLayerSelected(layer: ObservationCcpLayer) {
     this.onLayerSelected(layer, this.obersvationLegends);
+  }
+
+  private sidebarOpenChanged() {
+    const sidebar = this.$store.direct.state.sidebar;
+
+    this.isAnalysisLegendsActive = sidebar.analyses || (!sidebar.observations && sidebar.lastActiveSidebarName === "analyses");
+    this.isObservationsLegendsActive = sidebar.observations || (!sidebar.analyses && sidebar.lastActiveSidebarName === "observations");
   }
 
   private onLayerSelected(layer: BaseLayer, legends: Legend[]) {
@@ -211,6 +249,10 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
 
     padding: 10px 15px 5px 15px;
     box-shadow: 3px 3px 5px $dark-40pc;
+
+    &.inactive {
+      opacity: 0.3;
+    }
 
     &-entry {
       display: flex;
