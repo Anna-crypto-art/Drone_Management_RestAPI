@@ -18,10 +18,6 @@
         <template #title><b-icon icon="bar-chart-fill" /> <span class="pad-left">{{ $t("statistics") }}</span></template>
         <slot name="diagram" />
       </b-tab>
-      <b-tab lazy>
-        <template #title><b-icon icon="gear-fill" /> <span class="pad-left">{{ $t("settings") }}</span></template>
-        <slot name="settings" />
-      </b-tab>
       <b-tab v-if="isSuperAdmin && hasSelectAnalysisResults">
         <template #title><b-icon icon="shield-shaded" /><span class="pad-left">{{ $t("admin") }}</span></template>
         <slot name="admin" />

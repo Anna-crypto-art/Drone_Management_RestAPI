@@ -4,7 +4,7 @@
     <div class="app-content">
       <b-container>
         <div v-if="navback" class="app-content-navback">
-          <router-link class="link" to="/analyses">
+          <router-link class="link" :to="navbackPath">
             <b-icon icon="chevron-left"></b-icon> {{ $t("back-to-overview") }}
           </router-link>
         </div>
@@ -56,6 +56,7 @@ export default class AppContent extends BaseAuthComponent {
   @Prop({ default: true }) showHeader!: boolean;
   @Prop({ default: null }) eventId!: string | null;
   @Prop({ default: false }) superAdminProtected!: boolean;
+  @Prop() navbackPath: string | undefined;
 
   alert: AppAlert = { msg: "", variant: "info" };
   alertId: AppAlert = { msg: "", variant: "info" };

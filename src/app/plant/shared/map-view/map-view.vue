@@ -18,6 +18,15 @@
     />
     <app-map-view-legend :plant="plant" :analyses="analyses" :map="map" />
     <app-map-view-popup :plant="plant" :analyses="analyses" :mapFeature="clickedMapFeature" :map="map" />
+    <b-button 
+      variant="secondary"
+      size="sm"
+      class="toggle-button"
+      :class="{ open: sidebarOpen, selectionOpen: selectionSidebarOpen, invisible: invisible }"
+      @click="onToggleAll()"
+    >
+      <b-icon :icon="sidebarOpen ? 'chevron-compact-left' : 'chevron-compact-right'"></b-icon>
+    </b-button>
   </div>
 </template>
 
@@ -45,6 +54,7 @@ import { IAnalysisSelectionComponent } from "../selection-sidebar/analysis-selec
 import { AnalysisSelectionService } from "../selection-sidebar/analysis-selection/analysis-selection-service";
 import { LayersService } from "./layers/layers-service";
 import { RefMeasureLayersService } from "./layers/ref-measure-layers-service";
+import { State } from "vuex-class";
 
 @Component({
   name: "app-map-view",
@@ -66,6 +76,8 @@ export default class AppMapView extends BaseAuthComponent implements IAnalysisSe
   @Prop({ required: true }) keyFigureLayers!: KeyFigureTypeMap<GeoVisualQuery>[];
   @Prop({ required: true }) componentLayerTypes!: typeof ComponentLayer[];
 
+  invisible = false;
+  
   analysisSelectionService!: AnalysisSelectionService;
   layersService!: LayersService;
   refMeasureLayersService!: RefMeasureLayersService;
@@ -97,6 +109,10 @@ export default class AppMapView extends BaseAuthComponent implements IAnalysisSe
     this.analysisSelectionService.unregister();
   }
 
+  get selectionSidebarOpen(): boolean { return this.openAnalysesSelection || this.openObservationsSelection; }
+  get openAnalysesSelection(): boolean { return this.$store.direct.state.sidebar.analysesSelection }
+  get openObservationsSelection(): boolean { return this.$store.direct.state.sidebar.observationsSelection }
+
   @CatchError()
   onMapClick(features: FeatureLike[]) {
     // Multiselection is not supported
@@ -119,7 +135,44 @@ export default class AppMapView extends BaseAuthComponent implements IAnalysisSe
   @Watch("sidebarOpen")
   rerenderMap() {
     setTimeout(() => window.dispatchEvent(new UIEvent("resize")), 400);
+    // ToggleButton Fade on SidebarOpen only, no Observation selected
+    this.fadeInOutToggleButton();
   }
+
+  @Watch("openAnalysesSelection")
+  onOpenAnalysesSelectionChanged() {
+    this.fadeInOutToggleButton();
+  }
+
+  @Watch("openObservationsSelection")
+  onOpenObservationSelectionChanged() {
+    this.fadeInOutToggleButton();
+  }
+
+  @CatchError()
+  onToggleAll() {
+    this.fadeInOutToggleButton();
+    if (this.sidebarOpen) {
+      if (this.$store.direct.state.sidebar.analyses) {
+        this.$store.direct.commit.sidebar.toggle({ name: "analyses" });
+      }
+      if (this.$store.direct.state.sidebar.observations) {
+        this.$store.direct.commit.sidebar.toggle({ name: "observations" });
+      }
+    } else {
+      const lastActiveSidebarName = this.$store.direct.state.sidebar.lastActiveSidebarName || "analyses";
+      this.$store.direct.commit.sidebar.toggle({ name: lastActiveSidebarName });
+    }
+  }
+
+  private fadeInOutToggleButton() {
+
+    this.invisible = true;
+    setTimeout(() => {
+      this.invisible = false;
+    }, 500);
+  }
+
 }
 </script>
 
@@ -131,6 +184,28 @@ export default class AppMapView extends BaseAuthComponent implements IAnalysisSe
 .b-popover {
   z-index: 1101;
 }
+
+.toggle-button {
+    position: absolute;
+    top: 50%;
+    width: 15px;
+    height: 40px;
+    border: 1px solid $border-color-grey;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    opacity: 1;
+    transition: opacity 1s ease-in-out;
+    box-shadow: 3px 3px 5px $dark-40pc;
+
+    &.invisible {
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+    }
+    &.selectionOpen {
+      left: $layer-selection-width;
+    }
+  }
 
 .app-map-view {
   position: relative;

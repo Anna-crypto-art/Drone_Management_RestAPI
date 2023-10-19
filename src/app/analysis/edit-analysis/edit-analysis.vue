@@ -1,5 +1,5 @@
 <template>
-  <app-content v-if="analysis" :title="analysis.name || ''" :navback="true" :eventId="analysis.id">
+  <app-content v-if="analysis" :title="analysis.name || ''" :navback="true" :eventId="analysis.id" navbackPath="/analyses">
     <template #subtitle>
       <div class="mar-top">
         <app-step-progress :steps="analysisProgressSteps" />
@@ -154,6 +154,7 @@ import AppAnalysisFlightCampaigns from "@/app/analysis/edit-analysis/flight-camp
 })
 export default class AppEditAnalysis extends BaseAuthComponent {
   analysis: AnalysisSchema | null = null;
+  // path = "/analyses";
 
   flownAt = "";
   loading = false;
