@@ -762,6 +762,8 @@
   "ref-measure": "Ref. measure.",
   "observ": "Observ.",
   "plant-settings": "Plant settings",
+  "observed-at": "Observed at",
+  "external-id": "External Id",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

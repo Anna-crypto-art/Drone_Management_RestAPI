@@ -157,7 +157,7 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
         : ""
       ),
       bold: currentKeyFigureId === mappingEntry.keyFigureId,
-      descr: mappingEntry.transDescr,
+      descr: mappingEntry.transDescr && i18n.t(mappingEntry.transDescr).toString(),
       unit: value !== "" ? mappingEntry.unit : undefined,
       superAdminOnly: mappingEntry.superAdminOnly,
       hidden: currentKeyFigureId && 

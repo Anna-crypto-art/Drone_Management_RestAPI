@@ -14,6 +14,8 @@ import { AppSeqEventService } from "@/app/shared/services/app-event-service/app-
 import { Legend } from "../types";
 import { i18n } from "@/main";
 import { LayersService } from "./layers-service";
+import { asColorLike } from "ol/colorlike";
+import { setOpacityForColor } from "@/app/shared/services/helper/color-helper";
 
 export enum RefMeasureLayerEvent {
   ON_REF_MEASURE_LAYERS_CHANGED = "ON_REF_MEASURE_LAYERS_CHANGED",
@@ -48,13 +50,13 @@ export class RefMeasureLayersService extends AppSeqEventService<RefMeasureLayerE
   }
 
   public getLegend(): Legend | undefined {
-    if (this.currentAnalysis && (this.currentAnalysis.id in this.analysesRefMeasureLayers)) {
+    if (this.loadedLayer) {
       return {
         id: this.refMeasurLegendId,
         entries: [
           {
             color: LayerColor.volateqBlue,
-            name: this.analysesRefMeasureLayers[this.currentAnalysis.id].getSource()!.getFeatures().length + 
+            name: this.loadedLayer.getSource()!.getFeatures().length + 
               " " + i18n.t("reference-measurements").toString(),
           }
         ],
@@ -100,6 +102,25 @@ export class RefMeasureLayersService extends AppSeqEventService<RefMeasureLayerE
     }
   }
 
+  public get loadedLayer(): VectorGeoLayer | null {
+    if (this.currentAnalysis && (this.currentAnalysis.id in this.analysesRefMeasureLayers)) {
+      return this.analysesRefMeasureLayers[this.currentAnalysis.id];
+    }
+
+    return null;
+  }
+
+  public rerenderLoadedLayer() {
+    this.loadedLayer?.changed();
+  }
+
+  public setOpacity(opacity: number) {
+    if (this.loadedLayer) {
+      this.loadedLayer.getSource()?.getFeatures().forEach(f => f.setStyle(this.getStyle(opacity)));
+      this.rerenderLoadedLayer();
+    }
+  }
+
   private async loadLayer(analysis: AnalysisForViewSchema): Promise<VectorGeoLayer> {
     const features: Feature<Geometry>[] = [];
     for (const refMeasure of analysis.reference_measurements) {
@@ -109,12 +130,7 @@ export class RefMeasureLayersService extends AppSeqEventService<RefMeasureLayerE
     }
 
     for (const feature of features) {
-      feature.setStyle(new Style({
-        stroke: new Stroke({
-          color: LayerColor.volateqBlue,
-          width: 3,
-        }),
-      }));
+      feature.setStyle(this.getStyle());
     }
 
     const vectorGeoLayer = new VectorImageLayer({
@@ -129,5 +145,14 @@ export class RefMeasureLayersService extends AppSeqEventService<RefMeasureLayerE
     this.map.addLayer(vectorGeoLayer);
 
     return vectorGeoLayer;
+  }
+
+  private getStyle(opacity = 1): Style {
+    return new Style({
+      stroke: new Stroke({
+        color: opacity === 1 ? LayerColor.volateqBlue : setOpacityForColor(LayerColor.volateqBlue, opacity),
+        width: 3,
+      }),
+    });
   }
 }

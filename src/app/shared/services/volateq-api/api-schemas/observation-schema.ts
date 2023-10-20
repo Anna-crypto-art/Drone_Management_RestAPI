@@ -1,3 +1,7 @@
+import { CustomComponentPropertySchema } from "./custom-component-property-schema";
+import { FieldgeometryComponentSchema } from "./fieldgeometry-component-schema";
+import { SimpleUserSchema } from "./user-schemas";
+
 export enum TimePeriod {
   DAILY = 'DAILY',
   WEEKLY = 'WEEKLY',
@@ -35,4 +39,31 @@ export interface SummerizedDates {
   period: TimePeriod;
   observations: SummerizedObservations[];
   total: number;
+}
+
+export interface CcpColumn {
+  custom_component_property: CustomComponentPropertySchema;
+  count?: number;
+}
+
+export interface ObservationColumn {
+  id: string;
+  ccp_column: CcpColumn;
+}
+
+export type ObservationValue = string | number | boolean;
+
+export type ObservationColumnValue = Record<string, ObservationValue>;
+
+export interface ObservationSchema {
+  id: string; 
+  plant_id: string; 
+  fieldgeometry_component: FieldgeometryComponentSchema; 
+  observed_at: string; 
+  notes: string; 
+  external_id: string;
+  created_by_user: SimpleUserSchema;
+  updated_at: string;
+  created_at: string;
+  column_values: ObservationColumnValue;
 }

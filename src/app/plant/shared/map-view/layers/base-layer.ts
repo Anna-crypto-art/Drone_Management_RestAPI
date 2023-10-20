@@ -17,6 +17,8 @@ import { plantViewEventService } from "@/app/plant/plant-view-event-service";
 import { PlantViewEvent } from "@/app/plant/types";
 import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/sequential-event-emitter";
 import { LayerEvent } from "./types";
+import { setOpacityForColor } from "@/app/shared/services/helper/color-helper";
+import { asColorLike } from "ol/colorlike";
 
 /**
  * Represents a geojson layer
@@ -55,6 +57,8 @@ export abstract class BaseLayer implements IGeoLayer {
    */
   private initiallyLoadedBeforeSelected = false;
 
+  protected opacity = 1;
+
   constructor(public readonly plant: PlantSchema) {}
 
   public abstract getPcs(feature: FeatureLike): string | undefined;
@@ -67,11 +71,25 @@ export abstract class BaseLayer implements IGeoLayer {
 
   public style(feature: FeatureLike): Style | Style[] {
     const addStyles = this.getAddStyles(feature);
-    if (addStyles) {
-      return [...addStyles, this.getStyle(feature)];
+    const styles = [...(addStyles || []), this.getStyle(feature)];
+
+    for (const style of styles) {
+      if (this.opacity < 1) {
+        if (style && !Array.isArray(style)) {
+          const fillColor = style.getFill()?.getColor();
+          if (fillColor) {
+            style.getFill().setColor(setOpacityForColor(asColorLike(fillColor).toString(), this.opacity));
+          }
+    
+          const strokeColor = style.getStroke()?.getColor();
+          if (strokeColor) {
+            style.getStroke().setColor(setOpacityForColor(asColorLike(strokeColor).toString(), this.opacity));
+          }
+        }
+      }
     }
 
-    return this.getStyle(feature);
+    return styles;
   }
 
   protected getAddStyles(feature: FeatureLike): Style[] | undefined {
@@ -372,5 +390,13 @@ export abstract class BaseLayer implements IGeoLayer {
 
   public rerender() {
     this.loadedLayer?.changed();
+  }
+
+  public setOpacity(opacity: number) {
+    this.opacity = opacity;
+
+    if (this.loadedLayer) {
+      this.rerender();
+    }
   }
 }
