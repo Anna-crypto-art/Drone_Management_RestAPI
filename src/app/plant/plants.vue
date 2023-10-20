@@ -38,12 +38,10 @@
           <router-link class="link"  :to="{ name: 'PlantSettings', params: { id: row.item.id } }">
             <app-button
               v-show="isCustomerAdmin || isSuperAdmin"
-              @click="onManagePlantClick(row.item)"
               variant="secondary"
               size="sm"
               :title="$t('plant-settings')"
               icon="gear-fill"
-              class="plant-settings-btn"
             />
           </router-link>
           <app-button
@@ -395,9 +393,9 @@ export default class AppPlants extends BaseAuthComponent {
 </script>
 
 <style lang="scss">
-.plant-settings-btn {
-  margin-right: 5px;
-  width: 43.5px;
-  height: 31px;
-}
+// .plant-settings-btn {
+//   margin-right: 5px;
+//   width: 43.5px;
+//   height: 31px;
+// }
 </style>

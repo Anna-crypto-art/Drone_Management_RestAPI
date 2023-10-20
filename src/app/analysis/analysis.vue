@@ -72,7 +72,7 @@
               }"
             >
               <app-button variant="primary" size="sm">
-                <app-icon-analysis />
+                <b-icon icon="chevron-right" :title="$t('show-in-map')"></b-icon>
               </app-button>
             </router-link>
           </template>

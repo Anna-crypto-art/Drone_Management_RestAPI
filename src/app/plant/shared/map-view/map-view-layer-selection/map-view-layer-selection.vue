@@ -43,8 +43,8 @@ export default class AppMapViewLayerSelection extends BaseComponent {
   height: 100%;
   overflow-y: auto;
   width: $layer-selection-width;
-  left: calc($sidebar-width * -2 - $button-menu-width);  
-  transition: all 0.4s ease-in;
+  left: calc($sidebar-width * -2 - $button-menu-width - 10px);  // 10px for shadow
+  transition: left 0.4s ease-in;
   top: 0;
   background-color: $white;
   padding: 1em;
@@ -65,7 +65,7 @@ export default class AppMapViewLayerSelection extends BaseComponent {
   &.sidebar-open {
     @media(max-width: 1000px) {
       left: calc($sidebar-width * -1);
-      height: calc(100vh - $header-height); // - $tab-height);
+      height: calc(100vh - $header-height);
       top: calc($tab-height * -1);
     }
   }  

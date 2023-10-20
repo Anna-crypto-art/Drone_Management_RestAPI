@@ -222,7 +222,6 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
     left: 0;
     display: block;
     z-index: 9;
-    // box-shadow: 3px 3px 5px $dark-40pc;
   }
 
   &-filter {
@@ -233,7 +232,6 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
     margin: 10px;
     
     .app-icon-observations {
-      // margin-right: 5px;
       font-size: 120%;
     }
   }

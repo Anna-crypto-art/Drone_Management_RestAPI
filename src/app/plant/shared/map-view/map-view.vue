@@ -166,7 +166,6 @@ export default class AppMapView extends BaseAuthComponent implements IAnalysisSe
   }
 
   private fadeInOutToggleButton() {
-
     this.invisible = true;
     setTimeout(() => {
       this.invisible = false;
@@ -187,7 +186,7 @@ export default class AppMapView extends BaseAuthComponent implements IAnalysisSe
 
 .toggle-button {
     position: absolute;
-    top: 50%;
+    top: calc(50% - 20px);
     width: 15px;
     height: 40px;
     border: 1px solid $border-color-grey;
@@ -204,7 +203,14 @@ export default class AppMapView extends BaseAuthComponent implements IAnalysisSe
     }
     &.selectionOpen {
       left: $layer-selection-width;
+      transition: left 0.4s ease-in;
+
+      @media(max-width: 1000px) {
+        transition: left 0.4s ease-in;
+        left: 0px;
+      }
     }
+    
   }
 
 .app-map-view {
@@ -214,8 +220,8 @@ export default class AppMapView extends BaseAuthComponent implements IAnalysisSe
   overflow: hidden;
 
   @media(max-width: 1000px) {
-      z-index: 100;
-      overflow: visible;
-    }
+    z-index: 100;
+    overflow: visible;
+  }
 }
 </style>

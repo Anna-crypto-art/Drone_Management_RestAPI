@@ -305,7 +305,7 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
 .app-map-view-observ-layer-selection {
     @media(max-width: 1000px) {
       left: -250px;
-      height: calc(100vh - $header-height - $tab-height)
+      height: calc(100% - $header-height - $tab-height)
     }
 }
 

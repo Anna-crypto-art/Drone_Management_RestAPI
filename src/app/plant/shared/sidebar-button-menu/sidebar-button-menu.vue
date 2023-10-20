@@ -16,6 +16,7 @@
         tool="observations"
         class="sidebar-button"
         @click="onToggle('observations')"
+        :disabled="!hasObservAction"
       >
         <b-icon icon="clipboard-data" scale="1.1" shift-h="-2" />
       </b-button>
@@ -25,13 +26,15 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { Component } from "vue-property-decorator";
+import { Component, Prop } from "vue-property-decorator";
 import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
 import AppIconObservations from "@/app/shared/components/app-icon/app-icon-observations.vue";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { SidebarNames } from "@/app/shared/stores/sidebar";
 import { State } from "vuex-class";
 import AppMapView from "../map-view/map-view.vue";
+import { CcpService } from "../plant-settings/ccp-service";
+import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
 
 @Component({
   name: "app-sidebar-button-menu",
@@ -42,11 +45,18 @@ import AppMapView from "../map-view/map-view.vue";
   }
 })
 export default class AppSidebarButtonMenu extends Vue {
+  @Prop({ required: true }) plant!: PlantSchema;
   @State(state => state.sidebar["analyses"]) openAnalyses!: boolean;
   @State(state => state.sidebar["observations"]) openObservations!: boolean;
 
   get variantAnalyses(): string { return this.$store.direct.state.sidebar.analyses ? "primary" : "secondary"; }
   get variantObservations(): string { return this.$store.direct.state.sidebar.observations ? "primary" : "secondary"; }
+
+  hasObservAction = false;
+
+  async created() {
+    this.hasObservAction = (await CcpService.get(this.plant.id).getCcps()).length > 0;
+  }
 
   @CatchError()
   onToggle(tool: SidebarNames) {
@@ -97,6 +107,11 @@ export default class AppSidebarButtonMenu extends Vue {
 
     &:hover {
       background-color: $background-grey;
+    }
+
+    &:disabled {
+      border-color: transparent;
+      color: grey;
     }
   }
 }

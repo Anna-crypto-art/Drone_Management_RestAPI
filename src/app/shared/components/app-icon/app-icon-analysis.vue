@@ -1,7 +1,5 @@
 <template>
   <b-iconstack :class="cls">
-    <!-- <b-icon stacked icon="search" scale="1.2" shift-h="-1" />
-    <b-icon stacked icon="bar-chart-fill" shift-v="2" shift-h="-3" scale="0.5" /> -->
     <b-icon stacked icon="wrench" scale="0.4" shift-v="4.5" shift-h="2" rotate="90" shift-z="-1"/>
     <b-icon stacked icon="wrench" scale="0.4" shift-v="-4.5" shift-h="2" rotate="180"/>
     <b-icon stacked icon="wrench" scale="0.4" shift-v="-4.5" shift-h="-5.4" rotate="270"/>

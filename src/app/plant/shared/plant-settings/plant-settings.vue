@@ -1,8 +1,6 @@
 <template>
   <app-content :title="$t('plant-settings')" :navback="true" navbackPath="/plants">
-    <b-container>
-      <app-custom-component-properties v-if="plant" :plant="plant" />
-    </b-container>
+    <app-custom-component-properties v-if="plant" :plant="plant" />
   </app-content>
 </template>
 

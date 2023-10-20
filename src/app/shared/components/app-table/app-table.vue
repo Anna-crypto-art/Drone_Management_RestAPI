@@ -228,7 +228,7 @@ export default class AppTable extends Vue implements IAppSelectTable, IAppTable 
         margin-right: 0;
       }
     }
-    & > .btn {
+    & > .btn, & > a.link {
       margin-right: 5px;
       &:last-child {
         margin-right: 0;

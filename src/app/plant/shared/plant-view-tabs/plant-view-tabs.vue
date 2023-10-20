@@ -201,8 +201,8 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
   height: 100%;
   width: 100%;
 
-  @media (max-width: 576px) {
-    .nav-item .nav-link:not(.active) span {
+  @media (max-width: 1000px) {
+    .nav-item .nav-link span {
       display: none;
     }
   }
