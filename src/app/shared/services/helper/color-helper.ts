@@ -146,6 +146,17 @@ export function calcBlackOrWhiteTextContrast(backgroundColor: string): "black" |
 }
 
 
+export function setOpacityForColor(color: string, opacity: number): number[] {
+  const rgba = toRGB(color);
+  if (rgba.length === 4) {
+    rgba[3] *= opacity;
+  } else {
+    rgba.push(opacity);
+  }
+  return rgba;
+}
+
+
 function mixAlphaIntoColor(rgba: number[]): number[] {
   const a = rgba[3];
 

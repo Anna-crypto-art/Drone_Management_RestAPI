@@ -68,7 +68,7 @@ export class ObservationCcpLayer extends BaseLayer {
   }
 
   public getStyle(feature: FeatureLike): Style {
-    const style = this.componentLayer.style(feature) as Style;
+    const style = (this.componentLayer.style(feature) as Style[])[0];
 
     style.getStroke()?.setColor(this.color);
     style.getStroke()?.setWidth(5);

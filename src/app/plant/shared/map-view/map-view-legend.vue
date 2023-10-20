@@ -197,6 +197,12 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
 
     this.isAnalysisLegendsActive = sidebar.analyses || (!sidebar.observations && sidebar.lastActiveSidebarName === "analyses");
     this.isObservationsLegendsActive = sidebar.observations || (!sidebar.analyses && sidebar.lastActiveSidebarName === "observations");
+
+    const inactiveLayerOpacity = 0.3;
+
+    this.layersService.keyFigureLayers.forEach(l => l.setOpacity(this.isAnalysisLegendsActive ? 1 : inactiveLayerOpacity));
+    this.refMeasureLayersService.setOpacity(this.isAnalysisLegendsActive ? 1 : inactiveLayerOpacity);
+    this.layersService.observationLayers.forEach(l => l.setOpacity(this.isObservationsLegendsActive ? 1 : inactiveLayerOpacity));
   }
 
   private onLayerSelected(layer: BaseLayer, legends: Legend[]) {
@@ -251,7 +257,7 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
     box-shadow: 3px 3px 5px $dark-40pc;
 
     &.inactive {
-      opacity: 0.3;
+      opacity: 0.5;
     }
 
     &-entry {
