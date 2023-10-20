@@ -60,7 +60,6 @@ import { CCPDataType, CustomComponentPropertySchema, NumberRangeInfosSchema } fr
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 import { ObservFilterValue } from "@/app/shared/services/volateq-api/api-requests/observation-requests";
 import { ObservationCcpLayer } from "../layers/observation-ccp-layer";
-import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import AppExplWrap from "@/app/shared/components/app-explanation/app-expl-wrap.vue";
 import { State } from "vuex-class";
 
@@ -192,13 +191,16 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
 
         this.compGroupLayers.push(componentGroupObservLayer);
 
+        let hasSelectedChildLayers = false;
         const compCcps = ccps.filter(ccp => ccp.component.id === comp);
         for (const ccp of compCcps) {
+          let layersSelected = false;
+
           if (ccp.data_type === CCPDataType.NUMBER_RANGE || ccp.data_type === CCPDataType.VALUE_LIST) {
             const childLayer = this.createValueRangeGroupLayer(ccp, dateRange!);
             componentGroupObservLayer.childLayers.push(childLayer)
 
-            this.selectLayers(childLayer.childLayers, selectedLayerNameIds);
+            layersSelected = this.selectLayers(childLayer.childLayers, selectedLayerNameIds);
           } else {
             let filterValue: ObservFilterValue = undefined;
             if (ccp.data_type === CCPDataType.BOOLEAN) {
@@ -208,10 +210,18 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
             const childLayer = this.createObservCcpLayer(ccp, dateRange!, filterValue);
             componentGroupObservLayer.childLayers.unshift(childLayer);
 
-            this.selectLayers([childLayer], selectedLayerNameIds);
+            layersSelected = this.selectLayers([childLayer], selectedLayerNameIds);
           }
+
+          hasSelectedChildLayers = !hasSelectedChildLayers && layersSelected || hasSelectedChildLayers;
         }
+
+        componentGroupObservLayer.collapsed = hasSelectedChildLayers;
       }
+    }
+
+    if (this.compGroupLayers.length > 0 && !this.compGroupLayers.find(g => g.collapsed)) {
+      this.compGroupLayers[0].collapsed = true;
     }
   }
 
@@ -286,14 +296,20 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
     return layer.nameId;
   }
 
-  private selectLayers(layers: ObservationCcpLayer[], selectedLayerNameIds: string[]) {
+  private selectLayers(layers: ObservationCcpLayer[], selectedLayerNameIds: string[]): boolean {
+    let selected = false;
+
     if (selectedLayerNameIds.length > 0) {
       for (const layer of layers) {
         if (selectedLayerNameIds.includes(layer.nameId)) {
           layer.selectSilent();
+
+          selected = true;
         }
       }
     }
+
+    return selected;
   }
 }
 </script>

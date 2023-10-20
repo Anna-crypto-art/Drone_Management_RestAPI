@@ -270,7 +270,7 @@ export default class AppDiagramAreas extends BaseAuthComponent {
     // Copy tableFilter object to avoid manipulating origin
     const tableFilter: TableFilterRequest = { 
       component_filter: { ...this.tableFilter.component_filter },
-      columns_selection: { columns: [ ...this.tableFilter.columns_selection!.columns ]}
+      columns_selection: [ ...this.tableFilter.columns_selection! ]
     };
 
     tableFilter.component_filter!.component_id = this.selectedComponentId!;

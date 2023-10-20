@@ -764,6 +764,7 @@
   "plant-settings": "Plant settings",
   "observed-at": "Observed at",
   "external-id": "External Id",
+  "no-observations-available-expl": "Observations not available. Please create \"Component Properties\" under <a href=\"{plantSettingsUrl}\">Plant settings</a> to activate Observations.",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

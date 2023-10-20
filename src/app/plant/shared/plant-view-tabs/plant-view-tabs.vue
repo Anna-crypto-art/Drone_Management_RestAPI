@@ -29,7 +29,6 @@
 <script lang="ts">
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Component, Prop, Watch } from "vue-property-decorator";
-import { SelectionSidebarEvent, selectionSidebarEventService } from "@/app/plant/shared/selection-sidebar/selection-sidebar-event-serivce";
 import { RouteQueryHelper } from "../helper/route-query-helper";
 import { PlantViewTabs } from "./types";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
@@ -61,14 +60,6 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
 
   private routeQueryHelper = new RouteQueryHelper(this);
 
-  private isMobile!: boolean;
-  private isMobileQuery!: MediaQueryList;
-  private async isMobileListener<Evt extends { matches: boolean }>(e: Evt) {
-    this.isMobile = e.matches;
-
-    await this.updateLeftSidebarAbsolute();
-  }
-
   @CatchError()
   created() {
     this.setBrowserTitle(this.plant.name);
@@ -76,10 +67,6 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
     this.routeQueryHelper.queryChanged(async () => {
       this.selectedTab = this.queryTab;
     });
-
-    this.isMobileQuery = getMobileQuery()
-    this.isMobileQuery.addEventListener("change", this.isMobileListener);
-    this.isMobileListener(this.isMobileQuery);
 
     this.analysisSelectionService = new AnalysisSelectionService(this);
   }
@@ -117,8 +104,6 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
       const nextView = PlantViewTabs[this.selectedTab].toString().toLowerCase() as any;
       await this.routeQueryHelper.pushRoute({ view: nextView });
     }
-
-    await this.updateLeftSidebarAbsolute();
   }
 
   onTabsChanged() {
@@ -177,18 +162,6 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
 
   async unmounted() {
     this.analysisSelectionService?.unregister();
-
-    this.isMobileQuery.removeEventListener("change", this.isMobileListener);
-  }
-
-  async updateLeftSidebarAbsolute() {
-    const leftSidebarAbsolute = this.isMobile || this.selectedTab === PlantViewTabs.MAP;
-
-    await selectionSidebarEventService.emit(
-      this.plant.id, 
-      SelectionSidebarEvent.SIDEBAR_ABSOLUTE,
-      leftSidebarAbsolute
-    );
   }
 }
 </script>

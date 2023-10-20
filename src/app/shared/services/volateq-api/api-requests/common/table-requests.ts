@@ -18,15 +18,25 @@ export interface ColumnFuncCondition {
   compare_values: number[];
 }
 
+export interface QueryColumn {
+  name: string
+  entity_type: 'CCP' | 'PI',
+}
+
 export interface TableColumnSelect {
-  name: string;
+  column: QueryColumn;
   func?: "sum" | "avg" | "count";
   func_condition?: ColumnFuncCondition;
   label?: string;
 }
 
+export interface QueryColumnFilter {
+  column: QueryColumn;
+  filter_value: FilterFieldValueType;
+}
+
 export interface TableFilterRequest {
-  filters?: Record<string, FilterFieldValueType>;
+  filters?: QueryColumnFilter[];
   component_filter?: { component_id?: ApiComponent, codes?: string[], grouped?: boolean };
-  columns_selection?: { columns: TableColumnSelect[] };
+  columns_selection?: TableColumnSelect[];
 }

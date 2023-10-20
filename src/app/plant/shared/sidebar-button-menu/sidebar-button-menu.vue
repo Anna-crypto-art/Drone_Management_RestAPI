@@ -18,7 +18,9 @@
         @click="onToggle('observations')"
         :disabled="!hasObservAction"
       >
-        <b-icon icon="clipboard-data" scale="1.1" shift-h="-2" />
+        <app-expl-wrap :expl="noObservAvailableExpl" placement="right">
+          <b-icon icon="clipboard-data" scale="1.1" shift-h="-2" />
+        </app-expl-wrap>
       </b-button>
     </b-button-group>
   </div>
@@ -35,6 +37,7 @@ import { State } from "vuex-class";
 import AppMapView from "../map-view/map-view.vue";
 import { CcpService } from "../plant-settings/ccp-service";
 import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
+import AppExplWrap from "@/app/shared/components/app-explanation/app-expl-wrap.vue";
 
 @Component({
   name: "app-sidebar-button-menu",
@@ -42,6 +45,7 @@ import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant
     AppIconAnalysis,
     AppIconObservations,
     AppMapView,
+    AppExplWrap,
   }
 })
 export default class AppSidebarButtonMenu extends Vue {
@@ -56,6 +60,12 @@ export default class AppSidebarButtonMenu extends Vue {
 
   async created() {
     this.hasObservAction = (await CcpService.get(this.plant.id).getCcps()).length > 0;
+  }
+
+  get noObservAvailableExpl(): string {
+    return !this.hasObservAction && 
+      this.$t("no-observations-available-expl", { plantSettingsUrl: `/plant/${this.plant.id}/settings` }).toString() 
+      || "";
   }
 
   @CatchError()

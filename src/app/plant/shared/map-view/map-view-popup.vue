@@ -293,6 +293,10 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     this.visible = false;
   }
 
+  async onObservationSelected() {
+    this.visible = false;
+  }
+
   private resetPopupValues() {
     this.imgTitle = "";
     this.imgUrl = "",
@@ -515,6 +519,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   box-shadow: 3px 3px 5px $dark-40pc;
   max-height: calc(100% - 1em);
   overflow-y: auto;
+  z-index: 1;
 
   @supports (backdrop-filter: blur(5px)) {
     backdrop-filter: blur(5px);

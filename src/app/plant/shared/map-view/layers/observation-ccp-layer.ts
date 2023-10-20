@@ -1,4 +1,3 @@
-import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { Legend, PropsFeature } from "../types";
 import { GeoJSON } from "@/app/shared/components/app-geovisualization/types/layers";
 import { FeatureLike } from "ol/Feature";
@@ -39,6 +38,10 @@ export class ObservationCcpLayer extends BaseLayer {
 
   public get name(): string {
     return this.dataTypeOptionInfo?.label || this.ccp.name;
+  }
+
+  public getDisplayName(): string {
+    return this.name;
   }
 
   public get nameId(): string {

@@ -59,7 +59,7 @@ import { apiComponentsFilter } from "@/app/shared/services/volateq-api/api-compo
 import { apiComponentNames } from "@/app/shared/services/volateq-api/api-components/api-components-name";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { TableFilterRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
+import { QueryColumnFilter, TableFilterRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { TableResultMappingComponent } from "./types";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
@@ -166,10 +166,13 @@ export default class AppTableComponentFilter extends BaseAuthComponent implement
   private getTableFilterRequest(): TableFilterRequest | undefined {
     const columnsMapping = this.mappingHelper.getColumnsMapping();
 
-    const filters: Record<string, FilterFieldValueType> = {};
+    const filters: QueryColumnFilter[] = [];
     for (const piFilterFieldValue of this.piFilterFieldValues) {
       if (piFilterFieldValue.filterField) {
-        filters[columnsMapping[piFilterFieldValue.filterField.key]] = piFilterFieldValue.value;
+        filters.push({
+          column: { name: columnsMapping[piFilterFieldValue.filterField.key], entity_type: "PI" },
+          filter_value: piFilterFieldValue.value,
+        });
       }
     }
 

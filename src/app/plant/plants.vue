@@ -37,7 +37,6 @@
         <template #hoverActions="row">
           <router-link class="link"  :to="{ name: 'PlantSettings', params: { id: row.item.id } }">
             <app-button
-              v-show="isCustomerAdmin || isSuperAdmin"
               variant="secondary"
               size="sm"
               :title="$t('plant-settings')"

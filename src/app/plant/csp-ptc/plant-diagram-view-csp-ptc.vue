@@ -42,7 +42,7 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent impleme
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
 
-  analysisSelectionService!: AnalysisSelectionService;
+  analysisSelectionService: AnalysisSelectionService | null = null;
 
   resultMappings: DiagramResultMappings[] = [];
 
@@ -95,21 +95,24 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent impleme
       const diagramEntries = analysisResultMappingHelper.getDiagramEntries();
             
       const columnsSelection = this.getColumnsSelection(diagramEntries, columnsMapping);
-
-      resultMapping.tableFilter = {
-        component_filter: { component_id: 0 /* plant */, grouped: true },
-        columns_selection: { columns: columnsSelection },
-      };
-
-      if (resultMapping.componentId === ApiComponent.CSP_PTC_MIRROR) {
-        // Speeds up query for table analysis_result_csp_ptc_mirror
-        resultMapping.tableFilter.filters = { is_missing: true };
+      if (columnsSelection.length > 0) {
+        resultMapping.tableFilter = {
+          component_filter: { component_id: 0 /* plant */, grouped: true },
+          columns_selection: columnsSelection,
+        };
+  
+        if (resultMapping.componentId === ApiComponent.CSP_PTC_MIRROR) {
+          // Speeds up query for table analysis_result_csp_ptc_mirror
+          resultMapping.tableFilter.filters = [{ column: { name: "is_missing", entity_type: "PI" }, filter_value: true }];
+        }
+  
+        resultMapping.numberBoxes = this.getNumberBoxes(diagramEntries, columnsMapping);
+  
+        resultMappings.push(resultMapping);
       }
-
-      resultMapping.numberBoxes = this.getNumberBoxes(diagramEntries, columnsMapping);
-
-      resultMappings.push(resultMapping);
     }
+
+    console.log("resultMappings", resultMappings);
 
     this.resultMappings = resultMappings;
   }
@@ -125,7 +128,7 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent impleme
       if (entry.keyFigureId === ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID) {
         for (let i = this.firstAnalysisResult!.csp_ptc!.glass_tube_temperature_class_count; i > 1; i--) {
           columnsSelection.push({
-            name: columnName,
+            column: { name:  columnName, entity_type: "PI" },
             func: "count",
             func_condition: {
               compare_mode: "equal",
@@ -137,7 +140,7 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent impleme
       } else if (entry.keyFigureId === ApiKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID) {
         for (const recActionClass of [3, 2]) {
           columnsSelection.push({
-            name: columnName,
+            column: { name:  columnName, entity_type: "PI" },
             func: "count",
             func_condition: {
               compare_mode: "equal",
@@ -162,7 +165,7 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent impleme
         }[entry.keyFigureId];
 
         columnsSelection.push({
-          name: columnName,
+          column: { name:  columnName, entity_type: "PI" },
           func: "count",
           func_condition: {
             compare_mode: "greater",
@@ -171,7 +174,7 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent impleme
           label: columnName + "_" + 3,
         });
         columnsSelection.push({
-          name: columnName,
+          column: { name:  columnName, entity_type: "PI" },
           func: "count",
           func_condition: {
             compare_mode: "between", // postgresql between is inclusive (<= and >=)
@@ -182,7 +185,7 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent impleme
       } else if (entry.keyFigureId === ApiKeyFigure.SWIVEL_GRIPPING_POTENTIAL_CLASS_ID) {
         for (const swivelClass of [3, 2]) {
           columnsSelection.push({
-            name: columnName,
+            column: { name:  columnName, entity_type: "PI" },
             func: "count",
             func_condition: {
               compare_mode: "equal",
@@ -193,7 +196,7 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent impleme
         }
       } else if (entry.filterType === FilterFieldType.BOOLEAN) {
         columnsSelection.push({
-          name: columnName,
+          column: { name:  columnName, entity_type: "PI" },
           func: "sum",
         });
       }

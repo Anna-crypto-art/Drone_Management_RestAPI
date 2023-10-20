@@ -73,7 +73,7 @@ export default class AppDiagramOverview extends BaseAuthComponent implements IAn
   @Prop() resultMappings!: DiagramResultMappings[];
   @Prop() componentSelection!: ApiComponent[];
   
-  analysisSelectionService!: AnalysisSelectionService;
+  analysisSelectionService: AnalysisSelectionService | null = null;
   
   numberBoxes: DiagramNumberBox[] | null = null;
 
@@ -138,13 +138,14 @@ export default class AppDiagramOverview extends BaseAuthComponent implements IAn
 
   getTableFilter(numberBox: DiagramNumberBox): TableFilterRequest {
     const resultMapping = this.resultMappings.find(resultMapping => resultMapping.componentId === numberBox.keyFigure.component_id)!;
-
-    return {
-      component_filter: { ...resultMapping.tableFilter!.component_filter },
-      columns_selection: { columns: 
-        resultMapping.tableFilter!.columns_selection!.columns.filter(column => column.name === numberBox.columnName)!
-      }
+    if (resultMapping) {
+      return {
+        component_filter: { ...resultMapping.tableFilter!.component_filter },
+        columns_selection: resultMapping.tableFilter!.columns_selection!.filter(c => c.column.name === numberBox.columnName)!,
+      };
     }
+
+    return {};
   }
 
   async onAnalysisSelected() {

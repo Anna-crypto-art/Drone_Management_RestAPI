@@ -68,7 +68,6 @@ import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { AppTableColumns, IAppSelectTable } from "@/app/shared/components/app-table/types";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
-import { SelectionSidebarEvent, selectionSidebarEventService } from "../selection-sidebar-event-serivce";
 import { State } from "vuex-class";
 import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
 import AppExplWrap from "@/app/shared/components/app-explanation/app-expl-wrap.vue";
@@ -106,15 +105,9 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
 
   private routeQueryHelper = new RouteQueryHelper(this);
 
-  absolute = true;
-
   selectedByQueryRoute = false;
 
   created() {
-    selectionSidebarEventService.on(this.plant.id, SelectionSidebarEvent.SIDEBAR_ABSOLUTE, async (absolute) => {
-      this.absolute = absolute;
-    });
-      
     for (const analysis of this.analyses) {
       this.analysesTableItems.push({
         id: analysis.id,
