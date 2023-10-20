@@ -32,52 +32,9 @@
     </div>
     <div class="app-map-view-popup-body">
       <app-loading v-show="loading" />
-      <div v-if="piFeatureInfos.length > 0">
-        <h4 class="no-mar-top mar-bottom-half">{{ $t("performance-indicators") }}</h4>
-        <app-box class="app-map-view-popup-body-feature-infos no-mar-top no-mar-bottom">
-          <div v-for="(piFeatureInfo, index) in piFeatureInfos" :key="index">
-            <div v-show="piFeatureInfo._visible" v-if="piFeatureInfo.value">
-              <div class="app-map-view-popup-body-feature-infos-name">
-                <small class="grayed">
-                  <b>{{ piFeatureInfo.name }}</b>
-                  <app-super-admin-marker v-if="piFeatureInfo.superAdminOnly" />
-                  <app-explanation v-if="piFeatureInfo.descr"><span v-html="$t(piFeatureInfo.descr)"></span></app-explanation>
-                </small>
-              </div>
-              <div class="app-map-view-popup-body-feature-infos-value" :class="{ bold: piFeatureInfo.bold }">
-                {{ piFeatureInfo.value }}
-                <span v-if="piFeatureInfo.unit">
-                  {{ piFeatureInfo.unit }}
-                </span>
-              </div>
-              <hr class="mar-bottom-half mar-top-half" v-show="hasHiddenFeatures || index + 1 < piFeatureInfos.length" />
-            </div>
-          </div>
-          <a href="#" @click.prevent="onShowMorePiFeaturesClick" v-if="hasHiddenFeatures">
-            {{ hiddenFeaturesVisible ? $t("hide") : $t("show-more") }}
-          </a>
-        </app-box>
-      </div>
-      <div v-if="refMeasureFeatureInfos.length > 0" :class="{ 'mar-top': piFeatureInfos.length > 0 }">
-        <h4 class="no-mar-top mar-bottom-half">{{ $t("reference-measurements") }}</h4>
-        <app-box class="app-map-view-popup-body-feature-infos no-mar-top no-mar-bottom">
-          <div v-for="(rmFeatureInfo, index) in refMeasureFeatureInfos" :key="index">
-            <div class="app-map-view-popup-body-feature-infos-name">
-              <small class="grayed">
-                <b>{{ rmFeatureInfo.name }}</b>
-                <app-explanation v-if="rmFeatureInfo.descr"><span v-html="$t(rmFeatureInfo.descr)"></span></app-explanation>
-              </small>
-            </div>
-            <div class="app-map-view-popup-body-feature-infos-value" :class="{ bold: rmFeatureInfo.bold }">
-              {{ rmFeatureInfo.value }}
-              <span v-if="rmFeatureInfo.unit">
-                {{ rmFeatureInfo.unit }}
-              </span>
-            </div>
-            <hr class="mar-bottom-half mar-top-half" v-show="index + 1 < refMeasureFeatureInfos.length" />
-          </div>
-        </app-box>
-      </div>
+      <app-map-view-popup-feature-infos :featureInfos="piFeatureInfos" :title="$t('performance-indicators')" />
+      <app-map-view-popup-feature-infos :featureInfos="refMeasureFeatureInfos" :title="$t('reference-measurements')" />
+      <app-map-view-popup-feature-infos :featureInfos="observFeatureInfos" :title="$t('observations')" />
     </div>
     <app-reference-measurements ref="appReferenceMeasurements" :map="map" :plant="plant" />
     <app-observation-modal ref="appObservModal" :plant="plant" />
@@ -87,10 +44,8 @@
 <script lang="ts">
 import { CatchError } from '@/app/shared/services/helper/catch-helper';
 import { Component, Prop, Ref, Watch } from "vue-property-decorator";
-import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppDropdownButton from "@/app/shared/components/app-dropdown-button/app-dropdown-button.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
-import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
 import { AnalysisForViewSchema } from '@/app/shared/services/volateq-api/api-schemas/analysis-schema';
 import { IAnalysisSelectionComponent } from '../selection-sidebar/analysis-selection/types';
@@ -113,7 +68,6 @@ import { AnalysisResultSchemaBase } from '@/app/shared/services/volateq-api/api-
 import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
 import { FeatureInfo, FeatureInfos, ResultModMode } from './types';
 import { BaseLayer } from './layers/base-layer';
-import AppBox from '@/app/shared/components/app-box/app-box.vue';
 import { appLocalStorage } from '@/app/shared/services/app-storage/app-storage';
 import { STORAGE_KEY_ENABLERESULTMOD } from './storage-keys';
 import { FilterFieldType } from '../filter-fields/types';
@@ -128,21 +82,24 @@ import AppObservationModal from '../observations/observation-modal.vue';
 import { IAppObservationModal } from '../observations/types';
 import { FieldgeometryComponentSchema } from '@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema';
 import { CcpService } from '../plant-settings/ccp-service';
+import AppMapViewPopupFeatureInfos from "./map-view-popup-feature-infos.vue";
+import { ObservationSelectionService } from '../selection-sidebar/observation-selection/observation-selection-service';
+import { IObservationSelectionComponent } from '../selection-sidebar/observation-selection/types';
+import { ObservationCcpLayer } from './layers/observation-ccp-layer';
+import { ObservationMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/observation-mapping-helper";
 
 @Component({
   name: "app-map-view-popup",
   components: {
-    AppExplanation,
     AppDropdownButton,
     AppButton,
-    AppSuperAdminMarker,
     AppLoading,
-    AppBox,
     AppReferenceMeasurements,
     AppObservationModal,
+    AppMapViewPopupFeatureInfos,
   }
 })
-export default class AppMapViewPopup extends BaseAuthComponent implements IAnalysisSelectionComponent {
+export default class AppMapViewPopup extends BaseAuthComponent implements IAnalysisSelectionComponent, IObservationSelectionComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) analyses!: AnalysisForViewSchema[];
   @Prop({ required: true }) map!: Map;
@@ -156,6 +113,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   orthoLoading = false;
   resultModLoading = false;
 
+  observationSelectionService: ObservationSelectionService | null = null;
   analysisSelectionService!: AnalysisSelectionService;
   layersService!: LayersService;
   orthoImagesLayer!: OrthoImagesLayer;
@@ -166,7 +124,6 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   imgTitle = "";
   imgUrl = "";
   piFeatureInfos: FeatureInfo[] = [];
-  hiddenFeaturesVisible = false;
 
   hasRefMeasureAction = false;
   refMeasureFeatureInfos: FeatureInfo[] = [];
@@ -174,6 +131,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   myRefMeasureEntryKeyFigures: RefMeasureEntryKeyFigureSchema[] | null = null;
 
   hasObservAction = false;
+  observFeatureInfos: FeatureInfo[] = [];
 
   resultModEnabled = false;
   resultModModes: ResultModMode[] = [];
@@ -184,6 +142,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     this.analysisSelectionService = new AnalysisSelectionService(this);
     this.layersService = LayersService.get(this.plant.id);
     this.orthoImagesLayer = OrthoImagesLayer.get(this.plant, this.map);
+    this.observationSelectionService = new ObservationSelectionService(this);
 
     this.hasObservAction = (await CcpService.get(this.plant.id).getCcps()).length > 0;
   }
@@ -203,10 +162,12 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
 
   async mounted() {
     this.analysisSelectionService.register();
+    this.observationSelectionService!.register();
   }
 
   async unmounted() {
     this.analysisSelectionService.unregister();
+    this.observationSelectionService!.unregister();
   }
 
   @CatchError()
@@ -234,6 +195,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     this.setResultModModes();
     await this.setPiFeatureInfos();
     await this.setRefMeasureFeatureInfos();
+    await this.setObservFeatureInfos();
 
     this.hasRefMeasureAction = this.selectedKeyFigureLayers.length > 0 || 
       !!(this.currentSelectedLayers as ComponentLayer[]).find(l => l.allowRefMeasures);
@@ -271,20 +233,6 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
         this.pcs,
       );
     }
-  }
-
-  get hasHiddenFeatures(): boolean {
-    return !!this.piFeatureInfos.find(f => f.hidden);
-  }
-
-  @CatchError()
-  onShowMorePiFeaturesClick() {
-    for (const piFeatureInfo of this.piFeatureInfos) {
-      if (piFeatureInfo.hidden) {
-        piFeatureInfo._visible = !piFeatureInfo._visible;
-      }
-    }
-    this.hiddenFeaturesVisible = !this.hiddenFeaturesVisible;
   }
 
   @CatchError("resultModLoading")
@@ -351,13 +299,13 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     this.orthoImages = [];
     this.fieldgeometryComponent = null;
     this.piFeatureInfos = [];
-    this.hiddenFeaturesVisible = false;
     this.resultModEnabled = appLocalStorage.getItem(STORAGE_KEY_ENABLERESULTMOD) || false;
     this.currentSelectedLayers = [];
     this.hasRefMeasureAction = false;
     this.refMeasureFeatureInfos = [];
     this.myRefMeasureEntry = null;
     this.myRefMeasureEntryKeyFigures = null;
+    this.observFeatureInfos = [];
   }
 
   private async setFielgeoComp(pcs: string) {
@@ -474,6 +422,10 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     return this.currentSelectedLayers.filter(l => l instanceof KeyFigureLayer) as KeyFigureBaseLayer[];
   }
 
+  private get selectedObservationLayers(): ObservationCcpLayer[] {
+    return this.currentSelectedLayers.filter(l => l instanceof ObservationCcpLayer) as ObservationCcpLayer[];
+  }
+
   private async setRefMeasureFeatureInfos() {
     const mappings = AnalysisResultMappingHelper.getMappingsByComponentId(this.componentId!);
 
@@ -491,12 +443,14 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
         this.refMeasureFeatureInfos.push({
           name: this.$t("measure-timestamp").toString(), 
           value: dateHelper.toDateTime(refMeasureEntry.measure_time),
+          hidden: false,
         });
 
         if (refMeasureEntry.notes) {
           this.refMeasureFeatureInfos.push({
             name: this.$t("notes").toString(),
             value: refMeasureEntry.notes,
+            hidden: false,
           });
         }
 
@@ -513,6 +467,33 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
         if (refMeasureEntry.editable) {
           this.myRefMeasureEntry = refMeasureEntry;
           this.myRefMeasureEntryKeyFigures = refMeasureEntries.key_figures;
+        }
+      }
+
+      console.log("this.refMeasureFeatureInfos", this.refMeasureFeatureInfos);
+    }
+  }
+
+  private async setObservFeatureInfos() {
+    if (this.observationSelectionService?.hasSelectedObservations) {
+      const observationsLayers = this.selectedObservationLayers;
+      if (observationsLayers.length > 0) {
+        const observations = await volateqApi.getObservations(
+          this.plant.id, 
+          this.componentId!, 
+          this.observationSelectionService.dateRange!.from,
+          this.observationSelectionService.dateRange!.to,
+          {
+            search_text: this.pcs,
+            limit: 1,
+            search_mode: "equals",
+          }
+        );
+
+        const selectedCcpIds = observationsLayers.map(l => l.ccp.id);
+        const observMappingHelper = new ObservationMappingHelper(observations.columns!);
+        for (const item of observations.items) { 
+          this.observFeatureInfos.push(...observMappingHelper.toFeatureInfos(item, selectedCcpIds).infos);
         }
       }
     }
@@ -573,6 +554,10 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   &-body {
     position: relative;
     min-height: 50px;
+
+    .app-map-view-popup-feature-infos:not(:last-child) {
+      margin-bottom: 1em;
+    }
 
     &-feature-infos {
       // max-height: 500px;

@@ -20,7 +20,7 @@ export class ObservationCcpLayer extends BaseLayer {
 
   constructor(
     plant: PlantSchema,
-    protected readonly ccp: CustomComponentPropertySchema,
+    public readonly ccp: CustomComponentPropertySchema,
     protected readonly componentLayer: ComponentLayer,
     protected readonly dateRange: DateRange,
     protected readonly filterValue: ObservFilterValue,

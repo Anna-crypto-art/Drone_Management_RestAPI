@@ -761,6 +761,8 @@
   "last-year": "Last Year",
   "ref-measure": "Ref. measure.",
   "observ": "Observ.",
+  "observed-at": "Observed at",
+  "external-id": "External Id",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",
