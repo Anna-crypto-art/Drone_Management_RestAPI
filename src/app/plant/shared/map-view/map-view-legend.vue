@@ -110,8 +110,6 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
       this.plant.id,
       LayerEvent.ON_OBSERV_SELECTED,
       async (layer: ObservationCcpLayer) => {
-        console.log(LayerEvent.ON_OBSERV_SELECTED, layer);
-
         this.onObservLayerSelected(layer);
       }
     )

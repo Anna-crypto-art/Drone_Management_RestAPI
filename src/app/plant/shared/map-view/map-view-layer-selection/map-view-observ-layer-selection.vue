@@ -17,7 +17,7 @@
           <div v-if="childLayer.childLayers" class="app-map-view-observation-layer-selection-group">
             <div class="pad-bottom-half font-md" :class="{ 'pad-top': !isFirstVisibleGroup(compGroupLayer, index) }">
               <app-expl-wrap :expl="childLayer.ccp.description" placement="right">
-                {{ $t(childLayer.ccp.name) }}
+                {{ childLayer.ccp.name }}
               </app-expl-wrap>
             </div>
             <div class="pad-left-half">
@@ -53,8 +53,8 @@ import { IObservationSelectionComponent } from "../../selection-sidebar/observat
 import { ObservationSelectionService } from "../../selection-sidebar/observation-selection/observation-selection-service";
 import { ComponentLayer } from "../layers/component-layer";
 import { ApiTechnology } from "@/app/shared/services/volateq-api/api-technologies";
-import { COMPONENT_LAYERS as CSP_PTC_COMPONENT_LAYERS } from "@/app/plant/csp-ptc/visualization/layers";
-import { COMPONENT_LAYERS as PV_COMPONENT_LAYERS } from "@/app/plant/pv/visualization/layers";
+import { COMPONENT_LAYERS as CSP_PTC_COMPONENT_LAYERS } from "@/app/plant/csp-ptc/map-view/layers";
+import { COMPONENT_LAYERS as PV_COMPONENT_LAYERS } from "@/app/plant/pv/map-view/layers";
 import { DateRange } from "../../observations/types";
 import { CCPDataType, CustomComponentPropertySchema, NumberRangeInfosSchema } from "@/app/shared/services/volateq-api/api-schemas/custom-component-property-schema";
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";

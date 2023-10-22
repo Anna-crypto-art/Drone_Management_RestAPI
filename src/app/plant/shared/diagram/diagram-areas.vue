@@ -59,7 +59,7 @@ import { MathHelper } from "@/app/shared/services/helper/math-helper";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppLoading from "@/app/shared/components/app-loading/app-loading.vue";
-import { LayerColor } from "../visualization/layers/types";
+import { LayerColor } from "../map-view/layers/types";
 import { isOnMobileDevice } from "@/app/shared/services/helper/mobile-helper";
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ChartDataLables);

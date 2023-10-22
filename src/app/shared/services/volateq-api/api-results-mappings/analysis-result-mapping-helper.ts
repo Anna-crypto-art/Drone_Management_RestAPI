@@ -8,7 +8,7 @@ import { ApiComponent } from "../api-components/api-components";
 import { allCspPtcMappings } from "./csp_ptc/analysis-result-csp-ptc-mapping";
 import { allPvMappings } from "./pv/analysis-result-pv-mapping";
 import { ApiKeyFigure } from "../api-key-figures";
-import { FeatureInfo } from "@/app/plant/shared/visualization/types";
+import { FeatureInfo } from "@/app/plant/shared/map-view/types";
 import { i18n } from "@/main";
 import { RefMeasureEntry, RefMeasureEntryKeyFigureSchema, RefMeasureEntryValue } from "../api-schemas/reference-measurement-schema";
 

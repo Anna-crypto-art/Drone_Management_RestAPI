@@ -10,7 +10,7 @@ import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/com
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 import { keyFigureRainbowColors } from "./key-figure-colors";
 import { Stroke, Style } from "ol/style";
-import { GeoJSON } from "@/app/shared/components/app-geovisualization/types/layers";
+import { GeoJSON } from "@/app/shared/components/app-map/types";
 import { BaseLayer } from "./base-layer";
 import { i18n } from "@/main";
 import { ComparedFeatureType, ComparedFeatures, KeyFigureColorScheme, KeyFigureGeoJSON, KeyFigureLayerOptions, LayerColor, LayerEvent } from "./types";

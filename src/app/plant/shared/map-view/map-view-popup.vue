@@ -473,8 +473,6 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
           this.myRefMeasureEntryKeyFigures = refMeasureEntries.key_figures;
         }
       }
-
-      console.log("this.refMeasureFeatureInfos", this.refMeasureFeatureInfos);
     }
   }
 

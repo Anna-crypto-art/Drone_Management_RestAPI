@@ -58,7 +58,7 @@ import AppGeoJsonLayerCheckbox from "@/app/shared/components/app-map/app-geo-jso
 import { LayersService } from "../layers/layers-service";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
-import { LayerColor } from "../../visualization/layers/types";
+import { LayerColor } from "../../map-view/layers/types";
 import { PlantRouteQuery } from "../../types";
 import { RouteQueryHelper } from "../../helper/route-query-helper";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";

@@ -4,7 +4,7 @@
     <app-sidebar :plant="plant" :analyses="analyses" />
     <app-plant-view-tabs :plant="plant" :analyses="analyses">
       <template #visual>
-        <app-visual-csp-ptc :analyses="analyses" :plant="plant" />
+        <app-map-view-csp-ptc :analyses="analyses" :plant="plant" />
       </template>
       <template #tables>
         <app-tables-csp-ptc :analyses="analyses" :plant="plant" />
@@ -27,7 +27,7 @@
 <script lang="ts">
 import AppPlantAdminViewCspPtc from "@/app/plant/csp-ptc/plant-admin-view-csp-ptc.vue";
 import AppTablesCspPtc from "@/app/plant/csp-ptc/tables/tables-csp-ptc.vue";
-import AppVisualCspPtc from "@/app/plant/csp-ptc/visualization/visual-csp-ptc.vue";
+import AppMapViewCspPtc from "@/app/plant/csp-ptc/map-view/map-view-csp-ptc.vue";
 import AppPlantViewTabs from "@/app/plant/shared/plant-view-tabs/plant-view-tabs.vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
@@ -48,7 +48,7 @@ import AppSidebar from "@/app/plant/shared/sidebar/sidebar.vue";
   name: "app-plant-view-csp-ptc",
   components: {
     AppPlantViewTabs,
-    AppVisualCspPtc,
+    AppMapViewCspPtc,
     AppTablesCspPtc,
     AppPlantAdminViewCspPtc,
     AppPlantDiagramViewCspPtc,

@@ -1,5 +1,5 @@
 import { Legend, PropsFeature } from "../types";
-import { GeoJSON } from "@/app/shared/components/app-geovisualization/types/layers";
+import { GeoJSON } from "@/app/shared/components/app-map/types";
 import { FeatureLike } from "ol/Feature";
 import { CCPDataType, CustomComponentPropertySchema, DataTypeOptionInfo, NumberRangeInfosSchema, ValueListInfosSchema } from "@/app/shared/services/volateq-api/api-schemas/custom-component-property-schema";
 import { DateRange } from "../../observations/types";

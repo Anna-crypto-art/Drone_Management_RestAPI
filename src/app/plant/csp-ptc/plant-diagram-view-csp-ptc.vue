@@ -22,7 +22,7 @@ import AppDiagramOverview from "@/app/plant/shared/diagram/diagram-overview.vue"
 import { DiagramNumberBox, DiagramResultMappings } from "../shared/diagram/types";
 import { FilterFieldType } from "../shared/filter-fields/types";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
-import { LayerColor } from "../shared/visualization/layers/types";
+import { LayerColor } from "../shared/map-view/layers/types";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
@@ -111,8 +111,6 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent impleme
         resultMappings.push(resultMapping);
       }
     }
-
-    console.log("resultMappings", resultMappings);
 
     this.resultMappings = resultMappings;
   }

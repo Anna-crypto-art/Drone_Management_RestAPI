@@ -13,18 +13,17 @@
 <script lang="ts">
 import Map from "ol/Map";
 import { Component, Prop } from "vue-property-decorator";
-import { IGeoLayer, VectorGeoLayer } from "./types";
+import { IGeoLayer, VectorGeoLayer, IAppGeoJsonLayerCheckbox } from "./types";
 import { CatchError } from "../../services/helper/catch-helper";
 import { FeatureLike } from "ol/Feature";
 import GeoJSON from "ol/format/GeoJSON";
 import VectorImageLayer from "ol/layer/VectorImage";
 import VectorSource from "ol/source/Vector";
-import { IAppGeoJsonLayerCheckbox } from "../app-geovisualization/types/components";
 import { EVENT_ZOOM_TO_HOME } from "./events";
-import { GEO_JSON_OPTIONS } from "@/app/plant/shared/visualization/layers/layer-base";
 import { BaseAuthComponent } from "../base-auth-component/base-auth-component";
 import AppExplanation from "../app-explanation/app-explanation.vue";
 import AppExplWrap from "@/app/shared/components/app-explanation/app-expl-wrap.vue";
+import { GEO_JSON_OPTIONS } from "./constants";
 
 @Component({
   name: "app-geo-json-layer-checkbox",

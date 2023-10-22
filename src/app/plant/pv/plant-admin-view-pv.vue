@@ -14,7 +14,7 @@ import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import AppPlantAdminViewReleaseResult from "@/app/plant/shared/plant-admin-view/plant-admin-view-release-result.vue"
 import AppPlantAdminViewChangeHistory from "@/app/plant/shared/plant-admin-view/plant-admin-view-change-history.vue"
-import { KEY_FIGURE_LAYERS } from "./visualization/layers";
+import { KEY_FIGURE_LAYERS } from "./map-view/layers";
 
 @Component({
   name: "app-plant-admin-view-pv",

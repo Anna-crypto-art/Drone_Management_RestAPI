@@ -2,10 +2,10 @@ import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/a
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { FeatureLike } from "ol/Feature";
 import { PropsFeature } from "../types";
-import { GeoJSON } from "@/app/shared/components/app-geovisualization/types/layers";
+import { GeoJSON } from "@/app/shared/components/app-map/types";
 import { Extent } from "ol/extent";
 import { BaseLayer } from "./base-layer";
-import { LayerColor } from "../../visualization/layers/types";
+import { LayerColor } from "../../map-view/layers/types";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { RefMeasureLayersService } from "./ref-measure-layers-service";
 

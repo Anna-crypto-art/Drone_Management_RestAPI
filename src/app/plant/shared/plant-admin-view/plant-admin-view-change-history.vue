@@ -30,7 +30,6 @@ import AppTable from "@/app/shared/components/app-table/app-table.vue";
 import AppBox from "@/app/shared/components/app-box/app-box.vue";
 import { AnalysisResultDetailedSchema } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-schema';
 import volateqApi from '@/app/shared/services/volateq-api/volateq-api';
-import { KeyFigureTypeMap } from '../visualization/types';
 import { ApiKeyFigure } from '@/app/shared/services/volateq-api/api-key-figures';
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import { CatchError } from '@/app/shared/services/helper/catch-helper';
@@ -38,6 +37,7 @@ import { analysisResultEventService } from './analysis-result-event-service';
 import { AnalysisResultEvent } from './types';
 import { AppTableColumns } from '@/app/shared/components/app-table/types';
 import { GeoVisualQuery } from '@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests';
+import { KeyFigureTypeMap } from '../map-view/layers/types';
 
 
 @Component({
@@ -117,8 +117,8 @@ export default class AppPlantAdminViewChangeHistory extends BaseAuthComponent {
 
   private getKeyFigureName(keyFigureId: ApiKeyFigure): string {
     const layer = this.layers.find(l => l.keyFigureId === keyFigureId);
-    if (layer && layer.keyFigureInfo) {
-      return this.$t((layer.keyFigureInfo?.displayName || layer.keyFigureInfo.keyName)!).toString();
+    if (layer && layer.layerOptions) {
+      return this.$t((layer.layerOptions?.displayName || layer.layerOptions.keyName)!).toString();
     }
 
     return ApiKeyFigure[keyFigureId].toString();
