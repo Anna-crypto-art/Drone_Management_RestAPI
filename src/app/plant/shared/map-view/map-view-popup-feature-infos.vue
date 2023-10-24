@@ -1,6 +1,10 @@
 <template>
   <div class="app-map-view-popup-feature-infos" v-if="featureInfos.length > 0">
-    <h4 class="no-mar-top mar-bottom-half">{{ title }}</h4>
+    <h4 class="no-mar-top mar-bottom-half">
+      <slot name="title">
+        {{ title }}
+      </slot>
+    </h4>
     <app-box class="app-map-view-popup-feature-infos no-mar-top no-mar-bottom">
       <div v-for="(featureInfo, index) in featureInfos" :key="index">
         <div v-show="featureInfo._visible !== false" v-if="featureInfo.value">
@@ -31,7 +35,7 @@ import { CatchError } from '@/app/shared/services/helper/catch-helper';
 import { Component, Prop, Watch } from "vue-property-decorator";
 import AppSuperAdminMarker from "@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue";
 import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
-import { FeatureInfo, FeatureInfos, ResultModMode } from './types';
+import { FeatureInfo } from './types';
 import AppBox from '@/app/shared/components/app-box/app-box.vue';
 import AppExplWrap from '@/app/shared/components/app-explanation/app-expl-wrap.vue';
 
@@ -44,8 +48,8 @@ import AppExplWrap from '@/app/shared/components/app-explanation/app-expl-wrap.v
   }
 })
 export default class AppMapViewPopupFeatureInfos extends BaseAuthComponent {
-  @Prop({ required: true }) title!: string;
   @Prop({ required: true }) featureInfos!: FeatureInfo[];
+  @Prop({ default: "" }) title!: string;
 
   hiddenFeaturesVisible = false;
 

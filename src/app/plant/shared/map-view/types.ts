@@ -1,3 +1,5 @@
+import { ObservationSchema } from "@/app/shared/services/volateq-api/api-schemas/observation-schema";
+
 export interface FeatureProperties {
   name: string;
   value?: number | boolean | string | null;
@@ -41,3 +43,10 @@ export interface FeatureInfos {
 }
 
 export type ResultModMode = "null" | "false" | "true";
+
+export interface ObservationFeatures {
+  observation: ObservationSchema;
+  title: string;
+  featureInfos: FeatureInfos;
+  editable: boolean;
+}

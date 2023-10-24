@@ -740,6 +740,7 @@
   "manage-number-ranges": "Manage number ranges",
   "add-number-range": "Add number range",
   "flight-route-duration_expl": "This duration is a rough pre-calculation, more exact timings will be shown in your flight app.",
+  "observation-of": "Observation of {date}",
   "observations": "Observations",
   "observations-selection": "Observations selection",
   "observations-of": "Observations of <b>{date}</b>",

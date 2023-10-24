@@ -34,7 +34,15 @@
       <app-loading v-show="loading" />
       <app-map-view-popup-feature-infos :featureInfos="piFeatureInfos" :title="$t('performance-indicators')" />
       <app-map-view-popup-feature-infos :featureInfos="refMeasureFeatureInfos" :title="$t('reference-measurements')" />
-      <app-map-view-popup-feature-infos :featureInfos="observFeatureInfos" :title="$t('observations')" />
+      <div v-for="(observFeature, index) in observationFeatures" :key="index">
+        <app-map-view-popup-feature-infos :featureInfos="observFeature.featureInfos.infos">
+          <template #title>
+            <span v-html="observFeature.title" />
+            <app-button v-if="observFeature.editable" icon="pencil-square" variant="secondary" size="sm" cls="pull-right" />
+            <div class="clear" />
+          </template>
+        </app-map-view-popup-feature-infos>
+      </div>
     </div>
     <app-reference-measurements ref="appReferenceMeasurements" :map="map" :plant="plant" />
     <app-observation-modal ref="appObservModal" :plant="plant" />
@@ -66,7 +74,7 @@ import { TableRequest } from '@/app/shared/services/volateq-api/api-requests/com
 import { AnalysisResultMappingHelper } from '@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper';
 import { AnalysisResultSchemaBase } from '@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base';
 import { BaseAuthComponent } from '@/app/shared/components/base-auth-component/base-auth-component';
-import { FeatureInfo, FeatureInfos, ResultModMode } from './types';
+import { FeatureInfo, FeatureInfos, ObservationFeatures, ResultModMode } from './types';
 import { BaseLayer } from './layers/base-layer';
 import { appLocalStorage } from '@/app/shared/services/app-storage/app-storage';
 import { STORAGE_KEY_ENABLERESULTMOD } from './storage-keys';
@@ -87,6 +95,7 @@ import { ObservationSelectionService } from '../selection-sidebar/observation-se
 import { IObservationSelectionComponent } from '../selection-sidebar/observation-selection/types';
 import { ObservationCcpLayer } from './layers/observation-ccp-layer';
 import { ObservationMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/observation-mapping-helper";
+import { userService } from '@/app/shared/services/user-service/user-service';
 
 @Component({
   name: "app-map-view-popup",
@@ -131,7 +140,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   myRefMeasureEntryKeyFigures: RefMeasureEntryKeyFigureSchema[] | null = null;
 
   hasObservAction = false;
-  observFeatureInfos: FeatureInfo[] = [];
+  observationFeatures: ObservationFeatures[] = [];
 
   resultModEnabled = false;
   resultModModes: ResultModMode[] = [];
@@ -309,7 +318,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     this.refMeasureFeatureInfos = [];
     this.myRefMeasureEntry = null;
     this.myRefMeasureEntryKeyFigures = null;
-    this.observFeatureInfos = [];
+    this.observationFeatures = [];
   }
 
   private async setFielgeoComp(pcs: string) {
@@ -503,9 +512,19 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
 
         const selectedCcpIds = observationsLayers.map(l => l.ccp.id);
         const observMappingHelper = new ObservationMappingHelper(observations.columns!);
-        for (const item of observations.items) { 
-          this.observFeatureInfos.push(...observMappingHelper.toFeatureInfos(item, selectedCcpIds).infos);
+        
+        const me = await userService.me();
+
+        for (const item of observations.items) {
+          this.observationFeatures.push({
+            featureInfos: observMappingHelper.toFeatureInfos(item, selectedCcpIds),
+            observation: item,
+            editable: this.isSuperAdmin || this.isCustomerAdmin || item.created_by_user.email === me.email,
+            title: this.$t('observations-of', { date: dateHelper.toDateTime(item.observed_at) }).toString(),
+          });
         }
+
+        console.log("this.observationFeatures", this.observationFeatures)
       }
     }
   }

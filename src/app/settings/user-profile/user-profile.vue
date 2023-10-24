@@ -13,6 +13,7 @@ import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import AppChangeAuthMethod from "./change-auth-method.vue";
 import { UserEvent, UserEventService } from "./user-event-service";
+import { userService } from "@/app/shared/services/user-service/user-service";
 
 @Component({
   name: "app-user-profile",
@@ -25,15 +26,13 @@ export default class AppUserProfile extends BaseAuthComponent {
 
   @CatchError()
   async created() {
-    await this.refreshUser();
+    this.user = await userService.me();
 
     UserEventService.on(this.user!.id, UserEvent.CHANGED, async () => {
-      await this.refreshUser();
-    })
-  }
+      await userService.refreshMe();
 
-  private async refreshUser() {
-    this.user = await volateqApi.getMe();
+      this.user = await userService.me();
+    })
   }
 }
 </script>
