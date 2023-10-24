@@ -49,6 +49,11 @@ export default class AppMapViewPopupFeatureInfos extends BaseAuthComponent {
 
   hiddenFeaturesVisible = false;
 
+  @Watch("featureInfos")
+  onFeatureInfosChanged() {
+    this.hiddenFeaturesVisible = false;
+  }
+
   @CatchError()
   onShowMoreFeaturesClick() {
     for (const featureInfo of this.featureInfos) {

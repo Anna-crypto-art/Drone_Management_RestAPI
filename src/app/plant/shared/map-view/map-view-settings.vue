@@ -220,9 +220,10 @@ export default class AppMapViewSettings extends BaseAuthComponent implements IAn
       this.layersService.settings.multiSelection = 
       appLocalStorage.getItem(STORAGE_KEY_MULTISELECTION) || false;
     
+    const showCouldNotBeMeasured = appLocalStorage.getItem(STORAGE_KEY_SHOWUNDEFINED);
     this.showCouldNotBeMeasured = 
       this.layersService.settings.showCouldNotBeMeasured =
-      appLocalStorage.getItem(STORAGE_KEY_SHOWUNDEFINED) || false;
+      showCouldNotBeMeasured !== null ? showCouldNotBeMeasured : true;
 
     this.satelliteView = !!appLocalStorage.getItem(STORAGE_KEY_SATELLITEVIEW);
 

@@ -444,11 +444,18 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
       );
 
       for (const refMeasureEntry of refMeasureEntries.entries) {
-        this.refMeasureFeatureInfos.push({
-          name: this.$t("measure-timestamp").toString(), 
-          value: dateHelper.toDateTime(refMeasureEntry.measure_time),
-          hidden: false,
-        });
+        this.refMeasureFeatureInfos.push(...[
+          {
+            name: this.$t("measure-timestamp").toString(), 
+            value: dateHelper.toDateTime(refMeasureEntry.measure_time),
+            hidden: false,
+          },
+          {
+            name: this.$t("created-by").toString(),
+            value: refMeasureEntry.user.name,
+            hidden: false,
+          }
+        ]);
 
         if (refMeasureEntry.notes) {
           this.refMeasureFeatureInfos.push({
@@ -457,6 +464,8 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
             hidden: false,
           });
         }
+
+        
 
         const rmMappingEntries = mappingHelper.getRefMeasureEntries(refMeasureEntry, refMeasureEntries.key_figures)
         for (const rmMappingEntry of rmMappingEntries) {
