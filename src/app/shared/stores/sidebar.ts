@@ -13,28 +13,40 @@ export interface ILastActiveSidebarName {
   lastActiveSidebarName?: SidebarNames;
 }
 
-export type ISidebarModule = { [k in AllSidebarNames]: boolean; } & ILastActiveSidebarName;
+export interface ITabBarHeight {
+  tabBarHeight?: number;
+}
 
-export interface ISidebarEvent {
-  name: AllSidebarNames;
-  state: boolean;
+export type ISidebarModule = { [k in AllSidebarNames]: boolean; } & ILastActiveSidebarName & ITabBarHeight;
+
+export interface ISidebarEvent extends ITabBarHeight {
+  name?: AllSidebarNames;
+  state?: boolean;
 }
 
 const SidebarModule = defineModule({
-  state: [...sidebars, ...mapSidebars].reduce((acc, name) => ({ ...acc, [name]: false }), {}) as ISidebarModule,
+  state: {
+    ...([...sidebars, ...mapSidebars].reduce((acc, name) => ({ ...acc, [name]: false }), {}) as ISidebarModule),
+    tabBarHeight: 0,
+  },
   mutations: {
     toggle(state, { name }: { name: AllSidebarNames }) {
       SidebarModule.mutations.set(state, { name, state: !state[name] });
     },
-    set(state, { name, state: sidebarState }: ISidebarEvent) {
-      state[name] = sidebarState;
+    set(state, event: ISidebarEvent) {
+      if (event.name !== undefined && event.state !== undefined ) {
+        state[event.name] = event.state;
 
-      // TS forced me to write this...
-      if (sidebars.includes(name as SidebarNames)) {
-        state.lastActiveSidebarName = sidebarState ? undefined : name as SidebarNames;
+        // TS forced me to write this...
+        if (sidebars.includes(event.name as SidebarNames)) {
+          state.lastActiveSidebarName = event.state ? undefined : event.name as SidebarNames;
+        }
+
+        emit(event.name, event.state);
       }
-
-      emit(name, sidebarState);
+      if (event.tabBarHeight !== undefined) {
+        state.tabBarHeight = event.tabBarHeight;
+      }
     },
     setAll(state, sidebarState: boolean) {
       for (const sidebarName of sidebars) {
@@ -42,7 +54,7 @@ const SidebarModule = defineModule({
       }
     },
     restore(state, oldState: ISidebarModule) {
-      state = oldState;
+      state = { ...oldState, tabBarHeight: oldState.tabBarHeight || 0 };
       SidebarEvents.$emit("restore", oldState);
     },
   },

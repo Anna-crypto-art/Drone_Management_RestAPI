@@ -516,6 +516,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   padding: 1em;
   box-shadow: 3px 3px 5px $dark-40pc;
   max-height: calc(100% - 1em);
+  max-width: calc(100% - 1em);
   overflow-y: auto;
   z-index: 1;
 
