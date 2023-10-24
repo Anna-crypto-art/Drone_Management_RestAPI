@@ -8,13 +8,13 @@ import GeoJSON from "ol/format/GeoJSON";
 import { Geometry } from "ol/geom";
 import VectorImageLayer from "ol/layer/VectorImage";
 import VectorSource from "ol/source/Vector";
-import { Fill, Stroke, Style } from "ol/style";
+import { Circle, Stroke, Style } from "ol/style";
+import GeometryType from "ol/geom/GeometryType";
 import { LayerColor } from "./types";
 import { AppSeqEventService } from "@/app/shared/services/app-event-service/app-event-service";
 import { Legend } from "../types";
 import { i18n } from "@/main";
 import { LayersService } from "./layers-service";
-import { asColorLike } from "ol/colorlike";
 import { setOpacityForColor } from "@/app/shared/services/helper/color-helper";
 
 export enum RefMeasureLayerEvent {
@@ -116,7 +116,7 @@ export class RefMeasureLayersService extends AppSeqEventService<RefMeasureLayerE
 
   public setOpacity(opacity: number) {
     if (this.loadedLayer) {
-      this.loadedLayer.getSource()?.getFeatures().forEach(f => f.setStyle(this.getStyle(opacity)));
+      this.loadedLayer.getSource()?.getFeatures().forEach(f => f.setStyle(this.getStyle(f, opacity)));
       this.rerenderLoadedLayer();
     }
   }
@@ -130,7 +130,7 @@ export class RefMeasureLayersService extends AppSeqEventService<RefMeasureLayerE
     }
 
     for (const feature of features) {
-      feature.setStyle(this.getStyle());
+      feature.setStyle(this.getStyle(feature));
     }
 
     const vectorGeoLayer = new VectorImageLayer({
@@ -147,12 +147,28 @@ export class RefMeasureLayersService extends AppSeqEventService<RefMeasureLayerE
     return vectorGeoLayer;
   }
 
-  private getStyle(opacity = 1): Style {
+  private getStyle(feature: Feature<Geometry>, opacity = 1): Style {
+    if (feature.getGeometry()?.getType() === GeometryType.POINT) {
+      return new Style({
+        image: new Circle({
+          radius: 3,
+          stroke: new Stroke({
+            color: this.getColor(opacity),
+            width: 3,
+          }),
+        })
+      })
+    }
+
     return new Style({
       stroke: new Stroke({
-        color: opacity === 1 ? LayerColor.volateqBlue : setOpacityForColor(LayerColor.volateqBlue, opacity),
+        color: this.getColor(opacity),
         width: 3,
       }),
     });
+  }
+
+  private getColor(opacity = 1): string | number[] {
+    return opacity === 1 ? LayerColor.volateqBlue : setOpacityForColor(LayerColor.volateqBlue, opacity);
   }
 }

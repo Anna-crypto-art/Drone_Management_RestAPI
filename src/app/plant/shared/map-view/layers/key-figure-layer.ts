@@ -9,7 +9,7 @@ import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures"
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 import { keyFigureRainbowColors } from "./key-figure-colors";
-import { Stroke, Style } from "ol/style";
+import { Circle, Stroke, Style } from "ol/style";
 import { GeoJSON } from "@/app/shared/components/app-map/types";
 import { BaseLayer } from "./base-layer";
 import { i18n } from "@/main";
@@ -17,6 +17,7 @@ import { ComparedFeatureType, ComparedFeatures, KeyFigureColorScheme, KeyFigureG
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { FeatureInfos, FeatureProperties, PropsFeature } from "../types";
 import { RefMeasureLayersService } from "./ref-measure-layers-service";
+import GeometryType from "ol/geom/GeometryType";
 
 export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q extends GeoVisualQuery> extends BaseLayer {
   public abstract readonly analysisResultMapping: AnalysisResultMappings<T>;
@@ -62,9 +63,24 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
   protected getAddStyles(feature: FeatureLike): Style[] | undefined {
     const pcs = this.getPcs(feature);
     if (pcs && RefMeasureLayersService.get(this.plant, this.appLayerCheckbox!.map).hasPCS(pcs)) {
+      const width = this.zoomWidth ? this.zoomWidth + this.refMeasureFeatureStrokeWidthAddOnZoom : this.refMeasureFeatureStrokeWidth;
+
+      if (feature.getGeometry()?.getType() === GeometryType.POINT) {
+        // Special case for Rotation Joints
+        return [new Style({
+          image: new Circle({
+            radius: width + 2,
+            stroke: new Stroke({
+              width: width - 3,
+              color: LayerColor.volateqBlue,
+            }),
+          })
+        })];
+      }
+
       return [new Style({
         stroke: new Stroke({
-          width: this.zoomWidth ? this.zoomWidth + this.refMeasureFeatureStrokeWidthAddOnZoom : this.refMeasureFeatureStrokeWidth,
+          width: width,
           color: LayerColor.volateqBlue,
         }),
       })];
