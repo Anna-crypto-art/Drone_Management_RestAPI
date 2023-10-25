@@ -1,5 +1,5 @@
 <template>
-  <div class="plant-view-tabs">
+  <div class="plant-view-tabs" id="tabbar">
     <b-tabs v-model="selectedTab" align="center" @changed="onTabsChanged">
       <div class="plant-name" align="center" translate="no">
         {{ plant.name }}
@@ -28,7 +28,7 @@
 
 <script lang="ts">
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { Component, Prop, Watch } from "vue-property-decorator";
+import { Component, Prop, Watch, Ref } from "vue-property-decorator";
 import { RouteQueryHelper } from "../helper/route-query-helper";
 import { PlantViewTabs } from "./types";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
@@ -69,11 +69,19 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
     });
 
     this.analysisSelectionService = new AnalysisSelectionService(this);
+
+    window.addEventListener('resize', (event) => {
+      const tabbarElement = document.querySelectorAll("#tabbar")[0].children[0].children[0];
+      const tabBarHeight = tabbarElement.getBoundingClientRect().height;
+      this.$store.direct.commit.sidebar.set({ tabBarHeight: tabBarHeight });
+      // console.log(tabBarHeight);
+    });
   }
 
   async mounted() {
-    await this.analysisSelectionService?.register();
+    await this.analysisSelectionService?.register();    
   }
+  
 
   @Watch("selectedTab") async onSelectedTabChanged() {
     if (!this.allTabsLoaded) {
@@ -162,6 +170,8 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
 
   async unmounted() {
     this.analysisSelectionService?.unregister();
+    this.$nextTick(() => {console.log(document.querySelectorAll("#__BVID__107__BV_tab_controls_")[0].clientHeight);});
+
   }
 }
 </script>

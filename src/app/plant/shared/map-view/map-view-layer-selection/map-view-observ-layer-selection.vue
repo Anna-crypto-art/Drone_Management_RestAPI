@@ -78,6 +78,8 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
   @Prop({ required: true }) map!: Map;
   @State(state => state.sidebar["observationsSelection"]) selectionSidebarOpen!: boolean;
 
+  get tabBarHeight(): number { return (this.$store.direct.state.sidebar.tabBarHeight || 0) * -1; }
+
   compGroupLayers: ComponentGroupObservationLayer[] = [];
   
   observationSelectionService: ObservationSelectionService | null = null;
@@ -317,6 +319,11 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
 <style lang="scss">
 @import "@/scss/_colors.scss";
 @import "@/scss/_variables.scss";
+
+.app-map-view-layer-selection {
+  top: 0;
+  height: 100%;
+}
 
 .app-map-view-observ-layer-selection {
     @media(max-width: 1000px) {
