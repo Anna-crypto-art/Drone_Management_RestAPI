@@ -72,20 +72,10 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
   isAnalysisLegendsActive = true;
   isObservationsLegendsActive = true;
 
-  private isMobile = false;
-  private isMobileQuery!: MediaQueryList;
-  private async isMobileListener<Evt extends { matches: boolean }>(e: Evt) {
-    this.isMobile = e.matches;
-  }
-
   created() {
     this.analysisSelectionService = new AnalysisSelectionService(this);
     this.observationSelectionService = new ObservationSelectionService(this);
     this.refMeasureLayersService = RefMeasureLayersService.get(this.plant, this.map);
-
-    this.isMobileQuery = getMobileQuery()
-    this.isMobileQuery.addEventListener("change", this.isMobileListener);
-    this.isMobileListener(this.isMobileQuery);
     
     this.layersService = LayersService.get(this.plant.id);
     this.layersService.on(
@@ -136,12 +126,14 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
   async unmounted() {
     this.analysisSelectionService!.unregister();
     this.observationSelectionService!.unregister();
-
-    this.isMobileQuery.removeEventListener("change", this.isMobileListener);
   }
 
   get layerSelectionOpen(): boolean {
     return (this.$store.direct.state.sidebar.analysesSelection || this.$store.direct.state.sidebar.observationsSelection) && !this.isMobile;
+  }
+
+  get isMobile(): boolean {
+    return this.$store.direct.state.mobile.isMobile;
   }
 
   get visible(): boolean {

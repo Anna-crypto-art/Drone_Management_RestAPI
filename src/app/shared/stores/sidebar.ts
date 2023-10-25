@@ -41,8 +41,6 @@ const SidebarModule = defineModule({
         if (sidebars.includes(event.name as SidebarNames)) {
           state.lastActiveSidebarName = event.state ? undefined : event.name as SidebarNames;
         }
-
-        emit(event.name, event.state);
       }
       if (event.tabBarHeight !== undefined) {
         state.tabBarHeight = event.tabBarHeight;
@@ -55,13 +53,9 @@ const SidebarModule = defineModule({
     },
     restore(state, oldState: ISidebarModule) {
       state = { ...oldState, tabBarHeight: oldState.tabBarHeight || 0 };
-      SidebarEvents.$emit("restore", oldState);
     },
   },
   namespaced: true,
 });
-
-export const SidebarEvents = new Vue();
-const emit = (name: AllSidebarNames, state: boolean) => SidebarEvents.$emit("change", { name, state } as ISidebarEvent);
 
 export default SidebarModule;
