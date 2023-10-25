@@ -247,8 +247,7 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
           if (invAutoSelLayer) {
             await invAutoSelLayer.layer.setSelected(this.layersService.settings.showCouldNotBeMeasured);
           } else {
-            await layer.setSelected(false);
-            await layer.setSelected(true);
+            await layer.reselect();
           }
         }
       }

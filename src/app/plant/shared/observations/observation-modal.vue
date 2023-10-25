@@ -28,6 +28,11 @@
         <b-form-group :label="$t('ticket-id')">
           <b-form-input v-model="observation.ticketId" />
         </b-form-group>
+        <b-from-group v-if="observation.id" :label="$t('delete-observation')">
+          <app-button variant="danger" icon="trash" :loading="deleteLoading" @click="onDeleteClick">
+            {{ $t("delete-observation") }}
+          </app-button>
+        </b-from-group>
       </div>
     </app-modal-form>
   </div>
@@ -51,6 +56,7 @@ import { CCPValue, IAppObservationModal, ObservationModel } from './types';
 import dateHelper from '@/app/shared/services/helper/date-helper';
 import { ObservationSchema } from '@/app/shared/services/volateq-api/api-schemas/observation-schema';
 import { ObservationRequest } from '@/app/shared/services/volateq-api/api-requests/observation-requests';
+import { LayersService } from '../map-view/layers/layers-service';
 
 @Component({
   name: "app-observation-modal",
@@ -70,6 +76,7 @@ export default class AppObservationModal extends BaseAuthComponent implements IA
   fieldgeometryComponent: FieldgeometryComponentSchema | null = null;
 
   loading = false;
+  deleteLoading = false;
 
   ccpService!: CcpService;
   ccpValues: CCPValue[] = [];
@@ -133,8 +140,32 @@ export default class AppObservationModal extends BaseAuthComponent implements IA
   
       this.showSuccess(this.$t('observation-created-success').toString());
     }
+
+    await this.reselectObservationLayers();
  
     this.observModal.hide();
+  }
+
+  @CatchError("deleteLoading")
+  async onDeleteClick() {
+    if (!confirm(this.$t("delete-observation_quest").toString())) {
+      return;
+    }
+
+    await volateqApi.deleteObservation(this.plant.id, this.observation!.id!);
+
+    this.showSuccess(this.$t('observation-deleted-success').toString());
+
+    await this.reselectObservationLayers();
+
+    this.observModal.hide();
+  }
+
+  private async reselectObservationLayers() {
+    const loadedObservLayers = LayersService.get(this.plant.id).observationLayers.filter(l => l.loadedLayer);
+    for (const loadedObservLayer of loadedObservLayers) {
+      await loadedObservLayer.reselect();
+    }
   }
 }
 </script>

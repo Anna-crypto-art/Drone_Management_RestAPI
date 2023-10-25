@@ -350,6 +350,17 @@ export abstract class BaseLayer implements IGeoLayer {
     await this.appLayerCheckbox?.setSelected(selected);
   }
 
+  public async reselect() {
+    if (this.loadedLayer) {
+      this.reloadLayer();
+      
+      if (this.selected) {
+        await this.setSelected(false);
+        await this.setSelected(true);
+      }
+    }
+  }
+
   public async selectSilent() {
     this.selected = true;
   }

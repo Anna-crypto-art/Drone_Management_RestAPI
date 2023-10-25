@@ -272,9 +272,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
       new_value: mode,
     });
     
-    keyFigureLayer.reloadLayer();
-    await keyFigureLayer.setSelected(false);
-    await keyFigureLayer.setSelected(true);
+    await keyFigureLayer.reselect();
 
     this.visible = false;
 
@@ -534,11 +532,9 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
             featureInfos: observMappingHelper.toFeatureInfos(item, selectedCcpIds),
             observation: item,
             editable: this.isSuperAdmin || this.isCustomerAdmin || item.created_by_user.email === me.email,
-            title: this.$t('observations-of', { date: dateHelper.toDateTime(item.observed_at) }).toString(),
+            title: this.$t('observation-of', { date: dateHelper.toDateTime(item.observed_at) }).toString(),
           });
         }
-
-        console.log("this.observationFeatures", this.observationFeatures)
       }
     }
   }

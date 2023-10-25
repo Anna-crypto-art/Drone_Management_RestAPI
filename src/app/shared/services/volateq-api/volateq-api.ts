@@ -970,6 +970,10 @@ export class VolateqAPI extends HttpClientBase {
     await this.post(`/auth/plant/${plantId}/observation/${observationId}`, observation);
   }
 
+  public async deleteObservation(plantId: string, observationId: string): Promise<void> {
+    await this.delete(`/auth/plant/${plantId}/observation/${observationId}`);
+  }
+
   public async getObservationsGeoVisual(
     plantId: string,
     ccpId: string,
