@@ -46,7 +46,6 @@ import { Map } from "ol";
 import { RouteQueryHelper } from "../helper/route-query-helper";
 import { ObservationCcpLayer } from "./layers/observation-ccp-layer";
 import { BaseLayer } from "./layers/base-layer";
-import { getMobileQuery } from "@/app/shared/services/helper/mobile-helper";
 
 
 @Component({

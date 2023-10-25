@@ -1,5 +1,7 @@
 <template>
-    <div class="app-map-view-layer-selection" :class="{ 'sidebar-open': visible }" :style="{ top: tabBarHeight + 'px' }" >
+    <div class="app-map-view-layer-selection" 
+    :class="{ 'sidebar-open': visible, 'isMobile': isMobile}" 
+    :style="{ top: layerSelectionTop + 'px' }" >
       <div class="grayed app-map-view-popup-close-button" @click="onClose">x</div>
       <p class="grayed mar-bottom-half"><slot name="title" /></p>
         <slot />    
@@ -10,7 +12,6 @@
 import { Component, Prop, Watch } from "vue-property-decorator";
 import { BaseComponent } from "@/app/shared/components/base-component/base-component";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
-import { getMobileQuery } from "@/app/shared/services/helper/mobile-helper";
 
 @Component({
   name: "app-map-view-layer-selection",
@@ -20,19 +21,13 @@ export default class AppMapViewLayerSelection extends BaseComponent {
   @Prop({ default: false }) value!: boolean;
 
   get tabBarHeight(): number { return (this.$store.direct.state.sidebar.tabBarHeight || 0) * -1; }
-  newTabBarHeight = 0;
+  get layerSelectionTop(): number { return this.isMobile ? this.tabBarHeight : 0 ;}
   
   visible = false;
 
-  // @Watch('tabBarHeight')
-  // async onTabBarHeightChanged()  {      
-  //     let baseTabBarHeight = (this.$store.direct.state.sidebar.tabBarHeight!);
-  //     if (baseTabBarHeight <= 42)
-  //       this.newTabBarHeight = -42;
-  //     if (baseTabBarHeight >= 42)
-  //       this.newTabBarHeight = this.tabBarHeight;
-  //     console.log(this.tabBarHeight);  
-  // }
+  get isMobile(): boolean {
+    return this.$store.direct.state.mobile.isMobile;
+  }
 
   @Watch("value")
   onValueChanged() {
@@ -77,10 +72,9 @@ export default class AppMapViewLayerSelection extends BaseComponent {
   }
 
   &.sidebar-open {
-    @media(max-width: 1000px) {
+    &.isMobile {
       left: calc($sidebar-width * -1);
       height: calc(100vh - $header-height);
-      // top: calc($tab-height * -1);
       background-color: $white;
     }
   }  

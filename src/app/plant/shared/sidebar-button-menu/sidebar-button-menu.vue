@@ -117,6 +117,7 @@ export default class AppSidebarButtonMenu extends Vue {
 
     &:hover {
       background-color: $hover-light-blue;
+      color: $blue;
       border-color: transparent;
     }
 

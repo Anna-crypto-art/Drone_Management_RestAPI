@@ -33,7 +33,6 @@ import { RouteQueryHelper } from "../helper/route-query-helper";
 import { PlantViewTabs } from "./types";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
-import { getMobileQuery } from "@/app/shared/services/helper/mobile-helper";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { AnalysisSelectionService } from "../selection-sidebar/analysis-selection/analysis-selection-service";
 import { IAnalysisSelectionComponent } from "../selection-sidebar/analysis-selection/types";
@@ -74,7 +73,6 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
       const tabbarElement = document.querySelectorAll("#tabbar")[0].children[0].children[0];
       const tabBarHeight = tabbarElement.getBoundingClientRect().height;
       this.$store.direct.commit.sidebar.set({ tabBarHeight: tabBarHeight });
-      // console.log(tabBarHeight);
     });
   }
 
