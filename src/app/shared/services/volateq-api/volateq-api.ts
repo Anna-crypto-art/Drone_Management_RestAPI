@@ -966,6 +966,10 @@ export class VolateqAPI extends HttpClientBase {
     await this.post(`/auth/plant/${plantId}/observation`, observation);
   }
 
+  public async updateObservation(plantId: string, observationId: string, observation: ObservationRequest) {
+    await this.post(`/auth/plant/${plantId}/observation/${observationId}`, observation);
+  }
+
   public async getObservationsGeoVisual(
     plantId: string,
     ccpId: string,

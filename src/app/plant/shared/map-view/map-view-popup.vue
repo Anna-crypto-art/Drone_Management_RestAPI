@@ -37,8 +37,14 @@
       <div v-for="(observFeature, index) in observationFeatures" :key="index">
         <app-map-view-popup-feature-infos :featureInfos="observFeature.featureInfos.infos">
           <template #title>
-            <span v-html="observFeature.title" />
-            <app-button v-if="observFeature.editable" icon="pencil-square" variant="secondary" size="sm" cls="pull-right" />
+            <div v-html="observFeature.title" class="pull-right app-map-view-popup-body-feature-infos-observ-title" />
+            <app-button v-if="observFeature.editable" 
+              icon="pencil-square"
+              variant="secondary"
+              size="sm" 
+              cls="pull-right" 
+              @click="onEditObservClick(observFeature.observation)"
+            />
             <div class="clear" />
           </template>
         </app-map-view-popup-feature-infos>
@@ -96,6 +102,7 @@ import { IObservationSelectionComponent } from '../selection-sidebar/observation
 import { ObservationCcpLayer } from './layers/observation-ccp-layer';
 import { ObservationMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/observation-mapping-helper";
 import { userService } from '@/app/shared/services/user-service/user-service';
+import { ObservationSchema } from '@/app/shared/services/volateq-api/api-schemas/observation-schema';
 
 @Component({
   name: "app-map-view-popup",
@@ -290,6 +297,13 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
       this.myRefMeasureEntry,
       this.myRefMeasureEntryKeyFigures
     );
+
+    this.visible = false;
+  }
+
+  @CatchError()
+  onEditObservClick(observation: ObservationSchema) {
+    this.appObservModal.show(this.fieldgeometryComponent!, observation);
 
     this.visible = false;
   }
@@ -591,8 +605,12 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     }
 
     &-feature-infos {
-      // max-height: 500px;
-      // overflow-y: auto;
+      &-observ-title {
+        max-width: calc(100% - 35px);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
 
       &-name {
         line-height: 1;

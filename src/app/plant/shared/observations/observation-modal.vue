@@ -49,6 +49,8 @@ import { FieldgeometryComponentSchema } from '@/app/shared/services/volateq-api/
 import AppObservationCcpInput from './observation-ccp-input.vue';
 import { CCPValue, IAppObservationModal, ObservationModel } from './types';
 import dateHelper from '@/app/shared/services/helper/date-helper';
+import { ObservationSchema } from '@/app/shared/services/volateq-api/api-schemas/observation-schema';
+import { ObservationRequest } from '@/app/shared/services/volateq-api/api-requests/observation-requests';
 
 @Component({
   name: "app-observation-modal",
@@ -83,14 +85,29 @@ export default class AppObservationModal extends BaseAuthComponent implements IA
     return this.$t("add-observation").toString();
   }
 
-  async show(fieldgeometryComponent: FieldgeometryComponentSchema) {
+  async show(fieldgeometryComponent: FieldgeometryComponentSchema, observation?: ObservationSchema) {
     this.fieldgeometryComponent = fieldgeometryComponent;
+    
+    const ccps = await this.ccpService.getCcpsByComponent(this.fieldgeometryComponent.component_id);
 
-    this.ccpValues = (await this.ccpService.getCcpsByComponent(this.fieldgeometryComponent.component_id))
-      .map(ccp => ({ value: "", ccp }));
+    if (observation) {
+      this.ccpValues = ccps.map(ccp => ({ 
+        value: ccp.id in observation.column_values ? observation.column_values[ccp.id].toString() : "",
+        ccp,
+      }));
 
-    this.observation = {
-      observedAt: dateHelper.now(),
+      this.observation = {
+        id: observation.id,
+        observedAt: observation.observed_at,
+        notes: observation.notes,
+        ticketId: observation.external_id,
+      };
+    } else {
+      this.ccpValues = ccps.map(ccp => ({ value: "", ccp }));
+  
+      this.observation = {
+        observedAt: dateHelper.now(),
+      }
     }
 
     this.observModal.show();
@@ -98,17 +115,25 @@ export default class AppObservationModal extends BaseAuthComponent implements IA
 
   @CatchError("loading")
   async onSubmitObserv() {
-    await volateqApi.createObservation(this.plant.id, {
+    const observReq: ObservationRequest = {
       pcs: this.fieldgeometryComponent!.kks,
       observed_at: this.observation!.observedAt,
       ccp_values: this.ccpValues.filter(ccpVal => !!ccpVal.value)
         .map(ccpVal => ({ ccp_id: ccpVal.ccp.id, value: ccpVal.value })),
       notes: this.observation!.notes || undefined,
       external_id: this.observation!.ticketId || undefined,
-    });
+    };
 
-    this.showSuccess(this.$t('observation-created-success').toString());
+    if (this.observation!.id) {
+      await volateqApi.updateObservation(this.plant.id, this.observation!.id, observReq);
 
+      this.showSuccess(this.$t('observation-updated-success').toString());
+    } else {
+      await volateqApi.createObservation(this.plant.id, observReq);
+  
+      this.showSuccess(this.$t('observation-created-success').toString());
+    }
+ 
     this.observModal.hide();
   }
 }

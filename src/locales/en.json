@@ -750,6 +750,7 @@
   "timestamp": "Timestamp",
   "ticket-id": "Ticket ID",
   "observation-created-success": "Observation created successfully",
+  "observation-updated-success": "Observation updated successfully",
   "count": "Count",
   "print-flight-campaign": "Print flight campaign",
   "raw-ir-image": "Raw IR image",

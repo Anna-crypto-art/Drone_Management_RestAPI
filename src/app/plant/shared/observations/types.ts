@@ -1,11 +1,12 @@
 import { MultiselectOption } from "@/app/shared/components/app-multiselect/types";
 import { CustomComponentPropertySchema, DataTypeOptionInfo } from "@/app/shared/services/volateq-api/api-schemas/custom-component-property-schema";
 import { FieldgeometryComponentSchema } from "@/app/shared/services/volateq-api/api-schemas/fieldgeometry-component-schema";
+import { ObservationSchema } from "@/app/shared/services/volateq-api/api-schemas/observation-schema";
 
 export type CcpDataTypeValueListOption = MultiselectOption & DataTypeOptionInfo;
 
 export interface IAppObservationModal {
-  show(fieldgeometryComponent: FieldgeometryComponentSchema): Promise<void>;
+  show(fieldgeometryComponent: FieldgeometryComponentSchema, observation?: ObservationSchema): Promise<void>;
 }
 
 export interface CCPValue {
@@ -14,6 +15,7 @@ export interface CCPValue {
 }
 
 export interface ObservationModel {
+  id?: string;
   observedAt: string;
   notes?: string;
   ticketId?: string;
