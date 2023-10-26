@@ -34,21 +34,21 @@
       <app-loading v-show="loading" />
       <app-map-view-popup-feature-infos :featureInfos="piFeatureInfos" :title="$t('performance-indicators')" />
       <app-map-view-popup-feature-infos :featureInfos="refMeasureFeatureInfos" :title="$t('reference-measurements')" />
-      <div v-for="(observFeature, index) in observationFeatures" :key="index">
-        <app-map-view-popup-feature-infos :featureInfos="observFeature.featureInfos.infos">
-          <template #title>
-            <div v-html="observFeature.title" class="pull-right app-map-view-popup-body-feature-infos-observ-title" />
-            <app-button v-if="observFeature.editable" 
-              icon="pencil-square"
-              variant="secondary"
-              size="sm" 
-              cls="pull-right" 
-              @click="onEditObservClick(observFeature.observation)"
-            />
-            <div class="clear" />
-          </template>
-        </app-map-view-popup-feature-infos>
-      </div>
+      <app-map-view-popup-feature-infos v-for="(observFeature, index) in observationFeatures" :key="index"
+        :featureInfos="observFeature.featureInfos.infos"
+      >
+        <template #title>
+          <div v-html="observFeature.title" class="pull-left app-map-view-popup-body-feature-infos-observ-title" />
+          <app-button v-if="observFeature.editable" 
+            icon="pencil-square"
+            variant="secondary"
+            size="sm" 
+            cls="pull-right" 
+            @click="onEditObservClick(observFeature.observation)"
+          />
+          <div class="clear" />
+        </template>
+      </app-map-view-popup-feature-infos>
     </div>
     <app-reference-measurements ref="appReferenceMeasurements" :map="map" :plant="plant" />
     <app-observation-modal ref="appObservModal" :plant="plant" />
@@ -272,9 +272,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
       new_value: mode,
     });
     
-    keyFigureLayer.reloadLayer();
-    await keyFigureLayer.setSelected(false);
-    await keyFigureLayer.setSelected(true);
+    await keyFigureLayer.reselect();
 
     this.visible = false;
 
@@ -519,8 +517,8 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
           this.observationSelectionService.dateRange!.to,
           {
             search_text: this.pcs,
-            limit: 1,
             search_mode: "equals",
+            limit: 100,
           }
         );
 
@@ -534,11 +532,9 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
             featureInfos: observMappingHelper.toFeatureInfos(item, selectedCcpIds),
             observation: item,
             editable: this.isSuperAdmin || this.isCustomerAdmin || item.created_by_user.email === me.email,
-            title: this.$t('observations-of', { date: dateHelper.toDateTime(item.observed_at) }).toString(),
+            title: this.$t('observation-of', { date: dateHelper.toDateTime(item.observed_at) }).toString(),
           });
         }
-
-        console.log("this.observationFeatures", this.observationFeatures)
       }
     }
   }
@@ -607,7 +603,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
 
     &-feature-infos {
       &-observ-title {
-        max-width: calc(100% - 35px);
+        max-width: calc(100% - 50px);
         text-overflow: ellipsis;
         white-space: nowrap;
         overflow: hidden;

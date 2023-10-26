@@ -168,8 +168,6 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
 
   async unmounted() {
     this.analysisSelectionService?.unregister();
-    this.$nextTick(() => {console.log(document.querySelectorAll("#__BVID__107__BV_tab_controls_")[0].clientHeight);});
-
   }
 }
 </script>
