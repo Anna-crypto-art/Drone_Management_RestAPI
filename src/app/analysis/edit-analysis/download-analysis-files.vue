@@ -39,6 +39,9 @@
         :emptyText="$t('no-files-uploaded')"
         @rowSelected="onDownloadFilesSelected"
       >
+        <template #cell(size)="row">
+          {{ $t(row.item.readableSize) }}
+        </template>
         <template #cell(uploadedAt)="row">
           {{ getReadableDate(row.item.uploadedAt) }}
         </template>
@@ -100,10 +103,14 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
 
   downloadFilesTableColumns: AppTableColumns = [
     { key: "name", label: this.$t("name").toString(), sortable: true },
-    { key: "size", label: this.$t("size").toString(), sortable: true },
+    { 
+      key: "size", 
+      label: this.$t("size").toString(),
+      sortable: true
+    },
     { key: "uploadedAt", label: this.$t("uploaded-at").toString(), sortable: true },
   ];
-  downloadFilesTableItems: { name: string, size: string | null, uploadedAt: number | null }[] = [];
+  downloadFilesTableItems: { name: string, size: number | null, readableSize: string | null, uploadedAt: number | null }[] = [];
 
   selectedDonwloadFiles: { name: string }[] = [];
 
@@ -223,11 +230,12 @@ export default class AppDownloadAnalysisFiles extends BaseAuthComponent {
       const fileInfo = fileInfos[fileName];
       
       if (!fileInfo) {
-        this.downloadFilesTableItems.push({ name: fileName, size: null, uploadedAt: null });
+        this.downloadFilesTableItems.push({ name: fileName, size: null, readableSize: null, uploadedAt: null });
       } else {
         this.downloadFilesTableItems.push({ 
           name: fileName, 
-          size: getReadableFileSize(fileInfo.size),
+          size: fileInfo.size,
+          readableSize: getReadableFileSize(fileInfo.size),
           uploadedAt: Date.parse(fileInfo.uploaded_at),
         });
       }
