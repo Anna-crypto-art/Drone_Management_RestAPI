@@ -39,6 +39,10 @@ class AnalysisSelectionEventService extends AppEventServiceBase<AnalysisSelectio
   public async emit(plantId: string, event: AnalysisSelectionEvent, ...args: any[]): Promise<boolean> {
     return await this.getEventEmitter(plantId).emit(event, ...args);
   }
+
+  public async reemit(plantId: string): Promise<void> {
+    await this.getEventEmitter(plantId).reemit();
+  }
 }
 
 export const analysisSelectEventService = new AnalysisSelectionEventService();

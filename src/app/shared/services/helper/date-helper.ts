@@ -75,8 +75,14 @@ export default {
   toTime(date: string | number | Date, ignoreTimezone = false): string {
     return this.getDate(date, ignoreTimezone).toISOString().substring(11, 16);
   },
+  toTimeWithSeconds(date: string | number | Date, ignoreTimezone = false): string {
+    return this.getDate(date, ignoreTimezone).toISOString().substring(11, 19);
+  },
   toDateTime(date: string | number | Date, ignoreTimezone = false): string {
     return this.toDate(date, ignoreTimezone) + " " + this.toTime(date, ignoreTimezone);
+  },
+  toDateTimeWithSeconds(date: string | number | Date, ignoreTimezone = false): string {
+    return this.toDate(date, ignoreTimezone) + " " + this.toTimeWithSeconds(date, ignoreTimezone);
   },
   now(): string {
     return this.sustractTimezoneOffset(new Date()).toISOString();

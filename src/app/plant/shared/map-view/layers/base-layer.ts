@@ -1,9 +1,9 @@
 import { FeatureLike } from "ol/Feature";
 import { Extent } from "ol/extent";
 import { Map } from "ol";
-import { Style, Stroke, Text, Fill } from "ol/style";
+import { Style, Stroke, Text } from "ol/style";
 import { asArray, asString } from "ol/color";
-import { FeatureInfos, Legend, PropsFeature } from "../types";
+import { Legend, PropsFeature } from "../types";
 import GeoJSONFeatures from "ol/format/GeoJSON";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { transformExtent } from "ol/proj";

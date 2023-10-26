@@ -1,11 +1,10 @@
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { DateRange } from "../../observations/types";
 import { ObservationSelectionService } from "./observation-selection-service";
 import { SummerizedObservations } from "@/app/shared/services/volateq-api/api-schemas/observation-schema";
 
 export enum ObservationSelectionEvent {
   SELECTED = "observation_selected",
-  SIDEBAR_ABSOLUTE = "sidebar_absolute",
+  REFRESH = "observation_selection_referesh",
 }
 
 export interface IObservationSelectionComponent {
@@ -13,7 +12,7 @@ export interface IObservationSelectionComponent {
   plant: PlantSchema;
   mounted(): Promise<void>;
   unmounted(): Promise<void>;
-  onObservationSelected?(): Promise<void>;
+  onObservationSelected?(selectedByQueryRoute?: boolean): Promise<void>;
 }
 
 export interface ObservRowItem {

@@ -21,19 +21,22 @@ export class ObservationSelectionService {
     this.ccpService = CcpService.get(this.observSelectionComponent.plant.id);
   }
 
-  public register() {
+  public async register() {
     observationSelectEventService.on(
       this.observSelectionComponent.plant.id,
       ObservationSelectionEvent.SELECTED,
-      async (summerizedObservations: SummerizedObservations | undefined) => {
+      async (summerizedObservations: SummerizedObservations | undefined, selectedByQueryRoute: boolean) => {
         this.summerizedObservations = summerizedObservations || null;
 
         this.selectedCcps = await this.getSelectedCCPs();
 
-        this.observSelectionComponent.onObservationSelected && await this.observSelectionComponent.onObservationSelected();
+        this.observSelectionComponent.onObservationSelected && 
+          await this.observSelectionComponent.onObservationSelected(selectedByQueryRoute);
       },
       this.id,
     );
+    
+    await observationSelectEventService.reemit(this.observSelectionComponent.plant.id);
   }
 
   public unregister() {

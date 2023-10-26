@@ -186,16 +186,12 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
     }
   }
 
-  private async loadLayersFromUrlQuery(): Promise<boolean> {
+  private async loadLayersFromUrlQuery(): Promise<void> {
     const plantRouteQuery: PlantRouteQuery = this.$route.query;
     if (plantRouteQuery.layer) {
       const layerNames = typeof plantRouteQuery.layer === "string" ? [plantRouteQuery.layer] : plantRouteQuery.layer;
       await this.selectLayers(layerNames);
-
-      return true;
     }
-
-    return false;
   }
 
   private async selectInvAutoSelectLayer(layer: KeyFigureBaseLayer) {

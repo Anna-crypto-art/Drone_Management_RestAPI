@@ -10,11 +10,12 @@ import Vue from "vue";
 import { Prop, Component, Watch } from "vue-property-decorator";
 import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
 import AppIconObservations from "@/app/shared/components/app-icon/app-icon-observations.vue";
-import { State } from "vuex-class";
 import AppAnalysisSelectionSidebar from "../selection-sidebar/analysis-selection/analysis-selection-sidebar.vue";
 import AppObservationSelectionSidebar from "../selection-sidebar/observation-selection/observation-selection-sidebar.vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
+import { RouteQueryHelper } from "../helper/route-query-helper";
+import { SidebarNames, sidebars } from "@/app/shared/stores/sidebar";
 
 @Component({
   name: "app-sidebar",
@@ -29,12 +30,36 @@ export default class AppSidebar extends Vue {
   @Prop() plant!: PlantSchema;
   @Prop() analyses!: AnalysisForViewSchema[];
 
+  private routeQueryHelper = new RouteQueryHelper(this);
+
+  created() {
+    this.routeQueryHelper.queryChanged(async () => {
+      this.openSidebarByQueryRoute();
+    });
+  }
+
+  mounted() {
+    this.openSidebarByQueryRoute();
+  }
+
   get open(): boolean {
     return this.$store.direct.state.sidebar.analyses || this.$store.direct.state.sidebar.observations;
   }
 
   get selectionOpen(): boolean {
     return this.$store.direct.state.sidebar.analysesSelection || this.$store.direct.state.sidebar.observationsSelection;
+  }
+
+  private openSidebarByQueryRoute() {
+    if (this.$route.query.sidebar && typeof this.$route.query.sidebar === "string") {
+      const sidebarName = this.$route.query.sidebar as SidebarNames;
+      if (sidebars.includes(sidebarName)) {
+        this.$store.direct.commit.sidebar.set({ name: sidebarName, state: true });
+        sidebars.filter(s => s !== sidebarName).forEach(s => {
+          this.$store.direct.commit.sidebar.set({ name: s, state: false });
+        });
+      }
+    }
   }
 }
 </script>

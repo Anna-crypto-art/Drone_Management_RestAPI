@@ -100,9 +100,15 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
       LayerEvent.ON_OBSERV_SELECTED,
       async (layer: ObservationCcpLayer) => {
         this.onObservLayerSelected(layer);
+
+        await this.routeQueryHelper.replaceRoute({
+          ccpId: this.layersService.observationLayers.filter(l => l.selected)
+            .map(l => l.ccp.id + (l.filterValue !== undefined && l.filterValue !== null ?
+              "__" + l.filterValue.toString() :
+              "")),
+        });
       }
     )
-
 
     this.refMeasureLayersService.on(this.plant.id, RefMeasureLayerEvent.ON_REF_MEASURE_LAYERS_CHANGED, () => {
       const li = this.analysisLegends.findIndex(l => l.id === this.refMeasureLayersService.refMeasurLegendId);
@@ -119,7 +125,7 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
 
   async mounted() {
     await this.analysisSelectionService!.register();
-    this.observationSelectionService!.register();
+    await this.observationSelectionService!.register();
   }
 
   async unmounted() {
@@ -176,16 +182,6 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
     return this.$store.direct.state.sidebar.observations;
   }
 
-  @Watch("isAnalysesSidebarOpen")
-  onAnalysesSidebarOpenChanged() {
-    this.sidebarOpenChanged();
-  }
-
-  @Watch("isObservationsSidebarOpen") 
-  onObservationsSidebarOpenChanged() {
-    this.sidebarOpenChanged();
-  }
-
   onKeyFigureLayerSelected(layer: KeyFigureBaseLayer) {
     this.onLayerSelected(layer, this.analysisLegends);
   }
@@ -194,7 +190,9 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
     this.onLayerSelected(layer, this.obersvationLegends);
   }
 
-  private sidebarOpenChanged() {
+  @Watch("isAnalysesSidebarOpen")
+  @Watch("isObservationsSidebarOpen")
+  private updateOpacityBySidebarsOpenState() {
     const sidebar = this.$store.direct.state.sidebar;
 
     this.isAnalysisLegendsActive = sidebar.analyses || (!sidebar.observations && sidebar.lastActiveSidebarName === "analyses");
@@ -208,6 +206,8 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
   }
 
   private onLayerSelected(layer: BaseLayer, legends: Legend[]) {
+    this.updateOpacityBySidebarsOpenState();
+
     const legend = layer.getLegend();
 
     if (legend) {

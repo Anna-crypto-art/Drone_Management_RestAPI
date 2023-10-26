@@ -44,6 +44,9 @@ export default class selectedByQueryRoute extends BaseAuthComponent implements I
     this.geoLayer.appLayerCheckbox = this;
 
     await this.loadGeoLayer();
+    if (this.geoLayer.selected) {
+      await this.geoLayer.onSelectedChanged();
+    }
   }
 
   unmounted() {

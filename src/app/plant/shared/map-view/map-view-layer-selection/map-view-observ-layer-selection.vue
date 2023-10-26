@@ -62,6 +62,8 @@ import { ObservFilterValue } from "@/app/shared/services/volateq-api/api-request
 import { ObservationCcpLayer } from "../layers/observation-ccp-layer";
 import AppExplWrap from "@/app/shared/components/app-explanation/app-expl-wrap.vue";
 import { State } from "vuex-class";
+import { RouteQueryHelper } from "../../helper/route-query-helper";
+import { PlantRouteQuery } from "../../types";
 
 @Component({
   name: "app-map-view-observ-layer-selection",
@@ -87,15 +89,19 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
 
   componentLayers!: ComponentLayer[];
 
+  private routeQueryHelper = new RouteQueryHelper(this);
+
   created() {
     this.observationSelectionService = new ObservationSelectionService(this);
     this.layersService = LayersService.get(this.plant.id);
 
     this.componentLayers = this.getComponentLayerTypes().map(t => new (t as any)(this.plant));
+
+    this.routeQueryHelper.queryChanged(async () => { await this.loadLayersFromUrlQuery(); });
   }
 
   async mounted() {
-    this.observationSelectionService?.register();
+    await this.observationSelectionService?.register();
   }
 
   async unmounted() {
@@ -139,13 +145,17 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
     this.$store.direct.commit.sidebar.set({ name: "observationsSelection", state: open });
   }
 
-  async onObservationSelected() {
+  async onObservationSelected(selectedByQueryRoute?: boolean) {
     this.onSidebarOpenChanged();
 
     await this.refreshLayers(
       this.observationSelectionService!.dateRange,
       this.observationSelectionService!.selectedCcps
     );
+
+    if (selectedByQueryRoute) {
+      await this.loadLayersFromUrlQuery();
+    }
 
     this.$store.direct.commit.sidebar.set({ 
       name: "observationsSelection", 
@@ -178,7 +188,9 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
         selectedLayerNameIds = await this.unselectAndRemoveChildLayers(this.compGroupLayers[componentGroupObservLayerIndex]);
 
         this.compGroupLayers.splice(componentGroupObservLayerIndex, 1);
-      } 
+
+        await this.$nextTick(); // waiting for VUE removing elements from DOM
+      }
 
       const compCcps = ccps.filter(ccp => ccp.component.id === comp);
       if (compCcps.length > 0) {
@@ -312,6 +324,23 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
     }
 
     return selected;
+  }
+
+  private async loadLayersFromUrlQuery(): Promise<void> {
+    const plantRouteQuery: PlantRouteQuery = this.$route.query;
+    if (plantRouteQuery.ccpId) {
+      const ccpIds = typeof plantRouteQuery.ccpId === "string" ? [plantRouteQuery.ccpId] : plantRouteQuery.ccpId;
+      for (const ccpId of ccpIds) {
+        const ccpIdAndFilterValue = ccpId.split("__");
+        const ci = ccpIdAndFilterValue[0]
+        const fv = ccpIdAndFilterValue.length > 1 ? ccpIdAndFilterValue[1] : null;
+        const layer = this.layersService.observationLayers
+          .find(l => l.ccp.id === ci && (fv === null || l.filterValue?.toString() === fv));
+        if (layer) {
+          await layer.setSelected(true);
+        }
+      }
+    }
   }
 }
 </script>

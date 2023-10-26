@@ -57,6 +57,8 @@ import dateHelper from '@/app/shared/services/helper/date-helper';
 import { ObservationSchema } from '@/app/shared/services/volateq-api/api-schemas/observation-schema';
 import { ObservationRequest } from '@/app/shared/services/volateq-api/api-requests/observation-requests';
 import { LayersService } from '../map-view/layers/layers-service';
+import { observationSelectEventService } from '../selection-sidebar/observation-selection/observation-selection-event-service';
+import { ObservationSelectionEvent } from '../selection-sidebar/observation-selection/types';
 
 @Component({
   name: "app-observation-modal",
@@ -141,7 +143,7 @@ export default class AppObservationModal extends BaseAuthComponent implements IA
       this.showSuccess(this.$t('observation-created-success').toString());
     }
 
-    await this.reselectObservationLayers();
+    await observationSelectEventService.emit(this.plant.id, ObservationSelectionEvent.REFRESH);
  
     this.observModal.hide();
   }
@@ -156,17 +158,17 @@ export default class AppObservationModal extends BaseAuthComponent implements IA
 
     this.showSuccess(this.$t('observation-deleted-success').toString());
 
-    await this.reselectObservationLayers();
+    await observationSelectEventService.emit(this.plant.id, ObservationSelectionEvent.REFRESH);
 
     this.observModal.hide();
   }
 
-  private async reselectObservationLayers() {
-    const loadedObservLayers = LayersService.get(this.plant.id).observationLayers.filter(l => l.loadedLayer);
-    for (const loadedObservLayer of loadedObservLayers) {
-      await loadedObservLayer.reselect();
-    }
-  }
+  // private async reselectObservationLayers() {
+  //   const loadedObservLayers = LayersService.get(this.plant.id).observationLayers.filter(l => l.loadedLayer);
+  //   for (const loadedObservLayer of loadedObservLayers) {
+  //     await loadedObservLayer.reselect();
+  //   }
+  // }
 }
 </script>
 

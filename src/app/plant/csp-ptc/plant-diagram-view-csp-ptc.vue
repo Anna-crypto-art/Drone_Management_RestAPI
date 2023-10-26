@@ -54,7 +54,7 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent impleme
   }
 
   async mounted() {
-    this.analysisSelectionService?.register();
+    await this.analysisSelectionService?.register();
   }
 
   async unmounted() {

@@ -1,7 +1,8 @@
 import { CompareClassKeyFigureMixin } from "@/app/plant/shared/map-view/layers/key-figure-mixins/compare-class-key-figure-mixin";
 import { SwivelKeyFigureLayer } from "./abstract/swivel-key-figure-layer";
 import { ICompareClassKeyFigureMixin } from "@/app/plant/shared/map-view/layers/key-figure-mixins/types";
-import { FeatureInfos, FeatureProperties, Legend } from "@/app/plant/shared/map-view/types";
+import { FeatureProperties, Legend } from "@/app/plant/shared/map-view/types";
+import { FeatureInfos } from "@/app/plant/shared/map-view/map-view-popup/types";
 import { KeyFigureColorScheme, LayerColor } from "@/app/plant/shared/map-view/layers/types";
 import { AnalysisResultCspPtcSwivelSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-swivel-schema";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";

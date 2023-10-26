@@ -15,7 +15,8 @@ import { BaseLayer } from "./base-layer";
 import { i18n } from "@/main";
 import { ComparedFeatureType, ComparedFeatures, KeyFigureColorScheme, KeyFigureGeoJSON, KeyFigureLayerOptions, LayerColor, LayerEvent } from "./types";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { FeatureInfos, FeatureProperties, PropsFeature } from "../types";
+import { FeatureInfos } from "../map-view-popup/types";
+import { FeatureProperties, PropsFeature } from "../types";
 import { RefMeasureLayersService } from "./ref-measure-layers-service";
 import GeometryType from "ol/geom/GeometryType";
 

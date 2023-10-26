@@ -990,7 +990,7 @@ export class VolateqAPI extends HttpClientBase {
     componentId: number,
     dFrom: string,
     dTo: string,
-    params: TableRequest,
+    params: TableRequest & { ccp_ids?: string[] },
     filterParams?: TableFilterRequest,
   ): Promise<TableResultSchema<ObservationSchema, ObservationColumn>> {
     return await this.get(`/auth/plant/${plantId}/observations/${componentId}/${dFrom}/${dTo}${

@@ -3,4 +3,8 @@ export interface PlantRouteQuery {
   layer?: string | string[];
   result?: string | string[];
   component?: string | string[];
+  sidebar?: string;
+  observation?: string;
+  observFilter?: string;
+  ccpId?: string | string[];
 }

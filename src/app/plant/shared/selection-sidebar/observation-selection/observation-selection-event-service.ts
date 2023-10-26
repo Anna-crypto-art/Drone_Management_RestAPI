@@ -39,6 +39,10 @@ class ObservationSelectionEventService extends AppEventServiceBase<ObservationSe
   public async emit(plantId: string, event: ObservationSelectionEvent, ...args: any[]): Promise<boolean> {
     return await this.getEventEmitter(plantId).emit(event, ...args);
   }
+
+  public async reemit(plantId: string): Promise<void> {
+    await this.getEventEmitter(plantId).reemit();
+  }
 }
 
 export const observationSelectEventService = new ObservationSelectionEventService();

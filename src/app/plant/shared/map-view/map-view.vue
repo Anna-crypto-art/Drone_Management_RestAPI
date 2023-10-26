@@ -49,7 +49,7 @@ import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/g
 import AppMapViewLegend from "./map-view-legend.vue";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { FeatureLike } from "ol/Feature";
-import AppMapViewPopup from "./map-view-popup.vue";
+import AppMapViewPopup from "./map-view-popup/map-view-popup.vue";
 import { IAnalysisSelectionComponent } from "../selection-sidebar/analysis-selection/types";
 import { AnalysisSelectionService } from "../selection-sidebar/analysis-selection/analysis-selection-service";
 import { LayersService } from "./layers/layers-service";
@@ -102,7 +102,7 @@ export default class AppMapView extends BaseAuthComponent implements IAnalysisSe
   }
 
   async mounted() {
-    this.analysisSelectionService.register();
+    await this.analysisSelectionService.register();
   }
   
   async unmounted() {

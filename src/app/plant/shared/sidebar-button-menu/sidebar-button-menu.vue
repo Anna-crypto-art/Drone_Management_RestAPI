@@ -32,12 +32,13 @@ import { Component, Prop } from "vue-property-decorator";
 import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
 import AppIconObservations from "@/app/shared/components/app-icon/app-icon-observations.vue";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
-import { SidebarNames } from "@/app/shared/stores/sidebar";
+import { SidebarNames, sidebars } from "@/app/shared/stores/sidebar";
 import { State } from "vuex-class";
 import AppMapView from "../map-view/map-view.vue";
 import { CcpService } from "../plant-settings/ccp-service";
 import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
 import AppExplWrap from "@/app/shared/components/app-explanation/app-expl-wrap.vue";
+import { RouteQueryHelper } from "../helper/route-query-helper";
 
 @Component({
   name: "app-sidebar-button-menu",
@@ -58,6 +59,8 @@ export default class AppSidebarButtonMenu extends Vue {
 
   hasObservAction = false;
 
+  private routeQueryHelper = new RouteQueryHelper(this);
+
   async created() {
     this.hasObservAction = (await CcpService.get(this.plant.id).getCcps()).length > 0;
   }
@@ -69,21 +72,13 @@ export default class AppSidebarButtonMenu extends Vue {
   }
 
   @CatchError()
-  onToggle(tool: SidebarNames) {
-    switch (tool) {
-      case "analyses":
-        this.$store.direct.commit.sidebar.toggle({ name: "analyses" });
-        if (this.openObservations) {
-          this.$store.direct.commit.sidebar.toggle({ name: "observations" });
-        }
-        break;
-      case "observations":
-        this.$store.direct.commit.sidebar.toggle({ name: "observations" });
-        if (this.openAnalyses) {
-          this.$store.direct.commit.sidebar.toggle({ name: "analyses" });
-        }
-        break;
-    }
+  async onToggle(sidebarName: SidebarNames) {
+    this.$store.direct.commit.sidebar.set({ name: sidebarName, state: true });
+    sidebars.filter(s => s !== sidebarName).forEach(s => {
+      this.$store.direct.commit.sidebar.set({ name: s, state: false });
+    });
+
+    await this.routeQueryHelper.replaceRoute({ sidebar: sidebarName });
   }
 }
 </script>

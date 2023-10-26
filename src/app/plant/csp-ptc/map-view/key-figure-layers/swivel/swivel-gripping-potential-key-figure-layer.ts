@@ -1,4 +1,5 @@
-import { FeatureInfos, FeatureProperties, Legend } from "@/app/plant/shared/map-view/types";
+import { FeatureProperties, Legend } from "@/app/plant/shared/map-view/types";
+import { FeatureInfos } from "@/app/plant/shared/map-view/map-view-popup/types";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { AnalysisResultCspPtcSwivelSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-swivel-schema";
 import { CompareClassLimitsKeyFigureMixin } from "@/app/plant/shared/map-view/layers/key-figure-mixins/compare-class-limits-key-figure-mixin";

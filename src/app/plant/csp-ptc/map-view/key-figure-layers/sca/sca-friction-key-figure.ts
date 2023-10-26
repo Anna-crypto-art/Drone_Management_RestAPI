@@ -1,4 +1,5 @@
-import { FeatureInfos, FeatureProperties, Legend } from "@/app/plant/shared/map-view/types";
+import { FeatureProperties, Legend } from "@/app/plant/shared/map-view/types";
+import { FeatureInfos } from "@/app/plant/shared/map-view/map-view-popup/types";
 import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { AnalysisResultCspPtcScaSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-csp-ptc-sca-schema";
 import { FeatureLike } from "ol/Feature";

@@ -67,6 +67,8 @@ import { observationSelectEventService } from "./observation-selection-event-ser
 import { State } from "vuex-class";
 import AppIconObservations from "@/app/shared/components/app-icon/app-icon-observations.vue";
 import { ObservationSelectionService } from "./observation-selection-service";
+import { RouteQueryHelper } from "../../helper/route-query-helper";
+import { PlantRouteQuery } from "../../types";
 
 @Component({
   name: "app-observation-selection-sidebar",
@@ -98,8 +100,6 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
 
   loading = false;
 
-  absolute = true;
-
   ccpService!: CcpService;
 
   timeRangeOptions: { value: number, text: string }[] = [
@@ -111,28 +111,34 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
 
   selectedTimeRange = 7;
 
+  private routeQueryHelper = new RouteQueryHelper(this);
+  private selectedByQueryRoute = false;
+
   @CatchError("loading")
   async created() {
     this.observationSelectionService = new ObservationSelectionService(this);
 
-    observationSelectEventService.on(this.plant.id, ObservationSelectionEvent.SIDEBAR_ABSOLUTE, async (absolute) => {
-      this.absolute = absolute;
+    observationSelectEventService.on(this.plant.id, ObservationSelectionEvent.REFRESH, async () => {
+      await this.onSubmitFilter();
     });
-
-    // vue does not react to the preset sidebar state for a reason, so we switch the state here for reactivity
-    // this.$store.direct.commit.sidebar.set({ name: "observations", state: true });
-    // await this.$nextTick();
-    // this.$store.direct.commit.sidebar.set({ name: "observations", state: false });
 
     this.toDate = dateHelper.toDate(dateHelper.now());
 
     this.ccpService = CcpService.get(this.plant.id);
 
-    this.onTimeRangeChanged();
+    this.setFilterByQueryRoute();
+    await this.onTimeRangeChanged();
+
+    this.routeQueryHelper.queryChanged(async () => {
+      this.setFilterByQueryRoute();
+      await this.onTimeRangeChanged();
+    });
   }
 
   async mounted() {
-    this.observationSelectionService?.register();
+    await this.observationSelectionService?.register();
+
+    this.selectObservationByQueryRoute();
   }
 
   async unmounted() {
@@ -141,9 +147,12 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
 
   @CatchError("loading")
   async onTimeRangeChanged() {
+    this.routeQueryHelper.replaceRoute({ observFilter: this.selectedTimeRange.toString() });
+
     const dFrom = new Date();
     dFrom.setDate(dFrom.getDate() - this.selectedTimeRange);
     this.fromDate = dateHelper.toDate(dFrom);
+
     await this.updateSummerizedObservations();
   }
 
@@ -154,8 +163,17 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
 
   @CatchError("loading")
   async onObservSelected(selectedItems: ObservRowItem[]) {
-    if (selectedItems.length > 0 && this.sidebarOpen) {
-      await observationSelectEventService.emit(this.plant.id, ObservationSelectionEvent.SELECTED, selectedItems[0].name);
+    if (selectedItems.length > 0) {
+      await this.routeQueryHelper.replaceRoute({ observation: selectedItems[0].name.date })
+
+      await observationSelectEventService.emit(
+        this.plant.id,
+        ObservationSelectionEvent.SELECTED,
+        selectedItems[0].name,
+        this.selectedByQueryRoute
+      );
+
+      this.selectedByQueryRoute = false;
     } else if (selectedItems.length === 0) {
       if (this.observationSelectionService?.hasSelectedObservations) {
         const lastObservSelectedIndex = this.observTableItems
@@ -197,11 +215,43 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
   }
 
   private async updateSummerizedObservations() {
+    const selectedIndex = this.observTableItems.findIndex(item => item.name.date === this.observationSelectionService?.date);
+
     this.ccpService.getCcps(); // make sure ccps are available
 
     const summerizedDates = await volateqApi.getSummerizedOberservations(this.plant.id, { from: this.fromDate, to: this.toDate });
 
     this.observTableItems = summerizedDates.observations.map(o => ({ name: o }));
+
+    await this.$nextTick(); // Wait for table to rerender
+
+    if (selectedIndex >= 0) {
+      this.observTable.selectRow(selectedIndex);
+    } else {
+      await this.selectObservationByQueryRoute();
+    }
+  }
+
+  private setFilterByQueryRoute() {
+    const query = this.$route.query as PlantRouteQuery;
+    if (query.observFilter) {
+      const observFilter = Number(query.observFilter)
+      if (this.timeRangeOptions.find(t => t.value === observFilter)) {
+        this.selectedTimeRange = observFilter;
+      }
+    }
+  }
+
+  private async selectObservationByQueryRoute() {
+    const query = this.$route.query as PlantRouteQuery;
+    if (query.observation) {
+      const rowIndex = this.observTableItems.findIndex(item => item.name.date === query.observation);
+      if (rowIndex >= 0) {
+        this.selectedByQueryRoute = true;
+
+        this.observTable.selectRow(rowIndex);
+      }
+    }
   }
 }
 </script>
