@@ -1,4 +1,4 @@
-import { SummerizedObservations } from "@/app/shared/services/volateq-api/api-schemas/observation-schema";
+import { SummerizedComponent, SummerizedObservations } from "@/app/shared/services/volateq-api/api-schemas/observation-schema";
 import { DateRange } from "../../observations/types";
 import { observationSelectEventService } from "./observation-selection-event-service";
 import { IObservationSelectionComponent, ObservationSelectionEvent } from "./types";
@@ -56,6 +56,10 @@ export class ObservationSelectionService {
 
   public get date(): string | null {
     return this.summerizedObservations?.date || null;
+  }
+
+  public get components(): SummerizedComponent[] | null {
+    return this.summerizedObservations?.components || null;
   }
 
   private async getSelectedCCPs(): Promise<CustomComponentPropertySchema[]> {

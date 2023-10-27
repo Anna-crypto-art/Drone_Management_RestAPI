@@ -1,7 +1,7 @@
 <template>
   <div class="app-table-component-container">
     <slot></slot>
-    <app-loading v-show="loading"></app-loading>
+    <app-loading v-if="loading"></app-loading>
     <app-table-pagination :pagination="pagination" :tableName="tableName" v-show="!loading"></app-table-pagination>
   </div>
 </template>
@@ -23,15 +23,7 @@ import AppTablePagination from "@/app/shared/components/app-table-pagination/app
 export default class AppTableComponentContainer extends Vue {
   @Prop({ required: true }) tableName!: string;
   @Prop({ required: true }) pagination!: ITablePagination;
-
-  loading = true;
-
-  startLoading() {
-    this.loading = true;
-  }
-  stopLoading() {
-    this.loading = false;
-  }
+  @Prop({ default: false }) loading!: boolean;
 }
 </script>
 

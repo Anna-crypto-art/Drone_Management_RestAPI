@@ -2,7 +2,7 @@
   <div class="app-tables-pv">
     <app-tables-component
       :componentResultMappings="componentResultMappings"
-      :tableResultComponents="activeComponents"
+      :tableTabComponents="activeComponents"
       :analyses="analyses"
       :plant="plant"
     />
@@ -15,7 +15,7 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
 import AppTablesComponent from "@/app/plant/shared/table-component/tables-component.vue";
 import { allPvMappings } from "@/app/shared/services/volateq-api/api-results-mappings/pv/analysis-result-pv-mapping"
-import { ITablesComponent, TableResultComponent } from "@/app/plant/shared/table-component/types";
+import { ITablesComponent, TableTabComponent } from "@/app/plant/shared/table-component/types";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 
@@ -31,7 +31,7 @@ export default class AppTablesPv extends BaseAuthComponent implements ITablesCom
 
   componentResultMappings = allPvMappings
 
-  activeComponents: TableResultComponent[] = [
+  activeComponents: TableTabComponent[] = [
     { componentId: ApiComponent.PV_MODULE },
     { componentId: ApiComponent.PV_TRACKER },
   ];

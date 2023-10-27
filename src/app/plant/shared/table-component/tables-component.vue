@@ -14,21 +14,27 @@
       </div>
 
       <app-table-container>
-        <b-tabs v-model="tabIndex" @activate-tab="onTabChanged">
-          <b-tab
-            v-for="activeTabComponent in activeTabComponents"
-            :key="firstAnalysisResult.id + '_' + activeTabComponent.label"
-          >
+        <b-tabs v-model="analysisTabIndex" @activate-tab="onAnalysisTabChanged" v-show="analysesSidebarOpen">
+          <b-tab v-for="(activeTabComponent, index) in activeAnalysisTabComponents" :key="index">
             <template #title>
-              {{ $t(activeTabComponent.label) }}
-              <app-explanation v-if="activeTabComponent.descr">
-                <span v-html="$t(activeTabComponent.descr)"></span>
-              </app-explanation>
+              <app-expl-wrap :expl="activeTabComponent.descr">{{ $t(activeTabComponent.label) }}</app-expl-wrap>
             </template>
             <app-analysis-result-table-component
-              :ref="generateRefTableName(activeTabComponent)"
+              :ref="activeTabComponent.tableRefName"
               :analysisResult="firstAnalysisResult"
               :compareAnalysisResult="compareAnalysisResult"
+              :activeComponent="activeTabComponent"
+              :plant="plant"
+            />
+          </b-tab>
+        </b-tabs>
+        <b-tabs v-model="observationTabIndex" @activate-tab="onObservationTabChanged" v-show="observationsSidebarOpen">
+          <b-tab v-for="(activeTabComponent, index) in activeObservTabComponents" :key="index">
+            <template #title>
+              <app-expl-wrap :expl="activeTabComponent.descr">{{ $t(activeTabComponent.label) }}</app-expl-wrap>
+            </template>
+            <app-observation-table-component
+              :ref="activeTabComponent.tableRefName"
               :activeComponent="activeTabComponent"
               :plant="plant"
             />
@@ -42,7 +48,6 @@
 <script lang="ts">
 import AppAnalysisResultTableComponent from "@/app/plant/shared/table-component/analysis-result-table-component.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
-import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppSearchInput from "@/app/shared/components/app-search-input/app-search-input.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
@@ -58,7 +63,12 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { Component, Prop } from "vue-property-decorator";
 import { AnalysisSelectionService } from "../selection-sidebar/analysis-selection/analysis-selection-service";
 import { IAnalysisSelectionComponent } from "../selection-sidebar/analysis-selection/types";
-import { ITableComponent, TableResultComponent, TableResultMappingTabComponent } from "./types";
+import { ObservationSelectionService } from "../selection-sidebar/observation-selection/observation-selection-service";
+import { IObservationSelectionComponent } from "../selection-sidebar/observation-selection/types";
+import { ITableComponent, TableTabComponent, ResultMappingTableTabComponent, LabelledTableTabComponent } from "./types";
+import AppExplWrap from "@/app/shared/components/app-explanation/app-expl-wrap.vue";
+import AppObservationTableComponent from "./observation-table-component.vue";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
 
 @Component({
   name: "app-tables-component",
@@ -66,33 +76,50 @@ import { ITableComponent, TableResultComponent, TableResultMappingTabComponent }
     AppButton,
     AppTableContainer,
     AppSearchInput,
-    AppExplanation,
+    AppExplWrap,
     AppAnalysisResultTableComponent,
+    AppObservationTableComponent,
   },
 })
-export default class AppTablesComponent extends BaseAuthComponent implements IAnalysisSelectionComponent {
+export default class AppTablesComponent extends BaseAuthComponent implements IAnalysisSelectionComponent, IObservationSelectionComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) analyses!: AnalysisForViewSchema[];
   @Prop({ required: true }) componentResultMappings!: ComponentResultMappings[];
-  @Prop({ required: true }) tableResultComponents!: TableResultComponent[];
+  @Prop({ required: true }) tableTabComponents!: TableTabComponent[];
 
   analysisSelectionService: AnalysisSelectionService | null = null;
+  observationSelectionService: ObservationSelectionService | null = null;
   
   csvExportLoading = false;
-  tabIndex = 0;
   activeTabLabel = "";
-  readonly activeTabComponents: TableResultMappingTabComponent[] = [];
+  
+  analysisTabIndex = 0;
+  observationTabIndex = 0;
+
+  readonly activeAnalysisTabComponents: ResultMappingTableTabComponent[] = [];
+  readonly activeObservTabComponents: LabelledTableTabComponent[] = [];
 
   async created() {
     this.analysisSelectionService = new AnalysisSelectionService(this);
+    this.observationSelectionService = new ObservationSelectionService(this);
   }
 
   async mounted() {
-    await this.analysisSelectionService?.register();
+    await this.analysisSelectionService!.register();
+    await this.observationSelectionService!.register();
   }
 
   async unmounted() {
     this.analysisSelectionService?.unregister();
+    this.observationSelectionService?.unregister();
+  }
+
+  get analysesSidebarOpen(): boolean {
+    return this.$store.direct.state.sidebar.analyses;
+  }
+
+  get observationsSidebarOpen(): boolean {
+    return this.$store.direct.state.sidebar.observations;
   }
 
   get firstAnalysisResult(): AnalysisResultDetailedSchema | null {
@@ -103,49 +130,24 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
     return this.analysisSelectionService?.compareAnalysisResult || null;
   }
 
-  hasAnyAnalysisSelected(): boolean {
-    return this.analysisSelectionService?.hasAnyAnalysisSelected() || false;
-  }
-
   getKeyFigures(): KeyFigureSchema[] {
     return this.analysisSelectionService?.getKeyFigures() || [];
   }
 
   async onAnalysisSelected() {
-    this.setActiveTabComponents();
+    this.setActiveAnalysisTabComponents();
   }
 
   async onMultiAnalysesSelected() {
-    this.setActiveTabComponents();
+    this.setActiveAnalysisTabComponents();
   }
 
-  private setActiveTabComponents() {
-    this.activeTabComponents.length = 0;
-
-    if (this.hasAnyAnalysisSelected()) {
-      let tabIdx = 0;
-
-      for (const tableResultComponent of this.tableResultComponents) {
-        const keyFigure = this.getKeyFigures().find(
-          keyFigure => keyFigure.component.id === tableResultComponent.componentId
-        );
-        if (keyFigure) {
-          this.activeTabComponents.push({
-            ...tableResultComponent,
-            mapping: this.componentResultMappings
-              .find(m => m.componentId === tableResultComponent.componentId)!.resultMapping,
-            label: apiComponentNames[tableResultComponent.componentId],
-            tabIndex: tabIdx++,
-          });
-        }
-      }
-    }
-
-    this.onTabChanged(0);
+  async onObservationSelected() {
+    this.setActiveObservTabComonents();
   }
 
   onSearch(searchText: string) {
-    for (const activeComponent of this.tableResultComponents) {
+    for (const activeComponent of (this.getActiveTabComponents() || [])) {
       const tableComponent = this.getRefTableComponent(activeComponent);
       if (tableComponent) {
         tableComponent.search(searchText);
@@ -153,63 +155,114 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
     }
   }
 
-  onTabChanged(newTabIndex: number) {
-    this.tabIndex = newTabIndex;
+  onAnalysisTabChanged(newTabIndex: number) {
+    this.analysisTabIndex = newTabIndex;
 
+    this.setActiveTabLabel();
+  }
+
+  onObservationTabChanged(newTabIndex: number) {
+    this.observationTabIndex = newTabIndex;
+
+    this.setActiveTabLabel();
+  }
+
+  @CatchError("csvExportLoading")
+  async onExportCsv() {
+    const activeComponent = this.getSelectedActiveComponent();
+    if (activeComponent) {
+      const tableComponent = this.getRefTableComponent(activeComponent);
+      const authCsvDownloadUrl = tableComponent.getCsvDownloadUrl();
+
+      AppDownloader.download(await volateqApi.generateDownloadUrl(authCsvDownloadUrl));
+    }
+  }
+
+  private setActiveAnalysisTabComponents() {
+    this.activeAnalysisTabComponents.length = 0;
+
+    if (this.analysisSelectionService?.hasAnyAnalysisSelected()) {
+      let tabIdx = 0;
+
+      for (const tableTabComponent of this.tableTabComponents) {
+        const keyFigure = this.getKeyFigures().find(
+          keyFigure => keyFigure.component.id === tableTabComponent.componentId
+        );
+        if (keyFigure) {
+          this.activeAnalysisTabComponents.push({
+            ...tableTabComponent,
+            mapping: this.componentResultMappings
+              .find(m => m.componentId === tableTabComponent.componentId)!.resultMapping,
+            label: apiComponentNames[tableTabComponent.componentId],
+            tabIndex: tabIdx++,
+            tableRefName: ["tableTabComponentAnalysis", this.firstAnalysisResult!.id, tableTabComponent.componentId].join("_"),
+          });
+        }
+      }
+    }
+
+    this.onAnalysisTabChanged(0);
+  }
+
+  private setActiveObservTabComonents() {
+    this.activeObservTabComponents.length = 0;
+
+    if (this.observationSelectionService?.hasSelectedObservations) {
+      let tabIdx = 0;
+
+      for (const tableTabComponent of this.tableTabComponents) {
+        if (this.observationSelectionService.components?.find(c => c.component_id === tableTabComponent.componentId)) {
+          this.activeObservTabComponents.push({
+            ...tableTabComponent,
+            label: apiComponentNames[tableTabComponent.componentId],
+            tabIndex: tabIdx++,
+            tableRefName: [
+              "tableTabComponentObservation",
+              this.observationSelectionService.date,
+              tableTabComponent.componentId
+            ].join("_"),
+          });
+        }
+      }
+    }
+  }
+
+  private getRefTableComponent(activeTabComponent: LabelledTableTabComponent): ITableComponent {
+    return (this.$refs[activeTabComponent.tableRefName] as any[])[0];
+  }
+
+  private getActiveTabComponents(): LabelledTableTabComponent[] | undefined {
+    if (this.analysesSidebarOpen || this.$store.direct.state.sidebar.lastActiveSidebarName === "analyses") {
+      return this.activeAnalysisTabComponents;
+    }
+
+    if (this.observationsSidebarOpen || this.$store.direct.state.sidebar.lastActiveSidebarName === "observations") {
+      return this.activeObservTabComponents;
+    }
+  }
+
+  private getSelectedActiveComponent(): LabelledTableTabComponent | undefined {
+    return this.getActiveTabComponents()?.find(comp => comp.tabIndex === this.getActiveTabIndex());
+  }
+
+  private getActiveTabIndex(): number {
+    if (this.analysesSidebarOpen || this.$store.direct.state.sidebar.lastActiveSidebarName === "analyses") {
+      return this.analysisTabIndex;
+    }
+
+    if (this.observationsSidebarOpen || this.$store.direct.state.sidebar.lastActiveSidebarName === "observations") {
+      return this.observationTabIndex;
+    }
+
+    throw new Error("No active tab index");
+  }
+
+  private setActiveTabLabel() {
     const activeComponent = this.getSelectedActiveComponent();
     if (activeComponent) {
       this.activeTabLabel = this.$t(activeComponent.label).toString();
     }
   }
-
-  async onExportCsv() {
-    const activeComponent = this.getSelectedActiveComponent();
-    if (activeComponent) {
-      try {
-        this.csvExportLoading = true;
-
-        const tableComponent = this.getRefTableComponent(activeComponent);
-
-        const authCsvDownloadUrl = volateqApi.getSpecificAnalysisResultCsvUrl(
-          this.firstAnalysisResult!.id,
-          activeComponent.componentId,
-          tableComponent.getTableRequestParam(),
-          tableComponent.getTableFilterParam(),
-          tableComponent.getCsvColumnMappingsParam()
-        );
-
-        const csvFileName =
-          dateHelper.toNumericDateTime(new Date()) +
-          "_" +
-          this.plant.name +
-          "_" +
-          dateHelper.toDate(this.firstAnalysisResult!.created_at) +
-          "_" +
-          activeComponent.label +
-          ".csv";
-
-        AppDownloader.download(await volateqApi.generateDownloadUrl(authCsvDownloadUrl), csvFileName);
-      } catch (e) {
-        this.showError(e);
-      } finally {
-        this.csvExportLoading = false;
-      }
-    }
-  }
-
-  private getRefTableComponent(activeTabComponent: TableResultComponent): ITableComponent {
-    return (this.$refs[this.generateRefTableName(activeTabComponent)] as any[])[0];
-  }
-
-  private generateRefTableName(activeTabComponent: TableResultComponent): string {
-    return ["tableComponent", this.firstAnalysisResult!.id, activeTabComponent.componentId].join("_");
-  }
-
-  private getSelectedActiveComponent(): TableResultMappingTabComponent | undefined {
-    return Object.values(this.activeTabComponents).find(comp => comp.tabIndex === this.tabIndex);
-  }
-
-
 }
 </script>
 <style lang="scss">

@@ -1,6 +1,6 @@
 <template>
   <div class="app-observation-table-component">
-    <app-table-component-container ref="container" :tableName="tableName" :pagination="pagination" size="sm">
+    <app-table-component-container :loading="loading" :tableName="tableName" :pagination="pagination" size="sm">
       <app-table
         :id="tableName"
         :columns="columns"
@@ -22,15 +22,16 @@ import { BvTableCtxObject } from "bootstrap-vue";
 import AppTableComponentContainer from "@/app/plant/shared/table-component/table-component-container.vue";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppTable from "@/app/shared/components/app-table/app-table.vue";
-import { ITableComponentContainer, TableResultComponent } from "./types";
+import { TableTabComponent } from "./types";
 import { ITableComponent } from "./types";
-import { TableFilterRequest, TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
+import { TableRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { AppTableColumns, IAppTable } from "@/app/shared/components/app-table/types";
 import { ObservationSelectionService } from "../selection-sidebar/observation-selection/observation-selection-service";
 import { IObservationSelectionComponent } from "../selection-sidebar/observation-selection/types";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
 
 @Component({
   name: "app-observation-table-component",
@@ -42,10 +43,11 @@ import { IObservationSelectionComponent } from "../selection-sidebar/observation
 })
 export default class AppObservationTableComponent extends BaseAuthComponent implements ITableComponent, IObservationSelectionComponent {
   @Prop({ required: true }) plant!: PlantSchema;
-  @Prop({ required: true }) activeComponent!: TableResultComponent;
+  @Prop({ required: true }) activeComponent!: TableTabComponent;
 
-  @Ref() container!: ITableComponentContainer;
   @Ref() table!: IAppTable;
+
+  loading = false;
 
   columns: AppTableColumns = [];
   tableName!: string;
@@ -56,13 +58,12 @@ export default class AppObservationTableComponent extends BaseAuthComponent impl
 
   private lastCtx: BvTableCtxObject | undefined;
   private searchText = "";
-  private tableFilterRequest?: TableFilterRequest
 
   private columnsMapping!: Record<string, string>;
 
   async created() {
     this.observationSelectionService = new ObservationSelectionService(this);
-    this.tableName = "table_observations";
+    this.tableName = "table_observations" + "_" + this.activeComponent.componentId;
 
     // TODO: set columns, load rows
   }
@@ -75,26 +76,9 @@ export default class AppObservationTableComponent extends BaseAuthComponent impl
     this.observationSelectionService?.unregister();
   }
 
-  protected startLoading() {
-    this.container.startLoading();
-  }
-  protected stopLoading() {
-    this.container.stopLoading();
-  }
-
   public search(searchText: string) {
     this.searchText = searchText.trim();
 
-    this.refresh();
-  }
-
-  onFilter(tableFilterRequest?: TableFilterRequest) {
-    this.tableFilterRequest = tableFilterRequest;
-
-    this.refresh();
-  }
-
-  onShowSumAvgChange() {
     this.refresh();
   }
 
@@ -112,23 +96,19 @@ export default class AppObservationTableComponent extends BaseAuthComponent impl
     };
   }
 
-  getCsvColumnMappingsParam(): { [column_name: string]: string } {
+  getCsvDownloadUrl(): string {
     throw Error("Not Implememented")
-  }
-
-  getTableFilterParam(): TableFilterRequest | undefined {
-    return this.tableFilterRequest;
   }
 
   refresh(): void {
     this.table.refresh();
   }
 
+  @CatchError("loading")
   async dataProvider(ctx: BvTableCtxObject) {
-    this.startLoading();
     this.lastCtx = ctx;
 
-    try {
+   
       // const results = await this.getAnalysisResults();
       // this.pagination.total = results.total;
 
@@ -156,13 +136,7 @@ export default class AppObservationTableComponent extends BaseAuthComponent impl
       // }
 
       // return tableItems;
-    } catch (e) {
-      this.showError(e);
-    } finally {
-      this.stopLoading();
-    }
-
-    return [];
+    
   }
 
   
