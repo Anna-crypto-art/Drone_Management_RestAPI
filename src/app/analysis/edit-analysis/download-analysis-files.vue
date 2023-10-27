@@ -40,7 +40,7 @@
         @rowSelected="onDownloadFilesSelected"
       >
         <template #cell(size)="row">
-          {{ $t(row.item.readableSize) }}
+          {{ (row.item.readableSize) }}
         </template>
         <template #cell(uploadedAt)="row">
           {{ getReadableDate(row.item.uploadedAt) }}
