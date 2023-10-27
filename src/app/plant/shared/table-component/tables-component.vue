@@ -25,14 +25,13 @@
                 <span v-html="$t(activeTabComponent.descr)"></span>
               </app-explanation>
             </template>
-            <app-table-component
+            <app-analysis-result-table-component
               :ref="generateRefTableName(activeTabComponent)"
               :analysisResult="firstAnalysisResult"
               :compareAnalysisResult="compareAnalysisResult"
               :activeComponent="activeTabComponent"
               :plant="plant"
-            >
-            </app-table-component>
+            />
           </b-tab>
         </b-tabs>
       </app-table-container>
@@ -41,7 +40,7 @@
 </template>
 
 <script lang="ts">
-import AppTableComponent from "@/app/plant/shared/table-component/table-component.vue";
+import AppAnalysisResultTableComponent from "@/app/plant/shared/table-component/analysis-result-table-component.vue";
 import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppSearchInput from "@/app/shared/components/app-search-input/app-search-input.vue";
@@ -68,7 +67,7 @@ import { ITableComponent, TableResultComponent, TableResultMappingTabComponent }
     AppTableContainer,
     AppSearchInput,
     AppExplanation,
-    AppTableComponent,
+    AppAnalysisResultTableComponent,
   },
 })
 export default class AppTablesComponent extends BaseAuthComponent implements IAnalysisSelectionComponent {

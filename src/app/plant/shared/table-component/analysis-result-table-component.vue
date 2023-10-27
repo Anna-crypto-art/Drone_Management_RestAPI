@@ -1,5 +1,5 @@
 <template>
-  <div class="app-table-component">
+  <div class="app-analysis-result-table-component">
     <app-table-component-container ref="container" :tableName="tableName" :pagination="pagination" size="sm">
       <app-table-component-filter 
         :analysisResult="analysisResult"
@@ -55,7 +55,7 @@ import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/b
 import { AppTableColumns, IAppTable } from "@/app/shared/components/app-table/types";
 
 @Component({
-  name: "app-table-component",
+  name: "app-analysis-result-table-component",
   components: {
     AppTableComponentContainer,
     AppExplanation,
@@ -63,7 +63,7 @@ import { AppTableColumns, IAppTable } from "@/app/shared/components/app-table/ty
     AppTable,
   },
 })
-export default class AppTableComponent extends BaseAuthComponent implements ITableComponent {
+export default class AppAnalysisResultTableComponent extends BaseAuthComponent implements ITableComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) analysisResult!: AnalysisResultDetailedSchema;
   @Prop({ required: true }) activeComponent!: TableResultMappingComponent;
