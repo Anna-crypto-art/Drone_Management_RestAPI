@@ -118,7 +118,7 @@ export default class AppMapViewPopupFeatureInfos extends BaseAuthComponent {
             this.plant.id,
             this.fieldgeometryComponent.component_id,
             dateHelper.toDateTimeWithSeconds(new Date(0)),
-            dateHelper.toDateTimeWithSeconds(new Date()),
+            dateHelper.toDateTimeWithSeconds(new Date(), true),
             {
               search_text: this.fieldgeometryComponent.kks,
               search_mode: 'equals',
