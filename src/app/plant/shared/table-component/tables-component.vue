@@ -1,9 +1,12 @@
 <template>
   <div class="app-tables-component">
-    <div class="no-data-placeholder" v-if="!firstAnalysisResult">
+    <div class="no-data-placeholder" v-if="!firstAnalysisResult && analysesSidebarOpen">
       {{ $t("no-analysis-result-selected") }}
     </div>
-    <div v-if="firstAnalysisResult" class="app-table-root-container">
+    <div class="no-data-placeholder" v-if="!dateRange && observationsSidebarOpen">
+      {{ $t("no-observation-selected") }}
+    </div>
+    <div v-if="(firstAnalysisResult && analysesSidebarOpen) || (dateRange && observationsSidebarOpen)" class="app-table-root-container">
       <div class="pull-left">
         <app-search-input :placeholder="$t('search-pcs')" @search="onSearch"></app-search-input>
       </div>
@@ -17,7 +20,7 @@
         <b-tabs v-model="analysisTabIndex" @activate-tab="onAnalysisTabChanged" v-show="analysesSidebarOpen">
           <b-tab v-for="(activeTabComponent, index) in activeAnalysisTabComponents" :key="index">
             <template #title>
-              <app-expl-wrap :expl="activeTabComponent.descr">{{ $t(activeTabComponent.label) }}</app-expl-wrap>
+              <app-expl-wrap :expl="activeTabComponent.descr && $t(activeTabComponent.descr)">{{ $t(activeTabComponent.label) }}</app-expl-wrap>
             </template>
             <app-analysis-result-table-component
               :ref="activeTabComponent.tableRefName"
@@ -31,12 +34,14 @@
         <b-tabs v-model="observationTabIndex" @activate-tab="onObservationTabChanged" v-show="observationsSidebarOpen">
           <b-tab v-for="(activeTabComponent, index) in activeObservTabComponents" :key="index">
             <template #title>
-              <app-expl-wrap :expl="activeTabComponent.descr">{{ $t(activeTabComponent.label) }}</app-expl-wrap>
+              <app-expl-wrap :expl="activeTabComponent.descr && $t(activeTabComponent.descr)">{{ $t(activeTabComponent.label) }}</app-expl-wrap>
             </template>
-            <app-observation-table-component
+            <app-observation-table-component v-if="dateRange"
               :ref="activeTabComponent.tableRefName"
               :activeComponent="activeTabComponent"
+              :ccps="ccps"
               :plant="plant"
+              :dateRange="dateRange"
             />
           </b-tab>
         </b-tabs>
@@ -52,7 +57,6 @@ import AppSearchInput from "@/app/shared/components/app-search-input/app-search-
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
-import dateHelper from "@/app/shared/services/helper/date-helper";
 import { apiComponentNames } from "@/app/shared/services/volateq-api/api-components/api-components-name";
 import { ComponentResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
@@ -60,7 +64,7 @@ import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-sch
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { Component, Prop } from "vue-property-decorator";
+import { Component, Prop, Watch } from "vue-property-decorator";
 import { AnalysisSelectionService } from "../selection-sidebar/analysis-selection/analysis-selection-service";
 import { IAnalysisSelectionComponent } from "../selection-sidebar/analysis-selection/types";
 import { ObservationSelectionService } from "../selection-sidebar/observation-selection/observation-selection-service";
@@ -69,6 +73,8 @@ import { ITableComponent, TableTabComponent, ResultMappingTableTabComponent, Lab
 import AppExplWrap from "@/app/shared/components/app-explanation/app-expl-wrap.vue";
 import AppObservationTableComponent from "./observation-table-component.vue";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
+import { CustomComponentPropertySchema } from "@/app/shared/services/volateq-api/api-schemas/custom-component-property-schema";
+import { DateRange } from "../observations/types";
 
 @Component({
   name: "app-tables-component",
@@ -130,20 +136,34 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
     return this.analysisSelectionService?.compareAnalysisResult || null;
   }
 
+  get ccps(): CustomComponentPropertySchema[] | null {
+    return this.observationSelectionService && this.observationSelectionService.selectedCcps;
+  }
+
+  get dateRange(): DateRange | null {
+    return this.observationSelectionService && this.observationSelectionService.dateRange;
+  }
+
   getKeyFigures(): KeyFigureSchema[] {
     return this.analysisSelectionService?.getKeyFigures() || [];
   }
 
+  @Watch("analysesSidebarOpen")
+  @Watch("observationsSidebarOpen")
+  onSidebarOpenChanged() {
+    this.setActiveTabLabel();
+  }
+
   async onAnalysisSelected() {
-    this.setActiveAnalysisTabComponents();
+    await this.setActiveAnalysisTabComponents();
   }
 
   async onMultiAnalysesSelected() {
-    this.setActiveAnalysisTabComponents();
+    await this.setActiveAnalysisTabComponents();
   }
 
   async onObservationSelected() {
-    this.setActiveObservTabComonents();
+    await this.setActiveObservTabComonents();
   }
 
   onSearch(searchText: string) {
@@ -178,8 +198,10 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
     }
   }
 
-  private setActiveAnalysisTabComponents() {
+  private async setActiveAnalysisTabComponents() {
     this.activeAnalysisTabComponents.length = 0;
+
+    await this.$nextTick(); // wait for vue recognizing no components are set
 
     if (this.analysisSelectionService?.hasAnyAnalysisSelected()) {
       let tabIdx = 0;
@@ -204,8 +226,10 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
     this.onAnalysisTabChanged(0);
   }
 
-  private setActiveObservTabComonents() {
+  private async setActiveObservTabComonents() {
     this.activeObservTabComponents.length = 0;
+
+    await this.$nextTick(); // wait for vue recognizing no components are set
 
     if (this.observationSelectionService?.hasSelectedObservations) {
       let tabIdx = 0;
@@ -225,6 +249,8 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
         }
       }
     }
+
+    this.onAnalysisTabChanged(0);
   }
 
   private getRefTableComponent(activeTabComponent: LabelledTableTabComponent): ITableComponent {
@@ -232,11 +258,11 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
   }
 
   private getActiveTabComponents(): LabelledTableTabComponent[] | undefined {
-    if (this.analysesSidebarOpen || this.$store.direct.state.sidebar.lastActiveSidebarName === "analyses") {
+    if (this.isAnalysisSidebarActive()) {
       return this.activeAnalysisTabComponents;
     }
 
-    if (this.observationsSidebarOpen || this.$store.direct.state.sidebar.lastActiveSidebarName === "observations") {
+    if (this.isObservationsSidebarActive()) {
       return this.activeObservTabComponents;
     }
   }
@@ -246,15 +272,25 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
   }
 
   private getActiveTabIndex(): number {
-    if (this.analysesSidebarOpen || this.$store.direct.state.sidebar.lastActiveSidebarName === "analyses") {
+    if (this.isAnalysisSidebarActive()) {
       return this.analysisTabIndex;
     }
 
-    if (this.observationsSidebarOpen || this.$store.direct.state.sidebar.lastActiveSidebarName === "observations") {
+    if (this.isObservationsSidebarActive()) {
       return this.observationTabIndex;
     }
 
     throw new Error("No active tab index");
+  }
+
+  private isAnalysisSidebarActive(): boolean {
+    return this.analysesSidebarOpen || (!this.observationsSidebarOpen &&
+      this.$store.direct.state.sidebar.lastActiveSidebarName === "analyses");
+  }
+
+  private isObservationsSidebarActive(): boolean {
+    return this.observationsSidebarOpen || (!this.analysesSidebarOpen &&
+      this.$store.direct.state.sidebar.lastActiveSidebarName === "observations");
   }
 
   private setActiveTabLabel() {

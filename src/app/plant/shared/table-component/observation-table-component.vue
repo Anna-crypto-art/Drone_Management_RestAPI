@@ -29,9 +29,10 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { AppTableColumns, IAppTable } from "@/app/shared/components/app-table/types";
-import { ObservationSelectionService } from "../selection-sidebar/observation-selection/observation-selection-service";
-import { IObservationSelectionComponent } from "../selection-sidebar/observation-selection/types";
-import { CatchError } from "@/app/shared/services/helper/catch-helper";
+import { getUserName } from "@/app/shared/services/helper/user-helper";
+import { CustomComponentPropertySchema } from "@/app/shared/services/volateq-api/api-schemas/custom-component-property-schema";
+import { DateRange } from "../observations/types";
+import dateHelper from "@/app/shared/services/helper/date-helper";
 
 @Component({
   name: "app-observation-table-component",
@@ -41,9 +42,11 @@ import { CatchError } from "@/app/shared/services/helper/catch-helper";
     AppTable,
   },
 })
-export default class AppObservationTableComponent extends BaseAuthComponent implements ITableComponent, IObservationSelectionComponent {
+export default class AppObservationTableComponent extends BaseAuthComponent implements ITableComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) activeComponent!: TableTabComponent;
+  @Prop({ required: true }) ccps!: CustomComponentPropertySchema[];
+  @Prop({ required: true }) dateRange!: DateRange;
 
   @Ref() table!: IAppTable;
 
@@ -54,26 +57,23 @@ export default class AppObservationTableComponent extends BaseAuthComponent impl
 
   pagination = { currentPage: 1, perPage: 10, total: 0 };
 
-  observationSelectionService: ObservationSelectionService | null = null;
-
   private lastCtx: BvTableCtxObject | undefined;
   private searchText = "";
 
-  private columnsMapping!: Record<string, string>;
-
   async created() {
-    this.observationSelectionService = new ObservationSelectionService(this);
     this.tableName = "table_observations" + "_" + this.activeComponent.componentId;
 
-    // TODO: set columns, load rows
-  }
-
-  async mounted() {
-    await this.observationSelectionService!.register();
-  }
-
-  async unmounted() {
-    this.observationSelectionService?.unregister();
+    this.columns = [
+      { key: "pcs", label: this.$t("pcs").toString() },
+      { key: "observedAt", label: this.$t("observed-at").toString() },
+      ...this.ccps.map(ccp => ({
+        key: ccp.id,
+        label: ccp.name,
+        labelExpl: ccp.description
+      })),
+      { key: "notes", label: this.$t("notes").toString() },
+      { key: "createdBy", label: this.$t("created-by").toString() },
+    ];
   }
 
   public search(searchText: string) {
@@ -84,14 +84,12 @@ export default class AppObservationTableComponent extends BaseAuthComponent impl
 
   getTableRequestParam(): TableRequest {
     if (!this.lastCtx) {
-      throw Error("Missing last_ctx");
+      throw Error("Missing lastCtx");
     }
 
     return {
       limit: this.lastCtx.perPage,
       page: this.lastCtx.currentPage,
-      order_by: this.lastCtx.sortBy && this.columnsMapping[this.lastCtx.sortBy],
-      order_direction: this.lastCtx.sortDesc ? "desc" : "asc",
       search_text: this.searchText,
     };
   }
@@ -100,46 +98,51 @@ export default class AppObservationTableComponent extends BaseAuthComponent impl
     throw Error("Not Implememented")
   }
 
-  refresh(): void {
-    this.table.refresh();
+  async refresh() {
+    await this.table?.refresh();
   }
 
-  @CatchError("loading")
-  async dataProvider(ctx: BvTableCtxObject) {
+  async dataProvider(ctx: BvTableCtxObject): Promise<any> {
     this.lastCtx = ctx;
 
-   
-      // const results = await this.getAnalysisResults();
-      // this.pagination.total = results.total;
+    try {
+      this.loading = true;
 
-      // const tableItems = this.mappingHelper.getItems(results.items);
+      const observations = await volateqApi.getObservations(
+        this.plant.id,
+        this.activeComponent.componentId,
+        this.dateRange!.from,
+        this.dateRange!.to,
+        this.getTableRequestParam(),
+      );
 
-      // if (results.sums) {
-      //   const sumItem = this.mappingHelper.getItem(results.sums);
-      //   for (const key in sumItem) {
-      //     let val = sumItem[key];
-      //     if (MathHelper.isFloat(val as any)) {
-      //       sumItem[key] = val = MathHelper.roundTo(val as any, 2);
-      //     }
+      this.pagination.total = observations.total;
 
-      //     if (tableItems.length > 0 && val !== null) {
-      //       if (typeof tableItems[0][key] === "number") {
-      //         sumItem[key] = "μ " + sumItem[key];
-      //       }
-      //     }
-      //   }
+      const results: Record<string, unknown>[] = [];
+      for (const observation of observations.items) {
+        const row = {
+          pcs: observation.fieldgeometry_component.kks,
+          observedAt: dateHelper.toDateTime(observation.observed_at),
+          notes: observation.notes,
+          createdBy: getUserName(observation.created_by_user),
+        };
 
-      //   tableItems.unshift({
-      //     ...sumItem,
-      //    _rowVariant: "primary",
-      //   });
-      // }
+        for (const ccp of this.ccps) {
+          row[ccp.id] = ccp.id in observation.column_values ? observation.column_values[ccp.id] : "";
+        }
 
-      // return tableItems;
-    
+        results.push(row);
+      }
+
+      return results;
+    } catch (e) {
+      this.showError(e);
+    } finally {
+      this.loading = false;
+    }
+
+    return [];
   }
-
-  
 }
 </script>
 <style lang="scss">

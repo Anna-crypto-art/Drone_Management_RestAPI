@@ -159,7 +159,8 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
 
     this.$store.direct.commit.sidebar.set({ 
       name: "observationsSelection", 
-      state: this.observationSelectionService!.hasSelectedObservations
+      state: this.observationSelectionService!.hasSelectedObservations && 
+        (!selectedByQueryRoute || this.$route.query.sidebar === "observations")
     });
   }
 

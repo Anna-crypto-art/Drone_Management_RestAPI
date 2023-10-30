@@ -72,7 +72,7 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
       label: transFunc(mappingEntry.transName).toString() + 
         (mappingEntry.unit ? ` (${mappingEntry.unit})` : ""),
       sortable: true,
-      labelExpl: mappingEntry.transDescr,
+      labelExpl: mappingEntry.transDescr && transFunc(mappingEntry.transDescr).toString(),
     }));
   }
 

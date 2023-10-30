@@ -60,7 +60,7 @@ import { apiComponentNames } from "@/app/shared/services/volateq-api/api-compone
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { QueryColumnFilter, TableFilterRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
-import { TableResultMappingComponent } from "./types";
+import { ResultMappingTableTabComponent } from "./types";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { IAnalysisSelectionComponent } from "../selection-sidebar/analysis-selection/types";
@@ -77,7 +77,7 @@ import { AnalysisSelectionService } from "../selection-sidebar/analysis-selectio
 export default class AppTableComponentFilter extends BaseAuthComponent implements IAnalysisSelectionComponent {
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) analysisResult!: AnalysisResultDetailedSchema;
-  @Prop({ required: true }) activeComponent!: TableResultMappingComponent;
+  @Prop({ required: true }) activeComponent!: ResultMappingTableTabComponent;
 
   analysisSelectionService!: AnalysisSelectionService;
 

@@ -158,37 +158,47 @@ export default class AppAnalysisResultTableComponent extends BaseAuthComponent i
     this.table.refresh();
   }
 
-  @CatchError("loading")
-  async dataProvider(ctx: BvTableCtxObject) {
+  // Do not use "CatchError" decorator here
+  async dataProvider(ctx: BvTableCtxObject): Promise<any> {
     this.lastCtx = ctx;
 
-    const results = await this.getAnalysisResults();
-    this.pagination.total = results.total;
+    try {
+      this.loading = true;
 
-    const tableItems = this.mappingHelper.getItems(results.items);
+      const results = await this.getAnalysisResults();
+      this.pagination.total = results.total;
 
-    if (results.sums) {
-      const sumItem = this.mappingHelper.getItem(results.sums);
-      for (const key in sumItem) {
-        let val = sumItem[key];
-        if (MathHelper.isFloat(val as any)) {
-          sumItem[key] = val = MathHelper.roundTo(val as any, 2);
-        }
+      const tableItems = this.mappingHelper.getItems(results.items);
 
-        if (tableItems.length > 0 && val !== null) {
-          if (typeof tableItems[0][key] === "number") {
-            sumItem[key] = "μ " + sumItem[key];
+      if (results.sums) {
+        const sumItem = this.mappingHelper.getItem(results.sums);
+        for (const key in sumItem) {
+          let val = sumItem[key];
+          if (MathHelper.isFloat(val as any)) {
+            sumItem[key] = val = MathHelper.roundTo(val as any, 2);
+          }
+
+          if (tableItems.length > 0 && val !== null) {
+            if (typeof tableItems[0][key] === "number") {
+              sumItem[key] = "μ " + sumItem[key];
+            }
           }
         }
+
+        tableItems.unshift({
+          ...sumItem,
+          _rowVariant: "primary",
+        });
       }
 
-      tableItems.unshift({
-        ...sumItem,
-        _rowVariant: "primary",
-      });
+      return tableItems;
+    } catch (e) {
+      this.showError(e);
+    } finally {
+      this.loading = false;
     }
 
-    return tableItems;
+    return [];
   }
 
   private async getAnalysisResults(): Promise<TableResultSchema<AnalysisResultSchemaBase>> {
