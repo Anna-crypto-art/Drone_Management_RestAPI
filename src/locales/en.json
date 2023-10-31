@@ -771,6 +771,9 @@
   "external-id": "External Id",
   "no-observations-available-expl": "Observations not available. Please create \"Component Properties\" under <a href=\"{plantSettingsUrl}\">Plant settings</a> to activate Observations.",
   "no-observation-selected": "Select an observation to see table data",
+  "ask-leave-unsaved-changes": "You have unsaved changes. Are you sure that you like leave without saving them?",
+  "enable-pis": "Enable Performance indicators for Observations",
+  "component-properties": "Component Properties",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

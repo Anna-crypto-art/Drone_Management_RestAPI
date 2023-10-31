@@ -49,6 +49,8 @@ import { CustomComponentPropertyRequest } from "./api-requests/custom-component-
 import { ObservFilterValue, SummerizedObservationRequest } from "./api-requests/observation-requests";
 import { ObservationColumn, ObservationSchema, SummerizedDates } from "./api-schemas/observation-schema";
 import { ObservationRequest } from "./api-requests/observation-requests";
+import { CreateEnabledPiFieldRequest, DisablePiFieldsRequest, EnablePiFieldsRequest } from "./api-requests/enabled-pi-field-requests";
+import { EnabledPiFieldSchema } from "./api-schemas/enabled-pi-field-schema";
 
 export class VolateqAPI extends HttpClientBase {
   /**
@@ -995,6 +997,18 @@ export class VolateqAPI extends HttpClientBase {
   ): Promise<TableResultSchema<ObservationSchema, ObservationColumn>> {
     return await this.get(`/auth/plant/${plantId}/observations/${componentId}/${dFrom}/${dTo}${
       this.getQueryParams(params)}${this.getEncodedAnalysisResultFilterParams(filterParams)}`);
+  }
+
+  public async enablePiFields(plantId: string, enablePiFieldsRequest: EnablePiFieldsRequest) {
+    await this.post(`/auth/plant/${plantId}/enabled-pi-fields`, enablePiFieldsRequest);
+  }
+
+  public async disablePiFields(plantId: string, disablePiFieldsRequest: DisablePiFieldsRequest) {
+    await this.post(`/auth/plant/${plantId}/disabled-pi-fields`, disablePiFieldsRequest);
+  }
+
+  public async getEnabledPiFields(plantId: string): Promise<EnabledPiFieldSchema[]> {
+    return await this.get(`/auth/plant/${plantId}/enabled-pi-fields`);
   }
 
   private filterKeyFigures(analysisResults: AnalysisResultDetailedSchema[]): void {

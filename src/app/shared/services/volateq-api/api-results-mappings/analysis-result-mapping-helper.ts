@@ -5,23 +5,20 @@ import VueI18n from "vue-i18n";
 import { FilterFieldType } from "@/app/plant/shared/filter-fields/types";
 import { AppTableColumns } from "@/app/shared/components/app-table/types";
 import { ApiComponent } from "../api-components/api-components";
-import { allCspPtcMappings } from "./csp_ptc/analysis-result-csp-ptc-mapping";
-import { allPvMappings } from "./pv/analysis-result-pv-mapping";
 import { ApiKeyFigure } from "../api-key-figures";
 import { FeatureInfo, FeatureInfoType } from "@/app/plant/shared/map-view/map-view-popup/types";
 import { i18n } from "@/main";
 import { RefMeasureEntry, RefMeasureEntryKeyFigureSchema, RefMeasureEntryValue } from "../api-schemas/reference-measurement-schema";
+import { allMappings } from "./analysis-result-mapping";
 
 export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
   private compareAnalysisResult: AnalysisResultDetailedSchema | null = null;
   private tableView = false;
 
   public static getMappingsByComponentId(componentId: ApiComponent): AnalysisResultMappings<any, any> | null {
-    for (const mappings of [allCspPtcMappings, allPvMappings]) {
-      const compResultMapping = mappings.find(m => m.componentId === componentId);
-      if (compResultMapping) {
-        return compResultMapping.resultMapping;
-      }
+    const compResultMapping = allMappings.find(m => m.componentId === componentId);
+    if (compResultMapping) {
+      return compResultMapping.resultMapping;
     }
 
     return null;
@@ -190,4 +187,12 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
 
     return rmMappingEntriesValues;
   }     
+
+  public getEntriesForObservations(): AnalysisResultMappingEntry<T>[] {
+    return this.analysisResultMapping.filter(e => e.enableForRefMeasure);
+  }
+
+  public getEntryId(mappingEntry: AnalysisResultMappingEntry<T>): string {
+    return `${mappingEntry.keyFigureId}__${this.getPropertyName(mappingEntry)}`;
+  }
 }

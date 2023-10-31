@@ -1,6 +1,13 @@
 <template>
   <app-content :title="$t('plant-settings')" :navback="true" navbackPath="/plants">
-    <app-custom-component-properties v-if="plant" :plant="plant" />
+    <b-tabs v-if="plant">
+      <b-tab :title="$t('component-properties')">
+        <app-custom-component-properties :plant="plant" />
+      </b-tab>
+      <b-tab :title="$t('performance-indicators')">
+        <app-enabled-pi-fields :plant="plant" />
+      </b-tab>
+    </b-tabs>
   </app-content>
 </template>
 
@@ -14,6 +21,7 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue"
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import AppCustomComponentProperties from "./custom-component-properties.vue";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
+import AppEnabledPiFields from "./enabled-pi-fields.vue";
 
 @Component({
   name: "app-plant-settings",
@@ -22,6 +30,7 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
     AppButton,
     AppPlantSettings,
     AppCustomComponentProperties,
+    AppEnabledPiFields,
   },
 })
 export default class AppPlantSettings extends BaseAuthComponent {
