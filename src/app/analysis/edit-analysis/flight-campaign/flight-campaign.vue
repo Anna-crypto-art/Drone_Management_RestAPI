@@ -315,6 +315,14 @@ export default class AppAnalysisFlightCampaigns extends BaseAuthComponent {
         throw { error: "INVALID_OR_MISSING_DRONE_SELECTION", message: "Please select a drone"}
       }
 
+      if (this.newFlightCampaign.orderProductPackageIds.length == 0 && !this.isSuperAdmin) {
+        throw { error: "MISSING_PRODUCT_PACKAGE_SELECTION", message: "Please select a product package"}
+      }
+
+      if (this.newFlightCampaign.orderProductPackageIds.length == 0 && this.newFlightCampaign.forceAddFlightTypeIds.length == 0 && this.isSuperAdmin) {
+        throw { error: "MISSING_PRODUCT_PACKAGE_OR_FLIGHT_TYPE", message: "Please select a product package or additional flight type"}
+      }
+
       await volateqApi.createFlightCampaign({
         name: this.newFlightCampaign.name,
         analysis_id: this.newFlightCampaign.analysisId,
