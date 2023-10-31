@@ -6,13 +6,14 @@
           :label="compEntry.componentName"
         >
           <app-multiselect v-model="compEntry.selected"
-            :options="compEntry.options" 
+            :options="compEntry.options"
             :allowEmpty="true"
+            @change="onChange"
           />
         </b-form-group>
         <div class="mar-top">
-          <app-button type="submit" :loading="loading" :disabled="enabledPiFieldsChanged" cls="mar-left-half pull-right">{{ $t("apply") }}</app-button>
-          <app-button type="button" variant="secondary" :loading="cancelLoading" cls="pull-right" :disabled="enabledPiFieldsChanged" @click="onCancel">{{ $t("cancel") }}</app-button>
+          <app-button type="submit" :loading="loading" :disabled="!enabledPiFieldsChanged" cls="mar-left-half pull-right">{{ $t("apply") }}</app-button>
+          <app-button type="button" variant="secondary" :loading="cancelLoading" cls="pull-right" :disabled="!enabledPiFieldsChanged" @click="onCancel">{{ $t("cancel") }}</app-button>
           <div class="clear" />
         </div>
       </b-form>
@@ -31,7 +32,7 @@ import { apiComponentNames } from '@/app/shared/services/volateq-api/api-compone
 import { apiTechnologyComponents } from '@/app/shared/services/volateq-api/api-components/api-components';
 import { allMappings } from '@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping';
 import { CatchError } from '@/app/shared/services/helper/catch-helper';
-import { ComponentEnabledPiFields } from './types';
+import { ComponentEnabledPiFields, PiField } from './types';
 import { AnalysisResultMappingHelper } from '@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper';
 import AppMultiselect from '@/app/shared/components/app-multiselect/app-multiselect.vue';
 
@@ -69,9 +70,35 @@ export default class AppEnabledPiFields extends BaseAuthComponent {
     window.onbeforeunload = () => undefined;
   }
 
+  onChange() {
+    this.enabledPiFieldsChanged = true;
+  }
+
   @CatchError("loading")
-  onSubmit() {
-    // blub
+  async onSubmit() {
+    const deletedPiFieldIds: string[] = [];
+    const newPiFields: PiField[] = [];
+
+    for (const componentEntry of this.componentEntries) {
+      deletedPiFieldIds.push(...componentEntry.piFields
+        .filter(f => f.enabled_pi_field_id && !componentEntry.selected.find(s => s === f.id))
+        .map(f => f.enabled_pi_field_id!));
+
+      newPiFields.push(...componentEntry.piFields
+        .filter(f => !f.enabled_pi_field_id && componentEntry.selected.find(s => s === f.id)));
+    }
+
+    if (deletedPiFieldIds.length > 0) {
+      await volateqApi.disablePiFields(this.plant.id, { enable_pi_field_ids: deletedPiFieldIds });
+    }
+    if (newPiFields.length > 0) {
+      await volateqApi.enablePiFields(this.plant.id, { pi_fields: newPiFields.map(f => ({
+        key_figure_id: f.keyFigureId,
+        pi_field_name: f.piFieldName,
+      }))});
+    }
+
+    this.refreshComponentEntries();
   }
 
   @CatchError("cancelLoading")
@@ -86,9 +113,6 @@ export default class AppEnabledPiFields extends BaseAuthComponent {
 
     const apiComponents = apiTechnologyComponents[this.plant.technology_id];
     for (const apiComponent of apiComponents) {
-      console.log("allMappings", allMappings)
-      console.log("apiComponents", apiComponents)
-
       const mappings = allMappings.find(a => a.componentId === apiComponent);
       if (mappings) {
         const mappingHelper = new AnalysisResultMappingHelper(mappings.resultMapping);
@@ -103,11 +127,17 @@ export default class AppEnabledPiFields extends BaseAuthComponent {
             componentName: this.$t(apiComponentNames[apiComponent]).toString(),
             options: entries.map(e => ({ id: mappingHelper.getEntryId(e), label: this.$t(e.transName).toString() })),
             selected: selectedEntries.map(e => mappingHelper.getEntryId(e)),
-            piFields: entries.map(e => ({ 
-              id: mappingHelper.getEntryId(e),
-              keyFigureId: e.keyFigureId!, 
-              piFieldName: mappingHelper.getPropertyName(e),
-            })),
+            piFields: entries.map(e => {
+              const entryId = mappingHelper.getEntryId(e);
+              return {
+                id: entryId,
+                keyFigureId: e.keyFigureId!, 
+                piFieldName: mappingHelper.getPropertyName(e),
+                enabled_pi_field_id: enabledPiFields
+                  .find(pi => pi.key_figure_id === e.keyFigureId && pi.pi_field_name === mappingHelper.getPropertyName(e))
+                  ?.id
+              };
+            }),
           });
         }
       }

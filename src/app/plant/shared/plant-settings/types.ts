@@ -21,6 +21,7 @@ export interface PiField {
   id: string;
   keyFigureId: ApiKeyFigure;
   piFieldName: string;
+  enabled_pi_field_id?: string;
 }
 
 export interface ComponentEnabledPiFields {

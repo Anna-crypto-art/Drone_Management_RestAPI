@@ -1,5 +1,5 @@
 <template>
-  <app-content :title="$t('new-data-upload')" :navback="true" :subtitle="plantName" eventId="newAnalysis">
+  <app-content :title="$t('new-data-upload')" :subtitle="plantName" eventId="newAnalysis" navbackPath="/analyses">
     <div class="app-new-analysis mar-bottom-2x">
       <b-form-group v-show="plantOptions.length > 1" label-cols-lg="2" :label="$t('plant')">
         <b-form-select required v-model="selectedPlantId" :options="plantOptions"></b-form-select>

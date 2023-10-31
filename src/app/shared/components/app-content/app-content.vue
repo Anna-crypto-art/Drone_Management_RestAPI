@@ -3,10 +3,10 @@
     <app-header v-if="showHeader"></app-header>
     <div class="app-content">
       <b-container>
-        <div v-if="navback" class="app-content-navback">
-          <router-link class="link" :to="navbackPath">
+        <div v-if="navbackPath" class="app-content-navback">
+          <a :href="navbackPath" class="link">
             <b-icon icon="chevron-left"></b-icon> {{ $t("back-to-overview") }}
-          </router-link>
+          </a>
         </div>
         <div class="app-content-title">
           <h1><span v-html="title"></span> <app-super-admin-marker v-if="superAdminProtected" /></h1>
@@ -52,11 +52,10 @@ import { BaseAuthComponent } from "../base-auth-component/base-auth-component";
 export default class AppContent extends BaseAuthComponent {
   @Prop({ required: true }) title: string | undefined;
   @Prop() subtitle: string | undefined;
-  @Prop({ default: false }) navback: boolean | undefined;
+  @Prop({ default: "" }) navbackPath!: string;
   @Prop({ default: true }) showHeader!: boolean;
   @Prop({ default: null }) eventId!: string | null;
   @Prop({ default: false }) superAdminProtected!: boolean;
-  @Prop() navbackPath: string | undefined;
 
   alert: AppAlert = { msg: "", variant: "info" };
   alertId: AppAlert = { msg: "", variant: "info" };

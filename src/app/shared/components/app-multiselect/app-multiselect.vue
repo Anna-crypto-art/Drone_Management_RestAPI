@@ -65,11 +65,13 @@ export default class AppMultiselect extends Vue {
 
     this.removeEmptyOption();
 
-    if (Array.isArray(this.innerValue)) {
-      this.$emit("input", this.innerValue.map(val => val.id));
-    } else {
-      this.$emit("input", this.innerValue?.id);
-    }
+    this.emitValue();
+  }
+  
+  private emitValue() {
+    const val = Array.isArray(this.innerValue) ? this.innerValue.map(val => val.id) : this.innerValue?.id;
+    this.$emit("input", val);
+    this.$emit("change", val);
   }
 
   private addEmptyOption() {

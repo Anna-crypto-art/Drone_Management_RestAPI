@@ -1,5 +1,5 @@
 <template>
-  <app-content :title="$t('plant-settings')" :navback="true" navbackPath="/plants">
+  <app-content :title="$t('plant-settings')" navbackPath="/plants">
     <b-tabs v-if="plant">
       <b-tab :title="$t('component-properties')">
         <app-custom-component-properties :plant="plant" />

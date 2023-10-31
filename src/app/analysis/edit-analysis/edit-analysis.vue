@@ -1,5 +1,5 @@
 <template>
-  <app-content v-if="analysis" :title="analysis.name || ''" :navback="true" :eventId="analysis.id" navbackPath="/analyses">
+  <app-content v-if="analysis" :title="analysis.name || ''" :eventId="analysis.id" navbackPath="/analyses">
     <template #subtitle>
       <div class="mar-top">
         <app-step-progress :steps="analysisProgressSteps" />
