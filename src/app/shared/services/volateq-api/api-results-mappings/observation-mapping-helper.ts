@@ -3,30 +3,57 @@ import { ObservationColumn, ObservationSchema } from "../api-schemas/observation
 import { i18n } from "@/main";
 import dateHelper from "../../helper/date-helper";
 import { getUserName } from "../../helper/user-helper";
+import { AnalysisResultMappingHelper } from "./analysis-result-mapping-helper";
 
 export class ObservationMappingHelper {
   constructor(
     private readonly columns: ObservationColumn[],
   ) {}
 
-  public toFeatureInfos(observation: ObservationSchema, ccpIds?: string[]): FeatureInfos<ObservFeatureInfo> {
+  public toFeatureInfos(observation: ObservationSchema, ccpIds?: string[], piIds?: string[]): FeatureInfos<ObservFeatureInfo> {
     const featureInfos: ObservFeatureInfo[] = [];
     
     for (const columnId in observation.column_values) {
-      const ccpColumn = this.columns.find(c => c.id === columnId);
-      if (ccpColumn) {
-        const hasSelectedCcp = ccpIds && ccpIds.includes(ccpColumn.ccp_column.custom_component_property.id) || false
-        featureInfos.push({
-          type: FeatureInfoType.OBSERVATION,
-          id: ccpColumn.id,
-          name: ccpColumn.ccp_column.custom_component_property.name,
-          value: observation.column_values[columnId].toString(),
-          descr: ccpColumn.ccp_column.custom_component_property.description,
-          bold: hasSelectedCcp,
-          collapsable: hasSelectedCcp,
-          hidden: !hasSelectedCcp,
-          observation,
-        });
+      const observColumn = this.columns.find(c => c.id === columnId);
+      if (observColumn) {
+        if (observColumn.ccp_column) {
+          const ccpColumn = observColumn.ccp_column;
+          const hasSelectedCcp = ccpIds && ccpIds.includes(ccpColumn.custom_component_property.id) || false
+          
+          featureInfos.push({
+            type: FeatureInfoType.OBSERVATION,
+            id: observColumn.id,
+            name: ccpColumn.custom_component_property.name,
+            value: observation.column_values[columnId].toString(),
+            descr: ccpColumn.custom_component_property.description,
+            bold: hasSelectedCcp,
+            collapsable: hasSelectedCcp,
+            hidden: !hasSelectedCcp,
+            observation,
+          });
+        } else if (observColumn.pi_column) {
+          const piColumn = observColumn.pi_column;
+          const resultMappings = AnalysisResultMappingHelper.getMappingsByComponentId(observation.fieldgeometry_component.component_id)!;
+          const mappingHelper = new AnalysisResultMappingHelper(resultMappings);
+          const mappingEntry = mappingHelper.findEntry(piColumn.pi_field_name, piColumn.key_figure_id);
+          
+          if (mappingEntry) {
+            const hasSelectedPi = piIds?.includes(mappingHelper.getEntryId(mappingEntry)) || false;
+
+            featureInfos.push({
+              ...mappingHelper.toFeatureInfo(
+                mappingEntry,
+                observation.column_values[columnId].toString(),
+                FeatureInfoType.OBSERVATION, 
+              ),
+              type: FeatureInfoType.OBSERVATION,
+              bold: hasSelectedPi,
+              collapsable: hasSelectedPi,
+              hidden: !hasSelectedPi,
+              observation,
+            });
+          }
+        }
       }
     }
 

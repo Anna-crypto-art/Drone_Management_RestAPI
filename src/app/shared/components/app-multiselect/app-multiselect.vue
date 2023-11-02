@@ -1,5 +1,5 @@
 <template>
-  <div class="app-multiselect">
+  <div class="app-multiselect" :class="{ small }">
     <multiselect 
       label="label"
       track-by="id"
@@ -39,6 +39,7 @@ export default class AppMultiselect extends Vue {
   @Prop({ default: false }) readonly!: boolean;
   @Prop({ default: false }) singleSelect!: boolean;
   @Prop({ default: false }) allowEmpty!: boolean;
+  @Prop({ default: false }) small!: boolean
 
   innerValue: MultiselectOption | MultiselectOption[] | null = null;
 
@@ -114,6 +115,27 @@ export default class AppMultiselect extends Vue {
 
 .app-multiselect {
   position: relative;
+
+  &.small {
+    .multiselect {
+      min-height: 30px;
+    }
+    .multiselect__select {
+      height: 28px;
+      top: 3px;
+      width: 30px;
+    }
+    .multiselect__tags {
+      min-height: 30px;
+      padding-top: 4px;
+      padding-left: 3px;
+
+      .multiselect__single {
+        margin-bottom: 0;
+        font-size: 0.875rem;
+      }
+    }
+  }
 
   .multiselect__tags {
     border-radius: 0;

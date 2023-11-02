@@ -1,5 +1,12 @@
 <template>
-  <b-modal class="app-modal-form" :id="id" :ok-title="okTitle" :cancel-title="cancelTitle" :size="size" no-close-on-backdrop>
+  <b-modal class="app-modal-form" 
+    :id="id"
+    :ok-title="okTitle"
+    :cancel-title="cancelTitle"
+    :size="size"
+    no-close-on-backdrop
+    :body-class="{ squash }"
+  >
     <template v-slot:modal-title>
       <div class="app-modal-form-title">
         <slot name="modal-title">
@@ -51,6 +58,7 @@ export default class AppModalForm extends BaseAuthComponent implements IAppModal
   @Prop({ default: true }) showCancelButton!: boolean
   @Prop({ default: undefined }) size!: "sm" | "lg" | "xl" | undefined;
   @Prop({ default: false }) submitOnButtonClickOnly!: boolean;
+  @Prop({ default: false }) squash!: boolean;
 
   showAlert = false;
   alertMsg = "";
@@ -120,6 +128,16 @@ export default class AppModalForm extends BaseAuthComponent implements IAppModal
 
 <style lang="scss">
 @import "@/scss/_colors.scss";
+.modal-body.squash {
+  padding-top: 0;
+  padding-bottom: 0;
+
+  .app-modal-form-info-area  {
+    padding-top: 1em;
+    padding-bottom: 1em;
+  }
+}
+
 
 .app-modal-form {
   &-title {

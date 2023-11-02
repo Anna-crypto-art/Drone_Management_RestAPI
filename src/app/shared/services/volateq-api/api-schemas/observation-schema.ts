@@ -1,3 +1,4 @@
+import { ApiKeyFigure } from "../api-key-figures";
 import { CustomComponentPropertySchema } from "./custom-component-property-schema";
 import { FieldgeometryComponentSchema } from "./fieldgeometry-component-schema";
 import { SimpleUserSchema } from "./user-schemas";
@@ -46,9 +47,16 @@ export interface CcpColumn {
   count?: number;
 }
 
+export interface PiColumn {
+  key_figure_id: ApiKeyFigure;
+  pi_field_name: string;
+  count?: number;
+}
+
 export interface ObservationColumn {
   id: string;
-  ccp_column: CcpColumn;
+  ccp_column?: CcpColumn;
+  pi_column?: PiColumn;
 }
 
 export type ObservationValue = string | number | boolean;

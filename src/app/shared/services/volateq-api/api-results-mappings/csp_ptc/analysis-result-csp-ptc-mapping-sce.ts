@@ -2,7 +2,7 @@ import { FilterFieldType } from "@/app/plant/shared/filter-fields/types";
 import { ApiKeyFigure } from "../../api-key-figures";
 import { AnalysisResultCspPtcSceComparedSchema, AnalysisResultCspPtcSceSchema } from "../../api-schemas/analysis-result-csp-ptc-sce-schema";
 import analysisResultMappingBase from "../analysis-result-mapping-base";
-import { AnalysisResultMappings } from "../types";
+import { AnalysisResultMappings, PIDataType } from "../types";
 
 const analysisResultCspPtcMappingSce: AnalysisResultMappings<
   AnalysisResultCspPtcSceSchema, AnalysisResultCspPtcSceComparedSchema> = [
@@ -12,16 +12,18 @@ const analysisResultCspPtcMappingSce: AnalysisResultMappings<
     transName: "actual-angle",
     transDescr: "actual-angle_expl",
     keyFigureId: ApiKeyFigure.SCE_ORIENTATION_ID,
-    filterType: FilterFieldType.NUMERIC_EXTENDED,
+    dataType: PIDataType.NUMERIC,
+    enableForFilter: true,
     unit: "°",
-    enableForRefMeasure: true,
+    enableForObservation: true,
   },
   {
     getValue: r => r.alignment_deviation_to_drive,
     transName: "sce-alignment-offset",
     transDescr: "sce-alignment-offset_expl",
     keyFigureId: ApiKeyFigure.SCE_ALIGNMENT_ID,
-    filterType: FilterFieldType.NUMERIC_EXTENDED,
+    dataType: PIDataType.NUMERIC,
+    enableForFilter: true,
     enableForDiagram: true,
     getDiffValue: r => r.alignment_deviation_to_drive__diff,
     unit: "°",
@@ -31,7 +33,8 @@ const analysisResultCspPtcMappingSce: AnalysisResultMappings<
     transName: "uncertainty",
     transDescr: "uncertainty_expl",
     keyFigureId: ApiKeyFigure.SCE_ORIENTATION_ID,
-    filterType: FilterFieldType.NUMERIC_EXTENDED,
+    dataType: PIDataType.NUMERIC,
+    enableForFilter: true,
     unit: "°",
   },
   {
@@ -39,7 +42,8 @@ const analysisResultCspPtcMappingSce: AnalysisResultMappings<
     transName: "sce-slope-deviation",
     transDescr: "sce-slope-deviation_expl",
     keyFigureId: ApiKeyFigure.SCE_SDX_ID,
-    filterType: FilterFieldType.NUMERIC_EXTENDED,
+    dataType: PIDataType.NUMERIC,
+    enableForFilter: true,
     enableForDiagram: true,
     getDiffValue: r => r.sdx_rms_value__diff,
     unit: "[mrad]",

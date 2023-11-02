@@ -55,10 +55,6 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
     this.created();
   }
 
-  public getDisplayName(): string {
-    return i18n.t(this.name).toString();
-  }
-
   protected created(): void {/* override me */}
 
   protected getAddStyles(feature: FeatureLike): Style[] | undefined {

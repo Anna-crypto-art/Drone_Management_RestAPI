@@ -2,7 +2,7 @@ import { FilterFieldType } from "@/app/plant/shared/filter-fields/types";
 import { ApiKeyFigure } from "../../api-key-figures";
 import { AnalysisResultCspPtcScaComparedSchema, AnalysisResultCspPtcScaSchema } from "../../api-schemas/analysis-result-csp-ptc-sca-schema";
 import analysisResultMappingBase from "../analysis-result-mapping-base";
-import { AnalysisResultMappings } from "../types";
+import { AnalysisResultMappings, PIDataType } from "../types";
 
 const analysisResultCspPtcMappingSca: AnalysisResultMappings<
   AnalysisResultCspPtcScaSchema, AnalysisResultCspPtcScaComparedSchema> = [
@@ -12,7 +12,8 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
     transName: "angle-value",
     transDescr: "angle-value_expl",
     keyFigureId: ApiKeyFigure.SCA_ORIENTATION_ID,
-    filterType: FilterFieldType.NUMERIC_EXTENDED,
+    dataType: PIDataType.NUMERIC,
+    enableForFilter: true,
     unit: "°",
   },
   {
@@ -20,16 +21,18 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
     transName: "orientation-at-drive",
     transDescr: "orientation-at-drive_expl",
     keyFigureId: ApiKeyFigure.SCA_ORIENTATION_ID,
-    filterType: FilterFieldType.NUMERIC_EXTENDED,
+    dataType: PIDataType.NUMERIC,
+    enableForFilter: true,
     unit: "°",
-    enableForRefMeasure: true,
+    enableForObservation: true,
   },
   {
     getValue: r => r.uncertainty_at_drive,
     transName: "uncertainty",
     transDescr: "uncertainty_expl",
     keyFigureId: ApiKeyFigure.SCA_ORIENTATION_ID,
-    filterType: FilterFieldType.NUMERIC_EXTENDED,
+    dataType: PIDataType.NUMERIC,
+    enableForFilter: true,
     unit: "°",
   },
   {
@@ -37,7 +40,8 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
     transName: "tracking-offset",
     transDescr: "tracking-offset_expl",
     keyFigureId: ApiKeyFigure.SCA_TRACKING_DEVIATION_ID,
-    filterType: FilterFieldType.NUMERIC_EXTENDED,
+    dataType: PIDataType.NUMERIC,
+    enableForFilter: true,
     enableForDiagram: true,
     unit: "°",
   },
@@ -46,7 +50,8 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
     transName: "average-tracking-offset",
     transDescr: "average-tracking-offset_expl",
     keyFigureId: ApiKeyFigure.SCA_TRACKING_DEVIATION_ID,
-    filterType: FilterFieldType.NUMERIC_EXTENDED,
+    dataType: PIDataType.NUMERIC,
+    enableForFilter: true,
     enableForDiagram: true,
     unit: "°",
     getDiffValue: r => r.average_tracking_offset__diff,
@@ -56,7 +61,8 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
     transName: "torsion-caused-friction-mean",
     transDescr: "torsion-caused-friction-mean_expl",
     keyFigureId: ApiKeyFigure.SCA_FRICTION_ID,
-    filterType: FilterFieldType.NUMERIC_EXTENDED,
+    dataType: PIDataType.NUMERIC,
+    enableForFilter: true,
     enableForDiagram: true,
     getDiffValue: r => r.torsion_caused_friction_mean__diff,
     unit: "°",
@@ -66,7 +72,8 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
     transName: "sca-slope-deviation",
     transDescr: "sca-slope-deviation_expl",
     keyFigureId: ApiKeyFigure.SCA_SDX_ID,
-    filterType: FilterFieldType.NUMERIC_EXTENDED,
+    dataType: PIDataType.NUMERIC,
+    enableForFilter: true,
     enableForDiagram: true,
     getDiffValue: r => r.sdx_rms_value__diff,
     unit: "[mrad]",
@@ -76,16 +83,18 @@ const analysisResultCspPtcMappingSca: AnalysisResultMappings<
     transName: "ball-joint-south-damaged",
     transDescr: "ball-joint-damaged_descr",
     keyFigureId: ApiKeyFigure.SCA_BALL_JOINT_FRICTION_ID,
-    filterType: FilterFieldType.BOOLEAN,
-    enableForRefMeasure: true,
+    dataType: PIDataType.BOOLEAN,
+    enableForFilter: true,
+    enableForObservation: true,
   },
   {
     getValue: r => r.is_damaged_ball_joint_north,
     transName: "ball-joint-north-damaged",
     transDescr: "ball-joint-damaged_descr",
     keyFigureId: ApiKeyFigure.SCA_BALL_JOINT_FRICTION_ID,
-    filterType: FilterFieldType.BOOLEAN,
-    enableForRefMeasure: true,
+    dataType: PIDataType.BOOLEAN,
+    enableForFilter: true,
+    enableForObservation: true,
   }
 ];
 

@@ -172,12 +172,12 @@ export default class AppReferenceMeasurements extends BaseAuthComponent implemen
   }
 
   private updateFilterFields() {
-    this.filterFields = this.getMappingHelper().getEntries()
-      .filter(e => e.enableForRefMeasure && e.filterType !== undefined)
+    this.filterFields = this.getMappingHelper().getEntriesForObservations()
+      .filter(e => e.dataType)
       .map(e => ({
         key: e.transName,
         name: this.$t(e.transName).toString(),
-        type: e.filterType == FilterFieldType.NUMERIC_EXTENDED ? FilterFieldType.NUMERIC_SIMPLE : e.filterType!,
+        type: this.getMappingHelper().convertPiDataTypeToFilterFieldType(e.dataType)!,
       }));
   }
 

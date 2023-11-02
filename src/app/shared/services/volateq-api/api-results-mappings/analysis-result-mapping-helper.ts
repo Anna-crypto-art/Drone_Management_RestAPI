@@ -1,6 +1,6 @@
 import { AnalysisResultSchemaBase } from "../api-schemas/analysis-result-schema-base";
 import { AnalysisResultDetailedSchema } from "../api-schemas/analysis-result-schema";
-import { AnalysisResultMappingEntry, AnalysisResultMappings, RefMeasureMappingEntryValue } from "./types";
+import { AnalysisResultMappingEntry, AnalysisResultMappingEntryWithPiFieldName, AnalysisResultMappings, PIDataType, RefMeasureMappingEntryValue } from "./types";
 import VueI18n from "vue-i18n";
 import { FilterFieldType } from "@/app/plant/shared/filter-fields/types";
 import { AppTableColumns } from "@/app/shared/components/app-table/types";
@@ -8,8 +8,9 @@ import { ApiComponent } from "../api-components/api-components";
 import { ApiKeyFigure } from "../api-key-figures";
 import { FeatureInfo, FeatureInfoType } from "@/app/plant/shared/map-view/map-view-popup/types";
 import { i18n } from "@/main";
-import { RefMeasureEntry, RefMeasureEntryKeyFigureSchema, RefMeasureEntryValue } from "../api-schemas/reference-measurement-schema";
+import { RefMeasureEntry, RefMeasureEntryKeyFigureSchema } from "../api-schemas/reference-measurement-schema";
 import { allMappings } from "./analysis-result-mapping";
+import { EnabledPiFieldsService } from "@/app/plant/shared/plant-settings/enabled-pi-fields-service";
 
 export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
   private compareAnalysisResult: AnalysisResultDetailedSchema | null = null;
@@ -22,6 +23,33 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
     }
 
     return null;
+  }
+
+  public static getMappingsByKeyFigureId(keyFigureId: ApiKeyFigure): AnalysisResultMappingEntry[] {
+    for (const compResultMapping of allMappings) {
+      const mappingEntries = compResultMapping.resultMapping.filter(e => e.keyFigureId == keyFigureId);
+      if (mappingEntries.length > 0) {
+        return mappingEntries;
+      }
+    }
+
+    return [];
+  }
+
+  public static getPropertyName(mappingEntry: AnalysisResultMappingEntry): string {
+    if (mappingEntry.transName === "pcs") {
+      // special case.. regex is not working for this case...
+      return "fieldgeometry_component.kks";
+    }
+
+    return mappingEntry.getValue.toString().match(/({|=>)[^.]*\.([^;}]*)/)![2];
+  }
+
+  public static getEntryId(mappingEntry: AnalysisResultMappingEntry<any> | AnalysisResultMappingEntryWithPiFieldName<any>): string {
+    const mappingEntryWithPiFieldName: AnalysisResultMappingEntryWithPiFieldName = "piFieldName" in mappingEntry ? 
+        mappingEntry : { ...mappingEntry, piFieldName: this.getPropertyName(mappingEntry) };
+
+    return `__${mappingEntry.keyFigureId}__${mappingEntryWithPiFieldName.piFieldName}__`;
   }
 
   constructor(
@@ -56,11 +84,21 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
       .filter(entry => entry.enableForDiagram && (!this.compareAnalysisResult || !!entry.getDiffValue));
   }
 
-  public getFields(): { key: string, filterType?: FilterFieldType }[] {
-    return this.getEntries().map(entry => ({
+  public getFilterFields(): { key: string, filterType?: FilterFieldType }[] {
+    return this.getEntries().filter(e => e.enableForFilter).map(entry => ({
       key: entry.transName,
-      filterType: entry.filterType
+      filterType: this.convertPiDataTypeToFilterFieldType(entry.dataType)
     }));
+  }
+
+  public convertPiDataTypeToFilterFieldType(piDataType?: PIDataType): FilterFieldType | undefined {
+    switch (piDataType) {
+      case PIDataType.BOOLEAN:
+        return FilterFieldType.BOOLEAN;
+
+      case PIDataType.NUMERIC:
+        return FilterFieldType.NUMERIC_EXTENDED;
+    }
   }
 
   public getColumns(transFunc: (transName: string) => VueI18n.TranslateResult): AppTableColumns {
@@ -133,12 +171,7 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
   }
 
   public getPropertyName(mappingEntry: AnalysisResultMappingEntry<T>): string {
-    if (mappingEntry.transName === "pcs") {
-      // special case.. regex is not working for this case...
-      return "fieldgeometry_component.kks";
-    }
-
-    return mappingEntry.getValue.toString().match(/({|=>)[^.]*\.([^;}]*)/)![2];
+    return AnalysisResultMappingHelper.getPropertyName(mappingEntry as any);
   }
 
   public toFeatureInfo(
@@ -188,11 +221,22 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
     return rmMappingEntriesValues;
   }     
 
-  public getEntriesForObservations(): AnalysisResultMappingEntry<T>[] {
-    return this.analysisResultMapping.filter(e => e.enableForRefMeasure);
+  public getEntriesForObservations(): AnalysisResultMappingEntryWithPiFieldName<T>[] {
+    return this.withPiFieldNames().filter(e => e.enableForRefMeasure || e.enableForObservation);
   }
 
-  public getEntryId(mappingEntry: AnalysisResultMappingEntry<T>): string {
-    return `${mappingEntry.keyFigureId}__${this.getPropertyName(mappingEntry)}`;
+  public getEntryId(mappingEntry: AnalysisResultMappingEntry<T> | AnalysisResultMappingEntryWithPiFieldName<T>): string {
+    return AnalysisResultMappingHelper.getEntryId(mappingEntry);
+  }
+
+  public async getEnabledEntries(plantId: string): Promise<AnalysisResultMappingEntryWithPiFieldName<T>[]> {
+    const enabledPiFields = await EnabledPiFieldsService.get(plantId).getEnabledPiFields();
+
+    return this.withPiFieldNames().filter(e => 
+      enabledPiFields.find(pi => pi.pi_field_name === e.piFieldName && pi.key_figure.id === e.keyFigureId));
+  }
+
+  public withPiFieldNames(): AnalysisResultMappingEntryWithPiFieldName<T>[] {
+    return this.analysisResultMapping.map(e => ({...e, piFieldName: this.getPropertyName(e) }));
   }
 }

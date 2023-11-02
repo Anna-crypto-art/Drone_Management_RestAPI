@@ -14,13 +14,12 @@ import AppExplanation from "@/app/shared/components/app-explanation/app-explanat
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Component, Prop } from "vue-property-decorator";
 import { ApiComponent } from "@/app/shared/services/volateq-api/api-components/api-components";
-import { AnalysisResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
+import { AnalysisResultMappings, PIDataType } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { allCspPtcMappings } from "@/app/shared/services/volateq-api/api-results-mappings/csp_ptc/analysis-result-csp-ptc-mapping";
 import { TableColumnSelect, TableFilterRequest } from "@/app/shared/services/volateq-api/api-requests/common/table-requests";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
 import AppDiagramOverview from "@/app/plant/shared/diagram/diagram-overview.vue";
 import { DiagramNumberBox, DiagramResultMappings } from "../shared/diagram/types";
-import { FilterFieldType } from "../shared/filter-fields/types";
 import { ApiKeyFigure } from "@/app/shared/services/volateq-api/api-key-figures";
 import { LayerColor } from "../shared/map-view/layers/types";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
@@ -192,7 +191,7 @@ export default class AppPlantDiagramViewCspPtc extends BaseAuthComponent impleme
             label: columnName + "_" + swivelClass,
           });
         }
-      } else if (entry.filterType === FilterFieldType.BOOLEAN) {
+      } else if (entry.dataType === PIDataType.BOOLEAN) {
         columnsSelection.push({
           column: { name:  columnName, entity_type: "PI" },
           func: "sum",

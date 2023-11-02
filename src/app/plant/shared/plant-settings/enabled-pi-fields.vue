@@ -120,7 +120,7 @@ export default class AppEnabledPiFields extends BaseAuthComponent {
         const entries = mappingHelper.getEntriesForObservations();
         if (entries.length > 0) {
           const selectedEntries = entries.filter(e => enabledPiFields.find(pi => {
-            return mappingHelper.getPropertyName(e) === pi.pi_field_name && e.keyFigureId === pi.key_figure_id
+            return e.piFieldName === pi.pi_field_name && e.keyFigureId === pi.key_figure.id
           }));
   
           componentEntries.push({
@@ -134,7 +134,7 @@ export default class AppEnabledPiFields extends BaseAuthComponent {
                 keyFigureId: e.keyFigureId!, 
                 piFieldName: mappingHelper.getPropertyName(e),
                 enabled_pi_field_id: enabledPiFields
-                  .find(pi => pi.key_figure_id === e.keyFigureId && pi.pi_field_name === mappingHelper.getPropertyName(e))
+                  .find(pi => pi.key_figure.id === e.keyFigureId && pi.pi_field_name === e.piFieldName)
                   ?.id
               };
             }),

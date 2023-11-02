@@ -32,11 +32,15 @@
             v-b-popover.hover.top="row.item.name.user_names.join(', ')"
           /><br>
           <small class="grayed">{{ $t("count") }}: {{ row.item.name.count }}</small>
-          <div v-if="row.item.name.ccps.length > 0" class="mar-top">
+          <div v-if="row.item.name.ccps.length > 0 || row.item.name.pis.length > 0" class="mar-top">
             <app-badge v-for="ccp in row.item.name.ccps" :key="ccp.ccp_id" :color="getCcpColor(ccp.ccp_id)">
               {{ getCcpName(ccp.ccp_id) }}
             </app-badge>
+            <app-badge v-for="(pi, i) in row.item.name.pis" :key="i" :color="getPiColor(pi)">
+              {{ getPiName(pi) }}
+            </app-badge>
           </div>
+
         </template>
       </app-table>
     </app-table-container>
@@ -57,7 +61,7 @@ import AppButton from "@/app/shared/components/app-button/app-button.vue";
 import AppDatepicker from "@/app/shared/components/app-datepicker/app-datepicker.vue";
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
-import { SummerizedObservations } from "@/app/shared/services/volateq-api/api-schemas/observation-schema";
+import { PiColumn, SummerizedObservations } from "@/app/shared/services/volateq-api/api-schemas/observation-schema";
 import { apiComponentNames } from "@/app/shared/services/volateq-api/api-components/api-components-name";
 import AppBadge from "@/app/shared/components/app-badge/app-badge.vue";
 import { CcpService } from "../../plant-settings/ccp-service";
@@ -69,6 +73,8 @@ import AppIconObservations from "@/app/shared/components/app-icon/app-icon-obser
 import { ObservationSelectionService } from "./observation-selection-service";
 import { RouteQueryHelper } from "../../helper/route-query-helper";
 import { PlantRouteQuery } from "../../types";
+import { keyFigureRainbowColors } from "../../map-view/layers/key-figure-colors";
+import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
 
 @Component({
   name: "app-observation-selection-sidebar",
@@ -212,6 +218,17 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
 
   getCcpName(ccpId: string): string {
     return this.ccpService!.getCcp(ccpId)!.name; 
+  }
+
+  getPiColor(pi: PiColumn): string {
+    return keyFigureRainbowColors[pi.key_figure_id];
+  }
+
+  getPiName(pi: PiColumn): string {
+    const piTransName = AnalysisResultMappingHelper.getMappingsByKeyFigureId(pi.key_figure_id)
+      .find(e => AnalysisResultMappingHelper.getPropertyName(e) === pi.pi_field_name)?.transName || "";
+    
+    return piTransName ? this.$t(piTransName).toString() : "";
   }
 
   private async updateSummerizedObservations() {

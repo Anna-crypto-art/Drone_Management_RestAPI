@@ -94,7 +94,6 @@ import { FeatureInfo, FeatureInfos, FeatureInfoType, ObservationFeatures, Result
 import { BaseLayer } from '../layers/base-layer';
 import { appLocalStorage } from '@/app/shared/services/app-storage/app-storage';
 import { STORAGE_KEY_ENABLERESULTMOD } from '../storage-keys';
-import { FilterFieldType } from '../../filter-fields/types';
 import { analysisResultEventService } from '../../plant-admin-view/analysis-result-event-service';
 import { AnalysisResultEvent } from '../../plant-admin-view/types';
 import AppReferenceMeasurements from '../reference-measurements/reference-measurements.vue';
@@ -113,6 +112,7 @@ import { ObservationCcpLayer } from '../layers/observation-ccp-layer';
 import { ObservationMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/observation-mapping-helper";
 import { userService } from '@/app/shared/services/user-service/user-service';
 import { ObservationSchema } from '@/app/shared/services/volateq-api/api-schemas/observation-schema';
+import { PIDataType } from '@/app/shared/services/volateq-api/api-results-mappings/types';
 
 @Component({
   name: "app-map-view-popup",
@@ -445,7 +445,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
       return;
     }
 
-    if (keyFigureLayers[0].getMappingEntry()?.filterType === FilterFieldType.BOOLEAN) {
+    if (keyFigureLayers[0].getMappingEntry()?.dataType === PIDataType.BOOLEAN) {
       this.resultModModes = ["null", "false", "true"];
     } else {
       this.resultModModes = ["null"];

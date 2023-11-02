@@ -3,7 +3,7 @@ import dateHelper from "../../../helper/date-helper";
 import { ApiKeyFigure } from "../../api-key-figures";
 import { AnalysisResultPvTrackerComparedSchema, AnalysisResultPvTrackerSchema } from "../../api-schemas/analysis-result-pv-tracker-schema";
 import analysisResultMappingBase from "../analysis-result-mapping-base";
-import { AnalysisResultMappings } from "../types";
+import { AnalysisResultMappings, PIDataType } from "../types";
 
 const analysisResultPvMappingTracker: AnalysisResultMappings<
   AnalysisResultPvTrackerSchema, AnalysisResultPvTrackerComparedSchema> = [
@@ -27,15 +27,16 @@ const analysisResultPvMappingTracker: AnalysisResultMappings<
   {
     getValue: r => r.tracking_angle,
     transName: "tracking-angle",
-    filterType: FilterFieldType.NUMERIC_EXTENDED,
+    dataType: PIDataType.NUMERIC,
     getDiffValue: r => r.tracking_angle__diff,
-    enableForRefMeasure: true,
+    enableForObservation: true,
   },
   {
     keyFigureId: ApiKeyFigure.TRACKING_DEVIATION_ID,
     getValue: r => r.tracking_deviation,
     transName: "pv-tracker-tracking-deviation",
-    filterType: FilterFieldType.NUMERIC_EXTENDED,
+    dataType: PIDataType.NUMERIC,
+    enableForFilter: true,
     getDiffValue: r => r.tracking_deviation__diff,
   },
   {
@@ -44,7 +45,8 @@ const analysisResultPvMappingTracker: AnalysisResultMappings<
     transName: "pv-tracker-soiling-level",
     valueDescr: "pv-tracker-soiling-level-",
     transDescr: "pv-tracker-soiling-level_expl",
-    filterType: FilterFieldType.NUMERIC_EXTENDED,
+    dataType: PIDataType.NUMERIC,
+    enableForFilter: true,
     getDiffValue: r => r.soiling_level__diff,
     enableForRefMeasure: true,
   },

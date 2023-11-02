@@ -101,7 +101,7 @@ export default class AppTableComponentFilter extends BaseAuthComponent implement
   async created() {
     this.mappingHelper = new AnalysisResultMappingHelper(this.activeComponent.mapping, this.analysisResult);
 
-    this.piFilterFields = this.mappingHelper.getFields()
+    this.piFilterFields = this.mappingHelper.getFilterFields()
       .filter(field => field.filterType)
       .map(field => ({
         key: field.key,

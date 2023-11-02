@@ -1,13 +1,11 @@
 import { ApiKeyFigure } from "../api-key-figures";
 
 export interface ObservationCCPValueRequest {
-  id?: string;
   ccp_id: string;
   value: string;
 }
 
 export interface ObservationPIValueRequest {
-  id?: string;
   key_figure_id: ApiKeyFigure;
   pi_field_name: string;
   value: string;
