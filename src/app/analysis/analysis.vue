@@ -144,14 +144,9 @@ export default class AppAnalysis extends BaseAuthComponent {
       {
         key: "date",
         label: this.$t("acquisition-date").toString(),
-        sortable: true,
-        formatter: (flownAt: string) => {
-          return dateHelper.toDate(flownAt);
-        },
+        sortable: true
       },
-      { 
-        key: "stateId", label: this.$t("state").toString(), sortable: true,
-      },
+      { key: "stateId", label: this.$t("state").toString(), sortable: true, },
       { key: "productPackages", label: this.$t("product-packages").toString() },
     ];
 
