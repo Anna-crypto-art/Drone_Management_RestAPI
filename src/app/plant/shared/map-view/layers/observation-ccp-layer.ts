@@ -6,30 +6,23 @@ import { DateRange } from "../../observations/types";
 import { ObservFilterValue } from "@/app/shared/services/volateq-api/api-requests/observation-requests";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { ComponentLayer } from "./component-layer";
-import { Style } from "ol/style";
 import { CcpService } from "../../plant-settings/ccp-service";
-import { ObservationGeoJSON } from "./types";
-import { BaseLayer } from "./base-layer";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import { ObservationLayer } from "./observation-layer";
 
-export class ObservationCcpLayer extends BaseLayer {
+export class ObservationCcpLayer extends ObservationLayer {
   protected readonly dataTypeOptionInfo: DataTypeOptionInfo | undefined;
-
-  private geoJSON: ObservationGeoJSON | undefined = undefined; 
 
   constructor(
     plant: PlantSchema,
+    componentLayer: ComponentLayer,
+    dateRange: DateRange,
+    filterValue: ObservFilterValue,
     public readonly ccp: CustomComponentPropertySchema,
-    protected readonly componentLayer: ComponentLayer,
-    protected readonly dateRange: DateRange,
-    public readonly filterValue: ObservFilterValue,
   ) {
-    super(plant);
+    super(plant, componentLayer, dateRange, filterValue);
 
     this.dataTypeOptionInfo = this.getDataTypeOptionInfo();
-
-    this.zIndex = 50;
-    this.invisibleAutoSelection = false;
   }
 
   public get id(): string {
@@ -54,7 +47,7 @@ export class ObservationCcpLayer extends BaseLayer {
 
   public async load(): Promise<GeoJSON<PropsFeature> | undefined> {
     try {
-      this.geoJSON = await volateqApi.getObservationsGeoVisual(
+      this.geoJSON = await volateqApi.getObservationsGeoVisualCcp(
         this.plant.id,
         this.ccp.id,
         this.dateRange.from,
@@ -68,16 +61,6 @@ export class ObservationCcpLayer extends BaseLayer {
     }
 
     return undefined;
-  }
-
-  public getStyle(feature: FeatureLike): Style {
-    const style = (this.componentLayer.style(feature) as Style[])[0];
-
-    style.getStroke()?.setColor(this.color);
-    style.getStroke()?.setWidth(5);
-    style.getFill()?.setColor(this.color);
-
-    return style;
   }
 
   protected get color(): string {

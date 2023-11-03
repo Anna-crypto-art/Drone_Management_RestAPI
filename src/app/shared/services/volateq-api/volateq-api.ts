@@ -976,7 +976,7 @@ export class VolateqAPI extends HttpClientBase {
     await this.delete(`/auth/plant/${plantId}/observation/${observationId}`);
   }
 
-  public async getObservationsGeoVisual(
+  public async getObservationsGeoVisualCcp(
     plantId: string,
     ccpId: string,
     fromDate: string,
@@ -987,12 +987,24 @@ export class VolateqAPI extends HttpClientBase {
       filterValue !== undefined ? { filter_value: filterValue } : undefined);
   }
 
+  public async getObservationsGeoVisualPi(
+    plantId: string,
+    keyFigureId: number,
+    piFieldName: string,
+    fromDate: string,
+    toDate: string,
+    filterValue: ObservFilterValue,
+  ): Promise<any> {
+    return await this.get(`/auth/geo-visual/observations/${plantId}/pi/${keyFigureId}/${piFieldName}/${fromDate}/${toDate}`,
+      filterValue !== undefined ? { filter_value: filterValue } : undefined);
+  }
+
   public async getObservations(
     plantId: string,
     componentId: number,
     dFrom: string,
     dTo: string,
-    params: TableRequest & { ccp_ids?: string[] },
+    params: TableRequest /* DEACTIVATED for know: & { ccp_id?: string[], pi_id?: string[] } */,
     filterParams?: TableFilterRequest,
   ): Promise<TableResultSchema<ObservationSchema, ObservationColumn>> {
     return await this.get(`/auth/plant/${plantId}/observations/${componentId}/${dFrom}/${dTo}${

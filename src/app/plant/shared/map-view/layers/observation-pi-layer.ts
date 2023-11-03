@@ -1,31 +1,25 @@
 import { Legend, PropsFeature } from "../types";
 import { GeoJSON } from "@/app/shared/components/app-map/types";
 import { FeatureLike } from "ol/Feature";
-import { CCPDataType, CustomComponentPropertySchema, DataTypeOptionInfo, NumberRangeInfosSchema, ValueListInfosSchema } from "@/app/shared/services/volateq-api/api-schemas/custom-component-property-schema";
 import { DateRange } from "../../observations/types";
 import { ObservFilterValue } from "@/app/shared/services/volateq-api/api-requests/observation-requests";
 import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { ComponentLayer } from "./component-layer";
-import { Style } from "ol/style";
-import { CcpService } from "../../plant-settings/ccp-service";
-import { KeyFigureBaseLayer, ObservationGeoJSON } from "./types";
-import { BaseLayer } from "./base-layer";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { AnalysisResultMappingEntry } from "@/app/shared/services/volateq-api/api-results-mappings/types";
+import { PI } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
+import { keyFigureRainbowColors } from "./key-figure-colors";
+import { ObservationLayer } from "./observation-layer";
 
-export class ObservationCcpLayer extends BaseLayer {
-  private geoJSON: ObservationGeoJSON | undefined = undefined; 
-
+export class ObservationPiLayer extends ObservationLayer {
   constructor(
     plant: PlantSchema,
-    protected readonly mappingEntry: AnalysisResultMappingEntry,
-    protected readonly dateRange: DateRange,
+    componentLayer: ComponentLayer,
+    dateRange: DateRange,
+    filterValue: ObservFilterValue,
+    public readonly pi: PI,
   ) {
-    super(plant);
-
-    this.zIndex = 50;
-    this.invisibleAutoSelection = false;
+    super(plant, componentLayer, dateRange, filterValue);
   }
 
   public get id(): string {
@@ -33,11 +27,11 @@ export class ObservationCcpLayer extends BaseLayer {
   }
 
   public get name(): string {
-    return this.mappingEntry.transName;
+    return this.pi.transName;
   }
 
   public get nameId(): string {
-    return AnalysisResultMappingHelper.getEntryId(this.mappingEntry);
+    return AnalysisResultMappingHelper.getEntryId(this.pi);
   }
 
   public getPcs(feature: FeatureLike): string | undefined {
@@ -45,27 +39,32 @@ export class ObservationCcpLayer extends BaseLayer {
   }
 
   public async load(): Promise<GeoJSON<PropsFeature> | undefined> {
-    // continue here
-  }
+    try {
+      this.geoJSON = await volateqApi.getObservationsGeoVisualPi(
+        this.plant.id,
+        this.pi.keyFigureId!,
+        this.pi.piFieldName,
+        this.dateRange.from,
+        this.dateRange.to,
+        this.filterValue,
+      );
 
-  public getStyle(feature: FeatureLike): Style {
-    const style = (this.componentLayer.style(feature) as Style[])[0];
+      return this.geoJSON;
+    } catch (e) {
+      this.appLayerCheckbox?.showError(e);
+    }
 
-    style.getStroke()?.setColor(this.color);
-    style.getStroke()?.setWidth(5);
-    style.getFill()?.setColor(this.color);
-
-    return style;
+    return undefined;
   }
 
   protected get color(): string {
-    return this.dataTypeOptionInfo?.color || this.ccp.color || CcpService.defaultColor;
+    return keyFigureRainbowColors[this.pi.keyFigureId!];
   }
 
   public getLegend(): Legend | undefined {
     return {
       id: this.id!,
-      entries: [{ name: this.name + " (" + (this.geoJSON?.features.length || 0) + ")", color: this.color }],
+      entries: [{ name: this.getDisplayName() + " (" + (this.geoJSON?.features.length || 0) + ")", color: this.color }],
     };
   }
 }

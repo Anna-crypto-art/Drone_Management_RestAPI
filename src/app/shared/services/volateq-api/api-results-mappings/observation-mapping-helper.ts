@@ -46,6 +46,7 @@ export class ObservationMappingHelper {
                 observation.column_values[columnId].toString(),
                 FeatureInfoType.OBSERVATION, 
               ),
+              id: observColumn.id,
               type: FeatureInfoType.OBSERVATION,
               bold: hasSelectedPi,
               collapsable: hasSelectedPi,

@@ -113,6 +113,8 @@ import { ObservationMappingHelper } from "@/app/shared/services/volateq-api/api-
 import { userService } from '@/app/shared/services/user-service/user-service';
 import { ObservationSchema } from '@/app/shared/services/volateq-api/api-schemas/observation-schema';
 import { PIDataType } from '@/app/shared/services/volateq-api/api-results-mappings/types';
+import { ObservationLayer } from '../layers/observation-layer';
+import { ObservationPiLayer } from '../layers/observation-pi-layer';
 
 @Component({
   name: "app-map-view-popup",
@@ -456,8 +458,8 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     return this.currentSelectedLayers.filter(l => l instanceof KeyFigureLayer) as KeyFigureBaseLayer[];
   }
 
-  private get selectedObservationLayers(): ObservationCcpLayer[] {
-    return this.currentSelectedLayers.filter(l => l instanceof ObservationCcpLayer) as ObservationCcpLayer[];
+  private get selectedObservationLayers(): ObservationLayer[] {
+    return this.currentSelectedLayers.filter(l => l instanceof ObservationLayer) as ObservationLayer[];
   }
 
   private async setRefMeasureFeatureInfos() {
@@ -523,7 +525,16 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   private async setObservFeatureInfos() {
     if (this.observationSelectionService?.hasSelectedObservations) {
       const observationsLayers = this.selectedObservationLayers;
-      const selectedCcpIds = observationsLayers.map(l => l.ccp.id);
+
+      const selectedCcpIds: string[] = [];
+      const selectedPiIds: string[] = [];
+      for (const observationLayer of observationsLayers) {
+        if (observationLayer instanceof ObservationCcpLayer) {
+          selectedCcpIds.push(observationLayer.ccp.id);
+        } else if (observationLayer instanceof ObservationPiLayer) {
+          selectedPiIds.push(observationLayer.pi.id);
+        }
+      }
 
       if (observationsLayers.length > 0) {
         const observations = await volateqApi.getObservations(
@@ -534,8 +545,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
           {
             search_text: this.pcs,
             search_mode: "equals",
-            limit: selectedCcpIds.length,
-            ccp_ids: selectedCcpIds,
+            limit: 100,
           }
         );
 
@@ -544,7 +554,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
 
         for (const item of observations.items) {
           this.observationFeatures.push({
-            featureInfos: observMappingHelper.toFeatureInfos(item, selectedCcpIds),
+            featureInfos: observMappingHelper.toFeatureInfos(item, selectedCcpIds, selectedPiIds),
             observation: item,
             editable: this.isSuperAdmin || this.isCustomerAdmin || item.created_by_user.email === me.email,
             title: this.$t('observation-of', { date: dateHelper.toDateTime(item.observed_at) }).toString(),

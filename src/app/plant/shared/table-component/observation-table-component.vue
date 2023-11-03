@@ -33,6 +33,7 @@ import { getUserName } from "@/app/shared/services/helper/user-helper";
 import { CustomComponentPropertySchema } from "@/app/shared/services/volateq-api/api-schemas/custom-component-property-schema";
 import { DateRange } from "../observations/types";
 import dateHelper from "@/app/shared/services/helper/date-helper";
+import { PI } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 
 @Component({
   name: "app-observation-table-component",
@@ -46,6 +47,7 @@ export default class AppObservationTableComponent extends BaseAuthComponent impl
   @Prop({ required: true }) plant!: PlantSchema;
   @Prop({ required: true }) activeComponent!: TableTabComponent;
   @Prop({ required: true }) ccps!: CustomComponentPropertySchema[];
+  @Prop({ required: true }) pis!: PI[];
   @Prop({ required: true }) dateRange!: DateRange;
 
   @Ref() table!: IAppTable;
@@ -70,6 +72,11 @@ export default class AppObservationTableComponent extends BaseAuthComponent impl
         key: ccp.id,
         label: ccp.name,
         labelExpl: ccp.description
+      })),
+      ...this.pis.map(pi => ({
+        key: pi.id,
+        label: this.$t(pi.transName).toString(),
+        labelExpl: pi.transDescr && this.$t(pi.transDescr).toString(),
       })),
       { key: "notes", label: this.$t("notes").toString() },
       { key: "createdBy", label: this.$t("created-by").toString() },
@@ -129,6 +136,10 @@ export default class AppObservationTableComponent extends BaseAuthComponent impl
 
         for (const ccp of this.ccps) {
           row[ccp.id] = ccp.id in observation.column_values ? observation.column_values[ccp.id] : "";
+        }
+
+        for (const pi of this.pis) {
+          row[pi.id] = pi.id in observation.column_values ? observation.column_values[pi.id] : "";
         }
 
         results.push(row);

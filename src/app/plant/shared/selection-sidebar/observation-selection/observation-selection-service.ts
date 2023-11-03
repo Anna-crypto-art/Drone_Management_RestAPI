@@ -4,6 +4,8 @@ import { observationSelectEventService } from "./observation-selection-event-ser
 import { IObservationSelectionComponent, ObservationSelectionEvent } from "./types";
 import { CcpService } from "../../plant-settings/ccp-service";
 import { CustomComponentPropertySchema } from "@/app/shared/services/volateq-api/api-schemas/custom-component-property-schema";
+import { AnalysisResultMappingEntry, PI } from "@/app/shared/services/volateq-api/api-results-mappings/types";
+import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
 
 export class ObservationSelectionService {
   private readonly id: string;
@@ -13,6 +15,7 @@ export class ObservationSelectionService {
   public readonly ccpService: CcpService;
 
   public selectedCcps: CustomComponentPropertySchema[] = [];
+  public selectedPIs: PI[] = [];
 
   constructor(
     private readonly observSelectionComponent: IObservationSelectionComponent,
@@ -29,6 +32,9 @@ export class ObservationSelectionService {
         this.summerizedObservations = summerizedObservations || null;
 
         this.selectedCcps = await this.getSelectedCCPs();
+
+        this.selectedPIs = AnalysisResultMappingHelper.getPIs(this.summerizedObservations?.pis
+          .map(pi => ({ keyFigureId: pi.key_figure_id, piFieldName: pi.pi_field_name })) || []);
 
         this.observSelectionComponent.onObservationSelected && 
           await this.observSelectionComponent.onObservationSelected(selectedByQueryRoute);

@@ -1,5 +1,3 @@
-import { FilterFieldType } from "@/app/plant/shared/filter-fields/types";
-import { BvTableField } from "bootstrap-vue";
 import { ApiComponent } from "../api-components/api-components";
 import { ApiKeyFigure } from "../api-key-figures";
 import { AnalysisResultSchemaBase } from "../api-schemas/analysis-result-schema-base";
@@ -30,6 +28,13 @@ export interface AnalysisResultMappingEntry<T extends AnalysisResultSchemaBase =
 
 export interface AnalysisResultMappingEntryWithPiFieldName<T extends AnalysisResultSchemaBase = AnalysisResultSchemaBase> extends AnalysisResultMappingEntry<T> {
   piFieldName: string;
+}
+
+export interface PI extends AnalysisResultMappingEntryWithPiFieldName<AnalysisResultSchemaBase> {
+  id: string;
+  componentId: ApiComponent;
+  keyFigureId: ApiKeyFigure;
+  dataType: PIDataType;
 }
 
 export type AnalysisResultMappings<T extends AnalysisResultSchemaBase, C = any> = AnalysisResultMappingEntry<T, C>[];

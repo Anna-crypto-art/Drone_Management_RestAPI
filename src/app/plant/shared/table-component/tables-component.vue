@@ -40,6 +40,7 @@
               :ref="activeTabComponent.tableRefName"
               :activeComponent="activeTabComponent"
               :ccps="ccps"
+              :pis="pis"
               :plant="plant"
               :dateRange="dateRange"
             />
@@ -58,7 +59,7 @@ import AppTableContainer from "@/app/shared/components/app-table-container/app-t
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
 import { apiComponentNames } from "@/app/shared/services/volateq-api/api-components/api-components-name";
-import { ComponentResultMappings } from "@/app/shared/services/volateq-api/api-results-mappings/types";
+import { ComponentResultMappings, PI } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultDetailedSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema";
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
@@ -138,6 +139,10 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
 
   get ccps(): CustomComponentPropertySchema[] | null {
     return this.observationSelectionService && this.observationSelectionService.selectedCcps;
+  }
+
+  get pis(): PI[] | null {
+    return this.observationSelectionService && this.observationSelectionService.selectedPIs;
   }
 
   get dateRange(): DateRange | null {

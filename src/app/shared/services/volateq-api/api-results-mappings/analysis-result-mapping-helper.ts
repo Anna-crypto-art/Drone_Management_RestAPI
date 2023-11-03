@@ -1,6 +1,6 @@
 import { AnalysisResultSchemaBase } from "../api-schemas/analysis-result-schema-base";
 import { AnalysisResultDetailedSchema } from "../api-schemas/analysis-result-schema";
-import { AnalysisResultMappingEntry, AnalysisResultMappingEntryWithPiFieldName, AnalysisResultMappings, PIDataType, RefMeasureMappingEntryValue } from "./types";
+import { AnalysisResultMappingEntry, AnalysisResultMappingEntryWithPiFieldName, AnalysisResultMappings, PI, PIDataType, RefMeasureMappingEntryValue } from "./types";
 import VueI18n from "vue-i18n";
 import { FilterFieldType } from "@/app/plant/shared/filter-fields/types";
 import { AppTableColumns } from "@/app/shared/components/app-table/types";
@@ -34,6 +34,27 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
     }
 
     return [];
+  }
+
+  public static getPIs(pis: { keyFigureId: ApiKeyFigure, piFieldName: string }[]): PI[] {
+    const mappingEntries: PI[] = [];
+    
+    for (const compResultMapping of allMappings) {
+      mappingEntries.push(
+        ...compResultMapping.resultMapping
+          .filter(e => pis.find(pi => pi.keyFigureId === e.keyFigureId && pi.piFieldName === AnalysisResultMappingHelper.getPropertyName(e)))
+          .map(e => ({ 
+            ...e, 
+            keyFigureId: e.keyFigureId!,
+            dataType: e.dataType!,
+            componentId: compResultMapping.componentId,
+            piFieldName: AnalysisResultMappingHelper.getPropertyName(e),
+            id: AnalysisResultMappingHelper.getEntryId(e),
+          }))
+        );
+    }
+
+    return mappingEntries;
   }
 
   public static getPropertyName(mappingEntry: AnalysisResultMappingEntry): string {

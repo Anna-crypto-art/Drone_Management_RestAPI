@@ -7,6 +7,7 @@ import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/g
 import { CustomComponentPropertySchema } from "@/app/shared/services/volateq-api/api-schemas/custom-component-property-schema";
 import { ObservationCcpLayer } from "../layers/observation-ccp-layer";
 import { ComponentLayer } from "../layers/component-layer";
+import { ObservationPiLayer } from "../layers/observation-pi-layer";
 
 export interface ComponentGroupBaseLayer<T> {
   componentId: ApiComponent;
@@ -32,6 +33,6 @@ export interface ValueRangeGroupObservLayer {
   visible: boolean;
 }
 
-export interface ComponentGroupObservationLayer extends ComponentGroupBaseLayer<ValueRangeGroupObservLayer | ObservationCcpLayer> {
+export interface ComponentGroupObservationLayer extends ComponentGroupBaseLayer<ValueRangeGroupObservLayer | ObservationCcpLayer | ObservationPiLayer> {
   componentLayer: ComponentLayer;
 }

@@ -122,7 +122,6 @@ export default class AppMapViewPopupFeatureInfos extends BaseAuthComponent {
             {
               search_text: this.fieldgeometryComponent.kks,
               search_mode: 'equals',
-              ccp_ids: [featureInfo.id],
               limit: 100,
             }
           );

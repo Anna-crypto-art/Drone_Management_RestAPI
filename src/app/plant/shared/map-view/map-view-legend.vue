@@ -46,6 +46,7 @@ import { Map } from "ol";
 import { RouteQueryHelper } from "../helper/route-query-helper";
 import { ObservationCcpLayer } from "./layers/observation-ccp-layer";
 import { BaseLayer } from "./layers/base-layer";
+import { ObservationLayer } from "./layers/observation-layer";
 
 
 @Component({
@@ -98,7 +99,7 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
     this.layersService.on(
       this.plant.id,
       LayerEvent.ON_OBSERV_SELECTED,
-      async (layer: ObservationCcpLayer) => {
+      async (layer: ObservationLayer) => {
         this.onObservLayerSelected(layer);
 
         await this.routeQueryHelper.replaceRoute({
@@ -186,7 +187,7 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
     this.onLayerSelected(layer, this.analysisLegends);
   }
 
-  onObservLayerSelected(layer: ObservationCcpLayer) {
+  onObservLayerSelected(layer: ObservationLayer) {
     this.onLayerSelected(layer, this.obersvationLegends);
   }
 

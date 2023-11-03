@@ -6,6 +6,7 @@ import { KeyFigureLayer } from "./key-figure-layer";
 import { AnalysisResultSchemaBase } from "@/app/shared/services/volateq-api/api-schemas/analysis-result-schema-base";
 import { GeoVisualQuery } from "@/app/shared/services/volateq-api/api-requests/geo-visual-query-requests";
 import { ObservationCcpLayer } from "./observation-ccp-layer";
+import { ObservationLayer } from "./observation-layer";
 
 export class LayersService extends AppSeqEventService<LayerEvent> {
   private static readonly layersServices: Record<string, LayersService> = {};
@@ -40,7 +41,7 @@ export class LayersService extends AppSeqEventService<LayerEvent> {
           await this.emit(this.plantId, LayerEvent.ON_KEY_FIGURE_SELECTED, layer);
         }
 
-        if (l instanceof ObservationCcpLayer) {
+        if (l instanceof ObservationLayer) {
           await this.emit(this.plantId, LayerEvent.ON_OBSERV_SELECTED, layer);
         }
       });

@@ -64,6 +64,9 @@ import AppExplWrap from "@/app/shared/components/app-explanation/app-expl-wrap.v
 import { State } from "vuex-class";
 import { RouteQueryHelper } from "../../helper/route-query-helper";
 import { PlantRouteQuery } from "../../types";
+import { AnalysisResultMappingEntry, PI, PIDataType } from "@/app/shared/services/volateq-api/api-results-mappings/types";
+import { ObservationPiLayer } from "../layers/observation-pi-layer";
+import { ObservationLayer } from "../layers/observation-layer";
 
 @Component({
   name: "app-map-view-observ-layer-selection",
@@ -150,7 +153,8 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
 
     await this.refreshLayers(
       this.observationSelectionService!.dateRange,
-      this.observationSelectionService!.selectedCcps
+      this.observationSelectionService!.selectedCcps,
+      this.observationSelectionService!.selectedPIs,
     );
 
     if (selectedByQueryRoute) {
@@ -179,6 +183,7 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
   public async refreshLayers(
     dateRange: DateRange | null, 
     ccps: CustomComponentPropertySchema[],
+    pis: PI[],
   ) {
     for (const apiComponent in apiComponentNames) {
       const comp: ApiComponent = Number(apiComponent);
@@ -194,7 +199,8 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
       }
 
       const compCcps = ccps.filter(ccp => ccp.component.id === comp);
-      if (compCcps.length > 0) {
+      const compPis = pis.filter(pi => pi.componentId === comp);
+      if (compCcps.length > 0 || compPis.length > 0) {
         const componentGroupObservLayer: ComponentGroupObservationLayer = {
             componentId: comp,
             name: this.$t(apiComponentNames[comp]).toString(),
@@ -207,7 +213,7 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
         this.compGroupLayers.push(componentGroupObservLayer);
 
         let hasSelectedChildLayers = false;
-        const compCcps = ccps.filter(ccp => ccp.component.id === comp);
+
         for (const ccp of compCcps) {
           let layersSelected = false;
 
@@ -231,6 +237,18 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
           hasSelectedChildLayers = !hasSelectedChildLayers && layersSelected || hasSelectedChildLayers;
         }
 
+        for (const pi of compPis) {
+          let layersSelected = false;
+
+          let filterValue: ObservFilterValue = pi.dataType === PIDataType.BOOLEAN ? true : undefined;
+          const childLayer = this.createObservPiLayer(pi, dateRange!, filterValue);
+
+          componentGroupObservLayer.childLayers.push(childLayer);
+
+          layersSelected = this.selectLayers([childLayer], selectedLayerNameIds);
+          hasSelectedChildLayers = !hasSelectedChildLayers && layersSelected || hasSelectedChildLayers;
+        }
+
         componentGroupObservLayer.collapsed = hasSelectedChildLayers;
       }
     }
@@ -247,10 +265,28 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
   ): ObservationCcpLayer {
     const layer = new ObservationCcpLayer(
       this.plant,
-      ccp,
       this.componentLayers.find(cl => cl.componentId === ccp.component.id)!,
       dateRange,
       observFilterValue,
+      ccp,
+    );
+
+    this.layersService.addLayers(layer);
+
+    return layer;
+  }
+
+  private createObservPiLayer(
+    pi: PI,
+    dateRange: DateRange,
+    observFilterValue?: ObservFilterValue,
+  ): ObservationPiLayer {
+    const layer = new ObservationPiLayer(
+      this.plant,
+      this.componentLayers.find(cl => cl.componentId === pi.componentId)!,
+      dateRange,
+      observFilterValue,
+      pi,
     );
 
     this.layersService.addLayers(layer);
@@ -286,7 +322,7 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
     const unselectedLayerNameIds: string[] = [];
 
     for (const childLayer of componentGroupObservLayer.childLayers) {
-      if (childLayer instanceof ObservationCcpLayer) {
+      if (childLayer instanceof ObservationLayer) {
         if (childLayer.selected) {
           unselectedLayerNameIds.push(await this.unselectAndRemoveLayer(childLayer));
         }
@@ -302,7 +338,7 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
     return unselectedLayerNameIds;
   }
 
-  private async unselectAndRemoveLayer(layer: ObservationCcpLayer): Promise<string> {
+  private async unselectAndRemoveLayer(layer: ObservationLayer): Promise<string> {
     layer.reloadLayer(); // removes the layer from operlayers map
     await layer.setSelected(false);
     
@@ -311,7 +347,7 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
     return layer.nameId;
   }
 
-  private selectLayers(layers: ObservationCcpLayer[], selectedLayerNameIds: string[]): boolean {
+  private selectLayers(layers: ObservationLayer[], selectedLayerNameIds: string[]): boolean {
     let selected = false;
 
     if (selectedLayerNameIds.length > 0) {
