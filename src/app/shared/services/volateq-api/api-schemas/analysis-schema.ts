@@ -4,7 +4,6 @@ import { SimpleUserSchema } from "./user-schemas";
 import { AnalysisResultDetailedSchema, AnalysisResultSchema } from "./analysis-result-schema";
 import { PlantSchema } from "./plant-schema";
 import { OrderProductPackageSchema } from "./order-schema";
-import { ReferenceMeasurementSchema } from "./reference-measurement-schema";
 import { ApiKeyFigure } from "../api-key-figures";
 import { DroneSchema } from "./drone-schemas";
 
@@ -57,7 +56,6 @@ export interface AnalysisForViewSchema {
   analysis_result?: AnalysisResultDetailedSchema;
   flown_at: string;
   order_product_packages: OrderProductPackageSchema[];
-  reference_measurements: ReferenceMeasurementSchema[];
   has_key_figures: boolean;
   drone: DroneSchema;
 }

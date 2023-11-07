@@ -7,7 +7,6 @@ import { Extent } from "ol/extent";
 import { BaseLayer } from "./base-layer";
 import { LayerColor } from "../../map-view/layers/types";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
-import { RefMeasureLayersService } from "./ref-measure-layers-service";
 
 export abstract class ComponentLayer extends BaseLayer {
   public abstract readonly componentId: ApiComponent;
@@ -35,13 +34,6 @@ export abstract class ComponentLayer extends BaseLayer {
   }
 
   protected getColor(feature: FeatureLike): string {
-    const pcs = this.getPcs(feature);
-    if (this.allowRefMeasures && pcs && this.appLayerCheckbox && 
-      RefMeasureLayersService.get(this.plant, this.appLayerCheckbox.map).hasPCS(pcs)) 
-    {
-      return this.refMeasureColor;
-    }
-
     return this.color;
   }
 

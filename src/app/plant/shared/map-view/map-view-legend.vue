@@ -41,10 +41,8 @@ import { AnalysisSelectionService } from "../selection-sidebar/analysis-selectio
 import { AnalysisForViewSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { IObservationSelectionComponent } from "../selection-sidebar/observation-selection/types";
 import { ObservationSelectionService } from "../selection-sidebar/observation-selection/observation-selection-service";
-import { RefMeasureLayerEvent, RefMeasureLayersService } from "./layers/ref-measure-layers-service";
 import { Map } from "ol";
 import { RouteQueryHelper } from "../helper/route-query-helper";
-import { ObservationCcpLayer } from "./layers/observation-ccp-layer";
 import { BaseLayer } from "./layers/base-layer";
 import { ObservationLayer } from "./layers/observation-layer";
 
@@ -61,7 +59,6 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
   
   analysisSelectionService: AnalysisSelectionService | null = null;
   observationSelectionService: ObservationSelectionService | null = null;
-  refMeasureLayersService!: RefMeasureLayersService;
   layersService!: LayersService;
 
   routeQueryHelper = new RouteQueryHelper(this);
@@ -75,7 +72,6 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
   created() {
     this.analysisSelectionService = new AnalysisSelectionService(this);
     this.observationSelectionService = new ObservationSelectionService(this);
-    this.refMeasureLayersService = RefMeasureLayersService.get(this.plant, this.map);
     
     this.layersService = LayersService.get(this.plant.id);
     this.layersService.on(
@@ -109,19 +105,7 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
               "")),
         });
       }
-    )
-
-    this.refMeasureLayersService.on(this.plant.id, RefMeasureLayerEvent.ON_REF_MEASURE_LAYERS_CHANGED, () => {
-      const li = this.analysisLegends.findIndex(l => l.id === this.refMeasureLayersService.refMeasurLegendId);
-      if (li !== -1) {
-        this.analysisLegends.splice(li, 1);
-      }
-
-      const refMeasureLegend = this.refMeasureLayersService.getLegend();
-      if (refMeasureLegend) {
-        this.analysisLegends.push(refMeasureLegend);
-      }
-    });
+    );
   }
 
   async mounted() {
@@ -202,7 +186,6 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
     const inactiveLayerOpacity = 0.3;
 
     this.layersService.keyFigureLayers.forEach(l => l.setOpacity(this.isAnalysisLegendsActive ? 1 : inactiveLayerOpacity));
-    this.refMeasureLayersService.setOpacity(this.isAnalysisLegendsActive ? 1 : inactiveLayerOpacity);
     this.layersService.observationLayers.forEach(l => l.setOpacity(this.isObservationsLegendsActive ? 1 : inactiveLayerOpacity));
   }
 

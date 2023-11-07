@@ -1,38 +1,19 @@
 <template>
   <div>
-    <app-table-container>
-      <app-table
-        :rows="refMeasureItems"
-        :columns="refMeasureColumns"
-        selectMode="single"
-        :loading="loading"
-        @rowSelected="onRefMeasureSelected"
-        :hoverActions="true"
-      >
-        <template #hoverActions="row">
-          <app-button
-            v-show="isSuperAdmin"
-            icon="arrow-right-circle-fill"
-            @click="onMoveClick(row.item)"
-            variant="secondary"
-            size="sm"
-            :title="$t('move-to-another-analysis')"
-          />
-          <app-button
-            v-show="isSuperAdmin"
-            @click="onDeleteClick(row.item)"
-            variant="outline-danger"
-            size="sm"
-            icon="trash"
-            :title="$t('delete')"
-          />
-        </template>
-      </app-table>
-    </app-table-container>
+    <app-button
+      v-show="isSuperAdmin"
+      icon="arrow-right-circle-fill"
+      @click="onMoveClick"
+      variant="secondary"
+      :loading="loading"
+      cls="mar-top pull-right"
+    >
+      {{ $t('move-to-another-analysis') }}
+    </app-button>
+    <div class="clear" />
 
-    <app-reference-measurement-values 
+    <app-reference-measurement-values ref="appReferenceMeasurementValues"
       :analysis="analysis"
-      :refMeasureId="selectedRefMeasureId"
     />
 
     <app-modal-form
@@ -64,9 +45,9 @@ import { IAppModalForm } from "@/app/shared/components/app-modal/types";
 import { analysisEventService } from "../../shared/analysis-event-service";
 import { AnalysisEvent } from "../../shared/types";
 import AppReferenceMeasurementValues from "./reference-measurement-values.vue";
-import dateHelper from "@/app/shared/services/helper/date-helper";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { AppTableColumns } from "@/app/shared/components/app-table/types";
+import { IAppReferenceMeasurementValues } from "./types";
 
 @Component({
   name: "app-analysis-reference-measurements",
@@ -81,6 +62,7 @@ import { AppTableColumns } from "@/app/shared/components/app-table/types";
 export default class AppAnalysisReferenceMeasurements extends BaseAuthComponent {
   @Prop({ required: true }) analysis!: AnalysisSchema;
 
+  @Ref() appReferenceMeasurementValues!: IAppReferenceMeasurementValues;
   @Ref() moveModal!: IAppModalForm;
 
   loading = false;
@@ -93,19 +75,12 @@ export default class AppAnalysisReferenceMeasurements extends BaseAuthComponent 
   ];
   selectedRefMeasureId: string | null = null;
 
-  moveRefMeasureId: string | null = null;
   moveTargetAnalysisId: string | null = null;
   moveToAnalyses: { value: string, text: string }[] = [];
   moveModalLoading = false;
 
-  async created() {
-    this.updateRefMeasurements();
-  }
-
   @CatchError("loading")
-  async onMoveClick(refMeasureItem: any) {
-    this.moveRefMeasureId = refMeasureItem.id;
-
+  async onMoveClick() {
     this.moveToAnalyses = (await volateqApi.getAllAnalysis({ plant_id: this.analysis.plant.id }))
       .filter(analysis => analysis.id !== this.analysis.id)
       .map(analysis => ({
@@ -123,50 +98,15 @@ export default class AppAnalysisReferenceMeasurements extends BaseAuthComponent 
       throw { error: "MISSING_TARGET_ANALYSIS", message: "Please select an analysis" }
     }
 
-    await volateqApi.moveReferenceMeasurement(this.moveRefMeasureId!, this.moveTargetAnalysisId);
+    await volateqApi.moveObservations(this.analysis.id, this.moveTargetAnalysisId);
 
-    this.showSuccess(this.$t("reference-measurement-moved-success").toString())
-
-    await this.updateRefMeasurements();
+    this.showSuccess(this.$t("reference-measurement-moved-success").toString());
 
     analysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
 
     this.moveModal.hide();
-  }
 
-  @CatchError("loading")
-  async onDeleteClick(refMeasureItem: any) {
-    if (!confirm(this.$t("reference-measurement-delete-are-you-sure").toString())) {
-      return;
-    }
-
-    await volateqApi.deleteReferenceMeasurement(refMeasureItem.id);
-
-    this.showSuccess(this.$t("reference-measurement-delete-success").toString())
-    
-    await this.updateRefMeasurements();
-
-    analysisEventService.emit(this.analysis.id, AnalysisEvent.UPDATE_ANALYSIS);
-  }
-
-  onRefMeasureSelected(refMeasureItems: { id: string }[]) {
-    if (refMeasureItems.length > 0) {
-      this.selectedRefMeasureId = refMeasureItems[0].id;
-    } else {
-      this.selectedRefMeasureId = null;
-    }
-  }
-
-  @CatchError("loading")
-  private async updateRefMeasurements() {
-    this.refMeasureItems = (await volateqApi.getReferenceMeasurements(this.analysis.id)).map(refMeasure => ({
-      id: refMeasure.id,
-      measureDate: dateHelper.toDateTime(refMeasure.measure_time_from) + " - " +
-        dateHelper.toDateTime(refMeasure.measure_time_to),
-      measureNotes: refMeasure.notes,
-      user_created: refMeasure.user_created ? 
-        (refMeasure.user_created.first_name + " " + refMeasure.user_created.last_name).trim() || refMeasure.user_created.email : ""
-    }));
+    await this.appReferenceMeasurementValues.refresh();
   }
 }
 </script>

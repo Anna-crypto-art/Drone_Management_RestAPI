@@ -23,7 +23,6 @@ import { CustomerRequest } from "./api-requests/customer-requests";
 import { TechnologySchema } from "./api-schemas/technology-schema";
 import { AnalysisMonitoring } from "./api-schemas/analysis-monitoring";
 import { QFlyServerSchema } from "./api-schemas/server-schemas";
-import { ReferenceMeasurementEntriesSchema, ReferenceMeasurementSchema } from "./api-schemas/reference-measurement-schema";
 import { AnalysisQFlyServerActionRequest, QFlyServerUpdateRequest } from "./api-requests/server-requests";
 import { DocFile } from "./api-schemas/doc-file-schema";
 import { ProductPackageSchema, ProductPackageWithKeyFiguresSchema } from "./api-schemas/product-package";
@@ -47,7 +46,7 @@ import { PlantOperationActionSchema } from "./api-schemas/plant-operation-action
 import { CustomComponentPropertySchema } from "./api-schemas/custom-component-property-schema";
 import { CustomComponentPropertyRequest } from "./api-requests/custom-component-property-request";
 import { ObservFilterValue, SummerizedObservationRequest } from "./api-requests/observation-requests";
-import { ObservationColumn, ObservationSchema, SummerizedDates } from "./api-schemas/observation-schema";
+import { ObservationColumn, ObservationSchema, ReferenceMeasurementsSchema, SummerizedDates } from "./api-schemas/observation-schema";
 import { ObservationRequest } from "./api-requests/observation-requests";
 import { CreateEnabledPiFieldRequest, DisablePiFieldsRequest, EnablePiFieldsRequest } from "./api-requests/enabled-pi-field-requests";
 import { EnabledPiFieldSchema } from "./api-schemas/enabled-pi-field-schema";
@@ -586,40 +585,17 @@ export class VolateqAPI extends HttpClientBase {
     return this.get(`/auth/analysis/${analysisId}/uploading-users`);
   }
 
-  public async getReferenceMeasurements(analysisId: string): Promise<ReferenceMeasurementSchema[]> {
-    return await this.get(`/auth/analysis/${analysisId}/reference-measurements`);
+  public async getReferenceMeasurements(analysisId: string): Promise<ReferenceMeasurementsSchema> {
+    return await this.get(`/auth/reference-measurements/${analysisId}`);
   }
 
-  public async addReferenceMeasurement(analysisId: string, addRefMeasureRequest: AddReferenceMeasurementRequest): Promise<void> {
-    await this.post(`/auth/analysis/${analysisId}/reference-measurement`, addRefMeasureRequest);
+  public async moveObservations(sourceAnalysisId: string, targetAnalysisId: string): Promise<void> {
+    await this.post(`/auth/observations/move`, 
+      { source_analysis_id: sourceAnalysisId, target_analysis_id: targetAnalysisId });
   }
 
-  public async getReferenceMeasurementEntries(
-    analysisId: string,
-    params?: { reference_measurement_id?: string, pcs?: string; }
-  ): Promise<ReferenceMeasurementEntriesSchema> {
-    return this.get(`/auth/analysis/${analysisId}/reference-measurement/entries`, params);
-  }
-
-  public async moveReferenceMeasurement(referenceMeasurementId: string, targetAnalysisId: string): Promise<void> {
-    await this.post(`/auth/reference-measurement/${referenceMeasurementId}/move`, 
-      { target_analysis_id: targetAnalysisId });
-  }
-
-  public async deleteReferenceMeasurement(referenceMeasurementId: string): Promise<void> {
-    await this.delete(`/auth/reference-measurement/${referenceMeasurementId}`);
-  }
-
-  public async ignoreReferenceMeasurementEntry(referenceMeasurementEntryId: string, ignore: boolean): Promise<void> {
-    await this.post(`/auth/reference-measurement/entry/${referenceMeasurementEntryId}/ignore`, { ignore });
-  }
-
-  public async deleteReferenceMeasurementEntry(referenceMeasurementEntryId: string): Promise<void> {
-    await this.delete(`/auth/reference-measurement/entry/${referenceMeasurementEntryId}/delete`);
-  }
-
-  public async getReferenceMeasurementValuesGeoVisual(referenceMeasurementId: string): Promise<any> {
-    return this.get(`/auth/geo-visual/${referenceMeasurementId}/reference-measuurement-entries`);
+  public async ignoreReferenceMeasurement(observationId: string, ignore: boolean): Promise<void> {
+    await this.post(`/auth/reference-measurement/${observationId}/ignore`, { ignore });
   }
 
   public async getDronePlantCoverage(analysisId: string): Promise<void> {

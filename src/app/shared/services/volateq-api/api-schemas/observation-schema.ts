@@ -74,4 +74,10 @@ export interface ObservationSchema {
   updated_at: string;
   created_at: string;
   column_values: ObservationColumnValue;
+  ignore_as_ref_measure?: boolean;
+}
+
+export interface ReferenceMeasurementsSchema {
+  items: ObservationSchema[];
+  columns: ObservationColumn[];
 }

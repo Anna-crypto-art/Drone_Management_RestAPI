@@ -28,11 +28,6 @@
               class="mar-left-half orange" 
               v-b-popover.hover.top="$t('no-pis-available-yet')"
             />
-            <app-icon v-if="row.item.refMeasureCount > 0"
-              icon="clipboard-check"
-              class="mar-left-half blue"
-              v-b-popover.hover.top="$t('has-ref-measures')"
-            />
             <app-icon v-if="row.item.hasGoodies" 
               icon="gift"
               class="mar-left-half blue"
@@ -114,7 +109,6 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
         name: analysis.name,
         date: dateHelper.toDate(analysis.flown_at),
         orderPPs: analysis.order_product_packages,
-        refMeasureCount: analysis.reference_measurements.length,
         analysisResultReleased: analysis.analysis_result?.released,
         hasResults: this.isSuperAdmin ? !!analysis.analysis_result : (analysis.analysis_result?.released || false),
         hasGoodies: analysis.has_key_figures,

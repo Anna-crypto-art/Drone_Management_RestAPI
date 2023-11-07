@@ -53,8 +53,6 @@ import AppMapViewPopup from "./map-view-popup/map-view-popup.vue";
 import { IAnalysisSelectionComponent } from "../selection-sidebar/analysis-selection/types";
 import { AnalysisSelectionService } from "../selection-sidebar/analysis-selection/analysis-selection-service";
 import { LayersService } from "./layers/layers-service";
-import { RefMeasureLayersService } from "./layers/ref-measure-layers-service";
-import { State } from "vuex-class";
 
 @Component({
   name: "app-map-view",
@@ -80,7 +78,6 @@ export default class AppMapView extends BaseAuthComponent implements IAnalysisSe
   
   analysisSelectionService!: AnalysisSelectionService;
   layersService!: LayersService;
-  refMeasureLayersService!: RefMeasureLayersService;
 
   map: Map | null = null;
 
@@ -97,8 +94,6 @@ export default class AppMapView extends BaseAuthComponent implements IAnalysisSe
         zoom: 2,
       }),
     });
-
-    this.refMeasureLayersService = RefMeasureLayersService.get(this.plant, this.map);
   }
 
   async mounted() {
@@ -124,7 +119,6 @@ export default class AppMapView extends BaseAuthComponent implements IAnalysisSe
   }
 
   async onAnalysisSelected() {
-    await this.refMeasureLayersService.loadLayersForAnalysis(this.analysisSelectionService.firstAnalysis || undefined);
     this.layersService.rerenderLoadedLayers();
   }
 

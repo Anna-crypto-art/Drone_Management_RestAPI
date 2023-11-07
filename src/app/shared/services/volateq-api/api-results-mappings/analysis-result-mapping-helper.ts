@@ -1,6 +1,6 @@
 import { AnalysisResultSchemaBase } from "../api-schemas/analysis-result-schema-base";
 import { AnalysisResultDetailedSchema } from "../api-schemas/analysis-result-schema";
-import { AnalysisResultMappingEntry, AnalysisResultMappingEntryWithPiFieldName, AnalysisResultMappings, PI, PIDataType, RefMeasureMappingEntryValue } from "./types";
+import { AnalysisResultMappingEntry, AnalysisResultMappingEntryWithPiFieldName, AnalysisResultMappings, PI, PIDataType } from "./types";
 import VueI18n from "vue-i18n";
 import { FilterFieldType } from "@/app/plant/shared/filter-fields/types";
 import { AppTableColumns } from "@/app/shared/components/app-table/types";
@@ -8,7 +8,6 @@ import { ApiComponent } from "../api-components/api-components";
 import { ApiKeyFigure } from "../api-key-figures";
 import { FeatureInfo, FeatureInfoType } from "@/app/plant/shared/map-view/map-view-popup/types";
 import { i18n } from "@/main";
-import { RefMeasureEntry, RefMeasureEntryKeyFigureSchema } from "../api-schemas/reference-measurement-schema";
 import { allMappings } from "./analysis-result-mapping";
 import { EnabledPiFieldsService } from "@/app/plant/shared/plant-settings/enabled-pi-fields-service";
 
@@ -220,27 +219,6 @@ export class AnalysisResultMappingHelper<T extends AnalysisResultSchemaBase> {
         || false,
     }
   }
-
-  public getRefMeasureEntries(
-    refMeasureEntry: RefMeasureEntry,
-    refMeasureKeyFigures: RefMeasureEntryKeyFigureSchema[]
-  ): RefMeasureMappingEntryValue[] {
-    const rmMappingEntriesValues: RefMeasureMappingEntryValue[] = [];
-
-    for (const rmKeyFigure of refMeasureKeyFigures) {
-      if (refMeasureEntry.values && rmKeyFigure.entry_key_name in refMeasureEntry.values) {
-        const mappingEntry = this.findEntry(rmKeyFigure.column_name, rmKeyFigure.key_figure_id);
-        if (mappingEntry) {
-          rmMappingEntriesValues.push({
-            entry: mappingEntry,
-            value: refMeasureEntry.values[rmKeyFigure.entry_key_name]
-          });
-        }
-      }
-    }
-
-    return rmMappingEntriesValues;
-  }     
 
   public getEntriesForObservations(): AnalysisResultMappingEntryWithPiFieldName<T>[] {
     return this.withPiFieldNames().filter(e => e.enableForRefMeasure || e.enableForObservation);

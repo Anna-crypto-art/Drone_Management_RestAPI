@@ -1,5 +1,5 @@
 <template>
-  <div v-show="refMeasureId">
+  <div class="app-reference-measurement-values">
     <app-table-container>
       <app-table
         :rows="refMeasureValueItems"
@@ -36,10 +36,8 @@ import volateqApi from "@/app/shared/services/volateq-api/volateq-api";
 import { AppTableColumns } from "@/app/shared/components/app-table/types";
 import { AnalysisSchema } from "@/app/shared/services/volateq-api/api-schemas/analysis-schema";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
-import { KeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/key-figure-schema";
-import { RefMeasureEntry, RefMeasureEntryKeyFigureSchema } from "@/app/shared/services/volateq-api/api-schemas/reference-measurement-schema";
-import { RefMeasureMappingEntryValue } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { CatchError } from "@/app/shared/services/helper/catch-helper";
+import { IAppReferenceMeasurementValues } from "./types";
 
 @Component({
   name: "app-reference-measurement-values",
@@ -49,9 +47,8 @@ import { CatchError } from "@/app/shared/services/helper/catch-helper";
     AppButton,
   }
 })
-export default class AppReferenceMeasurementValues extends BaseAuthComponent {
+export default class AppReferenceMeasurementValues extends BaseAuthComponent implements IAppReferenceMeasurementValues {
   @Prop({ required: true }) analysis!: AnalysisSchema;
-  @Prop({ default: null }) refMeasureId!: string | null;
 
   loading = false;
 
@@ -64,47 +61,47 @@ export default class AppReferenceMeasurementValues extends BaseAuthComponent {
   ];
 
   async created() {
-    await this.updateRefMeasurementValues();
-  }
-
-  @Watch('refMeasureId')
-  async onRefMeasureChanged() {
-    await this.updateRefMeasurementValues();
+    await this.updateRefMeasurements();
   }
 
   @CatchError()
   async onIgnoreClick(refMeasureItem: any) {
-    await volateqApi.ignoreReferenceMeasurementEntry(refMeasureItem.id, !refMeasureItem.ignored);
+    await volateqApi.ignoreReferenceMeasurement(refMeasureItem.id, !refMeasureItem.ignored);
 
     refMeasureItem.ignored = !refMeasureItem.ignored;
 
     this.showSuccess(this.$t("reference-measurement-value-change-success").toString());
   }
 
+  async refresh() {
+    await this.updateRefMeasurements();
+  }
+
   @CatchError("loading")
-  private async updateRefMeasurementValues() {
-    if (!this.refMeasureId) {
-      this.refMeasureValueItems = [];
-      return;
-    }
+  private async updateRefMeasurements() {
+    const refMeasures = await volateqApi.getReferenceMeasurements(this.analysis.id);
 
-    const entries = await volateqApi.getReferenceMeasurementEntries(this.analysis.id, {
-      reference_measurement_id: this.refMeasureId,
-    });
-
-    const allKeyFigures = await volateqApi.getAllKeyFigures();
+    const pis = AnalysisResultMappingHelper.getPIs(
+      refMeasures.columns.map(c => ({ keyFigureId: c.pi_column!.key_figure_id, piFieldName: c.pi_column!.pi_field_name }))
+    );
 
     const refMeasureValueItems: Array<any> = [];
-    for (const entry of entries.entries) {
-      const entryValues = this.getRefMeasureEntryValues(allKeyFigures, entry, entries.key_figures);
-      const values = entryValues.map(ev => `${this.$t(ev.entry.transName).toString()}: ${ev.value}`).join('<br>');
-      
+    for (const observation of refMeasures.items) {
+      const piValues: string[] = [];
+      for (const columnId in observation.column_values) {
+        const column = refMeasures.columns.find(c => c.id === columnId)!;
+        const pi = pis.find(pi => pi.keyFigureId === column.pi_column!.key_figure_id &&
+          pi.piFieldName === column.pi_column!.pi_field_name)!;
+        
+        piValues.push(`${this.$t(pi.transName).toString()}: ${observation.column_values[columnId]}`);
+      }
+
       refMeasureValueItems.push({
-        id: entry.entry_id,
-        pcs: entry.pcs,
-        notes: entry.notes,
-        ignored: entry.ignore,
-        values: values,
+        id: observation.id,
+        pcs: observation.fieldgeometry_component.kks,
+        notes: observation.notes,
+        ignored: observation.ignore_as_ref_measure,
+        values: piValues.join('<br>'),
       });
     }
 
@@ -120,34 +117,6 @@ export default class AppReferenceMeasurementValues extends BaseAuthComponent {
       }
       return 0;
     });
-  }
-
-  private getRefMeasureEntryValues(
-    allKeyFigures: KeyFigureSchema[],
-    refMeasureEntry: RefMeasureEntry,
-    refMeasureKeyFigures: RefMeasureEntryKeyFigureSchema[]
-  ) {
-    const entryValues: RefMeasureMappingEntryValue[] = [];
-
-    if (refMeasureEntry.values) {
-      const fetchedComponentIds: number[] = [];
-
-      for (const rmKeyFigure of refMeasureKeyFigures) {
-        if (rmKeyFigure.entry_key_name in refMeasureEntry.values) {
-          const componentId = allKeyFigures.find(kf => kf.id === rmKeyFigure.key_figure_id)!.component_id;
-          if (!fetchedComponentIds.includes(componentId)) {
-            fetchedComponentIds.push(componentId);
-            
-            const mappings = AnalysisResultMappingHelper.getMappingsByComponentId(componentId)!;
-            const mappingHelper = new AnalysisResultMappingHelper(mappings);
-
-            entryValues.push(...mappingHelper.getRefMeasureEntries(refMeasureEntry, refMeasureKeyFigures));
-          }
-        }
-      }
-    }
-
-    return entryValues;
   }
 }
 </script>

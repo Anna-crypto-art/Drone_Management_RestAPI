@@ -247,7 +247,7 @@ export default class AppEditAnalysis extends BaseAuthComponent {
     this.flownAt = this.analysis.flown_at;
 
     if (this.isSuperAdmin) {
-      this.hasReferenceMeasurements = (await volateqApi.getReferenceMeasurements(this.analysis.id)).length > 0;
+      this.hasReferenceMeasurements = (await volateqApi.getReferenceMeasurements(this.analysis.id)).items.length > 0;
     }
 
     this.productPackagesSelection = await volateqApi.getOrderPPsMulitselectOptions(

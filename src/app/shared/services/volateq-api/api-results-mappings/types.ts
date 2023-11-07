@@ -1,7 +1,6 @@
 import { ApiComponent } from "../api-components/api-components";
 import { ApiKeyFigure } from "../api-key-figures";
 import { AnalysisResultSchemaBase } from "../api-schemas/analysis-result-schema-base";
-import { RefMeasureEntryValue } from "../api-schemas/reference-measurement-schema";
 
 export enum PIDataType {
   BOOLEAN = 1,
@@ -42,9 +41,4 @@ export type AnalysisResultMappings<T extends AnalysisResultSchemaBase, C = any> 
 export interface ComponentResultMappings {
   componentId: ApiComponent;
   resultMapping: AnalysisResultMappings<any>;
-}
-
-export interface RefMeasureMappingEntryValue { 
-  entry: AnalysisResultMappingEntry<any>, 
-  value: RefMeasureEntryValue 
 }

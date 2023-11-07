@@ -185,6 +185,8 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
     ccps: CustomComponentPropertySchema[],
     pis: PI[],
   ) {
+    console.log("refreshLayers", ccps, pis);
+
     for (const apiComponent in apiComponentNames) {
       const comp: ApiComponent = Number(apiComponent);
       let selectedLayerNameIds: string[] = [];
