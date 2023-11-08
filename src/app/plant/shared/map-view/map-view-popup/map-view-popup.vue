@@ -263,10 +263,6 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
 
   @CatchError("resultModLoading")
   async onModifyResultClick(mode: ResultModMode) {
-    if (!confirm(this.$t("apply-are-you-sure").toString())) {
-      return;
-    }
-
     const keyFigureLayer: KeyFigureBaseLayer = this.selectedKeyFigureLayers[0];
 
     const mappingHelper = new AnalysisResultMappingHelper(
