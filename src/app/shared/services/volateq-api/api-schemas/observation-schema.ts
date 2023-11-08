@@ -1,4 +1,5 @@
 import { ApiKeyFigure } from "../api-key-figures";
+import { SimpleAnalysisSchema } from "./analysis-schema";
 import { CustomComponentPropertySchema } from "./custom-component-property-schema";
 import { FieldgeometryComponentSchema } from "./fieldgeometry-component-schema";
 import { SimpleUserSchema } from "./user-schemas";
@@ -70,10 +71,19 @@ export interface ObservationSchema {
   observed_at: string; 
   notes: string; 
   external_id: string;
-  created_by_user: SimpleUserSchema;
+  created_by_user?: SimpleUserSchema;
   updated_at: string;
   created_at: string;
   column_values: ObservationColumnValue;
+  analysis?: SimpleAnalysisSchema;
+  ignore_as_ref_measure?: boolean;
+}
+
+export interface SimpleObservationSchema {
+  id: string; 
+  plant_id: string;
+  observed_at: string; 
+  notes: string;
   ignore_as_ref_measure?: boolean;
 }
 

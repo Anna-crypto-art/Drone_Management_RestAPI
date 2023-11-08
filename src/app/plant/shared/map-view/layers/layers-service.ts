@@ -58,8 +58,8 @@ export class LayersService extends AppSeqEventService<LayerEvent> {
     return this.layers.filter(l => l instanceof KeyFigureLayer) as KeyFigureBaseLayer[];
   }
 
-  public get observationLayers(): ObservationCcpLayer[] {
-    return this.layers.filter(l => l instanceof ObservationCcpLayer) as ObservationCcpLayer[];
+  public get observationLayers(): ObservationLayer[] {
+    return this.layers.filter(l => l instanceof ObservationLayer) as ObservationLayer[];
   }
 
   public rerenderLoadedLayers() {

@@ -8,15 +8,13 @@
       DEV
     </b-badge>
 
-    <b-navbar-brand href="#">
-      <b-link to="/">
-        <img
-          class="app-header-logo float-left"
-          src="/images/logos/logo_white.png"
-          srcset="/images/logos/logo_white.webp, /images/logos/logo_white.png"
-          alt="volateq"
-        />
-      </b-link>
+    <b-navbar-brand href="/">
+      <img
+        class="app-header-logo float-left"
+        src="/images/logos/logo_white.png"
+        srcset="/images/logos/logo_white.webp, /images/logos/logo_white.png"
+        alt="volateq"
+      />
     </b-navbar-brand>
 
     <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>

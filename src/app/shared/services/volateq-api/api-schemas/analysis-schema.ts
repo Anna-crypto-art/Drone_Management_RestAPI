@@ -6,6 +6,7 @@ import { PlantSchema } from "./plant-schema";
 import { OrderProductPackageSchema } from "./order-schema";
 import { ApiKeyFigure } from "../api-key-figures";
 import { DroneSchema } from "./drone-schemas";
+import { SimpleObservationSchema } from "./observation-schema";
 
 export interface AnalysisFilesSchema {
   video_files: string[];
@@ -58,4 +59,5 @@ export interface AnalysisForViewSchema {
   order_product_packages: OrderProductPackageSchema[];
   has_key_figures: boolean;
   drone: DroneSchema;
+  observations: SimpleObservationSchema[];
 }

@@ -185,8 +185,6 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
     ccps: CustomComponentPropertySchema[],
     pis: PI[],
   ) {
-    console.log("refreshLayers", ccps, pis);
-
     for (const apiComponent in apiComponentNames) {
       const comp: ApiComponent = Number(apiComponent);
       let selectedLayerNameIds: string[] = [];
@@ -374,7 +372,18 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
         const ci = ccpIdAndFilterValue[0]
         const fv = ccpIdAndFilterValue.length > 1 ? ccpIdAndFilterValue[1] : null;
         const layer = this.layersService.observationLayers
-          .find(l => l.ccp.id === ci && (fv === null || l.filterValue?.toString() === fv));
+          .find(l => l instanceof ObservationCcpLayer && l.ccp.id === ci && (fv === null || l.filterValue?.toString() === fv));
+        if (layer) {
+          await layer.setSelected(true);
+        }
+      }
+    }
+
+    if (plantRouteQuery.piId) {
+      const piIds = typeof plantRouteQuery.piId === "string" ? [plantRouteQuery.piId] : plantRouteQuery.piId;
+      for (const piId of piIds) {
+        const layer = this.layersService.observationLayers
+          .find(l => l instanceof ObservationPiLayer && l.pi.id === piId);
         if (layer) {
           await layer.setSelected(true);
         }

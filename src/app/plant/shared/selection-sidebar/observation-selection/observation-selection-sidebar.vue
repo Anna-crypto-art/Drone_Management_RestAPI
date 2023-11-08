@@ -9,41 +9,43 @@
         </b-form-select>
       </b-form>
     </div>
-    <app-table-container>
-      <app-table
-        ref="observTable"
-        :rows="observTableItems"
-        :columns="observTableColumns"
-        selectMode="single"
-        @rowSelected="onObservSelected"
-        :overlayLoading="loading"
-        :hideHeader="true"
-      >
-        <template #cell(name)="row">
-          {{ row.item.name.date }}
-          <app-icon 
-            icon="app-indicator"
-            class="mar-left-half"
-            v-b-popover.hover.top="getComponentNames(row.item.name)"
-          />
-          <app-icon 
-            icon="people-fill"
-            class="mar-left-half" 
-            v-b-popover.hover.top="row.item.name.user_names.join(', ')"
-          /><br>
-          <small class="grayed">{{ $t("count") }}: {{ row.item.name.count }}</small>
-          <div v-if="row.item.name.ccps.length > 0 || row.item.name.pis.length > 0" class="mar-top">
-            <app-badge v-for="ccp in row.item.name.ccps" :key="ccp.ccp_id" :color="getCcpColor(ccp.ccp_id)">
-              {{ getCcpName(ccp.ccp_id) }}
-            </app-badge>
-            <app-badge v-for="(pi, i) in row.item.name.pis" :key="i" :color="getPiColor(pi)">
-              {{ getPiName(pi) }}
-            </app-badge>
-          </div>
+    <div class="app-observation-selection-sidebar-table">
+      <app-table-container>
+        <app-table
+          ref="observTable"
+          :rows="observTableItems"
+          :columns="observTableColumns"
+          selectMode="single"
+          @rowSelected="onObservSelected"
+          :overlayLoading="loading"
+          :hideHeader="true"
+        >
+          <template #cell(name)="row">
+            {{ row.item.name.date }}
+            <app-icon 
+              icon="app-indicator"
+              class="mar-left-half"
+              v-b-popover.hover.top="getComponentNames(row.item.name)"
+            />
+            <app-icon 
+              icon="people-fill"
+              class="mar-left-half" 
+              v-b-popover.hover.top="row.item.name.user_names.join(', ')"
+            /><br>
+            <small class="grayed">{{ $t("count") }}: {{ row.item.name.count }}</small>
+            <div v-if="row.item.name.ccps.length > 0 || row.item.name.pis.length > 0" class="mar-top">
+              <app-badge v-for="ccp in row.item.name.ccps" :key="ccp.ccp_id" :color="getCcpColor(ccp.ccp_id)">
+                {{ getCcpName(ccp.ccp_id) }}
+              </app-badge>
+              <app-badge v-for="(pi, i) in row.item.name.pis" :key="i" :color="getPiColor(pi)">
+                {{ getPiName(pi) }}
+              </app-badge>
+            </div>
 
-        </template>
-      </app-table>
-    </app-table-container>
+          </template>
+        </app-table>
+      </app-table-container>
+    </div>
   </div>
 </template>
 
@@ -108,12 +110,7 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
 
   ccpService!: CcpService;
 
-  timeRangeOptions: { value: number, text: string }[] = [
-    { value: 7, text: this.$t("last-7-days").toString() },
-    { value: 30, text: this.$t("last-30-days").toString() },
-    { value: 90, text: this.$t("last-90-days").toString() },
-    { value: 365, text: this.$t("last-year").toString() },
-  ];
+  timeRangeOptions: { value: number, text: string }[] = ObservationSelectionService.timeRangeOptions;
 
   selectedTimeRange = 7;
 
@@ -293,6 +290,16 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
 
   &-filter {
     margin: 8px;
+  }
+
+  &-table {
+    height: calc(100% - 97px); // Such a nice magic number
+
+    .app-table-container {
+      height: 100%;
+      margin-top: 10px;  
+      overflow-y: auto;
+    }
   }
 
   .title {

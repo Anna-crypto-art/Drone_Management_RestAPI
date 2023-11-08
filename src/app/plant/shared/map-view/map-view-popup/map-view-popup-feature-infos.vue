@@ -1,10 +1,10 @@
 <template>
   <div class="app-map-view-popup-feature-infos" v-if="featureInfos.length > 0">
-    <h4 class="no-mar-top mar-bottom-half">
+    <h5 class="no-mar-top mar-bottom-half">
       <slot name="title">
         {{ title }}
       </slot>
-    </h4>
+    </h5>
     <app-box class="app-map-view-popup-feature-infos no-mar-top no-mar-bottom">
       <div v-for="(featureInfo, index) in internFeatureInfos" :key="index">
         <div v-show="featureInfo.visible" v-if="featureInfo.value">

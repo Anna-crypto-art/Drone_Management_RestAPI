@@ -33,6 +33,7 @@
               class="mar-left-half blue"
               v-b-popover.hover.top="$t('has-additional-pis')"
             />
+            // continue here
             <app-super-admin-marker v-if="row.item.analysisResultReleased === false" />
             <br>
             <small class="grayed">{{ row.item.name }}</small>
@@ -66,6 +67,8 @@ import { CatchError } from "@/app/shared/services/helper/catch-helper";
 import { State } from "vuex-class";
 import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
 import AppExplWrap from "@/app/shared/components/app-explanation/app-expl-wrap.vue";
+import { SimpleObservationSchema } from "@/app/shared/services/volateq-api/api-schemas/observation-schema";
+import { ObservationSelectionService } from "../observation-selection/observation-selection-service";
 
 
 @Component({
@@ -112,6 +115,8 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
         analysisResultReleased: analysis.analysis_result?.released,
         hasResults: this.isSuperAdmin ? !!analysis.analysis_result : (analysis.analysis_result?.released || false),
         hasGoodies: analysis.has_key_figures,
+        hasObservations: analysis.observations.length > 0,
+        loadRefMeasuresLink: this.generateRefMeasuresLink(analysis.observations),
       });
     }
 
@@ -288,6 +293,35 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
   private unselectAnalysis(analysisId: string) {
     const selectedIndex = this.analysesTableItems.findIndex(row => row.id === analysisId);
     this.analysesTable.unselectRow(selectedIndex);
+  }
+
+  private generateRefMeasuresLink(observations: SimpleObservationSchema[]): string {
+    if (observations.length > 0) {
+      const observedAt = dateHelper.getDate(observations[0].observed_at);
+      const diffDays = Math.abs((new Date()).getDate() - observedAt.getDate() / (24*60*60*1000));
+      const trOption = ObservationSelectionService.timeRangeOptions.find(o => o.value > diffDays)!;
+
+      let observation = "";
+      if (trOption.value <= 30) {
+        observation = dateHelper.toDate(observedAt);
+      } else if (trOption.value > 30 && trOption.value <= 90) {
+        observation = observedAt.getUTCFullYear() + "cw" + dateHelper.getWeekNumber(observedAt);
+      } else if (trOption.value > 90 && trOption.value <= 365) {
+        observation = observedAt.getUTCFullYear() + "-" + observedAt.getUTCMonth();
+      } else {
+        observation = observedAt.getUTCFullYear().toString();
+      }
+
+      return this.$route.fullPath.replace(/sidebar=[^&]*?(&)/g, "")
+        .replace(/observation=[^&]*?(&)/g, "")
+        .replace(/observFilter=[^&]*?(&)/g, "")
+        .replace(/piId=[^&]*?(&)/g, "")
+        + "&sidebar=observations"
+        + "&observation=" + observation
+        + "&observFilter=" + trOption.value;
+    }
+
+    return "";
   }
 }
 </script>

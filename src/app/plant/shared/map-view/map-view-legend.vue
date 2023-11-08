@@ -1,6 +1,6 @@
 <template>
   <div class="app-map-view-legend" :class="{ 'selection-sidebar-open': layerSelectionOpen }" v-show="visible">
-    <div v-show="selectedAnalysisName"
+    <div v-show="analysisLegendVisible"
       class="app-map-view-legend-container"
       :class="{ 'inactive': !isAnalysisLegendsActive }"
     >
@@ -16,8 +16,8 @@
       </div>
     </div>
     <div class="app-map-view-legend-container"
-      :class="{ 'mar-top-half': !!selectedAnalysisName, 'inactive': !isObservationsLegendsActive }"
-      v-show="selectedObservName"
+      :class="{ 'mar-top-half': observationLegendVisible, 'inactive': !isObservationsLegendsActive }"
+      v-show="observationLegendVisible"
     >
       <div class="grayed mar-bottom-half">
         <small><b>{{ selectedObservName }}</b></small>
@@ -45,6 +45,8 @@ import { Map } from "ol";
 import { RouteQueryHelper } from "../helper/route-query-helper";
 import { BaseLayer } from "./layers/base-layer";
 import { ObservationLayer } from "./layers/observation-layer";
+import { ObservationCcpLayer } from "./layers/observation-ccp-layer";
+import { ObservationPiLayer } from "./layers/observation-pi-layer";
 
 
 @Component({
@@ -99,10 +101,12 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
         this.onObservLayerSelected(layer);
 
         await this.routeQueryHelper.replaceRoute({
-          ccpId: this.layersService.observationLayers.filter(l => l.selected)
-            .map(l => l.ccp.id + (l.filterValue !== undefined && l.filterValue !== null ?
+          ccpId: this.layersService.observationLayers.filter(l => l.selected && l instanceof ObservationCcpLayer)
+            .map(l => (l as ObservationCcpLayer).ccp.id + (l.filterValue !== undefined && l.filterValue !== null ?
               "__" + l.filterValue.toString() :
               "")),
+          piId: this.layersService.observationLayers.filter(l => l.selected && l instanceof ObservationPiLayer)
+            .map(l => (l as ObservationPiLayer).pi.id),
         });
       }
     );
@@ -127,7 +131,15 @@ export default class AppMapViewLegend extends BaseComponent implements IAnalysis
   }
 
   get visible(): boolean {
+    return this.analysisLegendVisible || this.observationLegendVisible;
+  }
+
+  get analysisLegendVisible(): boolean {
     return this.analysislegendEntries.length > 0;
+  }
+
+  get observationLegendVisible(): boolean {
+    return this.observationslegendEntries.length > 0;
   }
 
   get analysislegendEntries(): LegendEntry[] {

@@ -17,7 +17,7 @@
         <b-form-group :label="$t('timestamp')">
           <app-datetimepicker v-model="observation.observedAt" />
         </b-form-group>
-        <app-modal-form-info-area v-if="ccpValues.length > 0">
+        <app-modal-form-info-area v-if="ccpValues.length > 0 || piValues.length > 0">
           <app-observation-ccp-input v-for="ccpVal in ccpValues" :key="ccpVal.ccp.id"
             :ccp="ccpVal.ccp"
             v-model="ccpVal.value" 
@@ -25,6 +25,8 @@
           <app-observation-pi-input v-for="(piVal, i) in piValues" :key="i"
             :entry="piVal.entry"
             v-model="piVal.value"
+            :observation="observation"
+            :plant="plant"
           />
         </app-modal-form-info-area>
         <b-form-group :label="$t('notes')">
@@ -107,7 +109,7 @@ export default class AppObservationModal extends BaseAuthComponent implements IA
   }
   
   get title(): string {
-    return this.$t("add-observation").toString();
+    return this.observation?.id ? this.$t("edit-observation").toString() : this.$t("add-observation").toString();
   }
 
   async show(fieldgeometryComponent: FieldgeometryComponentSchema, observation?: ObservationSchema) {
@@ -140,6 +142,7 @@ export default class AppObservationModal extends BaseAuthComponent implements IA
         observedAt: observation.observed_at,
         notes: observation.notes,
         ticketId: observation.external_id,
+        analysis: observation.analysis,
       };
     } else {
       this.ccpValues = ccps.map(ccp => ({ value: "", ccp }));

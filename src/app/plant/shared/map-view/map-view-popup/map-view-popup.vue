@@ -42,7 +42,12 @@
           :fieldgeometryComponent="fieldgeometryComponent"
         >
           <template #title>
-            <div v-html="observFeature.title" class="pull-left app-map-view-popup-body-feature-infos-observ-title" />
+            <div class="pull-left app-map-view-popup-body-feature-infos-observ-title">
+              <div v-html="observFeature.title" />
+              <div v-if="observFeature.observation.analysis">
+                <small class="grayed">{{ $t("ref-measure-for-analysis", { analysis: observFeature.observation.analysis.name }) }}</small>
+              </div>
+            </div>
             <app-button v-if="observFeature.editable" 
               icon="pencil-square"
               variant="secondary"
@@ -104,6 +109,7 @@ import { ObservationSchema } from '@/app/shared/services/volateq-api/api-schemas
 import { PIDataType } from '@/app/shared/services/volateq-api/api-results-mappings/types';
 import { ObservationLayer } from '../layers/observation-layer';
 import { ObservationPiLayer } from '../layers/observation-pi-layer';
+import { EnabledPiFieldsService } from '../../plant-settings/enabled-pi-fields-service';
 
 @Component({
   name: "app-map-view-popup",
@@ -154,7 +160,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
     this.orthoImagesLayer = OrthoImagesLayer.get(this.plant, this.map);
     this.observationSelectionService = new ObservationSelectionService(this);
 
-    this.hasObservAction = (await CcpService.get(this.plant.id).getCcps()).length > 0;
+    this.hasObservAction = (await CcpService.get(this.plant.id).getCcps()).length > 0 || (await EnabledPiFieldsService.get(this.plant.id).getEnabledPiFields()).length > 0;
   }
 
   @Watch("mapFeature")
@@ -457,7 +463,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
           this.observationFeatures.push({
             featureInfos: observMappingHelper.toFeatureInfos(item, selectedCcpIds, selectedPiIds),
             observation: item,
-            editable: this.isSuperAdmin || this.isCustomerAdmin || item.created_by_user.email === me.email,
+            editable: this.isSuperAdmin || this.isCustomerAdmin || (item.created_by_user && item.created_by_user.email === me.email || false),
             title: this.$t('observation-of', { date: dateHelper.toDateTime(item.observed_at) }).toString(),
           });
         }

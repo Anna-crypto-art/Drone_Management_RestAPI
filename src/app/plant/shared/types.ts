@@ -7,4 +7,5 @@ export interface PlantRouteQuery {
   observation?: string;
   observFilter?: string;
   ccpId?: string | string[];
+  piId?: string | string[];
 }

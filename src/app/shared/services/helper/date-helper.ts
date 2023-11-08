@@ -94,4 +94,15 @@ export default {
     
     return i18n.t(days[d.getDay()]).toString();
   },
+
+  getWeekNumber(date: string | number | Date, ignoreTimezone = false): number {
+    const d = this.getDate(date, ignoreTimezone);
+
+    // copied from stackoverflow: https://stackoverflow.com/a/6117889
+    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    const weekNo = Math.ceil((((d.getDate() - yearStart.getDate()) / 86400000) + 1) / 7);
+
+    return weekNo;
+  }
 };

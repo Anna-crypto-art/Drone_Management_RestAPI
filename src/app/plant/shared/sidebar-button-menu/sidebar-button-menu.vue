@@ -39,6 +39,7 @@ import { CcpService } from "../plant-settings/ccp-service";
 import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
 import AppExplWrap from "@/app/shared/components/app-explanation/app-expl-wrap.vue";
 import { RouteQueryHelper } from "../helper/route-query-helper";
+import { EnabledPiFieldsService } from "../plant-settings/enabled-pi-fields-service";
 
 @Component({
   name: "app-sidebar-button-menu",
@@ -62,7 +63,8 @@ export default class AppSidebarButtonMenu extends Vue {
   private routeQueryHelper = new RouteQueryHelper(this);
 
   async created() {
-    this.hasObservAction = (await CcpService.get(this.plant.id).getCcps()).length > 0;
+    this.hasObservAction = (await CcpService.get(this.plant.id).getCcps()).length > 0 || 
+      (await EnabledPiFieldsService.get(this.plant.id).getEnabledPiFields()).length > 0;
   }
 
   get noObservAvailableExpl(): string {

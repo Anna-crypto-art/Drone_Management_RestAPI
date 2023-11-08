@@ -8,7 +8,7 @@ export const keyFigureRainbowColors: Record<ApiKeyFigure, LayerColor> = {
   [ApiKeyFigure.HIGH_HYDROGEN_CONCENTRATION_ID]: LayerColor.RED_solluxCaptor,
   [ApiKeyFigure.COATING_DEGRADATION_ID]: LayerColor.RED_solluxCaptor,
   [ApiKeyFigure.HOT_GLASS_TUBE_ENDS_ID]: LayerColor.diagramBad,
-  [ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID]: LayerColor.RED_retroBerry,
+  [ApiKeyFigure.GLASS_TUBE_TEMPERATURE_ID]: LayerColor.volateqBlue,
   [ApiKeyFigure.IR_INTENSITY_ID]: LayerColor.RED_retroBerry,
   [ApiKeyFigure.HCE_RECOMMENDED_ACTION_CLASS_ID]: LayerColor.red,
   [ApiKeyFigure.HCE_POSITION_ID]: LayerColor.BLUE_midnightDarkRoyalBlue,

@@ -763,7 +763,7 @@
   "last-7-days": "Last 7 Days",
   "last-30-days": "Last 30 Days",
   "last-90-days": "Last 90 Days",
-  "last-year": "Last Year",
+  "past-year": "Past Year",
   "ref-measure": "Ref. measure.",
   "observ": "Observ.",
   "plant-settings": "Plant settings",
@@ -774,6 +774,9 @@
   "ask-leave-unsaved-changes": "You have unsaved changes. Are you sure that you like leave without saving them?",
   "enable-pis": "Enable Performance indicators for Observations",
   "component-properties": "Component Properties",
+  "edit-observation": "Edit observation",
+  "all": "All",
+  "ref-measure-for-analysis": "Reference measurement for {analysis}",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

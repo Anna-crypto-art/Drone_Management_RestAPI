@@ -6,6 +6,7 @@ import { CcpService } from "../../plant-settings/ccp-service";
 import { CustomComponentPropertySchema } from "@/app/shared/services/volateq-api/api-schemas/custom-component-property-schema";
 import { AnalysisResultMappingEntry, PI } from "@/app/shared/services/volateq-api/api-results-mappings/types";
 import { AnalysisResultMappingHelper } from "@/app/shared/services/volateq-api/api-results-mappings/analysis-result-mapping-helper";
+import { i18n } from "@/main";
 
 export class ObservationSelectionService {
   private readonly id: string;
@@ -16,6 +17,14 @@ export class ObservationSelectionService {
 
   public selectedCcps: CustomComponentPropertySchema[] = [];
   public selectedPIs: PI[] = [];
+
+  public static readonly timeRangeOptions: { value: number, text: string }[] = [
+    { value: 7, text: i18n.t("last-7-days").toString() },
+    { value: 30, text: i18n.t("last-30-days").toString() },
+    { value: 90, text: i18n.t("last-90-days").toString() },
+    { value: 365, text: i18n.t("past-year").toString() },
+    { value: 36500 /* 100 years */, text: i18n.t("all").toString() },
+  ];
 
   constructor(
     private readonly observSelectionComponent: IObservationSelectionComponent,

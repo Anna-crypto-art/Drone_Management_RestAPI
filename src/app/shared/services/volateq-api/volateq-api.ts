@@ -7,7 +7,7 @@ import { HttpClientBase } from "@/app/shared/services/volateq-api/http-client-ba
 import { apiBaseUrl, baseUrl } from "@/environment/environment";
 import { NewEmptyAnalysisRequest, UpdateAnalysisRequest, UpdateAnalysisStateRequest } from "./api-requests/analysis-requests";
 import { CreatePlantRequest, UpdatePlantRequest } from "./api-requests/plant-requests";
-import { AnalysisFileInfoSchema, AnalysisForViewSchema, AnalysisSchema } from "./api-schemas/analysis-schema";
+import { AnalysisFileInfoSchema, AnalysisForViewSchema, AnalysisSchema, SimpleAnalysisSchema } from "./api-schemas/analysis-schema";
 import { PlantSchema } from "./api-schemas/plant-schema";
 import { AnalysisResultChangeHistorySchema, AnalysisResultDetailedSchema } from "./api-schemas/analysis-result-schema";
 import { TableFilterRequest, TableRequest } from "./api-requests/common/table-requests";
@@ -596,6 +596,10 @@ export class VolateqAPI extends HttpClientBase {
 
   public async ignoreReferenceMeasurement(observationId: string, ignore: boolean): Promise<void> {
     await this.post(`/auth/reference-measurement/${observationId}/ignore`, { ignore });
+  }
+
+  public async getLastAnalysis(plantId: string, lastDate?: string): Promise<SimpleAnalysisSchema> {
+    return await this.get(`/auth/last-analysis/${plantId}`, lastDate && { date: lastDate });
   }
 
   public async getDronePlantCoverage(analysisId: string): Promise<void> {
