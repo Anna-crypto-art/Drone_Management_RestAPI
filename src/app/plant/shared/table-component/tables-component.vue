@@ -1,23 +1,23 @@
 <template>
   <div class="app-tables-component">
-    <div class="no-data-placeholder" v-if="!firstAnalysisResult && analysesSidebarOpen">
+    <div class="no-data-placeholder" v-if="!firstAnalysisResult && isAnalysisSidebarActive">
       {{ $t("no-analysis-result-selected") }}
     </div>
-    <div class="no-data-placeholder" v-if="!dateRange && observationsSidebarOpen">
+    <div class="no-data-placeholder" v-if="!dateRange && isObservationsSidebarActive">
       {{ $t("no-observation-selected") }}
     </div>
-    <div v-if="(firstAnalysisResult && analysesSidebarOpen) || (dateRange && observationsSidebarOpen)" class="app-table-root-container">
+    <div v-if="(firstAnalysisResult && isAnalysisSidebarActive) || (dateRange && isObservationsSidebarActive)" class="app-table-root-container">
       <div class="pull-left">
         <app-search-input :placeholder="$t('search-pcs')" @search="onSearch"></app-search-input>
       </div>
-      <div class="pull-right">
+      <div class="pull-right" v-show="!hideCsvExport">
         <app-button variant="secondary" :title="$t('export-csv')" :loading="csvExportLoading" @click="onExportCsv">
           <b-icon icon="download"></b-icon> {{ $t("export-csv") }}: {{ activeTabLabel }}
         </app-button>
       </div>
 
       <app-table-container>
-        <b-tabs v-model="analysisTabIndex" @activate-tab="onAnalysisTabChanged" v-show="analysesSidebarOpen">
+        <b-tabs v-model="analysisTabIndex" @activate-tab="onAnalysisTabChanged" v-show="isAnalysisSidebarActive">
           <b-tab v-for="(activeTabComponent, index) in activeAnalysisTabComponents" :key="index">
             <template #title>
               <app-expl-wrap :expl="activeTabComponent.descr && $t(activeTabComponent.descr)">{{ $t(activeTabComponent.label) }}</app-expl-wrap>
@@ -31,7 +31,7 @@
             />
           </b-tab>
         </b-tabs>
-        <b-tabs v-model="observationTabIndex" @activate-tab="onObservationTabChanged" v-show="observationsSidebarOpen">
+        <b-tabs v-model="observationTabIndex" @activate-tab="onObservationTabChanged" v-show="isObservationsSidebarActive">
           <b-tab v-for="(activeTabComponent, index) in activeObservTabComponents" :key="index">
             <template #title>
               <app-expl-wrap :expl="activeTabComponent.descr && $t(activeTabComponent.descr)">{{ $t(activeTabComponent.label) }}</app-expl-wrap>
@@ -97,6 +97,7 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
   analysisSelectionService: AnalysisSelectionService | null = null;
   observationSelectionService: ObservationSelectionService | null = null;
   
+  hideCsvExport = false;
   csvExportLoading = false;
   activeTabLabel = "";
   
@@ -149,6 +150,16 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
     return this.observationSelectionService && this.observationSelectionService.dateRange;
   }
 
+  get isAnalysisSidebarActive(): boolean {
+    return this.analysesSidebarOpen || (!this.observationsSidebarOpen &&
+      this.$store.direct.state.sidebar.lastActiveSidebarName === "analyses");
+  }
+
+  get isObservationsSidebarActive(): boolean {
+    return this.observationsSidebarOpen || (!this.analysesSidebarOpen &&
+      this.$store.direct.state.sidebar.lastActiveSidebarName === "observations");
+  }
+
   getKeyFigures(): KeyFigureSchema[] {
     return this.analysisSelectionService?.getKeyFigures() || [];
   }
@@ -156,6 +167,8 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
   @Watch("analysesSidebarOpen")
   @Watch("observationsSidebarOpen")
   onSidebarOpenChanged() {
+    this.hideCsvExport = this.observationsSidebarOpen;
+
     this.setActiveTabLabel();
   }
 
@@ -263,11 +276,11 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
   }
 
   private getActiveTabComponents(): LabelledTableTabComponent[] | undefined {
-    if (this.isAnalysisSidebarActive()) {
+    if (this.isAnalysisSidebarActive) {
       return this.activeAnalysisTabComponents;
     }
 
-    if (this.isObservationsSidebarActive()) {
+    if (this.isObservationsSidebarActive) {
       return this.activeObservTabComponents;
     }
   }
@@ -277,25 +290,15 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
   }
 
   private getActiveTabIndex(): number {
-    if (this.isAnalysisSidebarActive()) {
+    if (this.isAnalysisSidebarActive) {
       return this.analysisTabIndex;
     }
 
-    if (this.isObservationsSidebarActive()) {
+    if (this.isObservationsSidebarActive) {
       return this.observationTabIndex;
     }
 
     throw new Error("No active tab index");
-  }
-
-  private isAnalysisSidebarActive(): boolean {
-    return this.analysesSidebarOpen || (!this.observationsSidebarOpen &&
-      this.$store.direct.state.sidebar.lastActiveSidebarName === "analyses");
-  }
-
-  private isObservationsSidebarActive(): boolean {
-    return this.observationsSidebarOpen || (!this.analysesSidebarOpen &&
-      this.$store.direct.state.sidebar.lastActiveSidebarName === "observations");
   }
 
   private setActiveTabLabel() {
@@ -308,7 +311,7 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
 </script>
 <style lang="scss">
 .app-tables-component {
-  padding: 60px 20px;
+  padding: 1em;
 
   .app-table-root-container {
     display: grid;

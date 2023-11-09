@@ -307,18 +307,16 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
   private generateRefMeasuresLink(observations: SimpleObservationSchema[]): string {
     if (observations.length > 0) {
       const observedAt = dateHelper.getDate(observations[0].observed_at);
-      console.log("observedAt", observedAt)
       const diffDays = Math.ceil(((new Date()).getTime() - observedAt.getTime()) / (24*60*60*1000));
-      console.log("diffDays", diffDays)
       const trOption = ObservationSelectionService.timeRangeOptions.find(o => o.value > diffDays)!;
 
       let observation = "";
       if (trOption.value <= 30) {
         observation = dateHelper.toDate(observedAt);
       } else if (trOption.value > 30 && trOption.value <= 90) {
-        observation = observedAt.getUTCFullYear() + "cw" + dateHelper.getWeekNumber(observedAt);
+        observation = observedAt.getUTCFullYear() + "-W" + dateHelper.getWeekNumber(observedAt).toString().padStart(2, "0");
       } else if (trOption.value > 90 && trOption.value <= 365) {
-        observation = observedAt.getUTCFullYear() + "-" + (observedAt.getMonth() + 1);
+        observation = observedAt.getUTCFullYear() + "-" + (observedAt.getMonth() + 1).toString().padStart(2, "0");
       } else {
         observation = observedAt.getUTCFullYear().toString();
       }
