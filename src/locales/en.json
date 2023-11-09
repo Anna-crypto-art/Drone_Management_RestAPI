@@ -777,6 +777,7 @@
   "edit-observation": "Edit observation",
   "all": "All",
   "ref-measure-for-analysis": "Reference measurement for {analysis}",
+  "show-reference-measurements": "Show Reference measurements",
 
   "EMPTY": "Empty",
   "UPLOADING": "Uploading...",

@@ -129,12 +129,22 @@ export default class AppObservationSelectionSidebar extends BaseAuthComponent {
 
     this.ccpService = CcpService.get(this.plant.id);
 
+    console.log("this.selectedTimeRange 1", this.selectedTimeRange)
+
     this.setFilterByQueryRoute();
+
+    console.log("this.selectedTimeRange 2", this.selectedTimeRange)
     await this.onTimeRangeChanged();
+
+    console.log("this.selectedTimeRange 3", this.selectedTimeRange)
 
     this.routeQueryHelper.queryChanged(async () => {
       this.setFilterByQueryRoute();
+
+      console.log("this.selectedTimeRange 4", this.selectedTimeRange)
       await this.onTimeRangeChanged();
+
+      console.log("this.selectedTimeRange 5", this.selectedTimeRange)
     });
   }
 

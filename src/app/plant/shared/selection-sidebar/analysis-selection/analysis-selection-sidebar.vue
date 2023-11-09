@@ -33,7 +33,17 @@
               class="mar-left-half blue"
               v-b-popover.hover.top="$t('has-additional-pis')"
             />
-            // continue here
+            <app-expl-wrap placement="top">
+              <app-icon v-if="row.item.hasObservations"
+                icon="clipboard-check"
+                class="mar-left-half blue"
+              />
+              <template #expl>
+                <a :href="row.item.loadRefMeasuresLink">
+                  {{ $t("show-reference-measurements") }}
+                </a>
+              </template>
+            </app-expl-wrap>
             <app-super-admin-marker v-if="row.item.analysisResultReleased === false" />
             <br>
             <small class="grayed">{{ row.item.name }}</small>
@@ -48,7 +58,6 @@
 </template>
 
 <script lang="ts">
-import AppExplanation from "@/app/shared/components/app-explanation/app-explanation.vue";
 import AppTableContainer from "@/app/shared/components/app-table-container/app-table-container.vue";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
 import { Component, Prop, Ref } from "vue-property-decorator";
@@ -69,6 +78,7 @@ import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.
 import AppExplWrap from "@/app/shared/components/app-explanation/app-expl-wrap.vue";
 import { SimpleObservationSchema } from "@/app/shared/services/volateq-api/api-schemas/observation-schema";
 import { ObservationSelectionService } from "../observation-selection/observation-selection-service";
+import { ApiTechnology } from "@/app/shared/services/volateq-api/api-technologies";
 
 
 @Component({
@@ -77,7 +87,6 @@ import { ObservationSelectionService } from "../observation-selection/observatio
     AppIcon,
     AppIconAnalysis,
     AppTableContainer,
-    AppExplanation,
     AppOrderPpsView,
     AppSuperAdminMarker,
     AppTable,
@@ -298,7 +307,9 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
   private generateRefMeasuresLink(observations: SimpleObservationSchema[]): string {
     if (observations.length > 0) {
       const observedAt = dateHelper.getDate(observations[0].observed_at);
-      const diffDays = Math.abs((new Date()).getDate() - observedAt.getDate() / (24*60*60*1000));
+      console.log("observedAt", observedAt)
+      const diffDays = Math.ceil(((new Date()).getTime() - observedAt.getTime()) / (24*60*60*1000));
+      console.log("diffDays", diffDays)
       const trOption = ObservationSelectionService.timeRangeOptions.find(o => o.value > diffDays)!;
 
       let observation = "";
@@ -307,18 +318,19 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
       } else if (trOption.value > 30 && trOption.value <= 90) {
         observation = observedAt.getUTCFullYear() + "cw" + dateHelper.getWeekNumber(observedAt);
       } else if (trOption.value > 90 && trOption.value <= 365) {
-        observation = observedAt.getUTCFullYear() + "-" + observedAt.getUTCMonth();
+        observation = observedAt.getUTCFullYear() + "-" + (observedAt.getMonth() + 1);
       } else {
         observation = observedAt.getUTCFullYear().toString();
       }
 
-      return this.$route.fullPath.replace(/sidebar=[^&]*?(&)/g, "")
-        .replace(/observation=[^&]*?(&)/g, "")
-        .replace(/observFilter=[^&]*?(&)/g, "")
-        .replace(/piId=[^&]*?(&)/g, "")
+      return this.$route.fullPath.replace(/sidebar=[^&]*(&|$)/g, "")
+        .replace(/observation=[^&]*(&|$)/g, "")
+        .replace(/observFilter=[^&]*(&|$)/g, "")
+        .replace(/piId=[^&]*(&|$)/g, "")
         + "&sidebar=observations"
         + "&observation=" + observation
-        + "&observFilter=" + trOption.value;
+        + "&observFilter=" + trOption.value
+        + (this.plant.technology_id === ApiTechnology.CSP_PTC ? "&piId=__9__glass_tube_temperature__" : "");
     }
 
     return "";
