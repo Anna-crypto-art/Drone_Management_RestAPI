@@ -4,11 +4,11 @@
     <!-- Only for christmas time -->
     <!-- <div class="snow"><div class="snow-more"></div></div> -->
     
-    <b-badge class="app-header-dev-badge" v-if="isEnvDevelopment" variant="danger">
+    <b-badge class="app-header-dev-badge" v-if="isEnvDevelopment && !isMobile" variant="danger">
       DEV
     </b-badge>
 
-    <b-navbar-brand href="/">
+    <b-navbar-brand href="/" v-if="!isMobile">
       <img
         class="app-header-logo float-left"
         src="/images/logos/logo_white.png"
@@ -16,6 +16,13 @@
         alt="volateq"
       />
     </b-navbar-brand>
+
+    <img v-if="isMobile"
+      class="app-header-logo float-left"
+      src="/images/logos/logo_white.png"
+      srcset="/images/logos/logo_white.webp, /images/logos/logo_white.png"
+      alt="volateq"
+    />
 
     <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
@@ -164,6 +171,10 @@ export default class AppHeader extends BaseAuthComponent {
     return environment === "development";
   }
 
+  get isMobile(): boolean {
+    return this.$store.direct.state.mobile.isMobile;
+  }
+
   async onShowSwitchCustomerModal() {
     this.customerSelection = [
       { value: null, text: "" },
@@ -227,15 +238,14 @@ export default class AppHeader extends BaseAuthComponent {
     background-position: 0 0;
   }
   100% {
-    background-position: 0px $header-height;
+    background-position: 0px var(--header-height);
   }
 }
 
-
 .app-header {
   position: relative;
-  height: $header-height;
-  line-height: $header-height;
+  height: var(--header-height);
+  line-height: var(--header-height);
   background-color: $blue;
   color: $white;
 
@@ -245,6 +255,17 @@ export default class AppHeader extends BaseAuthComponent {
     position: absolute;
     top: 10px;
     left: 142px;
+  }
+
+  .navbar-toggler {
+    border: none;
+    padding-left: 0;
+    padding-right: 0;
+
+    &:hover, &:active, &:focus {
+      border: none;
+      outline: none;
+    }
   }
 
   .snow {
@@ -307,12 +328,12 @@ export default class AppHeader extends BaseAuthComponent {
   }
 
   .navbar-brand {
-    height: $header-height;
+    height: var(--header-height);
     @extend %padtopbot-0;
   }
 
   &-logo {
-    height: $header-height;
+    height: var(--header-height);
     margin-left: -15px;
     @extend %padtopbot-0;
   }
@@ -342,7 +363,7 @@ export default class AppHeader extends BaseAuthComponent {
     }
 
     &-toggle {
-      height: $header-height;
+      height: var(--header-height);
 
       display: flex;
       justify-content: center;

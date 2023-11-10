@@ -74,7 +74,7 @@ export default class AppMapViewLayerSelection extends BaseComponent {
   &.sidebar-open {
     &.isMobile {
       left: calc($sidebar-width * -1);
-      height: calc(100vh - $header-height);
+      height: calc(100vh - var(--header-height));
       background-color: $white;
     }
   }  

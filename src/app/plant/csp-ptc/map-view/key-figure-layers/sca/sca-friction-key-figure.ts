@@ -53,6 +53,10 @@ export class ScaFrictionKeyFigureLayer extends ScaKeyFigureLayer implements ICom
   }
 
   protected getLegendName(): string {
+    if (!this.query?.torsion_class) { // Avoids a stackoverflow
+      return super.getLegendName();
+    }
+
     return this.getLegendEntryTransName(
       "sca-torsion-class",
       this.getClassLimits(),

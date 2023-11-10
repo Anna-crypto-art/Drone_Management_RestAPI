@@ -115,6 +115,8 @@ export default class AppTablesComponent extends BaseAuthComponent implements IAn
   async mounted() {
     await this.analysisSelectionService!.register();
     await this.observationSelectionService!.register();
+
+    this.hideCsvExport = this.observationsSidebarOpen;
   }
 
   async unmounted() {

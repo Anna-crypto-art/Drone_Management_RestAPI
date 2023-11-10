@@ -15,6 +15,7 @@ export interface ComponentGroupBaseLayer<T> {
   childLayers: T[];
   visible: boolean;
   collapsed: boolean;
+  addMarTopLayerId?: string;
 }
 
 export interface GroupKeyFigureLayer {

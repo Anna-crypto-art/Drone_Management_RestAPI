@@ -216,12 +216,16 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
     const selectedLayers = this.layersService.keyFigureLayers.filter(l => l.selected);
     for (const selectedLayer of selectedLayers) {
       if (selectedLayer.id !== layer.id) {
-        if ((layerGroup as ComponentGroupKeyFigureLayer).componentId) {
+        // if the layerGroup has type (interface here...) ComponentGroupKeyFigureLayer
+        // instead of GroupKeyFigureLayer it is a single layer (e. g. Broken glass)
+        const isNotGroupKeyFigureLayer = (layerGroup as ComponentGroupKeyFigureLayer).componentId;
+        if (isNotGroupKeyFigureLayer) {
           await selectedLayer.setSelected(false);
-
         } else {
+          // Group layer. (e. g. Glass tube temperatur class). 
+          // Siblings (layers in the same group) keep selected.
           const sibling = (layerGroup as GroupKeyFigureLayer).childLayers.find(l => l.id === selectedLayer.id);
-          if (!sibling) {
+          if (!sibling || this.analysisSelectionService.compareAnalysisResult) { // Always unselect all other layers in compare mode.
             await selectedLayer.setSelected(false);
           }
         }

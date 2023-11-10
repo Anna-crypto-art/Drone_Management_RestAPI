@@ -1,5 +1,14 @@
-$header-height: 80px;
+:root {
+  --header-height: 80px;
+}
+
 $tab-height: 42px;
 $sidebar-width: min(250px, min(70vw, calc(100vw - 50px)));
 $button-menu-width: 40px;
 $layer-selection-width: 250px;
+
+@media (max-width: 1000px) {
+  :root {
+    --header-height: 40px;
+  }
+}

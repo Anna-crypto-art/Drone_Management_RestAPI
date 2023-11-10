@@ -10,7 +10,7 @@
     <div class="app-map-view-popup-actions mar-bottom">
       <app-dropdown-button v-if="orthoImages.length > 0" size="sm" variant="secondary" :loading="orthoLoading">
         <template #title>
-          <b-icon-image-fill /><span class="pad-left-half">{{ $t("ortho") }}</span>
+          <b-icon-image-fill class="mar-right-half" />
         </template>
         <b-dropdown-item v-for="orthoImage in orthoImages" :key="orthoImage.keyFigureId" @click="onOrthoImageClick(orthoImage)">
           {{ orthoImage.name }}
@@ -110,6 +110,7 @@ import { PIDataType } from '@/app/shared/services/volateq-api/api-results-mappin
 import { ObservationLayer } from '../layers/observation-layer';
 import { ObservationPiLayer } from '../layers/observation-pi-layer';
 import { EnabledPiFieldsService } from '../../plant-settings/enabled-pi-fields-service';
+import AppSuperAdminMarker from '@/app/shared/components/app-super-admin-marker/app-super-admin-marker.vue';
 
 @Component({
   name: "app-map-view-popup",
@@ -119,6 +120,7 @@ import { EnabledPiFieldsService } from '../../plant-settings/enabled-pi-fields-s
     AppLoading,
     AppObservationModal,
     AppMapViewPopupFeatureInfos,
+    AppSuperAdminMarker,
   }
 })
 export default class AppMapViewPopup extends BaseAuthComponent implements IAnalysisSelectionComponent, IObservationSelectionComponent {

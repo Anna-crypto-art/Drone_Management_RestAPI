@@ -180,12 +180,6 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
   height: 100%;
   width: 100%;
 
-  @media (max-width: 1000px) {
-    .nav-item .nav-link span {
-      display: none;
-    }
-  }
-
   .plant-name {
     width: 120px;
     position: absolute;
@@ -194,6 +188,18 @@ export default class AppPlantViewTabs extends BaseAuthComponent implements IAnal
     left:65px;
     color: white;
     font-size: 15px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .plant-view-tabs .nav-item .nav-link span {
+    display: none;
+  }
+
+  .plant-view-tabs .plant-name {
+    font-size: 1.2em;
+    top: -35px;
+    left: 100px;
   }
 }
 </style>

@@ -28,7 +28,10 @@
               />
             </div>
           </div>
-          <div v-if="!childLayer.childLayers" class="app-map-view-observation-layer-selection-single">
+          <div v-if="!childLayer.childLayers" 
+            class="app-map-view-observation-layer-selection-single"
+            :class="{ 'mar-top': childLayer.id == compGroupLayer.addMarTopLayerId }"
+          >
             <app-geo-json-layer-checkbox :geoLayer="childLayer" :map="map" descrPlacement="right" />
           </div>
         </div>
@@ -213,6 +216,7 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
         this.compGroupLayers.push(componentGroupObservLayer);
 
         let hasSelectedChildLayers = false;
+        let addMarTopForFirstPiLayer = false;
 
         for (const ccp of compCcps) {
           let layersSelected = false;
@@ -222,6 +226,7 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
             componentGroupObservLayer.childLayers.push(childLayer)
 
             layersSelected = this.selectLayers(childLayer.childLayers, selectedLayerNameIds);
+            addMarTopForFirstPiLayer = true;
           } else {
             let filterValue: ObservFilterValue = undefined;
             if (ccp.data_type === CCPDataType.BOOLEAN) {
@@ -242,6 +247,12 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
 
           let filterValue: ObservFilterValue = pi.dataType === PIDataType.BOOLEAN ? true : undefined;
           const childLayer = this.createObservPiLayer(pi, dateRange!, filterValue);
+
+          if (addMarTopForFirstPiLayer) {
+            componentGroupObservLayer.addMarTopLayerId = childLayer.id;
+            
+            addMarTopForFirstPiLayer = false;
+          }
 
           componentGroupObservLayer.childLayers.push(childLayer);
 
@@ -405,7 +416,7 @@ export default class AppMapViewObservLayerSelection extends BaseComponent implem
 .app-map-view-observ-layer-selection {
     @media(max-width: 1000px) {
       left: -250px;
-      height: calc(100% - $header-height - $tab-height)
+      height: calc(100% - var(--header-height) - $tab-height)
     }
 }
 

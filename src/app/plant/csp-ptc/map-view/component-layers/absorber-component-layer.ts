@@ -6,7 +6,7 @@ import { ComponentLayer } from "@/app/plant/shared/map-view/layers/component-lay
 
 export class AbsorberComponentLayer extends ComponentLayer {
   public readonly componentId = ApiComponent.CSP_PTC_ABSORBER;
-  protected readonly color = LayerColor.black;
+  protected readonly color = LayerColor.white;
   public readonly allowRefMeasures = true;
   public readonly name = "absorber-tubes";
   protected readonly width = 3;
@@ -27,9 +27,18 @@ export class AbsorberComponentLayer extends ComponentLayer {
     return new Style({
       stroke: new Stroke({
         color: this.getColor(feature),
-        width: this.getWidth(),
+        width: this.getWidth() - 3,
       }),
       text: this.showText(feature, { rotation: -(Math.PI / 2.8) }),
     });
+  }
+
+  protected getAddStyles(feature: FeatureLike): Style[] | undefined {
+    return [new Style({
+      stroke: new Stroke({
+        color: LayerColor.black,
+        width: this.getWidth(),
+      }),
+    })];
   }
 }

@@ -80,7 +80,7 @@ export default class AppPlantViewPv extends BaseAuthComponent implements IAnalys
 $left-width: 400px;
 
 .plant-view-pv {
-  height: calc(100vh - #{$header-height});
+  height: calc(100vh - var(--header-height));
   width: 100%;
   display: flex;
   position: relative;
