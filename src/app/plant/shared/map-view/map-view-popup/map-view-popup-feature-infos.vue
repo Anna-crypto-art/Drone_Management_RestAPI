@@ -126,12 +126,13 @@ export default class AppMapViewPopupFeatureInfos extends BaseAuthComponent {
             }
           );
 
-          featureInfo.historyValues = observations.items.map(item => ({
-            value: item.column_values[featureInfo.id].toString(),
-            date: dateHelper.toDateTime(item.observed_at),
-            descr: item.notes,
-            bold: item.id === currentObservation.id,
-          }));
+          featureInfo.historyValues = observations.items.filter(item => featureInfo.id in item.column_values)
+            .map(item => ({
+              value: item.column_values[featureInfo.id].toString(),
+              date: dateHelper.toDateTime(item.observed_at),
+              descr: item.notes,
+              bold: item.id === currentObservation.id,
+            }));
   
           break;
         }

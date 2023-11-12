@@ -321,11 +321,11 @@ export default class AppAnalysisSelectionSidebar extends BaseAuthComponent {
         observation = observedAt.getUTCFullYear().toString();
       }
 
-      return this.$route.fullPath.replace(/sidebar=[^&]*(&|$)/g, "")
-        .replace(/observation=[^&]*(&|$)/g, "")
-        .replace(/observFilter=[^&]*(&|$)/g, "")
-        .replace(/piId=[^&]*(&|$)/g, "")
-        + "&sidebar=observations"
+      const route = this.$route.fullPath.replace(/(\?|&)sidebar=[^&]*/g, "")
+        .replace(/(\?|&)observation=[^&]*/g, "")
+        .replace(/(\?|&)observFilter=[^&]*/g, "")
+        .replace(/(\?|&)piId=[^&]*/g, "");
+      return route + (route.includes("?") ? "&" : "?") + "sidebar=observations"
         + "&observation=" + observation
         + "&observFilter=" + trOption.value
         + (this.plant.technology_id === ApiTechnology.CSP_PTC ? "&piId=__9__glass_tube_temperature__" : "");
