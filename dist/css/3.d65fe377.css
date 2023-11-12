@@ -1,7 +1,0 @@
-.box{position:relative;padding:1em;background-color:#f4f5f8;margin-top:30px;border:1px solid rgba(68,68,68,.1)}.box-title{margin-bottom:1em}.box-title-subtitle{font-size:70%}.box-title-subtitle ul{margin-left:2em;margin-top:.5em}.box:last-child{margin-bottom:30px}
-.app-modal-form-info-area{background-color:#f4f5f8;margin:0 -1.5rem 1.5rem;padding:1.5rem}
-.app-colorpicker{-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column}
-.app-color-square{display:inline-block;width:16px;height:16px;border:1px solid rgba(68,68,68,.4);margin-right:5px;-webkit-box-sizing:border-box;box-sizing:border-box;margin-bottom:-2px}.app-color-square.circle{border-radius:10px}.app-color-square-inner{border:1px solid #fff;width:100%;height:100%}.app-color-square-inner.circle{border-radius:10px}
-.app-ccp-data-type-info-col{padding-right:0 !important}.app-ccp-data-type-info-col .del-btn{margin-right:15px}.app-ccp-data-type-info-col .app-colorpicker{width:66%;padding-right:15px;float:left}
-.app-ccp-data-type-number-range-number{width:50%;float:left}
-.app-custom-component-properties .input-group-color-picker{-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column}.app-custom-component-properties-value-range{list-style-type:none}
