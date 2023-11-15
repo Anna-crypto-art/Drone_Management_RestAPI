@@ -1,8 +1,11 @@
 <template>
   <div class="app-settings-users">
     <div class="app-settings-users-table-toolbar">
-      <app-button variant="primary" class="btn-invite" @click="showInviteUserModal()" v-b-modal.invite-modal>
+      <app-button variant="primary" class="btn-invite pull-left" @click="showInviteUserModal()" v-b-modal.invite-modal>
         {{ $t("invite") }}
+      </app-button>
+      <app-button variant="secondary" class="pull-left mar-left" @click="onClickDownloadUserEmails" icon="download">
+        {{ $t("download-emails") }}
       </app-button>
     </div>
     <div class="clearfix"></div>
@@ -179,6 +182,8 @@ import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant
 import { BaseAuthComponent } from "@/app/shared/components/base-auth-component/base-auth-component";
 import dateHelper from "@/app/shared/services/helper/date-helper";
 import { AppTableColumns } from "@/app/shared/components/app-table/types";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
+import { AppDownloader } from "@/app/shared/services/app-downloader/app-downloader";
 
 
 const MAX_USERS_PER_CUSTOMER = 10;
@@ -195,6 +200,8 @@ const MAX_USERS_PER_CUSTOMER = 10;
   },
 })
 export default class AppSettingsUsers extends BaseAuthComponent {
+  users: UserSchema[] = [];
+
   columns: AppTableColumns = [];
   rows: UserItem[] = [];
 
@@ -241,12 +248,11 @@ export default class AppSettingsUsers extends BaseAuthComponent {
   }
 
   async updateUserRows() {
-    let users: UserSchema[] = [];
     this.loading = true;
     try {
-      users = await volateqApi.getUsers(this.selectedCustomer?.id);
+      this.users = await volateqApi.getUsers(this.selectedCustomer?.id);
 
-      this.rows = users.map((user: UserSchema) => {
+      this.rows = this.users.map((user: UserSchema) => {
         let stateDate = "";
         let userState = user.state.toLowerCase() as any;
         if (user.is_locked) {
@@ -397,6 +403,12 @@ export default class AppSettingsUsers extends BaseAuthComponent {
     } finally {
       this.loading = false;
     }
+  }
+
+  @CatchError()
+  onClickDownloadUserEmails() {
+    const users = this.users.filter(u => !u.is_locked && !!u.registered_at).map(u => u.email).join(';');
+    AppDownloader.downloadText(users, "volateq-web-app-users.txt");
   }
 
   onCustomerChanged() {

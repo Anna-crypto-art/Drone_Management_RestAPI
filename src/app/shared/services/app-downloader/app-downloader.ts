@@ -11,6 +11,10 @@ export class AppDownloader {
     document.body.removeChild(fileLink);
   }
 
+  public static downloadText(text: string, filename: string): void {
+    this.download('data:text/plain;charset=utf-8,' + encodeURIComponent(text), filename);
+  }
+
   public static open(url: string, target="_blank"): void {
     window.open(url, target)?.focus();
   }
