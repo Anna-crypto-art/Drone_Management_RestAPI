@@ -7,6 +7,7 @@ import { Extent } from "ol/extent";
 import { BaseLayer } from "./base-layer";
 import { LayerColor } from "../../map-view/layers/types";
 import { PlantSchema } from "@/app/shared/services/volateq-api/api-schemas/plant-schema";
+import { GeoFeaturesLoader } from "./geo-features-loader";
 
 export abstract class ComponentLayer extends BaseLayer {
   public abstract readonly componentId: ApiComponent;
@@ -58,5 +59,12 @@ export abstract class ComponentLayer extends BaseLayer {
     }
 
     return undefined;
+  }
+
+  protected async getGeoFeaturesLoader(): Promise<GeoFeaturesLoader | undefined> {
+    const geoJsonLoader = new GeoFeaturesLoader(this.plant, this.componentId);
+    await geoJsonLoader.load();
+
+    return geoJsonLoader;
   }
 }

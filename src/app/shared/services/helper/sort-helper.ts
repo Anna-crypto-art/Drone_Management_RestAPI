@@ -31,3 +31,22 @@ export function sortBy<T>(array: Array<T>, ...args: Array<(e: T) => string | num
     return 0;
   });
 }
+
+/**
+ * Binary Search
+ */
+export function findSortIndex<T>(sortedArr: Array<T>, val: number, getVal: (e: T) => number): number {
+  let low = 0;
+	let high = sortedArr.length;
+
+	while (low < high) {
+		const mid = low + high >>> 1; // Bitwise shifting (unsigned). Similar to Math.floor(x / 2) but faster
+		if (getVal(sortedArr[mid]) < val) {
+      low = mid + 1;
+    } else {
+      high = mid;
+    }
+	}
+
+	return low;
+}

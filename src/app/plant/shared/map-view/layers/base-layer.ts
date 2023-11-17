@@ -19,6 +19,7 @@ import { SequentialEventEmitter } from "@/app/shared/services/app-event-service/
 import { LayerEvent } from "./types";
 import { setOpacityForColor } from "@/app/shared/services/helper/color-helper";
 import { asColorLike } from "ol/colorlike";
+import { GeoFeaturesLoader } from "./geo-features-loader";
 
 /**
  * Represents a geojson layer
@@ -31,6 +32,7 @@ export abstract class BaseLayer implements IGeoLayer {
   public readonly autoZoom: boolean = false;
   public visible = true;
   public zIndex = 1;
+  // Overwrite getGeoFeaturesLoader is required for minZoomLevel
   public readonly minZoomLevel: number | undefined = undefined;
   public description: string | undefined = undefined;
   public reloadLayerOnNextSelection = false;
@@ -41,8 +43,7 @@ export abstract class BaseLayer implements IGeoLayer {
 
   protected showPcsZoomLevel = 15;
   
-  protected zoomLoadedPcsCodes: Record<string, true> | undefined = undefined;
-  protected loadedExtent: Extent | undefined = undefined;
+  protected geoFeaturesLoader: GeoFeaturesLoader | undefined = undefined;
 
   // zoomlevel: width
   protected readonly zoomWidths: Record<number, number | { width: number, mobileOnly: boolean }> | null = null;
@@ -112,21 +113,7 @@ export abstract class BaseLayer implements IGeoLayer {
       // But in this case we need to add features to the geoJSON data each time
       // the layer gets selected...
       if (this.selected && !this.initiallyLoadedBeforeSelected) {
-        const geoJson = await this.loadExtent();
-        if (geoJson) {
-          this.addLoadedFeatures(geoJson);
-        }
-      }
-
-      // Bug: 
-      // 1. select component and load extent for top left corner
-      // 2. unselect component
-      // 3. select component and load extent for bottom right corner
-      // -> Now whole plant is within extent and no further components get loaded...
-      //
-      // Fix: Reset extend each time component gets unselected
-      if (this.loadedExtent && !this.selected) {
-        this.loadedExtent = undefined;
+        await this.loadAndAddExtend();
       }
     }
 
@@ -137,6 +124,10 @@ export abstract class BaseLayer implements IGeoLayer {
 
   protected async emitOnSelected() {
     await this.events.emit(LayerEvent.ON_SELECTED, this);
+  }
+
+  protected async getGeoFeaturesLoader(): Promise<GeoFeaturesLoader | undefined> {
+    return undefined;
   }
 
   protected onZoom(onZoomCallback: (zoomLevel: number | undefined) => void): void {
@@ -160,20 +151,20 @@ export abstract class BaseLayer implements IGeoLayer {
     }
 
     if (this.minZoomLevel) {
-      if (this.zoomLoadedPcsCodes === undefined) { // is "change:center" event is already registered
-        this.zoomLoadedPcsCodes = {};
-
-        const onLoadExtend = debounce(async () => {
-          if (this.selected) {
-            const geoJson = await this.loadExtent();
-            if (geoJson) {
-              this.addLoadedFeatures(geoJson);
+      if (this.geoFeaturesLoader === undefined) {
+        this.geoFeaturesLoader = await this.getGeoFeaturesLoader();
+        if (this.geoFeaturesLoader !== undefined) {
+          const onLoadExtend = debounce(async () => {
+            if (this.selected) {
+              await this.loadAndAddExtend();
             }
-          } 
-        }, 100);
-        
-        this.getMap()!.getView().on("change:center", onLoadExtend);
-        this.getMap()!.getView().on("change:resolution", onLoadExtend);
+          }, 100);
+          
+          this.getMap()!.getView().on("change:center", onLoadExtend);
+          this.getMap()!.getView().on("change:resolution", onLoadExtend);
+        } else {
+          throw new Error("Layer \"" + this.name + "\" with \"minZoomLevel\" but without geoFeaturesLoader");
+        }
       }
 
       const geoJson = await this.loadExtent();
@@ -208,6 +199,20 @@ export abstract class BaseLayer implements IGeoLayer {
     source.addFeatures(geometryFeatures);
   }
 
+  protected async loadAndAddExtend() {
+    try {
+      await this.setLoading(false);
+      await this.appLayerCheckbox?.$nextTick()
+
+      const geoJson = await this.loadExtent();
+      if (geoJson) {
+        this.addLoadedFeatures(geoJson);
+      }
+    } finally {
+      await this.setLoading(false);
+    }
+  }
+
   protected async loadExtent(): Promise<GeoJSON<PropsFeature> | undefined> {
     try {
       await this.setLoading(true);
@@ -217,33 +222,22 @@ export abstract class BaseLayer implements IGeoLayer {
       const zoomLevel = view.getZoom();
 
       if (zoomLevel! >= this.minZoomLevel!) {
+        if (this.geoFeaturesLoader === undefined) {
+          throw new Error("Cannot load extent. geoFeaturesLoader is undefined...");
+        }
+
         const extent = transformExtent(
           view.calculateExtent(map.getSize()),
           GEO_JSON_OPTIONS.featureProjection,
           GEO_JSON_OPTIONS.dataProjection
         );
 
-        if (this.isOutsideOfLoadedExtent(extent)) {
-          this.enlargeExtent(extent);
+        const minLong = extent[0];
+        const minLat = extent[1];
+        const maxLong = extent[2];
+        const maxLat = extent[3];
 
-          const geoJson = await this.load(extent);
-          if (geoJson) {
-            const newFeatures: (FeatureLike & PropsFeature)[] = [];
-            for (const feature of geoJson.features) {
-              const pcs = feature.properties.name;
-              if (pcs) {
-                if (!(pcs in this.zoomLoadedPcsCodes!)) {
-                  newFeatures.push(feature);
-                  this.zoomLoadedPcsCodes![pcs] = true;
-                }
-              }
-            }
-
-            geoJson.features = newFeatures;
-
-            return geoJson;
-          }
-        }
+        return this.geoFeaturesLoader.findFeatures(minLong, maxLong, minLat, maxLat);
       }
 
       return undefined;
@@ -251,43 +245,6 @@ export abstract class BaseLayer implements IGeoLayer {
       this.appLayerCheckbox?.showError(e);
     } finally {
       await this.setLoading(false);
-    }
-  }
-
-  private isOutsideOfLoadedExtent(extent: Extent): boolean {
-    const min_long = extent[0];
-    const min_lat = extent[1];
-    const max_long = extent[2];
-    const max_lat = extent[3];
-
-    return this.loadedExtent === undefined || 
-      this.loadedExtent[0] > min_long ||
-      this.loadedExtent[1] > min_lat ||
-      this.loadedExtent[2] < max_long ||
-      this.loadedExtent[3] < max_lat;
-  }
-  
-  private enlargeExtent(extent: Extent) {
-    const min_long = extent[0];
-    const min_lat = extent[1];
-    const max_long = extent[2];
-    const max_lat = extent[3];
-
-    if (this.loadedExtent === undefined) {
-      this.loadedExtent = extent;
-    } else {
-      if (this.loadedExtent[0] > min_long) {
-        this.loadedExtent[0] = min_long
-      }
-      if (this.loadedExtent[1] > min_lat) {
-        this.loadedExtent[1] = min_lat
-      }
-      if (this.loadedExtent[2] < max_long) {
-        this.loadedExtent[2] = max_long
-      }
-      if (this.loadedExtent[3] < max_lat) {
-        this.loadedExtent[3] = max_lat
-      }
     }
   }
 
