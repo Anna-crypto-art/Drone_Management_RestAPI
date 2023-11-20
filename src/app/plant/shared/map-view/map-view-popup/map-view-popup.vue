@@ -403,7 +403,7 @@ export default class AppMapViewPopup extends BaseAuthComponent implements IAnaly
   }
 
   private setResultModModes() {
-    const keyFigureLayers = this.selectedKeyFigureLayers;
+    const keyFigureLayers = this.selectedKeyFigureLayers.filter(l => !l.invisibleAutoSelection);
 
     if (keyFigureLayers.length !== 1) {
       this.resultModEnabled = false;

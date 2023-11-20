@@ -408,20 +408,20 @@ export default class AppMapViewKeyFigureLayerSelection extends BaseComponent imp
   }
 
   private async updateLayer(layer: KeyFigureBaseLayer): Promise<boolean> {
-    if (layer.isCompareEnabled) {
-      const newCompareAnalysisResult = this.analysisSelectionService?.compareAnalysisResult || null;
-      const oldCompareAnalysisResult = layer.compareAnalysisResult;
-      
-      layer.setCompareAnalysisResult(newCompareAnalysisResult);
+    const newCompareAnalysisResult = this.analysisSelectionService?.compareAnalysisResult || null;
+    const oldCompareAnalysisResult = layer.compareAnalysisResult;
 
-      if (newCompareAnalysisResult != oldCompareAnalysisResult) {
-        layer.reloadLayer();
-      }
+    layer.setCompareAnalysisResult(newCompareAnalysisResult);
+    
+    if (layer.isCompareEnabled && newCompareAnalysisResult != oldCompareAnalysisResult) {
+      layer.reloadLayer();
     }
+    
+    const inCompareMode = newCompareAnalysisResult !== null;
 
     const analysisResult = this.analysisSelectionService?.firstAnalysisResult;
     const visible = analysisResult && layer.analysisResult.id === analysisResult.id &&
-      (!layer.compareAnalysisResult || layer.hasKeyFigureForCompareAnalysisResult()) || false;
+      (!inCompareMode || layer.hasKeyFigureForCompareAnalysisResult()) || false;
     layer.setVisible(visible);
 
     if (layer.selected) {

@@ -174,7 +174,11 @@ export abstract class KeyFigureLayer<T extends AnalysisResultSchemaBase, Q exten
   }
 
   public hasKeyFigureForCompareAnalysisResult(): boolean {
-    if (this.isCompareEnabled && this.compareAnalysisResult) {
+    if (this.isCompareEnabled) {
+      if (!this.compareAnalysisResult) {
+        throw new Error("compareAnalysisResult has not been set for checking overlapping keyfigures")
+      }
+
       return !!(this.analysisResult.key_figures.find(keyFigure => keyFigure.id === this.keyFigureId) &&
         this.compareAnalysisResult.key_figures.find(keyFigure => keyFigure.id === this.keyFigureId));
     }
