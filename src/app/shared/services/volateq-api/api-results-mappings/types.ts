@@ -1,0 +1,44 @@
+import { ApiComponent } from "../api-components/api-components";
+import { ApiKeyFigure } from "../api-key-figures";
+import { AnalysisResultSchemaBase } from "../api-schemas/analysis-result-schema-base";
+
+export enum PIDataType {
+  BOOLEAN = 1,
+  NUMERIC = 2,
+}
+
+export interface AnalysisResultMappingEntry<T extends AnalysisResultSchemaBase = AnalysisResultSchemaBase, C = any> {
+  getValue: (result: T) => unknown;
+  getDiffValue?: (result: C) => unknown;
+  transName: string;
+  transDescr?: string;
+  keyFigureId?: ApiKeyFigure;
+  dataType?: PIDataType;
+  unit?: string;
+  formatter?: (value: unknown) => string;
+  enableForDiagram?: boolean;
+  disableForTable?: boolean;
+  enableForRefMeasure?: boolean;
+  enableForObservation?: boolean;
+  enableForFilter?: boolean;
+  superAdminOnly?: boolean;
+  valueDescr?: string;
+}
+
+export interface AnalysisResultMappingEntryWithPiFieldName<T extends AnalysisResultSchemaBase = AnalysisResultSchemaBase> extends AnalysisResultMappingEntry<T> {
+  piFieldName: string;
+}
+
+export interface PI extends AnalysisResultMappingEntryWithPiFieldName<AnalysisResultSchemaBase> {
+  id: string;
+  componentId: ApiComponent;
+  keyFigureId: ApiKeyFigure;
+  dataType: PIDataType;
+}
+
+export type AnalysisResultMappings<T extends AnalysisResultSchemaBase, C = any> = AnalysisResultMappingEntry<T, C>[];
+
+export interface ComponentResultMappings {
+  componentId: ApiComponent;
+  resultMapping: AnalysisResultMappings<any>;
+}

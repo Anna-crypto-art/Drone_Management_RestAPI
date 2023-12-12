@@ -1,0 +1,127 @@
+<template>
+  <div class="app-sidebar-button-menu" :class="{ openAnalyses:openAnalyses, openObservations:openObservations }">
+    <b-button-group vertical>
+      <b-button 
+        :variant="variantAnalyses"
+        size="sm"
+        tool="analyses"
+        class="sidebar-button"
+        @click="onToggle('analyses')"
+      >
+        <app-icon-analysis />
+      </b-button>
+      <b-button 
+        :variant="variantObservations"
+        size="sm"
+        tool="observations"
+        class="sidebar-button"
+        @click="onToggle('observations')"
+        :disabled="!hasObservAction"
+      >
+        <app-expl-wrap :expl="noObservAvailableExpl" placement="right">
+          <b-icon icon="clipboard-data" scale="1.1" shift-h="-2" />
+        </app-expl-wrap>
+      </b-button>
+    </b-button-group>
+  </div>
+</template>
+
+<script lang="ts">
+import Vue from "vue";
+import { Component, Prop } from "vue-property-decorator";
+import AppIconAnalysis from "@/app/shared/components/app-icon/app-icon-analysis.vue";
+import AppIconObservations from "@/app/shared/components/app-icon/app-icon-observations.vue";
+import { CatchError } from "@/app/shared/services/helper/catch-helper";
+import { SidebarNames, sidebars } from "@/app/shared/stores/sidebar";
+import { State } from "vuex-class";
+import AppMapView from "../map-view/map-view.vue";
+import { CcpService } from "../plant-settings/ccp-service";
+import { PlantSchema } from '@/app/shared/services/volateq-api/api-schemas/plant-schema';
+import AppExplWrap from "@/app/shared/components/app-explanation/app-expl-wrap.vue";
+import { RouteQueryHelper } from "../helper/route-query-helper";
+import { EnabledPiFieldsService } from "../plant-settings/enabled-pi-fields-service";
+
+@Component({
+  name: "app-sidebar-button-menu",
+  components: {
+    AppIconAnalysis,
+    AppIconObservations,
+    AppMapView,
+    AppExplWrap,
+  }
+})
+export default class AppSidebarButtonMenu extends Vue {
+  @Prop({ required: true }) plant!: PlantSchema;
+  @State(state => state.sidebar["analyses"]) openAnalyses!: boolean;
+  @State(state => state.sidebar["observations"]) openObservations!: boolean;
+
+  get variantAnalyses(): string { return this.$store.direct.state.sidebar.analyses ? "primary" : "secondary"; }
+  get variantObservations(): string { return this.$store.direct.state.sidebar.observations ? "primary" : "secondary"; }
+
+  hasObservAction = false;
+
+  private routeQueryHelper = new RouteQueryHelper(this);
+
+  async created() {
+    this.hasObservAction = (await CcpService.get(this.plant.id).getCcps()).length > 0 || 
+      (await EnabledPiFieldsService.get(this.plant.id).getEnabledPiFields()).length > 0;
+  }
+
+  get noObservAvailableExpl(): string {
+    return !this.hasObservAction && 
+      this.$t("no-observations-available-expl", { plantSettingsUrl: `/plant/${this.plant.id}/settings` }).toString() 
+      || "";
+  }
+
+  @CatchError()
+  async onToggle(sidebarName: SidebarNames) {
+    this.$store.direct.commit.sidebar.set({ name: sidebarName, state: true });
+    sidebars.filter(s => s !== sidebarName).forEach(s => {
+      this.$store.direct.commit.sidebar.set({ name: s, state: false });
+    });
+
+    await this.routeQueryHelper.replaceRoute({ sidebar: sidebarName });
+  }
+}
+</script>
+
+<style lang="scss">
+@import "@/scss/_colors.scss";
+@import "@/scss/_variables.scss";
+
+.app-sidebar-button-menu {
+  width: $button-menu-width;
+  height: 100%;
+  background-color: $white;
+  border: 1px solid $border-color-grey;
+  z-index: 10;
+  box-shadow: 3px 3px 5px $dark-40pc;
+
+  &.openObservations {
+    box-shadow: none;
+  }
+
+  &.openAnalyses {
+    box-shadow: none;
+  }
+
+  .sidebar-button {
+    width: 40px;
+    height: 40px;
+    margin-left: -1px;
+    border-right: 1px solid $border-color-grey !important;
+    border-color: transparent;
+
+    &:hover {
+      background-color: $hover-light-blue;
+      color: $blue;
+      border-color: transparent;
+    }
+
+    &:disabled {
+      // border-color: transparent;
+      color: grey;
+    }
+  }
+}
+</style>

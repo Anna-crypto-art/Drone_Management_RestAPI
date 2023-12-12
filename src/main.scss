@@ -1,0 +1,148 @@
+@import "./scss/custom-bootstrap.scss";
+@import "./scss/_colors.scss";
+
+@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro);
+
+* {
+  margin: 0;
+  padding: 0;
+  font-family: "Source Sans Pro";
+}
+
+html {
+  touch-action: pan-x pan-y;
+  height: 100% 
+}
+
+body {
+  color: $dark;
+}
+
+.width-100pc {
+  width: 100%;
+}
+
+.link {
+  color: $blue;
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 1rem;
+
+  &:hover {
+    text-decoration: none;
+    color: $hover-blue;
+  }
+}
+
+.grayed {
+  color: $dark-60pc;
+}
+.green {
+  color: $green;
+}
+.red {
+  color: $red;
+}
+.blue {
+  color: $blue;
+}
+.orange {
+  color: $orange;
+}
+
+.pull-right {
+  float: right;
+}
+.pull-left {
+  float: left;
+}
+.clear {
+  clear: both;
+}
+
+.hidden {
+  display: none;
+}
+.invisible {
+  opacity: 0;
+}
+
+.help-icon {
+  color: $blue;
+  margin-left: 5px;
+}
+
+
+
+.font-xl {
+  font-size: 2em;
+}
+.font-md {
+  font-size: 1.1em;
+}
+.font-xs {
+  font-size: 0.7em;
+}
+.font-bold {
+  font-weight: bold;
+}
+
+.pad-top {
+  padding-top: 1em;
+}
+.pad-left {
+  padding-left: 1em;
+}
+.pad-left-half {
+  padding-left: 0.5em;
+}
+.pad-right {
+  padding-right: 1em;
+}
+.pad-bottom {
+  padding-bottom: 1em;
+}
+.pad-bottom-2x {
+  padding-bottom: 2em;
+}
+.pad-bottom-half {
+  padding-bottom: 0.5em;
+}
+
+.mar-top-negative {
+  margin-top: -1em;
+}
+.mar-top {
+  margin-top: 1em;
+}
+.mar-top-half {
+  margin-top: 0.5em;
+}
+.mar-right {
+  margin-right: 1em;
+}
+.mar-right-half {
+  margin-right: 0.5em;
+}
+.mar-bottom {
+  margin-bottom: 1em;
+}
+.mar-bottom-2x {
+  margin-bottom: 2em;
+}
+.mar-bottom-half {
+  margin-bottom: 0.5em;
+}
+.mar-left {
+  margin-left: 1em;
+}
+.mar-left-half {
+  margin-left: 0.5em;
+}
+.no-mar-bottom {
+  margin-bottom: 0 !important;
+}
+.no-mar-top {
+  margin-top: 0 !important;
+}

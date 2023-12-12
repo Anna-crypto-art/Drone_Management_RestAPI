@@ -40,6 +40,7 @@ var _this = this;
 function Logger(constructor) {
     console.log('Logging...');
     console.log(constructor);
+    Object.seal(constructor);
 }
 var Person = function () {
     var _classDecorators = [Logger];

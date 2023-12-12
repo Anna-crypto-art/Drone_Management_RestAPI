@@ -1,0 +1,242 @@
+@import "~bootstrap";
+@import "~bootstrap-vue";
+
+@import "./_colors.scss";
+
+$theme-colors: (
+  "primary": $blue,
+);
+
+.btn {
+  border-radius: 0;
+  text-transform: uppercase;
+  font-weight: normal;
+  letter-spacing: 1px;
+  border-color: $blue;
+  padding: 0.45rem 1.2rem;
+  font-size: 0.9rem;
+
+  &-primary {
+    background-color: $blue;
+
+    &:hover {
+      background-color: $hover-blue;
+    }
+  }
+
+  &-danger {
+    border-color: $red;
+  }
+  &-outline-danger {
+    border-color: $red;
+  }
+
+  &.btn-secondary {
+    background-color: $white;
+    color: $blue;
+    transition: linear 100ms background-color;
+
+    &:hover {
+      background-color: $hover-light-blue;
+      border-color: $blue;
+    }
+  }
+
+  &.btn-sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  &.btn-secondary.dropdown-toggle {
+    color: $blue;
+    background-color: $white;
+    border-color: $blue;
+  }
+}
+.btn-sm,
+.btn-group-sm > .btn {
+  border-radius: 0 !important;
+}
+
+.form-control {
+  border-radius: 0;
+  border-color: $blue-60pc;
+
+  &::placeholder {
+    color: $blue-60pc;
+  }
+  &::-ms-input-placeholder {
+    color: $blue-60pc;
+  }
+  &:-ms-input-placeholder {
+    color: $blue-60pc;
+  }
+}
+.form-group {
+  label {
+    font-weight: bold;
+  }
+}
+.custom-select {
+  border-radius: 0;
+  border-color: $blue-60pc;
+}
+
+.alert {
+  border-radius: 0;
+  &-info {
+    background-color: $hover-light-blue;
+    color: $dark;
+    border-color: $hover-blue;
+  }
+}
+.alert > ul {
+  padding-left: 20px;
+}
+
+.dropdown-menu {
+  border-radius: 0;
+  border-color: $border-color-grey;
+}
+
+.nav-pills .nav-link {
+  border-radius: 0;
+}
+
+.modal-content {
+  border-radius: 0;
+
+  .modal-header {
+    padding: 1.5rem;
+    border: none;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  .modal-footer {
+    padding: 1.5rem;
+    border: none;
+  }
+}
+
+.nav-tabs .nav-link {
+  color: $dark-60pc;
+  border-radius: 0;
+
+  &.active,
+  &:hover {
+    border-color: transparent;
+    border-bottom-color: $blue-60pc;
+    color: $dark;
+  }
+}
+
+// b-form-file
+.custom-file-label {
+  border-radius: 0;
+  border-color: $blue-60pc;
+
+  &::after {
+    border-radius: 0;
+    background-color: $white;
+    color: $blue;
+    text-transform: uppercase;
+    font-weight: normal;
+    letter-spacing: 1px;
+    padding: 0.45rem 1.2rem;
+    height: calc(1.5em + 0.9rem);
+    font-size: 0.9rem;
+  }
+}
+
+.pagination {
+  border-radius: 0;
+
+  .page-link {
+    border-color: $blue-60pc;
+    color: $blue;
+  }
+
+  .page-item:first-child .page-link {
+    border-radius: 0;
+  }
+  .page-item:last-child .page-link {
+    border-radius: 0;
+  }
+}
+
+.popover.b-popover {
+  border-radius: 0 !important;
+}
+
+.custom-checkbox .custom-control-input:checked ~ .custom-control-label::before {
+  background-color: $blue;
+}
+.custom-checkbox .custom-control-label::before {
+  border-radius: 0 !important;
+}
+
+.badge {
+  border-radius: 0 !important;
+}
+
+.b-toast,
+.toast {
+  border-radius: 0 !important;
+  max-width: 500px;
+}
+.b-toast.b-toast-info > .toast, .b-toast.b-toast-info > .toast > .toast-header {
+  background-color: $blue-60pc;
+  color: $white;
+  border-color: $blue;
+}
+.b-toast.b-toast-info > .toast > .toast-header > button.close {
+  color: $white;
+}
+.b-toaster-slot {
+  max-height: calc(100vh - 0.5rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.b-toaster.b-toaster-top-right .b-toaster-slot,
+.b-toaster.b-toaster-top-left .b-toaster-slot,
+.b-toaster.b-toaster-top-center .b-toaster-slot,
+.b-toaster.b-toaster-top-full .b-toaster-slot,
+.b-toaster.b-toaster-bottom-right .b-toaster-slot,
+.b-toaster.b-toaster-bottom-left .b-toaster-slot,
+.b-toaster.b-toaster-bottom-center .b-toaster-slot,
+.b-toaster.b-toaster-bottom-full .b-toaster-slot {
+  max-width: 500px;
+}
+
+.b-toaster .toast {
+  .base-toast-body {
+    display: none;
+  }
+  .base-toast-header {
+    padding: 0.5em 1em;
+    font-size: 1.5em;
+
+    strong {
+      font-weight: normal !important;
+    }
+
+    button.close {
+      position: absolute;
+      top: 0.5em;
+      right: 0.5em;
+    }
+  }
+}
+
+.card {
+  border-radius: 0 !important;
+}
+
+.progress {
+  border-radius: 0 !important;
+}

@@ -1,0 +1,87 @@
+import { LayerColor } from "@/app/plant/shared/map-view/layers/types";
+import { FeatureProperties, Legend, LegendEntry } from "@/app/plant/shared/map-view/types";
+import { FeatureLike } from "ol/Feature";
+import { Stroke, Style } from "ol/style";
+import { HceKeyFigureLayer } from "./abstract/hce-key-figure-layer";
+import { i18n } from "@/main";
+
+export class BoolUndefinedHceKeyFigureLayer extends HceKeyFigureLayer {
+  public enableCompare = true;
+
+  public getStyle(feature: FeatureLike): Style {
+    const featureValue: boolean | null | undefined = this.getPropertyValue<boolean | null>(feature);
+
+    if (featureValue === null) {
+      return new Style({
+        stroke: new Stroke({
+          color: LayerColor.grey,
+          width: this.strokeWidth,
+        }),
+        text: this.showText(feature),
+      });
+    }
+
+    return super.getStyle(feature);
+  }
+
+  protected getDiffColor(featureProperties: FeatureProperties): string {
+    const diffValue = featureProperties.diff_value
+    if (diffValue === -1) { // Fixed
+      return LayerColor.strongGreen;
+    }
+    if (diffValue === 1) { // New
+      return LayerColor.red;
+    }
+
+    return LayerColor.black;
+  }
+
+  public getLegend(): Legend | undefined {
+    if (!this.geoJSON) {
+      return undefined;
+    }
+
+    const notMeasuredFeaturesCount = this.geoJSON.features.filter(feature => feature.properties.value === null).length;
+    let featuresCount = this.geoJSON.features.length - notMeasuredFeaturesCount;
+
+    let compareEntries: LegendEntry[] = [];
+    if (this.compareAnalysisResult) {
+      const fixedFeaturesCount = this.geoJSON.features.filter(feature => feature.properties.diff_value === -1).length;
+      const newFeaturesCount = this.geoJSON.features.filter(feature => feature.properties.diff_value === 1).length;
+
+      featuresCount = featuresCount - fixedFeaturesCount;
+
+      compareEntries = [
+        {
+          color: LayerColor.red,
+          name: i18n.t("of-which-are-new").toString() + this.getLegendEntryCount(newFeaturesCount),
+          indent: true,
+        },
+        {
+          color: LayerColor.strongGreen,
+          name: i18n.t("fixed").toString() + this.getLegendEntryCount(fixedFeaturesCount),
+        },
+      ]
+    }
+
+    const legend = {
+      id: this.getLegendId(),
+      entries: [
+        {
+          color: this.compareAnalysisResult ? LayerColor.black : this.color!,
+          name: this.getLegendName() + this.getLegendEntryCount(featuresCount),
+        },
+        ...compareEntries
+      ],
+    };
+
+    if (this.query?.undefined && !this.compareAnalysisResult) {
+      legend.entries.push({
+        color: LayerColor.grey,
+        name: i18n.t("not-measured").toString() + this.getLegendEntryCount(notMeasuredFeaturesCount),
+      });
+    }
+
+    return legend;
+  }
+}

@@ -1,21 +1,21 @@
-// void, it does not return a value
-// function add(n1: number, n2: number) {
-//     return n1 + n2;
-// }
-// function printResult(num: number): void {
-//     console.log('Result: ' + num);
-// }
-// printResult(add(5,12));
-// let combineValues: Function; //!!!!!!!!!!!!!!!!!!  one way
-// combineValues = add;
-// another way
-// let combineValues: (a: number, b: number) => number;
-// combineValues = add;
-// callbacks
-function addAndHandle(n1, n2, cb) {
-    var result = n1 + n2;
-    cb(result);
+var fields = {
+    labelExpl: "blub_labelExpl",
+    superAdminOnly: true,
+    hidden: true
+};
+var fields_1 = {
+    labelExpl: "blub_labelExpl",
+    superAdminOnly: true
+};
+if (fields.hasOwnProperty('hidden')) {
+    console.log('fields has the "hidden" property');
 }
-addAndHandle(10, 20, function (result) {
-    console.log(result);
-});
+else {
+    console.log('fields does not have the "hidden" property');
+}
+if (fields_1.hasOwnProperty('hidden')) {
+    console.log('fields_1 has the "hidden" property');
+}
+else {
+    console.log('fields_1 does not have the "hidden" property');
+}

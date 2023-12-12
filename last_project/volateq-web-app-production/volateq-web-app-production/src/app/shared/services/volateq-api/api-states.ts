@@ -1,0 +1,21 @@
+export enum ApiStates {
+  EMPTY = 0,
+  UPLOADING = 1,
+  UPLOAD_FAILED = 2,
+  DATA_INCOMPLETE = 3,
+  DATA_COMPLETE = 4,
+  DATA_COMPLETE_VERIFIED = 5,
+  PROCESSING = 6,
+  FINISHED = 7,
+}
+
+export const apiStateNames: Record<ApiStates, string> = {
+  [ApiStates.EMPTY]: "EMPTY",
+  [ApiStates.UPLOADING]: "UPLOADING",
+  [ApiStates.UPLOAD_FAILED]: "UPLOAD_FAILED",
+  [ApiStates.DATA_INCOMPLETE]: "DATA_INCOMPLETE",
+  [ApiStates.DATA_COMPLETE]: "DATA_COMPLETE",
+  [ApiStates.DATA_COMPLETE_VERIFIED]: "DATA_COMPLETE_VERIFIED",
+  [ApiStates.PROCESSING]: "PROCESSING",
+  [ApiStates.FINISHED]: "FINISHED",
+}
